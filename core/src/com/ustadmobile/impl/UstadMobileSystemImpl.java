@@ -137,7 +137,16 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String[] listDirectory(String dirURI) throws IOException;
     
-    public abstract UMTransferJob downloadURLToFile(String url, String fileURI);
+    /**
+     * Downloads the contents of the given URL to the given file URI.  Overwrite
+     * the fileURI if it already exists.
+     * 
+     * @param url HTTP URL to download from
+     * @param fileURI file URI to save to
+     * @param headers HTTP headers to set as key/value pairs
+     * @return A transfer job that can be started and progress of which can be tracked
+     */
+    public abstract UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers);
     
     public abstract void renameFile(String fromFileURI, String toFileURI);
     
@@ -148,6 +157,46 @@ public abstract class UstadMobileSystemImpl {
     public abstract void removeRecursively(String dirURI);
     
     public abstract UMTransferJob unzipFile(String zipSrc, String dstDir);
+    
+    /**
+     * Set the currently active user: the one that we need to know about for
+     * preferences etc. currently
+     * 
+     * @param username username as a string, or null for no active user
+     */
+    public abstract void setActiveUser(String username);
+    
+    /**
+     * Set a preference for the currently active user
+     * 
+     * @param key preference key as a string
+     * @param value preference value as a string
+     */
+    public abstract void setUserPref(String key, String value);
+    
+    /**
+     * Get a preference for the currently active user
+     * 
+     * @param key preference key as a string
+     * @return value of that preference
+     */
+    public abstract String getUserPref(String key, String value);
+    
+    /**
+     * Get a list of preference keys for currently active user
+     * 
+     * @return String array list of keys
+     */
+    public abstract String[] getPrefKeyList();
+    
+    /**
+     * Trigger persisting the currently active user preferences.  This does NOT
+     * need to be called each time when setting a preference, only when a user
+     * logs out, program ends, etc.
+     */
+    public abstract void saveUserPrefs();
+    
+    
     
 }
 
