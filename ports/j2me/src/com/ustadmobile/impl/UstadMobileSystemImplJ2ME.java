@@ -2,20 +2,54 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ustadmobile.app;
+package com.ustadmobile.impl;
 
 //import com.ustadmobile.app.controller.UstadMobileAppController;
+import com.ustadmobile.app.DeviceRoots;
+import com.ustadmobile.app.FileUtils;
+import com.ustadmobile.impl.UMTransferJob;
 import java.io.IOException;
 import java.util.Hashtable;
-import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
+import com.ustadmobile.impl.UstadMobileSystemImpl;
 
 /**
  *
  * @author varuna
  */
-public class UstadMobileSystemImplJ2ME { // extends UstadMobileSystemImpl
+public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
+
+    public boolean dirExists(String dirURI) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public UMTransferJob unzipFile(String zipSrc, String dstDir) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setActiveUser(String username) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setUserPref(String key, String value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getUserPref(String key, String value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String[] getPrefKeyList() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void saveUserPrefs() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
 
     public UstadMobileSystemImplJ2ME() {
@@ -35,15 +69,22 @@ public class UstadMobileSystemImplJ2ME { // extends UstadMobileSystemImpl
             String sharedContentDir = dt.path + FileUtils.FILE_SEP + 
                     FileUtils.USTAD_CONTENT_DIR;
             
+            /*
             //Return null if it doens't exist.
             if (!FileUtils.checkDir(sharedContentDir)){
                 return null;
             }
+            */
             
             //Check if it is created. If it isnt, create it. 
             if(FileUtils.createFileOrDir(sharedContentDir, 
                     Connector.READ_WRITE, true)){
                 return sharedContentDir;
+            }
+            
+            //Return null if it doens't exist.
+            if (!FileUtils.checkDir(sharedContentDir)){
+                return null;
             }
         }catch (Exception e){}
         return null;
@@ -133,7 +174,7 @@ public class UstadMobileSystemImplJ2ME { // extends UstadMobileSystemImpl
         
     }
     
-    public String[] listDirectory(String dirURI) throws Exception{
+    public String[] listDirectory(String dirURI) throws IOException{
         
         return null;
     }
@@ -159,11 +200,6 @@ public class UstadMobileSystemImplJ2ME { // extends UstadMobileSystemImpl
     }
     
     public void removeRecursively(String dirURI){
-        
-    }
-    
-    public void unzipFile(String zipSrc, String distDir){
-    //public UMTransferJob unzipFile(String zipSrc, String distDir){
         
     }
     

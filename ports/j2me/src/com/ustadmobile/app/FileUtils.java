@@ -187,7 +187,7 @@ public class FileUtils {
             return created;
     }
     
-    protected static boolean checkDir(String dirName){
+    public static boolean checkDir(String dirName){
         try{
             dirName = dirName.trim();
             if (!dirName.endsWith("/")){
@@ -206,7 +206,7 @@ public class FileUtils {
         return false;
     }
 
-    protected static boolean createFileOrDir(String fileName, int mode, 
+    public static boolean createFileOrDir(String fileName, int mode, 
             boolean isDir) throws IOException {
 
             boolean created = false;

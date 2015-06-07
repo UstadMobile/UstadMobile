@@ -32,4 +32,28 @@
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>
     </target>
+    
+    <target name="getlibs">
+        <mkdir dir="${lib.dir}"/>
+        <mkdir dir="${lib.dir}/downloads"/>
+
+        <get dest="${lib.dir}/downloads">
+
+            <!-- kXML JAR from UstadMobile.com -->
+            <url url="http://www.ustadmobile.com/build-dep/kxml2-min-2.3.0.jar"/>
+
+        </get>
+
+        <unzip dest="${lib.dir}">
+            <fileset dir="${lib.dir}/downloads">
+                <include name="*.zip"/>
+            </fileset>
+        </unzip>
+
+        <copy todir="${lib.dir}">
+            <fileset dir="${lib.dir}/downloads">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    </target>
 </project>

@@ -28,8 +28,9 @@ proguard/
 # Backup java source files
 *.java~
 
-Core libs and build files
+#Core libs and build files
 core/libs/*.jar
+core/libs/downloads/
 core/dist/*.jar
 
 #Android Studio files
