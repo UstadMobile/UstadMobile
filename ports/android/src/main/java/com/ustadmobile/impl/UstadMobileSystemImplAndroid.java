@@ -1,7 +1,9 @@
 package com.ustadmobile.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Hashtable;
 
@@ -32,9 +34,12 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     @Override
     public String readFileAsText(String filename, String encoding) throws IOException {
         IOException ioe = null;
+        FileInputStream fin = null;
+        ByteArrayOutputStream bout = null;
+
         try {
-            FileInputStream fin = new FileInputStream(filename);
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            fin = new FileInputStream(filename);
+            bout = new ByteArrayOutputStream();
             int bytesRead = -1;
             byte[] buf = new byte[1024];
             while((bytesRead = fin.read(buf, 0, buf.length)) != -1) {
@@ -43,10 +48,17 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
         }catch(IOException e) {
             ioe = e;
         }finally {
-            
+            if(fin != null) {
+                fin.close();
+            }
         }
 
-
+        if(ioe == null) {
+            String retVal = new String(bout.toByteArray(), encoding);
+            return retVal;
+        }else {
+            throw ioe;
+        }
     }
 
     @Override
@@ -55,8 +67,28 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     @Override
-    public void writeStringToFile(String s, String s1, String s2) throws IOException {
+    public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {
+        ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes(encoding));
+        FileOutputStream fout = null;
+        IOException ioe = null;
+        try {
+            int bytesRead = -1;
+            byte[] buf = new byte[1024];
+            fout = new FileOutputStream(fileURI);
+            while((bytesRead = bin.read(buf))!= -1) {
+                fout.write(buf, 0, bytesRead);
+            }
+        }catch(IOException e) {
+            ioe = e;
+        }finally{
+            if(fout != null) {
+                fout.close();
+            }
+        }
 
+        if(ioe != null) {
+            throw ioe;
+        }
     }
 
     @Override

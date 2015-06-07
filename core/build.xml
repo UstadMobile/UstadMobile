@@ -21,13 +21,15 @@
 
     <target name="dist" depends="compile">
         <mkdir dir="${dist.dir}"/>
-        <jar jarfile="${dist.dir}/UstadMobileCore.jar" basedir="${build.dir}"/>
+        <jar jarfile="${dist.dir}/UstadMobileCore.jar" 
+		basedir="${build.dir}"
+            excludes="**/UstadMobileSystemImplFactory.class" />
     </target>
 
     <target name="clean"
         description="clean up">
         <!-- Delete the ${build} and ${dist} directory trees -->
-        <delete dir="${build}"/>
-        <delete dir="${dist}"/>
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
     </target>
 </project>
