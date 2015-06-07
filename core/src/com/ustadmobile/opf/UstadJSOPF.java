@@ -2,9 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ustadmobile.app.opf;
+package com.ustadmobile.opf;
 
-import com.ustadmobile.app.opds.UstadJSOPDSItem;
+import com.ustadmobile.opds.UstadJSOPDSItem;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Vector;

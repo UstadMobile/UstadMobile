@@ -25,3 +25,9 @@ proguard/
 # Log Files
 *.log
 
+# Backup java source files
+*.java~
+
+Core libs and build files
+core/libs/*.jar
+core/dist/*.jar

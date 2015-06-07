@@ -1,0 +1,33 @@
+<project name="UstadMobileCore" default="dist" basedir=".">
+
+    <property name="src.dir" location="src"/>
+    <property name="build.dir" location="build"/>
+    <property name="dist.dir" location="dist"/>
+    <property name="lib.dir" location="libs"/>
+
+    <target name="init">
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src.dir}" destdir="${build.dir}">
+            <classpath>
+                <fileset dir="${lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="dist" depends="compile">
+        <mkdir dir="${dist.dir}"/>
+        <jar jarfile="${dist.dir}/UstadMobileCore.jar" basedir="${build.dir}"/>
+    </target>
+
+    <target name="clean"
+        description="clean up">
+        <!-- Delete the ${build} and ${dist} directory trees -->
+        <delete dir="${build}"/>
+        <delete dir="${dist}"/>
+    </target>
+</project>
