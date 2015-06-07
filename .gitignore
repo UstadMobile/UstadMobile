@@ -31,3 +31,6 @@ proguard/
 Core libs and build files
 core/libs/*.jar
 core/dist/*.jar
+
+#Android Studio files
+ports/android/.idea

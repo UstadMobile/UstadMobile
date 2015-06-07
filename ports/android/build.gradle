@@ -6,6 +6,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:1.2.3'
     }
 }
+
 apply plugin: 'android'
 
 android {
@@ -18,4 +19,8 @@ android {
             // proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
+}
+
+dependencies {
+    compile files('../../core/dist/UstadMobileCore.jar')
 }
