@@ -61,7 +61,7 @@
         </wtkjad>
     </target>
     <target name="package" depends="build, create-jad">
-        <wtkpackage preverify="true" jarfile="dist/UstadMobieCore.jar" jadfile="dist/UstadMobileCore.jad">
+        <wtkpackage preverify="true" jarfile="dist/UstadMobileCore.jar" jadfile="dist/UstadMobileCore.jad">
             <bootclasspath refid="bootclasspath.ref" />
 
             <fileset dir="classes" />
