@@ -4,7 +4,6 @@
  */
 package com.ustadmobile.app.opf;
 
-import com.ustadmobile.app.UstadJS;
 import com.ustadmobile.app.opds.UstadJSOPDSItem;
 import java.io.IOException;
 import java.util.Hashtable;
