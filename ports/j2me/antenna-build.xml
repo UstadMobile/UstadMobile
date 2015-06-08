@@ -38,7 +38,7 @@ NetBeans.  See README for instructions on building from source.
     
     <property name="MidletSuite" value="UstadMobileMicro"/>
     <property name="Midlet_1_name" value="Ustad Mobile"/>
-    <property name="Midlet_1_class" value="ustadmobilemicrotest.Midlet"/>
+    <property name="Midlet_1_class" value="ustadmobilej2me.Midlet"/>
     
     <property name="wtk.cldc.version" value="1.1"/>
     <property name="wtk.midp.version" value="2.1"/>
