@@ -1,0 +1,85 @@
+<project name="included" basedir="." default="...">
+    <property environment="env"/>
+    
+    <!-- Required to make LWUIT compile with Sun WTK and antenna-->
+    <property name="wtk.java3d.enabled" value="true" />
+    
+    <!-- 
+       If existing wtk.home does not exist - set it to 
+       environment variable
+     -->
+    <available file="${wtk.home}" property="wtk.home.present"/>
+    
+    <condition property="wtk.home" value="${env.WTK_HOME}">
+        <and>
+            <not>
+                <resourceexists>
+                    <file file="${wtk.home}"/>
+                </resourceexists>
+            </not>
+            
+            <resourceexists>
+                <file file="${env.WTK_HOME}"/>
+            </resourceexists>
+        </and>
+    </condition>
+    
+    <!-- Now check; if not fallback to default -->
+    <condition property="wtk.home" 
+        value="/opt/WTK2.5.2">
+        
+        <not>
+            <resourceexists>
+                <file file="${wtk.home}"/>
+            </resourceexists>
+        </not>
+        
+    </condition>
+    
+    <echo message="wtk.home Set to ${wtk.home}"/>
+    
+    <path id="bootclasspath.wtkalljars">
+        <fileset dir="${wtk.home}/lib" >
+            <include name="*.jar" />
+        </fileset>
+    </path>
+    
+    <path id="bootclasspath.sunwtklinux">
+        <fileset dir="${wtk.home}/lib">
+            <include name="jsr226.jar"/>
+            <include name="jsr239.jar"/>
+            <include name="jsr75.jar"/>
+            <include name="satsa-crypto.jar"/>
+            <include name="jsr229.jar"/>
+            <include name="satsa-pki.jar"/>
+            <include name="jsr179.jar"/>
+            <include name="jsr238.jar"/>
+            <include name="jsr211.jar"/>
+            <include name="j2me-xmlrpc.jar"/>
+            <include name="jsr180.jar"/>
+            <include name="mmapi.jar"/>
+            <include name="satsa-jcrmi.jar"/>
+            <include name="jsr082.jar"/>
+            <include name="satsa-apdu.jar"/>
+            <include name="jsr184.jar"/>
+            <include name="j2me-ws.jar"/>
+            <include name="wma20.jar"/>
+            <include name="jsr234.jar"/>
+            <include name="cldcapi11.jar"/>
+            <include name="midpapi20.jar"/>
+        </fileset>
+    </path>
+    
+    <!-- 
+    Sun WTK 2.5.2 on Linux requires only specifically named JARS and 
+    will not work with all jars in bootclasspath
+    -->
+    <condition property="wtk.active.bootclasspath"
+        value="${toString:bootclasspath.sunwtklinux}"
+        else="${toString:bootclasspath.wtkalljars}">
+        
+        <os family="unix" />
+    </condition>
+    
+</project>
+
