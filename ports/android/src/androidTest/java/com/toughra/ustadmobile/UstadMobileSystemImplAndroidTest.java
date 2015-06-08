@@ -16,11 +16,21 @@ import java.io.IOException;
  */
 public class UstadMobileSystemImplAndroidTest extends TestCase{
 
-    /*
+    private UstadMobileSystemImpl impl;
+
+    protected void setUp() {
+        impl = UstadMobileSystemImpl.getInstance();
+    }
+    
     public void testCanCreateImpl() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImplFactory.createUstadSystemImpl();
         assertNotNull("Can create impl", impl);
-    }*/
+    }
+
+    public void testSharedContentDir() {
+        File sharedDir = new File(impl.getSharedContentDir());
+        assertTrue(sharedDir.exists() && sharedDir.isDirectory());
+    }
+
 
     /*
     public void testReadWriteStringToFile() throws IOException {
@@ -31,6 +41,7 @@ public class UstadMobileSystemImplAndroidTest extends TestCase{
         String contents = "The answer is 42";
         impl.writeStringToFile(contents, outFile.getAbsolutePath(), "UTF-8");
         assertEquals(true, "Managed to write file without throwing exception");
-    }*/
+    }
+    */
 
 }

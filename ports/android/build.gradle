@@ -12,15 +12,22 @@ apply plugin: 'android'
 android {
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
-
     buildTypes {
         release {
             minifyEnabled false
             // proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
+    defaultConfig {
+        minSdkVersion 9
+    }
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
     compile files('../../core/dist/UstadMobileCore.jar')
+    testCompile 'junit:junit:4.12'
 }

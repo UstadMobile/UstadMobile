@@ -1,23 +1,45 @@
 package com.ustadmobile.impl;
 
+import android.app.Activity;
+import android.os.Environment;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
 import java.util.Hashtable;
 
 /**
  * Created by mike on 07/06/15.
  */
 public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobileSystemImpl{
-    @Override
-    public String getSharedContentDir() {
-        return null;
+
+    private Activity currentActivity;
+
+    public static final String PREFS_NAME = "ustadmobilePreferences";
+
+    public void init() {
+        File sharedContentDir = new File(getSharedContentDir());
+        if(!sharedContentDir.exists() && sharedContentDir.isDirectory()) {
+            sharedContentDir.mkdirs();
+        }
+    }
+
+    public void setCurrentActivity(Activity activity) {
+
     }
 
     @Override
-    public String getUserContentDirectory(String s) {
+    public String getSharedContentDir() {
+        File extStorage = Environment.getExternalStorageDirectory();
+        File ustadContentDir = new File(extStorage, "ustadmobileContent");
+        return ustadContentDir.getAbsolutePath();
+    }
+
+    @Override
+    public String getUserContentDirectory(String username) {
         return null;
     }
 
