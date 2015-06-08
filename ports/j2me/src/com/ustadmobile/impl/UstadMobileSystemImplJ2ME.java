@@ -19,6 +19,10 @@ import com.ustadmobile.impl.UstadMobileSystemImpl;
  */
 public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
+    public String getImplementationName() {
+        return "J2ME";
+    }
+
     public boolean dirExists(String dirURI) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
