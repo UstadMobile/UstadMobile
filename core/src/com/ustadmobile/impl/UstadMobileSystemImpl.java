@@ -33,6 +33,33 @@ public abstract class UstadMobileSystemImpl {
     }
     
     /**
+     * Make a view for the platform : this is done by using class.forName
+     * to ask for com.ustadmobile.view.<ViewName>View<PlatformName> e.g.
+     * com.ustadmobile.view.LoginViewJ2ME
+     * 
+     * @param viewName The name of the view to create e.g. Login or Catalog
+     * @return new instance of the view for this platform; or null if an exception occurs.
+     */
+    public Object makeView(String viewName) {
+        try {
+            Object viewObj = Class.forName("com.ustadmobile.view." + viewName + 
+                    this.getImplementationName()).newInstance();
+            return viewObj;
+        }catch(Exception e) {
+            return null;
+        }
+    }
+    
+    
+    /**
+     * Get the name of the platform implementation being used
+     * 
+     * @return the name of the platform (used constructing views etc) e.g. "J2ME", "Android", etc
+     */
+    public abstract String getImplementationName();
+    
+    
+    /**
      * Provides the path to the shared content directory 
      * 
      * @return URI of the shared content directory
