@@ -187,22 +187,175 @@ public class FileUtils {
             return created;
     }
     
-    public static boolean checkDir(String dirName){
-        try{
+    public static boolean checkDir(String dirName) throws IOException{
             dirName = dirName.trim();
             if (!dirName.endsWith("/")){
                 dirName += "/";
             }
-            try{
-                FileConnection fc = (FileConnection) Connector.open(dirName, 
-                    Connector.READ_WRITE);
-                if (fc.exists()){
-                    return true;
+            boolean exists = false;
+            FileConnection fc = null;
+            fc = (FileConnection) Connector.open(dirName, 
+                Connector.READ_WRITE);
+            if (fc.exists()){
+                exists = true;
+            }
+            if (fc != null){
+                fc.close();
+            }
+            
+            return exists;
+          
+    }
+    
+    public static boolean checkFile(String fileURI) throws IOException{
+        fileURI = fileURI.trim();
+        FileConnection fc = (FileConnection)Connector.open(fileURI,
+                Connector.READ);
+        if(fc.exists()){
+            fc.close();
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static String[] enumerationToStringArray(Enumeration enu){
+        String[] list;
+        Vector listVector = new Vector();
+        while(enu.hasMoreElements()){
+            listVector.addElement(enu.nextElement());
+        }
+        list = new String[listVector.size()];
+        listVector.copyInto(list);
+        return list;
+    }
+    
+    
+    public static boolean deleteRecursively(String path, boolean recursive) 
+            throws IOException {
+      FileConnection file = (FileConnection) Connector.open(path, 
+              Connector.READ_WRITE);
+      if (!file.exists()) {
+          return true;
+      }
+
+      if (!recursive || !file.isDirectory()){
+          file.delete();
+          if (!file.exists()){
+              file.close();
+              return true;
+          }
+          return false;
+      }
+
+      
+      Enumeration listEnu = file.list();
+      String[] list;
+      list = enumerationToStringArray(listEnu);
+      
+      for (int i = 0; i < list.length; i++) {
+          if (!deleteRecursively(FileUtils.joinPath(path, list[i]), true)){
+              return false;
+          }
+      }
+      file.delete();
+      if (!file.exists()){
+          file.close();
+          return true;
+      }else{
+          return false;
+      }
+      
+  }
+    
+    public static boolean removeDirRecursively(String dirURI, int mode) 
+            throws IOException{
+        dirURI = dirURI.trim();
+        if(!dirURI.endsWith("/")){
+            dirURI += "/";
+        }
+        FileConnection fc = (FileConnection) Connector.open(dirURI, mode);
+        
+        if (fc.isDirectory()){
+            
+            Enumeration dirListEnu = fc.list();
+            fc.close();
+            String currentElement;
+            String currentPath;
+            while(dirListEnu.hasMoreElements()){
+                currentElement = "";
+                currentElement = dirListEnu.nextElement().toString();
+                currentPath = "";
+                //FileConnection fc = (FileConnection) Connector.open( , 
+                //        Connector.READ_WRITE);
+                if (currentElement.endsWith("/")){
+                    
+                }else{
+                    
                 }
+              int i=0;  
+            }
+            
+            
+            fc.close();
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean removeFileOrDir(String path, int mode, 
+            boolean isDir) throws IOException{
+        path = path.trim();
+        if (isDir && !path.endsWith("/")){
+            path += "/";
+        }
+        FileConnection fc = (FileConnection) Connector.open(path, mode);
+        if (fc.exists()){
+            if (isDir && !fc.isDirectory()){
                 return false;
-            }catch(Exception e) {}
-            return false;
-        }catch(Exception e){}
+            }
+            fc.delete();
+            fc.close();
+            return true;
+        }
+        fc.close();
+        
+        return false;
+    }
+    public static String[] listFilesInDirectory(String dirURI) throws IOException{
+        
+        if (!dirURI.endsWith("/")){
+            dirURI += "/";
+        }
+        FileConnection fc = null;
+        String dirList[] = null;
+        fc = (FileConnection) Connector.open(dirURI, 
+                Connector.READ);
+        if(fc.isDirectory()){
+            Enumeration dirListEnu = fc.list();
+            dirList = enumerationToStringArray(dirListEnu);
+        }
+        if (fc != null){
+            fc.close();
+        }
+        return dirList;
+        
+    }
+    public static boolean renameFileOrDir(String path, String pathTo, int mode, 
+            boolean isDir) throws IOException{
+        path = path.trim();
+        pathTo = pathTo.trim();
+        String newName = FileUtils.getBaseName(pathTo);
+        if (isDir && !path.endsWith("/")){
+            path += "/";
+        }
+        FileConnection fc = (FileConnection) Connector.open(path, mode);
+        if (fc.exists()){
+            fc.rename(newName);
+            fc.close();
+            return true;
+        }
+        
         return false;
     }
 
@@ -231,7 +384,7 @@ public class FileUtils {
                     }
                     created = true;
             }
-
+            fc.close();
             /*
             } catch (Throwable t) {
                     t.printStackTrace();
@@ -277,6 +430,7 @@ public class FileUtils {
         FileConnection fCon = (FileConnection)Connector.open(fileURI,
             Connector.READ);
         InputStream is = fCon.openInputStream();
+        fCon.close();
         return is;
     }
     
@@ -295,6 +449,7 @@ public class FileUtils {
                 is.read(bytes, 0, size);
                 str = new String(bytes, 0, size);
                 is.close();
+                fCon.close();
                 return str;
             }
         return null;
@@ -332,7 +487,8 @@ public class FileUtils {
         return -1;
     }
     
-    public static boolean writeStringToFile(String string, String fileURI){
+    public static boolean writeStringToFile(String string, String fileURI, 
+            boolean append){
         try{
             FileConnection fileCon = (FileConnection) Connector.open(fileURI, 
                     Connector.READ_WRITE);
@@ -343,8 +499,12 @@ public class FileUtils {
             if (!fileCon.canWrite() && string != null){
                 return false;
             }
-            
-            OutputStream outputStream = fileCon.openOutputStream();
+            OutputStream outputStream = null;
+            if(append){
+                outputStream = fileCon.openOutputStream(fileCon.fileSize());
+            }else{
+                outputStream = fileCon.openDataOutputStream();
+            }
             
             byte[] stringBytes = string.getBytes();
             outputStream.write(stringBytes);

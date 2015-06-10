@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
+import javax.bluetooth.BluetoothConnectionException;
 
 /**
  *
@@ -24,7 +25,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public boolean dirExists(String dirURI) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return FileUtils.checkDir(dirURI);
     }
 
     public UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers) {
@@ -164,23 +165,28 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public void writeStringToFile(String str, String fileURI, String encoding) 
             throws IOException{
         try{
-            FileUtils.writeStringToFile(str, fileURI);
+            FileUtils.writeStringToFile(str, fileURI, true);
             
         }catch (Exception e){}
     }
     
     public boolean fileExists(String fileURI) throws IOException{
-        
-        return false;
+        return FileUtils.checkFile(fileURI);
     }
     
     public void removeFile(String fileURI) throws IOException{
-        
+        boolean success = FileUtils.removeFileOrDir(fileURI, Connector.READ_WRITE,
+                false);
+        if (success == false){
+            //Wanna do something?
+        }
     }
-    
+
     public String[] listDirectory(String dirURI) throws IOException{
         
-        return null;
+        String[] list = FileUtils.listFilesInDirectory(dirURI);
+        
+        return list;
     }
     
     //public UMTransferJob downloadURLToFile(String url, String fileURI){ 
@@ -189,7 +195,17 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     //}
     
     public void renameFile(String fromFileURI, String toFileURI){
-        
+        boolean success;
+        try {
+            success = FileUtils.renameFileOrDir(fromFileURI, toFileURI, 
+            Connector.READ_WRITE, false);
+            if (success == false){
+                //Wanna do something?
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+       
     }
     
     public int fileSize(String fileURI){
@@ -200,10 +216,33 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     public void makeDirectory(String dirURI) throws IOException{
-        FileUtils.createFileOrDir(dirURI, Connector.READ, true);
+ 
+        boolean createFileOrDir = FileUtils.createFileOrDir(dirURI, 
+                Connector.READ_WRITE, true);
+        if (!createFileOrDir){
+            IOException e = new IOException();
+            throw e;
+        }
+
     }
     
     public void removeRecursively(String dirURI){
+        if (!dirURI.endsWith("/")){
+            dirURI += "/";
+        }
+        try { 
+            boolean success = FileUtils.deleteRecursively(dirURI, true);
+            if (success){
+                //Wanna do something?
+            }else{
+                IOException e = new IOException();
+                throw e;
+            }
+            //FileUtils.removeDirRecursively(dirURI, Connector.READ_WRITE);
+            //FileUtils.removeFileOrDir(dirURI, Connector.READ_WRITE, true);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         
     }
     
