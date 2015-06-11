@@ -268,7 +268,7 @@ public class FileUtils {
       
   }
     
-    public static boolean removeDirRecursively(String dirURI, int mode) 
+    /*public static boolean removeDirRecursively(String dirURI, int mode) 
             throws IOException{
         dirURI = dirURI.trim();
         if(!dirURI.endsWith("/")){
@@ -301,7 +301,7 @@ public class FileUtils {
             return true;
         }
         return false;
-    }
+    }*/
     
     public static boolean removeFileOrDir(String path, int mode, 
             boolean isDir) throws IOException{
@@ -322,6 +322,95 @@ public class FileUtils {
         
         return false;
     }
+    
+    public static String replaceString( String str, String pattern, String replace ) 
+    {
+        int s = 0;
+        int e = 0;
+        StringBuffer result = new StringBuffer();
+
+        while ( (e = str.indexOf( pattern, s ) ) >= 0 ) 
+        {
+            result.append(str.substring( s, e ) );
+            result.append( replace );
+            s = e+pattern.length();
+        }
+        result.append( str.substring( s ) );
+        return result.toString();
+    }   
+    
+    
+    public static Vector addTwoVectors(Vector v1, Vector v2){
+        Vector v  = null;
+        Enumeration e = null;
+        e = v2.elements();
+        while (e.hasMoreElements()){
+            v1.addElement(e.nextElement());
+        }
+        return v1;
+    }
+    
+    public static Vector listFilesRecursivelyInDirectory(String dirURI,
+            String parentDirURI) throws IOException{
+        
+        dirURI = dirURI.trim();
+        parentDirURI = parentDirURI.trim();
+        
+        if (!dirURI.endsWith("/")){
+            dirURI += "/";
+        }
+        if (!parentDirURI.endsWith("/")){
+            parentDirURI += "/";
+        }
+        FileConnection fc = null;
+        Vector dirListVector = new Vector();
+        Vector listVector = new Vector();
+        
+        fc = (FileConnection) Connector.open(dirURI, 
+                Connector.READ);
+        
+        if(fc.isDirectory()){
+            String toAdd = null;
+            toAdd = replaceString(dirURI, parentDirURI, "");
+            Enumeration dirListEnu = fc.list();
+            if (fc != null){
+                fc.close();
+            }            
+            while(dirListEnu.hasMoreElements()){
+                String entry = dirListEnu.nextElement().toString().trim();
+                //If entry is a directory
+                if (entry.endsWith("/")){
+                    Vector nextVector = new Vector();
+                    String subDirURI = FileUtils.joinPath(dirURI, entry);
+                    if ( (nextVector = listFilesRecursivelyInDirectory(subDirURI, parentDirURI)) == null){
+                        return null;
+                    }
+                    listVector = addTwoVectors(listVector, nextVector);
+                    
+                }else{
+                    listVector.addElement(toAdd + entry);
+                }
+                
+            }
+            
+        }
+        
+        if (fc != null){
+            fc.close();
+        }
+        return listVector;
+    }
+    
+    public static String[] vectorToStringArray(Vector v){
+        String[] sa = null;
+        if (!v.isEmpty()){
+            sa = new String[v.size()];
+            v.copyInto(sa);
+            return sa;
+        }
+        return sa;
+    }
+    
     public static String[] listFilesInDirectory(String dirURI) throws IOException{
         
         if (!dirURI.endsWith("/")){

@@ -44,6 +44,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestSerializedHashtable());
         //allTestSuite.addTest(new TestRename());
         allTestSuite.addTest(new TestSystemimplJ2ME());
+        allTestSuite.addTest(new TestUnzip());
         return allTestSuite;
 
     }
