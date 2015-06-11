@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.amms.control.PriorityControl;
 import javax.microedition.io.Connector;
@@ -218,18 +219,7 @@ public class FileUtils {
         
         return false;
     }
-    
-    public static String[] enumerationToStringArray(Enumeration enu){
-        String[] list;
-        Vector listVector = new Vector();
-        while(enu.hasMoreElements()){
-            listVector.addElement(enu.nextElement());
-        }
-        list = new String[listVector.size()];
-        listVector.copyInto(list);
-        return list;
-    }
-    
+
     
     public static boolean deleteRecursively(String path, boolean recursive) 
             throws IOException {
@@ -267,41 +257,7 @@ public class FileUtils {
       }
       
   }
-    
-    /*public static boolean removeDirRecursively(String dirURI, int mode) 
-            throws IOException{
-        dirURI = dirURI.trim();
-        if(!dirURI.endsWith("/")){
-            dirURI += "/";
-        }
-        FileConnection fc = (FileConnection) Connector.open(dirURI, mode);
-        
-        if (fc.isDirectory()){
-            
-            Enumeration dirListEnu = fc.list();
-            fc.close();
-            String currentElement;
-            String currentPath;
-            while(dirListEnu.hasMoreElements()){
-                currentElement = "";
-                currentElement = dirListEnu.nextElement().toString();
-                currentPath = "";
-                //FileConnection fc = (FileConnection) Connector.open( , 
-                //        Connector.READ_WRITE);
-                if (currentElement.endsWith("/")){
-                    
-                }else{
-                    
-                }
-              int i=0;  
-            }
-            
-            
-            fc.close();
-            return true;
-        }
-        return false;
-    }*/
+
     
     public static boolean removeFileOrDir(String path, int mode, 
             boolean isDir) throws IOException{
@@ -322,6 +278,25 @@ public class FileUtils {
         
         return false;
     }
+    
+    
+     /*
+     * 
+     * Other utils 
+     * 
+     */
+    
+    public static String[] enumerationToStringArray(Enumeration enu){
+        String[] list;
+        Vector listVector = new Vector();
+        while(enu.hasMoreElements()){
+            listVector.addElement(enu.nextElement());
+        }
+        list = new String[listVector.size()];
+        listVector.copyInto(list);
+        return list;
+    }
+    
     
     public static String replaceString( String str, String pattern, String replace ) 
     {
@@ -349,6 +324,25 @@ public class FileUtils {
         }
         return v1;
     }
+    
+    public static Vector hashtableToVector(Hashtable h){
+        String[] stringArray = null;
+        Vector v = null;
+        if (!h.isEmpty()){
+            v = new Vector();
+            Enumeration e = h.elements();
+            while (e.hasMoreElements()){
+                v.addElement(e.nextElement());
+            }
+        }
+        return v;
+    }
+    
+    
+    /*
+     * 
+     * end of common utils.
+     */
     
     public static Vector listFilesRecursivelyInDirectory(String dirURI,
             String parentDirURI) throws IOException{
@@ -409,6 +403,20 @@ public class FileUtils {
             return sa;
         }
         return sa;
+    }
+    
+    public static boolean isStringInStringArray(String str, String[] strArray){
+        if (str != null && strArray.length > 0 ){
+            boolean found = false;
+            for (int i = 0; i< strArray.length; i++){
+                if (strArray[i].indexOf(str) >= 0){
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+        return false;
     }
     
     public static String[] listFilesInDirectory(String dirURI) throws IOException{

@@ -4,15 +4,15 @@
  */
 package com.ustadmobile.app.tests;
 
+import com.ustadmobile.app.DeviceRoots;
 import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.app.ZipUtils;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.impl.UstadMobileSystemImplFactory;
+import java.util.Hashtable;
 import java.util.Vector;
-import javax.microedition.io.Connector;
-
 /**
  *
  * @author varuna
@@ -33,7 +33,7 @@ public class TestUnzip extends TestCase {
         
         String zipURI = FileUtils.joinPath(getSharedContentDir, "unzipme.zip");
         if (FileUtils.checkFile(zipURI)){
-            //continue..
+            assertTrue(true);
         }else{
             assertTrue(false);
         }
@@ -44,6 +44,25 @@ public class TestUnzip extends TestCase {
             FileUtils.deleteRecursively(unzipURI, true);
         }
         
+        //Test if you can list files in a zip
+        String[] zipListStringArray = null;
+        zipListStringArray = ZipUtils.listFiles(zipURI);
+        
+        if (zipListStringArray.length < 1){
+            assertTrue(false);
+        }else{
+            assertTrue(true);
+        }
+        
+        //Check if file in the list..
+        if(FileUtils.isStringInStringArray("fileinafolder.txt",
+                zipListStringArray)){
+           assertTrue(true); //yay
+        }else{
+            assertTrue(false);
+        }
+        
+        //Lets unzip it..
         ZipUtils.unZipFile(zipURI, unzipURI);
         if (FileUtils.checkDir(unzipURI)){
             assertTrue(true);
@@ -51,19 +70,14 @@ public class TestUnzip extends TestCase {
             assertTrue(false);
         }
         
-        String unZipDirList[] = FileUtils.listFilesInDirectory(unzipURI);
+        //getting list of files in directory..
         Vector unZipDirListVector = FileUtils.listFilesRecursivelyInDirectory(unzipURI, unzipURI);
         String[] unZipDirListStr = FileUtils.vectorToStringArray(unZipDirListVector);
-        boolean found = false;
-        for (int i=0; i<unZipDirListStr.length; i++){
-            if(unZipDirListStr[i].toLowerCase().indexOf("fileinafolder.txt") >=0 ){
-                found = true;
-                break;
-            }
-        }
         
-        if (found){
-            assertTrue(true);
+        //Check if file in the list..
+        if(FileUtils.isStringInStringArray("fileinafolder.txt",
+                unZipDirListStr)){
+           assertTrue(true);
         }else{
             assertTrue(false);
         }

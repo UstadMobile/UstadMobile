@@ -9,7 +9,9 @@ import gnu.classpath.java.util.zip.ZipInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
@@ -21,9 +23,18 @@ public class ZipUtils {
 
     public ZipUtils() {
     }
-    /*
-    public Hashtable listFiles(String zipFile) throws IOException{
-		Hashtable listFilesHashtable = new Hashtable();
+    
+    public static class Entry{
+        String filetype;
+        String name;
+        Entry(String filetype, String name){
+            this.filetype = filetype;
+            this.name = name;
+        }
+    }
+    
+    public static String[] listFiles(String zipFile) throws IOException{
+        Vector listFilesVector = new Vector();
         FileConnection fileCon = null;
         InputStream is = null;
         ZipEntry entry = null;
@@ -39,10 +50,12 @@ public class ZipUtils {
                     ZipInputStream zis = new ZipInputStream(is);
                     while ((entry = zis.getNextEntry()) != null) {
                         if (entry.isDirectory()) {
-                            listFilesHashtable.put(entry, new Entry("dir", entry.getName()));
+                            //listFilesHashtable.put(entry, new Entry("dir", entry.getName()));
+                            listFilesVector.addElement(entry.getName());
                             continue;
                         }
-                        listFilesHashtable.put(entry, new Entry("file", entry.getName()));
+                        //listFilesHashtable.put(entry, new Entry("file", entry.getName()));
+                        listFilesVector.addElement(entry.getName());
                     }
                     zis.close();
                 } catch (Exception e) {
@@ -59,10 +72,13 @@ public class ZipUtils {
             }
         }
 
-        return listFilesHashtable;
+        String[] a = null;
+        a = FileUtils.vectorToStringArray(listFilesVector);
+        
+        return a;
 
-	}
-    */
+    }
+    
     public static boolean unZipFile(String zipFile, String extractFolderURI) throws Exception {
         ZipEntry entry = null;
         //boolean overwriteall = false;

@@ -45,6 +45,7 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestRename());
         allTestSuite.addTest(new TestSystemimplJ2ME());
         allTestSuite.addTest(new TestUnzip());
+        //allTestSuite.addTest(new TestBigUnzip());
         return allTestSuite;
 
     }
