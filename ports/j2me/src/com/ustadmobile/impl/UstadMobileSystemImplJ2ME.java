@@ -7,6 +7,8 @@ package com.ustadmobile.impl;
 //import com.ustadmobile.app.controller.UstadMobileAppController;
 import com.ustadmobile.app.DeviceRoots;
 import com.ustadmobile.app.FileUtils;
+import com.ustadmobile.app.HTTPUtils;
+import com.ustadmobile.app.ZipUtils;
 import com.ustadmobile.impl.UMTransferJob;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -30,10 +32,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //HTTPUtils.downloadURLToFile(url, fileURI, "");
     }
 
     public UMTransferJob unzipFile(String zipSrc, String dstDir) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //ZipUtils.unZipFile(zipSrc, dstDir);
+
     }
 
     public void setActiveUser(String username) {

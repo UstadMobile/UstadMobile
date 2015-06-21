@@ -25,6 +25,7 @@ public class TestRMS extends TestCase {
         UstadMobileAppController.getCurrentAppSettings();
         
         RMSUtils rms = new RMSUtils("UstadMobileApp");
+        /*
         rms.deleteRMS();
         String string1 = "Hey, hows it going?";
         String string2 = "Oh not bad, hows the cat?";
@@ -41,7 +42,7 @@ public class TestRMS extends TestCase {
                 rmsht.get("1"));
         assertEquals("RMS read and write test success", string2,
                 rmsht.get("2"));
-        
+        */
         Hashtable appSettings = UstadMobileAppController.getAppSettings();
         byte[] appSettingsByteArray = 
                 SerializedHashtable.hashTabletoStream(appSettings);
