@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.amms.control.PriorityControl;
 import javax.microedition.io.Connector;
@@ -187,22 +188,271 @@ public class FileUtils {
             return created;
     }
     
-    public static boolean checkDir(String dirName){
-        try{
+    public static boolean checkDir(String dirName) throws IOException{
             dirName = dirName.trim();
             if (!dirName.endsWith("/")){
                 dirName += "/";
             }
-            try{
-                FileConnection fc = (FileConnection) Connector.open(dirName, 
-                    Connector.READ_WRITE);
-                if (fc.exists()){
-                    return true;
-                }
+            boolean exists = false;
+            FileConnection fc = null;
+            fc = (FileConnection) Connector.open(dirName, 
+                Connector.READ_WRITE);
+            if (fc.exists()){
+                exists = true;
+            }
+            if (fc != null){
+                fc.close();
+            }
+            
+            return exists;
+          
+    }
+    
+    public static boolean checkFile(String fileURI) throws IOException{
+        fileURI = fileURI.trim();
+        FileConnection fc = (FileConnection)Connector.open(fileURI,
+                Connector.READ);
+        if(fc.exists()){
+            fc.close();
+            return true;
+        }
+        
+        return false;
+    }
+
+    
+    public static boolean deleteRecursively(String path, boolean recursive) 
+            throws IOException {
+      FileConnection file = (FileConnection) Connector.open(path, 
+              Connector.READ_WRITE);
+      if (!file.exists()) {
+          return true;
+      }
+
+      if (!recursive || !file.isDirectory()){
+          file.delete();
+          if (!file.exists()){
+              file.close();
+              return true;
+          }
+          return false;
+      }
+
+      
+      Enumeration listEnu = file.list();
+      String[] list;
+      list = enumerationToStringArray(listEnu);
+      
+      for (int i = 0; i < list.length; i++) {
+          if (!deleteRecursively(FileUtils.joinPath(path, list[i]), true)){
+              return false;
+          }
+      }
+      file.delete();
+      if (!file.exists()){
+          file.close();
+          return true;
+      }else{
+          return false;
+      }
+      
+  }
+
+    
+    public static boolean removeFileOrDir(String path, int mode, 
+            boolean isDir) throws IOException{
+        path = path.trim();
+        if (isDir && !path.endsWith("/")){
+            path += "/";
+        }
+        FileConnection fc = (FileConnection) Connector.open(path, mode);
+        if (fc.exists()){
+            if (isDir && !fc.isDirectory()){
                 return false;
-            }catch(Exception e) {}
-            return false;
-        }catch(Exception e){}
+            }
+            fc.delete();
+            fc.close();
+            return true;
+        }
+        fc.close();
+        
+        return false;
+    }
+    
+    
+     /*
+     * 
+     * Other utils 
+     * 
+     */
+    
+    public static String[] enumerationToStringArray(Enumeration enu){
+        String[] list;
+        Vector listVector = new Vector();
+        while(enu.hasMoreElements()){
+            listVector.addElement(enu.nextElement());
+        }
+        list = new String[listVector.size()];
+        listVector.copyInto(list);
+        return list;
+    }
+    
+    
+    public static String replaceString( String str, String pattern, String replace ) 
+    {
+        int s = 0;
+        int e = 0;
+        StringBuffer result = new StringBuffer();
+
+        while ( (e = str.indexOf( pattern, s ) ) >= 0 ) 
+        {
+            result.append(str.substring( s, e ) );
+            result.append( replace );
+            s = e+pattern.length();
+        }
+        result.append( str.substring( s ) );
+        return result.toString();
+    }   
+    
+    
+    public static Vector addTwoVectors(Vector v1, Vector v2){
+        Vector v  = null;
+        Enumeration e = null;
+        e = v2.elements();
+        while (e.hasMoreElements()){
+            v1.addElement(e.nextElement());
+        }
+        return v1;
+    }
+    
+    public static Vector hashtableToVector(Hashtable h){
+        String[] stringArray = null;
+        Vector v = null;
+        if (!h.isEmpty()){
+            v = new Vector();
+            Enumeration e = h.elements();
+            while (e.hasMoreElements()){
+                v.addElement(e.nextElement());
+            }
+        }
+        return v;
+    }
+    
+    
+    /*
+     * 
+     * end of common utils.
+     */
+    
+    public static Vector listFilesRecursivelyInDirectory(String dirURI,
+            String parentDirURI) throws IOException{
+        
+        dirURI = dirURI.trim();
+        parentDirURI = parentDirURI.trim();
+        
+        if (!dirURI.endsWith("/")){
+            dirURI += "/";
+        }
+        if (!parentDirURI.endsWith("/")){
+            parentDirURI += "/";
+        }
+        FileConnection fc = null;
+        Vector dirListVector = new Vector();
+        Vector listVector = new Vector();
+        
+        fc = (FileConnection) Connector.open(dirURI, 
+                Connector.READ);
+        
+        if(fc.isDirectory()){
+            String toAdd = null;
+            toAdd = replaceString(dirURI, parentDirURI, "");
+            Enumeration dirListEnu = fc.list();
+            if (fc != null){
+                fc.close();
+            }            
+            while(dirListEnu.hasMoreElements()){
+                String entry = dirListEnu.nextElement().toString().trim();
+                //If entry is a directory
+                if (entry.endsWith("/")){
+                    Vector nextVector = new Vector();
+                    String subDirURI = FileUtils.joinPath(dirURI, entry);
+                    if ( (nextVector = listFilesRecursivelyInDirectory(subDirURI, parentDirURI)) == null){
+                        return null;
+                    }
+                    listVector = addTwoVectors(listVector, nextVector);
+                    
+                }else{
+                    listVector.addElement(toAdd + entry);
+                }
+                
+            }
+            
+        }
+        
+        if (fc != null){
+            fc.close();
+        }
+        return listVector;
+    }
+    
+    public static String[] vectorToStringArray(Vector v){
+        String[] sa = null;
+        if (!v.isEmpty()){
+            sa = new String[v.size()];
+            v.copyInto(sa);
+            return sa;
+        }
+        return sa;
+    }
+    
+    public static boolean isStringInStringArray(String str, String[] strArray){
+        if (str != null && strArray.length > 0 ){
+            boolean found = false;
+            for (int i = 0; i< strArray.length; i++){
+                if (strArray[i].indexOf(str) >= 0){
+                    found = true;
+                    break;
+                }
+            }
+            return found;
+        }
+        return false;
+    }
+    
+    public static String[] listFilesInDirectory(String dirURI) throws IOException{
+        
+        if (!dirURI.endsWith("/")){
+            dirURI += "/";
+        }
+        FileConnection fc = null;
+        String dirList[] = null;
+        fc = (FileConnection) Connector.open(dirURI, 
+                Connector.READ);
+        if(fc.isDirectory()){
+            Enumeration dirListEnu = fc.list();
+            dirList = enumerationToStringArray(dirListEnu);
+        }
+        if (fc != null){
+            fc.close();
+        }
+        return dirList;
+        
+    }
+    public static boolean renameFileOrDir(String path, String pathTo, int mode, 
+            boolean isDir) throws IOException{
+        path = path.trim();
+        pathTo = pathTo.trim();
+        String newName = FileUtils.getBaseName(pathTo);
+        if (isDir && !path.endsWith("/")){
+            path += "/";
+        }
+        FileConnection fc = (FileConnection) Connector.open(path, mode);
+        if (fc.exists()){
+            fc.rename(newName);
+            fc.close();
+            return true;
+        }
+        
         return false;
     }
 
@@ -231,7 +481,7 @@ public class FileUtils {
                     }
                     created = true;
             }
-
+            fc.close();
             /*
             } catch (Throwable t) {
                     t.printStackTrace();
@@ -277,6 +527,7 @@ public class FileUtils {
         FileConnection fCon = (FileConnection)Connector.open(fileURI,
             Connector.READ);
         InputStream is = fCon.openInputStream();
+        fCon.close();
         return is;
     }
     
@@ -295,6 +546,7 @@ public class FileUtils {
                 is.read(bytes, 0, size);
                 str = new String(bytes, 0, size);
                 is.close();
+                fCon.close();
                 return str;
             }
         return null;
@@ -332,7 +584,8 @@ public class FileUtils {
         return -1;
     }
     
-    public static boolean writeStringToFile(String string, String fileURI){
+    public static boolean writeStringToFile(String string, String fileURI, 
+            boolean append){
         try{
             FileConnection fileCon = (FileConnection) Connector.open(fileURI, 
                     Connector.READ_WRITE);
@@ -343,8 +596,12 @@ public class FileUtils {
             if (!fileCon.canWrite() && string != null){
                 return false;
             }
-            
-            OutputStream outputStream = fileCon.openOutputStream();
+            OutputStream outputStream = null;
+            if(append){
+                outputStream = fileCon.openOutputStream(fileCon.fileSize());
+            }else{
+                outputStream = fileCon.openDataOutputStream();
+            }
             
             byte[] stringBytes = string.getBytes();
             outputStream.write(stringBytes);

@@ -183,7 +183,8 @@ public class HTTPUtils {
             
             httpURLConnection = (HttpConnection) Connector.open(url);
             httpURLConnection.setRequestMethod(HttpConnection.GET); //Get method
-            file = (FileConnection) Connector.open(destDir + filename);
+            file = (FileConnection) Connector.open(destDir + 
+                    FileUtils.FILE_SEP + filename);
             if (file.exists()) {
                 //No need to re create it.
             } else {
@@ -202,13 +203,14 @@ public class HTTPUtils {
             int bytesRead = -1;
             while ((bytesRead = inputURLStream.read(buffer, 0, buffer.length)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
-                file.openOutputStream().write(buffer);
+                file.openOutputStream().write(buffer, 0, bytesRead);
             }
             
             
             //file.openOutputStream().write(outputStream.toByteArray());
 
-            file.setReadable(true);
+            //file.setReadable(true);
+            file.setWritable(true);
             System.gc();
             
         }catch(Exception e){
