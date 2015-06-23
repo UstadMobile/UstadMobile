@@ -8,10 +8,10 @@ import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.view.LoginView;
 
 /**
- *
+ * 
  * @author varuna
  */
-public class LoginController {
+public class LoginController implements UstadController{
     
     private LoginView view;
     
@@ -36,6 +36,7 @@ public class LoginController {
     
     public void show() {
         this.view = (LoginView)UstadMobileSystemImpl.getInstance().makeView("Login");
+        this.view.show();
     }
     
     public void hide() {

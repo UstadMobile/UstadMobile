@@ -1,5 +1,6 @@
 package com.ustadmobile.impl;
 
+import com.ustadmobile.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
 
@@ -40,9 +41,9 @@ public abstract class UstadMobileSystemImpl {
      * @param viewName The name of the view to create e.g. Login or Catalog
      * @return new instance of the view for this platform; or null if an exception occurs.
      */
-    public Object makeView(String viewName) {
+    public UstadView makeView(String viewName) {
         try {
-            Object viewObj = Class.forName("com.ustadmobile.view." + viewName + 
+            UstadView viewObj = (UstadView)Class.forName("com.ustadmobile.view." + viewName + 
                     this.getImplementationName()).newInstance();
             return viewObj;
         }catch(Exception e) {
@@ -192,6 +193,28 @@ public abstract class UstadMobileSystemImpl {
      * @param username username as a string, or null for no active user
      */
     public abstract void setActiveUser(String username);
+    
+    /**
+     * Get the currently active user
+     * 
+     * @return Currently active username
+     */
+    public abstract String getActiveUser();
+    
+    /**
+     * Set the authentication (e.g. password) of the currently active user
+     * Used for communicating with server, download catalogs, etc.
+     * 
+     * @param password 
+     */
+    public abstract void setActiveUserAuth(String password);
+    
+    /**
+     * Get the authentication (e.g. password) of the currently active user
+     * 
+     * @return The authentication (e.g. password) of the current user
+     */
+    public abstract String getActiveUserAuth();
     
     /**
      * Set a preference for the currently active user

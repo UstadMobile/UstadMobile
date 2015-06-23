@@ -31,6 +31,10 @@ public class UstadMobileSystemImplAndroidTest extends TestCase{
         assertTrue(sharedDir.exists() && sharedDir.isDirectory());
     }
 
+    
+
+
+
 
     /*
     public void testReadWriteStringToFile() throws IOException {

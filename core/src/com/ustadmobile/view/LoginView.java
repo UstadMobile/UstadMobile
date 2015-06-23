@@ -10,7 +10,7 @@ import com.ustadmobile.controller.LoginController;
  *
  * @author varuna
  */
-public interface LoginView {
+public interface LoginView extends UstadView {
     public void setController(LoginController controller);
     
     public void showDialog(String title, String text);
