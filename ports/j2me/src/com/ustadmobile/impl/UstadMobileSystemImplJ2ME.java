@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import javax.bluetooth.BluetoothConnectionException;
+import com.ustadmobile.view.LoginViewJ2ME;
 
 /**
  *
