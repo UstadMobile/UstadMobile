@@ -14,6 +14,7 @@ public class UstadMobileActivity extends Activity
     {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String contentDirURI = impl.getSharedContentDir();
+        String localeStr = impl.getSystemLocale();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
     }

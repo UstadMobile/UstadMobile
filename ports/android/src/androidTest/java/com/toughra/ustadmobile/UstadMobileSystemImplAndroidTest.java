@@ -10,6 +10,8 @@ import junit.framework.Assert;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
+import java.util.Locale;
 
 /**
  * Created by mike on 07/06/15.
@@ -31,21 +33,37 @@ public class UstadMobileSystemImplAndroidTest extends TestCase{
         assertTrue(sharedDir.exists() && sharedDir.isDirectory());
     }
 
-    
 
-
-
-
-    /*
+    /**
+     * Test that the implementation can write a String to a file, and then read the same string
+     * back
+     *
+     * @throws IOException
+     */
     public void testReadWriteStringToFile() throws IOException {
         File baseDir = Environment.getExternalStorageDirectory();
         File outFile = new File(baseDir, "umtestfile.txt");
 
-        UstadMobileSystemImplAndroid impl = new UstadMobileSystemImplAndroid();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String contents = "The answer is 42";
         impl.writeStringToFile(contents, outFile.getAbsolutePath(), "UTF-8");
-        assertEquals(true, "Managed to write file without throwing exception");
+
+        String contentsRead = impl.readFileAsText(outFile.getAbsolutePath(), "UTF-8");
+
+        assertEquals("String read from file equal to what was written", contents, contentsRead);
     }
-    */
+
+    public void testSystemInfo() {
+        Hashtable systemInfo = UstadMobileSystemImpl.getInstance().getSystemInfo();
+        assertEquals("Got hashtable: os = Android", "Android", (String)systemInfo.get("os"));
+    }
+
+    public void testSystemLocale() {
+        String systemLocale = UstadMobileSystemImpl.getInstance().getSystemLocale();
+        String[] localeComponents = systemLocale.split("_");
+        Locale newLocale = new Locale(localeComponents[0], localeComponents[1]);
+        assertNotNull("Can create a locale object from given locale string", newLocale);
+    }
+
 
 }

@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.File;
 import java.util.Hashtable;
+import java.util.Locale;
+import android.os.Build;
 
 /**
  * Created by mike on 07/06/15.
@@ -40,17 +42,28 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
     @Override
     public String getUserContentDirectory(String username) {
+
         return null;
     }
 
+    /**
+     * Will return language_COUNTRY e.g. en_US
+     *
+     * @return
+     */
     @Override
     public String getSystemLocale() {
-        return null;
+        return Locale.getDefault().toString();
     }
 
     @Override
     public Hashtable getSystemInfo() {
-        return null;
+        Hashtable ht = new Hashtable();
+        ht.put("os", "Android");
+        ht.put("osversion", Build.VERSION.RELEASE);
+        ht.put("locale", this.getSystemLocale());
+
+        return ht;
     }
 
     @Override
@@ -114,8 +127,8 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     @Override
-    public boolean fileExists(String s) throws IOException {
-        return false;
+    public boolean fileExists(String fileURI) throws IOException {
+        return new File(fileURI).exists();
     }
 
     @Override
@@ -124,8 +137,9 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     @Override
-    public void removeFile(String s) throws IOException {
-
+    public void removeFile(String fileURI) throws IOException {
+        File f = new File(fileURI);
+        f.delete();
     }
 
     @Override
