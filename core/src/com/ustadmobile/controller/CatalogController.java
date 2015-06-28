@@ -32,6 +32,16 @@ public class CatalogController implements UstadController{
         
     }
     
+    /**
+     * Get the catalog model that corresponds to this controller.  The model
+     * contains the OPDS feed
+     * 
+     * @return CatalogModel corresponding to this feed
+     */
+    public CatalogModel getModel() {
+        return this.model;
+    }
+    
     //methods go here..
     
     public void handleClickRefresh() {
