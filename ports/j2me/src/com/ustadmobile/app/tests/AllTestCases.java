@@ -48,6 +48,8 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestBigUnzip());
         allTestSuite.addTest(new TestAppPref());
         allTestSuite.addTest(new TestUserPref());
+        
+        allTestSuite.addTest(new TestLoginView());
         return allTestSuite;
 
     }

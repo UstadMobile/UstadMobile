@@ -12,7 +12,7 @@ import com.ustadmobile.opds.UstadJSOPDSFeed;
  *
  * @author varuna
  */
-public interface CatalogView {
+public interface CatalogView extends UstadView{
     public void setFeed(UstadJSOPDSFeed feed);
     
     public void setController(CatalogController controller);

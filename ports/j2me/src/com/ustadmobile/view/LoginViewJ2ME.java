@@ -21,11 +21,16 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     private TextField passwordField;
     
     public LoginViewJ2ME() {
+        setTitle("Login");
+        
         usernameField = new TextField();
         addComponent(usernameField);
         
         passwordField = new TextField();
         addComponent(passwordField);
+        
+        Label spaceLabel = new Label(" ");
+        addComponent(spaceLabel);
         
         Command loginCmd = new Command("Login", CMD_LOGIN);
         Button loginButton = new Button(loginCmd);
@@ -43,7 +48,7 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     public void showDialog(String title, String text) {
         
     }
-
+    
     public void actionPerformed(ActionEvent evt) {
         if(evt.getCommand().getId() == CMD_LOGIN) {
             this.controller.handleClickLogin(usernameField.getText(),

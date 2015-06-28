@@ -23,7 +23,15 @@ public class TestFormShow extends TestCase{
         Form f = new Form();
         f = TestForm.loadTestForm();
         f.show();
-        assertEquals("Form Show OK", "OK",
+        //sleep
+        //    
+        /*
+         * Test sample:
+         * ActionEvent evt = new ActionEvent();//blah blah
+         * myView.actionPerformed(evt)
+         * 
+         */
+         assertEquals("Form Show OK", "OK",
                 "OK");
         
         

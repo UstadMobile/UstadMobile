@@ -57,8 +57,17 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
 
     public void actionPerformed(ActionEvent evt) {
         if(evt.getCommand().getId() == CMD_REFRESH){
+            this.controller = this.controller.makeDeviceCatalog();
             //this.controller.handleClickRefresh();
+        }else{
+            int entryid = evt.getCommand().getId() - 1;
+            if (entryid > 0){
+                int a=0;
+                //make a new epub controller and show it.
+            }
+            
         }
+        
     }
 
     public void setFeed(UstadJSOPDSFeed feed) {

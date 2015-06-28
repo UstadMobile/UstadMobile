@@ -71,6 +71,140 @@ public class HTTPUtils {
 
     }
     
+    public static int basicAuth(String url, String username,
+            String password, Hashtable headers){
+        return basicAuth(url, username, password, headers, false);
+    }
+    
+    public static int basicAuth(String url, String username,
+            String password, Hashtable headers, boolean POST){
+        
+        HttpConnection httpConn = null;
+        if(url == null){
+            return -1;
+        }
+        try{
+            // Open an HTTP Connection object
+            httpConn = (HttpConnection)Connector.open(url);
+            // Setup HTTP Request to GET/POST
+            if(POST){
+                httpConn.setRequestMethod(HttpConnection.POST);
+            }else{
+                httpConn.setRequestMethod(HttpConnection.GET);
+            }
+            String encodedUserAndPass="Basic "+ BasicAuth.encode(username,
+                    password);
+            httpConn.setRequestProperty("Authorization", "Basic "+ encodedUserAndPass);
+            String params = null;
+            Enumeration keys = headers.keys();
+            String key, value;
+            //boolean firstAmp = true;
+            while(keys.hasMoreElements()) {
+                    key = keys.nextElement().toString();
+                    value = headers.get(key).toString();
+                    if(key != "" && value != ""){
+                        httpConn.setRequestProperty(key, value);
+                    }
+                    /*
+                    if (firstAmp){
+                        params = key + "=" + value;
+                        firstAmp=false;
+                    }else{
+                        params = params + "&"+ key + "=" + value;
+                    }*/
+            }
+            
+            int response_code=httpConn.getResponseCode();  
+            return response_code;
+
+            
+        }catch(IOException e){  
+            e.printStackTrace();
+        }finally{
+            if(httpConn!=null){  
+                try {  
+                    httpConn.close();  
+                } catch (IOException ex) {  
+                    ex.printStackTrace();  
+                }  
+            }  
+            
+        }
+        return -1;
+    }
+    
+    public static int makeHTTPRequest(String url,
+            Hashtable optionalParameters, 
+            Hashtable optionalHeaders) throws IOException{
+        return makeHTTPRequest(url, optionalParameters, optionalHeaders, false);
+    }
+    
+    public static int makeHTTPRequest(String url, 
+            Hashtable optionalParameters, Hashtable optionalHeaders, 
+            boolean POST) throws IOException{
+        
+        HttpConnection httpConn = null;
+        if(url == null){
+            return -1;
+        }
+        try{
+            // Open an HTTP Connection object
+            httpConn = (HttpConnection)Connector.open(url);
+            // Setup HTTP Request to GET/POST
+            if(POST){
+                httpConn.setRequestMethod(HttpConnection.POST);
+            }else{
+                httpConn.setRequestMethod(HttpConnection.GET);
+            }
+            
+            //Add Parameters
+            String params = null;
+            Enumeration keys = optionalParameters.keys();
+            String key, value;
+            boolean firstAmp = true;
+            while(keys.hasMoreElements()) {
+                    key = keys.nextElement().toString();
+                    value = optionalParameters.get(key).toString();
+                    if (firstAmp){
+                        params = key + "=" + value;
+                        firstAmp=false;
+                    }else{
+                        params = params + "&"+ key + "=" + value;
+                    }
+            }
+            
+            //Add Headers
+            Enumeration headerKeys = optionalHeaders.keys();
+            String hKey, hValue;
+            while(headerKeys.hasMoreElements()) {
+                    hKey = headerKeys.nextElement().toString();
+                    hValue = optionalHeaders.get(hKey).toString();
+                    if(!hKey.equals("") && !hValue.equals("")){
+                        httpConn.setRequestProperty(hKey, hValue);
+                    }
+            }
+            
+            // Read Response from the Server
+            int response_code=httpConn.getResponseCode();  
+            return response_code;
+
+            
+        }catch(IOException e){  
+            e.printStackTrace();
+        }finally{
+            if(httpConn!=null){  
+                try {  
+                    httpConn.close();  
+                } catch (IOException ex) {  
+                    ex.printStackTrace();  
+                }  
+            }  
+            
+        }
+        return -1;
+              
+    }
+    
     public static String sendPost(String url, Hashtable optionalParameters) 
             throws IOException {
         HttpConnection httpConn = null;

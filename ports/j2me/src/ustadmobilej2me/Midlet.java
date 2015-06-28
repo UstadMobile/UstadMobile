@@ -12,6 +12,7 @@ import com.sun.lwuit.Display;
 import com.ustadmobile.app.HTTPUtils;
 import com.ustadmobile.app.RMSUtils;
 import com.ustadmobile.app.controller.UstadMobileAppController;
+import com.ustadmobile.controller.LoginController;
 
 //TextBox for screen:
 import javax.microedition.lcdui.TextBox;
@@ -29,15 +30,20 @@ public class Midlet extends j2meunit.midletui.TestRunner {
     }
     
     //To Display on Screen
-    public void _startApp(){
+    public void startApp(){
         Display.init(this);                   
+        /*
         Form f = new Form("Hello there");
         //Form f = TestForm.loadTestForm();
         f.show();
+        */
+        
+        LoginController loginController = new LoginController();
+        loginController.show();
     }
     
     //Start the tests:
-    public void startApp(){
+    public void _startApp(){
         //start(new String[] { com.ustadmobile.app.tests.AllTestCases.class.getName() });
         
         
