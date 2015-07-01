@@ -92,10 +92,12 @@ public class HTTPUtils {
             }else{
                 httpConn.setRequestMethod(HttpConnection.GET);
             }
+            if (username.equals("") || username.equals(null)){
+                return 401;
+            }
             String encodedUserAndPass="Basic "+ BasicAuth.encode(username,
                     password);
-            httpConn.setRequestProperty("Authorization", "Basic "+ encodedUserAndPass);
-            String params = null;
+            httpConn.setRequestProperty("Authorization", encodedUserAndPass);
             Enumeration keys = headers.keys();
             String key, value;
             //boolean firstAmp = true;
@@ -105,13 +107,6 @@ public class HTTPUtils {
                     if(key != "" && value != ""){
                         httpConn.setRequestProperty(key, value);
                     }
-                    /*
-                    if (firstAmp){
-                        params = key + "=" + value;
-                        firstAmp=false;
-                    }else{
-                        params = params + "&"+ key + "=" + value;
-                    }*/
             }
             
             int response_code=httpConn.getResponseCode();  
@@ -159,29 +154,33 @@ public class HTTPUtils {
             
             //Add Parameters
             String params = null;
-            Enumeration keys = optionalParameters.keys();
-            String key, value;
-            boolean firstAmp = true;
-            while(keys.hasMoreElements()) {
-                    key = keys.nextElement().toString();
-                    value = optionalParameters.get(key).toString();
-                    if (firstAmp){
-                        params = key + "=" + value;
-                        firstAmp=false;
-                    }else{
-                        params = params + "&"+ key + "=" + value;
-                    }
+            if (optionalParameters != null){
+                Enumeration keys = optionalParameters.keys();
+                String key, value;
+                boolean firstAmp = true;
+                while(keys.hasMoreElements()) {
+                        key = keys.nextElement().toString();
+                        value = optionalParameters.get(key).toString();
+                        if (firstAmp){
+                            params = key + "=" + value;
+                            firstAmp=false;
+                        }else{
+                            params = params + "&"+ key + "=" + value;
+                        }
+                }
             }
             
             //Add Headers
-            Enumeration headerKeys = optionalHeaders.keys();
-            String hKey, hValue;
-            while(headerKeys.hasMoreElements()) {
-                    hKey = headerKeys.nextElement().toString();
-                    hValue = optionalHeaders.get(hKey).toString();
-                    if(!hKey.equals("") && !hValue.equals("")){
-                        httpConn.setRequestProperty(hKey, hValue);
-                    }
+            if (optionalHeaders != null){
+                Enumeration headerKeys = optionalHeaders.keys();
+                String hKey, hValue;
+                while(headerKeys.hasMoreElements()) {
+                        hKey = headerKeys.nextElement().toString();
+                        hValue = optionalHeaders.get(hKey).toString();
+                        if(!hKey.equals("") && !hValue.equals("")){
+                            httpConn.setRequestProperty(hKey, hValue);
+                        }
+                }
             }
             
             // Read Response from the Server

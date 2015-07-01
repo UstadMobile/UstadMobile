@@ -35,6 +35,8 @@ public class AllTestCases extends TestCase {
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
         allTestSuite.addTest(new TestFormShow());
+
+        
         allTestSuite.addTest(new TestSimple());
         allTestSuite.addTest(new TestXmlParse());
         allTestSuite.addTest(new TestOPDSParse());
@@ -50,6 +52,8 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestUserPref());
         
         allTestSuite.addTest(new TestLoginView());
+        allTestSuite.addTest(new TestCatalogView());
+        
         return allTestSuite;
 
     }

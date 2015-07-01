@@ -41,12 +41,19 @@ public class LoginController implements UstadController{
         }else {
             //make a new catalog controller and show it for the users base directory
             CatalogController catalogController = new CatalogController();
+            catalogController.show();
             
         }
     }
     
     public void show() {
+        int a = UstadMobileSystemImpl.getInstance().makeRequest(
+                "http://umcloud1.ustadmobile.com/letstrythis", null, null, false);
         this.view = (LoginView)UstadMobileSystemImpl.getInstance().makeView("Login");
+        int b = UstadMobileSystemImpl.getInstance().makeRequest(
+                "http://umcloud1.ustadmobile.com/show1", null, null, false);
+
+        
         this.view.setController(this);
         this.view.show();
     }

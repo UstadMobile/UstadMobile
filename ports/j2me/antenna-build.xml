@@ -38,7 +38,12 @@ NetBeans.  See README for instructions on building from source.
     
     <property name="MidletSuite" value="UstadMobileMicro"/>
     <property name="Midlet_1_name" value="Ustad Mobile"/>
-    <property name="Midlet_1_class" value="ustadmobilej2me.Midlet"/>
+    <property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2ME"/>
+    <!--
+    <property name="Midlet_2_name" value="Multiple Forms"/>
+    <property name="Midlet_2_class" value="ustadmobilej2me.MultipleFormMidlet"/>
+    -->
+
     
     <property name="wtk.cldc.version" value="1.1"/>
     <property name="wtk.midp.version" value="2.1"/>
@@ -50,11 +55,14 @@ NetBeans.  See README for instructions on building from source.
         
         <path id="ustadlibclasspath.ref">
             <fileset dir="${lib.dir}" >
-                <include name="j2meunit.jar" />
+                <include name="*.jar" />
+                <!-- 
+	 	<include name="j2meunit.jar" />
                 <include name="kxml2-min-2.3.0.jar" />
                 <include name="LWUIT-MIDP-IO.jar" />
                 <include name="LWUIT-MIDP.jar" />            
-	  	<include name="UstadMobileCore.jar" />
+	  	<include name="UstadMobileCore.jar" /> 
+		-->
             </fileset>
         </path>
         

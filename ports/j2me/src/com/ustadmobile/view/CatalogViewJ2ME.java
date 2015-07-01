@@ -18,37 +18,41 @@ import com.ustadmobile.controller.CatalogController;
 public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener {
 
     private int CMD_REFRESH = 0;
-    private final UstadJSOPDSEntry[] entries;
-    
-    //private TextField textField;
-    
+    private UstadJSOPDSEntry[] entries;
+    private CatalogController controller;
+    //private UstadJSOPDSFeed feed;
+        
     public CatalogViewJ2ME() {
         /*
         textField = new TextField();
         addComponent(textField);
         
         * */
-        Command refreshCmd = new Command("Refresh", CMD_REFRESH);
-        Button refreshButton = new Button(refreshCmd);
-        refreshButton.addActionListener(this);
-        this.addComponent(refreshButton);
         
-        entries = feed.entries;
+        Label spaceLabel = new Label(" ");
+        addComponent(spaceLabel);
+        
+        
+        
+    }
+    
+    public void setController(CatalogController controller) {
+        this.controller = controller;
+        //entries = feed.entries;
+        entries = this.controller.getModel().opdsFeed.entries;
         int i;
         for(i=0; i<entries.length; i++){
             String title = entries[i].title;
             Command entry = new Command(title, i+1);
             Button entryButton = new Button(entry);
             this.addComponent(entryButton);
+            Label spaceLabel = new Label(" ");
+            addComponent(spaceLabel);
         }
-        
-    }
-    
-    private CatalogController controller;
-    private UstadJSOPDSFeed feed;
-    
-    public void setController(CatalogController controller) {
-        this.controller = controller;
+        Command refreshCmd = new Command("Refresh", CMD_REFRESH);
+        Button refreshButton = new Button(refreshCmd);
+        refreshButton.addActionListener(this);
+        this.addComponent(refreshButton);
     }
 
     public void showDialog(String title, String text) {
@@ -70,9 +74,9 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         
     }
 
-    public void setFeed(UstadJSOPDSFeed feed) {
-        this.feed = feed;
-    }
+    //public void setFeed(UstadJSOPDSFeed feed) {
+    //    this.feed = feed;
+    //}
 
     public void showDialog(String title, String text, int commandId) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

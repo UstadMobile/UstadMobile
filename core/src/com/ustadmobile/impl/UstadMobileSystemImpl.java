@@ -268,7 +268,7 @@ public abstract class UstadMobileSystemImpl {
             Hashtable headers);
     
     /**
-     * Do Basic Authentication
+     * Do Basic Request
      * 
      * @param url Server url to make the request 
      * @param optionalParameters Parameters to be put in HTTP Request
@@ -278,6 +278,18 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract int makeRequest(String url, 
             Hashtable optionalParameters, Hashtable optionalHeaders, boolean POST);
+    
+    /**
+     * Do Basic Request and return response
+     * 
+     * @param url Server url to make the request 
+     * @param optionalParameters Parameters to be put in HTTP Request
+     * @param optionalHeaders Headers to be put in HTTP Request.
+     * @param POST boolean TRUE or FALSE if the request is a POST or GET
+     * @return status code
+     */
+    //public abstract String makeRequest(String url, 
+    //        Hashtable optionalParameters, Hashtable optionalHeaders, boolean POST);
     
 }
 
