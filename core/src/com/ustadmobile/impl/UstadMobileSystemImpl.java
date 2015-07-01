@@ -90,7 +90,7 @@ public abstract class UstadMobileSystemImpl {
      * @return 
      */
     public abstract Hashtable getSystemInfo();
-    
+     
     /**
      * Read the given fileURI as a string and return it 
      * 
@@ -117,7 +117,7 @@ public abstract class UstadMobileSystemImpl {
      * @param fileURI2
      * @return 
      */
-    public abstract int modTimeDifference(String fileURI1, String fileURI2);
+    public abstract long modTimeDifference(String fileURI1, String fileURI2);
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 
