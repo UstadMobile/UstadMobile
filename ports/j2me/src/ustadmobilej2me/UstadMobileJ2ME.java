@@ -12,6 +12,8 @@ import com.sun.lwuit.Display;
 import com.ustadmobile.app.HTTPUtils;
 import com.ustadmobile.app.RMSUtils;
 import com.ustadmobile.app.controller.UstadMobileAppController;
+import com.ustadmobile.app.forms.TestForm;
+import com.ustadmobile.controller.LoginController;
 
 //TextBox for screen:
 import javax.microedition.lcdui.TextBox;
@@ -19,11 +21,11 @@ import javax.microedition.lcdui.TextBox;
 /**
  * @author varuna
  */
-public class Midlet extends j2meunit.midletui.TestRunner {
+public class UstadMobileJ2ME extends j2meunit.midletui.TestRunner {
 
     private TextBox tbox;
     
-    public Midlet() {
+    public UstadMobileJ2ME() {
         tbox = new TextBox("App Dir", 
                 "Hows it going?", 100, 0 );
     }
@@ -31,11 +33,18 @@ public class Midlet extends j2meunit.midletui.TestRunner {
     //To Display on Screen
     public void _startApp(){
         Display.init(this);                   
+        /*
         Form f = new Form("Hello there");
         //Form f = TestForm.loadTestForm();
         f.show();
+        */
+        
+        LoginController loginController = new LoginController();
+        loginController.show();
+        
+        
     }
-    
+   
     //Start the tests:
     public void startApp(){
         //start(new String[] { com.ustadmobile.app.tests.AllTestCases.class.getName() });
@@ -79,6 +88,7 @@ public class Midlet extends j2meunit.midletui.TestRunner {
                             "Result");
                     testResult.put("device", 
                             UstadMobileAppController.getPlatform().toString());
+                    
                     try {
                         String postResult = null;
 

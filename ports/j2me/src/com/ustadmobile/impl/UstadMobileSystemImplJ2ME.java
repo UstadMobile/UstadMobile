@@ -5,6 +5,7 @@
 package com.ustadmobile.impl;
 
 //import com.ustadmobile.app.controller.UstadMobileAppController;
+import com.ustadmobile.app.AppPref;
 import com.ustadmobile.app.DeviceRoots;
 import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
@@ -256,5 +257,39 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         return null;
     }
-    
+
+    public String getActiveUser() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void setActiveUserAuth(String password) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getActiveUserAuth() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getAppPref(String key) {
+        AppPref appPref = new AppPref();
+        String value = null;
+        value = appPref.getSetting(key);
+        return value;
+    }
+
+    public int basicAuth(String url, String username, String password, Hashtable headers) {
+        return HTTPUtils.basicAuth(url, username, password, headers);
+    }
+
+    public int makeRequest(String url, Hashtable optionalParameters, 
+            Hashtable optionalHeaders, boolean POST) {
+        try {
+            return HTTPUtils.makeHTTPRequest(url, optionalParameters, optionalHeaders, POST);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return -1;
+    }
+
+
 }

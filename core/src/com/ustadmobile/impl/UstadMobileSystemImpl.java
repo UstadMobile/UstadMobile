@@ -43,8 +43,10 @@ public abstract class UstadMobileSystemImpl {
      */
     public UstadView makeView(String viewName) {
         try {
-            UstadView viewObj = (UstadView)Class.forName("com.ustadmobile.view." + viewName + 
-                    this.getImplementationName()).newInstance();
+            String portName = getImplementationName();
+            String className = "com.ustadmobile.view."+viewName+"View"+portName;
+            UstadView viewObj = (UstadView) Class.forName(
+                    className).newInstance();
             return viewObj;
         }catch(Exception e) {
             return null;
@@ -246,7 +248,48 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract void saveUserPrefs();
     
+    /**
+     * Get a preference for the app
+     * 
+     * @param key preference key as a string
+     * @return value of that preference
+     */
+    public abstract String getAppPref(String key);
     
+    /**
+     * Do Basic Authentication
+     * 
+     * @param url Server url to make the request 
+     * @param username Username for basic authentication
+     * @param password Password for basic authentication
+     * @return status code
+     */
+    public abstract int basicAuth(String url, String username, String password,
+            Hashtable headers);
+    
+    /**
+     * Do Basic Request
+     * 
+     * @param url Server url to make the request 
+     * @param optionalParameters Parameters to be put in HTTP Request
+     * @param optionalHeaders Headers to be put in HTTP Request.
+     * @param POST boolean TRUE or FALSE if the request is a POST or GET
+     * @return status code
+     */
+    public abstract int makeRequest(String url, 
+            Hashtable optionalParameters, Hashtable optionalHeaders, boolean POST);
+    
+    /**
+     * Do Basic Request and return response
+     * 
+     * @param url Server url to make the request 
+     * @param optionalParameters Parameters to be put in HTTP Request
+     * @param optionalHeaders Headers to be put in HTTP Request.
+     * @param POST boolean TRUE or FALSE if the request is a POST or GET
+     * @return status code
+     */
+    //public abstract String makeRequest(String url, 
+    //        Hashtable optionalParameters, Hashtable optionalHeaders, boolean POST);
     
 }
 

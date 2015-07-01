@@ -23,13 +23,17 @@ public class CatalogController implements UstadController{
     
     public static final int STATUS_NOT_ACQUIRED = 2;
     
-    
+    //The View (J2ME or Android)
     private CatalogView view;
     
+    //this is where the feed (and its entries) live.
     private CatalogModel model;
     
     public CatalogController() {
         
+    }
+    public CatalogController(CatalogModel model){
+        this.model=model;
     }
     
     /**
@@ -48,9 +52,12 @@ public class CatalogController implements UstadController{
         
     }
     
+    //shows the view
     public void show() {
         this.view = (CatalogView)
                 UstadMobileSystemImpl.getInstance().makeView("Catalog");
+        this.view.setController(this);
+        this.view.show();
     }
     
     public void hide() {

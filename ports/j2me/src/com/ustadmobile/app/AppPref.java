@@ -27,6 +27,9 @@ public class AppPref {
     //set up default settings.
     private static void setDefaultPreferences() {
         Hashtable defaultAppSettings = new Hashtable();
+        
+        defaultAppSettings.put("server", 
+                "http://umcloud1.ustadmobile.com/umlrs/statements?limit=1");
         defaultAppSettings.put("umcloud", "http://umcloud1.ustadmobile.com");
         defaultAppSettings.put("tincan", 
                 "http://umcloud1.ustadmobile.com/umlrs");
@@ -151,6 +154,20 @@ public class AppPref {
         }
         //close the app RMS
         appRms.closeRMS();
+    }
+    
+    public static String getSetting(String key){
+        //Initiate app RMS..
+        RMSUtils appRms = new RMSUtils(REC_STORE);
+        String value = null;
+        //Get Current configuration
+        Hashtable currentSettings = getAppSettings();
+        if(currentSettings.containsKey(key)){
+            value = currentSettings.get(key).toString();
+        }
+        //close the app RMS
+        appRms.closeRMS();
+        return value;
     }
     
     public static Hashtable getAppSettings(){
