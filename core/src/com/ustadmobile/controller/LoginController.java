@@ -4,11 +4,10 @@
  */
 package com.ustadmobile.controller;
 
-import com.sun.midp.io.HttpUrl;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.view.LoginView;
+import com.ustadmobile.view.ViewFactory;
 import java.util.Hashtable;
-import com.ustadmobile.controller.CatalogController;
 
 /**
  * 
@@ -49,7 +48,7 @@ public class LoginController implements UstadController{
     public void show() {
         int a = UstadMobileSystemImpl.getInstance().makeRequest(
                 "http://umcloud1.ustadmobile.com/letstrythis", null, null, false);
-        this.view = (LoginView)UstadMobileSystemImpl.getInstance().makeView("Login");
+        this.view = ViewFactory.makeLoginView();
         int b = UstadMobileSystemImpl.getInstance().makeRequest(
                 "http://umcloud1.ustadmobile.com/show1", null, null, false);
 
