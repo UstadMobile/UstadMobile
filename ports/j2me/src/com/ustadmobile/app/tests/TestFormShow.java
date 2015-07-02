@@ -54,18 +54,9 @@ public class TestFormShow extends TestCase{
         
         //final LoginController loginController = new LoginController();
         com.sun.lwuit.Display.getInstance().callSeriallyAndWait(new Runnable() {
-            public void run() {
-                
+            public void run() {               
                 final LoginController loginController = new LoginController();
                 loginController.show();
-                
-                /*
-                Form f = new Form();
-                f = TestForm2.loadTestForm();
-                f.show();
-                f.setTitle("in the thread 2..");
-                f.show();
-                * */
             }
         });
         try { Thread.sleep(2000); }
