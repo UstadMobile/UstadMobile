@@ -17,6 +17,7 @@ import javax.microedition.io.Connector;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import javax.bluetooth.BluetoothConnectionException;
 import com.ustadmobile.view.LoginViewJ2ME;
+import com.ustadmobile.app.UserPref;
 
 /**
  *
@@ -48,14 +49,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setUserPref(String key, String value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        UserPref.addSetting(key, value);
+        //throw new UnsupportedOperationException("Not supported yet."); 
+        //To change body of generated methods, choose Tools | Templates.
     }
 
     public String getUserPref(String key, String value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return UserPref.getSetting(key);
+        //throw new UnsupportedOperationException("Not supported yet."); 
+        //To change body of generated methods, choose Tools | Templates.
     }
 
     public String[] getPrefKeyList() {
+        
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -277,11 +283,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return value;
     }
 
-    public int basicAuth(String url, String username, String password, Hashtable headers) {
+    /*public int basicAuth(String url, String username, String password, Hashtable headers) {
         return HTTPUtils.basicAuth(url, username, password, headers);
-    }
+    }*/
 
-    public int makeRequest(String url, Hashtable optionalParameters, 
+    /*public int makeRequest(String url, Hashtable optionalParameters, 
             Hashtable optionalHeaders, boolean POST) {
         try {
             return HTTPUtils.makeHTTPRequest(url, optionalParameters, optionalHeaders, POST);
@@ -289,6 +295,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             ex.printStackTrace();
         }
         return -1;
+    }*/
+
+    public HTTPResult makeRequest(String url, Hashtable headers, 
+            Hashtable postParameters, String method) {
+        try {
+            return HTTPUtils.makeHTTPRequest(url, postParameters, headers, 
+                    method);
+            //To change body of generated methods, choose Tools | Templates.
+            //To change body of generated methods, choose Tools | Templates.
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
 

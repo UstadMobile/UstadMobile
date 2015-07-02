@@ -40,9 +40,9 @@ package com.ustadmobile.app;
  * @see http://java.sun.com/docs/books/j2mewireless/examples/src/examples/netclient/BasicAuth.java
  */
 
-public class BasicAuth {
+public class Base64 {
     // make sure no one can instantiate this class
-    private BasicAuth() {}
+    private Base64() {}
 
     // conversion table
     private static byte[] cvtTable = {

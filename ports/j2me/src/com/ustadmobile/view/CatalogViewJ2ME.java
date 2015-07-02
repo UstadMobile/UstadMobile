@@ -18,9 +18,11 @@ import com.ustadmobile.controller.CatalogController;
 public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener {
 
     private int CMD_REFRESH = 0;
+    private int CMD_DOWNLOAD_ALL = 9999999;
     private UstadJSOPDSEntry[] entries;
     private CatalogController controller;
     //private UstadJSOPDSFeed feed;
+    boolean acquisition = false;
         
     public CatalogViewJ2ME() {
         /*
@@ -38,7 +40,6 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     
     public void setController(CatalogController controller) {
         this.controller = controller;
-        //entries = feed.entries;
         entries = this.controller.getModel().opdsFeed.entries;
         int i;
         for(i=0; i<entries.length; i++){
@@ -53,6 +54,17 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         Button refreshButton = new Button(refreshCmd);
         refreshButton.addActionListener(this);
         this.addComponent(refreshButton);
+        
+        Label spaceLabel = new Label(" ");
+        addComponent(spaceLabel);
+        
+        if (acquisition){
+            Command downloadAll = new Command("Download All", CMD_DOWNLOAD_ALL);
+            Button downloadAllButton = new Button(downloadAll);
+            downloadAllButton.addActionListener(this);
+            this.addComponent(downloadAllButton); 
+       }
+        
     }
 
     public void showDialog(String title, String text) {
@@ -62,6 +74,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     public void actionPerformed(ActionEvent evt) {
         if(evt.getCommand().getId() == CMD_REFRESH){
             this.controller = this.controller.makeDeviceCatalog();
+            this.controller.show();
             //this.controller.handleClickRefresh();
         }else{
             int entryid = evt.getCommand().getId() - 1;
@@ -74,12 +87,9 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         
     }
 
-    //public void setFeed(UstadJSOPDSFeed feed) {
-    //    this.feed = feed;
-    //}
-
     public void showDialog(String title, String text, int commandId) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); 
+        //To change body of generated methods, choose Tools | Templates.
     }
 
     public void showContainerContextMenu(UstadJSOPDSItem item) {

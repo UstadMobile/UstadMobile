@@ -59,4 +59,8 @@ public class HTTPResult {
         }
     }
     
+    public int getStatus(){
+        return status;
+    }
+    
 }

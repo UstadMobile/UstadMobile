@@ -14,6 +14,8 @@ import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
+import com.ustadmobile.app.Base64;
+import com.ustadmobile.impl.HTTPResult;
 
 /**
  *
@@ -95,7 +97,7 @@ public class HTTPUtils {
             if (username.equals("") || username.equals(null)){
                 return 401;
             }
-            String encodedUserAndPass="Basic "+ BasicAuth.encode(username,
+            String encodedUserAndPass="Basic "+ Base64.encode(username,
                     password);
             httpConn.setRequestProperty("Authorization", encodedUserAndPass);
             Enumeration keys = headers.keys();
@@ -128,26 +130,29 @@ public class HTTPUtils {
         return -1;
     }
     
-    public static int makeHTTPRequest(String url,
+    public static HTTPResult makeHTTPRequest(String url,
             Hashtable optionalParameters, 
             Hashtable optionalHeaders) throws IOException{
-        return makeHTTPRequest(url, optionalParameters, optionalHeaders, false);
+        return makeHTTPRequest(url, optionalParameters, optionalHeaders, "GET");
     }
     
-    public static int makeHTTPRequest(String url, 
+    public static HTTPResult makeHTTPRequest(String url, 
             Hashtable optionalParameters, Hashtable optionalHeaders, 
-            boolean POST) throws IOException{
+            String type) throws IOException{
         
+        HTTPResult httpResult;
         HttpConnection httpConn = null;
         if(url == null){
-            return -1;
+            return null;
         }
         try{
             // Open an HTTP Connection object
             httpConn = (HttpConnection)Connector.open(url);
             // Setup HTTP Request to GET/POST
-            if(POST){
+            if(type.equals("POST")){
                 httpConn.setRequestMethod(HttpConnection.POST);
+            }else if (type.equals("GET")){
+                httpConn.setRequestMethod(HttpConnection.GET);
             }else{
                 httpConn.setRequestMethod(HttpConnection.GET);
             }
@@ -185,7 +190,11 @@ public class HTTPUtils {
             
             // Read Response from the Server
             int response_code=httpConn.getResponseCode();  
-            return response_code;
+            byte[] response = null;
+            Hashtable responseHeaders = null;
+            
+            httpResult = new HTTPResult(response, response_code, responseHeaders);
+            return httpResult;
 
             
         }catch(IOException e){  
@@ -200,7 +209,7 @@ public class HTTPUtils {
             }  
             
         }
-        return -1;
+        return null;
               
     }
     

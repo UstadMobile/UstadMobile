@@ -4,6 +4,8 @@
  */
 package com.ustadmobile.controller;
 
+import com.ustadmobile.app.Base64;
+import com.ustadmobile.impl.HTTPResult;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.view.LoginView;
 import com.ustadmobile.view.ViewFactory;
@@ -25,10 +27,13 @@ public class LoginController implements UstadController{
     public static int authenticate(String username, String password, String url) {
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");
-        
-        //return UstadMobileSystemImpl.getInstance().basicAuth(url, 
-        //        username, password, headers);
-        return 400;
+        String encodedUserAndPass="Basic "+ Base64.encode(username,
+                    password);
+        headers.put("Authorization", encodedUserAndPass);
+        HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
+                url, headers, null, "GET");
+        return authResult.getStatus();
+
     }
     
     public void handleClickLogin(String username, String password) {
@@ -39,6 +44,7 @@ public class LoginController implements UstadController{
             this.view.showDialog("Error", "Login failed: please try again");
         }else {
             //make a new catalog controller and show it for the users base directory
+            //Add username to UserPreferences.
             CatalogController catalogController = new CatalogController();
             catalogController.show();
             
