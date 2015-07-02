@@ -236,39 +236,18 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getAppPref(String key);
     
     /**
-     * Do Basic Authentication
+     * Do a basic HTTP Request
      * 
-     * @param url Server url to make the request 
-     * @param username Username for basic authentication
-     * @param password Password for basic authentication
-     * @return status code
+     * @param url URL to request e.g. http://www.somewhere.com/some/thing.php?param1=blah
+     * @param headers Hashtable of extra headers to add (can be null)
+     * @param postParameters Parameters to be put in HTTP Request (can be null) 
+     *  only applicable when method = POST
+     * @param method e.g. GET, POST, PUT
+     * @return HTTPResult object containing the server response
      */
-    public abstract int basicAuth(String url, String username, String password,
-            Hashtable headers);
+    public abstract HTTPResult makeRequest(String url, 
+            Hashtable headers, Hashtable postParameters, String method);
     
-    /**
-     * Do Basic Request
-     * 
-     * @param url Server url to make the request 
-     * @param optionalParameters Parameters to be put in HTTP Request
-     * @param optionalHeaders Headers to be put in HTTP Request.
-     * @param POST boolean TRUE or FALSE if the request is a POST or GET
-     * @return status code
-     */
-    public abstract int makeRequest(String url, 
-            Hashtable optionalParameters, Hashtable optionalHeaders, boolean POST);
-    
-    /**
-     * Do Basic Request and return response
-     * 
-     * @param url Server url to make the request 
-     * @param optionalParameters Parameters to be put in HTTP Request
-     * @param optionalHeaders Headers to be put in HTTP Request.
-     * @param POST boolean TRUE or FALSE if the request is a POST or GET
-     * @return status code
-     */
-    //public abstract String makeRequest(String url, 
-    //        Hashtable optionalParameters, Hashtable optionalHeaders, boolean POST);
     
 }
 

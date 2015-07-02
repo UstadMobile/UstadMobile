@@ -2,7 +2,10 @@ package com.ustadmobile.impl;
 
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
 
@@ -250,6 +253,10 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
         public static final int DOWNLOAD_PROGRESS_UPDATE_TIMEOUT = 1000;
 
+        private BroadcastReceiver downloadCompleteReceiver;
+
+        private IntentFilter downloadCompleteIntentFilter;
+
         public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplAndroid hostImpl) {
             this.hostImpl = hostImpl;
             this.srcURL = srcURL;
@@ -265,8 +272,26 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
             File destFile = new File(destFileURI);
             String destStr = destFile.getAbsolutePath();
             request.setDestinationUri(Uri.fromFile(destFile));
+            final DownloadJob thisJob = this;
+
+
+            downloadCompleteIntentFilter =
+                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+            downloadCompleteReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L) == thisJob.downloadID) {
+                        thisJob.fireDownloadComplete(intent);
+                    }
+                }
+            };
+            ctx.registerReceiver(downloadCompleteReceiver, downloadCompleteIntentFilter);
 
             downloadID = mgr.enqueue(request);
+        }
+
+        private void fireDownloadComplete(Intent intent) {
+
         }
 
         public long getDownloadID() {

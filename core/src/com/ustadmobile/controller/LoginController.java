@@ -26,9 +26,9 @@ public class LoginController implements UstadController{
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");
         
-        return UstadMobileSystemImpl.getInstance().basicAuth(url, 
-                username, password, headers);
-        //return 400;
+        //return UstadMobileSystemImpl.getInstance().basicAuth(url, 
+        //        username, password, headers);
+        return 400;
     }
     
     public void handleClickLogin(String username, String password) {
