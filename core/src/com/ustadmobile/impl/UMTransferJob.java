@@ -15,4 +15,10 @@ public interface UMTransferJob {
     
     public void addProgresListener(UMProgressListener listener);
     
+    public int getBytesDownloadedCount();
+    
+    public int getTotalSize();
+    
+    public boolean isFinished();
+    
 }

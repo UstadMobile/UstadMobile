@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 
@@ -36,10 +37,9 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
     public static final String PREFS_NAME = "ustadmobilePreferences";
 
-    private List<UstadMobileDownloadJobAndroid> activeDownloads;
 
     public UstadMobileSystemImplAndroid() {
-        activeDownloads = new ArrayList<UstadMobileDownloadJobAndroid>();
+
     }
 
     public void init() {
@@ -47,6 +47,11 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
         if(!sharedContentDir.exists() && sharedContentDir.isDirectory()) {
             sharedContentDir.mkdirs();
         }
+    }
+
+    @Override
+    public String getImplementationName() {
+        return null;
     }
 
     public void setCurrentActivity(Activity activity) {
@@ -126,13 +131,10 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     @Override
-    public int modTimeDifference(String fileURI1, String fileURI2) {
-        return (int)(new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
+    public long modTimeDifference(String fileURI1, String fileURI2) {
+        return (new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
     }
 
-    public long modTimeDifferenceLong(String fileURI1, String fileURI2) {
-        return (int)(new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
-    }
 
     @Override
     public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {
@@ -220,6 +222,21 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     @Override
+    public String getActiveUser() {
+        return null;
+    }
+
+    @Override
+    public void setActiveUserAuth(String s) {
+
+    }
+
+    @Override
+    public String getActiveUserAuth() {
+        return null;
+    }
+
+    @Override
     public void setUserPref(String s, String s1) {
 
     }
@@ -237,6 +254,16 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     @Override
     public void saveUserPrefs() {
 
+    }
+
+    @Override
+    public String getAppPref(String s) {
+        return null;
+    }
+
+    @Override
+    public HTTPResult makeRequest(String s, Hashtable hashtable, Hashtable hashtable1, String s1) {
+        return null;
     }
 
     public class DownloadJob implements UMTransferJob {
@@ -257,15 +284,24 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
         private IntentFilter downloadCompleteIntentFilter;
 
+        private List<UMProgressListener> progressListeners;
+
+        private Context ctx;
+
+        private boolean finished;
+
         public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplAndroid hostImpl) {
             this.hostImpl = hostImpl;
             this.srcURL = srcURL;
             this.destFileURI = destFileURI;
+
+            this.progressListeners = new LinkedList<UMProgressListener>();
+            this.finished = false;
         }
 
         @Override
         public void start() {
-            Context ctx = hostImpl.getCurrentContext();
+            this.ctx = hostImpl.getCurrentContext();
             DownloadManager mgr = (DownloadManager)ctx.getSystemService(Context.DOWNLOAD_SERVICE);
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(this.srcURL));
 
@@ -281,17 +317,59 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L) == thisJob.downloadID) {
-                        thisJob.fireDownloadComplete(intent);
+                        thisJob.cleanup();
                     }
                 }
             };
             ctx.registerReceiver(downloadCompleteReceiver, downloadCompleteIntentFilter);
 
             downloadID = mgr.enqueue(request);
+            startProgressTracking(this);
         }
 
-        private void fireDownloadComplete(Intent intent) {
+        private void fireDownloadComplete() {
+            int[] downloadStatus = getProgressAndTotal();
+            UMProgressEvent evt = new UMProgressEvent(UMProgressEvent.TYPE_COMPLETE, downloadStatus[0],
+                    downloadStatus[1], 200);
+            for(int i = 0; i < progressListeners.size(); i++) {
+                progressListeners.get(i).progressUpdated(evt);
+            }
+        }
 
+        private void cleanup() {
+            //when everything is done...
+            if(timerProgressUpdate != null) {
+                timerProgressUpdate.cancel();
+            }
+
+            this.finished = true;
+            this.ctx.unregisterReceiver(downloadCompleteReceiver);
+
+            try { notifyAll(); }
+            catch(Exception e) {}
+
+            fireDownloadComplete();
+        }
+
+        private void fireProgressEvent() {
+
+        }
+
+        private int[] getProgressAndTotal() {
+            DownloadManager mgr = (DownloadManager)hostImpl.getCurrentContext().getSystemService(
+                    Context.DOWNLOAD_SERVICE);
+            DownloadManager.Query query = new DownloadManager.Query();
+            query.setFilterById(this.downloadID);
+            Cursor cursor = mgr.query(query);
+            cursor.moveToFirst();
+
+            int bytesDownloaded = cursor.getInt(cursor.getColumnIndex(
+                    DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+            int bytesTotal = cursor.getInt(cursor.getColumnIndex(
+                DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+            int statusCode = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+
+            return new int[]{bytesDownloaded, bytesTotal};
         }
 
         public long getDownloadID() {
@@ -304,14 +382,29 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
             timerProgressUpdate.schedule(new TimerTask() {
                 @Override
                 public void run() {
-
+                    fireProgressEvent();
                 }
             }, DOWNLOAD_PROGRESS_UPDATE_TIMEOUT, DOWNLOAD_PROGRESS_UPDATE_TIMEOUT);
         }
 
         @Override
         public void addProgresListener(UMProgressListener umProgressListener) {
+            this.progressListeners.add(umProgressListener);
+        }
 
+        @Override
+        public int getBytesDownloadedCount() {
+            return getProgressAndTotal()[0];
+        }
+
+        @Override
+        public int getTotalSize() {
+            return getProgressAndTotal()[1];
+        }
+
+        @Override
+        public boolean isFinished() {
+            return finished;
         }
     }
 
