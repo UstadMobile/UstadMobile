@@ -11,8 +11,17 @@ package com.ustadmobile.impl;
  */
 public interface UMProgressEvent {
     
+    public static final int TYPE_PROGRESS = 0;
+    
+    public static final int TYPE_COMPLETE = 1;
+    
+    public int getType();
+    
     public int getJobLength();
     
     public int getProgress();
+    
+    public int getStatusCode();
+    
     
 }
