@@ -34,27 +34,6 @@ public abstract class UstadMobileSystemImpl {
     }
     
     /**
-     * Make a view for the platform : this is done by using class.forName
-     * to ask for com.ustadmobile.view.<ViewName>View<PlatformName> e.g.
-     * com.ustadmobile.view.LoginViewJ2ME
-     * 
-     * @param viewName The name of the view to create e.g. Login or Catalog
-     * @return new instance of the view for this platform; or null if an exception occurs.
-     */
-    public UstadView makeView(String viewName) {
-        try {
-            String portName = getImplementationName();
-            String className = "com.ustadmobile.view."+viewName+"View"+portName;
-            UstadView viewObj = (UstadView) Class.forName(
-                    className).newInstance();
-            return viewObj;
-        }catch(Exception e) {
-            return null;
-        }
-    }
-    
-    
-    /**
      * Get the name of the platform implementation being used
      * 
      * @return the name of the platform (used constructing views etc) e.g. "J2ME", "Android", etc
@@ -92,7 +71,7 @@ public abstract class UstadMobileSystemImpl {
      * @return 
      */
     public abstract Hashtable getSystemInfo();
-    
+     
     /**
      * Read the given fileURI as a string and return it 
      * 
@@ -119,7 +98,7 @@ public abstract class UstadMobileSystemImpl {
      * @param fileURI2
      * @return 
      */
-    public abstract int modTimeDifference(String fileURI1, String fileURI2);
+    public abstract long modTimeDifference(String fileURI1, String fileURI2);
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 

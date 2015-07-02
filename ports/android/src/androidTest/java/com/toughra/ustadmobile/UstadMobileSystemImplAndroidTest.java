@@ -3,7 +3,6 @@ import android.os.Environment;
 
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.impl.UstadMobileSystemImplFactory;
 
 import junit.framework.TestCase;
 import junit.framework.Assert;
@@ -64,6 +63,26 @@ public class UstadMobileSystemImplAndroidTest extends TestCase{
         Locale newLocale = new Locale(localeComponents[0], localeComponents[1]);
         assertNotNull("Can create a locale object from given locale string", newLocale);
     }
+
+    public void testModTimeDiff() throws IOException{
+        File baseDir = Environment.getExternalStorageDirectory();
+        File file1 = new File(baseDir, "umtestfile1.txt");
+        File file2 = new File(baseDir, "umtestfile2.txt");
+
+
+        UstadMobileSystemImplAndroid impl = (UstadMobileSystemImplAndroid) UstadMobileSystemImpl.getInstance();
+        impl.writeStringToFile("hello world", file1.getAbsolutePath(), "UTF-8");
+        try {
+            Thread.sleep(1000);
+        }catch(InterruptedException e) {}
+        impl.writeStringToFile("hello world", file2.getAbsolutePath(), "UTF-8");
+        long timeDiff = impl.modTimeDifferenceLong(file1.getAbsolutePath(), file2.getAbsolutePath());
+        assertTrue("Time difference is at least 1 second, less than two: is " + timeDiff ,
+                timeDiff >= 1000 && timeDiff < 2000);
+        file1.delete();
+        file2.delete();
+    }
+
 
 
 }

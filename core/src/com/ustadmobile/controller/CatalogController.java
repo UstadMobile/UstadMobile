@@ -10,6 +10,7 @@ import com.ustadmobile.model.CatalogModel;
 import com.ustadmobile.opds.UstadJSOPDSFeed;
 import com.ustadmobile.opds.UstadJSOPDSItem;
 import com.ustadmobile.view.CatalogView;
+import com.ustadmobile.view.ViewFactory;
 
 /**
  *
@@ -54,8 +55,7 @@ public class CatalogController implements UstadController{
     
     //shows the view
     public void show() {
-        this.view = (CatalogView)
-                UstadMobileSystemImpl.getInstance().makeView("Catalog");
+        this.view = ViewFactory.makeCatalogView();
         this.view.setController(this);
         this.view.show();
     }
