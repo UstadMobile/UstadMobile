@@ -5,28 +5,58 @@
  */
 package com.ustadmobile.impl;
 
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 /**
  *
  * @author mike
  */
-public abstract class HTTPResult {
+public class HTTPResult {
     
     private byte[] response;
     
     private int status;
     
-    public HTTPResult(byte[] response, int status) {
+    private Hashtable responseHeaders;
+    
+    /**
+     * 
+     * @param response The byte response data from the server
+     * @param status the response code returned by the server
+     * @param responseHeaders the headers returned by the server in a hashtable
+     */
+    public HTTPResult(byte[] response, int status, Hashtable responseHeaders) {
         this.response = response;
         this.status = status;
+        this.responseHeaders = responseHeaders;
     }
     
-    public abstract String[] getHTTPHeaders();
+    public String[] getHTTPHeaderKeys() {
+        Enumeration e   = responseHeaders.keys();
+        String[] headerKeys = new String[responseHeaders.size()];
+        int index = 0;
+        
+        while(e.hasMoreElements()) {
+            headerKeys[index] = e.nextElement().toString();
+            index++;
+        }
+        
+        return headerKeys;
+    }
     
     /**
      * 
      * @param value
      * @return 
      */
-    public abstract String getHeaderValue(String value);
+    public String getHeaderValue(String key) {
+        Object valObj = responseHeaders.get(key);
+        if(valObj != null) {
+            return valObj.toString();
+        }else {
+            return null;
+        }
+    }
     
 }
