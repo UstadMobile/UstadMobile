@@ -148,6 +148,20 @@ public class UserPref {
         appRms.closeRMS();
     }
     
+    public static String getSetting(String key){
+        //Initiate app RMS..
+        RMSUtils appRms = new RMSUtils(REC_STORE);
+        String value = null;
+        //Get Current configuration
+        Hashtable currentSettings = getUserSettings();
+        if(currentSettings.containsKey(key)){
+            value = currentSettings.get(key).toString();
+        }
+        //close the app RMS
+        appRms.closeRMS();
+        return value;
+    }
+    
     public static Hashtable getUserSettings(){
         
         //getDefault values

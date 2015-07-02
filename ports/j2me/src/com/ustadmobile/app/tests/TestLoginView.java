@@ -7,7 +7,6 @@ package com.ustadmobile.app.tests;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.events.ActionEvent;
-import com.sun.lwuit.events.ActionListener;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.controller.LoginController;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
@@ -46,9 +45,14 @@ public class TestLoginView extends TestCase {
         String server = 
                 UstadMobileSystemImpl.getInstance().getAppPref("server");
         
+        //Correct Login cred
         int loginReturn = loginController.authenticate(
                 "karmakid02", "karmakid02",server );
         assertEquals("Authenticate logic", loginReturn, 200);
-        
+
+        //wrong Login cred
+        int loginReturn2 = loginController.authenticate(
+                "karmakid02", "karmakid022",server );
+        assertEquals("Authenticate logic", loginReturn2, 401);
     }
 }
