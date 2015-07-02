@@ -67,7 +67,7 @@ public class TestSystemimplJ2ME extends TestCase {
         HTTPUtils.downloadURLToFile(url, getSharedContentDir, "");
         
         String fileURI2 = FileUtils.joinPath(getSharedContentDir, "hello.txt");
-        int modTimeDifference = ustadMobileSystemImpl.modTimeDifference(
+        int modTimeDifference = (int) ustadMobileSystemImpl.modTimeDifference(
                 fileURI2, fileURI);
         
         if ( modTimeDifference != -1 ){

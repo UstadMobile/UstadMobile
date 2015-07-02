@@ -157,13 +157,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return this.readFileAsText(fileURI, "UTF-8");
     }
     
-    public int modTimeDifference(String fileURI1, String fileURI2){
+    public long modTimeDifference(String fileURI1, String fileURI2){
         try{
             long file1LastModified = FileUtils.getLastModified(fileURI1);
             long file2LastModified = FileUtils.getLastModified(fileURI2);
             if (file1LastModified != -1 || file2LastModified != -1 ){
                 long difference = file1LastModified - file2LastModified;
-                return (int)difference;
+                return difference;
             }
         }catch(Exception e){}
         return -1;

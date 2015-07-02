@@ -10,6 +10,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.controller.LoginController;
+import com.ustadmobile.impl.UstadMobileSystemImpl;
 /**
  *
  * @author varuna
@@ -42,6 +43,12 @@ public class TestLoginView extends TestCase {
         try { Thread.sleep(2000); }
         catch(InterruptedException e) {}
         
+        String server = 
+                UstadMobileSystemImpl.getInstance().getAppPref("server");
+        
+        int loginReturn = loginController.authenticate(
+                "karmakid02", "karmakid02",server );
+        assertEquals("Authenticate logic", loginReturn, 200);
         
     }
 }

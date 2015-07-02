@@ -46,13 +46,7 @@ public class LoginController implements UstadController{
     }
     
     public void show() {
-        int a = UstadMobileSystemImpl.getInstance().makeRequest(
-                "http://umcloud1.ustadmobile.com/letstrythis", null, null, false);
         this.view = ViewFactory.makeLoginView();
-        int b = UstadMobileSystemImpl.getInstance().makeRequest(
-                "http://umcloud1.ustadmobile.com/show1", null, null, false);
-
-        
         this.view.setController(this);
         this.view.show();
     }
