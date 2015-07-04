@@ -25,6 +25,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.os.Build;
+import android.util.Log;
 
 /**
  * Created by mike on 07/06/15.
@@ -34,6 +35,8 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     private Activity currentActivity;
 
     private Context currentContext;
+
+    public static final String TAG = "UstadMobileImplAndroid";
 
     public static final String PREFS_NAME = "ustadmobilePreferences";
 
@@ -373,7 +376,18 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
             }
 
             this.finished = true;
-            this.ctx.unregisterReceiver(downloadCompleteReceiver);
+
+            /*
+             * On Android 2.3 devices it seems after the download is complete the receiver is no
+             * longer registered and this will throw an IllegalArgumentException
+             */
+            try {
+                this.ctx.unregisterReceiver(downloadCompleteReceiver);
+            }catch(IllegalArgumentException e) {
+                Log.d(TAG, "Ignore illegal argument exception for receiver already unregistered");
+            }
+
+
 
             try { notifyAll(); }
             catch(Exception e) {}
