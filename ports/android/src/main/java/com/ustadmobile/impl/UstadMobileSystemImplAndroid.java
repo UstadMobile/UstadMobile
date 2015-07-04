@@ -47,7 +47,7 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
     public void init() {
         File sharedContentDir = new File(getSharedContentDir());
-        if(!sharedContentDir.exists() && sharedContentDir.isDirectory()) {
+        if(!sharedContentDir.isDirectory()) {
             sharedContentDir.mkdirs();
         }
     }
@@ -301,6 +301,10 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
          */
         public static final int DOWNLOAD_PROGRESS_UPDATE_TIMEOUT = 1000;
 
+        public static final int IDX_DOWNLOADED_SO_FAR = 0;
+
+        public static final int IDX_BYTES_TOTAL = 1;
+
         /**
          * BroadCastReceiver that listens for the download complete message
          */
@@ -322,6 +326,16 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
         private Context ctx;
 
         private boolean finished;
+
+        /**
+         * In Android2.3 this is not available after completion: cache with object
+         */
+        private int finishedTotalSize;
+
+        /**
+         * In Android2.3 this is not available after completion: cache with object
+         */
+        private int finishedBytesDownloaded;
 
         public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplAndroid hostImpl) {
             this.hostImpl = hostImpl;
@@ -350,6 +364,7 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     if(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L) == thisJob.downloadID) {
+                        Log.d(TAG, "Download Complete");
                         thisJob.cleanup();
                     }
                 }
@@ -371,11 +386,17 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
         private void cleanup() {
             //when everything is done...
+            Log.d(TAG, "Download Complete");
             if(timerProgressUpdate != null) {
                 timerProgressUpdate.cancel();
             }
 
+            final int[] byteTotals = this.getProgressAndTotal();
             this.finished = true;
+            this.finishedBytesDownloaded = byteTotals[IDX_DOWNLOADED_SO_FAR];
+            this.finishedTotalSize = byteTotals[IDX_BYTES_TOTAL];
+            Log.d(TAG, "Download Size: " + finishedBytesDownloaded + " / " + finishedTotalSize);
+
 
             /*
              * On Android 2.3 devices it seems after the download is complete the receiver is no
@@ -400,20 +421,26 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
         }
 
         private int[] getProgressAndTotal() {
-            DownloadManager mgr = (DownloadManager)hostImpl.getCurrentContext().getSystemService(
-                    Context.DOWNLOAD_SERVICE);
-            DownloadManager.Query query = new DownloadManager.Query();
-            query.setFilterById(this.downloadID);
-            Cursor cursor = mgr.query(query);
-            cursor.moveToFirst();
+            int[] retVal = new int[2];
+            if(this.isFinished()) {
+                retVal[IDX_DOWNLOADED_SO_FAR] = this.finishedBytesDownloaded;
+                retVal[IDX_BYTES_TOTAL] = this.finishedTotalSize;
+            }else {
+                DownloadManager mgr = (DownloadManager)hostImpl.getCurrentContext().getSystemService(
+                        Context.DOWNLOAD_SERVICE);
+                DownloadManager.Query query = new DownloadManager.Query();
+                query.setFilterById(this.downloadID);
+                Cursor cursor = mgr.query(query);
+                cursor.moveToFirst();
 
-            int bytesDownloaded = cursor.getInt(cursor.getColumnIndex(
-                    DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-            int bytesTotal = cursor.getInt(cursor.getColumnIndex(
-                DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-            int statusCode = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                retVal[IDX_DOWNLOADED_SO_FAR] = cursor.getInt(cursor.getColumnIndex(
+                        DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+                retVal[IDX_BYTES_TOTAL] = cursor.getInt(cursor.getColumnIndex(
+                        DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+                int statusCode = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+            }
 
-            return new int[]{bytesDownloaded, bytesTotal};
+            return retVal;
         }
 
         public long getDownloadID() {

@@ -77,8 +77,8 @@ public class UstadMobileSystemImplAndroidTest extends TestCase{
         }catch(InterruptedException e) {}
         impl.writeStringToFile("hello world", file2.getAbsolutePath(), "UTF-8");
         long timeDiff = impl.modTimeDifference(file1.getAbsolutePath(), file2.getAbsolutePath());
-        assertTrue("Time difference is at least 1 second, less than two: is " + timeDiff ,
-                timeDiff >= 1000 && timeDiff < 2000);
+        assertTrue("Time difference is at least 1 second, less than five: is " + timeDiff ,
+                timeDiff >= 1000 && timeDiff < 5000);
         file1.delete();
         file2.delete();
     }

@@ -28,6 +28,6 @@ repositories {
 }
 
 dependencies {
+    androidTestCompile 'junit:junit:4.12'
     compile files('../../core/dist/UstadMobileCore.jar')
-    testCompile 'junit:junit:4.12'
 }

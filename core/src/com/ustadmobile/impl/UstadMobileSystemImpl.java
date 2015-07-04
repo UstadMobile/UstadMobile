@@ -19,6 +19,7 @@ public abstract class UstadMobileSystemImpl {
     public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
             mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
+            mainInstance.init();
         }
         
         return mainInstance;

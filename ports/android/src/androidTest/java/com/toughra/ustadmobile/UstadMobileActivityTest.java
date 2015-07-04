@@ -51,8 +51,11 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
             }catch(InterruptedException e) {}
         }
 
-        assertTrue("Downloaded size is the same as total size",
-                job.getTotalSize() == job.getBytesDownloadedCount());
+        int totalSize = job.getTotalSize();
+        int downloadedSize = job.getBytesDownloadedCount();
+        assertTrue("Downloaded size is the same as total size: "
+                + totalSize + " : " + downloadedSize,
+                totalSize == downloadedSize);
 
     }
 

@@ -37,13 +37,6 @@ public class UstadMobileActivity extends Activity
             e.printStackTrace();
         }
 
-
-        UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile("http://www.ustadmobile.com/wordpress-4.2.2.zip",
-                file3.getAbsolutePath(), new Hashtable());
-
-        job.start();
-
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
     }
