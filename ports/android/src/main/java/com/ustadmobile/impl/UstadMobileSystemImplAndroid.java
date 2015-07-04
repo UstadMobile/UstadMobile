@@ -266,26 +266,56 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
         return null;
     }
 
+    /**
+     * Represents a single Download: backed by the Android DownloadManager service
+     *
+     */
     public class DownloadJob implements UMTransferJob {
+
 
         private String srcURL;
 
         private UstadMobileSystemImplAndroid hostImpl;
 
+        /**
+         * The download id assigned by the DownloadManager service
+         */
         private long downloadID = -1;
 
+        /**
+         * Timer object that runs to check on the download progress: Download Manager itself
+         * does not provide progress events
+         */
         private Timer timerProgressUpdate = null;
 
+        /**
+         * Where we are going to save the file
+         */
         private String destFileURI;
 
+        /**
+         * The interval (in ms) used to check on download progress
+         */
         public static final int DOWNLOAD_PROGRESS_UPDATE_TIMEOUT = 1000;
 
+        /**
+         * BroadCastReceiver that listens for the download complete message
+         */
         private BroadcastReceiver downloadCompleteReceiver;
 
+        /**
+         * IntentFilter used to when registering for updates
+         */
         private IntentFilter downloadCompleteIntentFilter;
 
+        /**
+         * UMProgressListener objects
+         */
         private List<UMProgressListener> progressListeners;
 
+        /**
+         * Android Context to be used to lookup services etc.
+         */
         private Context ctx;
 
         private boolean finished;
