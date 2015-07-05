@@ -34,6 +34,10 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
         Activity act = getActivity();
         File baseDir = Environment.getExternalStorageDirectory();
         File file3 = new File(baseDir, "wpdownload.zip");
+        if(file3.exists()) {
+            file3.delete();
+        }
+
 
         UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile("http://www.ustadmobile.com/wordpress-4.2.2.zip",
                 file3.getAbsolutePath(), new Hashtable());

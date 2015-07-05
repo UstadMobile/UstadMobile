@@ -348,6 +348,9 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
         @Override
         public void start() {
+            /* TODO: In Android 2.3 if the destination file already exists: it must be removed or
+            *  we must use a temporary dir
+            *  */
             this.ctx = hostImpl.getCurrentContext();
             DownloadManager mgr = (DownloadManager)ctx.getSystemService(Context.DOWNLOAD_SERVICE);
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(this.srcURL));
