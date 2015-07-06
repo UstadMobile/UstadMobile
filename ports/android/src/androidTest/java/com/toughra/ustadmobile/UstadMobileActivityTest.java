@@ -88,7 +88,7 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
                 null));
         impl.setActiveUser("someoneelse");
         assertNull("After changing user preference is gone", impl.getUserPref(userPrefKey, null));
-
+        impl.setActiveUser(null);
     }
 
 

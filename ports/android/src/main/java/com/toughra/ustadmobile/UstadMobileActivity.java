@@ -1,6 +1,7 @@
 package com.toughra.ustadmobile;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 
@@ -8,6 +9,7 @@ import com.ustadmobile.impl.UMTransferJob;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.opf.UstadJSOPFItem;
+import com.ustadmobile.view.LoginActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,5 +41,11 @@ public class UstadMobileActivity extends Activity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+
+        if(impl.getActiveUser() == null) {
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+        }
+
     }
 }
