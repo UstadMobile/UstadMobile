@@ -1,6 +1,7 @@
 package com.toughra.ustadmobile;
 import android.os.Environment;
 
+import com.ustadmobile.impl.HTTPResult;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.impl.UstadMobileSystemImplAndroid;
 
@@ -108,6 +109,12 @@ public class UstadMobileSystemImplAndroidTest extends TestCase{
                 timeDiff >= 1000 && timeDiff < 5000);
         file1.delete();
         file2.delete();
+    }
+
+    public void testHttpRequest() throws IOException {
+        String httpServer = "http://www.ustadmobile.com";
+        HTTPResult result = impl.makeRequest(httpServer, new Hashtable(), new Hashtable(), "GET");
+        assertEquals("Get 200 response OK from live server", 200, result.getStatus());
     }
 
 

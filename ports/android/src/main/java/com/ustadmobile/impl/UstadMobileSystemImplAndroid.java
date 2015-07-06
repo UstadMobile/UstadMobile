@@ -17,7 +17,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,11 +48,21 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
     public static final String APP_PREFERENCES_NAME = "UMAPP-PREFERENCES";
 
-    public static final String PREFIX_USER_DATA = "user-";
+    public static final String USER_PREFERENCES_NAME  = "user-";
 
     public static final String KEY_CURRENTUSER = "app-currentuser";
 
+    public static final String KEY_CURRENTAUTH = "app-currentauth";
+
     private String currentUsername;
+
+    private String currentAuth;
+
+    private SharedPreferences appPreferences;
+
+    private SharedPreferences userPreferences;
+
+    private SharedPreferences.Editor userPreferencesEditor;
 
 
     public UstadMobileSystemImplAndroid() {
@@ -75,6 +90,7 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
             this.currentContext = context;
             SharedPreferences appPrefs = getAppSharedPreferences();
             currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
+            this.userPreferences = null;//change of context: force this to get reloaded when requested
         }
     }
 
@@ -250,11 +266,29 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     private SharedPreferences getAppSharedPreferences() {
-        return currentContext.getSharedPreferences(APP_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        if(appPreferences == null) {
+            appPreferences = currentContext.getSharedPreferences(APP_PREFERENCES_NAME,
+                Context.MODE_PRIVATE);
+        }
+        return appPreferences;
+    }
+
+    private SharedPreferences getUserPreferences() {
+        if(currentUsername != null) {
+            if(userPreferences == null) {
+                userPreferences = currentContext.getSharedPreferences(USER_PREFERENCES_NAME +
+                        currentUsername, Context.MODE_PRIVATE);
+                Log.d(TAG, "Opening preferences for user: " + currentUsername);
+            }
+            return userPreferences;
+        }else {
+            return null;
+        }
     }
 
     @Override
     public void setActiveUser(String username) {
+        saveUserPrefs();
         SharedPreferences appPreferences = getAppSharedPreferences();
         SharedPreferences.Editor editor = appPreferences.edit();
         if(username != null) {
@@ -264,7 +298,8 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
         }
         editor.commit();
 
-        currentUsername = username;
+        this.currentUsername = username;
+        this.userPreferences = null;
     }
 
     @Override
@@ -273,23 +308,33 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     @Override
-    public void setActiveUserAuth(String s) {
-
+    public void setActiveUserAuth(String auth) {
+        setAppPref(KEY_CURRENTAUTH, auth);
+        this.currentAuth = auth;
     }
 
     @Override
     public String getActiveUserAuth() {
-        return null;
+        return this.currentAuth;
     }
 
     @Override
-    public void setUserPref(String s, String s1) {
+    public void setUserPref(String key, String value) {
+        if(userPreferencesEditor == null) {
+            userPreferencesEditor = getUserPreferences().edit();
+        }
+        if(value != null) {
+            userPreferencesEditor.putString(key, value);
+        }else {
+            userPreferencesEditor.remove(key);
+        }
 
+        userPreferencesEditor.commit();
     }
 
     @Override
-    public String getUserPref(String s, String s1) {
-        return null;
+    public String getUserPref(String key, String s1) {
+        return getUserPreferences().getString(key, null);
     }
 
     @Override
@@ -299,17 +344,62 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
     @Override
     public void saveUserPrefs() {
-
+        if(userPreferencesEditor != null) {
+            userPreferencesEditor.commit();
+            userPreferencesEditor = null;
+        }
     }
 
     @Override
-    public String getAppPref(String s) {
-        return null;
+    public String getAppPref(String key) {
+        return getAppSharedPreferences().getString(key, null);
+    }
+
+    public void setAppPref(String key, String value) {
+        SharedPreferences prefs = getAppSharedPreferences();
+        SharedPreferences.Editor editor = prefs.edit();
+        if(value != null) {
+            editor.putString(key, value);
+        }else {
+            editor.remove(key);
+        }
+        editor.commit();
     }
 
     @Override
-    public HTTPResult makeRequest(String s, Hashtable hashtable, Hashtable hashtable1, String s1) {
-        return null;
+    public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method) throws IOException {
+        URL url = new URL(httpURL);
+        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+
+        Enumeration e = headers.keys();
+        while(e.hasMoreElements()) {
+            String headerField = e.nextElement().toString();
+            String headerValue = headers.get(headerField).toString();
+            conn.setRequestProperty(headerField, headerValue);
+        }
+
+        conn.setRequestMethod(method);
+
+        conn.connect();
+
+        int contentLen = conn.getContentLength();
+        InputStream in = conn.getInputStream();
+        byte[] buf = new byte[1024];
+        int bytesRead = 0;
+        int bytesReadTotal = 0;
+
+        //do not read more bytes than is available in the stream
+        int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
+            bout.write(buf, 0, bytesRead);
+        }
+        in.close();
+
+        HTTPResult result = new HTTPResult(bout.toByteArray(), conn.getResponseCode(),
+                new Hashtable());
+
+        return result;
     }
 
     /**

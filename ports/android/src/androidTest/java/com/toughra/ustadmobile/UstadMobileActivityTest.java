@@ -64,14 +64,31 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
 
     }
 
-    public void testUserprefs() {
+    public void testPrefs() {
         String currentUsername = "bobtheamazing";
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(currentUsername);
         assertEquals("Current username is as set", currentUsername, impl.getActiveUser());
         assertTrue("Current username in Shared Preferences", getActivity().getSharedPreferences(
-            UstadMobileSystemImplAndroid.APP_PREFERENCES_NAME, 0).contains(
-            UstadMobileSystemImplAndroid.KEY_CURRENTUSER));
+                UstadMobileSystemImplAndroid.APP_PREFERENCES_NAME, 0).contains(
+                UstadMobileSystemImplAndroid.KEY_CURRENTUSER));
+
+        impl.setActiveUser(null);
+        assertNull("User not logged in after setActiveUser null", impl.getActiveUser());
+
+        impl.setAppPref("meaning", "forty-two");
+        assertEquals("App preference set can be retrieved", "forty-two", impl.getAppPref("meaning"));
+
+        impl.setActiveUser(currentUsername);
+
+        String userPrefStr = "the answer is 42 for you too";
+        String userPrefKey = "usermeaning";
+        impl.setUserPref(userPrefKey, userPrefStr);
+        assertEquals("Can retrieve set preference", userPrefStr, impl.getUserPref(userPrefKey,
+                null));
+        impl.setActiveUser("someoneelse");
+        assertNull("After changing user preference is gone", impl.getUserPref(userPrefKey, null));
+
     }
 
 

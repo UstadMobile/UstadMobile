@@ -252,6 +252,14 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getAppPref(String key);
     
     /**
+     * Set a preference for the app
+     * @param key preference that is being set
+     * @param value value to be set
+     * 
+     */
+    public abstract void setAppPref(String key, String value);
+    
+    /**
      * Do a basic HTTP Request
      * 
      * @param url URL to request e.g. http://www.somewhere.com/some/thing.php?param1=blah
@@ -262,7 +270,7 @@ public abstract class UstadMobileSystemImpl {
      * @return HTTPResult object containing the server response
      */
     public abstract HTTPResult makeRequest(String url, 
-            Hashtable headers, Hashtable postParameters, String method);
+            Hashtable headers, Hashtable postParameters, String method) throws IOException;
     
     
 }
