@@ -158,13 +158,28 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers);
     
-    public abstract void renameFile(String fromFileURI, String toFileURI);
+    /**
+     * Rename file from/to 
+     * 
+     * @param fromFileURI current path / uri
+     * @param toFileURI new path / uri
+     * @return true if successful, false otherwise
+     * 
+     */
+    public abstract boolean renameFile(String fromFileURI, String toFileURI);
     
-    public abstract int fileSize(String fileURI);
+    /**
+     * Get the size of a file in bytes
+     * 
+     * @param fileURI File URI / Path
+     * 
+     * @return length in bytes
+     */
+    public abstract long fileSize(String fileURI);
     
-    public abstract void makeDirectory(String dirURI) throws IOException;
+    public abstract boolean makeDirectory(String dirURI) throws IOException;
     
-    public abstract void removeRecursively(String dirURI);
+    public abstract boolean removeRecursively(String dirURI);
     
     public abstract UMTransferJob unzipFile(String zipSrc, String dstDir);
     

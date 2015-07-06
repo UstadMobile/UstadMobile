@@ -13,6 +13,10 @@ import java.util.Hashtable;
 import java.util.Locale;
 
 /**
+ *
+ * TODO: Add instrumentation
+ * https://developer.android.com/training/testing/unit-testing/instrumented-unit-tests.html
+ *
  * Created by mike on 07/06/15.
  */
 public class UstadMobileSystemImplAndroidTest extends TestCase{
@@ -50,6 +54,29 @@ public class UstadMobileSystemImplAndroidTest extends TestCase{
         String contentsRead = impl.readFileAsText(outFile.getAbsolutePath(), "UTF-8");
 
         assertEquals("String read from file equal to what was written", contents, contentsRead);
+    }
+
+    public void testMakeRemoveDirectory() throws IOException{
+        File baseDir = Environment.getExternalStorageDirectory();
+        File outDir = new File(baseDir, "umtestdir/umtestsubdir");
+        impl.makeDirectory(outDir.getAbsolutePath());
+        assertTrue("New directory made", outDir.isDirectory());
+
+        String filePath = outDir.getAbsolutePath()+"/content.txt";
+        impl.writeStringToFile("The answer is 42", filePath, "UTF-8");
+        assertTrue("Newly written file exists", impl.fileExists(filePath));
+        File delDir = new File(baseDir, "umtestdir");
+
+        impl.removeRecursively(delDir.getAbsolutePath());
+        assertFalse("Directory deleted", impl.dirExists(delDir.getAbsolutePath()));
+        assertFalse("Deleted file does not exist", impl.fileExists(filePath));
+    }
+
+    public void testFileSize() throws IOException {
+        File baseDir = Environment.getExternalStorageDirectory();
+        File outFile = new File(baseDir, "umtestfile.txt");
+        String message = "This file is written here";
+        impl.writeStringToFile(message, outFile.getAbsolutePath(), "UTF-8");
     }
 
     public void testSystemInfo() {

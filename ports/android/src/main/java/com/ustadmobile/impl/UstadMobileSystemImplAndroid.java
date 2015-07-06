@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
@@ -40,6 +41,14 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
 
     public static final String PREFS_NAME = "ustadmobilePreferences";
 
+    public static final String APP_PREFERENCES_NAME = "UMAPP-PREFERENCES";
+
+    public static final String PREFIX_USER_DATA = "user-";
+
+    public static final String KEY_CURRENTUSER = "app-currentuser";
+
+    private String currentUsername;
+
 
     public UstadMobileSystemImplAndroid() {
 
@@ -62,7 +71,11 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     public void setCurrentContext(Context context) {
-        this.currentContext = context;
+        if(this.currentContext != context) {
+            this.currentContext = context;
+            SharedPreferences appPrefs = getAppSharedPreferences();
+            currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
+        }
     }
 
     protected Context getCurrentContext() {
@@ -195,23 +208,40 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
     }
 
     @Override
-    public void renameFile(String s, String s1) {
-
+    public boolean renameFile(String path1, String path2) {
+        File file1 = new File(path1);
+        File file2 = new File(path2);
+        return file1.renameTo(file2);
     }
 
     @Override
-    public int fileSize(String s) {
-        return 0;
+    public long fileSize(String path) {
+        File file = new File(path);
+        return file.length();
     }
 
     @Override
-    public void makeDirectory(String s) throws IOException {
-
+    public boolean makeDirectory(String dirPath) throws IOException {
+        File newDir = new File(dirPath);
+        return newDir.mkdirs();
     }
 
     @Override
-    public void removeRecursively(String s) {
+    public boolean removeRecursively(String path) {
+        return removeRecursively(new File(path));
+    }
 
+    public boolean removeRecursively(File f) {
+        if(f.isDirectory()) {
+            File[] dirContents = f.listFiles();
+            for(int i = 0; i < dirContents.length; i++) {
+                if(dirContents[i].isDirectory()) {
+                    removeRecursively(dirContents[i]);
+                }
+                dirContents[i].delete();
+            }
+        }
+        return f.delete();
     }
 
     @Override
@@ -219,14 +249,27 @@ public class UstadMobileSystemImplAndroid extends com.ustadmobile.impl.UstadMobi
         return null;
     }
 
-    @Override
-    public void setActiveUser(String s) {
+    private SharedPreferences getAppSharedPreferences() {
+        return currentContext.getSharedPreferences(APP_PREFERENCES_NAME, Context.MODE_PRIVATE);
+    }
 
+    @Override
+    public void setActiveUser(String username) {
+        SharedPreferences appPreferences = getAppSharedPreferences();
+        SharedPreferences.Editor editor = appPreferences.edit();
+        if(username != null) {
+            editor.putString(KEY_CURRENTUSER, username);
+        }else {
+            editor.remove(KEY_CURRENTUSER);
+        }
+        editor.commit();
+
+        currentUsername = username;
     }
 
     @Override
     public String getActiveUser() {
-        return null;
+        return currentUsername;
     }
 
     @Override

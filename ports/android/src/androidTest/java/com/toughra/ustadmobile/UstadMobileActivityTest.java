@@ -8,6 +8,7 @@ import com.ustadmobile.impl.UMProgressEvent;
 import com.ustadmobile.impl.UMProgressListener;
 import com.ustadmobile.impl.UMTransferJob;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.impl.UstadMobileSystemImplAndroid;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -61,6 +62,16 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
                 + totalSize + " : " + downloadedSize,
                 totalSize == downloadedSize);
 
+    }
+
+    public void testUserprefs() {
+        String currentUsername = "bobtheamazing";
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setActiveUser(currentUsername);
+        assertEquals("Current username is as set", currentUsername, impl.getActiveUser());
+        assertTrue("Current username in Shared Preferences", getActivity().getSharedPreferences(
+            UstadMobileSystemImplAndroid.APP_PREFERENCES_NAME, 0).contains(
+            UstadMobileSystemImplAndroid.KEY_CURRENTUSER));
     }
 
 
