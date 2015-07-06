@@ -42,10 +42,12 @@ public class UstadMobileActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        /*
         if(impl.getActiveUser() == null) {
             Intent loginIntent = new Intent(this, LoginActivity.class);
             startActivity(loginIntent);
         }
+        */
 
     }
 }
