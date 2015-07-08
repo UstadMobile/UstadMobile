@@ -23,7 +23,7 @@
         <mkdir dir="${dist.dir}"/>
         <jar jarfile="${dist.dir}/UstadMobileCore.jar" 
 		basedir="${build.dir}"
-            excludes="**/UstadMobileSystemImplFactory.class" />
+            excludes="**/UstadMobileSystemImplFactory.class **/ViewFactory.class" />
     </target>
 
     <target name="clean"

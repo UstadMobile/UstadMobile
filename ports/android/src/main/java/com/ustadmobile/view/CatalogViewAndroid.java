@@ -28,64 +28,58 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.impl;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+package com.ustadmobile.view;
+
+import com.ustadmobile.controller.CatalogController;
+import com.ustadmobile.opds.UstadJSOPDSItem;
 
 /**
- *
- * @author mike
+ * Created by mike on 07/07/15.
  */
-public class HTTPResult {
-    
-    private byte[] response;
-    
-    private int status;
-    
-    private Hashtable responseHeaders;
-    
-    /**
-     * 
-     * @param response The byte response data from the server
-     * @param status the response code returned by the server
-     * @param responseHeaders the headers returned by the server in a hashtable
-     */
-    public HTTPResult(byte[] response, int status, Hashtable responseHeaders) {
-        this.response = response;
-        this.status = status;
-        this.responseHeaders = responseHeaders;
+public class CatalogViewAndroid implements CatalogView {
+    @Override
+    public void setController(CatalogController catalogController) {
+
     }
-    
-    public String[] getHTTPHeaderKeys() {
-        Enumeration e   = responseHeaders.keys();
-        String[] headerKeys = new String[responseHeaders.size()];
-        int index = 0;
-        
-        while(e.hasMoreElements()) {
-            headerKeys[index] = e.nextElement().toString();
-            index++;
-        }
-        
-        return headerKeys;
+
+    @Override
+    public void showDialog(String s, String s1, int i) {
+
     }
-    
-    /**
-     * 
-     * @param value
-     * @return 
-     */
-    public String getHeaderValue(String key) {
-        Object valObj = responseHeaders.get(key);
-        if(valObj != null) {
-            return valObj.toString();
-        }else {
-            return null;
-        }
+
+    @Override
+    public void showContainerContextMenu(UstadJSOPDSItem ustadJSOPDSItem) {
+
     }
-    
-    public int getStatus(){
-        return status;
+
+    @Override
+    public void hideContainerContextMenu() {
+
     }
-    
+
+    @Override
+    public void setEntryStatus(String s, int i) {
+
+    }
+
+    @Override
+    public void updateDownloadAllProgress(int i, int i1) {
+
+    }
+
+    @Override
+    public void setDownloadEntryProgressVisible(String s, boolean b) {
+
+    }
+
+    @Override
+    public void updateDownloadEntryProgress(String s, int i, int i1) {
+
+    }
+
+    @Override
+    public void show() {
+
+    }
 }

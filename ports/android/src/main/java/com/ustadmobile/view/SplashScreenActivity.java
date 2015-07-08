@@ -28,64 +28,49 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.impl;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+package com.ustadmobile.view;
 
-/**
- *
- * @author mike
- */
-public class HTTPResult {
-    
-    private byte[] response;
-    
-    private int status;
-    
-    private Hashtable responseHeaders;
-    
-    /**
-     * 
-     * @param response The byte response data from the server
-     * @param status the response code returned by the server
-     * @param responseHeaders the headers returned by the server in a hashtable
-     */
-    public HTTPResult(byte[] response, int status, Hashtable responseHeaders) {
-        this.response = response;
-        this.status = status;
-        this.responseHeaders = responseHeaders;
+import android.support.v7.app.ActionBarActivity;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import com.toughra.ustadmobile.R;
+import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.impl.UstadMobileSystemImplAndroid;
+
+public class SplashScreenActivity extends ActionBarActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash_screen);
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        ((UstadMobileSystemImplAndroid)impl).setCurrentContext(this);
+        impl.startUI();
     }
-    
-    public String[] getHTTPHeaderKeys() {
-        Enumeration e   = responseHeaders.keys();
-        String[] headerKeys = new String[responseHeaders.size()];
-        int index = 0;
-        
-        while(e.hasMoreElements()) {
-            headerKeys[index] = e.nextElement().toString();
-            index++;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_splash_screen, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
         }
-        
-        return headerKeys;
+
+        return super.onOptionsItemSelected(item);
     }
-    
-    /**
-     * 
-     * @param value
-     * @return 
-     */
-    public String getHeaderValue(String key) {
-        Object valObj = responseHeaders.get(key);
-        if(valObj != null) {
-            return valObj.toString();
-        }else {
-            return null;
-        }
-    }
-    
-    public int getStatus(){
-        return status;
-    }
-    
 }

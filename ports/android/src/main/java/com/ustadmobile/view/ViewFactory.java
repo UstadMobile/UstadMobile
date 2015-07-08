@@ -28,64 +28,23 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.impl;
 
-import java.util.Enumeration;
-import java.util.Hashtable;
+package com.ustadmobile.view;
 
 /**
- *
- * @author mike
+ * Created by mike on 07/07/15.
  */
-public class HTTPResult {
-    
-    private byte[] response;
-    
-    private int status;
-    
-    private Hashtable responseHeaders;
-    
-    /**
-     * 
-     * @param response The byte response data from the server
-     * @param status the response code returned by the server
-     * @param responseHeaders the headers returned by the server in a hashtable
-     */
-    public HTTPResult(byte[] response, int status, Hashtable responseHeaders) {
-        this.response = response;
-        this.status = status;
-        this.responseHeaders = responseHeaders;
+public class ViewFactory {
+
+    public static LoginView makeLoginView() {
+        return new LoginViewAndroid();
+    };
+
+    public static CatalogView makeCatalogView() {
+        return new CatalogViewAndroid();
     }
-    
-    public String[] getHTTPHeaderKeys() {
-        Enumeration e   = responseHeaders.keys();
-        String[] headerKeys = new String[responseHeaders.size()];
-        int index = 0;
-        
-        while(e.hasMoreElements()) {
-            headerKeys[index] = e.nextElement().toString();
-            index++;
-        }
-        
-        return headerKeys;
+
+    public static ContainerView makeContainerView() {
+        throw new RuntimeException("Not Implemented");
     }
-    
-    /**
-     * 
-     * @param value
-     * @return 
-     */
-    public String getHeaderValue(String key) {
-        Object valObj = responseHeaders.get(key);
-        if(valObj != null) {
-            return valObj.toString();
-        }else {
-            return null;
-        }
-    }
-    
-    public int getStatus(){
-        return status;
-    }
-    
 }
