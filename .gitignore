@@ -44,3 +44,6 @@ ports/j2me/dist/
 ports/j2me/lib/
 ports/j2me/*-ANTENNA/
 ports/j2me/*~
+
+#Preprocessed unit test files
+preproctmp

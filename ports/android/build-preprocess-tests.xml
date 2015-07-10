@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<!--
+
+ Preprocessor for test arch: see core/test/README.md
+
+-->
+
+<project name="UstadMobile Preprocess Core Test to Android" default="androidproc" basedir=".">
+    <taskdef name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
+
+    <target name="androidproc">
+        <delete dir="preproctmp"/>
+	
+        <preprocess indir="../../core/test/" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="1"/>
+        </preprocess>
+
+        <copy todir="src/androidTest/java/">
+            <fileset dir="preproctmp"/>
+        </copy>
+    </target>
+</project>
+
