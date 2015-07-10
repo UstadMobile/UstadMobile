@@ -47,3 +47,4 @@ ports/j2me/*~
 
 #Preprocessed unit test files
 preproctmp
+ports/android/src/androidTest/java/com/ustadmobile/test/core
