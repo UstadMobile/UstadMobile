@@ -51,6 +51,15 @@ public class LoginController implements UstadController{
         
     }
     
+    /**
+     * Try and login with the given username and password
+     * 
+     * @param username Username to authenticate as
+     * @param password Password to authenticate with
+     * @param url xAPI statements endpoint to authenticate against
+     * @return HTTP OK 200 if OK, 403 for unauthorized
+     * @throws IOException if something goes wrong talking to server
+     */
     public static int authenticate(String username, String password, String url) throws IOException{
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");

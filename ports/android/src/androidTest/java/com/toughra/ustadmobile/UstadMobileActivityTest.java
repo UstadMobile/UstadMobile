@@ -31,6 +31,8 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
         super("com.toughra.ustadmobile", UstadMobileActivity.class);
     }
 
+
+
     public void testDownloadImpl() {
         Activity act = getActivity();
         File baseDir = Environment.getExternalStorageDirectory();
@@ -63,8 +65,10 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
                 totalSize == downloadedSize);
 
     }
+    
 
     public void testPrefs() {
+        Activity act = getActivity();
         String currentUsername = "bobtheamazing";
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(currentUsername);

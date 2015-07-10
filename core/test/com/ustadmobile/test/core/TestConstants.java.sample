@@ -30,36 +30,17 @@
  */
 package com.ustadmobile.test.core;
 
-/* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
- $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
-
-import com.ustadmobile.controller.LoginController;
-import java.io.IOException;
-
-/** 
-*
+/**
+ * Before testing fill in these constants
+ *
  * @author mike
  */
-public class TestLogin extends TestCase{
+public class TestConstants {
+    public static final String LOGIN_USER = "";
     
-    public TestLogin() {
-    }
+    public static final String LOGIN_PASS = "";
     
-    public void setUp() {
-    }
+    public static final String LOGIN_URL = 
+        "http://umcloud1.ustadmobile.com/umlrs/statements?limit=1";
     
-    public void tearDown() {
-    }
-
-    public void testLogin() throws IOException{
-        int loginOKResult = LoginController.authenticate(
-                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
-        
-        
-    }
 }
