@@ -5,6 +5,7 @@
  */
 package com.ustadmobile.impl;
 
+import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -61,6 +62,12 @@ public class HTTPResult {
     
     public int getStatus(){
         return status;
+    }
+    
+    public byte[] getResponse(){
+        ByteArrayInputStream bais = new ByteArrayInputStream(
+                    this.response);
+        return this.response;
     }
     
 }

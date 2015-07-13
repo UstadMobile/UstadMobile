@@ -7,6 +7,8 @@ package com.ustadmobile.controller;
 import com.ustadmobile.app.Base64;
 import com.ustadmobile.impl.HTTPResult;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.model.CatalogModel;
+import com.ustadmobile.opds.UstadJSOPDSFeed;
 import com.ustadmobile.view.LoginView;
 import com.ustadmobile.view.ViewFactory;
 import java.util.Hashtable;
@@ -45,7 +47,15 @@ public class LoginController implements UstadController{
         }else {
             //make a new catalog controller and show it for the users base directory
             //Add username to UserPreferences.
-            CatalogController catalogController = new CatalogController();
+            UstadMobileSystemImpl.getInstance().setUserPref("username", username);
+            UstadMobileSystemImpl.getInstance().setUserPref("password", password);
+            //UstadMobileSystemImpl.getInstance().setActiveUser(username);
+            
+            //get the feed.
+            UstadJSOPDSFeed userFeed = null;
+            
+            CatalogModel catalogModel = new CatalogModel(userFeed);
+            CatalogController catalogController = new CatalogController(catalogModel);
             catalogController.show();
             
         }

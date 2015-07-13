@@ -62,7 +62,7 @@ public class UstadMobileJ2ME extends j2meunit.midletui.TestRunner {
             try{
                 int rc = aResult.runCount();
                 int ac = aResult.assertionCount();
-                System.out.println("assertionCount: " + ac + "/" + rc);
+                //System.out.println("assertionCount: " + ac + "/" + rc);
 
                 if (rc == ctc){
                     System.out.println("");

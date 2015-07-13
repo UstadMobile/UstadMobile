@@ -65,6 +65,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                     UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
                     do
                     {
+                        xpp.next();
                         evtType = xpp.next();
                         
                         if(xpp.getName().equals("name")){

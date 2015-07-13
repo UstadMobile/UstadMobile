@@ -4,6 +4,8 @@
  */
 package com.ustadmobile.controller;
 
+import com.ustadmobile.app.Base64;
+import com.ustadmobile.impl.HTTPResult;
 import com.ustadmobile.impl.UMTransferJob;
 import com.ustadmobile.impl.UstadMobileSystemImpl;
 import com.ustadmobile.model.CatalogModel;
@@ -11,6 +13,12 @@ import com.ustadmobile.opds.UstadJSOPDSFeed;
 import com.ustadmobile.opds.UstadJSOPDSItem;
 import com.ustadmobile.view.CatalogView;
 import com.ustadmobile.view.ViewFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import javax.microedition.pki.UserCredentialManager;
+import org.kxml2.io.KXmlParser;
 
 /**
  *
@@ -73,6 +81,54 @@ public class CatalogController implements UstadController{
      */
     public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl) {
         
+        //Create ODPSn feed
+        String opdsEndpoint = 
+                UstadMobileSystemImpl.getInstance().getAppPref("opds");
+        if (url == null | url.equals("")){
+            url = opdsEndpoint;
+        }
+        
+        Hashtable requestHeaders = new Hashtable();
+        String username = 
+                UstadMobileSystemImpl.getInstance().getUserPref("username", "");
+        String password = 
+                UstadMobileSystemImpl.getInstance().getUserPref("password", "");
+        if (username == null || username.equals("") || username == ""){
+            return null;
+        }
+        String encodedUserAndPass="Basic "+ Base64.encode(username,
+                    password);
+        requestHeaders.put("Authorization", encodedUserAndPass);
+        HTTPResult httpResult = null;
+        httpResult = UstadMobileSystemImpl.getInstance().makeRequest(url,
+                requestHeaders, null, "GET");
+        
+        InputStream is = null;
+        
+        try{
+            KXmlParser parser = new KXmlParser();
+            String response = new String(httpResult.getResponse());
+            is = new ByteArrayInputStream(httpResult.getResponse());
+            parser.setInput(is, "utf-8");
+
+            UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(parser);
+ 
+            CatalogModel feedModel = new CatalogModel(feed);
+            
+            CatalogController catalogController = new CatalogController(feedModel);
+            return catalogController;
+                    
+        }catch(Exception e){
+            e.printStackTrace();
+        } finally{
+            if (is != null){
+                try {
+                    is.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
         return null;
     }
     
