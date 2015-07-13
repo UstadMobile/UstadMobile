@@ -61,7 +61,7 @@ public class AllTestCases extends TestCase {
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
         allTestSuite.addTest(new TestCustomLWUIT());
-        /*
+        
         allTestSuite.addTest(new TestFormShow());
         
         allTestSuite.addTest(new TestSimple());
@@ -81,7 +81,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestLoginView());
         allTestSuite.addTest(new TestCatalogView());
         
-        */
+        
         
         allTestSuite.addTest(new TestHttpResult());
         

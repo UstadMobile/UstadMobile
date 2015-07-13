@@ -114,9 +114,9 @@ public class TestSystemimplJ2ME extends TestCase {
         }
         
         //fileSize
-        int fileSize = -1;
+        long fileSize = -1;
         fileSize = ustadMobileSystemImpl.fileSize(fileURI2);
-        if (fileSize != -1){
+        if ((int)fileSize != -1){
             assertTrue(true);
         }else{
             assertTrue(false);

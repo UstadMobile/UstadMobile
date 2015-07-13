@@ -126,8 +126,12 @@ public class CatalogController implements UstadController{
                     password);
         requestHeaders.put("Authorization", encodedUserAndPass);
         HTTPResult httpResult = null;
-        httpResult = UstadMobileSystemImpl.getInstance().makeRequest(url,
-                requestHeaders, null, "GET");
+        try {
+            httpResult = UstadMobileSystemImpl.getInstance().makeRequest(url,
+                    requestHeaders, null, "GET");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         
         InputStream is = null;
         
