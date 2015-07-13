@@ -1,6 +1,40 @@
+/*
+    This file is part of Ustad Mobile.
+
+    Ustad Mobile Copyright (C) 2011-2014 UstadMobile Inc.
+
+    Ustad Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version with the following additional terms:
+
+    All names, links, and logos of Ustad Mobile and Toughra Technologies FZ
+    LLC must be kept as they are in the original distribution.  If any new
+    screens are added you must include the Ustad Mobile logo as it has been
+    used in the original distribution.  You may not create any new
+    functionality whose purpose is to diminish or remove the Ustad Mobile
+    Logo.  You must leave the Ustad Mobile logo as the logo for the
+    application to be used with any launcher (e.g. the mobile app launcher).
+
+    If you want a commercial license to remove the above restriction you must
+    contact us.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Ustad Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+ */
+
 package com.ustadmobile.impl;
 
+import com.ustadmobile.controller.CatalogController;
+import com.ustadmobile.controller.LoginController;
 import com.ustadmobile.view.UstadView;
+import com.ustadmobile.view.ViewFactory;
 import java.io.IOException;
 import java.util.Hashtable;
 
@@ -14,11 +48,12 @@ import java.util.Hashtable;
  */
 public abstract class UstadMobileSystemImpl {
     
-    private static UstadMobileSystemImpl mainInstance;
+    protected static UstadMobileSystemImpl mainInstance;
     
     public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
             mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
+            mainInstance.init();
         }
         
         return mainInstance;
@@ -32,6 +67,18 @@ public abstract class UstadMobileSystemImpl {
     public void init() {
         
     }
+    
+    /**
+     * Starts the user interface for the app
+     */
+    public void startUI() {
+        if(getActiveUser() == null) {
+            new LoginController().show();
+        }else {
+            new CatalogController().show();
+        }
+    }
+    
     
     /**
      * Get the name of the platform implementation being used
@@ -157,13 +204,28 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers);
     
-    public abstract void renameFile(String fromFileURI, String toFileURI);
+    /**
+     * Rename file from/to 
+     * 
+     * @param fromFileURI current path / uri
+     * @param toFileURI new path / uri
+     * @return true if successful, false otherwise
+     * 
+     */
+    public abstract boolean renameFile(String fromFileURI, String toFileURI);
     
-    public abstract int fileSize(String fileURI);
+    /**
+     * Get the size of a file in bytes
+     * 
+     * @param fileURI File URI / Path
+     * 
+     * @return length in bytes
+     */
+    public abstract long fileSize(String fileURI);
     
-    public abstract void makeDirectory(String dirURI) throws IOException;
+    public abstract boolean makeDirectory(String dirURI) throws IOException;
     
-    public abstract void removeRecursively(String dirURI);
+    public abstract boolean removeRecursively(String dirURI);
     
     public abstract UMTransferJob unzipFile(String zipSrc, String dstDir);
     
@@ -236,6 +298,14 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getAppPref(String key);
     
     /**
+     * Set a preference for the app
+     * @param key preference that is being set
+     * @param value value to be set
+     * 
+     */
+    public abstract void setAppPref(String key, String value);
+    
+    /**
      * Do a basic HTTP Request
      * 
      * @param url URL to request e.g. http://www.somewhere.com/some/thing.php?param1=blah
@@ -246,7 +316,7 @@ public abstract class UstadMobileSystemImpl {
      * @return HTTPResult object containing the server response
      */
     public abstract HTTPResult makeRequest(String url, 
-            Hashtable headers, Hashtable postParameters, String method);
+            Hashtable headers, Hashtable postParameters, String method) throws IOException;
     
     
 }
