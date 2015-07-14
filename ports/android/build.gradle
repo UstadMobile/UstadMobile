@@ -29,6 +29,6 @@ repositories {
 
 dependencies {
     androidTestCompile 'junit:junit:4.12'
-    compile files('../../core/dist/UstadMobileCore.jar')
+    //compile files('../../core/dist/UstadMobileCore.jar')
     compile 'com.android.support:appcompat-v7:22.2.0'
 }

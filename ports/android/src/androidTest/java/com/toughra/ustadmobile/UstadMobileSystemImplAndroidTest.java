@@ -1,12 +1,11 @@
 package com.toughra.ustadmobile;
 import android.os.Environment;
 
-import com.ustadmobile.impl.HTTPResult;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
-import com.ustadmobile.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import junit.framework.TestCase;
-import junit.framework.Assert;
 
 import java.io.File;
 import java.io.IOException;

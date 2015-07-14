@@ -28,38 +28,28 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core;
+package com.ustadmobile.core.view;
 
-/* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
- $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
-
-import com.ustadmobile.core.controller.LoginController;
-import java.io.IOException;
-
-/** 
-*
+/**
+ * This class needs to be overriden by the implementation to return an 
+ * implementation of the view for that platform.  Use the exact same names
+ * and methods
+ * 
+ * 
  * @author mike
  */
-public class TestLogin extends TestCase{
+public class ViewFactory {
     
-    public TestLogin() {
+    public static LoginView makeLoginView() {
+        throw new RuntimeException("Not Implemented");
+    };
+    
+    public static CatalogView makeCatalogView() {
+        throw new RuntimeException("Not Implemented");
     }
     
-    public void setUp() {
+    public static ContainerView makeContainerView() {
+        throw new RuntimeException("Not Implemented");
     }
     
-    public void tearDown() {
-    }
-
-    public void testLogin() throws IOException{
-        int loginOKResult = LoginController.authenticate(
-                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
-        
-        
-    }
 }

@@ -30,36 +30,31 @@
  */
 package com.ustadmobile.test.core;
 
+
+import org.xmlpull.v1.XmlPullParserException;
+import java.io.IOException;
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
+
 /* $if umplatform == 2  $
     import org.j2meunit.framework.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
 
-import com.ustadmobile.core.controller.LoginController;
-import java.io.IOException;
-
-/** 
-*
+/**
+ *
  * @author mike
  */
-public class TestLogin extends TestCase{
+public class TestCatalogController extends TestCase{
     
-    public TestLogin() {
+    public void testCatalogController() throws IOException, XmlPullParserException {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        CatalogController controller = CatalogController.makeControllerByURL(
+            TestConstants.CATALOG_OPDS_ROOT, impl, TestConstants.LOGIN_USER, 
+            TestConstants.LOGIN_PASS);
+        assertNotNull("Create catalog controller", controller);
     }
     
-    public void setUp() {
-    }
-    
-    public void tearDown() {
-    }
-
-    public void testLogin() throws IOException{
-        int loginOKResult = LoginController.authenticate(
-                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
-        
-        
-    }
 }

@@ -21,5 +21,16 @@
             <fileset dir="preproctmp"/>
         </copy>
     </target>
+
+
+    <target name="androidcore">
+        <delete>
+            <fileset dir="src/main/java/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
+        </delete>
+
+        <copy todir="src/main/java/com/ustadmobile/core">
+            <fileset dir="../../core/src/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
+        </copy>
+    </target>
 </project>
 

@@ -1,4 +1,4 @@
-/*
+    /*
     This file is part of Ustad Mobile.
 
     Ustad Mobile Copyright (C) 2011-2014 UstadMobile Inc.
@@ -28,38 +28,68 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core;
+package com.ustadmobile.core.impl;
 
-/* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
- $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
+import java.util.Enumeration;
+import java.util.Hashtable;
 
-import com.ustadmobile.core.controller.LoginController;
-import java.io.IOException;
-
-/** 
-*
+/**
+ *
  * @author mike
  */
-public class TestLogin extends TestCase{
+public class HTTPResult {
     
-    public TestLogin() {
+    private byte[] response;
+    
+    private int status;
+    
+    private Hashtable responseHeaders;
+    
+    /**
+     * 
+     * @param response The byte response data from the server
+     * @param status the response code returned by the server
+     * @param responseHeaders the headers returned by the server in a hashtable
+     */
+    public HTTPResult(byte[] response, int status, Hashtable responseHeaders) {
+        this.response = response;
+        this.status = status;
+        this.responseHeaders = responseHeaders;
     }
     
-    public void setUp() {
-    }
-    
-    public void tearDown() {
-    }
-
-    public void testLogin() throws IOException{
-        int loginOKResult = LoginController.authenticate(
-                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
+    public String[] getHTTPHeaderKeys() {
+        Enumeration e   = responseHeaders.keys();
+        String[] headerKeys = new String[responseHeaders.size()];
+        int index = 0;
         
+        while(e.hasMoreElements()) {
+            headerKeys[index] = e.nextElement().toString();
+            index++;
+        }
         
+        return headerKeys;
     }
+    
+    /**
+     * 
+     * @param value
+     * @return 
+     */
+    public String getHeaderValue(String key) {
+        Object valObj = responseHeaders.get(key);
+        if(valObj != null) {
+            return valObj.toString();
+        }else {
+            return null;
+        }
+    }
+    
+    public int getStatus(){
+        return status;
+    }
+    
+    public byte[] getResponse() {
+        return this.response;
+    }
+    
 }

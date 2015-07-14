@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.ustadmobile.impl.UMProgressEvent;
-import com.ustadmobile.impl.UMProgressListener;
-import com.ustadmobile.impl.UMTransferJob;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
-import com.ustadmobile.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.core.impl.*;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import com.ustadmobile.test.core.TestConstants;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -36,13 +35,13 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
     public void testDownloadImpl() {
         Activity act = getActivity();
         File baseDir = Environment.getExternalStorageDirectory();
-        File file3 = new File(baseDir, "wpdownload.zip");
+        File file3 = new File(baseDir, "phonepic-large.png");
         if(file3.exists()) {
             file3.delete();
         }
 
-
-        UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile("http://www.ustadmobile.com/wordpress-4.2.2.zip",
+        String fileDownloadURL = TestConstants.TEST_HTTP_ROOT + "phonepic-large.png";
+        UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
                 file3.getAbsolutePath(), new Hashtable());
         job.addProgresListener(this);
         job.start();
@@ -65,7 +64,7 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
                 totalSize == downloadedSize);
 
     }
-    
+
 
     public void testPrefs() {
         Activity act = getActivity();

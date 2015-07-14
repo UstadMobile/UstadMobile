@@ -29,56 +29,59 @@
 
  */
 
-package com.toughra.ustadmobile;
+package com.ustadmobile.port.android.view;
 
-import android.app.Activity;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.os.Environment;
+import android.view.Menu;
+import android.view.MenuItem;
 
+import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.core.opf.UstadJSOPFItem;
 
-import java.io.File;
-import java.io.IOException;
+public class SplashScreenActivity extends ActionBarActivity {
 
-public class UstadMobileActivity extends Activity
-{
-    /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash_screen);
+
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        ((UstadMobileSystemImplAndroid)impl).setCurrentContext(getApplicationContext());
+        ((UstadMobileSystemImplAndroid)impl).setCurrentContext(this);
 
-
-        String contentDirURI = impl.getSharedContentDir();
-        String localeStr = impl.getSystemLocale();
-
-        File baseDir = Environment.getExternalStorageDirectory();
-        File file1 = new File(baseDir, "umtestfile1.txt");
-        File file2 = new File(baseDir, "umtestfile2.txt");
-        File file3 = new File(baseDir, "wpdownload.zip");
         try {
-            impl.writeStringToFile("hello world", file1.getAbsolutePath(), "UTF-8");
-            System.out.println("WRite file OK");
-        }catch(IOException e) {
+            CatalogController controller = CatalogController.makeControllerByURL(
+                    "http://192.168.2.104:5062/root.opds", impl, "miketestecop",
+                    "letsLearnEcop");
+        }catch(Exception e) {
             e.printStackTrace();
         }
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
 
+        impl.startUI();
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_splash_screen, menu);
+        return true;
+    }
 
-        /*
-        if(impl.getActiveUser() == null) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivity(loginIntent);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
         }
-        */
 
+        return super.onOptionsItemSelected(item);
     }
 }

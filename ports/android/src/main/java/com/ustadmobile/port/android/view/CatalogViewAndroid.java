@@ -28,38 +28,60 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core;
 
-/* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
- $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
+package com.ustadmobile.port.android.view;
 
-import com.ustadmobile.core.controller.LoginController;
-import java.io.IOException;
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.view.CatalogView;
 
-/** 
-*
- * @author mike
+
+/**
+ * Created by mike on 07/07/15.
  */
-public class TestLogin extends TestCase{
-    
-    public TestLogin() {
-    }
-    
-    public void setUp() {
-    }
-    
-    public void tearDown() {
+public class CatalogViewAndroid implements CatalogView {
+    @Override
+    public void setController(CatalogController catalogController) {
+
     }
 
-    public void testLogin() throws IOException{
-        int loginOKResult = LoginController.authenticate(
-                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
-        
-        
+    @Override
+    public void showDialog(String s, String s1, int i) {
+
+    }
+
+    @Override
+    public void showContainerContextMenu(UstadJSOPDSItem ustadJSOPDSItem) {
+
+    }
+
+    @Override
+    public void hideContainerContextMenu() {
+
+    }
+
+    @Override
+    public void setEntryStatus(String s, int i) {
+
+    }
+
+    @Override
+    public void updateDownloadAllProgress(int i, int i1) {
+
+    }
+
+    @Override
+    public void setDownloadEntryProgressVisible(String s, boolean b) {
+
+    }
+
+    @Override
+    public void updateDownloadEntryProgress(String s, int i, int i1) {
+
+    }
+
+    @Override
+    public void show() {
+
     }
 }
