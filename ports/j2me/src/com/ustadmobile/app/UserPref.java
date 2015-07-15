@@ -258,6 +258,11 @@ public class UserPref {
         }
     }
     
+    public static void setActiveUser(String username){
+        //Check if this username exists
+        
+    }
+    
     public static String getPlatform(){
         return System.getProperty("microedition.platform");
     }

@@ -60,8 +60,9 @@ public class AllTestCases extends TestCase {
                 TestUtils.testSettings.get("appDataURI"));
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
+        allTestSuite.addTest(new TestCustomLWUIT());
+        
         allTestSuite.addTest(new TestFormShow());
-
         
         allTestSuite.addTest(new TestSimple());
         allTestSuite.addTest(new TestXmlParse());
@@ -79,6 +80,10 @@ public class AllTestCases extends TestCase {
         
         allTestSuite.addTest(new TestLoginView());
         allTestSuite.addTest(new TestCatalogView());
+        
+        
+        
+        allTestSuite.addTest(new TestHttpResult());
         
         return allTestSuite;
 

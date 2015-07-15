@@ -202,13 +202,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return list;
     }
     
-    //public UMTransferJob downloadURLToFile(String url, String fileURI){ 
-    //
-    //  return null;
-    //}
-    
-    public void renameFile(String fromFileURI, String toFileURI){
-        boolean success;
+    public boolean renameFile(String fromFileURI, String toFileURI){
+        boolean success = false;
         try {
             success = FileUtils.renameFileOrDir(fromFileURI, toFileURI, 
             Connector.READ_WRITE, false);
@@ -218,17 +213,18 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        return success;
        
     }
     
-    public int fileSize(String fileURI){
+    public long fileSize(String fileURI){
         try{
-            return (int) FileUtils.getFileSize(fileURI);
+            return FileUtils.getFileSize(fileURI);
         }catch(Exception e){}
         return -1;
     }
     
-    public void makeDirectory(String dirURI) throws IOException{
+    public boolean makeDirectory(String dirURI) throws IOException{
  
         boolean createFileOrDir = FileUtils.createFileOrDir(dirURI, 
                 Connector.READ_WRITE, true);
@@ -236,10 +232,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             IOException e = new IOException();
             throw e;
         }
+        return createFileOrDir;
 
     }
     
-    public void removeRecursively(String dirURI){
+    public boolean removeRecursively(String dirURI){
         if (!dirURI.endsWith("/")){
             dirURI += "/";
         }
@@ -251,11 +248,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 IOException e = new IOException();
                 throw e;
             }
+            return success;
             //FileUtils.removeDirRecursively(dirURI, Connector.READ_WRITE);
             //FileUtils.removeFileOrDir(dirURI, Connector.READ_WRITE, true);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        return false;
         
     }
     
@@ -283,31 +282,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return value;
     }
 
-    /*public int basicAuth(String url, String username, String password, Hashtable headers) {
-        return HTTPUtils.basicAuth(url, username, password, headers);
-    }*/
-
-    /*public int makeRequest(String url, Hashtable optionalParameters, 
-            Hashtable optionalHeaders, boolean POST) {
-        try {
-            return HTTPUtils.makeHTTPRequest(url, optionalParameters, optionalHeaders, POST);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        return -1;
-    }*/
-
     public HTTPResult makeRequest(String url, Hashtable headers, 
             Hashtable postParameters, String method) {
         try {
             return HTTPUtils.makeHTTPRequest(url, postParameters, headers, 
                     method);
-            //To change body of generated methods, choose Tools | Templates.
-            //To change body of generated methods, choose Tools | Templates.
         } catch (IOException ex) {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public void setAppPref(String key, String value) {
+        AppPref.addSetting(key, value);
     }
 
 

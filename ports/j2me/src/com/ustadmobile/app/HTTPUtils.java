@@ -168,6 +168,8 @@ public class HTTPUtils {
         
         HTTPResult httpResult;
         HttpConnection httpConn = null;
+        InputStream is = null;
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         if(url == null){
             return null;
         }
@@ -216,8 +218,25 @@ public class HTTPUtils {
             
             // Read Response from the Server
             int response_code=httpConn.getResponseCode();  
+            is = httpConn.openInputStream();
+            
+            byte[] buf = new byte[1024];
+            int bytesRead = -1;
+            while ((bytesRead = is.read(buf)) != -1) {
+                bout.write(buf, 0, bytesRead);
+            }
+            is.close();
+            is = null;
+
+                        
+            bout.close();
+            
+            
+            
             byte[] response = null;
+            response = bout.toByteArray();
             Hashtable responseHeaders = null;
+            
             
             httpResult = new HTTPResult(response, response_code, responseHeaders);
             return httpResult;

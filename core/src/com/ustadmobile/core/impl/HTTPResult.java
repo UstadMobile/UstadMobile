@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.impl;
 
+import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -88,7 +89,7 @@ public class HTTPResult {
         return status;
     }
     
-    public byte[] getResponse() {
+    public byte[] getResponse(){
         return this.response;
     }
     

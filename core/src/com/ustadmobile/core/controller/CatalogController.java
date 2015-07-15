@@ -116,6 +116,7 @@ public class CatalogController implements UstadController{
             new CatalogModel(opdsFeed));
         
         return result;
+
     }
     
     /**

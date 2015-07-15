@@ -7,9 +7,11 @@ package com.ustadmobile.view;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.opds.UstadJSOPDSFeed;
 import com.ustadmobile.opds.*;
 import com.ustadmobile.controller.CatalogController;
+import java.util.Hashtable;
 
 /**
  *
@@ -23,6 +25,8 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     private CatalogController controller;
     //private UstadJSOPDSFeed feed;
     boolean acquisition = false;
+    
+    private Hashtable entryIdToButtons;
         
     public CatalogViewJ2ME() {
         /*
@@ -34,30 +38,35 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         Label spaceLabel = new Label(" ");
         addComponent(spaceLabel);
         
-        
-        
+        //Set Layout of the form.
+        BoxLayout boxLayout = new BoxLayout(BoxLayout.Y_AXIS);
+        setLayout(boxLayout);
+        entryIdToButtons = new Hashtable();
     }
     
     public void setController(CatalogController controller) {
         this.controller = controller;
         entries = this.controller.getModel().opdsFeed.entries;
+        entryIdToButtons.clear();
+        
         int i;
         for(i=0; i<entries.length; i++){
             String title = entries[i].title;
             Command entry = new Command(title, i+1);
-            Button entryButton = new Button(entry);
+            OPDSItemButton entryButton = new OPDSItemButton(entry);
             this.addComponent(entryButton);
-            Label spaceLabel = new Label(" ");
-            addComponent(spaceLabel);
+            entryIdToButtons.put(entries[i].id, entryButton);
         }
+        
+        Label spaceLabel = new Label(" ");
+        addComponent(spaceLabel);
+        
         Command refreshCmd = new Command("Refresh", CMD_REFRESH);
         Button refreshButton = new Button(refreshCmd);
         refreshButton.addActionListener(this);
         this.addComponent(refreshButton);
         
-        Label spaceLabel = new Label(" ");
-        addComponent(spaceLabel);
-        
+
         if (acquisition){
             Command downloadAll = new Command("Download All", CMD_DOWNLOAD_ALL);
             Button downloadAllButton = new Button(downloadAll);
@@ -68,7 +77,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void showDialog(String title, String text) {
-        
+        //alert box
     }
 
     public void actionPerformed(ActionEvent evt) {
@@ -88,7 +97,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void showDialog(String title, String text, int commandId) {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        //Display.getInstance().callSerially(null);
         //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -113,7 +122,10 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void updateDownloadEntryProgress(String entryId, int loaded, int total) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        OPDSItemButton entryButton = 
+            (OPDSItemButton)entryIdToButtons.get(entryId);
+        //update with percentage
+        entryButton.updateProgress((loaded/total)*100);
     }
 
     

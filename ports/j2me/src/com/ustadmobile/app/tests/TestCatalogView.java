@@ -75,7 +75,8 @@ public class TestCatalogView extends TestCase {
                     UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(parser);
 
                     CatalogModel feedModel = new CatalogModel(feed);
-                    CatalogController catalogController = new CatalogController(feedModel);
+                    CatalogController catalogController = 
+                            new CatalogController(feedModel);
                     catalogController.show();
                 } catch (XmlPullParserException ex) {
                     ex.printStackTrace();
