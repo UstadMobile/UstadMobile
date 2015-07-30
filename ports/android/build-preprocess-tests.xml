@@ -27,9 +27,13 @@
 
 
     <target name="androidcore">
-        <delete failonerror="false">
+	<!-- Using failonerror=false not cooperating with nested fileset -->
+	<mkdir dir="src/main/java/com/ustadmobile/core"/>
+        <delete>
             <fileset dir="src/main/java/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
         </delete>
+
+	<mkdir dir="src/main/java/com/ustadmobile/core"/>
 
         <copy todir="src/main/java/com/ustadmobile/core">
             <fileset dir="../../core/src/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
