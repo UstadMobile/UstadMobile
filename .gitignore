@@ -47,13 +47,20 @@ ports/j2me/*~
 
 #Preprocessed unit test files
 preproctmp
-ports/android/src/androidTest/java/com/ustadmobile/test/core
+ports/android/src/androidTest/java/com/ustadmobile/test/core/*
 core/test/com/ustadmobile/test/core/TestConstants.java
 
 #Files copied into the main Android project to force
 #Android studio to cooperate debugging them
-ports/android/src/main/java/com/ustadmobile/core
+
+ports/android/src/main/java/com/ustadmobile/core/*
+!ports/android/src/main/java/com/ustadmobile/core/view
+!ports/android/src/main/java/com/ustadmobile/core/impl
+
+ports/android/src/main/java/com/ustadmobile/core/view/*
 !ports/android/src/main/java/com/ustadmobile/core/view/ViewFactory.java
+
+ports/android/src/main/java/com/ustadmobile/core/impl/*
 !ports/android/src/main/java/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
 
 #Testing node server files
