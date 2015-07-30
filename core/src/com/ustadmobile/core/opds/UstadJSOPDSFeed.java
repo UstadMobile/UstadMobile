@@ -29,6 +29,8 @@
 
  */
 package com.ustadmobile.core.opds;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
@@ -44,6 +46,13 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public UstadJSOPDSFeed() {
         
+    }
+    
+    public static UstadJSOPDSFeed loadFromXML(String str) throws XmlPullParserException, IOException {
+        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+        ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
+        parser.setInput(bin, "UTF-8");
+        return loadFromXML(parser);
     }
     
     public static UstadJSOPDSFeed loadFromXML(XmlPullParser xpp) throws 
@@ -170,5 +179,20 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         return (entries.length > 0);
     }
     
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("<?xml version='1.0' encoding='UTF-8'?>\n");
+        buffer.append("<feed xmlns=\"http://www.w3.org/2005/Atom\" \n"); 
+        buffer.append("  xmlns:dc=\"http://purl.org/dc/terms/\" \n");
+        buffer.append("  xmlns:opds=\"http://opds-spec.org/2010/catalog\">\n");
+        buffer.append(super.toString());
+        for(int i = 0; i < entries.length; i++) {
+            buffer.append("<entry>");
+            buffer.append(entries[i].toString());
+            buffer.append("</entry>");
+        }
+        buffer.append("</feed>");
+        return buffer.toString();
+    }
 
 }

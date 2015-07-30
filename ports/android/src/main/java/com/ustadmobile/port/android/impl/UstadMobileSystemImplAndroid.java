@@ -372,7 +372,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public String getUserPref(String key, String s1) {
+    public String getUserPref(String key) {
         return getUserPreferences().getString(key, null);
     }
 

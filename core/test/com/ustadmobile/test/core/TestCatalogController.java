@@ -35,7 +35,15 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import java.io.ByteArrayInputStream;
+import org.xmlpull.v1.XmlPullParser;
 
+
+/* $if umplatform == 1 $
+        import android.test.ActivityInstrumentationTestCase2;
+        import com.toughra.ustadmobile.UstadMobileActivity;
+   $endif$ */
 
 /* $if umplatform == 2  $
     import org.j2meunit.framework.TestCase;
@@ -47,7 +55,18 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
  *
  * @author mike
  */
+
+/* $if umplatform == 1  $
+public class TestCatalogController extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
+ $else$ */
 public class TestCatalogController extends TestCase{
+/* $endif */
+    
+    public TestCatalogController() {
+        /* $if umplatform == 1 $ 
+        super("com.toughra.ustadmobile", UstadMobileActivity.class);
+        $endif */
+    }
     
     public void testCatalogController() throws IOException, XmlPullParserException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -55,6 +74,20 @@ public class TestCatalogController extends TestCase{
             TestConstants.CATALOG_OPDS_ROOT, impl, TestConstants.LOGIN_USER, 
             TestConstants.LOGIN_PASS);
         assertNotNull("Create catalog controller", controller);
+        
+        
+        UstadJSOPDSFeed feedItem = controller.getModel().opdsFeed;
+        String feedXML = feedItem.toString();
+        ByteArrayInputStream bin = new ByteArrayInputStream(
+            feedXML.getBytes("UTF-8"));
+        XmlPullParser parser = impl.newPullParser();
+        parser.setInput(bin, "UTF-8");
+        UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
+        assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
+        CatalogController.cacheCatalog(feedItem, null, null);
+        UstadJSOPDSFeed cachedFeed = 
+            CatalogController.getCachedCatalogByID(feedItem.id, null);
+        assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
     }
     
 }

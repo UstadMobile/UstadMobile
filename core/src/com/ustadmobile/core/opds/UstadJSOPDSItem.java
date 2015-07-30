@@ -164,5 +164,41 @@ public abstract class UstadJSOPDSItem {
     public Vector getNavigationLinks(){
         return this.getLinks(null, TYPE_ATOMFEED, false, true);
     }
+    
+    /**
+     * Makes an XML fragment representing this item
+     * @return 
+     */
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        
+        buffer.append("<title>").append(title).append("</title>\n");
+        buffer.append("<id>").append(id).append("</id>\n");
+        if(summary != null) {
+            buffer.append("<summary>").append(summary).append("</summary>\n");
+        }
+        if(updated != null) {
+            buffer.append("<updated>").append(updated).append("</updated>\n");
+        }
+        
+        if(publisher != null) {
+            buffer.append("<dc:publisher>").append(publisher).append("</dc:publisher>\n");
+        }
+        
+        for(int i = 0; i < linkVector.size(); i++) {
+            String[] thisLink = (String[])linkVector.elementAt(i);
+            //As per the ATOM Spec: href is mandatory
+            buffer.append("<link href=\"").append(thisLink[LINK_HREF]).append("\" ");
+            if(thisLink[LINK_REL] != null) {
+                buffer.append("rel=\"").append(thisLink[LINK_REL]).append("\" ");
+            }
+            if(thisLink[LINK_MIMETYPE] != null) {
+                buffer.append("type=\"").append(thisLink[LINK_MIMETYPE]).append("\" ");
+            }
+            buffer.append("/>\n");
+        }
+        
+        return buffer.toString();
+    }
 
 }

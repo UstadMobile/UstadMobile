@@ -23,8 +23,6 @@ sed s/__TESTSERVERIP__/$IPADDR/g ../../core/test/com/ustadmobile/test/core/TestC
     sed s/__TESTSERVERPORT__/$ASSETPORT/g \
     > ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java
 
-cat ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java
-read
 
 ./gradlew connectedAndroidTest
 

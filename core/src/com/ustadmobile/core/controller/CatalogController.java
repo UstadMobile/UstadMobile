@@ -104,19 +104,13 @@ public class CatalogController implements UstadController{
      * @return 
      */
     public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, String username, String password) throws IOException, XmlPullParserException{
-        Hashtable headers = new Hashtable();
-        headers.put("Authorization", 
-                "Basic "+ Base64.encode(username,password));
-        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-        parser.setInput(
-            new ByteArrayInputStream(impl.readURLToString(url, headers).getResponse()), 
-            "UTF-8");
-        UstadJSOPDSFeed opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+        UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, username, 
+            password, true);
+        
         CatalogController result = new CatalogController(
             new CatalogModel(opdsFeed));
         
         return result;
-
     }
     
     /**
@@ -216,33 +210,21 @@ public class CatalogController implements UstadController{
      * @param cacheEnabled
      * @return 
      */
-    public static CatalogController getCatalogByURL(String url, String httpUsername, String httpPassword, boolean cacheEnabled) {
+    public static UstadJSOPDSFeed getCatalogByURL(String url, String httpUsername, String httpPassword, boolean cacheEnabled) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
-        Exception getException = null;
         
-        try {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            Hashtable headers = new Hashtable();
-            headers.put("Authorization", 
-                    "Basic "+ Base64.encode(httpUsername,httpPassword));
-            XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-            parser.setInput(
-                new ByteArrayInputStream(impl.readURLToString(url, headers).getResponse()), 
-                "UTF-8");
-            opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
-        }catch(IOException e) {
-            getException = e;
-        }catch(XmlPullParserException e2) {
-            getException = e2;
-        }
         
-        if(opdsFeed != null) {
-            CatalogController controller = new CatalogController(
-                new CatalogModel(opdsFeed));
-            return controller;
-        }else {
-            return null;
-        }
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable headers = new Hashtable();
+        headers.put("Authorization", 
+                "Basic "+ Base64.encode(httpUsername,httpPassword));
+        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+        parser.setInput(
+            new ByteArrayInputStream(impl.readURLToString(url, headers).getResponse()), 
+            "UTF-8");
+        opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+
+        return opdsFeed;
     }
     
     /**
@@ -280,8 +262,24 @@ public class CatalogController implements UstadController{
     }
     
     protected static String getFileNameForOPDSFeedId(String feedId, String user) {
-        
-        return null;
+        return ".cache-" + sanitizeIDForFilename(feedId) + ".opds";
+    }
+    
+    public static String sanitizeIDForFilename(String id) {
+        char c;
+        int len = id.length();
+        StringBuffer retVal = new StringBuffer();
+        for(int i = 0; i < len; i++) {
+            c = id.charAt(i);
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '.' || c == '-' || c == '*' || c == '_') {
+                retVal.append(c);
+            }else if(c == ' ' || c == '\t' || c == '\n'){
+                retVal.append('_');
+            }else {
+                retVal.append("_").append(Integer.toHexString((int)c));
+            }
+        }
+        return retVal.toString();
     }
     
     /**
@@ -289,10 +287,28 @@ public class CatalogController implements UstadController{
      * 
      * @param catalog 
      * @param ownerUser the user that owns the download, or null if this is for the shared directory
-     * @param serializedCatalog String contents of the catalog (in XML)
+     * @param serializedCatalog String contents of the catalog (in XML) : optional : if they are 'handy', otherwise null
      */
-    public static void cacheCatalog(UstadJSOPDSFeed catalog, String ownerUser, String serializedCatalog) {
+    public static void cacheCatalog(UstadJSOPDSFeed catalog, String ownerUser, String serializedCatalog) throws IOException{
+        String destPath = null;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(ownerUser == null) {
+            destPath = impl.getSharedContentDir();
+        }else {
+            destPath = impl.getUserContentDirectory(ownerUser);
+        }
         
+        destPath += "/" + getFileNameForOPDSFeedId(catalog.id, ownerUser);
+        if(serializedCatalog == null) {
+            serializedCatalog = catalog.toString();
+        }
+        impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
+        String keyName = "opds-cache-" + catalog.id;
+        if(ownerUser == null) {
+            impl.setAppPref(keyName, destPath);
+        }else {
+            impl.setUserPref(keyName, destPath);
+        }
     }
     
     /**
@@ -306,7 +322,22 @@ public class CatalogController implements UstadController{
     /**
       * Get a cached copy of a given catalog according to it's ID
       */
-    public static CatalogController getCachedCatalogByID(String catalogID, String username) {
+    public static UstadJSOPDSFeed getCachedCatalogByID(String catalogID, String username) throws IOException, XmlPullParserException{
+        String filename;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String key = "opds-cache-" + catalogID;
+        if(username == null) {
+            filename = impl.getAppPref(key);
+        }else {
+            filename = impl.getUserPref(key);
+        }
+        
+        if(filename != null) {
+            String contentsXML = impl.readFileAsText(filename, "UTF-8");
+            UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(contentsXML);
+            return feed;
+        }
+        
         return null;
     }
     

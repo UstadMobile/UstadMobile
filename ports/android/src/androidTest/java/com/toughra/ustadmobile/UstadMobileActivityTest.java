@@ -87,10 +87,9 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
         String userPrefStr = "the answer is 42 for you too";
         String userPrefKey = "usermeaning";
         impl.setUserPref(userPrefKey, userPrefStr);
-        assertEquals("Can retrieve set preference", userPrefStr, impl.getUserPref(userPrefKey,
-                null));
+        assertEquals("Can retrieve set preference", userPrefStr, impl.getUserPref(userPrefKey));
         impl.setActiveUser("someoneelse");
-        assertNull("After changing user preference is gone", impl.getUserPref(userPrefKey, null));
+        assertNull("After changing user preference is gone", impl.getUserPref(userPrefKey));
         impl.setActiveUser(null);
     }
 

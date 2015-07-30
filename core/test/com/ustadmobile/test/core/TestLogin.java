@@ -59,7 +59,10 @@ public class TestLogin extends TestCase{
                 TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
                 TestConstants.LOGIN_URL);
         assertEquals("Login OK returns 200", 200, loginOKResult);
-        
-        
     }
+    
+    public void runTest() throws IOException{
+        testLogin();
+    }
+    
 }

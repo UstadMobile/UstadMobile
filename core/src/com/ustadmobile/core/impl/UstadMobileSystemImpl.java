@@ -275,7 +275,7 @@ public abstract class UstadMobileSystemImpl {
      * @param key preference key as a string
      * @return value of that preference
      */
-    public abstract String getUserPref(String key, String value);
+    public abstract String getUserPref(String key);
     
     /**
      * Get a list of preference keys for currently active user

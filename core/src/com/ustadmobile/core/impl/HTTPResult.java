@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.impl;
 
-import java.io.ByteArrayInputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
