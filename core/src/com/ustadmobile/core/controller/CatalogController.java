@@ -56,6 +56,14 @@ public class CatalogController implements UstadController{
     
     public static final int STATUS_NOT_ACQUIRED = 2;
     
+    
+    /**
+     * Common flags
+     */
+    public static final int CACHE_ENABLED= 1;
+    
+    public static final int USER_SPECIFIC = 2;
+    
     //The View (J2ME or Android)
     private CatalogView view;
     
@@ -100,12 +108,15 @@ public class CatalogController implements UstadController{
      * Construct a CatalogController for the OPDS feed at the given URL
      * 
      * @param url the URL of the OPDS feed
+     * @param ownerUser: the local username on the system (e.g. tincan user)
+     * @param httpUser: the HTTP username to use for authentication
+     * @param httpPassword:or the HTTP password to use for authentication
      * @param impl System implementation to use
      * @return 
      */
-    public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, String username, String password) throws IOException, XmlPullParserException{
-        UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, username, 
-            password, true);
+    public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, String ownerUser, String httpUser, String httpPassword) throws IOException, XmlPullParserException{
+        UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, ownerUser, 
+            httpUser, httpPassword, CACHE_ENABLED);
         
         CatalogController result = new CatalogController(
             new CatalogModel(opdsFeed));
@@ -205,25 +216,30 @@ public class CatalogController implements UstadController{
      * Get an OPDS catalog by URL
      * 
      * @param url
+     * @param ownerUser the local owner username
      * @param httpUsername
      * @param httpPassword
-     * @param cacheEnabled
+     * @param flags boolean flags 
      * @return 
      */
-    public static UstadJSOPDSFeed getCatalogByURL(String url, String httpUsername, String httpPassword, boolean cacheEnabled) throws IOException, XmlPullParserException{
+    public static UstadJSOPDSFeed getCatalogByURL(String url, String ownerUser, String httpUsername, String httpPassword, int flags) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
         
+        boolean isUserSpecific = (flags & USER_SPECIFIC) == USER_SPECIFIC;
         
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable headers = new Hashtable();
         headers.put("Authorization", 
                 "Basic "+ Base64.encode(httpUsername,httpPassword));
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+        byte[] opdsContents = impl.readURLToString(url, headers).getResponse();
         parser.setInput(
-            new ByteArrayInputStream(impl.readURLToString(url, headers).getResponse()), 
+            new ByteArrayInputStream(opdsContents), 
             "UTF-8");
         opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
-
+        CatalogController.cacheCatalog(opdsFeed, ownerUser, new String(opdsContents, 
+            "UTF-8"));
+        
         return opdsFeed;
     }
     
@@ -304,11 +320,7 @@ public class CatalogController implements UstadController{
         }
         impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
         String keyName = "opds-cache-" + catalog.id;
-        if(ownerUser == null) {
-            impl.setAppPref(keyName, destPath);
-        }else {
-            impl.setUserPref(keyName, destPath);
-        }
+        impl.setPref(ownerUser != null, keyName, destPath);
     }
     
     /**

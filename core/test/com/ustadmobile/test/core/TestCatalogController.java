@@ -70,9 +70,12 @@ public class TestCatalogController extends TestCase{
     
     public void testCatalogController() throws IOException, XmlPullParserException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setActiveUser(TestConstants.LOGIN_USER);
+        
+        
         CatalogController controller = CatalogController.makeControllerByURL(
             TestConstants.CATALOG_OPDS_ROOT, impl, TestConstants.LOGIN_USER, 
-            TestConstants.LOGIN_PASS);
+            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS);
         assertNotNull("Create catalog controller", controller);
         
         

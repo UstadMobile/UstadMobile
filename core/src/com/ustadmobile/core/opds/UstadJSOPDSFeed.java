@@ -44,8 +44,17 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public UstadJSOPDSEntry[] entries;
     
+    /**
+     * The absolute URL of this catalog (HTTP or Filesystem based)
+     */
+    public String href;
+    
     public UstadJSOPDSFeed() {
-        
+        href = null;
+    }
+    
+    public UstadJSOPDSFeed(String srcHref) {
+        this.href = srcHref;
     }
     
     public static UstadJSOPDSFeed loadFromXML(String str) throws XmlPullParserException, IOException {

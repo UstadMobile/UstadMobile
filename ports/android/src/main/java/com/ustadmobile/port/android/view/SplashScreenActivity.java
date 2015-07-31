@@ -58,8 +58,8 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         try {
             CatalogController controller = CatalogController.makeControllerByURL(
-                    "http://192.168.2.101:5062/root.opds", impl, "miketestecop",
-                    "letsLearnEcop");
+                    "http://10.232.90.139:5062/root.opds", impl, "miketestecop",
+                    "miketestecop", "letsLearnEcop");
             UstadJSOPDSFeed feedItem = controller.getModel().opdsFeed;
             String feedXML = feedItem.toString();
             ByteArrayInputStream bin = new ByteArrayInputStream(

@@ -148,7 +148,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public String getUserContentDirectory(String username) {
         File userDir = new File(Environment.getExternalStorageDirectory(),
             "ustadmobileContent/users/" + username);
-        return null;
+        return userDir.getAbsolutePath();
     }
 
     /**
@@ -327,6 +327,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     @Override
     public void setActiveUser(String username) {
+        super.setActiveUser(username);
         saveUserPrefs();
         SharedPreferences appPreferences = getAppSharedPreferences();
         SharedPreferences.Editor editor = appPreferences.edit();

@@ -237,7 +237,16 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param username username as a string, or null for no active user
      */
-    public abstract void setActiveUser(String username);
+    public void setActiveUser(String username) {
+        //Make sure there is a valid directory for this user
+        String userDirPath = getUserContentDirectory(username);
+        try {
+            makeDirectory(userDirPath);
+        }catch(IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
     
     /**
      * Get the currently active user
@@ -306,6 +315,23 @@ public abstract class UstadMobileSystemImpl {
      * 
      */
     public abstract void setAppPref(String key, String value);
+    
+    /**
+     * Convenience method: setPref will use setUserPref if
+     * isUser is true, setAppPref otherwise
+     * 
+     * @param isUserSpecific true if this is a user specific preference
+     * @param key Preference key
+     * @param value Value of preference to store
+     */
+    public void setPref(boolean isUserSpecific, String key, String value) {
+        if(isUserSpecific) {
+            setUserPref(key, value);
+        }else {
+            setAppPref(key, value);
+        }
+    }
+    
     
     /**
      * Do a basic HTTP Request
