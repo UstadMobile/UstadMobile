@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.app;
 
-import com.ustadmobile.impl.UstadMobileSystemImplJ2ME;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;

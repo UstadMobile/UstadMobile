@@ -125,7 +125,6 @@ public class UstadJSOPF {
                 }else if(xpp.getName() != null && xpp.getName().equals("item")){
                     
                     filename=xpp.getAttributeValue(null, "href");
-                    System.out.println("item: " + filename);
                     itemMime=xpp.getAttributeValue(null, "media-type");
                     id = xpp.getAttributeValue(null, "id");
                     properties = xpp.getAttributeValue(null, "properties");

@@ -35,8 +35,7 @@ import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.app.ZipUtils;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
-import com.ustadmobile.impl.UstadMobileSystemImplFactory;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.Vector;
 /**
  *
@@ -49,7 +48,7 @@ public class TestBigUnzip extends TestCase {
     }
     
     public void runTest() throws Throwable{
-        ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
+        //ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
         //String getSharedContentDir = ustadMobileSystemImpl.getSharedContentDir();
 
         //Test big zip file.

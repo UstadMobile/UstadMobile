@@ -31,9 +31,9 @@
 package com.ustadmobile.app.tests;
 
 import com.ustadmobile.app.controller.UstadMobileAppController;
-import com.ustadmobile.controller.CatalogController;
-import com.ustadmobile.model.CatalogModel;
-import com.ustadmobile.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.model.CatalogModel;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import j2meunit.framework.TestCase;
 import java.io.IOException;
 import java.io.InputStream;

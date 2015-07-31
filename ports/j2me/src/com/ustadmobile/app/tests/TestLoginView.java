@@ -34,8 +34,8 @@ import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.events.ActionEvent;
 import j2meunit.framework.TestCase;
-import com.ustadmobile.controller.LoginController;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 /**
  *
  * @author varuna

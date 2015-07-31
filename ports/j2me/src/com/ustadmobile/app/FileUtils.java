@@ -41,6 +41,7 @@ public class FileUtils {
     /** The File seperator character */
     public static char FILE_SEP = '/';
     public static final String USTAD_CONTENT_DIR = "ustadmobileContent";
+    public static final String EPUB_CONTAINER = "META-INF/container.xml";
 
     //The fileURI?
     //String fileURI;
@@ -460,34 +461,36 @@ public class FileUtils {
             boolean isDir) throws IOException {
 
             boolean created = false;
-            /*
-            try {
-            * */
+            FileConnection fc = null;
             fileName = fileName.trim();
 
             if (isDir && !fileName.endsWith("/")) {
                     fileName += "/";
             }
+            
+            //fileName = fileName.substring(0, fileName.length()-1);
 
-            FileConnection fc = (FileConnection) Connector.open(fileName, mode);
-
-            if (fc.exists()) {
+            try{
+                fc = (FileConnection) 
+                    Connector.open(fileName, mode);
+                if (fc.exists()) {
                     created = true;
-            } else {
+                } else {                        
                     if (isDir) {
-                            fc.mkdir();
+                        fc.mkdir();
                     } else {
-                            fc.create();
+                        fc.create();
                     }
                     created = true;
+                }
+                
+            }catch(Exception e){
+                e.printStackTrace();
+            }finally{
+                if(fc!=null){
+                    fc.close();
+                }
             }
-            fc.close();
-            /*
-            } catch (Throwable t) {
-                    t.printStackTrace();
-            } finally {
-            }
-            * */
             return created;
             
     }
@@ -566,6 +569,12 @@ public class FileUtils {
         }
         
         return path1 + path2;
+    }
+    
+    public static String getFolderPath (String absolutePath){
+        int pos = absolutePath.lastIndexOf('/');
+        return absolutePath.substring(0, pos) + "/";
+        
     }
     
     public static String getBaseName(String url){

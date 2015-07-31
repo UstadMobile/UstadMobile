@@ -93,7 +93,7 @@ public class LoginController implements UstadController{
             //Add username to UserPreferences.
             UstadMobileSystemImpl.getInstance().setUserPref("username", username);
             UstadMobileSystemImpl.getInstance().setUserPref("password", password);
-            //UstadMobileSystemImpl.getInstance().setActiveUser(username);
+            UstadMobileSystemImpl.getInstance().setActiveUser(username);
             
             //get the feed.
             UstadJSOPDSFeed userFeed = null;

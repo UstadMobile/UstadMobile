@@ -13,7 +13,7 @@ import com.ustadmobile.app.HTTPUtils;
 import com.ustadmobile.app.RMSUtils;
 import com.ustadmobile.app.controller.UstadMobileAppController;
 import com.ustadmobile.app.forms.TestForm;
-import com.ustadmobile.controller.LoginController;
+import com.ustadmobile.core.controller.LoginController;
 
 //TextBox for screen:
 import javax.microedition.lcdui.TextBox;
@@ -21,39 +21,22 @@ import javax.microedition.lcdui.TextBox;
 /**
  * @author varuna
  */
-public class UstadMobileJ2ME extends j2meunit.midletui.TestRunner {
+public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
 
     private TextBox tbox;
     
-    public UstadMobileJ2ME() {
+    public UstadMobileJ2METest() {
         tbox = new TextBox("App Dir", 
                 "Hows it going?", 100, 0 );
     }
     
-    //To Display on Screen
-    public void _startApp(){
-        Display.init(this);                   
-        /*
-        Form f = new Form("Hello there");
-        //Form f = TestForm.loadTestForm();
-        f.show();
-        */
-        
-        LoginController loginController = new LoginController();
-        loginController.show();
-        
-        
-    }
-   
     //Start the tests:
     public void startApp(){
         //start(new String[] { com.ustadmobile.app.tests.AllTestCases.class.getName() });
         
-        
         Display.init(this);
         AllTestCases atc = new AllTestCases() ;
         int ctc = atc.suite().countTestCases();
-        System.out.println("Number of Tests: " + ctc);
         start(new String[] {
             atc.getClass().getName()
         });

@@ -30,8 +30,7 @@
  */
 package com.ustadmobile.app.tests;
 
-import com.ustadmobile.impl.UstadMobileSystemImpl;
-import com.ustadmobile.impl.UstadMobileSystemImplFactory;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.app.FileUtils;
 import javax.microedition.io.Connector;
@@ -48,7 +47,7 @@ public class TestRename extends TestCase {
     }
     
     public void runTest() throws Throwable{
-        ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
+        //ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
         String getSharedContentDir = ustadMobileSystemImpl.getSharedContentDir();
         String fileURIFrom = FileUtils.joinPath(getSharedContentDir, "from.txt");
         FileConnection fc = null;

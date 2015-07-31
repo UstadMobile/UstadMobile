@@ -30,8 +30,12 @@
  */
 package com.ustadmobile.app;
 
+import com.ustadmobile.app.controller.UstadMobileAppController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import gnu.classpath.java.util.zip.ZipEntry;
 import gnu.classpath.java.util.zip.ZipInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,6 +51,8 @@ import javax.microedition.io.file.FileConnection;
  */
 public class ZipUtils {
 
+    private static final int BUFFER = 2048;
+    
     public ZipUtils() {
     }
     
@@ -105,30 +111,231 @@ public class ZipUtils {
 
     }
     
-    public static boolean unZipFile(String zipFile, String extractFolderURI) throws Exception {
+    public static boolean unZipSingleFile(String zipFile, String fileInZip) 
+            throws IOException{
+        return unZipSingleFile(zipFile, fileInZip, null);
+    }
+    
+    public static boolean unZipSingleFile(String zipFile, String fileInZip, 
+            String extractDir) throws IOException{
+        Vector listFilesVector = new Vector();
+        FileConnection fileCon = null;
+        InputStream is = null;
+        ZipEntry entry;
+        //extractDir = FileUtils.getFolderPath(extractDir); // if needed.
+        try {
+            fileCon = (FileConnection) Connector.open(zipFile, Connector.READ);
+            is = fileCon.openInputStream();
+
+            if (zipFile.toLowerCase().endsWith("zip") 
+            	|| zipFile.toLowerCase().endsWith("jar") 
+            		|| zipFile.toLowerCase().endsWith("elp") 
+            			|| zipFile.toLowerCase().endsWith("epub")){
+                try {
+                    ZipInputStream zis = new ZipInputStream(is);
+                    while ((entry = zis.getNextEntry()) != null) {
+
+                        listFilesVector.addElement(entry.getName());
+                        
+                        if (entry.getName().equals(fileInZip)){
+                            //unzip this file.
+ 
+                            int bytesRead;
+                            byte buffer[] = new byte[BUFFER];
+                            
+                            
+                            if(extractDir == null){
+                                String sharedContentDir = UstadMobileSystemImpl.getInstance().getSharedContentDir();
+                                extractDir = FileUtils.joinPath(sharedContentDir, "test");
+                            }
+                            
+                            OutputStream outputStream = null;
+                            FileConnection currentDirCon = null;
+                            FileConnection currentFileCon = null;
+
+                            //Prepare and make the extracted directory.
+                            try {
+                                currentDirCon = (FileConnection) 
+                                    Connector.open(extractDir, Connector.READ_WRITE);
+                                if (!currentDirCon.exists()) {
+                                    currentDirCon.mkdir();
+                                }
+                                currentDirCon.setWritable(true);
+                            } catch (Error e) {
+                                e.printStackTrace();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                    if ( currentDirCon != null ){
+                                            currentDirCon.close();
+                                    }
+                            }
+                            
+                            
+                            //Create the file and write to it.
+                            String extractFile = 
+                                    FileUtils.joinPath(extractDir, FileUtils.getBaseName(fileInZip));
+                            try {
+                                currentFileCon = (FileConnection)
+                                        Connector.open(extractFile, Connector.READ_WRITE);
+                                if (!currentFileCon.exists()){
+                                    currentFileCon.create();
+                                }
+                                outputStream = currentFileCon.openOutputStream();
+                                while ((bytesRead = zis.read(buffer, 0, BUFFER)) != -1) {
+                                    outputStream.write(buffer, 0, bytesRead);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                if (outputStream != null ){
+                                        outputStream.close();
+                                }
+                                if (currentFileCon != null){
+                                        currentFileCon.close();
+                                }
+                            }
+                            
+                        }
+                    }
+                    zis.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            } 
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (fileCon != null) {
+                fileCon.close();
+            }
+        }
+
+        //Putting the file list vector into a string array.
+        String[] a = null;
+        a = FileUtils.vectorToStringArray(listFilesVector);
+        
+        return true;
+
+    }
+    
+    public static ZipInputStream readFileFromZip (String zipFile, String fileInZip)
+            throws IOException{
+        Vector listFilesVector = new Vector();
+        FileConnection fileCon = null;
+        InputStream is = null;
+        ZipEntry entry;
+        //extractDir = FileUtils.getFolderPath(extractDir); // if needed.
+        try {
+            fileCon = (FileConnection) Connector.open(zipFile, Connector.READ);
+            is = fileCon.openInputStream();
+
+            if (zipFile.toLowerCase().endsWith("zip") 
+            	|| zipFile.toLowerCase().endsWith("jar") 
+            		|| zipFile.toLowerCase().endsWith("elp") 
+            			|| zipFile.toLowerCase().endsWith("epub")){
+                try {
+                    ZipInputStream zis = new ZipInputStream(is);
+                    while ((entry = zis.getNextEntry()) != null) {
+
+                        listFilesVector.addElement(entry.getName());
+                        
+                        if (entry.getName().equals(fileInZip)){
+                            //unzip this file.
+ 
+                            int bytesRead;
+                            byte buffer[] = new byte[BUFFER];
+                            
+                            OutputStream outputStream = null;
+                            InputStream inputStream = null;
+
+                            try {
+                                //FileUtils.getFileContents(fileInZip);
+                                //FileUtils.getFileBytes(fileInZip);
+                                
+                                
+                                /*while ((bytesRead = zis.read(buffer, 0, BUFFER)) != -1) {
+                                    outputStream.write(buffer, 0, bytesRead);
+                                }*/
+                                
+                                //inputStream  = convertZipInputStreamToInputStream(zis);
+                                return zis;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            } finally {
+                                if (outputStream != null ){
+                                        outputStream.close();
+                                }
+                            }
+                            
+                        }
+                    }
+                    zis.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            } 
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (fileCon != null) {
+                fileCon.close();
+            }
+        }
+        
+        return null;
+
+    }
+    
+    private static InputStream convertZipInputStreamToInputStream(ZipInputStream in) 
+            throws IOException
+    {
+        final int BUFFER = 2048;
+        int count = 0;
+        byte data[] = new byte[BUFFER];
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        while ((count = in.read(data, 0, BUFFER)) != -1) {
+            out.write(data);
+        }       
+        InputStream is = new ByteArrayInputStream(out.toByteArray());
+        return is;
+    }
+    
+    
+    public static boolean unZipFile(String zipFile, String extractFolderURI)
+            throws Exception{
+        return unZipFile(zipFile, extractFolderURI, null);
+    }
+    
+    public static boolean unZipFile(String zipFile, String extractFolderURI,
+            InputStream is) throws Exception {
         ZipEntry entry = null;
         //boolean overwriteall = false;
         boolean overwriteall = true;
         FileConnection zipFileCon = null;
         FileConnection zipDirCon = null;
-        InputStream is = null;
         FileConnection c = null;
         FileConnection unzipDirCon = null;
         
         try {
-            c = (FileConnection) Connector.open(zipFile);
-            is = c.openInputStream();
+            if (is == null){
+                c = (FileConnection) Connector.open(zipFile);
+                is = c.openInputStream();
+            }
 
         } catch (Exception e) {
             System.out.println("Could not open url: " + zipFile + " Exception: " + e.getMessage());
         }finally{
         	/*
-			if (c != null){
-				c.close();
-			}
+                if (c != null){
+                        c.close();
+                }
         	*/
         }
-
 
         //If no extracted folder is given, auto create a folder
         //with the zip's name in the same  directory.
@@ -163,10 +370,7 @@ public class ZipUtils {
         		unzipDirCon.close();
         	}
         }
-
-
-        //set buffer size (2k)
-        int BUFFER = 2048;
+        
         ZipInputStream zis = null;
         zis = new ZipInputStream(is); //GNU Public License
         String zipsDirURI;
