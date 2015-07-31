@@ -6,9 +6,10 @@ package com.ustadmobile.app.tests;
 
 import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
-import com.ustadmobile.controller.CatalogController;
-import com.ustadmobile.impl.HTTPResult;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImplFactory;
 import j2meunit.framework.TestCase;
 
 /**
@@ -37,9 +38,11 @@ public class TestHttpResult extends TestCase {
                 UstadMobileSystemImpl.getInstance().getAppPref("opds");
         opdsEndpoint = FileUtils.joinPath(opdsEndpoint, "assigned_courses") +
                 FileUtils.FILE_SEP; 
-                
+        UstadMobileSystemImpl impl = 
+                UstadMobileSystemImplFactory.createUstadSystemImpl();
         CatalogController catalogController = 
-                CatalogController.makeControllerByURL(opdsEndpoint, null);
+                CatalogController.makeControllerByURL(opdsEndpoint, impl, 
+                "karmakid02", "karmakid02");
         catalogController.show();
         
         Thread.sleep(2000);

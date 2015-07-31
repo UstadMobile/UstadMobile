@@ -40,8 +40,9 @@ import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
-import com.ustadmobile.app.Base64;
-import com.ustadmobile.impl.HTTPResult;
+import com.ustadmobile.core.app.Base64;
+import com.ustadmobile.core.impl.HTTPResult;
+import javax.microedition.pim.FieldFullException;
 
 /**
  *
@@ -364,43 +365,51 @@ public class HTTPUtils {
         Exception exception=null;
         FileConnection file = null;
         InputStream inputURLStream = null;
-        ByteArrayOutputStream outputStream = null;
-        
+        OutputStream fileOutputStream = null;
+        String fileToCreate="";
         try{
             
             httpURLConnection = (HttpConnection) Connector.open(url);
             httpURLConnection.setRequestMethod(HttpConnection.GET); //Get method
-            file = (FileConnection) Connector.open(destDir + 
-                    FileUtils.FILE_SEP + filename);
-            if (file.exists()) {
-                //No need to re create it.
-            } else {
+
+            fileToCreate = FileUtils.joinPath(destDir, filename);
+
+            file = (FileConnection) 
+                    Connector.open(fileToCreate, Connector.READ_WRITE);
+            
+            if(file.exists()) {
+                
+                //ToDo: Handle resume and or delete existing
+                file.delete();
                 file.create();
+                
+                //fileOutputStream = file.openOutputStream(file.fileSize());
+                fileOutputStream = file.openOutputStream();
+                
+            }else {
+                file.create();
+                fileOutputStream = file.openOutputStream();
             }
-
-            if (httpURLConnection.getResponseCode() != HttpConnection.HTTP_OK) {
-                throw new IOException("Request to " + url + " is not HTTP 200 OK");
+            
+            if (httpURLConnection.getResponseCode() != HttpConnection.HTTP_OK){
+                throw new IOException("Request to " + url + 
+                        " is not HTTP 200 OK");
             }
-
+            
             inputURLStream = httpURLConnection.openInputStream();
-            outputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
 
             //int bytesRead = inputURLStream.read(buffer, 0, buffer.length);
             int bytesRead = -1;
             while ((bytesRead = inputURLStream.read(buffer, 0, buffer.length)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-                file.openOutputStream().write(buffer, 0, bytesRead);
+            //while ((bytesRead = inputURLStream.read(buffer)) != -1) {
+                fileOutputStream.write(buffer, 0, bytesRead);
             }
             
-            
-            //file.openOutputStream().write(outputStream.toByteArray());
-
-            //file.setReadable(true);
-            file.setWritable(true);
             System.gc();
             
         }catch(Exception e){
+            e.printStackTrace();
             exception.equals(e);
         }finally{
             if(exception != null){
@@ -415,9 +424,9 @@ public class HTTPUtils {
             }
             if (inputURLStream != null){
                 inputURLStream.close();
-            }
-            if(outputStream != null){
-                outputStream.close();
+            }            
+            if (fileOutputStream != null){
+                fileOutputStream.close();
             }
         }
         

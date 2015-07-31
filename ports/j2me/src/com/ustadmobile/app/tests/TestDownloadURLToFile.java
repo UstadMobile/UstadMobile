@@ -34,6 +34,10 @@ import com.ustadmobile.app.DeviceRoots;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
+
 
 /**
  *
@@ -45,12 +49,22 @@ public class TestDownloadURLToFile extends TestCase {
     }
     
     public void runTest() throws Throwable{
-        DeviceRoots mainRoot = FileUtils.getBestRoot();
         
+        DeviceRoots[] allRoots = FileUtils.getAllRoots();
+        DeviceRoots mainRoot = FileUtils.getBestRoot();
+        String path = FileUtils.joinPath(mainRoot.path, FileUtils.USTAD_CONTENT_DIR);
+
+        for (int i = 0; i<allRoots.length; i++){
+            String rPath = FileUtils.replaceString(allRoots[i].path, ":/", "//");
+            rPath = FileUtils.replaceString(rPath, " ", "_");
+            //HTTPUtils.makeHTTPRequest(
+            //    "http://umcloud1.ustadmobile.com/roots/"+path,
+            //    null, null);
+        }   
         String url = "http://www.ustadmobile.com/hello.txt";
-        HTTPUtils.downloadURLToFile(url, mainRoot.path, "");
+        HTTPUtils.downloadURLToFile(url, path, "");
         String fileContents = FileUtils.getFileContents(
-                FileUtils.joinPath(mainRoot.path, "hello.txt"));
+                FileUtils.joinPath(path, "hello.txt"));
         if (fileContents!=null){
             if(fileContents.startsWith("Hello")){
                 assertTrue(true);

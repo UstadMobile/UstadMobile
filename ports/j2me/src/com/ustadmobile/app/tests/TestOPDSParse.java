@@ -31,9 +31,9 @@
 package com.ustadmobile.app.tests;
 import com.ustadmobile.app.controller.UstadMobileAppController;
 
-import com.ustadmobile.opds.UstadJSOPDSAuthor;
-import com.ustadmobile.opds.UstadJSOPDSEntry;
-import com.ustadmobile.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSAuthor;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import j2meunit.framework.*;
 //import java.io.ByteArrayInputStream;
 import java.io.InputStream;

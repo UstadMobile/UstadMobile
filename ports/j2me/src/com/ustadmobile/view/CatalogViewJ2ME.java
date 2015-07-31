@@ -8,10 +8,11 @@ import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.ustadmobile.opds.UstadJSOPDSFeed;
-import com.ustadmobile.opds.*;
-import com.ustadmobile.controller.CatalogController;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.*;
+import com.ustadmobile.core.controller.CatalogController;
 import java.util.Hashtable;
+import com.ustadmobile.core.view.CatalogView;
 
 /**
  *

@@ -48,17 +48,14 @@ public class AllTestCases extends TestCase {
         try {
             TestUtils.getInstance().loadTestSettingsResource();
             //TestUtils.loadTestSettingsFile();
-            System.out.println("Test Settings gotten!");
         }catch(Exception e) {
             e.printStackTrace();
-            System.out.println("Could not load TestSettings.");
             throw new RuntimeException(e.toString());
         }
         
-        System.out.println("Starting Tests..");
-        System.out.println("--Testing : " + 
-                TestUtils.testSettings.get("appDataURI"));
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
+                
+        //allTestSuite.addTest(new TestUnzip());
         
         allTestSuite.addTest(new TestCustomLWUIT());
         
@@ -80,10 +77,8 @@ public class AllTestCases extends TestCase {
         
         allTestSuite.addTest(new TestLoginView());
         allTestSuite.addTest(new TestCatalogView());
-        
-        
-        
         allTestSuite.addTest(new TestHttpResult());
+        allTestSuite.addTest(new TestEPUBRead());
         
         return allTestSuite;
 

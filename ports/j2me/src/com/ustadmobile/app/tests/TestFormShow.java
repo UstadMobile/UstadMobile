@@ -34,8 +34,8 @@ import com.sun.lwuit.Form;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.app.forms.TestForm;
 import com.ustadmobile.app.forms.TestForm2;
-import com.ustadmobile.controller.LoginController;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import javax.microedition.lcdui.Display;
 import java.lang.Thread;
 

@@ -34,10 +34,10 @@ package com.ustadmobile.app.tests;
 import com.ustadmobile.app.DeviceRoots;
 import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImplFactory;
 import j2meunit.framework.TestCase;
 
-import com.ustadmobile.impl.UstadMobileSystemImplFactory;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;

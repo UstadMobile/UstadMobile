@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ustadmobile.impl;
+package com.ustadmobile.port.j2me.impl;
 
 //import com.ustadmobile.app.controller.UstadMobileAppController;
 import com.ustadmobile.app.AppPref;
@@ -10,14 +10,19 @@ import com.ustadmobile.app.DeviceRoots;
 import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
 import com.ustadmobile.app.ZipUtils;
-import com.ustadmobile.impl.UMTransferJob;
+import com.ustadmobile.core.impl.UMTransferJob;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import javax.bluetooth.BluetoothConnectionException;
 import com.ustadmobile.view.LoginViewJ2ME;
 import com.ustadmobile.app.UserPref;
+import com.ustadmobile.core.impl.HTTPResult;
+import javax.microedition.io.file.FileConnection;
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  *
@@ -45,7 +50,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setActiveUser(String username) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        AppPref.addSetting("CURRENTUSER", username);
     }
 
     public void setUserPref(String key, String value) {
@@ -84,17 +89,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         //appData is different
         try{
             DeviceRoots dt = FileUtils.getBestRoot();
-            String sharedContentDir = dt.path + FileUtils.FILE_SEP + 
-                    FileUtils.USTAD_CONTENT_DIR;
+            String sharedContentDir = FileUtils.joinPath(dt.path, 
+                    FileUtils.USTAD_CONTENT_DIR);
             
-            /*
-            //Return null if it doens't exist.
-            if (!FileUtils.checkDir(sharedContentDir)){
-                return null;
-            }
-            */
-            
-            //Check if it is created. If it isnt, create it. 
+            //Check if it is created. If it isnt, create it.       
             if(FileUtils.createFileOrDir(sharedContentDir, 
                     Connector.READ_WRITE, true)){
                 return sharedContentDir;
@@ -264,7 +262,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public String getActiveUser() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //Code here:
+        return AppPref.getSetting("CURRENTUSER");
     }
 
     public void setActiveUserAuth(String password) {
@@ -295,6 +294,15 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public void setAppPref(String key, String value) {
         AppPref.addSetting(key, value);
+    }
+
+    public XmlPullParser newPullParser() throws XmlPullParserException { 
+        KXmlParser parser = new KXmlParser();
+        return parser;
+    }
+
+    public String getUserPref(String key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 

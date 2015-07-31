@@ -31,12 +31,9 @@
 package com.ustadmobile.app.controller;
 
 import com.ustadmobile.app.DeviceRoots;
-import com.ustadmobile.app.DeviceRoots;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import com.ustadmobile.app.FileUtils;
-import com.ustadmobile.app.FileUtils;
-import com.ustadmobile.app.RMSUtils;
 import com.ustadmobile.app.RMSUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -96,8 +93,6 @@ public class UstadMobileAppController {
         //Get RMS config
         RMSUtils rms = new RMSUtils("UstadMobileApp");
         rms.openRMS();
-        byte[] rmsByteArray = rms.readBytes();
-        System.out.println("here..");
         Hashtable rmsHashtable = rms.readRMS();
         if(!rmsHashtable.contains("umcloud")){
             //HashTable aint existin..
@@ -170,7 +165,7 @@ public class UstadMobileAppController {
         return parser;
     }
     
-    public final static String getBaseDir() {
+    public static String getBaseDir() {
         return appDataDir;
     }
     

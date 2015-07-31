@@ -30,14 +30,13 @@
  */
 package com.ustadmobile.app.tests;
 
-import com.ustadmobile.app.DeviceRoots;
 import com.ustadmobile.app.FileUtils;
 import com.ustadmobile.app.HTTPUtils;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.app.ZipUtils;
-import com.ustadmobile.impl.UstadMobileSystemImpl;
-import com.ustadmobile.impl.UstadMobileSystemImplFactory;
-import java.util.Hashtable;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.UstadMobileSystemImplFactory;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.util.Vector;
 /**
  *
@@ -54,16 +53,18 @@ public class TestUnzip extends TestCase {
         String getSharedContentDir = ustadMobileSystemImpl.getSharedContentDir();
         
         //Lets download a zip file shall we?
-        String url = "http://www.ustadmobile.com/unzipme.zip";        
+        String url = "http://www.ustadmobile.com/unzipme.zip"; 
         HTTPUtils.downloadURLToFile(url, getSharedContentDir, "");
-        
-        String zipURI = FileUtils.joinPath(getSharedContentDir, "unzipme.zip");
+
+        String zipURI = FileUtils.joinPath(getSharedContentDir, 
+                "unzipme.zip");
         if (FileUtils.checkFile(zipURI)){
             assertTrue(true);
         }else{
             assertTrue(false);
         }
-        String unzipURI = FileUtils.joinPath(getSharedContentDir, "unzippedfolder");
+        String unzipURI = FileUtils.joinPath(getSharedContentDir, 
+                "unzippedfolder");
         
         //Delete if folder exists..
         if (FileUtils.checkDir(unzipURI)){

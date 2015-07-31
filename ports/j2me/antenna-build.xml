@@ -38,7 +38,9 @@ NetBeans.  See README for instructions on building from source.
     
     <property name="MidletSuite" value="UstadMobileMicro"/>
     <property name="Midlet_1_name" value="Ustad Mobile"/>
-    <property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2ME"/>
+    <property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2METest"/>
+    <!--<property name="Midlet_1_class" value="ustadmobilej2me.SetRootWritable"/>-->
+    <!--<property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2MERun"/>-->
     <!--
     <property name="Midlet_2_name" value="Multiple Forms"/>
     <property name="Midlet_2_class" value="ustadmobilej2me.MultipleFormMidlet"/>

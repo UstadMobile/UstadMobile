@@ -7,7 +7,8 @@ package com.ustadmobile.view;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.ustadmobile.controller.LoginController;
+import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.view.LoginView;
 /**
  *
  * @author varuna
