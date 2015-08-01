@@ -179,11 +179,14 @@ public abstract class UstadMobileSystemImpl {
     public abstract boolean dirExists(String dirURI) throws IOException;
     
     /**
-     * Remove the given file
+     * Remove the given file.  If the file does not exist, this method simply
+     * returns false (also returns false if the file does exist but for some
+     * other reason... e.g. permissions cannot be deleted).
+     * 
      * @param fileURI URI to be removed
-     * @throws IOException 
+     * @return true if the file was successfully deleted, false otherwise
      */
-    public abstract void removeFile(String fileURI) throws IOException;
+    public abstract boolean removeFile(String fileURI);
     
     /**
      * List of files and directories within a directory as an array of Strings.

@@ -53,9 +53,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -244,9 +246,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public void removeFile(String fileURI) throws IOException {
+    public boolean removeFile(String fileURI)  {
         File f = new File(fileURI);
-        f.delete();
+        return f.delete();
     }
 
     @Override
@@ -422,6 +424,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         conn.connect();
 
+
         int contentLen = conn.getContentLength();
         InputStream in = conn.getInputStream();
         byte[] buf = new byte[1024];
@@ -436,9 +439,21 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
         in.close();
 
+        Hashtable responseHeaders = new Hashtable();
+        Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
+        while(headerIterator.hasNext()) {
+            String header = headerIterator.next();
+            if(header == null) {
+                continue;//a null header is the response line not header; leave that alone...
+            }
+
+            String headerVal = conn.getHeaderField(header);
+            responseHeaders.put(header.toLowerCase(), headerVal);
+        }
+
         byte[] resultBytes = bout.toByteArray();
         HTTPResult result = new HTTPResult(resultBytes, conn.getResponseCode(),
-                new Hashtable());
+                responseHeaders);
         String resultStr = new String(resultBytes, "UTF-8");
 
         return result;
@@ -519,6 +534,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
          */
         private int finishedBytesDownloaded;
 
+        /**
+         * When a request for the total size is made before the job starts; use an HTTP HEAD
+         * request to get the total size if available.  This variable is used to store the result.
+         */
+        private int cachedTotalSize;
+
         public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplAndroid hostImpl) {
             this.hostImpl = hostImpl;
             this.srcURL = srcURL;
@@ -526,6 +547,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
             this.progressListeners = new LinkedList<UMProgressListener>();
             this.finished = false;
+            cachedTotalSize = -1;
         }
 
         @Override
@@ -655,7 +677,35 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         @Override
         public int getTotalSize() {
-            return getProgressAndTotal()[1];
+            int totalSize = -1;
+
+            // if we are trying to get the total size before an exception will be thrown here
+            try {
+                totalSize =getProgressAndTotal()[1];
+            }catch(Exception e) {}
+
+            if(totalSize == -1) {
+                if(cachedTotalSize != -1) {
+                    totalSize = cachedTotalSize;
+                }else {
+                    Hashtable headersToSend = new Hashtable();
+                    try {
+                        HTTPResult result = hostImpl.makeRequest(this.srcURL, headersToSend, null,
+                            "HEAD");
+                        String contentLengthStr = result.getHeaderValue("content-length");
+                        if(contentLengthStr != null) {
+                            totalSize = Integer.parseInt(contentLengthStr);
+                            this.cachedTotalSize = totalSize;
+                        }
+                    }catch(IOException e) {
+                        e.printStackTrace();
+                        //do nothing; just means we don't know the size of this job for the moment
+                    }
+                }
+            }
+
+
+            return totalSize;
         }
 
         @Override

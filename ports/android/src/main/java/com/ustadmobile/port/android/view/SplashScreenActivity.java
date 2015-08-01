@@ -31,6 +31,7 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -38,6 +39,7 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -45,6 +47,8 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.util.Hashtable;
 
 public class SplashScreenActivity extends ActionBarActivity {
 
@@ -55,7 +59,7 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ((UstadMobileSystemImplAndroid)impl).setCurrentContext(this);
-
+        
         impl.startUI();
     }
 
