@@ -74,8 +74,9 @@ public class TestCatalogController extends TestCase{
         
         
         CatalogController controller = CatalogController.makeControllerByURL(
-            TestConstants.CATALOG_OPDS_ROOT, impl, TestConstants.LOGIN_USER, 
-            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS);
+            TestConstants.CATALOG_OPDS_ROOT, impl, CatalogController.USER_RESOURCE, 
+            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+            CatalogController.CACHE_ENABLED);
         assertNotNull("Create catalog controller", controller);
         
         
@@ -87,7 +88,7 @@ public class TestCatalogController extends TestCase{
         parser.setInput(bin, "UTF-8");
         UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
         assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
-        CatalogController.cacheCatalog(feedItem, null, null);
+        CatalogController.cacheCatalog(feedItem, CatalogController.USER_RESOURCE, null);
         UstadJSOPDSFeed cachedFeed = 
             CatalogController.getCachedCatalogByID(feedItem.id, 
             CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);

@@ -56,23 +56,6 @@ public class SplashScreenActivity extends ActionBarActivity {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ((UstadMobileSystemImplAndroid)impl).setCurrentContext(this);
 
-        try {
-            CatalogController controller = CatalogController.makeControllerByURL(
-                    "http://10.232.90.139:5062/root.opds", impl, "miketestecop",
-                    "miketestecop", "letsLearnEcop");
-            UstadJSOPDSFeed feedItem = controller.getModel().opdsFeed;
-            String feedXML = feedItem.toString();
-            ByteArrayInputStream bin = new ByteArrayInputStream(
-                    feedXML.getBytes("UTF-8"));
-            XmlPullParser parser = impl.newPullParser();
-            parser.setInput(bin, "UTF-8");
-            UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
-            boolean isSame = feedItem.id.equals(fromXMLItem.id);
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-
-
         impl.startUI();
     }
 

@@ -134,15 +134,15 @@ public class CatalogController implements UstadController{
      * Construct a CatalogController for the OPDS feed at the given URL
      * 
      * @param url the URL of the OPDS feed
-     * @param ownerUser: the local username on the system (e.g. tincan user)
+     * @param resourceMode: SHARED_RESOURCE to keep in shared cache: USER_RESOURCE to keep in user cache
      * @param httpUser: the HTTP username to use for authentication
      * @param httpPassword:or the HTTP password to use for authentication
      * @param impl System implementation to use
      * @return 
      */
-    public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, String ownerUser, String httpUser, String httpPassword) throws IOException, XmlPullParserException{
-        UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, ownerUser, 
-            httpUser, httpPassword, CACHE_ENABLED);
+    public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, int resourceMode, String httpUser, String httpPassword, int flags) throws IOException, XmlPullParserException{
+        UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, resourceMode, 
+            httpUser, httpPassword, flags);
         
         CatalogController result = new CatalogController(
             new CatalogModel(opdsFeed));
@@ -242,17 +242,17 @@ public class CatalogController implements UstadController{
      * Get an OPDS catalog by URL
      * 
      * @param url
-     * @param ownerUser the local owner username
+     * @param resourceMode USER_RESOURCE or SHARED_RESOURCE - where it will be saved
      * @param httpUsername
      * @param httpPassword
-     * @param flags boolean flags 
+     * @param flags boolean flags inc. for cache retrieval 
+     *  - set USER_RESOURCE to retrieve catalogs from active user cache.
+     *  - set SHARED_RESOURCE to retrieve catalogs from shared cache as well.
      * @return 
      */
-    public static UstadJSOPDSFeed getCatalogByURL(String url, String ownerUser, String httpUsername, String httpPassword, int flags) throws IOException, XmlPullParserException{
+    public static UstadJSOPDSFeed getCatalogByURL(String url, int resourceMode, String httpUsername, String httpPassword, int flags) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
-        
-        boolean isUserSpecific = (flags & USER_RESOURCE) == USER_RESOURCE;
-        
+                
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable headers = new Hashtable();
         headers.put("Authorization", 
@@ -264,7 +264,7 @@ public class CatalogController implements UstadController{
             "UTF-8");
         opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
         opdsFeed.href = url;
-        CatalogController.cacheCatalog(opdsFeed, ownerUser, new String(opdsContents, 
+        CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
             "UTF-8"));
         
         return opdsFeed;
@@ -316,7 +316,7 @@ public class CatalogController implements UstadController{
         return null;
     }
     
-    protected static String getFileNameForOPDSFeedId(String feedId, String user) {
+    protected static String getFileNameForOPDSFeedId(String feedId) {
         return ".cache-" + sanitizeIDForFilename(feedId) + ".opds";
     }
     
@@ -348,24 +348,25 @@ public class CatalogController implements UstadController{
      * @param ownerUser the user that owns the download, or null if this is for the shared directory
      * @param serializedCatalog String contents of the catalog (in XML) : optional : if they are 'handy', otherwise null
      */
-    public static void cacheCatalog(UstadJSOPDSFeed catalog, String ownerUser, String serializedCatalog) throws IOException{
+    public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog) throws IOException{
         String destPath = null;
+        boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(ownerUser == null) {
+        if(!isUserMode) {
             destPath = impl.getSharedContentDir();
         }else {
-            destPath = impl.getUserContentDirectory(ownerUser);
+            destPath = impl.getUserContentDirectory(impl.getActiveUser());
         }
         
-        destPath += "/" + getFileNameForOPDSFeedId(catalog.id, ownerUser);
+        destPath += "/" + getFileNameForOPDSFeedId(catalog.id);
         if(serializedCatalog == null) {
             serializedCatalog = catalog.toString();
         }
         impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
         String keyName = "opds-cache-" + catalog.id;
-        impl.setPref(ownerUser != null, keyName, destPath);
-        impl.setPref(ownerUser != null, 
-            getPrefKeyNameForOPDSURLToIDMap(catalog.id), catalog.href);
+        impl.setPref(isUserMode, keyName, destPath);
+        impl.setPref(isUserMode, getPrefKeyNameForOPDSURLToIDMap(catalog.id), 
+            catalog.href);
     }
     
     /**
