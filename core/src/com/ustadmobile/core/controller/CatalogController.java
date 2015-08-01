@@ -45,8 +45,25 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- *
- * @author varuna
+ * CatalogController manages OPDS Feeds and controls the view component
+ * showing catalogs to the user
+ * 
+ * Resources (Containers and OPDS Feeds themselves) can be either in a user
+ * specific area or in a public shared area.  
+ * 
+ * If USER_RESOURCE bit is set look for the resource in the user specific area
+ * If SHARED_RESOURCE bit is set - look in shared resources if not already 
+ * found in users' resources.  USER_RESOURCE takes precedence; i.e. if the
+ * resource is found in the user area it is served from there; even if there
+ * is also the same resource in the shared area.
+ * 
+ * To ask a method to look in both locations - use the bitwise OR e.g.
+ * int mode =  USER_RESOURCE | SHARED_RESOURCE
+ * 
+ * Most methods have a resourceMode (which can be included in general flags)
+ * 
+ * @author Varuna Singh <varuna@ustadmobile.com>
+ * @author Mike Dawson <mike@ustadmobile.com>
  */
 public class CatalogController implements UstadController{
     
@@ -58,11 +75,20 @@ public class CatalogController implements UstadController{
     
     
     /**
-     * Common flags
+     * Enable retrieving resource from cache
      */
     public static final int CACHE_ENABLED= 1;
     
-    public static final int USER_SPECIFIC = 2;
+    /**
+     * Save/retrieve resource from user specific directory
+     */
+    public static final int USER_RESOURCE = 2;
+    
+    
+    /**
+     * Save/retrieve resource from shared directory
+     */
+    public static final int SHARED_RESOURCE = 4;
     
     //The View (J2ME or Android)
     private CatalogView view;
@@ -225,7 +251,7 @@ public class CatalogController implements UstadController{
     public static UstadJSOPDSFeed getCatalogByURL(String url, String ownerUser, String httpUsername, String httpPassword, int flags) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
         
-        boolean isUserSpecific = (flags & USER_SPECIFIC) == USER_SPECIFIC;
+        boolean isUserSpecific = (flags & USER_RESOURCE) == USER_RESOURCE;
         
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable headers = new Hashtable();
@@ -237,6 +263,7 @@ public class CatalogController implements UstadController{
             new ByteArrayInputStream(opdsContents), 
             "UTF-8");
         opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+        opdsFeed.href = url;
         CatalogController.cacheCatalog(opdsFeed, ownerUser, new String(opdsContents, 
             "UTF-8"));
         
@@ -248,10 +275,22 @@ public class CatalogController implements UstadController{
      * downloaded from
      * 
      * @param url The URL of where the catalog was downloaded from
+     * @param resourceMode 
+     * 
      * @return The OPDS ID of the entry from that location
      */
-    public String getCatalogIDByURL(String url) {
-        return null;
+    public String getCatalogIDByURL(String url, int resourceMode) {
+        String catalogID = null;
+        String prefKey = getPrefKeyNameForOPDSURLToIDMap(url);
+        if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
+            catalogID = UstadMobileSystemImpl.getInstance().getUserPref(prefKey);
+        }
+        
+        if(catalogID == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
+            catalogID = UstadMobileSystemImpl.getInstance().getAppPref(prefKey);
+        }
+        
+        return catalogID;
     }
     
     /**
@@ -279,6 +318,10 @@ public class CatalogController implements UstadController{
     
     protected static String getFileNameForOPDSFeedId(String feedId, String user) {
         return ".cache-" + sanitizeIDForFilename(feedId) + ".opds";
+    }
+    
+    protected static String getPrefKeyNameForOPDSURLToIDMap(String opdsId) {
+        return "opds-id-to-url-" + sanitizeIDForFilename(opdsId);
     }
     
     public static String sanitizeIDForFilename(String id) {
@@ -321,6 +364,8 @@ public class CatalogController implements UstadController{
         impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
         String keyName = "opds-cache-" + catalog.id;
         impl.setPref(ownerUser != null, keyName, destPath);
+        impl.setPref(ownerUser != null, 
+            getPrefKeyNameForOPDSURLToIDMap(catalog.id), catalog.href);
     }
     
     /**
@@ -333,15 +378,23 @@ public class CatalogController implements UstadController{
     
     /**
       * Get a cached copy of a given catalog according to it's ID
+      * 
+      * @param catalogID - The catalogID to retrieve the cached entry for (if available)
+      * @param resourceMode - 
+      * 
+      * 
       */
-    public static UstadJSOPDSFeed getCachedCatalogByID(String catalogID, String username) throws IOException, XmlPullParserException{
-        String filename;
+    public static UstadJSOPDSFeed getCachedCatalogByID(String catalogID, int resourceMode) throws IOException, XmlPullParserException{
+        String filename = null;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String key = "opds-cache-" + catalogID;
-        if(username == null) {
-            filename = impl.getAppPref(key);
-        }else {
+        
+        if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
             filename = impl.getUserPref(key);
+        }
+        
+        if(filename == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
+            filename = impl.getAppPref(key);
         }
         
         if(filename != null) {
@@ -353,7 +406,16 @@ public class CatalogController implements UstadController{
         return null;
     }
     
-    public static CatalogController getCachedCatalogByURL(String url, String username) {
+    /**
+     * 
+     * @param url
+     * @param username
+     * @return 
+     */
+    public static UstadJSOPDSFeed getCachedCatalogByURL(String url, int resourceMode) {
+        UstadJSOPDSFeed retVal = null;
+        
+        
         return null;
     }
     

@@ -89,7 +89,9 @@ public class TestCatalogController extends TestCase{
         assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
         CatalogController.cacheCatalog(feedItem, null, null);
         UstadJSOPDSFeed cachedFeed = 
-            CatalogController.getCachedCatalogByID(feedItem.id, null);
+            CatalogController.getCachedCatalogByID(feedItem.id, 
+            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
+        
         assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
     }
     
