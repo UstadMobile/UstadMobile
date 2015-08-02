@@ -79,6 +79,10 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
         String filePath1 = impl.getSharedContentDir() +"/testlist-phonepic-large.png";
         String filePath2 = impl.getSharedContentDir()+ "/testlist-root.opds";
         
+        //delete just in case there are leftovers laying around...
+        impl.removeFile(filePath1);
+        impl.removeFile(filePath2);
+        
         Hashtable requestHeaders = new Hashtable();
         UMTransferJob job1 = impl.downloadURLToFile(url1, filePath1, requestHeaders);
         UMTransferJob job2 = impl.downloadURLToFile(url2, filePath2, requestHeaders);
@@ -95,7 +99,7 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
             catch(InterruptedException e) {}
             timeRemaining -= INTERVAL;
         }
-        
+            
         assertTrue("Completed download of list items", this.completed);
         
         impl.removeFile(filePath1);

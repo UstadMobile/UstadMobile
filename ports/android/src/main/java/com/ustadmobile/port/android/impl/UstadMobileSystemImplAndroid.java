@@ -434,9 +434,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         //do not read more bytes than is available in the stream
         int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
-            bout.write(buf, 0, bytesRead);
+        if(!method.equalsIgnoreCase("HEAD")) {
+            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
+                bout.write(buf, 0, bytesRead);
+            }
         }
+
         in.close();
 
         Hashtable responseHeaders = new Hashtable();

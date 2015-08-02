@@ -40,6 +40,7 @@ import android.view.MenuItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMTransferJob;
+import com.ustadmobile.core.impl.UMTransferJobList;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -52,6 +53,12 @@ import java.util.Hashtable;
 
 public class SplashScreenActivity extends ActionBarActivity {
 
+    public static String TEST_HTTP_ROOT = "http://192.168.0.102:5062/";
+
+    public static final int TIMEOUT = 30000;
+
+    public static final int INTERVAL = 1000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,8 +66,76 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ((UstadMobileSystemImplAndroid)impl).setCurrentContext(this);
-        
+        //testDownloadImpl();
+        try {
+            //testTransferJobList();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
+
         impl.startUI();
+    }
+
+    public void testTransferJobList() throws Exception {
+        String url1 = TEST_HTTP_ROOT + "phonepic-large.png";
+        String url2 = TEST_HTTP_ROOT + "root.opds";
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        String filePath1 = impl.getSharedContentDir() +"/testlists-phonepic-large.png";
+        String filePath2 = impl.getSharedContentDir()+ "/testlists-root.opds";
+
+
+
+        Hashtable requestHeaders = new Hashtable();
+        UMTransferJob job1 = impl.downloadURLToFile(url1, filePath1, requestHeaders);
+        UMTransferJob job2 = impl.downloadURLToFile(url2, filePath2, requestHeaders);
+
+        UMTransferJobList jobList = new UMTransferJobList(
+                new UMTransferJob[]{job1, job2});
+        //Crashes on 2.3 here
+        int listSize = jobList.getTotalSize();
+
+        jobList.start();
+        int timeRemaining = TIMEOUT;
+        while(timeRemaining > 0 && !jobList.isFinished()) {
+            try { Thread.sleep(INTERVAL); }
+            catch(InterruptedException e) {}
+            timeRemaining -= INTERVAL;
+        }
+
+        boolean isCompleted = jobList.isFinished();
+
+        impl.removeFile(filePath1);
+        impl.removeFile(filePath2);
+    }
+
+
+    public void testDownloadImpl() {
+        File baseDir = Environment.getExternalStorageDirectory();
+        File file3 = new File(baseDir, "sscreen-phonepic-large.png");
+        if(file3.exists()) {
+            file3.delete();
+        }
+
+        String fileDownloadURL = "http://192.168.0.102:5062/" + "phonepic-large.png";
+        UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
+                file3.getAbsolutePath(), new Hashtable());
+        job.start();
+
+
+        int timeout = 30000;
+        int interval = 1500;
+        int timeCount = 0;
+
+        for(timeCount = 0; timeCount < timeout && !job.isFinished(); timeCount+= interval) {
+            try {
+                Thread.sleep(1500);
+            }catch(InterruptedException e) {}
+        }
+
+        int totalSize = job.getTotalSize();
+        int downloadedSize = job.getBytesDownloadedCount();
     }
 
     @Override
