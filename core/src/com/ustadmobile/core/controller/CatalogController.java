@@ -471,8 +471,20 @@ public class CatalogController implements UstadController{
      * with one entry in it.
      * 
      * 3. Update the localstorage map of EntryID -> containerURI 
+     * 
+     * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
      */
-    public static UMTransferJob acquireCatalogEntries(UstadJSOPDSItem[] entries, String httpUsername, String httpPassword) {
+    public static UMTransferJob acquireCatalogEntries(UstadJSOPDSItem[] entries, String httpUsername, String httpPassword, int resourceMode, int flags) {
+        UMTransferJob[] transferJobs = new UMTransferJob[entries.length];
+        String destDirPath = null;
+        if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
+            //destDirPath = UstadMobileSystemImpl.getInstance().getUserContentDirectory()
+        }
+        
+        for(int i = 0; i < entries.length; i++) {
+            
+        }
+        
         return null;
     }
     
