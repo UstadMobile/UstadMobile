@@ -113,9 +113,13 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                         evtType = xpp.next();
                         
                         if(xpp.getName().equals("name")){
-                            currentAuthor.name = xpp.nextText();
-                        }else if (xpp.getName().equals("uri")){
-                            currentAuthor.uri = xpp.nextText();
+                            if(xpp.next() == XmlPullParser.TEXT) {
+                                currentAuthor.name = xpp.getText();
+                            }
+                        }else if (xpp.getName().equals("uri")) {
+                            if(xpp.next() == XmlPullParser.TEXT) {
+                                currentAuthor.uri = xpp.getText();
+                            }
                         }
                         if(evtType == XmlPullParser.END_TAG
                                 && xpp.getName().equals("author")){
