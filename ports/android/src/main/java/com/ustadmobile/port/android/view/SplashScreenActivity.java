@@ -40,7 +40,6 @@ import android.view.MenuItem;
 import com.toughra.ustadmobile.R;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 

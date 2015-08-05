@@ -38,11 +38,13 @@ import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ViewFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -228,7 +230,26 @@ public class CatalogController implements UstadController{
      */
     public void handleClickEntry(UstadJSOPDSEntry entry) {
         if(!entry.parentFeed.isAcquisitionFeed()) {
-            
+            //we are loading another opds catalog
+            Vector entryLinks = entry.getLinks(null, UstadJSOPDSItem.TYPE_ATOMFEED, 
+                true, true);
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            if(entryLinks.size() > 0) {
+                String[] firstLink = (String[])entryLinks.elementAt(0);
+                String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
+                    firstLink[UstadJSOPDSItem.LINK_HREF]);
+                try {
+                    int resourceMode = USER_RESOURCE;
+                    int fetchFlags = CACHE_ENABLED;
+                    String httpUsername = impl.getActiveUser();
+                    String httpPassword = impl.getActiveUserAuth();
+                    CatalogController newController = CatalogController.makeControllerByURL(url, impl, resourceMode, 
+                        httpUsername, httpPassword, fetchFlags);
+                    newController.show();
+                }catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }else {
             
         }
