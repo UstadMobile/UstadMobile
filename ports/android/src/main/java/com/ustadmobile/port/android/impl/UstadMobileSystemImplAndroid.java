@@ -101,6 +101,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private SharedPreferences.Editor userPreferencesEditor;
 
+    public static final String EXTRA_VIEWID = "VIEWID";
 
     public UstadMobileSystemImplAndroid() {
 
@@ -131,6 +132,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             this.currentContext = context;
             SharedPreferences appPrefs = getAppSharedPreferences();
             currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
+            currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
             this.userPreferences = null;//change of context: force this to get reloaded when requested
         }
     }
@@ -138,6 +140,23 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public Context getCurrentContext() {
         return this.currentContext;
     }
+
+    /**
+     * The implementation of the MVC pattern in Android generally means instantiating a view object
+     * and then starting an activity with an intent that contains an ID that can be used by the
+     * activity to find the view object that started it.
+     *
+     * This will start an activity, with the parameter EXTRA_VIEWID set to the given viewId
+     *
+     * @param activityClass The Class object of the Activity to start
+     * @param viewId An integer ID that activity expects so it can find it's view object after being created
+     */
+    public void startActivityForViewId(Class activityClass, int viewId) {
+        Intent startIntent = new Intent(getCurrentContext(), activityClass);
+        startIntent.putExtra(EXTRA_VIEWID, viewId);
+        getCurrentContext().startActivity(startIntent);
+    }
+
 
     @Override
     public String getSharedContentDir() {

@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.util;
 
+import java.util.Vector;
+
 /**
  * Assorted cross platform file utility methods
  * 
@@ -67,4 +69,139 @@ public class UMFileUtil {
         
         return result.toString();
     }
+    
+    /**
+     * Resolve a link relative to an absolute base.  The path to resolve could
+     * itself be absolute or relative.
+     * 
+     * e.g.
+     * resolvePath("http://www.server.com/some/dir", "../img.jpg");
+     *  returns http://www.server.com/some/img.jpg
+     * 
+     * @param base The absolute base path
+     * @param link The link given relative to the base
+     * @return 
+     */
+    public static String resolveLink(String base, String link) {
+        String linkLower = link.toLowerCase();
+        int charFoundIndex;
+        
+        charFoundIndex = linkLower.indexOf("://");
+        if(charFoundIndex != -1) {
+            boolean isAllChars = true;
+            char cc;
+            for(int i = 0; i < charFoundIndex; i++) {
+                cc = linkLower.charAt(i);
+                isAllChars &= ((cc > 'a' && cc < 'z') || (cc > '0' && cc < '9') || cc == '+' || cc == '.' || cc == '-');
+            }
+            
+            //we found :// and all valid scheme name characters before; path itself is absolute
+            if(isAllChars) {
+                return link;
+            }
+        }
+        
+        if(link.length() > 2 && link.charAt(0) == '/' && link.charAt(1) == '/'){
+            //we want the protocol only from the base
+            String resolvedURL = base.substring(0, base.indexOf(':')+1) + link;
+            return resolvedURL;
+        }
+        
+        if(link.length() > 1 && link.charAt(0) == '/') {
+            //we should start from the end of the server
+            int serverStartPos = base.indexOf("://")+3;
+            int serverFinishPos = base.indexOf('/', serverStartPos+1);
+            return base.substring(0, serverFinishPos) + link;
+        }
+        
+        //get rid of query if it's present in the base path
+        charFoundIndex = base.indexOf('?');
+        if(charFoundIndex != -1) {
+            base = base.substring(0, charFoundIndex);
+        }
+        
+        //remove the filename component if present in base path
+        //if the base path ends with a /, remove that, because it will be joined to the path using a /
+        charFoundIndex = base.lastIndexOf(FILE_SEP);
+        base = base.substring(0, charFoundIndex);
+        
+        
+        String[] baseParts = splitString(base, FILE_SEP);
+        String[] linkParts = splitString(link, FILE_SEP);
+        
+        Vector resultVector = new Vector();
+        for(int i = 0; i < baseParts.length; i++) {
+            resultVector.addElement(baseParts[i]);
+        }
+        
+        for(int i = 0; i < linkParts.length; i++) {
+            if(linkParts[i].equals(".")) {
+                continue;
+            }
+            
+            if(linkParts[i].equals("..")) {
+                resultVector.removeElementAt(resultVector.size()-1);
+            }else {
+                resultVector.addElement(linkParts[i]);
+            }
+        }
+        
+        StringBuffer resultSB = new StringBuffer();
+        int numElements = resultVector.size();
+        for(int i = 0; i < numElements; i++) {
+            resultSB.append(resultVector.elementAt(i));
+            if(i < numElements -1) {
+                resultSB.append(FILE_SEP);
+            }
+        }
+        
+        return resultSB.toString();
+    }
+    
+    /**
+     * Split a string into an array of Strings at each instance of splitChar
+     * 
+     * This is roughly the same as using String.split : Unfortunately 
+     * String.split is not available in J2ME
+     * 
+     * @param str Whole string e.g. some/path/file.jpg
+     * @param splitChar Character to split by - e.g. /
+     * @return Array of Strings split e.g. "some", "path", "file.jpg"
+     */
+    public static String[] splitString(String str, char splitChar) {
+        int numParts = countChar(str, splitChar);
+        String[] splitStr = new String[numParts + 1];
+        StringBuffer buffer = new StringBuffer();
+        int partCounter = 0;
+        
+        char currentChar;
+        for(int i = 0; i < str.length(); i++) {
+            currentChar = str.charAt(i);
+            if(currentChar == splitChar) {
+                splitStr[partCounter] = buffer.toString();
+                partCounter++;
+                buffer = new StringBuffer();
+            }else {
+                buffer.append(currentChar);
+            }
+        }
+        
+        //catch the last part
+        splitStr[partCounter] = buffer.toString();
+        
+        return splitStr;
+    }
+    
+    private static int countChar(String str, char c) {
+        int count = 0;
+        int strLen = str.length();
+        for(int i = 0; i < strLen; i++) {
+            if(str.charAt(i) == c) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
 }

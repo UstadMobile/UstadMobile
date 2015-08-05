@@ -32,11 +32,13 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.ViewFactory;
+import com.ustadmobile.core.util.UMFileUtil;
 import java.io.IOException;
 import java.util.Hashtable;
 
@@ -75,8 +77,12 @@ public class LoginController implements UstadController{
     }
     
     public void handleClickLogin(String username, String password) {
-        String serverURL = 
-                UstadMobileSystemImpl.getInstance().getAppPref("server");
+        String serverBaseURL = 
+            UstadMobileSystemImpl.getInstance().getAppPref("server",
+            UstadMobileDefaults.DEFAULT_XAPI_SERVER);
+        String serverURL = UMFileUtil.joinPaths(new String[]{serverBaseURL, 
+            "statements?limit=1"});
+        
         int result = 0;
         IOException ioe = null;
         
@@ -91,9 +97,8 @@ public class LoginController implements UstadController{
         }else {
             //make a new catalog controller and show it for the users base directory
             //Add username to UserPreferences.
-            UstadMobileSystemImpl.getInstance().setUserPref("username", username);
-            UstadMobileSystemImpl.getInstance().setUserPref("password", password);
             UstadMobileSystemImpl.getInstance().setActiveUser(username);
+            UstadMobileSystemImpl.getInstance().setActiveUserAuth(password);
             
             //get the feed.
             UstadJSOPDSFeed userFeed = null;

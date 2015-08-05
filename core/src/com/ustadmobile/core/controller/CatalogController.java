@@ -32,8 +32,10 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.UMTransferJob;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
@@ -157,9 +159,15 @@ public class CatalogController implements UstadController{
      * 
      * @return CatalogController representing the default catalog for the active user
      */
-    public static CatalogController makeUserCatalog(UstadMobileSystemImpl impl) {
+    public static CatalogController makeUserCatalog(UstadMobileSystemImpl impl) throws IOException, XmlPullParserException{
+        String opdsServerURL = impl.getUserPref("opds_server_primary", 
+            UstadMobileDefaults.DEFAULT_OPDS_SERVER);
         
-        return null;
+        String activeUser = impl.getActiveUser();
+        String activeUserAuth = impl.getActiveUserAuth();
+        return CatalogController.makeControllerByURL(opdsServerURL, impl, 
+            USER_RESOURCE, activeUser, activeUserAuth, CACHE_ENABLED);
+        
     }
     
     /**
@@ -212,12 +220,18 @@ public class CatalogController implements UstadController{
     }
     
     /**
-     * Triggered when the user selects a given container from an acquisition feed
+     * Triggered when the user selects an entry from the catalog.  This could
+     * be another OPDS catalog Feed to display or it could be a container
+     * entry.
      * 
      * @param item 
      */
-    public void handleClickContainerEntry(UstadJSOPDSItem item) {
-        
+    public void handleClickEntry(UstadJSOPDSEntry entry) {
+        if(!entry.parentFeed.isAcquisitionFeed()) {
+            
+        }else {
+            
+        }
     }
     
     /**
@@ -475,14 +489,18 @@ public class CatalogController implements UstadController{
      * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
      */
     public static UMTransferJob acquireCatalogEntries(UstadJSOPDSItem[] entries, String httpUsername, String httpPassword, int resourceMode, int flags) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UMTransferJob[] transferJobs = new UMTransferJob[entries.length];
         String destDirPath = null;
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
-            //destDirPath = UstadMobileSystemImpl.getInstance().getUserContentDirectory()
+            destDirPath = impl.getUserContentDirectory(impl.getActiveUser());
+        }else {
+            destDirPath = impl.getSharedContentDir();
         }
         
         for(int i = 0; i < entries.length; i++) {
-            
+            transferJobs[i] = impl.downloadURLToFile(destDirPath, destDirPath, 
+                null);
         }
         
         return null;
@@ -498,7 +516,7 @@ public class CatalogController implements UstadController{
         
     }
     
-    public static int getAcquisitionSTatusByEntryID(String entryID, String user) {
+    public static int getAcquisitionStatusByEntryID(String entryID, String user) {
         return -1;
     }
     

@@ -39,15 +39,16 @@ import android.view.MenuItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 public class LoginActivity extends AppCompatActivity implements LoginView {
 
-    public static final String EXTRA_VIEWID = "VIEWID";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Integer viewId = getIntent().getIntExtra(EXTRA_VIEWID, 0);
+        Integer viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         setContentView(R.layout.umactivity_login);
 
         LoginViewAndroid.getViewById(viewId.intValue()).setLoginViewActivity(this);

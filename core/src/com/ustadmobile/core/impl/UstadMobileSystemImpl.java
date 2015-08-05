@@ -74,10 +74,16 @@ public abstract class UstadMobileSystemImpl {
      * Starts the user interface for the app
      */
     public void startUI() {
+        //new LoginController().show();
+        
         if(getActiveUser() == null) {
             new LoginController().show();
         }else {
-            new CatalogController().show();
+            try {
+                CatalogController.makeUserCatalog(this).show();
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
     
@@ -289,6 +295,19 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getUserPref(String key);
     
+    
+    /**
+     * Get a preference for the currently active user 
+     * 
+     * @param key preference key as a string
+     * @param defaultVal default value to return in case this is not set for this user
+     * @return Value of preference for this user if set, otherwise defaultVal
+     */
+    public String getUserPref(String key, String defaultVal) {
+        String valFound = getUserPref(key);
+        return valFound != null ? valFound : defaultVal;
+    }
+    
     /**
      * Get a list of preference keys for currently active user
      * 
@@ -310,6 +329,18 @@ public abstract class UstadMobileSystemImpl {
      * @return value of that preference
      */
     public abstract String getAppPref(String key);
+    
+    /**
+     * Get a preference for the app.  If not set, return the provided defaultVal
+     *
+     * @param key preference key as string
+     * @param defaultVal default value to return if not set
+     * @return value of the preference if set, defaultVal otherwise
+     */
+    public String getAppPref(String key, String defaultVal) {
+        String valFound = getAppPref(key);
+        return valFound != null ? valFound : defaultVal;
+    }
     
     /**
      * Set a preference for the app

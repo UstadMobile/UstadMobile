@@ -28,40 +28,20 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core;
-
-/* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
- $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
-
-import com.ustadmobile.core.util.UMFileUtil;
+package com.ustadmobile.core.impl;
 
 /**
- *
+ * Assorted hard coded default values
  * @author mike
  */
-public class TestUMFileUtilJoin extends TestCase{
+public class UstadMobileDefaults {
     
-    public TestUMFileUtilJoin() {
-        
-    }
+    /**
+     * The default Experience API server
+     */
+    public static final String DEFAULT_XAPI_SERVER = 
+            "http://umcloud1.ustadmobile.com/umlrs/";
     
-    public void setUp() {
-    }
-    
-    public void tearDown() {
-    }
-    
-    public void testUMFileUtilJoin() {
-        assertEquals("Can handle basic join with to single slash", 
-            "testpath/somefile.txt", 
-            UMFileUtil.joinPaths(new String[]{"testpath/", "/somefile.txt"}));
-        assertEquals("Will not remove first slash", "/testpath/somefile.txt",
-            UMFileUtil.joinPaths(new String[]{"/testpath/", "/somefile.txt"}));
-        assertEquals("Will not remove trailing slash", "/testpath/somedir/",
-            UMFileUtil.joinPaths(new String[]{"/testpath/", "/somedir/"}));
-    }
-    
+    public static final String DEFAULT_OPDS_SERVER = 
+            "http://umcloud1.ustadmobile.com/opds/";
 }

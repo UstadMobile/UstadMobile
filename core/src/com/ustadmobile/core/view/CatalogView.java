@@ -53,6 +53,14 @@ public interface CatalogView extends UstadView{
     public void setController(CatalogController controller);
     
     /**
+     * Get the controller linked to this view: the feed is reference via the
+     * controller
+     * 
+     * @return Controller connected with this view
+     */
+    public CatalogController getController();
+    
+    /**
      * Show a confirm/cancel dialog to the user (e.g. delete item? download item?)
      * 
      * @param title

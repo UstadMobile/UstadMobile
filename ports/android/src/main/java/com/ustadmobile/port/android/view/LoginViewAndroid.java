@@ -84,7 +84,7 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
 
     @Override
     public void setController(LoginController loginController) {
-        this.controller = controller;
+        this.controller = loginController;
     }
 
     @Override
@@ -100,9 +100,7 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
     @Override
     public void show() {
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        Intent startIntent = new Intent(impl.getCurrentContext(), LoginActivity.class);
-        startIntent.putExtra(LoginActivity.EXTRA_VIEWID, this.viewId);
-        impl.getCurrentContext().startActivity(startIntent);
+        impl.startActivityForViewId(LoginActivity.class, this.viewId);
     }
 
 

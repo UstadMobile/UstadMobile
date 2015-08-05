@@ -31,18 +31,69 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.content.Intent;
+
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
  * Created by mike on 07/07/15.
  */
 public class CatalogViewAndroid implements CatalogView {
+    private CatalogController controller;
+
+    private CatalogActivity activity;
+
+    private static Map<Integer, CatalogViewAndroid> viewMap;
+
+    private static int idCounter = 0;
+
+    private int viewId;
+
+    private CatalogOPDSFragment fragment;
+
+
+
+    static {
+        viewMap = new HashMap<Integer, CatalogViewAndroid>();
+    }
+
+    public CatalogViewAndroid() {
+        viewId = CatalogViewAndroid.idCounter;
+        CatalogViewAndroid.idCounter++;
+        viewMap.put(new Integer(viewId), this);
+    }
+
+    public int getViewId() {
+        return viewId;
+    }
+
+    public static CatalogViewAndroid getViewById(int id) {
+        return viewMap.get(new Integer(id));
+    }
+
+    public void setCatalogViewActivity(CatalogActivity activity) {
+        this.activity = activity;
+    }
+
+    public void setFragment(CatalogOPDSFragment fragment) {
+        this.fragment = fragment;
+    }
+
     @Override
     public void setController(CatalogController catalogController) {
+        this.controller = catalogController;
+    }
 
+    @Override
+    public CatalogController getController() {
+        return controller;
     }
 
     @Override
@@ -82,6 +133,11 @@ public class CatalogViewAndroid implements CatalogView {
 
     @Override
     public void show() {
+        UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
+        if(impl.getCurrentContext() instanceof CatalogActivity) {
 
+        }else {
+            impl.startActivityForViewId(CatalogActivity.class, this.viewId);
+        }
     }
 }
