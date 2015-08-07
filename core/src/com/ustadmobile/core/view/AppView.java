@@ -31,16 +31,25 @@
 package com.ustadmobile.core.view;
 
 /**
- *
+ * Display methods that can be used in multiple areas: dialog, alerts, etc.
+ * 
  * @author mike
  */
-public interface UstadView {
-    public void show();
+public interface AppView {
     
     /**
-     * Determine if this view is on screen now
+     * Show progress going on (e.g. show spinner) with title
      * 
-     * @return true if the view is on screen now, false otherwise
+     * @param title 
      */
-    public boolean isShowing();
+    public abstract void showProgressDialog(String title);
+    
+    /**
+     * Dismiss the progress dialog (if showing).  If this method is called
+     * when no progress dialog is showing there is no effect/no error thrown
+     * 
+     * @return true if dialog was showing and is now hidden, false otherwise
+     */
+    public abstract boolean dismissProgressDialog();
+    
 }

@@ -140,4 +140,15 @@ public class CatalogViewAndroid implements CatalogView {
             impl.startActivityForViewId(CatalogActivity.class, this.viewId);
         }
     }
+
+    @Override
+    public boolean isShowing() {
+        if(UstadMobileSystemImplAndroid.getInstanceAndroid().getCurrentActivity() instanceof CatalogActivity && activity != null) {
+            if(activity.getCurrentFragment() instanceof CatalogOPDSFragment) {
+                return ((CatalogOPDSFragment)activity.getCurrentFragment()).getCatalogView() == this;
+            }
+        }
+
+        return false;
+    }
 }

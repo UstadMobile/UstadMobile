@@ -110,4 +110,9 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
         String password = ((EditText)activity.findViewById(R.id.login_password)).getText().toString();
         controller.handleClickLogin(username, password);
     }
+
+    @Override
+    public boolean isShowing() {
+        return UstadMobileSystemImplAndroid.getInstanceAndroid().getCurrentActivity() instanceof LoginActivity;
+    }
 }

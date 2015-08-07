@@ -31,50 +31,46 @@
 
 package com.ustadmobile.port.android.view;
 
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.app.ProgressDialog;
 
-import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.LoginController;
-import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
-public class LoginActivity extends AppCompatActivity {
+/**
+ * Created by mike on 07/08/15.
+ */
+public class AppViewAndroid implements AppView{
 
+    private UstadMobileSystemImplAndroid impl;
 
+    private ProgressDialog progressDialog;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Integer viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
-        setContentView(R.layout.umactivity_login);
-
-        LoginViewAndroid.getViewById(viewId.intValue()).setLoginViewActivity(this);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_login, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    public AppViewAndroid(UstadMobileSystemImplAndroid impl) {
+        this.impl = impl;
     }
 
 
+    @Override
+    public void showProgressDialog(final String title) {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                dismissProgressDialog();
+
+                progressDialog = ProgressDialog.show(impl.getCurrentContext(), title, "");
+            }
+        });
+    }
+
+    @Override
+    public boolean dismissProgressDialog() {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+            }
+        });
+        return progressDialog != null;
+    }
 }

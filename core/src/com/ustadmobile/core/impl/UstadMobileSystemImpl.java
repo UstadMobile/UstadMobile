@@ -33,6 +33,7 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ViewFactory;
 import java.io.IOException;
@@ -411,6 +412,14 @@ public abstract class UstadMobileSystemImpl {
      * @return A new default options XmlPullParser
      */
     public abstract XmlPullParser newPullParser() throws XmlPullParserException;
+    
+    /**
+     * Get access to the App View to do common UI activities (e.g. show
+     * progress dialog, flash message, etc)
+     * 
+     * @return Platform AppView
+     */
+    public abstract AppView getAppView();
 }
 
 

@@ -130,6 +130,10 @@ public class CatalogController implements UstadController{
         this.view.show();
     }
     
+    public CatalogView getView() {
+        return this.view;
+    }
+    
     public void hide() {
         
     }
@@ -228,27 +232,35 @@ public class CatalogController implements UstadController{
      * 
      * @param item 
      */
-    public void handleClickEntry(UstadJSOPDSEntry entry) {
+    public void handleClickEntry(final UstadJSOPDSEntry entry) {
         if(!entry.parentFeed.isAcquisitionFeed()) {
             //we are loading another opds catalog
             Vector entryLinks = entry.getLinks(null, UstadJSOPDSItem.TYPE_ATOMFEED, 
                 true, true);
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             if(entryLinks.size() > 0) {
                 String[] firstLink = (String[])entryLinks.elementAt(0);
-                String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
+                final String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
                     firstLink[UstadJSOPDSItem.LINK_HREF]);
-                try {
-                    int resourceMode = USER_RESOURCE;
-                    int fetchFlags = CACHE_ENABLED;
-                    String httpUsername = impl.getActiveUser();
-                    String httpPassword = impl.getActiveUserAuth();
-                    CatalogController newController = CatalogController.makeControllerByURL(url, impl, resourceMode, 
-                        httpUsername, httpPassword, fetchFlags);
-                    newController.show();
-                }catch(Exception e) {
-                    e.printStackTrace();
-                }
+                
+                Thread bgThread = new Thread() {
+                    public void run() {
+                        int resourceMode = USER_RESOURCE;
+                        int fetchFlags = CACHE_ENABLED;
+                        String httpUsername = impl.getActiveUser();
+                        String httpPassword = impl.getActiveUserAuth();
+                        try {
+                            CatalogController newController = CatalogController.makeControllerByURL(url, impl, resourceMode, 
+                                httpUsername, httpPassword, fetchFlags);
+                            newController.show();
+                        }catch(Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                };
+                    
+                    
+                
             }
         }else {
             

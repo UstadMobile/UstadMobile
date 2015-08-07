@@ -62,6 +62,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.ustadmobile.core.impl.*;
+import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.android.view.AppViewAndroid;
 
 import android.os.Build;
 import android.util.Log;
@@ -103,8 +105,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     public static final String EXTRA_VIEWID = "VIEWID";
 
-    public UstadMobileSystemImplAndroid() {
+    private AppViewAndroid appView;
 
+    public UstadMobileSystemImplAndroid() {
+        appView = new AppViewAndroid(this);
     }
 
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
@@ -124,7 +128,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     public void setCurrentActivity(Activity activity) {
-
+        this.currentActivity = activity;
+        setCurrentContext(activity);
     }
 
     public void setCurrentContext(Context context) {
@@ -137,8 +142,20 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
     }
 
+    /**
+     * Return the current Android context
+     * @return
+     */
     public Context getCurrentContext() {
         return this.currentContext;
+    }
+
+    /**
+     * Return the current Android activity (may equal currentcontext)
+     *
+     */
+    public Activity getCurrentActivity() {
+        return this.currentActivity;
     }
 
     /**
@@ -486,6 +503,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
         return parser;
+    }
+
+    @Override
+    public AppView getAppView() {
+        return appView;
     }
 
     /**

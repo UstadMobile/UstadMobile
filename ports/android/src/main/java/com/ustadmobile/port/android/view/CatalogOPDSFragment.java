@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,6 +65,7 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
         if (getArguments() != null) {
             int viewId = getArguments().getInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID);
             this.catalogView = CatalogViewAndroid.getViewById(viewId);
+
         }
     }
 
@@ -73,6 +75,10 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
         // Inflate the layout for this fragment
         this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
         return rootContainer;
+    }
+
+    public CatalogView getCatalogView() {
+        return catalogView;
     }
 
     @Override
@@ -159,15 +165,21 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            TextView returnVal = null;
-            if(convertView != null && convertView instanceof TextView) {
-                returnVal = (TextView)convertView;
-            }else {
-                returnVal = new TextView(context);
-            }
+            ViewGroup returnVal = null;
+            /*if(convertView != null && convertView instanceof TextView) {
 
-            returnVal.setText(feed.entries[position].title);
-            return returnVal;
+            }else {*/
+                LayoutInflater inflater = (LayoutInflater)context.getSystemService(
+                    Context.LAYOUT_INFLATER_SERVICE);
+                RelativeLayout viewLayout = (RelativeLayout)inflater.inflate(
+                        R.layout.fragment_opds_item, null);
+                ((TextView)viewLayout.findViewById(R.id.opdsitem_title_text)).setText(
+                        feed.entries[position].title);
+                //returnVal = new TextView(context);
+            //}
+
+            //returnVal.setText(feed.entries[position].title);
+            return viewLayout;
         }
     }
 

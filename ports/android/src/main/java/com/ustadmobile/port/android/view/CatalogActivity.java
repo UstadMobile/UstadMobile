@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.ProgressDialog;
 import android.net.Uri;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -25,11 +26,13 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
 
     private Map<CatalogViewAndroid, CatalogOPDSFragment> opdsFragmentMap;
 
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
-        UstadMobileSystemImplAndroid.getInstanceAndroid().setCurrentContext(this);
+        UstadMobileSystemImplAndroid.getInstanceAndroid().setCurrentActivity(this);
         setContentView(R.layout.activity_catalog);
 
         opdsFragmentMap = new WeakHashMap<CatalogViewAndroid, CatalogOPDSFragment>();
@@ -47,20 +50,30 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
      *
      * @param view
      */
-    public void setCurrentOPDSCatalogFragment(CatalogViewAndroid view) {
-        CatalogOPDSFragment fragment = opdsFragmentMap.get(view);
-        if(fragment == null) {
-            fragment = CatalogOPDSFragment.newInstance(view.getViewId());
-            opdsFragmentMap.put(view, fragment);
-        }
+    public void setCurrentOPDSCatalogFragment(final CatalogViewAndroid view) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                CatalogOPDSFragment fragment = opdsFragmentMap.get(view);
+                if(fragment == null) {
+                    fragment = CatalogOPDSFragment.newInstance(view.getViewId());
+                    opdsFragmentMap.put(view, fragment);
+                }
 
-        String backEntryTitle = view.getController().getModel().opdsFeed.title;
-        FragmentTransaction fTransaction = getSupportFragmentManager().beginTransaction();
+                String backEntryTitle = view.getController().getModel().opdsFeed.title;
+                FragmentTransaction fTransaction = getSupportFragmentManager().beginTransaction();
 
-        fTransaction.replace(R.id.fragment_container, fragment);
-        fTransaction.addToBackStack(backEntryTitle);
-        fTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        fTransaction.commit();
+                fTransaction.replace(R.id.fragment_container, fragment);
+                fTransaction.addToBackStack(backEntryTitle);
+                fTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                fTransaction.commit();
+                currentFrag = fragment;
+            }
+        });
+
+    }
+
+    public Fragment getCurrentFragment() {
+        return currentFrag;
     }
 
 
