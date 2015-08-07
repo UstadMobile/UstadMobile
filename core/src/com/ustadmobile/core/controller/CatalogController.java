@@ -32,6 +32,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.UMTransferJob;
+import com.ustadmobile.core.impl.UMTransferJobList;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
@@ -286,6 +287,24 @@ public class CatalogController implements UstadController{
     }
     
     /**
+     * Make a Hashtable with http authorization headers if username and password
+     * are not null.  Otherwise return empty hashtable.
+     * 
+     * TODO: If empty; let's use null instead
+     * 
+     * @param username HTTP username
+     * @param password HTTP password
+     * @return Hashtable with Authorization and Base64 encoded username/password
+     */
+    public static Hashtable makeAuthHeaders(String username, String password) {
+        Hashtable headers = new Hashtable();
+        if(username != null && password != null) {
+            headers.put("Authorization", "Basic "+ Base64.encode(username,password));
+        }
+        return headers;
+    }
+    
+    /**
      * Get an OPDS catalog by URL
      * 
      * @param url
@@ -301,9 +320,8 @@ public class CatalogController implements UstadController{
         UstadJSOPDSFeed opdsFeed = null;
                 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Hashtable headers = new Hashtable();
-        headers.put("Authorization", 
-                "Basic "+ Base64.encode(httpUsername,httpPassword));
+        Hashtable headers = makeAuthHeaders(httpUsername, httpPassword);
+        
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         byte[] opdsContents = impl.readURLToString(url, headers).getResponse();
         parser.setInput(
@@ -417,10 +435,21 @@ public class CatalogController implements UstadController{
     }
     
     /**
-     * For any acquisition feed that we have - make a catalog of what we have locally
-     * that points at the actual contain entries on the disk
+     * For any acquisition feed that we know about - make a catalog of what we have locally
+     * that points at the actual contain entries on the disk.
+     * 
+     * This will go through all the entries in the catalog (retrieved from cache)
+     * and check the acquisition status of each entry.  If the entry is present 
+     * on the system it will be included in the returned feed.
+     * 
+     * This can then be saved to a file ending .local.opds
+     * 
+     * @param catalog the Remote catalog we want a local feed for
+     * @return A feed containing an entry for each entry in the remote catalog
+     * already acquired; with the links pointing to the local file container
+     * 
      */
-    public static CatalogController generateLocalCatalog(UstadJSOPDSFeed catalog) {
+    public static UstadJSOPDSFeed generateLocalCatalog(UstadJSOPDSFeed catalog) {
         return null;
     }
     
@@ -521,7 +550,7 @@ public class CatalogController implements UstadController{
      * 
      * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
      */
-    public static UMTransferJob acquireCatalogEntries(UstadJSOPDSItem[] entries, String httpUsername, String httpPassword, int resourceMode, int flags) {
+    public static UMTransferJob acquireCatalogEntries(UstadJSOPDSEntry[] entries, String httpUsername, String httpPassword, int resourceMode, int flags) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UMTransferJob[] transferJobs = new UMTransferJob[entries.length];
         String destDirPath = null;
@@ -531,12 +560,30 @@ public class CatalogController implements UstadController{
             destDirPath = impl.getSharedContentDir();
         }
         
+        Hashtable authHeaders = makeAuthHeaders(httpUsername, httpPassword);
+        
         for(int i = 0; i < entries.length; i++) {
-            transferJobs[i] = impl.downloadURLToFile(destDirPath, destDirPath, 
-                null);
+            Vector itemLinks = entries[i].getAcquisitionLinks();
+            if(itemLinks.size() <= 0) {
+                continue;
+            }
+            
+            String itemHref = 
+                ((String[])itemLinks.elementAt(0))[UstadJSOPDSItem.LINK_HREF];
+            String itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
+                    itemHref);
+            itemLinks = null;
+            
+            String destFilename = UMFileUtil.joinPaths(new String[] {
+                destDirPath,
+                UMFileUtil.getFilename(itemHref)
+            });
+            
+            transferJobs[i] = impl.downloadURLToFile(itemURL, destFilename, 
+                authHeaders);
         }
         
-        return null;
+        return new UMTransferJobList(transferJobs);
     }
     
     /**

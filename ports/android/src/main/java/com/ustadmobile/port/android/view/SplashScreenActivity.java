@@ -39,7 +39,10 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 
@@ -52,6 +55,22 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ((UstadMobileSystemImplAndroid) impl).setCurrentContext(this);
+
+        String httpRoot = "http://192.168.0.49:5062";
+        String acquireURL = httpRoot + "/acquire.opds";
+
+        long totalSize = -1;
+
+        try {
+            UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireURL,
+                CatalogController.SHARED_RESOURCE, null, null, CatalogController.CACHE_ENABLED);
+            UMTransferJob job = CatalogController.acquireCatalogEntries(feed.entries, null, null,
+                    CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
+            totalSize = job.getTotalSize();
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
+
 
         impl.startUI();
     }
