@@ -204,4 +204,27 @@ public class UMFileUtil {
         return count;
     }
     
+    /**
+     * Gets the end filename from a url or path string.  Will chop off query 
+     * and preceeding directories: e.g
+     * "/some/path/file.ext" returns "file.ext"
+     * "http://server.com/path/thing.php?foo=bar" returns "thing.php"
+     * 
+     * @param url
+     * @return 
+     */
+    public static String getFilename(String url) {
+        int charPos = url.lastIndexOf('/');
+        if(charPos != -1 && charPos != url.length() -1) {
+            url = url.substring(charPos+1);
+        }
+        
+        charPos = url.indexOf("?");
+        if(charPos != -1) {
+            url = url.substring(0, charPos);
+        }
+        
+        return url;
+    }
+    
 }
