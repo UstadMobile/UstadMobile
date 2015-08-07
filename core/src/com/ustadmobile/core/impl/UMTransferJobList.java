@@ -52,6 +52,17 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
     
     private boolean isFinished;
     
+    /**
+     * Runnable item that will be triggered before start
+     */
+    private Runnable runBeforeStartJob;
+    
+    
+    /**
+     * Runnable item that will run after job finish, before firing the finish event
+     */
+    private Runnable runAfterFinishJob;
+    
     public UMTransferJobList(UMTransferJob[] jobList) {
         this.jobList = jobList;
         this.currentItem = -1;
@@ -65,6 +76,10 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
             throw new RuntimeException("already started");
         }
         
+        if(runBeforeStartJob != null) {
+            runBeforeStartJob.run();
+        }
+        
         //Make sure that we know the size of the whole
         getTotalSize();
         if(this.jobList.length > 0) {
@@ -72,6 +87,27 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
             this.jobList[0].addProgresListener(this);
             this.jobList[0].start();
         }
+    }
+    
+    /**
+     * Add something to run when the job is started.  The Runnable will be called
+     * when start() is called before anything actually starts downloading
+     * 
+     * @param job The runnable to run in the start method before file downloads start
+     */
+    public void setRunBeforeStartJob(Runnable job) {
+        this.runBeforeStartJob = job;
+    }
+    
+    /**
+     * Add something to run after all the downloads complete.  This runnable
+     * will be called when all downloads have finished but before fireComplete
+     * sends the event out.
+     * 
+     * @param job The runnable to run once all downloads have completed.
+     */
+    public void setRunAfterFinishJob(Runnable job) {
+        this.runAfterFinishJob = job;
     }
 
     @Override
@@ -121,6 +157,10 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
                 this.jobList[currentItem].start();
             }else {
                 isFinished = true;
+                if(runAfterFinishJob != null) {
+                    runAfterFinishJob.run();
+                }
+                
                 fireComplete();
             }
         }

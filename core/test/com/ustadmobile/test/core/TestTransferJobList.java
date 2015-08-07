@@ -72,6 +72,9 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
     }
     
     public void testTransferJobList() throws Exception {
+        TestRunnable beforeStartJob = new TestRunnable();
+        TestRunnable afterFinishJob = new TestRunnable();
+        
         String url1 = TestConstants.TEST_HTTP_ROOT + "phonepic-large.png";
         String url2 = TestConstants.TEST_HTTP_ROOT + "root.opds";
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -89,10 +92,15 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
         
         UMTransferJobList jobList = new UMTransferJobList(
             new UMTransferJob[]{job1, job2});
+        jobList.setRunBeforeStartJob(beforeStartJob);
+        jobList.setRunAfterFinishJob(afterFinishJob);
+        
         int listSize = jobList.getTotalSize();
         jobList.addProgresListener(this);
         assertTrue("Can get positive total size for download list", listSize > 0);
         jobList.start();
+        
+        assertTrue("Run before start job runnable", beforeStartJob.hasRun());
         int timeRemaining = TIMEOUT;
         while(timeRemaining > 0 && !jobList.isFinished()) {
             try { Thread.sleep(INTERVAL); }
@@ -101,7 +109,7 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
         }
             
         assertTrue("Completed download of list items", this.completed);
-        
+        assertTrue("Run after finish job has run", afterFinishJob.hasRun());
         impl.removeFile(filePath1);
         impl.removeFile(filePath2);
     }
@@ -110,6 +118,18 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
     public void progressUpdated(UMProgressEvent evt) {
         if(evt.getEvtType() == UMProgressEvent.TYPE_COMPLETE) {
             completed = true;
+        }
+    }
+    
+    private class TestRunnable implements Runnable {
+        private boolean ran;
+        
+        public void run() {
+            ran = true;
+        }
+        
+        public boolean hasRun() {
+            return ran;
         }
     }
 
