@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.net.Uri;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -42,6 +43,7 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
     }
 
     /**
+     * When the activity is running - change the fragment showing.
      *
      * @param view
      */
@@ -51,8 +53,14 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
             fragment = CatalogOPDSFragment.newInstance(view.getViewId());
             opdsFragmentMap.put(view, fragment);
         }
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-            fragment);
+
+        String backEntryTitle = view.getController().getModel().opdsFeed.title;
+        FragmentTransaction fTransaction = getSupportFragmentManager().beginTransaction();
+
+        fTransaction.replace(R.id.fragment_container, fragment);
+        fTransaction.addToBackStack(backEntryTitle);
+        fTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        fTransaction.commit();
     }
 
 

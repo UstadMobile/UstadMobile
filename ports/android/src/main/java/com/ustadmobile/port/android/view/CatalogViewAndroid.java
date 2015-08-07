@@ -135,7 +135,7 @@ public class CatalogViewAndroid implements CatalogView {
     public void show() {
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         if(impl.getCurrentContext() instanceof CatalogActivity) {
-
+            ((CatalogActivity)impl.getCurrentContext()).setCurrentOPDSCatalogFragment(this);
         }else {
             impl.startActivityForViewId(CatalogActivity.class, this.viewId);
         }
