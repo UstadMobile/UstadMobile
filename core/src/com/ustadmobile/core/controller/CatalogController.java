@@ -264,14 +264,15 @@ public class CatalogController implements UstadController{
                             CatalogController newController = CatalogController.makeControllerByURL(url, impl, resourceMode, 
                                 httpUsername, httpPassword, fetchFlags);
                             newController.show();
+                            impl.getAppView().dismissProgressDialog();
                         }catch(Exception e) {
                             e.printStackTrace();
+                            impl.getAppView().dismissProgressDialog();
                         }
                     }
                 };
-                    
-                    
-                
+                impl.getAppView().showProgressDialog("Loading");
+                bgThread.start();
             }
         }else {
             

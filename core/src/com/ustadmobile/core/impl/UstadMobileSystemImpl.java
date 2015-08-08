@@ -77,6 +77,7 @@ public abstract class UstadMobileSystemImpl {
     public void startUI() {
         //new LoginController().show();
         
+        
         if(getActiveUser() == null) {
             new LoginController().show();
         }else {

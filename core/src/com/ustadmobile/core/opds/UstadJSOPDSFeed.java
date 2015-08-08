@@ -174,8 +174,8 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         for (int i=0; i< this.entries.length; i++){
             Vector entryResult = this.entries[i].getLinks(linkRel, linkType, 
                     relByPrefix, mimeTypeByPrefix);
-            for(int j = 0; j < entryResult.size(); j++) {
-                matches.addElement(entryResult.elementAt(j));
+            if(entryResult.size() > 0) {
+                matches.addElement(this.entries[i]);
             }
         }
         

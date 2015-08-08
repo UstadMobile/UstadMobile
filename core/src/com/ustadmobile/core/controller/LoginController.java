@@ -76,38 +76,47 @@ public class LoginController implements UstadController{
 
     }
     
-    public void handleClickLogin(String username, String password) {
-        String serverBaseURL = 
-            UstadMobileSystemImpl.getInstance().getAppPref("server",
-            UstadMobileDefaults.DEFAULT_XAPI_SERVER);
-        String serverURL = UMFileUtil.joinPaths(new String[]{serverBaseURL, 
-            "statements?limit=1"});
-        
-        int result = 0;
-        IOException ioe = null;
-        
-        try {
-            result = LoginController.authenticate(username, password, serverURL);    
-        }catch(IOException e) {
-            ioe = e;
-        }
-        
-        if(result != 200) {
-            this.view.showDialog("Error", "Login failed: please try again");
-        }else {
-            //make a new catalog controller and show it for the users base directory
-            //Add username to UserPreferences.
-            UstadMobileSystemImpl.getInstance().setActiveUser(username);
-            UstadMobileSystemImpl.getInstance().setActiveUserAuth(password);
-            
-            //get the feed.
-            UstadJSOPDSFeed userFeed = null;
-            
-            CatalogModel catalogModel = new CatalogModel(userFeed);
-            CatalogController catalogController = new CatalogController(catalogModel);
-            catalogController.show();
-            
-        }
+    public void handleClickLogin(final String username, final String password) {
+        final LoginView myView = view;
+        Thread loginThread = new Thread() {
+            public void run() {
+                String serverBaseURL = 
+                UstadMobileSystemImpl.getInstance().getAppPref("server",
+                UstadMobileDefaults.DEFAULT_XAPI_SERVER);
+                String serverURL = UMFileUtil.joinPaths(new String[]{serverBaseURL, 
+                    "statements?limit=1"});
+
+                int result = 0;
+                IOException ioe = null;
+
+                try {
+                    result = LoginController.authenticate(username, password, 
+                        serverURL);
+                }catch(IOException e) {
+                    ioe = e;
+                }
+
+                if(result != 200) {
+                    myView.showDialog("Error", "Login failed: please try again");
+                }else {
+                    //make a new catalog controller and show it for the users base directory
+                    //Add username to UserPreferences.
+                    UstadMobileSystemImpl.getInstance().setActiveUser(username);
+                    UstadMobileSystemImpl.getInstance().setActiveUserAuth(password);
+                    
+                    try {
+                        CatalogController userCatalog = CatalogController.makeUserCatalog(
+                            UstadMobileSystemImpl.getInstance());
+                        UstadMobileSystemImpl.getInstance().getAppView().dismissProgressDialog();
+                        userCatalog.show();
+                    }catch(Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+        UstadMobileSystemImpl.getInstance().getAppView().showProgressDialog("Authenticating");
+        loginThread.start();
     }
     
     public void show() {

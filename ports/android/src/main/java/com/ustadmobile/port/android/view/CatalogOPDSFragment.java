@@ -2,12 +2,18 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
@@ -31,13 +37,15 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
  * Use the {@link CatalogOPDSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemClickListener {
+public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
 
     private OnFragmentInteractionListener mListener;
 
     private View rootContainer;
 
     private CatalogView catalogView;
+
+    private ListView catalogListView;
 
     /**
      * Use this factory method to create a new instance of
@@ -85,12 +93,25 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
     public void onStart() {
         super.onStart();
         UstadJSOPDSFeed feed = catalogView.getController().getModel().opdsFeed;
-        ListView catalogList =
+        catalogListView =
             (ListView)this.rootContainer.findViewById(R.id.fragment_catalog_listview);
         OPDSFeedAdapter feedAdapter = new OPDSFeedAdapter(feed, this.getActivity());
-        catalogList.setAdapter(feedAdapter);
-        catalogList.setOnItemClickListener(this);
+        catalogListView.setAdapter(feedAdapter);
+        catalogListView.setOnItemClickListener(this);
+        catalogListView.setOnItemLongClickListener(this);
+        catalogListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        boolean isAcquisitionFeed = this.catalogView.getController().getModel().opdsFeed.isAcquisitionFeed();
+        if(isAcquisitionFeed) {
+            inflater.inflate(R.menu.menu_opds_acquireopts, menu);
+        }else {
+            inflater.inflate(R.menu.menu_opds_navopts, menu);
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -121,6 +142,16 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         UstadJSOPDSEntry entry= this.catalogView.getController().getModel().opdsFeed.entries[position];
         catalogView.getController().handleClickEntry(entry);
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        //catalogListView.setItemChecked(position, true);
+        //view.setBackgroundResource(R.color.background_material_dark);
+        //view.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
+        view.setBackgroundResource(R.drawable.bg_card);
+        //catalogListView.setItemChecked(position, true);
+        return true;
     }
 
     /**

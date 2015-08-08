@@ -57,34 +57,6 @@ public class SplashScreenActivity extends ActionBarActivity {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         ((UstadMobileSystemImplAndroid) impl).setCurrentContext(this);
 
-        String httpRoot = "http://192.168.0.49:5062";
-        String acquireURL = httpRoot + "/acquire.opds";
-
-        long totalSize = -1;
-
-        /*
-        try {
-            UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireURL,
-                CatalogController.SHARED_RESOURCE, null, null, CatalogController.CACHE_ENABLED);
-            UMTransferJob job = CatalogController.acquireCatalogEntries(feed.entries, null, null,
-                    CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
-            totalSize = job.getTotalSize();
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-        */
-
-        CatalogEntryInfo testInfo = new CatalogEntryInfo();
-        testInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
-        testInfo.srcURLs = new String[]{"http://www.server1.com/file.epub",
-                "http://www.server2.com/file.epub"};
-        testInfo.fileURI = "/some/file/path/file.epub";
-        testInfo.mimeType = "application/epub+zip";
-
-        String infoStr = testInfo.toString();
-        CatalogEntryInfo restoreEntry = CatalogEntryInfo.fromString(infoStr);
-
-
         impl.startUI();
     }
 
