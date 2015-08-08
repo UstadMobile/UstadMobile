@@ -1,11 +1,20 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ustadmobile.port.android.view.CatalogOPDSFragment">
+    tools:context="com.ustadmobile.port.android.view.CatalogOPDSFragment"
+    android:orientation="vertical">
 
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/fragment_catalog_listview"
-        android:layout_gravity="left|top" />
-</FrameLayout>
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/fragment_catalog_container"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"></LinearLayout>
+
+
+    </ScrollView>
+
+</LinearLayout>

@@ -1,31 +1,54 @@
+/*
+    This file is part of Ustad Mobile.
+
+    Ustad Mobile Copyright (C) 2011-2014 UstadMobile Inc.
+
+    Ustad Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version with the following additional terms:
+
+    All names, links, and logos of Ustad Mobile and Toughra Technologies FZ
+    LLC must be kept as they are in the original distribution.  If any new
+    screens are added you must include the Ustad Mobile logo as it has been
+    used in the original distribution.  You may not create any new
+    functionality whose purpose is to diminish or remove the Ustad Mobile
+    Logo.  You must leave the Ustad Mobile logo as the logo for the
+    application to be used with any launcher (e.g. the mobile app launcher).
+
+    If you want a commercial license to remove the above restriction you must
+    contact us.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Ustad Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+ */
+
+
 package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
-import android.content.Context;
-import android.graphics.Color;
+
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
@@ -37,7 +60,7 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
  * Use the {@link CatalogOPDSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+public class CatalogOPDSFragment extends Fragment implements View.OnClickListener {
 
     private OnFragmentInteractionListener mListener;
 
@@ -82,26 +105,26 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
+        UstadJSOPDSFeed feed = catalogView.getController().getModel().opdsFeed;
+        LinearLayout linearLayout = (LinearLayout)this.rootContainer.findViewById(
+                R.id.fragment_catalog_container);
+        for(int i = 0; i < feed.entries.length; i++) {
+            OPDSEntryCard cardView  = (OPDSEntryCard) inflater.inflate(
+                    R.layout.fragment_opds_item, null);
+            cardView.setOPDSEntry(feed.entries[i]);
+            cardView.setOnClickListener(this);
+            ((TextView)cardView.findViewById(R.id.opdsitem_title_text)).setText(
+                    feed.entries[i].title);
+            linearLayout.addView(cardView);
+        }
+
+        setHasOptionsMenu(true);
+
         return rootContainer;
     }
 
     public CatalogView getCatalogView() {
         return catalogView;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        UstadJSOPDSFeed feed = catalogView.getController().getModel().opdsFeed;
-        catalogListView =
-            (ListView)this.rootContainer.findViewById(R.id.fragment_catalog_listview);
-        OPDSFeedAdapter feedAdapter = new OPDSFeedAdapter(feed, this.getActivity());
-        catalogListView.setAdapter(feedAdapter);
-        catalogListView.setOnItemClickListener(this);
-        catalogListView.setOnItemLongClickListener(this);
-        catalogListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -139,19 +162,11 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        UstadJSOPDSEntry entry= this.catalogView.getController().getModel().opdsFeed.entries[position];
-        catalogView.getController().handleClickEntry(entry);
-    }
-
-    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        //catalogListView.setItemChecked(position, true);
-        //view.setBackgroundResource(R.color.background_material_dark);
-        //view.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_dark));
-        view.setBackgroundResource(R.drawable.bg_card);
-        //catalogListView.setItemChecked(position, true);
-        return true;
+    public void onClick(View view) {
+        if(view instanceof OPDSEntryCard) {
+            UstadJSOPDSEntry entry = ((OPDSEntryCard)view).getEntry();
+            catalogView.getController().handleClickEntry(entry);
+        }
     }
 
     /**
@@ -167,51 +182,6 @@ public class CatalogOPDSFragment extends Fragment implements AdapterView.OnItemC
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
-    }
-
-    public class OPDSFeedAdapter extends BaseAdapter {
-
-        private UstadJSOPDSFeed feed;
-        private Context context;
-
-        public OPDSFeedAdapter(UstadJSOPDSFeed feed, Context context) {
-            this.feed = feed;
-            this.context = context;
-        }
-
-        @Override
-        public int getCount() {
-            return feed.entries.length;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return feed.entries[position];
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewGroup returnVal = null;
-            /*if(convertView != null && convertView instanceof TextView) {
-
-            }else {*/
-                LayoutInflater inflater = (LayoutInflater)context.getSystemService(
-                    Context.LAYOUT_INFLATER_SERVICE);
-                RelativeLayout viewLayout = (RelativeLayout)inflater.inflate(
-                        R.layout.fragment_opds_item, null);
-                ((TextView)viewLayout.findViewById(R.id.opdsitem_title_text)).setText(
-                        feed.entries[position].title);
-                //returnVal = new TextView(context);
-            //}
-
-            //returnVal.setText(feed.entries[position].title);
-            return viewLayout;
-        }
     }
 
 }
