@@ -40,6 +40,7 @@ import android.view.MenuItem;
 import com.toughra.ustadmobile.R;
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -61,6 +62,7 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         long totalSize = -1;
 
+        /*
         try {
             UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireURL,
                 CatalogController.SHARED_RESOURCE, null, null, CatalogController.CACHE_ENABLED);
@@ -70,6 +72,17 @@ public class SplashScreenActivity extends ActionBarActivity {
         }catch(Exception e) {
             e.printStackTrace();
         }
+        */
+
+        CatalogEntryInfo testInfo = new CatalogEntryInfo();
+        testInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        testInfo.srcURLs = new String[]{"http://www.server1.com/file.epub",
+                "http://www.server2.com/file.epub"};
+        testInfo.fileURI = "/some/file/path/file.epub";
+        testInfo.mimeType = "application/epub+zip";
+
+        String infoStr = testInfo.toString();
+        CatalogEntryInfo restoreEntry = CatalogEntryInfo.fromString(infoStr);
 
 
         impl.startUI();

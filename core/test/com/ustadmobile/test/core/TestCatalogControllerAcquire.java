@@ -31,15 +31,12 @@
 package com.ustadmobile.test.core;
 
 
-import org.xmlpull.v1.XmlPullParserException;
-import java.io.IOException;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
-import java.io.ByteArrayInputStream;
-import org.xmlpull.v1.XmlPullParser;
 
 
 /* $if umplatform == 1 $
@@ -64,6 +61,16 @@ public class TestCatalogControllerAcquire extends ActivityInstrumentationTestCas
 public class TestCatalogControllerAcquire extends TestCase{
 /* $endif */
     
+    /**
+     * Interval at which to check on if the job has finished
+     */
+    public static final int CHECKINTERVAL = 1000;
+    
+    /**
+     * Timeout - maximum time allowed for test acquisition of feed to succeed
+     */
+    public static final int TIMEOUT = 60000;
+    
     public TestCatalogControllerAcquire() {
         /* $if umplatform == 1 $ 
         super("com.toughra.ustadmobile", UstadMobileActivity.class);
@@ -83,6 +90,37 @@ public class TestCatalogControllerAcquire extends TestCase{
             null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
         int totalSize = acquireJob.getTotalSize();
         assertTrue("Can count transfer size", totalSize > 0);
+        
+        acquireJob.start();
+        int timeRemaining = TIMEOUT;
+        while(timeRemaining > 0 && !acquireJob.isFinished()) {
+            try {Thread.sleep(CHECKINTERVAL); }
+            catch(InterruptedException e) {}
+        }
+        assertTrue("Job has completed", acquireJob.isFinished());
+        
+        
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        
+        String acquiredFileURI = entryInfo.fileURI;
+        
+        assertNotNull("Can obtain catalogEntryInfo for first downloaded item", 
+            entryInfo);
+        assertEquals("Status of entry is now acquired", 
+            CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED, 
+            entryInfo.acquisitionStatus);
+        assertTrue("Destination file container exists", 
+                impl.fileExists(entryInfo.fileURI));
+                
+        CatalogController.removeEntry(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        assertNull("Catalog entry no longer available after deleted",
+            entryInfo);
+        assertFalse("Entry file no longer present after delete",
+                impl.fileExists(acquiredFileURI));
     }
     
 }

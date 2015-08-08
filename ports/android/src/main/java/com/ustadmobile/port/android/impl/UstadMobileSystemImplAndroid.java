@@ -756,6 +756,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         public boolean isFinished() {
             return finished;
         }
+
+        @Override
+        public String getSource() {
+            return srcURL;
+        }
+
+        @Override
+        public String getDestination() {
+            return destFileURI;
+        }
     }
 
 }

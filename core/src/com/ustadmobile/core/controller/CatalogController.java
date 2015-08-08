@@ -95,6 +95,16 @@ public class CatalogController implements UstadController{
      */
     public static final int SHARED_RESOURCE = 4;
     
+    
+    
+    public static final int ENTRY_ACQUISITION_STATUS = 0;
+    
+    public static final int ENTRY_URLs = 1;
+    
+    public static final int ENTRY_FILEURI = 2;
+    
+    public static final int ENTRY_MIMETYPE = 3;
+    
     //The View (J2ME or Android)
     private CatalogView view;
     
@@ -369,18 +379,6 @@ public class CatalogController implements UstadController{
         return null;
     }
     
-    /**
-     * Make a transfer job that can download the entire contents of the acquisition feed
-     * 
-     * @param feed
-     * @param httpUsername
-     * @param httpPassword
-     * @return 
-     */
-    public static UMTransferJob downloadEntireAcquisitionFeed(UstadJSOPDSFeed feed, String httpUsername, String httpPassword) {
-        return null;
-    }
-    
     protected static String getFileNameForOPDSFeedId(String feedId) {
         return ".cache-" + sanitizeIDForFilename(feedId) + ".opds";
     }
@@ -388,6 +386,8 @@ public class CatalogController implements UstadController{
     protected static String getPrefKeyNameForOPDSURLToIDMap(String opdsId) {
         return "opds-id-to-url-" + sanitizeIDForFilename(opdsId);
     }
+    
+    
     
     public static String sanitizeIDForFilename(String id) {
         char c;
@@ -537,6 +537,63 @@ public class CatalogController implements UstadController{
     }
     
     /**
+     * Generates a String preference key for the given entryID.  Used to map
+     * in the form of entryID -> EntryInfo (serialized)
+     * 
+     * @param entryID
+     * @return 
+     */
+    private static String getEntryInfoKey(String entryID) {
+        return "e2ei-" + entryID;
+    }
+    
+    /**
+     * Save the info we need to know about a given entry using CatalogEntryInfo
+     * object which can be encoded as a String then saved as an app or user 
+     * preference
+     * 
+     * @param entryID the OPDS ID of the entry in question
+     * @param entryInfo CatalogEntryInfo object with required info about entry
+     * @param resourceMode  USER_RESOURCE or SHARED_RESOURCE to be set as a user or shared preference
+     * Use USER_RESOURCE when the file is in the users own directory, SHARED_RESOURCE otherwise
+     */
+    public static void setEntryInfo(String entryID, CatalogEntryInfo info, int resourceMode) {
+        UstadMobileSystemImpl.getInstance().setPref(resourceMode == USER_RESOURCE, 
+            getEntryInfoKey(entryID), info != null? info.toString(): null);
+    }
+    
+    /**
+     * Get info about a given entryID; if known by the device.  Will return a 
+     * CatalogEntryInfo that was serialized as a String.  
+     * 
+     * @param entryID The OPDS ID in question
+     * @param resourceMode BitMask - valid values are USER_RESOURCE and SHARED_RESOURCE
+     * eg. to get both - use USER_RESOURCE | SHARED_RESOURCE
+     * @return CatalogEntryInfo for the given ID, or null if not found
+     */
+    public static CatalogEntryInfo getEntryInfo(String entryID, int resourceMode) {
+        String prefKey = getEntryInfoKey(entryID);
+        String entryInfoStr = null;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
+            entryInfoStr = impl.getUserPref(prefKey);
+        }
+        
+        if(entryInfoStr == null && (resourceMode & SHARED_RESOURCE) ==SHARED_RESOURCE) {
+            entryInfoStr = impl.getAppPref(prefKey);
+        }
+        
+        if(entryInfoStr != null) {
+            return CatalogEntryInfo.fromString(entryInfoStr);
+        }else {
+            return null;
+        }
+    }
+    
+    
+    
+    /**
      * Fetch and download the given container, save required information about it to
      * disk
      * 
@@ -548,11 +605,21 @@ public class CatalogController implements UstadController{
      * 
      * 3. Update the localstorage map of EntryID -> containerURI 
      * 
-     * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
+     * @param entries The OPDS Entries that should be acquired.  Must be OPDS 
+     * Entry items with acquire links.  For now the first acquisition link will
+     * be used
+     * TODO: Enable user specification of preferred acuiqsition types
+     * 
+     * @param httpUsername optional HTTP authentication username - can be null
+     * @param httpPassword optional HTTP authentication password - can be null
+     * @param flags bitmask flags to use (unused currently)
+     * @param resourceMode SHARED_RESOURCE or USER_RESOURCE to save to shared area or user specific area.
      */
     public static UMTransferJob acquireCatalogEntries(UstadJSOPDSEntry[] entries, String httpUsername, String httpPassword, int resourceMode, int flags) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UMTransferJob[] transferJobs = new UMTransferJob[entries.length];
+        String[] mimeTypes = new String[entries.length];
+        
         String destDirPath = null;
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
             destDirPath = impl.getUserContentDirectory(impl.getActiveUser());
@@ -568,8 +635,10 @@ public class CatalogController implements UstadController{
                 continue;
             }
             
-            String itemHref = 
-                ((String[])itemLinks.elementAt(0))[UstadJSOPDSItem.LINK_HREF];
+            String[] firstLink = ((String[])itemLinks.elementAt(0));
+            String itemHref = firstLink[UstadJSOPDSItem.LINK_HREF];
+            mimeTypes[i] = firstLink[UstadJSOPDSItem.LINK_MIMETYPE];
+            
             String itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
                     itemHref);
             itemLinks = null;
@@ -583,17 +652,85 @@ public class CatalogController implements UstadController{
                 authHeaders);
         }
         
-        return new UMTransferJobList(transferJobs);
+        UMTransferJobList transferJob = new UMTransferJobList(transferJobs);
+        transferJob.setRunAfterFinishJob(new AcquirePostDownloadRunnable(entries, 
+                transferJobs, mimeTypes, resourceMode));
+        return transferJob;
     }
+    
+    /**
+     * Runs before an acquisition run goes: marks items as in progress
+     */
+    private static class AcquirePreDownloadRunnable implements Runnable{
+        
+        private UstadJSOPDSEntry[] entries;
+        
+        private UMTransferJob[] srcJobs;
+        
+        private String[] mimeTypes;
+        
+        public AcquirePreDownloadRunnable(UstadJSOPDSEntry[] entries, UMTransferJob[] srcJobs, String[] mimeTypes) {
+            this.entries = entries;
+            this.mimeTypes = mimeTypes;
+        }
+        
+        public void run() {
+            
+        }
+    }
+    
+    private static class AcquirePostDownloadRunnable implements Runnable {
+        private UstadJSOPDSEntry[] entries;
+        
+        private UMTransferJob[] srcJobs;
+        
+        private String[] mimeTypes;
+        
+        private int resourceMode;
+        
+        public AcquirePostDownloadRunnable(UstadJSOPDSEntry[] entries, UMTransferJob[] srcJobs, String[] mimeTypes, int resourceMode) {
+            this.entries = entries;
+            this.srcJobs = srcJobs;
+            this.mimeTypes = mimeTypes;
+            this.resourceMode = resourceMode;
+        }
+        
+        public void run() {
+            for(int i = 0; i < entries.length; i++) {
+                CatalogEntryInfo info = new CatalogEntryInfo();
+                info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+                info.srcURLs = new String[]{srcJobs[i].getSource()};
+                info.fileURI = srcJobs[i].getDestination();
+                info.mimeType = mimeTypes[i];
+                CatalogController.setEntryInfo(entries[i].id, info, resourceMode);
+            }
+        }
+    }
+    
     
     /**
      * Delete the given entry
      * 
      * @param entryID
-     * @param user 
+     * @param resourceMode
      */
-    public static void removeEntry(String entryID, String user) {
+    public static void removeEntry(String entryID, int resourceMode) {
+        if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
+            actionRemoveEntry(entryID, USER_RESOURCE);
+        }
         
+        if((resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
+            actionRemoveEntry(entryID, SHARED_RESOURCE);
+        }
+    }
+    
+    private static void actionRemoveEntry(String entryID, int resourceMode) {
+        CatalogEntryInfo entry = getEntryInfo(entryID, resourceMode);
+        if(entry != null && entry.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            impl.removeFile(entry.fileURI);
+            setEntryInfo(entryID, null, resourceMode);
+        }
     }
     
     public static int getAcquisitionStatusByEntryID(String entryID, String user) {

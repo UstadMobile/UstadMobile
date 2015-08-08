@@ -192,6 +192,31 @@ public class UMFileUtil {
         return splitStr;
     }
     
+    /**
+     * Join an array of Strings 
+     * e.g. 
+     * joinString(new String[]{"a", "b", "c"}, '/') returns "a/b/c"
+     * 
+     * @param strArr An array of Strings
+     * @param joinChar the character to use to join them
+     * @return A single string with each element of the array joined by joinChar
+     */
+    public static String joinString(String[] strArr, char joinChar) {
+        //TODO: Make this more efficient by calculating size first
+        StringBuffer resultSB = new StringBuffer();
+        
+        int numElements = strArr.length;
+        for(int i = 0; i < numElements; i++) {
+            resultSB.append(strArr[i]);
+            if(i < numElements -1) {
+                resultSB.append(joinChar);
+            }
+        }
+        
+        return resultSB.toString();
+    }
+    
+    
     private static int countChar(String str, char c) {
         int count = 0;
         int strLen = str.length();

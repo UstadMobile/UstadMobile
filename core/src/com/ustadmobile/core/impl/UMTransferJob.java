@@ -36,14 +36,57 @@ package com.ustadmobile.core.impl;
  */
 public interface UMTransferJob {
     
+    /**
+     * Start the transfer job.  The start method must be async and must
+     * return immediately.  The job itself must run in another thread.
+     */
     public void start();
     
+    /**
+     * Add a progress listener that will receive events as the job completes
+     * 
+     * @param listener 
+     */
     public void addProgresListener(UMProgressListener listener);
     
+    /**
+     * Return the total number of bytes processed (e.g. downloaded) thus far
+     * 
+     * @return Number of bytes processed so far
+     */
     public int getBytesDownloadedCount();
     
+    /**
+     * Get the total size of the job in bytes or -1 if unknown
+     * 
+     * @return Total size of job in bytes
+     */
     public int getTotalSize();
     
+    /**
+     * Determine if the job is completed yet or not
+     * 
+     * @return True if finished, false otherwise
+     */
     public boolean isFinished();
+    
+    /**
+     * Get the source of the job (e.g. url being downloaded from) if applicable.
+     * If a job is a list or does not have a direct source; this can return
+     * null.  If a job has a direct source it should be returned
+     * 
+     * @return 
+     */
+    public String getSource();
+    
+    /**
+     * Get the destination of the job (e.g. the file path being saved to) if
+     * applicable.  If a job is a list or does not have a direct destination
+     * this can return null.  If a job has a direct full path destination it
+     * should be returned
+     * 
+     * @return 
+     */
+    public String getDestination();
     
 }

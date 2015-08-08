@@ -173,5 +173,15 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
             ((UMProgressListener)progressListeners.get(i)).progressUpdated(evt);
         }
     }
+
+    @Override
+    public String getSource() {
+        return null;
+    }
+
+    @Override
+    public String getDestination() {
+        return null;
+    }
     
 }
