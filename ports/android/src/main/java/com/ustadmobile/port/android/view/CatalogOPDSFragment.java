@@ -60,13 +60,13 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
  * Use the {@link CatalogOPDSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CatalogOPDSFragment extends Fragment implements View.OnClickListener {
+public class CatalogOPDSFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener {
 
     private OnFragmentInteractionListener mListener;
 
     private View rootContainer;
 
-    private CatalogView catalogView;
+    private CatalogViewAndroid catalogView;
 
     private ListView catalogListView;
 
@@ -96,7 +96,8 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         if (getArguments() != null) {
             int viewId = getArguments().getInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID);
             this.catalogView = CatalogViewAndroid.getViewById(viewId);
-
+            catalogView.setFragment(this);
+            catalogView.setCatalogViewActivity((CatalogActivity)getActivity());
         }
     }
 
@@ -113,6 +114,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
                     R.layout.fragment_opds_item, null);
             cardView.setOPDSEntry(feed.entries[i]);
             cardView.setOnClickListener(this);
+            cardView.setOnLongClickListener(this);
             ((TextView)cardView.findViewById(R.id.opdsitem_title_text)).setText(
                     feed.entries[i].title);
             linearLayout.addView(cardView);
@@ -167,6 +169,17 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             UstadJSOPDSEntry entry = ((OPDSEntryCard)view).getEntry();
             catalogView.getController().handleClickEntry(entry);
         }
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        if(view instanceof OPDSEntryCard) {
+            OPDSEntryCard card = (OPDSEntryCard)view;
+            card.setSelected(!card.isSelected());
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -31,12 +31,14 @@
 
 package com.ustadmobile.port.android.view;
 
-import android.content.Intent;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -97,8 +99,22 @@ public class CatalogViewAndroid implements CatalogView {
     }
 
     @Override
-    public void showDialog(String s, String s1, int i) {
-
+    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId) {
+        //android.support.v4.
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(message);
+        builder.setTitle(title);
+        builder.setPositiveButton(positiveChoice, new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int id) {
+                controller.handleConfirmDialogClick(true, commandId);
+            }
+        });
+        builder.setNegativeButton(negativeChoice, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                controller.handleConfirmDialogClick(false, commandId);
+            }
+        });
+        builder.create().show();
     }
 
     @Override

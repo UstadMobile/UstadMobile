@@ -105,6 +105,16 @@ public class CatalogController implements UstadController{
     
     public static final int ENTRY_MIMETYPE = 3;
     
+    
+    /**
+     * Command ID representing a user wishing to download a single entry 
+     * (e.g. after just tapping it)
+     */
+    public static final int CMD_DOWNLOADENTRY = 0;
+    
+    
+    private UstadJSOPDSEntry[] selectedEntries;
+    
     //The View (J2ME or Android)
     private CatalogView view;
     
@@ -117,6 +127,27 @@ public class CatalogController implements UstadController{
     public CatalogController(CatalogModel model){
         this.model=model;
     }
+    
+    /**
+     * Set the items currently selected now by the user (this is called by the
+     * corresponding view object in response to user interaction)
+     * 
+     * @param entries Entry objects currently selected by the user
+     */
+    public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
+        this.selectedEntries = entries;
+    }
+    
+    /**
+     * Get the list of items that are currently marked as selected by the user
+     * from this view
+     * 
+     * @return Array of UstadJSOPDSEntry of those selected by the user
+     */
+    public UstadJSOPDSEntry[] getSelectedEntries() {
+        return this.selectedEntries;
+    }
+    
     
     /**
      * Get the catalog model that corresponds to this controller.  The model
@@ -275,17 +306,46 @@ public class CatalogController implements UstadController{
                 bgThread.start();
             }
         }else {
-            
+            String title = entry.title;
+            selectedEntries = new UstadJSOPDSEntry[]{entry};
+            view.showConfirmDialog("Download?", "Download " + title + "?", "OK", 
+                "Cancel", CMD_DOWNLOADENTRY);
         }
     }
     
     /**
-     * Triggered when the user confirms that they wish to download a given container
+     * Called when the user makes a choice on the confirm dialog
+     * 
+     * @param userResponse true if the user selected the positive option (e.g. OK)
+     * , false otherwise (e.g. Cancel)
+     * @param commandId The commandId that was provided when the dialog was shown
+     */
+    public void handleConfirmDialogClick(boolean userResponse, int commandId) {
+        if(!userResponse) {
+            return;
+        }
+        
+        switch(commandId) {
+            case CMD_DOWNLOADENTRY:
+                this.handleConfirmDownloadEntries(selectedEntries);
+                break;
+        }
+    }
+    
+    
+    /**
+     * Triggered when the user confirms that they wish to download a given set 
+     * of entries
      * 
      * @param item 
      */
-    public void handleConfirmDownloadContainer(UstadJSOPDSItem item) {
-        
+    public void handleConfirmDownloadEntries(UstadJSOPDSEntry[] entries) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UMTransferJobList transferJob;
+        transferJob = CatalogController.acquireCatalogEntries(entries, impl.getActiveUser(), 
+                impl.getActiveUserAuth(), SHARED_RESOURCE, CACHE_ENABLED);
+        //TODO: Add event listeners to update progress etc.
+        transferJob.start();
     }
     
     /**
@@ -615,8 +675,10 @@ public class CatalogController implements UstadController{
      * @param httpPassword optional HTTP authentication password - can be null
      * @param flags bitmask flags to use (unused currently)
      * @param resourceMode SHARED_RESOURCE or USER_RESOURCE to save to shared area or user specific area.
+     * 
+     * @return a Transfer job, that when it's start method is called will acquire the given entries
      */
-    public static UMTransferJob acquireCatalogEntries(UstadJSOPDSEntry[] entries, String httpUsername, String httpPassword, int resourceMode, int flags) {
+    public static UMTransferJobList acquireCatalogEntries(UstadJSOPDSEntry[] entries, String httpUsername, String httpPassword, int resourceMode, int flags) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UMTransferJob[] transferJobs = new UMTransferJob[entries.length];
         String[] mimeTypes = new String[entries.length];

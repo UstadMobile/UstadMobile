@@ -67,7 +67,7 @@ public interface CatalogView extends UstadView{
      * @param text 
      * @param commandId The type of event (the view should then know what to trigger next)
      */
-    public void showDialog(String title, String text, int commandId);
+    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId);
     
     /**
      * Show the context menu for a container (e.g. more info, delete this item, etc)

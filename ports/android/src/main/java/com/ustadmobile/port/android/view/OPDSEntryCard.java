@@ -34,6 +34,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 /**
@@ -65,4 +66,10 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     }
 
 
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        int newColor = isSelected() ? R.color.opds_card_pressed : R.color.opds_card_normal;
+        this.setCardBackgroundColor(getContext().getResources().getColor(newColor));
+    }
 }
