@@ -29,9 +29,11 @@
 
  */
 package com.ustadmobile.app.tests;
+import com.ustadmobile.app.HTTPUtils;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
 import j2meunit.framework.TestSuite;
+import java.io.IOException;
 
 /**
  *
@@ -55,8 +57,9 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
                 
-        //allTestSuite.addTest(new TestUnzip());
-        
+        //allTestSuite.addTest(new TestSimple());
+        allTestSuite.addTest(new TestSimpleHTTP());
+
         allTestSuite.addTest(new TestCustomLWUIT());
         allTestSuite.addTest(new TestFormShow());
         allTestSuite.addTest(new TestSimple());
@@ -76,7 +79,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestCatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
-        
+ 
         return allTestSuite;
 
     }

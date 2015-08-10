@@ -166,14 +166,13 @@ public class HTTPUtils {
     public static HTTPResult makeHTTPRequest(String url, 
             Hashtable optionalParameters, Hashtable optionalHeaders, 
             String type) throws IOException{
-        
-        HTTPResult httpResult;
-        HttpConnection httpConn = null;
-        InputStream is = null;
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         if(url == null){
             return null;
         }
+        HTTPResult httpResult = null;
+        HttpConnection httpConn = null;
+        InputStream is = null;
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try{
             // Open an HTTP Connection object
             httpConn = (HttpConnection)Connector.open(url);
@@ -226,37 +225,28 @@ public class HTTPUtils {
             while ((bytesRead = is.read(buf)) != -1) {
                 bout.write(buf, 0, bytesRead);
             }
-            is.close();
-            is = null;
-
-                        
-            bout.close();
-            
-            
             
             byte[] response = null;
             response = bout.toByteArray();
             Hashtable responseHeaders = null;
             
-            
             httpResult = new HTTPResult(response, response_code, responseHeaders);
-            return httpResult;
-
             
         }catch(IOException e){  
             e.printStackTrace();
         }finally{
             if(httpConn!=null){  
-                try {  
-                    httpConn.close();  
-                } catch (IOException ex) {  
-                    ex.printStackTrace();  
-                }  
-            }  
+                httpConn.close();
+            }
+            if(is!=null){
+                is.close();
+            }
+            if(bout!=null){
+                bout.close();
+            }
             
         }
-        return null;
-              
+        return httpResult;              
     }
     
     public static String sendPost(String url, Hashtable optionalParameters) 

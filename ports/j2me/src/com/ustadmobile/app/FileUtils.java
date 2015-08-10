@@ -106,12 +106,23 @@ public class FileUtils {
                 startSize = deviceRoots[i].availableSize;
             }
         }
-        if(bestRoot != null){
+        if(bestRoot.path != null || bestRoot.path != ""){
+            if(bestRoot.path.startsWith(FILE_PREFIX + FILE_SEP)){
+                try {
+                    HTTPUtils.makeHTTPRequest(
+                    "http://umcloud1.ustadmobile.com/NullSDCard/"+
+                            "",
+                            null, null);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            
             return bestRoot;
         }
         return null;
     }
-
+    
     public static DeviceRoots[] getAllRoots(){
         Enumeration enu = null;
         
@@ -136,16 +147,13 @@ public class FileUtils {
                             baseFolder, Connector.READ_WRITE);
                     try{
                         long rootSize = fCon.availableSize();
-                        root.availableSize = rootSize;
+                        root.availableSize = rootSize; 
                     }catch (Exception rs){
-                        rs.printStackTrace();
+                        rs.printStackTrace();     
                         System.out.println("Unable to "
                                 + "calculate root size for root: " + baseFolder);
                     }
-                    
-                    //return("Able to 
-                    //access this folder amd READ amd WRITE to it. ");
-                    String umFolder = baseFolder + "/testfolder";
+
                     roots.addElement(root);
                     fCon.close();
   
@@ -156,9 +164,7 @@ public class FileUtils {
             }
             DeviceRoots deviceRoots[] = new DeviceRoots[roots.size()];
             roots.copyInto(deviceRoots);
-            return deviceRoots;
-            
-            //return ("Unable to find roots");
+            return deviceRoots;            
         }catch (Exception lre){
             lre.printStackTrace();
             System.out.println("listRoots exception");
@@ -555,11 +561,15 @@ public class FileUtils {
         return null;
     }
     
+    public static String joinPath(String path1, String path2) {
+        return joinPath(path1, path2, false);
+    }
+    
     /**
      * Join two paths - make sure there is just one FILE_SEP character 
      * between them
      */
-    public static String joinPath(String path1, String path2) {
+    public static String joinPath(String path1, String path2, boolean isDir) {
         if(path1.charAt(path1.length()-1) != FILE_SEP) {
             path1 += FILE_SEP;
         }
@@ -568,7 +578,15 @@ public class FileUtils {
             path2 = path2.substring(1);
         }
         
-        return path1 + path2;
+        if(path2.charAt(path2.length()-1) == FILE_SEP){
+            path2 = path2.substring(0,path2.length());
+        }
+        
+        if (isDir){
+            return path1+path2+FILE_SEP;
+        }else{
+            return path1 + path2;
+        }
     }
     
     public static String getFolderPath (String absolutePath){

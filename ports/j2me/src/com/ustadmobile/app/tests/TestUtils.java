@@ -30,11 +30,14 @@
  */
 package com.ustadmobile.app.tests;
 
+import com.ustadmobile.app.FileUtils;
+import com.ustadmobile.app.HTTPUtils;
 import java.io.InputStream;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import org.xmlpull.v1.XmlPullParser;
 import com.ustadmobile.app.controller.UstadMobileAppController;
+import java.io.IOException;
 import javax.microedition.io.file.FileConnection;
 
 /**
@@ -55,7 +58,7 @@ public class TestUtils {
         return mainInstance;
     }
     
-    public void loadTestSettingsResource() throws Exception {
+    public void loadTestSettingsResource() throws Exception { 
         InputStream is = getClass().getResourceAsStream(
                 "/com/ustadmobile/app/tests/test-settings.xml");
         XmlPullParser xpp = UstadMobileAppController.parseXml(is);
