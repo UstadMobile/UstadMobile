@@ -628,8 +628,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         private void fireDownloadComplete() {
             int[] downloadStatus = getProgressAndTotal();
-            UMProgressEvent evt = new UMProgressEvent(UMProgressEvent.TYPE_COMPLETE, downloadStatus[0],
-                    downloadStatus[1], 200);
+            UMProgressEvent evt = new UMProgressEvent(this, UMProgressEvent.TYPE_COMPLETE,
+                    downloadStatus[0], downloadStatus[1], 200);
             for(int i = 0; i < progressListeners.size(); i++) {
                 progressListeners.get(i).progressUpdated(evt);
             }
@@ -710,7 +710,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
 
         @Override
-        public void addProgresListener(UMProgressListener umProgressListener) {
+        public void addProgressListener(UMProgressListener umProgressListener) {
             this.progressListeners.add(umProgressListener);
         }
 
@@ -723,29 +723,31 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         public int getTotalSize() {
             int totalSize = -1;
 
+            if(cachedTotalSize != -1) {
+                return cachedTotalSize;
+            }
+
             // if we are trying to get the total size before an exception will be thrown here
             try {
-                totalSize =getProgressAndTotal()[1];
+                cachedTotalSize  =getProgressAndTotal()[1];
+                totalSize = cachedTotalSize;
             }catch(Exception e) {}
 
             if(totalSize == -1) {
-                if(cachedTotalSize != -1) {
-                    totalSize = cachedTotalSize;
-                }else {
-                    Hashtable headersToSend = new Hashtable();
-                    try {
-                        HTTPResult result = hostImpl.makeRequest(this.srcURL, headersToSend, null,
-                            "HEAD");
-                        String contentLengthStr = result.getHeaderValue("content-length");
-                        if(contentLengthStr != null) {
-                            totalSize = Integer.parseInt(contentLengthStr);
-                            this.cachedTotalSize = totalSize;
-                        }
-                    }catch(IOException e) {
-                        e.printStackTrace();
-                        //do nothing; just means we don't know the size of this job for the moment
+                Hashtable headersToSend = new Hashtable();
+                try {
+                    HTTPResult result = hostImpl.makeRequest(this.srcURL, headersToSend, null,
+                        "HEAD");
+                    String contentLengthStr = result.getHeaderValue("content-length");
+                    if(contentLengthStr != null) {
+                        totalSize = Integer.parseInt(contentLengthStr);
+                        this.cachedTotalSize = totalSize;
                     }
+                }catch(IOException e) {
+                    e.printStackTrace();
+                    //do nothing; just means we don't know the size of this job for the moment
                 }
+
             }
 
 

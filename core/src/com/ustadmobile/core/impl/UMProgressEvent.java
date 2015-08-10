@@ -42,23 +42,29 @@ public class UMProgressEvent {
     
     private int jobLength;
     
-    private int statusCode;
+    private int statusCode; 
     
     public static final int TYPE_PROGRESS = 0;
     
     public static final int TYPE_COMPLETE = 1;
     
+    private UMTransferJob evtSrc;
+    
     public UMProgressEvent() {
         
     }
     
-    public UMProgressEvent(int evtType, int progress, int jobLength, int statusCode) {
+    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
+        this.evtSrc = evtSrc;
         this.evtType = evtType;
         this.progress = progress;
         this.jobLength = jobLength;
         this.statusCode = statusCode;
     }
     
+    public UMTransferJob getSrc() {
+        return this.evtSrc;
+    }
     
     public int getEvtType() {
         return this.evtType;

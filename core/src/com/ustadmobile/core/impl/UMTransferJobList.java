@@ -42,6 +42,8 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
 
     private UMTransferJob[] jobList;
     
+    private Object[] jobValues;
+    
     private int currentItem;
     
     private int totalSizeCombined = -1;
@@ -63,11 +65,87 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
      */
     private Runnable runAfterFinishJob;
     
+    /**
+     * Total in bytes of jobs in list that have completed so far
+     */
+    private int completedJobBytes;
+    
+    /**
+     * Number of bytes downloaded on the current job
+     */
+    private int currentJobProgress;
+    
+    /**
+     * Total size of the current job
+     */
+    private int currentJobSize;
+    
+    /**
+     * Create a new transfer job list for the given transfer jobs
+     * 
+     * @param jobList Array of transfer jobs to run sequentially
+     */
     public UMTransferJobList(UMTransferJob[] jobList) {
         this.jobList = jobList;
         this.currentItem = -1;
         progressListeners = new Vector();
         isFinished = false;
+        completedJobBytes = 0;
+    }
+    
+    /**
+     * Create a new transfer job list for the given transfer jobs
+     * 
+     * @param jobList Array of transfer jobs to run sequentially
+     * @param jobValues Array of values associated with each job (optional) Can
+     * be useful to associate transfer jobs with what they represent for alert
+     * progress update purposes etc.
+     */
+    public UMTransferJobList(UMTransferJob[] jobList, Object[] jobValues) {
+        this(jobList);
+        this.jobValues = jobValues;
+    }
+    
+    /**
+     * Gives the index of the job that is currently in progress now
+     * 
+     * @return Index of the job in progress now
+     */
+    public int getCurrentItem() {
+        return this.currentItem;
+    }
+    
+    /**
+     * Returns the last known progress of the job currently in progress now.
+     * This is cached from it's update events as asking live can have overhead.
+     * 
+     * @return number of bytes downloaded by the current job in the list
+     */
+    public int getCurrentJobProgress() {
+        return this.currentJobProgress;
+    }
+    
+    /**
+     * Returns the total size of the current job.  Jobs themselves are expected
+     * to cache their total size
+     * 
+     * @return total number of bytes in the current job
+     */
+    public int getCurrentJobTotalSize() {
+        return this.jobList[currentItem].getTotalSize();
+    }
+    
+    /**
+     * Get the value object associated with a particular transfer job in the list
+     * 
+     * Note: This can only be used if jobValues were given at the time of creation
+     * via the constructor method
+     * 
+     * @param index index corresponding with that of the transfer job
+     * @return The object value at this index
+     */
+    public Object getJobValue(int index) {
+        return this.jobValues[index];
     }
     
     @Override
@@ -84,7 +162,7 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         getTotalSize();
         if(this.jobList.length > 0) {
             currentItem = 0;
-            this.jobList[0].addProgresListener(this);
+            this.jobList[0].addProgressListener(this);
             this.jobList[0].start();
         }
     }
@@ -111,13 +189,13 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
     }
 
     @Override
-    public void addProgresListener(UMProgressListener listener) {
+    public void addProgressListener(UMProgressListener listener) {
         progressListeners.add(listener);
     }
 
     @Override
     public int getBytesDownloadedCount() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return -1;
     }
 
     @Override
@@ -150,10 +228,12 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
     @Override
     public void progressUpdated(UMProgressEvent evt) {
         if(evt.getEvtType() == UMProgressEvent.TYPE_COMPLETE) {
+            this.completedJobBytes += evt.getProgress();
+
             // time to start the next download
             if(currentItem < this.jobList.length - 1) {
                 currentItem++;
-                this.jobList[currentItem].addProgresListener(this);
+                this.jobList[currentItem].addProgressListener(this);
                 this.jobList[currentItem].start();
             }else {
                 isFinished = true;
@@ -161,14 +241,20 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
                     runAfterFinishJob.run();
                 }
                 
-                fireComplete();
+                UMProgressEvent subEvt = new UMProgressEvent(this, UMProgressEvent.TYPE_COMPLETE, 
+                    totalSizeCombined, totalSizeCombined, 200);
+                fireProgressEvt(subEvt);
             }
+        }else {
+            this.currentJobProgress = evt.getProgress();
+            int sizeCompleted = completedJobBytes + currentJobProgress;
+            UMProgressEvent subEvt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS,
+                    sizeCompleted, totalSizeCombined, 200);
+            fireProgressEvt(subEvt);
         }
     }
     
-    protected void fireComplete() {
-        UMProgressEvent evt = new UMProgressEvent(UMProgressEvent.TYPE_COMPLETE, 
-            totalSizeCombined, totalSizeCombined, 200);
+    protected void fireProgressEvt(UMProgressEvent evt) {
         for(int i = 0; i < progressListeners.size(); i++) {
             ((UMProgressListener)progressListeners.get(i)).progressUpdated(evt);
         }

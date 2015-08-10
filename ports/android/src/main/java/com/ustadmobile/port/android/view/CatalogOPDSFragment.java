@@ -52,6 +52,8 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
+import java.util.ArrayList;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -69,6 +71,8 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     private CatalogViewAndroid catalogView;
 
     private ListView catalogListView;
+
+    private ArrayList<UstadJSOPDSEntry> selectedEntries;
 
     /**
      * Use this factory method to create a new instance of
@@ -99,6 +103,8 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             catalogView.setFragment(this);
             catalogView.setCatalogViewActivity((CatalogActivity)getActivity());
         }
+
+        selectedEntries = new ArrayList<UstadJSOPDSEntry>();
     }
 
     @Override
@@ -163,11 +169,25 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         mListener = null;
     }
 
+    public void toggleEntrySelected(OPDSEntryCard card) {
+        boolean nowSelected = !card.isSelected();
+        if(nowSelected) {
+            selectedEntries.add(card.getEntry());
+        }else {
+            selectedEntries.remove(card.getEntry());
+        }
+        card.setSelected(nowSelected);
+    }
+
     @Override
     public void onClick(View view) {
         if(view instanceof OPDSEntryCard) {
-            UstadJSOPDSEntry entry = ((OPDSEntryCard)view).getEntry();
-            catalogView.getController().handleClickEntry(entry);
+            OPDSEntryCard card = ((OPDSEntryCard)view);
+            if(selectedEntries.size() > 0) {
+                toggleEntrySelected(card);
+            }else {
+                catalogView.getController().handleClickEntry(card.getEntry());
+            }
         }
     }
 
@@ -175,7 +195,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     public boolean onLongClick(View view) {
         if(view instanceof OPDSEntryCard) {
             OPDSEntryCard card = (OPDSEntryCard)view;
-            card.setSelected(!card.isSelected());
+            toggleEntrySelected(card);
             return true;
         }
 

@@ -47,7 +47,7 @@ public interface UMTransferJob {
      * 
      * @param listener 
      */
-    public void addProgresListener(UMProgressListener listener);
+    public void addProgressListener(UMProgressListener listener);
     
     /**
      * Return the total number of bytes processed (e.g. downloaded) thus far

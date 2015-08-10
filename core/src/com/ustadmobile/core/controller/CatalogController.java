@@ -31,6 +31,8 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.app.Base64;
+import com.ustadmobile.core.impl.UMProgressEvent;
+import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UMTransferJobList;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -70,7 +72,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController implements UstadController{
+public class CatalogController implements UstadController, UMProgressListener {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -114,6 +116,8 @@ public class CatalogController implements UstadController{
     
     
     private UstadJSOPDSEntry[] selectedEntries;
+    
+    private Vector activeTransferJobs;
     
     //The View (J2ME or Android)
     private CatalogView view;
@@ -345,7 +349,12 @@ public class CatalogController implements UstadController{
         transferJob = CatalogController.acquireCatalogEntries(entries, impl.getActiveUser(), 
                 impl.getActiveUserAuth(), SHARED_RESOURCE, CACHE_ENABLED);
         //TODO: Add event listeners to update progress etc.
+        if(activeTransferJobs == null) {
+            activeTransferJobs = new Vector();
+        }
+        transferJob.addProgressListener(this);
         transferJob.start();
+        activeTransferJobs.addElement(transferJob);
     }
     
     /**
@@ -715,10 +724,23 @@ public class CatalogController implements UstadController{
                 authHeaders);
         }
         
-        UMTransferJobList transferJob = new UMTransferJobList(transferJobs);
+        UMTransferJobList transferJob = new UMTransferJobList(transferJobs, 
+            entries);
         transferJob.setRunAfterFinishJob(new AcquirePostDownloadRunnable(entries, 
-                transferJobs, mimeTypes, resourceMode));
+            transferJobs, mimeTypes, resourceMode));
         return transferJob;
+    }
+
+    @Override
+    public void progressUpdated(UMProgressEvent evt) {
+        if(this.view != null) {
+            UMTransferJobList jobList = (UMTransferJobList)evt.getSrc();
+            int currentJobItem = jobList.getCurrentItem();
+            UstadJSOPDSEntry entry = (UstadJSOPDSEntry)jobList.getJobValue(
+                currentJobItem);
+            this.view.updateDownloadEntryProgress(entry.id, jobList.getCurrentJobProgress(), 
+                jobList.getCurrentJobTotalSize());
+        }
     }
     
     /**

@@ -96,7 +96,7 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
         jobList.setRunAfterFinishJob(afterFinishJob);
         
         int listSize = jobList.getTotalSize();
-        jobList.addProgresListener(this);
+        jobList.addProgressListener(this);
         assertTrue("Can get positive total size for download list", listSize > 0);
         jobList.start();
         
