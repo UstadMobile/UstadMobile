@@ -39,6 +39,10 @@ NetBeans.  See README for instructions on building from source.
     <property name="MidletSuite" value="UstadMobileMicro"/>
     <property name="Midlet_1_name" value="Ustad Mobile"/>
     <property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2METest"/>
+
+    <property name="MidletSuite2" value="UstadMobileRun"/>
+    <property name="Midlet_2_name" value="Ustad Mobile Run"/>
+    <property name="Midlet_2_class" value="ustadmobilej2me.UstadMobileJ2MERun"/>    
     <!--<property name="Midlet_1_class" value="ustadmobilej2me.SetRootWritable"/>-->
     <!--<property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2MERun"/>-->
     <!--
@@ -115,10 +119,29 @@ NetBeans.  See README for instructions on building from source.
 
             <attribute name="progressive_download" value="enabled"/>
 
+        </wtkjad>
+
+        <wtkjad jadfile="${dist.dir.ANTENNA}/${MidletSuite2}.jad" 
+            jarfile="${dist.dir.ANTENNA}/${MidletSuite2}.jar"
+            name="Ustad Mobile"
+            vendor="Ustad Mobile Inc">
+
+            <midlet name="${Midlet_2_name}" class="${Midlet_2_class}"></midlet>
+
+            <attribute name="MIDlet-Version" value="${ustadmobileversion}"/>
+
+            <attribute name="MicroEdition-Configuration" value="CLDC-1.1"/>
+            <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
+            <attribute name="Antenna-MIDlet-Category" value="Application"/>
+            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket"/>
+            <attribute name="Nokia-Update" value="http://www.ustadmobile.com/jad/midp2/UstadMobileMicro.jad"/>
+            <attribute name="MIDlet-Jar-URL" value="${MidletSuite2}.jar"/>
+
+            <attribute name="progressive_download" value="enabled"/>
 
         </wtkjad>
 
-	<copy file="${src.dir}/com/ustadmobile/app/tests/test.opds" tofile="${classes.dir.ANTENNA}/com/ustadmobile/app/tests/test.opds"/>
+    	<copy file="${src.dir}/com/ustadmobile/app/tests/test.opds" tofile="${classes.dir.ANTENNA}/com/ustadmobile/app/tests/test.opds"/>
         <copy file="${src.dir}/com/ustadmobile/app/tests/test.opf" tofile="${classes.dir.ANTENNA}/com/ustadmobile/app/tests/test.opf"/>
         <copy file="${src.dir}/com/ustadmobile/app/tests/test-settings.xml" tofile="${classes.dir.ANTENNA}/com/ustadmobile/app/tests/test-settings.xml"/>
 
@@ -126,6 +149,19 @@ NetBeans.  See README for instructions on building from source.
         <wtkpackage basedir="${classes.dir.ANTENNA}" 
             jarfile="${dist.dir.ANTENNA}/${MidletSuite}.jar"
             jadfile="${dist.dir.ANTENNA}/${MidletSuite}.jad"
+            config="CLDC-1.1"
+            profile="MIDP-2.0"
+            obfuscate="${ustadmobile.obfuscate}"
+            preverify="true"
+            libclasspath="${toString:ustadlibclasspath.ref}"
+            bootclasspath="${wtk.active.bootclasspath}:${wtk.proguard.home}/lib/proguard.jar:${classpath.antennaui}" 
+            includes="${javac.includes}">
+                <fileset dir="${classes.dir.ANTENNA}"/>
+
+        </wtkpackage>
+        <wtkpackage basedir="${classes.dir.ANTENNA}" 
+            jarfile="${dist.dir.ANTENNA}/${MidletSuite2}.jar"
+            jadfile="${dist.dir.ANTENNA}/${MidletSuite2}.jad"
             config="CLDC-1.1"
             profile="MIDP-2.0"
             obfuscate="${ustadmobile.obfuscate}"
@@ -149,6 +185,14 @@ NetBeans.  See README for instructions on building from source.
             keystore="${wtk.keystore}"
             jarfile="${dist.dir.ANTENNA}/${MidletSuite}.jar" 
             jadfile="${dist.dir.ANTENNA}/${MidletSuite}.jad"
+            storepass="${wtk.storepass}" 
+            certpass="${wtk.certpass}" 
+            certalias="${wtk.certalias}"
+        />
+        <wtksign
+            keystore="${wtk.keystore}"
+            jarfile="${dist.dir.ANTENNA}/${MidletSuite2}.jar" 
+            jadfile="${dist.dir.ANTENNA}/${MidletSuite2}.jad"
             storepass="${wtk.storepass}" 
             certpass="${wtk.certpass}" 
             certalias="${wtk.certalias}"

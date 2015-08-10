@@ -34,6 +34,7 @@ import com.ustadmobile.app.DeviceRoots;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import com.ustadmobile.app.FileUtils;
+import com.ustadmobile.app.HTTPUtils;
 import com.ustadmobile.app.RMSUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -110,22 +111,46 @@ public class UstadMobileAppController {
      * Find out where we should put the base folder by finding the root folder
      * with the maximum amount of space (this should be the memory card generally)
      */
-    public static String getAppDataDir(){
+    public static String getAppDataDir() throws IOException{
+//        HTTPUtils.makeHTTPRequest("http://umcloud1.ustadmobile.com/b4bestRoot/"+
+//                    "",
+//                    null, null);
         DeviceRoots bestRoot = FileUtils.getBestRoot();
+//        HTTPUtils.makeHTTPRequest("http://umcloud1.ustadmobile.com/afterBestRoot/"+
+//                    "",
+//                    null, null);
+//        try {
+//            String br = FileUtils.replaceString(bestRoot.path, " ", "@");
+//            br = FileUtils.replaceString(br, ":", "|");
+//            HTTPUtils.makeHTTPRequest("http://umcloud1.ustadmobile.com/bestRoot/"+
+//                    br,
+//                    null, null);
+//        } catch (IOException ex) {
+//            ex.printStackTrace();
+//        }
         if (bestRoot==null){
             return null;
         }
-        String baseFolder = bestRoot.path + "umobiledata";
+        //String baseFolder = bestRoot.path + "umobiledata" +"/";
+        String baseFolder = FileUtils.joinPath(bestRoot.path, "umobiledata", true);
+        FileConnection bCon = null;
         try{
-            FileConnection bCon = (FileConnection)Connector.open(baseFolder);
+            bCon = (FileConnection)Connector.open(baseFolder, 
+                    Connector.READ_WRITE);
+            if (!bCon.exists()){
+                bCon.mkdir();
+            }
             if (!bCon.isDirectory()){
                 bCon.mkdir();
             }
-            bCon.close();
             appDataDir = baseFolder;
             return appDataDir;
         }catch (Exception ce){
             return null;
+        } finally {
+            if (bCon != null){
+                bCon.close();
+            }
         }
     }
     
