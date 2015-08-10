@@ -33,6 +33,7 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ViewFactory;
 import java.io.IOException;
@@ -74,10 +75,17 @@ public abstract class UstadMobileSystemImpl {
      * Starts the user interface for the app
      */
     public void startUI() {
+        //new LoginController().show();
+        
+        
         if(getActiveUser() == null) {
             new LoginController().show();
         }else {
-            new CatalogController().show();
+            try {
+                CatalogController.makeUserCatalog(this).show();
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
     
@@ -179,11 +187,14 @@ public abstract class UstadMobileSystemImpl {
     public abstract boolean dirExists(String dirURI) throws IOException;
     
     /**
-     * Remove the given file
+     * Remove the given file.  If the file does not exist, this method simply
+     * returns false (also returns false if the file does exist but for some
+     * other reason... e.g. permissions cannot be deleted).
+     * 
      * @param fileURI URI to be removed
-     * @throws IOException 
+     * @return true if the file was successfully deleted, false otherwise
      */
-    public abstract void removeFile(String fileURI) throws IOException;
+    public abstract boolean removeFile(String fileURI);
     
     /**
      * List of files and directories within a directory as an array of Strings.
@@ -237,7 +248,16 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param username username as a string, or null for no active user
      */
-    public abstract void setActiveUser(String username);
+    public void setActiveUser(String username) {
+        //Make sure there is a valid directory for this user
+        String userDirPath = getUserContentDirectory(username);
+        try {
+            makeDirectory(userDirPath);
+        }catch(IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
     
     /**
      * Get the currently active user
@@ -277,6 +297,19 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getUserPref(String key);
     
+    
+    /**
+     * Get a preference for the currently active user 
+     * 
+     * @param key preference key as a string
+     * @param defaultVal default value to return in case this is not set for this user
+     * @return Value of preference for this user if set, otherwise defaultVal
+     */
+    public String getUserPref(String key, String defaultVal) {
+        String valFound = getUserPref(key);
+        return valFound != null ? valFound : defaultVal;
+    }
+    
     /**
      * Get a list of preference keys for currently active user
      * 
@@ -300,12 +333,41 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getAppPref(String key);
     
     /**
+     * Get a preference for the app.  If not set, return the provided defaultVal
+     *
+     * @param key preference key as string
+     * @param defaultVal default value to return if not set
+     * @return value of the preference if set, defaultVal otherwise
+     */
+    public String getAppPref(String key, String defaultVal) {
+        String valFound = getAppPref(key);
+        return valFound != null ? valFound : defaultVal;
+    }
+    
+    /**
      * Set a preference for the app
      * @param key preference that is being set
      * @param value value to be set
      * 
      */
     public abstract void setAppPref(String key, String value);
+    
+    /**
+     * Convenience method: setPref will use setUserPref if
+     * isUser is true, setAppPref otherwise
+     * 
+     * @param isUserSpecific true if this is a user specific preference
+     * @param key Preference key
+     * @param value Value of preference to store
+     */
+    public void setPref(boolean isUserSpecific, String key, String value) {
+        if(isUserSpecific) {
+            setUserPref(key, value);
+        }else {
+            setAppPref(key, value);
+        }
+    }
+    
     
     /**
      * Do a basic HTTP Request
@@ -351,6 +413,14 @@ public abstract class UstadMobileSystemImpl {
      * @return A new default options XmlPullParser
      */
     public abstract XmlPullParser newPullParser() throws XmlPullParserException;
+    
+    /**
+     * Get access to the App View to do common UI activities (e.g. show
+     * progress dialog, flash message, etc)
+     * 
+     * @return Platform AppView
+     */
+    public abstract AppView getAppView();
 }
 
 

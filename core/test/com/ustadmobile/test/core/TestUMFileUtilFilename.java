@@ -28,58 +28,34 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+package com.ustadmobile.test.core;
+
+
+/* $if umplatform == 2  $
+    import org.j2meunit.framework.TestCase;
+ $else$ */
+    import junit.framework.TestCase;
+/* $endif$ */
+
+import com.ustadmobile.core.util.UMFileUtil;
+
 
 /**
  *
  * @author mike
  */
-public class UMProgressEvent {
+public class TestUMFileUtilFilename extends TestCase{
     
-    private int evtType;
-    
-    private int progress;
-    
-    private int jobLength;
-    
-    private int statusCode; 
-    
-    public static final int TYPE_PROGRESS = 0;
-    
-    public static final int TYPE_COMPLETE = 1;
-    
-    private UMTransferJob evtSrc;
-    
-    public UMProgressEvent() {
-        
-    }
-    
-    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
-        this.evtSrc = evtSrc;
-        this.evtType = evtType;
-        this.progress = progress;
-        this.jobLength = jobLength;
-        this.statusCode = statusCode;
-    }
-    
-    public UMTransferJob getSrc() {
-        return this.evtSrc;
-    }
-    
-    public int getEvtType() {
-        return this.evtType;
-    }
-    
-    public int getJobLength() {
-        return this.jobLength;
-    }
-    
-    public int getProgress() {
-        return this.progress;
-    }
-    
-    public int getStatusCode() {
-        return this.statusCode;
+    public void testFileUtilFilename() {
+        assertEquals("Will return the same for a name only entry", 
+            UMFileUtil.getFilename("testfile.txt"), "testfile.txt");
+        assertEquals("Will return the same for a name only entry with trailing /", 
+            UMFileUtil.getFilename("somedir/"), "somedir/");
+        assertEquals("Will cut the path off and return filnemae", 
+            UMFileUtil.getFilename("/somedir/file.txt"), "file.txt");
+        assertEquals("Will cut off query string", 
+            UMFileUtil.getFilename("http://someplace.com/somedir/file.txt"), 
+            "file.txt");
     }
     
     

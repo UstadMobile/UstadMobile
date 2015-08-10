@@ -28,59 +28,28 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+package com.ustadmobile.core.view;
 
 /**
- *
+ * Display methods that can be used in multiple areas: dialog, alerts, etc.
+ * 
  * @author mike
  */
-public class UMProgressEvent {
+public interface AppView {
     
-    private int evtType;
+    /**
+     * Show progress going on (e.g. show spinner) with title
+     * 
+     * @param title 
+     */
+    public abstract void showProgressDialog(String title);
     
-    private int progress;
-    
-    private int jobLength;
-    
-    private int statusCode; 
-    
-    public static final int TYPE_PROGRESS = 0;
-    
-    public static final int TYPE_COMPLETE = 1;
-    
-    private UMTransferJob evtSrc;
-    
-    public UMProgressEvent() {
-        
-    }
-    
-    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
-        this.evtSrc = evtSrc;
-        this.evtType = evtType;
-        this.progress = progress;
-        this.jobLength = jobLength;
-        this.statusCode = statusCode;
-    }
-    
-    public UMTransferJob getSrc() {
-        return this.evtSrc;
-    }
-    
-    public int getEvtType() {
-        return this.evtType;
-    }
-    
-    public int getJobLength() {
-        return this.jobLength;
-    }
-    
-    public int getProgress() {
-        return this.progress;
-    }
-    
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-    
+    /**
+     * Dismiss the progress dialog (if showing).  If this method is called
+     * when no progress dialog is showing there is no effect/no error thrown
+     * 
+     * @return true if dialog was showing and is now hidden, false otherwise
+     */
+    public abstract boolean dismissProgressDialog();
     
 }

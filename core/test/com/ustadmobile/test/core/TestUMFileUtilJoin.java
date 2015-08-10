@@ -28,59 +28,40 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+package com.ustadmobile.test.core;
+
+/* $if umplatform == 2  $
+    import org.j2meunit.framework.TestCase;
+ $else$ */
+    import junit.framework.TestCase;
+/* $endif$ */
+
+import com.ustadmobile.core.util.UMFileUtil;
 
 /**
  *
  * @author mike
  */
-public class UMProgressEvent {
+public class TestUMFileUtilJoin extends TestCase{
     
-    private int evtType;
-    
-    private int progress;
-    
-    private int jobLength;
-    
-    private int statusCode; 
-    
-    public static final int TYPE_PROGRESS = 0;
-    
-    public static final int TYPE_COMPLETE = 1;
-    
-    private UMTransferJob evtSrc;
-    
-    public UMProgressEvent() {
+    public TestUMFileUtilJoin() {
         
     }
     
-    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
-        this.evtSrc = evtSrc;
-        this.evtType = evtType;
-        this.progress = progress;
-        this.jobLength = jobLength;
-        this.statusCode = statusCode;
+    public void setUp() {
     }
     
-    public UMTransferJob getSrc() {
-        return this.evtSrc;
+    public void tearDown() {
     }
     
-    public int getEvtType() {
-        return this.evtType;
+    public void testUMFileUtilJoin() {
+        assertEquals("Can handle basic join with to single slash", 
+            "testpath/somefile.txt", 
+            UMFileUtil.joinPaths(new String[]{"testpath/", "/somefile.txt"}));
+        assertEquals("Will not remove first slash", "/testpath/somefile.txt",
+            UMFileUtil.joinPaths(new String[]{"/testpath/", "/somefile.txt"}));
+        assertEquals("Will not remove trailing slash", "/testpath/somedir/",
+            UMFileUtil.joinPaths(new String[]{"/testpath/", "/somedir/"}));
     }
-    
-    public int getJobLength() {
-        return this.jobLength;
-    }
-    
-    public int getProgress() {
-        return this.progress;
-    }
-    
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-    
     
 }

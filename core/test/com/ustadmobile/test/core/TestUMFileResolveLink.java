@@ -28,59 +28,52 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+package com.ustadmobile.test.core;
+
+/* $if umplatform == 2  $
+    import org.j2meunit.framework.TestCase;
+ $else$ */
+    import junit.framework.TestCase;
+/* $endif$ */
+import com.ustadmobile.core.util.UMFileUtil;
 
 /**
  *
  * @author mike
  */
-public class UMProgressEvent {
+public class TestUMFileResolveLink extends TestCase{
     
-    private int evtType;
-    
-    private int progress;
-    
-    private int jobLength;
-    
-    private int statusCode; 
-    
-    public static final int TYPE_PROGRESS = 0;
-    
-    public static final int TYPE_COMPLETE = 1;
-    
-    private UMTransferJob evtSrc;
-    
-    public UMProgressEvent() {
+    public TestUMFileResolveLink() {
         
     }
     
-    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
-        this.evtSrc = evtSrc;
-        this.evtType = evtType;
-        this.progress = progress;
-        this.jobLength = jobLength;
-        this.statusCode = statusCode;
+    public void setUp() {
     }
     
-    public UMTransferJob getSrc() {
-        return this.evtSrc;
+    public void tearDown() {
     }
     
-    public int getEvtType() {
-        return this.evtType;
+    public void testUMFileUtilResolveLink() {
+        assertEquals("Absolute path returns same path back",
+            "http://www.server2.com/somewhere", 
+            UMFileUtil.resolveLink("http://server1.com/some/place", 
+                "http://www.server2.com/somewhere"));
+        assertEquals("Can resolve prtocol only link",
+            "http://www.server2.com/somewhere",
+            UMFileUtil.resolveLink("http://server1.com/some/place", 
+                "//www.server2.com/somewhere"));
+        assertEquals("Can resolve relative to server link",
+            "http://server1.com/somewhere",
+            UMFileUtil.resolveLink("http://server1.com/some/place", 
+                "/somewhere"));
+        assertEquals("Can handle basic relative path",
+            "http://server1.com/some/file.jpg",
+            UMFileUtil.resolveLink("http://server1.com/some/other.html", 
+                "file.jpg"));
+        assertEquals("Can handle .. in relative path",
+            "http://server1.com/file.jpg",
+            UMFileUtil.resolveLink("http://server1.com/some/other.html", 
+                "../file.jpg"));
     }
-    
-    public int getJobLength() {
-        return this.jobLength;
-    }
-    
-    public int getProgress() {
-        return this.progress;
-    }
-    
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-    
     
 }

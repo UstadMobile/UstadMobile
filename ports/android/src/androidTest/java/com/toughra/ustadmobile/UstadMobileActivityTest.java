@@ -43,7 +43,7 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
         String fileDownloadURL = TestConstants.TEST_HTTP_ROOT + "phonepic-large.png";
         UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
                 file3.getAbsolutePath(), new Hashtable());
-        job.addProgresListener(this);
+        job.addProgressListener(this);
         job.start();
 
 

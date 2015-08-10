@@ -28,59 +28,49 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+
+package com.ustadmobile.port.android.view;
+
+import android.app.ProgressDialog;
+
+import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 /**
- *
- * @author mike
+ * Created by mike on 07/08/15.
  */
-public class UMProgressEvent {
-    
-    private int evtType;
-    
-    private int progress;
-    
-    private int jobLength;
-    
-    private int statusCode; 
-    
-    public static final int TYPE_PROGRESS = 0;
-    
-    public static final int TYPE_COMPLETE = 1;
-    
-    private UMTransferJob evtSrc;
-    
-    public UMProgressEvent() {
-        
+public class AppViewAndroid implements AppView{
+
+    private UstadMobileSystemImplAndroid impl;
+
+    private ProgressDialog progressDialog;
+
+    public AppViewAndroid(UstadMobileSystemImplAndroid impl) {
+        this.impl = impl;
     }
-    
-    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
-        this.evtSrc = evtSrc;
-        this.evtType = evtType;
-        this.progress = progress;
-        this.jobLength = jobLength;
-        this.statusCode = statusCode;
+
+
+    @Override
+    public void showProgressDialog(final String title) {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                dismissProgressDialog();
+
+                progressDialog = ProgressDialog.show(impl.getCurrentContext(), title, "");
+            }
+        });
     }
-    
-    public UMTransferJob getSrc() {
-        return this.evtSrc;
+
+    @Override
+    public boolean dismissProgressDialog() {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
+            }
+        });
+        return progressDialog != null;
     }
-    
-    public int getEvtType() {
-        return this.evtType;
-    }
-    
-    public int getJobLength() {
-        return this.jobLength;
-    }
-    
-    public int getProgress() {
-        return this.progress;
-    }
-    
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-    
-    
 }

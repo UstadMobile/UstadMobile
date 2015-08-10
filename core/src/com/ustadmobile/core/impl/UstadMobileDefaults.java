@@ -31,56 +31,17 @@
 package com.ustadmobile.core.impl;
 
 /**
- *
+ * Assorted hard coded default values
  * @author mike
  */
-public class UMProgressEvent {
+public class UstadMobileDefaults {
     
-    private int evtType;
+    /**
+     * The default Experience API server
+     */
+    public static final String DEFAULT_XAPI_SERVER = 
+            "http://umcloud1.ustadmobile.com/umlrs/";
     
-    private int progress;
-    
-    private int jobLength;
-    
-    private int statusCode; 
-    
-    public static final int TYPE_PROGRESS = 0;
-    
-    public static final int TYPE_COMPLETE = 1;
-    
-    private UMTransferJob evtSrc;
-    
-    public UMProgressEvent() {
-        
-    }
-    
-    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
-        this.evtSrc = evtSrc;
-        this.evtType = evtType;
-        this.progress = progress;
-        this.jobLength = jobLength;
-        this.statusCode = statusCode;
-    }
-    
-    public UMTransferJob getSrc() {
-        return this.evtSrc;
-    }
-    
-    public int getEvtType() {
-        return this.evtType;
-    }
-    
-    public int getJobLength() {
-        return this.jobLength;
-    }
-    
-    public int getProgress() {
-        return this.progress;
-    }
-    
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-    
-    
+    public static final String DEFAULT_OPDS_SERVER = 
+            "http://umcloud1.ustadmobile.com/opds/";
 }

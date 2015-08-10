@@ -53,13 +53,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.ustadmobile.core.impl.*;
+import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.android.view.AppViewAndroid;
 
 import android.os.Build;
 import android.util.Log;
@@ -99,9 +103,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private SharedPreferences.Editor userPreferencesEditor;
 
+    public static final String EXTRA_VIEWID = "VIEWID";
+
+    private AppViewAndroid appView;
 
     public UstadMobileSystemImplAndroid() {
-
+        appView = new AppViewAndroid(this);
     }
 
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
@@ -121,7 +128,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     public void setCurrentActivity(Activity activity) {
-
+        this.currentActivity = activity;
+        setCurrentContext(activity);
     }
 
     public void setCurrentContext(Context context) {
@@ -129,13 +137,43 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             this.currentContext = context;
             SharedPreferences appPrefs = getAppSharedPreferences();
             currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
+            currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
             this.userPreferences = null;//change of context: force this to get reloaded when requested
         }
     }
 
+    /**
+     * Return the current Android context
+     * @return
+     */
     public Context getCurrentContext() {
         return this.currentContext;
     }
+
+    /**
+     * Return the current Android activity (may equal currentcontext)
+     *
+     */
+    public Activity getCurrentActivity() {
+        return this.currentActivity;
+    }
+
+    /**
+     * The implementation of the MVC pattern in Android generally means instantiating a view object
+     * and then starting an activity with an intent that contains an ID that can be used by the
+     * activity to find the view object that started it.
+     *
+     * This will start an activity, with the parameter EXTRA_VIEWID set to the given viewId
+     *
+     * @param activityClass The Class object of the Activity to start
+     * @param viewId An integer ID that activity expects so it can find it's view object after being created
+     */
+    public void startActivityForViewId(Class activityClass, int viewId) {
+        Intent startIntent = new Intent(getCurrentContext(), activityClass);
+        startIntent.putExtra(EXTRA_VIEWID, viewId);
+        getCurrentContext().startActivity(startIntent);
+    }
+
 
     @Override
     public String getSharedContentDir() {
@@ -148,7 +186,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public String getUserContentDirectory(String username) {
         File userDir = new File(Environment.getExternalStorageDirectory(),
             "ustadmobileContent/users/" + username);
-        return null;
+        return userDir.getAbsolutePath();
     }
 
     /**
@@ -244,9 +282,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public void removeFile(String fileURI) throws IOException {
+    public boolean removeFile(String fileURI)  {
         File f = new File(fileURI);
-        f.delete();
+        return f.delete();
     }
 
     @Override
@@ -327,6 +365,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     @Override
     public void setActiveUser(String username) {
+        super.setActiveUser(username);
         saveUserPrefs();
         SharedPreferences appPreferences = getAppSharedPreferences();
         SharedPreferences.Editor editor = appPreferences.edit();
@@ -421,6 +460,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         conn.connect();
 
+
         int contentLen = conn.getContentLength();
         InputStream in = conn.getInputStream();
         byte[] buf = new byte[1024];
@@ -430,14 +470,29 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         //do not read more bytes than is available in the stream
         int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
-            bout.write(buf, 0, bytesRead);
+        if(!method.equalsIgnoreCase("HEAD")) {
+            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
+                bout.write(buf, 0, bytesRead);
+            }
         }
+
         in.close();
+
+        Hashtable responseHeaders = new Hashtable();
+        Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
+        while(headerIterator.hasNext()) {
+            String header = headerIterator.next();
+            if(header == null) {
+                continue;//a null header is the response line not header; leave that alone...
+            }
+
+            String headerVal = conn.getHeaderField(header);
+            responseHeaders.put(header.toLowerCase(), headerVal);
+        }
 
         byte[] resultBytes = bout.toByteArray();
         HTTPResult result = new HTTPResult(resultBytes, conn.getResponseCode(),
-                new Hashtable());
+                responseHeaders);
         String resultStr = new String(resultBytes, "UTF-8");
 
         return result;
@@ -448,6 +503,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
         return parser;
+    }
+
+    @Override
+    public AppView getAppView() {
+        return appView;
     }
 
     /**
@@ -518,6 +578,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
          */
         private int finishedBytesDownloaded;
 
+        /**
+         * When a request for the total size is made before the job starts; use an HTTP HEAD
+         * request to get the total size if available.  This variable is used to store the result.
+         */
+        private int cachedTotalSize;
+
         public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplAndroid hostImpl) {
             this.hostImpl = hostImpl;
             this.srcURL = srcURL;
@@ -525,6 +591,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
             this.progressListeners = new LinkedList<UMProgressListener>();
             this.finished = false;
+            cachedTotalSize = -1;
         }
 
         @Override
@@ -561,8 +628,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         private void fireDownloadComplete() {
             int[] downloadStatus = getProgressAndTotal();
-            UMProgressEvent evt = new UMProgressEvent(UMProgressEvent.TYPE_COMPLETE, downloadStatus[0],
-                    downloadStatus[1], 200);
+            UMProgressEvent evt = new UMProgressEvent(this, UMProgressEvent.TYPE_COMPLETE,
+                    downloadStatus[0], downloadStatus[1], 200);
             for(int i = 0; i < progressListeners.size(); i++) {
                 progressListeners.get(i).progressUpdated(evt);
             }
@@ -643,7 +710,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
 
         @Override
-        public void addProgresListener(UMProgressListener umProgressListener) {
+        public void addProgressListener(UMProgressListener umProgressListener) {
             this.progressListeners.add(umProgressListener);
         }
 
@@ -654,12 +721,52 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         @Override
         public int getTotalSize() {
-            return getProgressAndTotal()[1];
+            int totalSize = -1;
+
+            if(cachedTotalSize != -1) {
+                return cachedTotalSize;
+            }
+
+            // if we are trying to get the total size before an exception will be thrown here
+            try {
+                cachedTotalSize  =getProgressAndTotal()[1];
+                totalSize = cachedTotalSize;
+            }catch(Exception e) {}
+
+            if(totalSize == -1) {
+                Hashtable headersToSend = new Hashtable();
+                try {
+                    HTTPResult result = hostImpl.makeRequest(this.srcURL, headersToSend, null,
+                        "HEAD");
+                    String contentLengthStr = result.getHeaderValue("content-length");
+                    if(contentLengthStr != null) {
+                        totalSize = Integer.parseInt(contentLengthStr);
+                        this.cachedTotalSize = totalSize;
+                    }
+                }catch(IOException e) {
+                    e.printStackTrace();
+                    //do nothing; just means we don't know the size of this job for the moment
+                }
+
+            }
+
+
+            return totalSize;
         }
 
         @Override
         public boolean isFinished() {
             return finished;
+        }
+
+        @Override
+        public String getSource() {
+            return srcURL;
+        }
+
+        @Override
+        public String getDestination() {
+            return destFileURI;
         }
     }
 

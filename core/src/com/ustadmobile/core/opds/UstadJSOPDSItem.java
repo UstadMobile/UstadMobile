@@ -126,6 +126,15 @@ public abstract class UstadJSOPDSItem {
         return this.getLinks(linkRel, mimeType, false, false);
     }
     
+    /**
+     * Search through the links of this opds item
+     * 
+     * @param linkRel
+     * @param mimeType
+     * @param relByPrefix
+     * @param mimeTypeByPrefix
+     * @return 
+     */
     public Vector getLinks(String linkRel, String mimeType, boolean relByPrefix,
             boolean mimeTypeByPrefix) {
         Vector result = new Vector();

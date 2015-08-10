@@ -31,23 +31,90 @@
 
 package com.ustadmobile.port.android.view;
 
+
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
  * Created by mike on 07/07/15.
  */
 public class CatalogViewAndroid implements CatalogView {
-    @Override
-    public void setController(CatalogController catalogController) {
+    private CatalogController controller;
 
+    private CatalogActivity activity;
+
+    private static Map<Integer, CatalogViewAndroid> viewMap;
+
+    private static int idCounter = 0;
+
+    private int viewId;
+
+    private CatalogOPDSFragment fragment;
+
+
+
+    static {
+        viewMap = new HashMap<Integer, CatalogViewAndroid>();
+    }
+
+    public CatalogViewAndroid() {
+        viewId = CatalogViewAndroid.idCounter;
+        CatalogViewAndroid.idCounter++;
+        viewMap.put(new Integer(viewId), this);
+    }
+
+    public int getViewId() {
+        return viewId;
+    }
+
+    public static CatalogViewAndroid getViewById(int id) {
+        return viewMap.get(new Integer(id));
+    }
+
+    public void setCatalogViewActivity(CatalogActivity activity) {
+        this.activity = activity;
+    }
+
+    public void setFragment(CatalogOPDSFragment fragment) {
+        this.fragment = fragment;
     }
 
     @Override
-    public void showDialog(String s, String s1, int i) {
+    public void setController(CatalogController catalogController) {
+        this.controller = catalogController;
+    }
 
+    @Override
+    public CatalogController getController() {
+        return controller;
+    }
+
+    @Override
+    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId) {
+        //android.support.v4.
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(message);
+        builder.setTitle(title);
+        builder.setPositiveButton(positiveChoice, new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int id) {
+                controller.handleConfirmDialogClick(true, commandId);
+            }
+        });
+        builder.setNegativeButton(negativeChoice, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                controller.handleConfirmDialogClick(false, commandId);
+            }
+        });
+        builder.create().show();
     }
 
     @Override
@@ -82,6 +149,22 @@ public class CatalogViewAndroid implements CatalogView {
 
     @Override
     public void show() {
+        UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
+        if(impl.getCurrentContext() instanceof CatalogActivity) {
+            ((CatalogActivity)impl.getCurrentContext()).setCurrentOPDSCatalogFragment(this);
+        }else {
+            impl.startActivityForViewId(CatalogActivity.class, this.viewId);
+        }
+    }
 
+    @Override
+    public boolean isShowing() {
+        if(UstadMobileSystemImplAndroid.getInstanceAndroid().getCurrentActivity() instanceof CatalogActivity && activity != null) {
+            if(activity.getCurrentFragment() instanceof CatalogOPDSFragment) {
+                return ((CatalogOPDSFragment)activity.getCurrentFragment()).getCatalogView() == this;
+            }
+        }
+
+        return false;
     }
 }

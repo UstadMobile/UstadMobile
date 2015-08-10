@@ -53,13 +53,21 @@ public interface CatalogView extends UstadView{
     public void setController(CatalogController controller);
     
     /**
+     * Get the controller linked to this view: the feed is reference via the
+     * controller
+     * 
+     * @return Controller connected with this view
+     */
+    public CatalogController getController();
+    
+    /**
      * Show a confirm/cancel dialog to the user (e.g. delete item? download item?)
      * 
      * @param title
      * @param text 
      * @param commandId The type of event (the view should then know what to trigger next)
      */
-    public void showDialog(String title, String text, int commandId);
+    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId);
     
     /**
      * Show the context menu for a container (e.g. more info, delete this item, etc)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="umblue" type="color">#FF33B5E5</item>
+    <item name="opds_card_pressed" type="color">#FF888888</item>
+    <item name="opds_card_normal" type="color">#FFFFFFFF</item>
+</resources>

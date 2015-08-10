@@ -36,4 +36,11 @@ package com.ustadmobile.core.view;
  */
 public interface UstadView {
     public void show();
+    
+    /**
+     * Determine if this view is on screen now
+     * 
+     * @return true if the view is on screen now, false otherwise
+     */
+    public boolean isShowing();
 }

@@ -28,59 +28,48 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+
+package com.ustadmobile.port.android.view;
+
+import android.content.Context;
+import android.util.AttributeSet;
+
+import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 /**
- *
- * @author mike
+ * Created by mike on 08/08/15.
  */
-public class UMProgressEvent {
-    
-    private int evtType;
-    
-    private int progress;
-    
-    private int jobLength;
-    
-    private int statusCode; 
-    
-    public static final int TYPE_PROGRESS = 0;
-    
-    public static final int TYPE_COMPLETE = 1;
-    
-    private UMTransferJob evtSrc;
-    
-    public UMProgressEvent() {
-        
+public class OPDSEntryCard extends android.support.v7.widget.CardView {
+
+    private UstadJSOPDSEntry entry;
+
+    public OPDSEntryCard(Context ctx) {
+        super(ctx);
     }
-    
-    public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
-        this.evtSrc = evtSrc;
-        this.evtType = evtType;
-        this.progress = progress;
-        this.jobLength = jobLength;
-        this.statusCode = statusCode;
+
+    public OPDSEntryCard(Context ctx, AttributeSet attrs) {
+        super(ctx, attrs);
     }
-    
-    public UMTransferJob getSrc() {
-        return this.evtSrc;
+
+    public OPDSEntryCard(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
-    
-    public int getEvtType() {
-        return this.evtType;
+
+
+    public void setOPDSEntry(UstadJSOPDSEntry entry) {
+        this.entry = entry;
     }
-    
-    public int getJobLength() {
-        return this.jobLength;
+
+    public UstadJSOPDSEntry getEntry() {
+        return this.entry;
     }
-    
-    public int getProgress() {
-        return this.progress;
+
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        int newColor = isSelected() ? R.color.opds_card_pressed : R.color.opds_card_normal;
+        this.setCardBackgroundColor(getContext().getResources().getColor(newColor));
     }
-    
-    public int getStatusCode() {
-        return this.statusCode;
-    }
-    
-    
 }

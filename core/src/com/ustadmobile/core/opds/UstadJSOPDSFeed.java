@@ -44,8 +44,17 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public UstadJSOPDSEntry[] entries;
     
+    /**
+     * The absolute URL of this catalog (HTTP or Filesystem based)
+     */
+    public String href;
+    
     public UstadJSOPDSFeed() {
-        
+        href = null;
+    }
+    
+    public UstadJSOPDSFeed(String srcHref) {
+        this.href = srcHref;
     }
     
     public static UstadJSOPDSFeed loadFromXML(String str) throws XmlPullParserException, IOException {
@@ -100,15 +109,19 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                     UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
                     do
                     {
-                        xpp.next();
                         evtType = xpp.next();
                         
-                        if(xpp.getName().equals("name")){
-                            currentAuthor.name = xpp.nextText();
-                        }else if (xpp.getName().equals("uri")){
-                            currentAuthor.uri = xpp.nextText();
-                        }
-                        if(evtType == XmlPullParser.END_TAG
+                        if(evtType == XmlPullParser.START_TAG) {
+                            if(xpp.getName().equals("name")){
+                                if(xpp.next() == XmlPullParser.TEXT) {
+                                    currentAuthor.name = xpp.getText();
+                                }
+                            }else if (xpp.getName().equals("uri")) {
+                                if(xpp.next() == XmlPullParser.TEXT) {
+                                    currentAuthor.uri = xpp.getText();
+                                }
+                            }
+                        }else if(evtType == XmlPullParser.END_TAG
                                 && xpp.getName().equals("author")){
                             if (currentItem.authors == null){
                                 currentItem.authors = new Vector();
@@ -117,9 +130,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                                 currentItem.authors.addElement(currentAuthor);
                             }
                         }
-                        
-                    }while(evtType != XmlPullParser.END_TAG && 
-                            !xpp.getName().equals("author"));
+                    }while(!(evtType == XmlPullParser.END_TAG && xpp.getName().equals("author")));
                 }
                 
             }else if(evtType == XmlPullParser.END_TAG) {
@@ -160,11 +171,11 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     public UstadJSOPDSEntry[] getEntriesByLinkParams(String linkRel, 
         String linkType, boolean relByPrefix, boolean mimeTypeByPrefix){
         Vector matches = new Vector();
-        for (int i=0; i<=this.entries.length; i++){
+        for (int i=0; i< this.entries.length; i++){
             Vector entryResult = this.entries[i].getLinks(linkRel, linkType, 
                     relByPrefix, mimeTypeByPrefix);
-            for(int j = 0; j < entryResult.size(); j++) {
-                matches.addElement(entryResult.elementAt(j));
+            if(entryResult.size() > 0) {
+                matches.addElement(this.entries[i]);
             }
         }
         

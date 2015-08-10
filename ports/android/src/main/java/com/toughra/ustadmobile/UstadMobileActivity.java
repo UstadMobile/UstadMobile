@@ -51,7 +51,7 @@ public class UstadMobileActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        ((UstadMobileSystemImplAndroid)impl).setCurrentContext(getApplicationContext());
+        ((UstadMobileSystemImplAndroid)impl).setCurrentActivity(this);
 
 
         String contentDirURI = impl.getSharedContentDir();

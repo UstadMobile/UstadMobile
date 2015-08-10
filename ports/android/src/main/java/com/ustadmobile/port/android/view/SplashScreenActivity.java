@@ -31,20 +31,21 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
-import org.xmlpull.v1.XmlPullParser;
-
-import java.io.ByteArrayInputStream;
 
 public class SplashScreenActivity extends ActionBarActivity {
 
@@ -54,24 +55,7 @@ public class SplashScreenActivity extends ActionBarActivity {
         setContentView(R.layout.activity_splash_screen);
 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        ((UstadMobileSystemImplAndroid)impl).setCurrentContext(this);
-
-        try {
-            CatalogController controller = CatalogController.makeControllerByURL(
-                    "http://192.168.2.101:5062/root.opds", impl, "miketestecop",
-                    "letsLearnEcop");
-            UstadJSOPDSFeed feedItem = controller.getModel().opdsFeed;
-            String feedXML = feedItem.toString();
-            ByteArrayInputStream bin = new ByteArrayInputStream(
-                    feedXML.getBytes("UTF-8"));
-            XmlPullParser parser = impl.newPullParser();
-            parser.setInput(bin, "UTF-8");
-            UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
-            boolean isSame = feedItem.id.equals(fromXMLItem.id);
-        }catch(Exception e) {
-            e.printStackTrace();
-        }
-
+        ((UstadMobileSystemImplAndroid) impl).setCurrentContext(this);
 
         impl.startUI();
     }

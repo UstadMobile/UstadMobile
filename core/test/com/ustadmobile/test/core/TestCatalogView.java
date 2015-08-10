@@ -30,19 +30,10 @@
  */
 package com.ustadmobile.test.core;
 
-
-import org.xmlpull.v1.XmlPullParserException;
-import java.io.IOException;
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import java.io.ByteArrayInputStream;
-import org.xmlpull.v1.XmlPullParser;
-
-
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
+        import android.app.Activity;
    $endif$ */
 
 /* $if umplatform == 2  $
@@ -51,24 +42,36 @@ import org.xmlpull.v1.XmlPullParser;
     import junit.framework.TestCase;
 /* $endif$ */
 
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
+
 /**
  *
  * @author mike
  */
 
 /* $if umplatform == 1  $
-public class TestCatalogController extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
+public class TestCatalogView extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestCatalogController extends TestCase{
-/* $endif */
+public class TestCatalogView extends TestCase {
+/* $endif */    
     
-    public TestCatalogController() {
+    public static final int VIEWSHOWTIMEOUT = 10000;
+    
+    public static final int VIEWCHECKINTERVAL = 1000;
+    
+    public TestCatalogView() {
         /* $if umplatform == 1 $ 
         super("com.toughra.ustadmobile", UstadMobileActivity.class);
         $endif */
     }
     
-    public void testCatalogController() throws IOException, XmlPullParserException {
+    public void testCatalogView() throws Exception{
+        /* $if umplatform == 1 $ 
+        Activity activity = getActivity();
+        $endif */
+        
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(TestConstants.LOGIN_USER);
         
@@ -77,23 +80,14 @@ public class TestCatalogController extends TestCase{
             TestConstants.CATALOG_OPDS_ROOT, impl, CatalogController.USER_RESOURCE, 
             TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
             CatalogController.CACHE_ENABLED);
-        assertNotNull("Create catalog controller", controller);
+        controller.show();
+        int timeLeft = VIEWSHOWTIMEOUT;
+        while(!controller.getView().isShowing()) {
+            try { Thread.sleep(VIEWCHECKINTERVAL); }
+            catch(InterruptedException e) {};
+        }
+        assertTrue("View is showing", controller.getView().isShowing());
         
         
-        UstadJSOPDSFeed feedItem = controller.getModel().opdsFeed;
-        String feedXML = feedItem.toString();
-        ByteArrayInputStream bin = new ByteArrayInputStream(
-            feedXML.getBytes("UTF-8"));
-        XmlPullParser parser = impl.newPullParser();
-        parser.setInput(bin, "UTF-8");
-        UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
-        assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
-        CatalogController.cacheCatalog(feedItem, CatalogController.USER_RESOURCE, null);
-        UstadJSOPDSFeed cachedFeed = 
-            CatalogController.getCachedCatalogByID(feedItem.id, 
-            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
-        
-        assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
     }
-    
 }

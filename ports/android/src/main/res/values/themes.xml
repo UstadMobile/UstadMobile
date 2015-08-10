@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- see http://android-developers.blogspot.de/2014/10/appcompat-v21-material-design-for-pre.html -->
+
+    <style name="Theme.UstadTheme" parent="Theme.AppCompat.Light">
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/material_blue_grey_800</item>
+    </style>
+</resources>
