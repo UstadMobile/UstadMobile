@@ -40,9 +40,12 @@ public class TestHttpResult extends TestCase {
                 FileUtils.FILE_SEP; 
         UstadMobileSystemImpl impl = 
                 UstadMobileSystemImplFactory.createUstadSystemImpl();
-        CatalogController catalogController = 
-                CatalogController.makeControllerByURL(opdsEndpoint, impl, 
-                "karmakid02", "karmakid02");
+        CatalogController catalogController =
+            CatalogController.makeControllerByURL(opdsEndpoint, impl, 
+                CatalogController.USER_RESOURCE, "karmakid02", "karmakid02", 0);
+        //CatalogController catalogController = 
+        //        CatalogController.makeControllerByURL(opdsEndpoint, impl, 
+        //        "karmakid02", "karmakid02");
         catalogController.show();
         
         Thread.sleep(2000);

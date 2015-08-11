@@ -19,6 +19,7 @@ import javax.bluetooth.BluetoothConnectionException;
 import com.ustadmobile.view.LoginViewJ2ME;
 import com.ustadmobile.app.UserPref;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.view.AppView;
 import javax.microedition.io.file.FileConnection;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -185,12 +186,18 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return FileUtils.checkFile(fileURI);
     }
     
-    public void removeFile(String fileURI) throws IOException{
-        boolean success = FileUtils.removeFileOrDir(fileURI, Connector.READ_WRITE,
-                false);
+    public boolean removeFile(String fileURI) {
+        boolean success = false;
+        try {
+            success = FileUtils.removeFileOrDir(fileURI, Connector.READ_WRITE,
+            false);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
         if (success == false){
             //Wanna do something?
         }
+        return success;
     }
 
     public String[] listDirectory(String dirURI) throws IOException{
@@ -302,8 +309,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public String getUserPref(String key) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String value = UserPref.getSetting(key);
+        return value;
     }
 
+    public AppView getAppView() {
+        throw new UnsupportedOperationException("Not supported yet."); 
+        //ToDo: This.
+    }
 
 }

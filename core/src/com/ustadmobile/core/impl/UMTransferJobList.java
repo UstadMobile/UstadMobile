@@ -148,7 +148,7 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         return this.jobValues[index];
     }
     
-    @Override
+    //@Override
     public void start() {
         if(currentItem != -1) {
             throw new RuntimeException("already started");
@@ -188,17 +188,19 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         this.runAfterFinishJob = job;
     }
 
-    @Override
+    //@Override
     public void addProgressListener(UMProgressListener listener) {
-        progressListeners.add(listener);
+        //progressListeners.add(listener);
+        //J2ME:
+        progressListeners.addElement(listener);
     }
 
-    @Override
+    //@Override
     public int getBytesDownloadedCount() {
         return -1;
     }
 
-    @Override
+    //@Override
     public int getTotalSize() {
         // go over all the component downloads to find the total size
         int numUncertain = 0;
@@ -220,12 +222,12 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         return totalSizeCombined;
     }
 
-    @Override
+    //@Override
     public boolean isFinished() {
         return isFinished;
     }
 
-    @Override
+    //@Override
     public void progressUpdated(UMProgressEvent evt) {
         if(evt.getEvtType() == UMProgressEvent.TYPE_COMPLETE) {
             this.completedJobBytes += evt.getProgress();
@@ -256,16 +258,17 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
     
     protected void fireProgressEvt(UMProgressEvent evt) {
         for(int i = 0; i < progressListeners.size(); i++) {
-            ((UMProgressListener)progressListeners.get(i)).progressUpdated(evt);
+            //((UMProgressListener)progressListeners.get(i)).progressUpdated(evt);
+            ((UMProgressListener)progressListeners.elementAt(i)).progressUpdated(evt);
         }
     }
 
-    @Override
+    //@Override
     public String getSource() {
         return null;
     }
 
-    @Override
+    //@Override
     public String getDestination() {
         return null;
     }

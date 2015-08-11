@@ -61,7 +61,7 @@ public class TestLoginView extends TestCase {
 
                 //evt.getCommand();
                 int id = evt.getCommand().getId();
-                loginController.view.performAction(evt);
+                //loginController.view.performAction(evt);
             }
         });
         assertTrue("Completed first callSerially and wait", true);

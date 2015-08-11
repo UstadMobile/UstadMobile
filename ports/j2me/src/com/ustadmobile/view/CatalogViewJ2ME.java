@@ -129,5 +129,19 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         entryButton.updateProgress((loaded/total)*100);
     }
 
+    public CatalogController getController() {
+        return controller;
+    }
+
+    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, int commandId) {
+        throw new UnsupportedOperationException("Not supported yet."); 
+        //ToDo: This
+    }
+
+    public boolean isShowing() {
+        throw new UnsupportedOperationException("Not supported yet."); 
+        //ToDo: This
+    }
+
     
 }

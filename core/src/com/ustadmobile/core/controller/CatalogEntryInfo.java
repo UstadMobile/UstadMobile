@@ -54,7 +54,9 @@ public class CatalogEntryInfo {
     
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        //StringBuilder sb = new StringBuilder();
+        //Changed to support J2ME:
+        StringBuffer sb = new StringBuffer();
         sb.append(acquisitionStatus).append(':');
         for(int i = 0; i < srcURLs.length; i++) {
             sb.append(URLTextUtil.urlEncodeUTF8(srcURLs[i]));
