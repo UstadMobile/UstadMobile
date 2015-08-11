@@ -22,14 +22,7 @@ import javax.microedition.lcdui.TextBox;
  * @author varuna
  */
 public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
-
-    private TextBox tbox;
-    
-    public UstadMobileJ2METest() {
-        tbox = new TextBox("App Dir", 
-                "Hows it going?", 100, 0 );
-    }
-    
+ 
     //Start the tests:
     public void startApp(){
         //start(new String[] { com.ustadmobile.app.tests.AllTestCases.class.getName() });

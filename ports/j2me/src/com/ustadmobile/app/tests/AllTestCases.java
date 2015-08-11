@@ -57,9 +57,7 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
                 
-        //allTestSuite.addTest(new TestSimple());
         allTestSuite.addTest(new TestSimpleHTTP());
-
         allTestSuite.addTest(new TestCustomLWUIT());
         allTestSuite.addTest(new TestFormShow());
         allTestSuite.addTest(new TestSimple());
