@@ -281,10 +281,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public String getAppPref(String key) {
-        AppPref appPref = new AppPref();
-        String value = null;
-        value = appPref.getSetting(key);
+    public String getAppPref(String key) {       
+        String value;
+        value = AppPref.getSetting(key);
         return value;
     }
 

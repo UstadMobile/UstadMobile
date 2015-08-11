@@ -33,6 +33,7 @@ package com.ustadmobile.app.tests;
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.events.ActionEvent;
+import com.ustadmobile.app.HTTPUtils;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -47,7 +48,6 @@ public class TestLoginView extends TestCase {
     
     public void runTest() throws Throwable{
         assertEquals("Simple Test OK", 2, 1+1);
-        LoginController loginController = new LoginController();
         
         com.sun.lwuit.Display.getInstance().callSeriallyAndWait(new Runnable() {
             public void run() {
@@ -67,18 +67,21 @@ public class TestLoginView extends TestCase {
         assertTrue("Completed first callSerially and wait", true);
         try { Thread.sleep(2000); }
         catch(InterruptedException e) {}
-        
+
+        //UstadMobileSystemImpl impl = new UstadMobileSystemImplJ2ME();
+        //String server = impl.getAppPref("server");
         String server = 
                 UstadMobileSystemImpl.getInstance().getAppPref("server");
         
         //Correct Login cred
-        int loginReturn = loginController.authenticate(
+        int loginReturn = LoginController.authenticate(
                 "karmakid02", "karmakid02",server );
         assertEquals("Authenticate logic", loginReturn, 200);
 
         //wrong Login cred
-        int loginReturn2 = loginController.authenticate(
+        int loginReturn2 = LoginController.authenticate(
                 "karmakid02", "karmakid022",server );
         assertEquals("Authenticate logic", loginReturn2, 401);
+        
     }
 }

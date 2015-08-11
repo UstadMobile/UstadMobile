@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.app;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
