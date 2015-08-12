@@ -353,8 +353,26 @@ public class CatalogController implements UstadController, UMProgressListener {
             activeTransferJobs = new Vector();
         }
         transferJob.addProgressListener(this);
+        setViewEntryProgressVisible(entries, true);
         transferJob.start();
         activeTransferJobs.addElement(transferJob);
+    }
+    
+    /**
+     * If the view is available (e.g. not null) set all the given entries 
+     * progress visible to be visible/not visible
+     * 
+     * @param entries Array of entries this should effect
+     * @param visible Whether or not the progress bar for these entries should be visible
+     */
+    private void setViewEntryProgressVisible(UstadJSOPDSEntry[] entries, boolean visible) {
+        if(this.view == null) {
+            return;
+        }
+        
+        for(int i = 0; i < entries.length; i++){ 
+                this.view.setDownloadEntryProgressVisible(entries[i].id, visible);
+        }
     }
     
     /**

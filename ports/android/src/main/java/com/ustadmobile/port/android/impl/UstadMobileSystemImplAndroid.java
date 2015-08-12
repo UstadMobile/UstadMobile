@@ -49,6 +49,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Enumeration;
@@ -626,13 +627,31 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             startProgressTracking(this);
         }
 
-        private void fireDownloadComplete() {
+        /**
+         * Fire the progress event to all registered listeners
+         *
+         * @param evtType UMProgressEvent.TYPE_COMPLETE or UMProgressEvent.TYPE_PROGRESS
+         * @param status HTTP status code if appropriate
+         */
+        private void fireProgressEvent(int evtType, int status) {
             int[] downloadStatus = getProgressAndTotal();
-            UMProgressEvent evt = new UMProgressEvent(this, UMProgressEvent.TYPE_COMPLETE,
-                    downloadStatus[0], downloadStatus[1], 200);
+            UMProgressEvent evt = new UMProgressEvent(this, evtType,
+                    downloadStatus[0], downloadStatus[1], status);
             for(int i = 0; i < progressListeners.size(); i++) {
                 progressListeners.get(i).progressUpdated(evt);
             }
+        }
+
+
+        /**
+         * Fire a progress event as TYPE_PROGRESS with the current progress to all registered listeners
+         */
+        private void fireProgressEvent() {
+            fireProgressEvent(UMProgressEvent.TYPE_PROGRESS, 0);
+        }
+
+        private void fireDownloadComplete() {
+            fireProgressEvent(UMProgressEvent.TYPE_COMPLETE, 200);
         }
 
         private void cleanup() {
@@ -667,9 +686,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             fireDownloadComplete();
         }
 
-        private void fireProgressEvent() {
-
-        }
 
         private int[] getProgressAndTotal() {
             int[] retVal = new int[2];

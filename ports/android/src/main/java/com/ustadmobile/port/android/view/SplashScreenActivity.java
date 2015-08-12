@@ -39,11 +39,7 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 
@@ -61,7 +57,8 @@ public class SplashScreenActivity extends ActionBarActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(
+            Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_splash_screen, menu);
         return true;

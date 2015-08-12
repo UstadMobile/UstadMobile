@@ -33,6 +33,8 @@ package com.ustadmobile.port.android.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -43,6 +45,11 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 public class OPDSEntryCard extends android.support.v7.widget.CardView {
 
     private UstadJSOPDSEntry entry;
+
+    /**
+     * The 100% amount of the progress bar; defined as 100
+     */
+    public static final int PROGRESS_ENTRY_MAX = 100;
 
     public OPDSEntryCard(Context ctx) {
         super(ctx);
@@ -71,5 +78,19 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
         super.drawableStateChanged();
         int newColor = isSelected() ? R.color.opds_card_pressed : R.color.opds_card_normal;
         this.setCardBackgroundColor(getContext().getResources().getColor(newColor));
+    }
+
+    public void setProgressBarVisible(boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.INVISIBLE;
+        ((ProgressBar)findViewById(R.id.opds_item_progressbar)).setVisibility(visibility);
+    }
+
+    /**
+     * Set the current progress amount on the entry - where PROGRESS_ENTRY_MAX is 100%
+     *
+     * @param loaded
+     */
+    public void setDownloadProgressBarProgress(int loaded) {
+        ((ProgressBar)findViewById(R.id.opds_item_progressbar)).setProgress(loaded);
     }
 }

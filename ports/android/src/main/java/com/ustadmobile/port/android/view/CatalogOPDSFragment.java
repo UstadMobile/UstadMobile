@@ -44,6 +44,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -53,6 +54,9 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -73,6 +77,8 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     private ListView catalogListView;
 
     private ArrayList<UstadJSOPDSEntry> selectedEntries;
+
+    private Map<String, OPDSEntryCard> idToCardMap;
 
     /**
      * Use this factory method to create a new instance of
@@ -115,6 +121,8 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         UstadJSOPDSFeed feed = catalogView.getController().getModel().opdsFeed;
         LinearLayout linearLayout = (LinearLayout)this.rootContainer.findViewById(
                 R.id.fragment_catalog_container);
+        idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
+
         for(int i = 0; i < feed.entries.length; i++) {
             OPDSEntryCard cardView  = (OPDSEntryCard) inflater.inflate(
                     R.layout.fragment_opds_item, null);
@@ -124,6 +132,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             ((TextView)cardView.findViewById(R.id.opdsitem_title_text)).setText(
                     feed.entries[i].title);
             linearLayout.addView(cardView);
+            idToCardMap.put(feed.entries[i].id, cardView);
         }
 
         setHasOptionsMenu(true);
@@ -133,6 +142,16 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     public CatalogView getCatalogView() {
         return catalogView;
+    }
+
+    /**
+     * Get the OPDSEntryCard for the given OPDS Entry ID
+     *
+     * @param id OPDS Entry id
+     * @return OPDSEntryCard representing this item
+     */
+    public OPDSEntryCard getEntryCardByOPDSID(String id) {
+        return idToCardMap.get(id);
     }
 
     @Override

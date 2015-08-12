@@ -54,6 +54,8 @@ public class CatalogViewAndroid implements CatalogView {
 
     private static Map<Integer, CatalogViewAndroid> viewMap;
 
+    private Map<OPDSEntryCard, EntryProgressUpdateRunnable> updateRunnableMap;
+
     private static int idCounter = 0;
 
     private int viewId;
@@ -70,6 +72,7 @@ public class CatalogViewAndroid implements CatalogView {
         viewId = CatalogViewAndroid.idCounter;
         CatalogViewAndroid.idCounter++;
         viewMap.put(new Integer(viewId), this);
+        updateRunnableMap = new HashMap<OPDSEntryCard, EntryProgressUpdateRunnable>();
     }
 
     public int getViewId() {
@@ -138,13 +141,50 @@ public class CatalogViewAndroid implements CatalogView {
     }
 
     @Override
-    public void setDownloadEntryProgressVisible(String s, boolean b) {
+    public void setDownloadEntryProgressVisible(String entryId, boolean visible) {
+        OPDSEntryCard card = this.fragment.getEntryCardByOPDSID(entryId);
+        if(card != null) {
+            card.setProgressBarVisible(visible);
+        }
 
+        if(visible) {
+            updateRunnableMap.put(card, new EntryProgressUpdateRunnable(card));
+        }else {
+            updateRunnableMap.remove(card);
+        }
     }
 
     @Override
-    public void updateDownloadEntryProgress(String s, int i, int i1) {
+    public void updateDownloadEntryProgress(String entryId, int loaded, int total) {
+        OPDSEntryCard card = this.fragment.getEntryCardByOPDSID(entryId);
+        if(card != null && updateRunnableMap.containsKey(card)) {
+            EntryProgressUpdateRunnable runnable = updateRunnableMap.get(card);
+            int progressPercent = Math.round(((float)loaded/(float)total) * OPDSEntryCard.PROGRESS_ENTRY_MAX);
+            runnable.setProgress(progressPercent);
+            activity.runOnUiThread(runnable);
+        }
+    }
 
+    public class EntryProgressUpdateRunnable implements Runnable {
+
+        private OPDSEntryCard card;
+
+        private int progress;
+
+        public EntryProgressUpdateRunnable(OPDSEntryCard card) {
+            this.card = card;
+            this.progress = 0;
+        }
+
+        public synchronized void setProgress(int progress) {
+            this.progress = progress;
+        }
+
+        public void run() {
+            synchronized (this) {
+                card.setDownloadProgressBarProgress(progress);
+            }
+        }
     }
 
     @Override
