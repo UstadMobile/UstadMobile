@@ -108,8 +108,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private AppViewAndroid appView;
 
+    private UMLogAndroid logger;
+
     public UstadMobileSystemImplAndroid() {
         appView = new AppViewAndroid(this);
+        logger = new UMLogAndroid();
     }
 
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
@@ -509,6 +512,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public AppView getAppView() {
         return appView;
+    }
+
+    @Override
+    public UMLog getLogger() {
+        return logger;
     }
 
     /**
