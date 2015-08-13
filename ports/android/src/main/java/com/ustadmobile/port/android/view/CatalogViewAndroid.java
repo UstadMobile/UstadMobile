@@ -56,6 +56,11 @@ public class CatalogViewAndroid implements CatalogView {
 
     private Map<OPDSEntryCard, EntryProgressUpdateRunnable> updateRunnableMap;
 
+    /**
+     * Map that holds the acquisition status of each entry in the form of OPDS ID -> Status
+     */
+    private Map<String, Integer> acquisitionStatusMap;
+
     private static int idCounter = 0;
 
     private int viewId;
@@ -73,6 +78,7 @@ public class CatalogViewAndroid implements CatalogView {
         CatalogViewAndroid.idCounter++;
         viewMap.put(new Integer(viewId), this);
         updateRunnableMap = new HashMap<OPDSEntryCard, EntryProgressUpdateRunnable>();
+        acquisitionStatusMap = new HashMap<String, Integer>();
     }
 
     public int getViewId() {
@@ -131,8 +137,17 @@ public class CatalogViewAndroid implements CatalogView {
     }
 
     @Override
-    public void setEntryStatus(String s, int i) {
+    public void setEntryStatus(String entryId, int status) {
+        acquisitionStatusMap.put(entryId, new Integer(status));
+    }
 
+    public int getEntryStatus(String entryId) {
+        Integer intVal = acquisitionStatusMap.get(entryId);
+        if(intVal != null) {
+            return intVal.intValue();
+        }else {
+            return -1;
+        }
     }
 
     @Override

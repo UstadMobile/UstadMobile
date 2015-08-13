@@ -40,6 +40,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -48,6 +49,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.CatalogView;
@@ -123,6 +125,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
                 R.id.fragment_catalog_container);
         idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
 
+        int entryStatus = -1;
         for(int i = 0; i < feed.entries.length; i++) {
             OPDSEntryCard cardView  = (OPDSEntryCard) inflater.inflate(
                     R.layout.fragment_opds_item, null);
@@ -132,6 +135,13 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             ((TextView)cardView.findViewById(R.id.opdsitem_title_text)).setText(
                     feed.entries[i].title);
             linearLayout.addView(cardView);
+
+            //check the acquisition status
+            entryStatus =catalogView.getEntryStatus(feed.entries[i].id);
+            if(entryStatus != -1) {
+                cardView.setOPDSEntryOverlay(entryStatus);
+            }
+
             idToCardMap.put(feed.entries[i].id, cardView);
         }
 
@@ -161,6 +171,21 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             inflater.inflate(R.menu.menu_opds_acquireopts, menu);
         }else {
             inflater.inflate(R.menu.menu_opds_navopts, menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_opds_acquire) {
+            if(selectedEntries.size() > 0) {
+                catalogView.getController().handleClickDownloadEntries(selectedEntries.toArray(
+                        new UstadJSOPDSEntry[selectedEntries.size()]));
+            }else {
+                catalogView.getController().handleClickDownloadAll();
+            }
+            return true;
+        }else {
+            return super.onOptionsItemSelected(item);
         }
     }
 

@@ -229,11 +229,16 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
 
     //@Override
     public void progressUpdated(UMProgressEvent evt) {
+        this.currentJobProgress = evt.getProgress();
+        
         if(evt.getEvtType() == UMProgressEvent.TYPE_COMPLETE) {
             this.completedJobBytes += evt.getProgress();
 
             // time to start the next download
             if(currentItem < this.jobList.length - 1) {
+                fireProgressEvt(new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS, 
+                    completedJobBytes, totalSizeCombined, 200));
+                
                 currentItem++;
                 this.jobList[currentItem].addProgressListener(this);
                 this.jobList[currentItem].start();
@@ -242,13 +247,10 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
                 if(runAfterFinishJob != null) {
                     runAfterFinishJob.run();
                 }
-                
-                UMProgressEvent subEvt = new UMProgressEvent(this, UMProgressEvent.TYPE_COMPLETE, 
-                    totalSizeCombined, totalSizeCombined, 200);
-                fireProgressEvt(subEvt);
+                fireProgressEvt(new UMProgressEvent(this, UMProgressEvent.TYPE_COMPLETE, 
+                    totalSizeCombined, totalSizeCombined, 200));
             }
         }else {
-            this.currentJobProgress = evt.getProgress();
             int sizeCompleted = completedJobBytes + currentJobProgress;
             UMProgressEvent subEvt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS,
                     sizeCompleted, totalSizeCombined, 200);
@@ -258,7 +260,6 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
     
     protected void fireProgressEvt(UMProgressEvent evt) {
         for(int i = 0; i < progressListeners.size(); i++) {
-            //((UMProgressListener)progressListeners.get(i)).progressUpdated(evt);
             ((UMProgressListener)progressListeners.elementAt(i)).progressUpdated(evt);
         }
     }

@@ -32,11 +32,14 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ProgressBar;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 /**
@@ -50,6 +53,12 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
      * The 100% amount of the progress bar; defined as 100
      */
     public static final int PROGRESS_ENTRY_MAX = 100;
+
+    /**
+     * A drawable that represents the status of the entry (e.g. acquired, not acquired, etc)
+     */
+    private Drawable opdsStatusOverlay;
+
 
     public OPDSEntryCard(Context ctx) {
         super(ctx);
@@ -92,5 +101,24 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
      */
     public void setDownloadProgressBarProgress(int loaded) {
         ((ProgressBar)findViewById(R.id.opds_item_progressbar)).setProgress(loaded);
+    }
+
+    public void setOPDSEntryOverlay(int overlay) {
+        if(overlay == CatalogController.STATUS_ACQUIRED) {
+            opdsStatusOverlay = getResources().getDrawable(R.drawable.opds_item_overlay_acquired);
+        }else {
+            opdsStatusOverlay = null;
+        }
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        if(opdsStatusOverlay != null) {
+            int width = canvas.getWidth();
+            int height = canvas.getHeight();
+            opdsStatusOverlay.setBounds(getLeft(), getTop(), getWidth(), getHeight());
+            opdsStatusOverlay.draw(canvas);
+        }
     }
 }

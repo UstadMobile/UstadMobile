@@ -173,6 +173,18 @@ public class CatalogController implements UstadController, UMProgressListener {
     public void show() {
         this.view = ViewFactory.makeCatalogView();
         this.view.setController(this);
+        
+        UstadJSOPDSFeed feed = this.getModel().opdsFeed;
+        if(feed.isAcquisitionFeed()) {
+            //go through and set the acquisition status
+            for(int i = 0; i < feed.entries.length; i++) {
+                CatalogEntryInfo info = getEntryInfo(feed.entries[i].id, 
+                    USER_RESOURCE | SHARED_RESOURCE);
+                this.view.setEntryStatus(feed.entries[i].id, 
+                    info.acquisitionStatus);
+            }
+        }
+        
         this.view.show();
     }
     
@@ -239,16 +251,10 @@ public class CatalogController implements UstadController, UMProgressListener {
      * 
      */
     public void handleClickDownloadAll() {
-        
-    }
-    
-    /**
-     * Triggered when the user confirms that they wish to download all entries
-     * for this feed
-     * 
-     */
-    public void handleConfirmDownloadAll() {
-        
+        selectedEntries = getModel().opdsFeed.entries;
+        view.showConfirmDialog("Download?", "Download all " 
+            + selectedEntries.length + " entries ?", "OK", "Cancel", 
+            CMD_DOWNLOADENTRY);
     }
     
     /**
@@ -318,6 +324,18 @@ public class CatalogController implements UstadController, UMProgressListener {
     }
     
     /**
+     * This should be called when the user has selected entries and requested
+     * them to be downloaded
+     * 
+     * @param entries The entries selected by the user to download
+     */
+    public void handleClickDownloadEntries(final UstadJSOPDSEntry[] entries) {
+        selectedEntries = entries;
+        view.showConfirmDialog("Download?", "Download " + entries.length +
+                " entries ?", "OK", "Cancel", CMD_DOWNLOADENTRY);
+    }
+    
+    /**
      * Called when the user makes a choice on the confirm dialog
      * 
      * @param userResponse true if the user selected the positive option (e.g. OK)
@@ -373,15 +391,6 @@ public class CatalogController implements UstadController, UMProgressListener {
         for(int i = 0; i < entries.length; i++){ 
                 this.view.setDownloadEntryProgressVisible(entries[i].id, visible);
         }
-    }
-    
-    /**
-     * Triggered when the user selects a sub-feed from a navigation feed
-     * 
-     * @param item 
-     */
-    public void handleClickFeedEntry(UstadJSOPDSItem item) {
-        
     }
     
     /**
