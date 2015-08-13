@@ -33,6 +33,8 @@ package com.ustadmobile.port.android.view;
 
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -67,6 +69,7 @@ public class CatalogViewAndroid implements CatalogView {
 
     private CatalogOPDSFragment fragment;
 
+    private UstadJSOPDSEntry[] selectedEntries;
 
 
     static {
@@ -137,8 +140,15 @@ public class CatalogViewAndroid implements CatalogView {
     }
 
     @Override
-    public void setEntryStatus(String entryId, int status) {
+    public void setEntryStatus(final String entryId, final int status) {
         acquisitionStatusMap.put(entryId, new Integer(status));
+        if(fragment != null) {
+            activity.runOnUiThread(new Runnable() {
+                public void run() {
+                    fragment.getEntryCardByOPDSID(entryId).setOPDSEntryOverlay(status);
+                }
+            });
+        }
     }
 
     public int getEntryStatus(String entryId) {
@@ -178,6 +188,37 @@ public class CatalogViewAndroid implements CatalogView {
             runnable.setProgress(progressPercent);
             activity.runOnUiThread(runnable);
         }
+    }
+
+    @Override
+    public UstadJSOPDSEntry[] getSelectedEntries() {
+        return this.selectedEntries != null ? this.selectedEntries : new UstadJSOPDSEntry[0];
+    }
+
+    @Override
+    public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
+        UstadJSOPDSFeed thisFeed = getController().getModel().opdsFeed;
+        for(int i = 0; i < thisFeed.entries.length; i++) {
+            boolean isSelected = false;
+            for(int j = 0; j < entries.length; j++) {
+                if(thisFeed.entries[i].id.equals(entries[j].id)) {
+                    isSelected = true;
+                    break;
+                }
+            }
+
+            fragment.getEntryCardByOPDSID(thisFeed.entries[i].id).setSelected(isSelected);
+        }
+
+        this.selectedEntries = entries;
+    }
+
+    /**
+     * Call this method from the fragment when the user has changed their selection
+     * @param selectedEntries
+     */
+    public void handleUserSelectedEntryChange(UstadJSOPDSEntry[] selectedEntries) {
+        this.selectedEntries = selectedEntries;
     }
 
     public class EntryProgressUpdateRunnable implements Runnable {

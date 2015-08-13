@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="check.svg">
+   sodipodi:docname="check.svg"
+   inkscape:export-filename="/home/mike/src/UstadMobile/ports/android/src/main/res/drawable/check.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -26,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="3.959798"
-     inkscape:cx="16.879249"
+     inkscape:cx="11.828487"
      inkscape:cy="10.994171"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"

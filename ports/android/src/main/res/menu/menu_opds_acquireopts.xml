@@ -4,4 +4,7 @@
     <item android:id="@+id/action_opds_acquire" android:title="@string/download"
         android:icon="@drawable/ic_file_download_black_24dp"
         android:orderInCategory="100" app:showAsAction="always"/>
+    <item android:id="@+id/action_opds_deleteitem" android:title="@string/delete"
+        android:icon="@drawable/ic_delete_black_24dp"
+        android:orderInCategory="110" app:showAsAction="always"/>
 </menu>

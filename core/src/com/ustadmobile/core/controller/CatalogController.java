@@ -114,6 +114,12 @@ public class CatalogController implements UstadController, UMProgressListener {
      */
     public static final int CMD_DOWNLOADENTRY = 0;
     
+    /**
+     * Command ID representing a user wishing to delete an entry or set
+     * of entries
+     */
+    public static final int CMD_DELETEENTRY = 1;
+    
     
     private UstadJSOPDSEntry[] selectedEntries;
     
@@ -180,8 +186,11 @@ public class CatalogController implements UstadController, UMProgressListener {
             for(int i = 0; i < feed.entries.length; i++) {
                 CatalogEntryInfo info = getEntryInfo(feed.entries[i].id, 
                     USER_RESOURCE | SHARED_RESOURCE);
-                this.view.setEntryStatus(feed.entries[i].id, 
-                    info.acquisitionStatus);
+                if(info != null) {
+                    this.view.setEntryStatus(feed.entries[i].id, 
+                        info.acquisitionStatus);
+                }
+                
             }
         }
         
@@ -273,8 +282,20 @@ public class CatalogController implements UstadController, UMProgressListener {
      * 
      * @param item OPDS item selected
      */
-    public void handleClickDeleteEntry(UstadJSOPDSItem item) {
-        
+    public void handleClickDeleteEntries(UstadJSOPDSEntry[] entries) {
+        selectedEntries = entries;
+        this.view.showConfirmDialog("Delete?", "Delete " + entries.length + 
+                " entries from device?", "Delete", "Cancel", CMD_DELETEENTRY);
+    }
+    
+    public void handleConfirmDeleteEntries() {
+        int numDeleted = 0;
+        for(int i = 0; i < selectedEntries.length; i++) {
+            CatalogController.removeEntry(selectedEntries[i].id, 
+                USER_RESOURCE | SHARED_RESOURCE);
+            this.view.setEntryStatus(selectedEntries[i].id, STATUS_NOT_ACQUIRED);
+        }
+        this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
     }
     
     /**
@@ -351,6 +372,10 @@ public class CatalogController implements UstadController, UMProgressListener {
             case CMD_DOWNLOADENTRY:
                 this.handleConfirmDownloadEntries(selectedEntries);
                 break;
+                
+            case CMD_DELETEENTRY:
+                this.handleConfirmDeleteEntries();
+                break;
         }
     }
     
@@ -374,6 +399,7 @@ public class CatalogController implements UstadController, UMProgressListener {
         setViewEntryProgressVisible(entries, true);
         transferJob.start();
         activeTransferJobs.addElement(transferJob);
+        this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
     }
     
     /**
@@ -765,8 +791,13 @@ public class CatalogController implements UstadController, UMProgressListener {
             int currentJobItem = jobList.getCurrentItem();
             UstadJSOPDSEntry entry = (UstadJSOPDSEntry)jobList.getJobValue(
                 currentJobItem);
+            boolean isComplete = 
+                jobList.getCurrentJobProgress() == jobList.getCurrentJobTotalSize();
             this.view.updateDownloadEntryProgress(entry.id, jobList.getCurrentJobProgress(), 
                 jobList.getCurrentJobTotalSize());
+            if(isComplete) {
+                this.view.setEntryStatus(entry.id, STATUS_ACQUIRED);
+            }
         }
     }
     

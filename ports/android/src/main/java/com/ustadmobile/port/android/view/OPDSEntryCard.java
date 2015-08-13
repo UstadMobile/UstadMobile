@@ -109,6 +109,7 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
         }else {
             opdsStatusOverlay = null;
         }
+        invalidate();
     }
 
     @Override

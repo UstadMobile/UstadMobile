@@ -57,6 +57,7 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -77,8 +78,6 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     private CatalogViewAndroid catalogView;
 
     private ListView catalogListView;
-
-    private ArrayList<UstadJSOPDSEntry> selectedEntries;
 
     private Map<String, OPDSEntryCard> idToCardMap;
 
@@ -111,8 +110,6 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             catalogView.setFragment(this);
             catalogView.setCatalogViewActivity((CatalogActivity)getActivity());
         }
-
-        selectedEntries = new ArrayList<UstadJSOPDSEntry>();
     }
 
     @Override
@@ -176,10 +173,29 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_opds_acquire:
+                if(catalogView.getSelectedEntries().length > 0) {
+                    catalogView.getController().handleClickDownloadEntries(
+                        catalogView.getSelectedEntries());
+                }else {
+                    catalogView.getController().handleClickDownloadAll();
+                }
+
+                return true;
+
+            case R.id.action_opds_deleteitem:
+                if(catalogView.getSelectedEntries().length > 0) {
+                    catalogView.getController().handleClickDeleteEntries(
+                        catalogView.getSelectedEntries());
+                }
+        }
+
+
         if(item.getItemId() == R.id.action_opds_acquire) {
-            if(selectedEntries.size() > 0) {
-                catalogView.getController().handleClickDownloadEntries(selectedEntries.toArray(
-                        new UstadJSOPDSEntry[selectedEntries.size()]));
+            if(catalogView.getSelectedEntries().length > 0) {
+                catalogView.getController().handleClickDownloadEntries(
+                    catalogView.getSelectedEntries());
             }else {
                 catalogView.getController().handleClickDownloadAll();
             }
@@ -215,19 +231,34 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     public void toggleEntrySelected(OPDSEntryCard card) {
         boolean nowSelected = !card.isSelected();
-        if(nowSelected) {
-            selectedEntries.add(card.getEntry());
-        }else {
-            selectedEntries.remove(card.getEntry());
-        }
         card.setSelected(nowSelected);
+        UstadJSOPDSEntry[] currentSelection = this.catalogView.getSelectedEntries();
+        int newArraySize = nowSelected ? currentSelection.length + 1 : currentSelection.length -1;
+        UstadJSOPDSEntry[] newSelection = new UstadJSOPDSEntry[newArraySize];
+
+        if(nowSelected) {
+            //just make the new selection one larger
+            System.arraycopy(currentSelection, 0, newSelection, 0, currentSelection.length);
+            newSelection[newSelection.length-1] = card.getEntry();
+        }else {
+            for(int i = 0, elCount = 0; i < currentSelection.length; i++) {
+                if(!currentSelection[i].id.equals(card.getEntry().id)) {
+                    newSelection[elCount] = currentSelection[i];
+                    elCount++;
+                }
+            }
+        }
+
+        this.catalogView.setSelectedEntries(newSelection);
     }
+
+
 
     @Override
     public void onClick(View view) {
         if(view instanceof OPDSEntryCard) {
             OPDSEntryCard card = ((OPDSEntryCard)view);
-            if(selectedEntries.size() > 0) {
+            if(this.catalogView.getSelectedEntries().length > 0) {
                 toggleEntrySelected(card);
             }else {
                 catalogView.getController().handleClickEntry(card.getEntry());

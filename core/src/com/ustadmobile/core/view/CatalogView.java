@@ -31,6 +31,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 
 /**
@@ -113,6 +114,18 @@ public interface CatalogView extends UstadView{
      */
     public void updateDownloadEntryProgress(String entryId, int loaded, int total);
     
+    /**
+     * Get the entries that have been selected by the user (e.g. by long press)
+     * 
+     * @return Array of entries selected by the user
+     */
+    public UstadJSOPDSEntry[] getSelectedEntries();
     
+    /**
+     * Set the entries that are to be marked as selected
+     * 
+     * @param entries Array of entries to be marked as selected
+     */
+    public void setSelectedEntries(UstadJSOPDSEntry[] entries);
         
 }
