@@ -73,6 +73,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+
 /**
  * Created by mike on 07/06/15.
  */
@@ -601,6 +602,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             this.progressListeners = new LinkedList<UMProgressListener>();
             this.finished = false;
             cachedTotalSize = -1;
+
         }
 
         @Override
