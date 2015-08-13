@@ -421,6 +421,13 @@ public abstract class UstadMobileSystemImpl {
      * @return Platform AppView
      */
     public abstract AppView getAppView();
+    
+    /**
+     * Get access to the logger to use on this implementation
+     * 
+     * @return Platform logger
+     */
+    public abstract UMLog getLogger();
 }
 
 
