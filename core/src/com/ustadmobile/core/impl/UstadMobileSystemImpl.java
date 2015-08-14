@@ -33,6 +33,7 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ViewFactory;
@@ -428,6 +429,26 @@ public abstract class UstadMobileSystemImpl {
      * @return Platform logger
      */
     public abstract UMLog getLogger();
+    
+    /**
+     * This method should open the given container and return a URI from
+     * which it can be accessed.  Sometimes this may involve nothing more than
+     * returning the input container path (e.g. in the case of a video that will
+     * play locally from the file).  In the case of an EPUB or a zip container
+     * this might involve it being mounted on a local http server (and then 
+     * returning a local http URL for example).
+     * 
+     * This method should be assumed to take a while and be run in a SEPERATE
+     * thread.
+     * 
+     * @param entry
+     * @param containerPath
+     * @param mimeType
+     * @return 
+     */
+    public abstract String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType);
+    
+    public abstract void closeContainer(String openURI);
 }
 
 

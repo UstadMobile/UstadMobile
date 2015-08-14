@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+
 /**
  * This class needs to be overriden by the implementation to return an 
  * implementation of the view for that platform.  Use the exact same names
@@ -48,7 +50,17 @@ public class ViewFactory {
         throw new RuntimeException("Not Implemented");
     }
     
-    public static ContainerView makeContainerView() {
+    /**
+     * This method should return a ContainerView for the given entry.  The entry
+     * must be opened using UstadMobileSystemImpl.openContainer first.  
+     * 
+     * @param entry The entry to be opened - used to provide title etc.
+     * @param openURI The URI returned by UstadMobileSystemImpl.openContainer
+     * @param mimeType the mime type of the container
+     * 
+     * @return ContainerView to be used to show this container.
+     */
+    public static ContainerView makeContainerView(UstadJSOPDSEntry entry, String openURI, String mimeType) {
         throw new RuntimeException("Not Implemented");
     }
     

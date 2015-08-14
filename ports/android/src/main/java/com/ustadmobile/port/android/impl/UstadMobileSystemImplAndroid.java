@@ -33,45 +33,25 @@ package com.ustadmobile.port.android.impl;
 
 import android.app.Activity;
 import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.File;
-import java.io.InputStream;
-import java.lang.reflect.Array;
+import java.io.*;
+import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.ustadmobile.core.impl.*;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 
 import android.os.Build;
 import android.util.Log;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.*;
 
 
 /**
@@ -518,6 +498,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public UMLog getLogger() {
         return logger;
+    }
+
+    @Override
+    public String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType) {
+        return null;
+    }
+
+    @Override
+    public void closeContainer(String openURI) {
+        
     }
 
     /**

@@ -36,4 +36,6 @@ package com.ustadmobile.core.view;
  */
 public interface ContainerView extends UstadView {
     
+    
+    
 }

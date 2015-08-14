@@ -31,6 +31,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.view.ContainerView;
 
 /**
  * Represents a container (e.g. epub file)
@@ -39,6 +40,8 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
  * @author mike
  */
 public class ContainerController implements UstadController{
+    
+    private ContainerView containerView;
     
     public ContainerController makeFromEntry(UstadJSOPDSItem entry) {
         return null;
