@@ -11,6 +11,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 public class ContainerActivity extends AppCompatActivity {
@@ -55,17 +56,19 @@ public class ContainerActivity extends AppCompatActivity {
 
     public void initEPUB() {
         UstadOCF ocf = null;
+        String firstURL = null;
 
         try {
             ocf = containerView.getContainerController().getOCF();
-
+            String opfPath = UMFileUtil.joinPaths(new String[]{
+                    containerView.getContainerController().getOpenPath(), ocf.rootFiles[0].fullPath});
+            UstadJSOPF opf = containerView.getContainerController().getOPF(0);
+            firstURL = UMFileUtil.resolveLink(opfPath, opf.spine[1].href);
+            WebView webView = (WebView)findViewById(R.id.container_webview);
+            webView.loadUrl(firstURL);
         }catch(Exception e) {
             e.printStackTrace();
         }
-
-        String firstURL = containerView.getContainerController().getOpenPath() +"/META-INF/container.xml";
-        WebView webView = (WebView)findViewById(R.id.container_webview);
-        webView.loadUrl(firstURL);
     }
 
 

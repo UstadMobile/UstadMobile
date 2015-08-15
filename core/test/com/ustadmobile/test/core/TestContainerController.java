@@ -50,6 +50,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.IOException;
@@ -121,6 +122,10 @@ public class TestContainerController extends TestCase {
             openPath, entryInfo.fileURI, entryInfo.mimeType);
         UstadOCF ocf = controller.getOCF();
         assertNotNull("Controller can fetch OCF once open", ocf);
+        
+        UstadJSOPF opf = controller.getOPF(0);
+        assertNotNull("Can load package OPF", opf);
+        assertTrue("Package has spine with entries", opf.spine.length > 0);
     }
     
 }

@@ -252,4 +252,23 @@ public class UMFileUtil {
         return url;
     }
     
+    /**
+     * Gets the extension from a url or path string.  Will chop off the query
+     * and preceeding directories, and then get the file extension.  Is returned
+     * without the .
+     * 
+     * @param uri the path or URL that we want the extension of 
+     * @return the extension - the last characters after the last . if there is a . in the name
+     * null if no extension is found
+     */
+    public static String getExtension(String uri) {
+        String filename = getFilename(uri);
+        int lastDot = filename.lastIndexOf('.');
+        if(lastDot != -1 && lastDot != filename.length() -1) {
+            return filename.substring(lastDot+1);
+        }else {
+            return null;
+        }
+    }
+    
 }

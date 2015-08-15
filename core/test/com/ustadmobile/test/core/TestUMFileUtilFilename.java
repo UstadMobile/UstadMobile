@@ -56,6 +56,11 @@ public class TestUMFileUtilFilename extends TestCase{
         assertEquals("Will cut off query string", 
             UMFileUtil.getFilename("http://someplace.com/somedir/file.txt"), 
             "file.txt");
+        
+        assertEquals("Will correctly find extension: mp3",
+            "mp3", UMFileUtil.getExtension("http://server.com/dir/file.mp3"));
+        assertEquals("Will return null in case of no extension",
+            null, UMFileUtil.getExtension("http://server.com/some/dir"));
     }
     
     
