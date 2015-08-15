@@ -30,12 +30,14 @@
  */
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.controller.ContainerController;
+
 /**
  *
  * @author mike
  */
 public interface ContainerView extends UstadView {
     
-    
+    public void setController(ContainerController controller);
     
 }

@@ -31,6 +31,7 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 
 import com.ustadmobile.core.view.AppView;
@@ -52,11 +53,12 @@ public class AppViewAndroid implements AppView{
 
     @Override
     public void showProgressDialog(final String title) {
-        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+        final Activity currentActivity = impl.getCurrentActivity();
+        currentActivity.runOnUiThread(new Runnable() {
             public void run() {
                 dismissProgressDialog();
 
-                progressDialog = ProgressDialog.show(impl.getCurrentContext(), title, "");
+                progressDialog = ProgressDialog.show(currentActivity, title, "");
             }
         });
     }

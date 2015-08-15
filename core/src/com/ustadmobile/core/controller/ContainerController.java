@@ -30,8 +30,17 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.ocf.UstadOCF;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.ViewFactory;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Represents a container (e.g. epub file)
@@ -43,12 +52,103 @@ public class ContainerController implements UstadController{
     
     private ContainerView containerView;
     
-    public ContainerController makeFromEntry(UstadJSOPDSItem entry) {
+    private String openPath;
+    
+    private String fileURI; 
+    
+    private String mimeType;
+    
+    private UstadJSOPDSEntry entry;
+    
+    private UstadOCF ocf;
+    
+    public ContainerController(UstadJSOPDSEntry entry, String openPath, String fileURI, String mimeType) {
+        this.entry = entry;
+        this.openPath = openPath;
+        this.fileURI = fileURI;
+        this.mimeType = mimeType;
+    }
+    
+    
+    /**
+     * 
+     * @param entry
+     * @param openPath
+     * @param fileURI
+     * @param mimeType
+     * @return 
+     */
+    public static ContainerController makeFromEntry(UstadJSOPDSEntry entry, String openPath, String fileURI, String mimeType) {
+        return new ContainerController(entry, openPath, fileURI, mimeType);
+    }
+    
+    public String getOpenPath() {
+        return openPath;
+    }
+    
+    public String getFileURI() {
+        return fileURI;
+    }
+    
+    public String getMimeType() {
+        return mimeType;
+    }
+    
+    /**
+     * If this is an EPUB container; it can technically container multiple OPF
+     * descriptor files
+     * 
+     * @return 
+     */
+    public UstadOCF getOCF() throws IOException, XmlPullParserException{
+        if(ocf != null) {
+            return ocf;
+        }
+        
+        String containerXMLURI = UMFileUtil.joinPaths(
+                new String[]{openPath, "META-INF/container.xml"});
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance(); 
+        byte[] contentBytes = impl.readURLToString(containerXMLURI, 
+            null).getResponse();
+                
+        XmlPullParser xpp = impl.newPullParser();
+        xpp.setInput(new ByteArrayInputStream(contentBytes), "UTF-8");
+        ocf = UstadOCF.loadFromXML(xpp);
+        return ocf;
+    }
+    
+    public UstadJSOPF getOPF(int index) throws IOException, XmlPullParserException{
+        UstadJSOPF opf = null;
+        UstadOCF ocf = getOCF();
+        String opfPath = UMFileUtil.joinPaths(new String[] {openPath, 
+            ocf.rootFiles[index].fullPath});
+        
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance(); 
+        XmlPullParser xpp = impl.newPullParser();
+        byte[] contentBytes = impl.readURLToString(opfPath, null).getResponse();
+        xpp.setInput(new ByteArrayInputStream(contentBytes), "UTF-8");
+        opf = UstadJSOPF.loadFromOPF(xpp);
+        
+        return opf;
+    }
+    
+    
+    /**
+     * Utility method to return an array of the pages that are in this, if it's an epub
+     * @return 
+     */
+    public UstadJSOPF getEpubPageList() {
         return null;
     }
     
     public void show() {
+        if(this.containerView == null) {
+            containerView = ViewFactory.makeContainerView(entry, openPath, 
+                mimeType);
+        }
+        containerView.setController(this);
         
+        containerView.show();
     }
     
 }

@@ -39,7 +39,15 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.ocf.UstadOCF;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 
@@ -49,11 +57,83 @@ public class SplashScreenActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+    }
 
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        ((UstadMobileSystemImplAndroid) impl).setCurrentContext(this);
+    @Override
+    public void onStart() {
+        super.onStart();
+        UstadMobileSystemImpl.getInstance();
+
+        UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
+        impl.handleActivityStart(this);
+        //runTest();
 
         impl.startUI();
+    }
+
+    public void onStop() {
+        super.onStop();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
+    }
+
+
+    public void runTest(){
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    String httpRoot = "http://192.168.0.103:5062/";
+
+                    String acquireOPDSURL = UMFileUtil.joinPaths(new String[]{
+                            httpRoot, "acquire.opds"});
+                    UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+                    UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL,
+                            CatalogController.SHARED_RESOURCE, null, null,
+                            CatalogController.CACHE_ENABLED);
+
+                    UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries,
+                            null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
+                    int totalSize = acquireJob.getTotalSize();
+
+                    acquireJob.start();
+                    int timeRemaining = 60000;
+                    while(timeRemaining > 0 && !acquireJob.isFinished()) {
+                        try {Thread.sleep(1000); }
+                        catch(InterruptedException e) {}
+                    }
+                    //assertTrue("Job has completed", acquireJob.isFinished());
+
+                    CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id,
+                            CatalogController.SHARED_RESOURCE);
+
+                    String acquiredFileURI = entryInfo.fileURI;
+
+                    UstadJSOPDSEntry entry = feed.entries[0];
+
+                    String openPath = impl.openContainer(entry, acquiredFileURI,
+                            entryInfo.mimeType);
+                    //assertNotNull("Got an open path from the system", openPath);
+
+                    ContainerController controller = ContainerController.makeFromEntry(entry,
+                            openPath, entryInfo.fileURI, entryInfo.mimeType);
+                    UstadOCF ocf = controller.getOCF();
+                    //assertNotNull("Controller can fetch OCF once open", ocf);
+                    String helloName = "bob";
+                    helloName += "joe";
+                }catch(Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }).start();
+
+
+
     }
 
     @Override

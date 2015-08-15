@@ -46,9 +46,11 @@ import java.net.URL;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 
 import android.os.Build;
+import android.os.IBinder;
 import android.util.Log;
 
 import org.xmlpull.v1.*;
@@ -91,9 +93,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private UMLogAndroid logger;
 
+    private HTTPService httpService;
+
+    private HashMap<Activity, HTTPServiceConnection> activityHTTPServiceConnections;
+
     public UstadMobileSystemImplAndroid() {
         appView = new AppViewAndroid(this);
         logger = new UMLogAndroid();
+        activityHTTPServiceConnections = new HashMap<>();
     }
 
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
@@ -112,9 +119,31 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return null;
     }
 
-    public void setCurrentActivity(Activity activity) {
+    public void handleActivityStart(Activity activity) {
         this.currentActivity = activity;
         setCurrentContext(activity);
+
+        //bind the activity to the HTTP service
+        Intent httpServiceIntent = new Intent(activity, HTTPService.class);
+        HTTPServiceConnection activityCon = activityHTTPServiceConnections.get(activity);
+        if(activityCon == null) {
+            activityCon = new HTTPServiceConnection();
+            activity.bindService(httpServiceIntent, activityCon, Context.BIND_AUTO_CREATE);
+            activityHTTPServiceConnections.put(activity, activityCon);
+        }
+    }
+
+    public void handleActivityStop(Activity activity) {
+        int x =42 ;
+        int y = x + 1;
+    }
+
+    public void handleActivityDestroy(Activity activity) {
+        HTTPServiceConnection activityCon = activityHTTPServiceConnections.get(activity);
+        if(activityCon != null) {
+            activity.unbindService(activityCon);
+            activityHTTPServiceConnections.remove(activity);
+        }
     }
 
     public void setCurrentContext(Context context) {
@@ -434,11 +463,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         URL url = new URL(httpURL);
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
-        Enumeration e = headers.keys();
-        while(e.hasMoreElements()) {
-            String headerField = e.nextElement().toString();
-            String headerValue = headers.get(headerField).toString();
-            conn.setRequestProperty(headerField, headerValue);
+        if(headers != null) {
+            Enumeration e = headers.keys();
+            while(e.hasMoreElements()) {
+                String headerField = e.nextElement().toString();
+                String headerValue = headers.get(headerField).toString();
+                conn.setRequestProperty(headerField, headerValue);
+            }
         }
 
         conn.setRequestMethod(method);
@@ -502,13 +533,29 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     @Override
     public String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType) {
-        return null;
+        String openPath = httpService.mountZIP(containerURI);
+        return openPath;
     }
 
     @Override
     public void closeContainer(String openURI) {
-        
+
     }
+
+    public class HTTPServiceConnection implements ServiceConnection {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            HTTPService.HTTPBinder httpBinder = (HTTPService.HTTPBinder)service;
+            UstadMobileSystemImplAndroid.this.httpService = httpBinder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    }
+
 
     /**
      * Represents a single Download: backed by the Android DownloadManager service

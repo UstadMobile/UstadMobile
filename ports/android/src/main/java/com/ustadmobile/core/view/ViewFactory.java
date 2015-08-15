@@ -33,6 +33,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.port.android.view.CatalogViewAndroid;
+import com.ustadmobile.port.android.view.ContainerViewAndroid;
 import com.ustadmobile.port.android.view.LoginViewAndroid;
 
 /**
@@ -59,6 +60,6 @@ public class ViewFactory {
      * @return ContainerView to be used to show this container.
      */
     public static ContainerView makeContainerView(UstadJSOPDSEntry entry, String openURI, String mimeType) {
-        throw new RuntimeException("Not Implemented");
+        return new ContainerViewAndroid();
     }
 }

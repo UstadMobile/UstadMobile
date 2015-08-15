@@ -337,10 +337,24 @@ public class CatalogController implements UstadController, UMProgressListener {
                 bgThread.start();
             }
         }else {
-            String title = entry.title;
-            selectedEntries = new UstadJSOPDSEntry[]{entry};
-            view.showConfirmDialog("Download?", "Download " + title + "?", "OK", 
-                "Cancel", CMD_DOWNLOADENTRY);
+            CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
+                    SHARED_RESOURCE | USER_RESOURCE);
+            if(entryInfo != null && entryInfo.acquisitionStatus == STATUS_ACQUIRED) {
+                String openPath = UstadMobileSystemImpl.getInstance().openContainer(
+                    entry, entryInfo.fileURI, entryInfo.mimeType);
+                
+                ContainerController catalogCtrl = 
+                    ContainerController.makeFromEntry(entry, openPath, 
+                        entryInfo.fileURI, entryInfo.mimeType);
+                catalogCtrl.show();
+                
+                System.out.println("Opened to : " + openPath);
+            }else {
+                String title = entry.title;
+                selectedEntries = new UstadJSOPDSEntry[]{entry};
+                view.showConfirmDialog("Download?", "Download " + title + "?", "OK", 
+                    "Cancel", CMD_DOWNLOADENTRY);
+            }
         }
     }
     

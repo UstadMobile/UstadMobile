@@ -48,12 +48,26 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UstadMobileSystemImplAndroid.getInstanceAndroid().setCurrentActivity(this);
         Integer viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         setContentView(R.layout.umactivity_login);
-
         LoginViewAndroid.getViewById(viewId.intValue()).setLoginViewActivity(this);
     }
+
+    public void onStart() {
+        super.onStart();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
+    }
+
+    public void onStop() {
+        super.onStop();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

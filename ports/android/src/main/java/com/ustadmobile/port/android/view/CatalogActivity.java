@@ -28,21 +28,36 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
 
     private ProgressDialog progressDialog;
 
+    private int viewId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
-        UstadMobileSystemImplAndroid.getInstanceAndroid().setCurrentActivity(this);
+        viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         setContentView(R.layout.activity_catalog);
 
         opdsFragmentMap = new WeakHashMap<CatalogViewAndroid, CatalogOPDSFragment>();
-
-        currentView = CatalogViewAndroid.getViewById(viewId);
-        currentView.setCatalogViewActivity(this);
-
         currentFrag = CatalogOPDSFragment.newInstance(viewId);
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container,
             currentFrag).commit();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
+        currentView = CatalogViewAndroid.getViewById(viewId);
+        currentView.setCatalogViewActivity(this);
+    }
+
+    public void onStop() {
+        super.onStop();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
 
     /**

@@ -35,6 +35,17 @@
             android:name="com.ustadmobile.port.android.view.CatalogActivity"
             android:label="@string/title_activity_catalog" >
         </activity>
+
+        <service
+            android:name="com.ustadmobile.port.android.impl.http.HTTPService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+        <activity
+            android:name="com.ustadmobile.port.android.view.ContainerActivity"
+            android:label="@string/title_activity_container" >
+        </activity>
     </application>
 
 </manifest>

@@ -81,6 +81,9 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     private Map<String, OPDSEntryCard> idToCardMap;
 
+    /** The viewId of the view we are supposed to be attached with */
+    private int viewId;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -105,10 +108,10 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            int viewId = getArguments().getInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID);
+            viewId = getArguments().getInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID);
             this.catalogView = CatalogViewAndroid.getViewById(viewId);
             catalogView.setFragment(this);
-            catalogView.setCatalogViewActivity((CatalogActivity)getActivity());
+            catalogView.setCatalogViewActivity((CatalogActivity) getActivity());
         }
     }
 
@@ -146,6 +149,12 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
         return rootContainer;
     }
+
+    public void onStart() {
+        super.onStart();
+    }
+
+
 
     public CatalogView getCatalogView() {
         return catalogView;

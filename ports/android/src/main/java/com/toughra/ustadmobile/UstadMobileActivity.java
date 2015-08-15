@@ -50,35 +50,24 @@ public class UstadMobileActivity extends Activity
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        ((UstadMobileSystemImplAndroid)impl).setCurrentActivity(this);
-
-
-        String contentDirURI = impl.getSharedContentDir();
-        String localeStr = impl.getSystemLocale();
-
-        File baseDir = Environment.getExternalStorageDirectory();
-        File file1 = new File(baseDir, "umtestfile1.txt");
-        File file2 = new File(baseDir, "umtestfile2.txt");
-        File file3 = new File(baseDir, "wpdownload.zip");
-        try {
-            impl.writeStringToFile("hello world", file1.getAbsolutePath(), "UTF-8");
-            System.out.println("WRite file OK");
-        }catch(IOException e) {
-            e.printStackTrace();
-        }
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-
-
-
-        /*
-        if(impl.getActiveUser() == null) {
-            Intent loginIntent = new Intent(this, LoginActivity.class);
-            startActivity(loginIntent);
-        }
-        */
-
     }
+
+    public void onStart() {
+        super.onStart();
+        ((UstadMobileSystemImplAndroid)UstadMobileSystemImpl.getInstance()).handleActivityStart(this);
+    }
+
+    public void onStop() {
+        super.onStop();
+        ((UstadMobileSystemImplAndroid)UstadMobileSystemImpl.getInstance()).handleActivityStop(this);
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+        ((UstadMobileSystemImplAndroid)UstadMobileSystemImpl.getInstance()).handleActivityDestroy(this);
+    }
+
+
 }
