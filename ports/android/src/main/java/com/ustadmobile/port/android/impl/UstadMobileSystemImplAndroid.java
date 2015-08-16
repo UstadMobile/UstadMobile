@@ -39,6 +39,7 @@ import android.net.Uri;
 import android.os.Environment;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -474,10 +475,33 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         conn.setRequestMethod(method);
 
+        if("POST".equals(method) && postParams != null && postParams.size() > 0) {
+            //we need to write the post params to the request
+            StringBuilder sb = new StringBuilder();
+            Enumeration e = postParams.keys();
+            boolean firstParam = true;
+            while(e.hasMoreElements()) {
+                String key = e.nextElement().toString();
+                String value = postParams.get(key).toString();
+                if(firstParam) {
+                    firstParam = false;
+                }else {
+                    sb.append('&');
+                }
+                sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
+                sb.append(URLEncoder.encode(value, "UTF-8"));
+            }
+
+            OutputStream out = conn.getOutputStream();
+            out.write(sb.toString().getBytes());
+            out.flush();
+            out.close();
+        }
+
         conn.connect();
 
-
         int contentLen = conn.getContentLength();
+        int statusCode = conn.getResponseCode();
         InputStream in = conn.getInputStream();
         byte[] buf = new byte[1024];
         int bytesRead = 0;
@@ -507,7 +531,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
 
         byte[] resultBytes = bout.toByteArray();
-        HTTPResult result = new HTTPResult(resultBytes, conn.getResponseCode(),
+        HTTPResult result = new HTTPResult(resultBytes, statusCode,
                 responseHeaders);
         String resultStr = new String(resultBytes, "UTF-8");
 

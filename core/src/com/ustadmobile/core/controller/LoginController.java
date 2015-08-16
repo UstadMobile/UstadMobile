@@ -76,6 +76,31 @@ public class LoginController implements UstadController{
 
     }
     
+    /**
+     * Register a new user
+     * @param userInfoParams Hashtable with 
+     *  phonenumber Mandatory: must start with +countrycode
+     *  name  optional - simple string of username
+     *  gender "m" or "f"  - optional - can be blank
+     * 
+     * @param url HTTP endpoint from which to register the user
+     * @return Hashtable with 
+     */
+    public static String registerNewUser(Hashtable userInfoParams, String url) throws IOException{
+        Hashtable headers = new Hashtable();
+        headers.put("UM-In-App-Registration-Version", "1.0.1");
+        HTTPResult registrationResult = UstadMobileSystemImpl.getInstance().makeRequest(url, 
+            headers, userInfoParams, "POST");
+        if(registrationResult.getStatus() != 200) {
+            throw new IOException("Registration error: code " 
+                    + registrationResult.getStatus());
+        }
+        
+        String serverSays = new String(registrationResult.getResponse(), "UTF-8");
+        return serverSays;
+    }
+    
+    
     public void handleClickLogin(final String username, final String password) {
         final LoginView myView = view;
         Thread loginThread = new Thread() {

@@ -42,6 +42,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
@@ -49,6 +50,9 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import java.io.IOException;
+import java.util.Hashtable;
 
 
 public class SplashScreenActivity extends ActionBarActivity {
@@ -69,6 +73,21 @@ public class SplashScreenActivity extends ActionBarActivity {
         //runTest();
 
         impl.startUI();
+
+        /*
+        Hashtable registerParams = new Hashtable();
+        registerParams.put("phonenumber", "+9641234567");
+        registerParams.put("gender", "f");
+        registerParams.put("name", "Unit Testing");
+
+        try {
+            String serverSays = LoginController.registerNewUser(registerParams,
+                    "http://umcloud1.ustadmobile.com/phoneinappreg/");
+            String somethingElse = serverSays  + "!";
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        */  
     }
 
     public void onStop() {
