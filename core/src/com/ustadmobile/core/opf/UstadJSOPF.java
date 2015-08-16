@@ -189,4 +189,19 @@ public class UstadJSOPF {
         return DEFAULT_MIMETYPE;
     }
     
+    /**
+     * Get the an Array of all the URLs in the spine
+     * 
+     * @return 
+     */
+    public String[] getSpineURLS() {
+        String[] spineURLs = new String[this.spine.length];
+        for(int i = 0; i < this.spine.length; i++) {
+            spineURLs[i] = this.spine[i].href;
+        }
+        return spineURLs;
+    }
+    
+    
+    
 }
