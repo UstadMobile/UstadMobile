@@ -33,6 +33,8 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -45,6 +47,8 @@ public class AppViewAndroid implements AppView{
     private UstadMobileSystemImplAndroid impl;
 
     private ProgressDialog progressDialog;
+
+    private AlertDialog alertDialog;
 
     public AppViewAndroid(UstadMobileSystemImplAndroid impl) {
         this.impl = impl;
@@ -67,12 +71,47 @@ public class AppViewAndroid implements AppView{
     public boolean dismissProgressDialog() {
         impl.getCurrentActivity().runOnUiThread(new Runnable() {
             public void run() {
-                if (progressDialog != null) {
-                    progressDialog.dismiss();
-                    progressDialog = null;
-                }
+            if (progressDialog != null) {
+                progressDialog.dismiss();
+                progressDialog = null;
+            }
             }
         });
         return progressDialog != null;
+    }
+
+    @Override
+    public void showAlertDialog(final String title, final String text) {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(impl.getCurrentActivity());
+                builder.setMessage(text).setTitle(title);
+                builder.setPositiveButton("OK", new AlertDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //do nothing
+                    }
+                });
+                alertDialog = builder.create();
+                alertDialog.show();
+            }
+        });
+    }
+
+    @Override
+    public void dismissAlertDialog() {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run(){
+                if(alertDialog != null) {
+                    alertDialog.dismiss();
+                    alertDialog = null;
+                }
+            }
+        });
+    }
+
+    @Override
+    public void showNotification(String text, int length) {
+
     }
 }

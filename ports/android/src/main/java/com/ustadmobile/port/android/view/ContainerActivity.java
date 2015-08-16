@@ -90,14 +90,6 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
             mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(), urlArray);
             mPager.setAdapter(mPagerAdapter);
-
-
-            /*
-            firstURL = UMFileUtil.resolveLink(opfPath, opf.spine[1].href);
-
-            WebView webView = (WebView)findViewById(R.id.container_webview);
-            webView.loadUrl(firstURL);
-             */
         }catch(Exception e) {
             e.printStackTrace();
         }

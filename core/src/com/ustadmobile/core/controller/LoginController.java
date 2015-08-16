@@ -95,9 +95,15 @@ public class LoginController implements UstadController{
                 }catch(IOException e) {
                     ioe = e;
                 }
+                
+                UstadMobileSystemImpl.getInstance().getAppView().dismissProgressDialog();
 
-                if(result != 200) {
-                    myView.showDialog("Error", "Login failed: please try again");
+                if(result == 401 | result == 403) {
+                    UstadMobileSystemImpl.getInstance().getAppView().showAlertDialog("Login Error", 
+                        "Wrong username/password: please check");
+                }else if(result != 200) {
+                    UstadMobileSystemImpl.getInstance().getAppView().showAlertDialog(
+                        "Login Error", "Network error: please check you are online");
                 }else {
                     //make a new catalog controller and show it for the users base directory
                     //Add username to UserPreferences.
@@ -107,7 +113,6 @@ public class LoginController implements UstadController{
                     try {
                         CatalogController userCatalog = CatalogController.makeUserCatalog(
                             UstadMobileSystemImpl.getInstance());
-                        UstadMobileSystemImpl.getInstance().getAppView().dismissProgressDialog();
                         userCatalog.show();
                     }catch(Exception e) {
                         e.printStackTrace();

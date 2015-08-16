@@ -38,6 +38,20 @@ package com.ustadmobile.core.view;
 public interface AppView {
     
     /**
+     * Short duration to show notification for - matches the android constant
+     * 
+     * http://developer.android.com/reference/android/widget/Toast.html#LENGTH_SHORT
+     */
+    public static final int LENGTH_SHORT = 0;
+    
+    /**
+     * Long duration to show a notification for - matches the android constnat
+     * 
+     * http://developer.android.com/reference/android/widget/Toast.html#LENGTH_LONG
+     */
+    public static final int LENGTH_LONG = 1;
+    
+    /**
      * Show progress going on (e.g. show spinner) with title
      * 
      * @param title 
@@ -51,5 +65,26 @@ public interface AppView {
      * @return true if dialog was showing and is now hidden, false otherwise
      */
     public abstract boolean dismissProgressDialog();
+    
+    
+    /**
+     * Show an alert dialog
+     * @param title Dialog window title
+     * @param text Message text to show
+     */
+    public abstract void showAlertDialog(String title, String text);
+    
+    /**
+     * Dismiss the alert dialog (this can be done by the user normally) if its
+     * still showing
+     */
+    public abstract void dismissAlertDialog();
+    
+    /**
+     * Show a short notification on top of the normal UI
+     * @param text The text to show in the notification
+     * @param length 
+     */
+    public abstract void showNotification(String text, int length);
     
 }
