@@ -70,17 +70,15 @@ public interface CatalogView extends UstadView{
      */
     public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId);
     
+   
     /**
-     * Show the context menu for a container (e.g. more info, delete this item, etc)
+     * Sets the options available in the menu (this could be a drawer, J2ME menu, etc)
      * 
-     * @param item 
+     * When an item is clicked/tapped called controller.handleMenuItemClick(index)
+     * 
+     * @param String array of options to show in the menu
      */
-    public void showContainerContextMenu(UstadJSOPDSItem item);
-    
-    /**
-     * Hide the container context menu if one is showing
-     */
-    public void hideContainerContextMenu();
+    public void setMenuOptions(String[] menuOptions);
     
     /**
      * Set the status of a given entry (e.g. acquired, not acquired, in progress) 

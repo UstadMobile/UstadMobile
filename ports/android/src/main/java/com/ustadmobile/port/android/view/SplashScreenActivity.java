@@ -73,21 +73,6 @@ public class SplashScreenActivity extends ActionBarActivity {
         //runTest();
 
         impl.startUI();
-
-        /*
-        Hashtable registerParams = new Hashtable();
-        registerParams.put("phonenumber", "+9641234567");
-        registerParams.put("gender", "f");
-        registerParams.put("name", "Unit Testing");
-
-        try {
-            String serverSays = LoginController.registerNewUser(registerParams,
-                    "http://umcloud1.ustadmobile.com/phoneinappreg/");
-            String somethingElse = serverSays  + "!";
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */  
     }
 
     public void onStop() {

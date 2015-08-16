@@ -71,6 +71,8 @@ public class CatalogViewAndroid implements CatalogView {
 
     private UstadJSOPDSEntry[] selectedEntries;
 
+    private String[] drawerMenuItems;
+
 
     static {
         viewMap = new HashMap<Integer, CatalogViewAndroid>();
@@ -82,6 +84,7 @@ public class CatalogViewAndroid implements CatalogView {
         viewMap.put(new Integer(viewId), this);
         updateRunnableMap = new HashMap<OPDSEntryCard, EntryProgressUpdateRunnable>();
         acquisitionStatusMap = new HashMap<String, Integer>();
+        drawerMenuItems = new String[0];
     }
 
     public int getViewId() {
@@ -130,13 +133,15 @@ public class CatalogViewAndroid implements CatalogView {
     }
 
     @Override
-    public void showContainerContextMenu(UstadJSOPDSItem ustadJSOPDSItem) {
-
+    public void setMenuOptions(String[] menuOptions) {
+        this.drawerMenuItems = menuOptions;
+        if(activity != null) {
+            activity.setDrawerMenuItems(menuOptions);
+        }
     }
 
-    @Override
-    public void hideContainerContextMenu() {
-
+    protected String[] getMenuOptions() {
+        return this.drawerMenuItems;
     }
 
     @Override

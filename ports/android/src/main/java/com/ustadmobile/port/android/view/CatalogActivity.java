@@ -13,16 +13,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.app.Fragment;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFragment.OnFragmentInteractionListener {
+public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFragment.OnFragmentInteractionListener, ListView.OnItemClickListener {
 
     private CatalogViewAndroid currentView;
 
@@ -40,6 +41,8 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
 
     private ListView mDrawerList;
 
+    private String[] drawerMenuItems;
+
     private ActionBarDrawerToggle mDrawerToggle;
 
     @Override
@@ -52,13 +55,16 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
         //Toolbar toolbar =
         Toolbar toolbar = (Toolbar)findViewById(R.id.catalog_toolbar);
         setSupportActionBar(toolbar);
-        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-        toolbar.setTitle("Catalog");
-        //toolbar.setLogo(R.drawable.ic_launcher);
+
+        currentView = CatalogViewAndroid.getViewById(viewId);
+        currentView.setCatalogViewActivity(this);
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.catalog_drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.catalog_left_drawer);
+        mDrawerList = (ListView) findViewById(R.id.catalog_left_drawer_list);
+
+        setDrawerMenuItems(currentView.getMenuOptions());
+        mDrawerList.setOnItemClickListener(this);
 
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         mDrawerToggle = new ActionBarDrawerToggle(this,//host activity
@@ -79,10 +85,6 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
         };
 
         mDrawerToggle.syncState();
-
-
-
-
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         opdsFragmentMap = new WeakHashMap<CatalogViewAndroid, CatalogOPDSFragment>();
@@ -91,12 +93,16 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
             currentFrag).commit();
     }
 
+    public void setDrawerMenuItems(String[] drawerMenuItems) {
+        this.drawerMenuItems = drawerMenuItems;
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawermenuitem,
+                drawerMenuItems));
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
-        currentView = CatalogViewAndroid.getViewById(viewId);
-        currentView.setCatalogViewActivity(this);
     }
 
     public void onStop() {
@@ -167,5 +173,10 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
 
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        currentView.getController().handleClickMenuItem(position);
     }
 }

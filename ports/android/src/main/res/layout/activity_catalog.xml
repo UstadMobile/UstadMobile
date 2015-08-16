@@ -1,20 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:auto="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
+    <include android:id="@+id/catalog_toolbar" layout="@layout/toolbar"/>
 
-    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/catalog_toolbar"
-        android:layout_width="fill_parent"
-        android:layout_height="54dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        auto:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        auto:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <android.support.v4.widget.DrawerLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -30,18 +20,23 @@
             android:layout_height="match_parent" />
 
 
-        <ListView android:id="@+id/catalog_left_drawer"
-            android:layout_width="240dp"
-            android:layout_height="match_parent"
+        <LinearLayout
             android:layout_gravity="start"
-            android:choiceMode="singleChoice"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp"
-            android:background="#111">
+            android:background="#111"
+            android:orientation="vertical"
+            android:layout_width="240dp"
+            android:layout_height="match_parent">
 
-
-
-        </ListView>
+            <ListView android:id="@+id/catalog_left_drawer_list"
+                android:layout_width="240dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="start"
+                android:choiceMode="singleChoice"
+                android:divider="@android:color/transparent"
+                android:dividerHeight="0dp"
+                android:background="#111"/>
+            <!-- more stuff could go here if needed -->
+        </LinearLayout>
 
     </android.support.v4.widget.DrawerLayout>
 </RelativeLayout>

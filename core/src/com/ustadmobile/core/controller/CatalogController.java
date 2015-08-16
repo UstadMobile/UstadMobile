@@ -131,6 +131,10 @@ public class CatalogController implements UstadController, UMProgressListener {
     //this is where the feed (and its entries) live.
     private CatalogModel model;
     
+    public static String[] catalogMenuOpts = new String[]{"My Catalogs",
+        "My Courses", "Logout"};
+    
+    
     public CatalogController() {
         
     }
@@ -179,6 +183,7 @@ public class CatalogController implements UstadController, UMProgressListener {
     public void show() {
         this.view = ViewFactory.makeCatalogView();
         this.view.setController(this);
+        this.view.setMenuOptions(catalogMenuOpts);
         
         UstadJSOPDSFeed feed = this.getModel().opdsFeed;
         if(feed.isAcquisitionFeed()) {
@@ -414,6 +419,16 @@ public class CatalogController implements UstadController, UMProgressListener {
         transferJob.start();
         activeTransferJobs.addElement(transferJob);
         this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
+    }
+    
+    /**
+     * Called when the user selects an item from the menu (e.g. Drawer, J2ME options
+     * menu etc)
+     * 
+     * @param index Index of the item clicked corresponding with the menuitem string array
+     */
+    public void handleClickMenuItem(int index) {
+        System.out.println("You click: " + index);
     }
     
     /**

@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
@@ -41,7 +42,11 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
         viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         containerView = ContainerViewAndroid.getViewById(viewId);
         containerView.setContainerActivity(this);
+
         initByContentType();
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
+        setSupportActionBar(toolbar);
     }
 
     public void onStart() {
