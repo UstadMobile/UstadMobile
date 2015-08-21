@@ -12,15 +12,27 @@ apply plugin: 'android'
 android {
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE_FILE") == null ? "keystore.ks" : System.getenv("KEYSTORE_FILE"))
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEYSTORE_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             // proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
     defaultConfig {
         minSdkVersion 9
     }
+
+
 }
 
 repositories {

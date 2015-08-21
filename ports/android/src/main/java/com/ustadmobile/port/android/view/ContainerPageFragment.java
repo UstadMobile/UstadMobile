@@ -34,6 +34,11 @@ public class ContainerPageFragment extends Fragment {
      */
     private WebView webView;
 
+    /**
+     * Main root view here
+     */
+    private ViewGroup viewGroup;
+
     private OnFragmentInteractionListener mListener;
 
     /**
@@ -68,19 +73,24 @@ public class ContainerPageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        RelativeLayout viewGroup = (RelativeLayout)inflater.inflate(R.layout.fragment_container_page,
-            container, false);
-        WebView webView = (WebView)viewGroup.findViewById(R.id.fragment_container_page_webview);
+        if(viewGroup == null) {
+            viewGroup = (RelativeLayout)inflater.inflate(R.layout.fragment_container_page,
+                    container, false);
+            webView = (WebView)viewGroup.findViewById(R.id.fragment_container_page_webview);
 
-        //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
-        if(Build.VERSION.SDK_INT >= 17) {
-            webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+            //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
+            if(Build.VERSION.SDK_INT >= 17) {
+                webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+            }
+
+            webView.loadUrl(mPageURL);
+            webView.getSettings().setJavaScriptEnabled(true);
         }
-
-        webView.loadUrl(mPageURL);
-        webView.getSettings().setJavaScriptEnabled(true);
-
         return viewGroup;
+    }
+
+    public void evaluateJavascript(String script) {
+        webView.loadUrl(script);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

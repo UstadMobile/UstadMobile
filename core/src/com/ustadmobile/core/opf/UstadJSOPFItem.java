@@ -38,8 +38,9 @@ public class UstadJSOPFItem {
     public String href;
     public String mimeType;
     public String properties;
+    public boolean linear;
     
     public UstadJSOPFItem(){
-        
+        this.linear = true;
     }
 }

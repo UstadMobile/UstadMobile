@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.res.AssetManager;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -19,6 +20,9 @@ import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.WeakHashMap;
 
 public class ContainerActivity extends AppCompatActivity implements ContainerPageFragment.OnFragmentInteractionListener {
@@ -33,6 +37,8 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
     /** The Page Adapter used to manage swiping between epub pages */
     private ContainerViewPagerAdapter mPagerAdapter;
 
+    private String onpageSelectedJS = "javascript: document.body.innerHTML = 'all ur bases are us';";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +48,26 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
         viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         containerView = ContainerViewAndroid.getViewById(viewId);
         containerView.setContainerActivity(this);
+        String mTitle = containerView.getTitle() != null ? containerView.getTitle() : "Content";
+        setTitle(mTitle);
+
+        try {
+            AssetManager asMgr = getApplicationContext().getAssets();
+            InputStream is =asMgr.open("onpageshow.js");
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            int bytesRead = 0;
+            while((bytesRead = is.read(buf, 0, buf.length)) != -1) {
+                bout.write(buf, 0, bytesRead);
+            }
+            is.close();
+            onpageSelectedJS = "javascript:" + new String(bout.toByteArray(), "UTF-8");
+            int four = 2+2;
+            int five = four + 1;
+        }catch(IOException e) {
+            System.err.println("Error loading javascript for page changing");
+            e.printStackTrace();
+        }
 
         initByContentType();
 
@@ -87,7 +113,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
             //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
             UstadJSOPF opf = containerView.getContainerController().getOPF(0);
 
-            String[] hrefArray = opf.getSpineURLS();
+            String[] hrefArray = opf.getLinearSpineURLS();
             String[] urlArray = new String[hrefArray.length];
             for(int i = 0; i < hrefArray.length; i++) {
                 urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i]);
@@ -95,6 +121,23 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
             mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(), urlArray);
             mPager.setAdapter(mPagerAdapter);
+            mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    ContainerPageFragment frag = (ContainerPageFragment) mPagerAdapter.getItem(position);
+                    frag.evaluateJavascript(onpageSelectedJS);
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
         }catch(Exception e) {
             e.printStackTrace();
         }

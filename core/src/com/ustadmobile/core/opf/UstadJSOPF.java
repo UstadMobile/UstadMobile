@@ -106,6 +106,8 @@ public class UstadJSOPF {
         String id=null;
         String properties=null;
         String idref=null;
+        boolean isLinear = true;
+        String isLinearStrVal = null;
         Hashtable allItems = new Hashtable();
         Vector spineItems = new Vector();        
 
@@ -118,6 +120,8 @@ public class UstadJSOPF {
             defMimeType = null;
             extension=null;
             idref=null;
+            isLinear = true;
+            isLinearStrVal = null;
             
             if(evtType == XmlPullParser.START_TAG){
                 if(xpp.getName().equals("manifest")){
@@ -128,6 +132,7 @@ public class UstadJSOPF {
                     itemMime=xpp.getAttributeValue(null, "media-type");
                     id = xpp.getAttributeValue(null, "id");
                     properties = xpp.getAttributeValue(null, "properties");
+                    
 
                     extension=getExtension(filename);
                     if(extension != null && defaultMimeTypes.containsKey(extension)){
@@ -140,24 +145,30 @@ public class UstadJSOPF {
                     UstadJSOPFItem item2 = new UstadJSOPFItem();
                     item2.href = filename;
                     item2.mimeType = itemMime;
-                    item2.properties = properties;                        
+                    item2.properties = properties;
+                    
 
                     allItems.put(id, item2);
 
                 }else if(xpp.getName() != null && xpp.getName().equals("itemref")){
                     //for each itemRef in spine
-                    //if(xpp.getName().equals("itemref")){
                     idref=xpp.getAttributeValue(null, "idref");
+                    isLinearStrVal = xpp.getAttributeValue(null, "linear");
+                    
                     Object spineItem = allItems.get(idref);
                     if(spineItem == null){
                         throw new RuntimeException("Invalid OPF: item not found: #" + idref);
+                    }
+                    
+                    if(isLinearStrVal != null) {
+                        char isLinearChar = isLinearStrVal.charAt(0);
+                        isLinear = !(isLinearChar == 'n' | isLinearChar == 'N');
+                        ((UstadJSOPFItem)allItems.get(idref)).linear = isLinear;
                     }
                         
                     spineItems.addElement(allItems.get(idref));
                     
                 }
-                    
-                
             }else if(evtType == XmlPullParser.END_TAG){
                 if(xpp.getName().equals("manifest")){
                     System.out.println("End of manifest.");
@@ -202,6 +213,18 @@ public class UstadJSOPF {
         return spineURLs;
     }
     
+    public String[] getLinearSpineURLS() {
+        Vector spineURLs = new Vector();
+        for(int i = 0; i < this.spine.length; i++) {
+            if(this.spine[i].linear) {
+                spineURLs.addElement(this.spine[i].href);
+            }
+        }
+        
+        String[] linearSpine = new String[spineURLs.size()];
+        spineURLs.copyInto(linearSpine);
+        return linearSpine;
+    }
     
     
 }

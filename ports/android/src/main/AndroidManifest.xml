@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.toughra.ustadmobile"
-    android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionCode="42"
+    android:versionName="0.2.0.1" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -19,6 +19,7 @@
         </activity>
         <activity
             android:name="com.ustadmobile.port.android.view.LoginActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/title_activity_login" >
         </activity>
         <activity
@@ -33,6 +34,7 @@
         </activity>
         <activity
             android:name="com.ustadmobile.port.android.view.CatalogActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/title_activity_catalog" >
         </activity>
 
@@ -44,6 +46,7 @@
 
         <activity
             android:name="com.ustadmobile.port.android.view.ContainerActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/title_activity_container" >
         </activity>
     </application>

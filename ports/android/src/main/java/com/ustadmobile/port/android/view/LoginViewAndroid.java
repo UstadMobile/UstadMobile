@@ -100,7 +100,10 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
     @Override
     public void show() {
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        impl.startActivityForViewId(LoginActivity.class, this.viewId);
+        Intent startIntent = new Intent(impl.getCurrentContext(), LoginActivity.class);
+        startIntent.putExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, viewId);
+        startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        impl.getCurrentActivity().startActivity(startIntent);
     }
 
 

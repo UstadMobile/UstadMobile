@@ -60,10 +60,13 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
         currentView = CatalogViewAndroid.getViewById(viewId);
         currentView.setCatalogViewActivity(this);
 
+        setTitle(currentView.getController().getModel().opdsFeed.title);
+
         mDrawerLayout = (DrawerLayout)findViewById(R.id.catalog_drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.catalog_left_drawer_list);
 
         setDrawerMenuItems(currentView.getMenuOptions());
+
         mDrawerList.setOnItemClickListener(this);
 
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);

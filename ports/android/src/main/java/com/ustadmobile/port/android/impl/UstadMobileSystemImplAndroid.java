@@ -46,6 +46,7 @@ import java.net.URL;
 
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.view.AppViewAndroid;
@@ -558,6 +559,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType) {
         String openPath = httpService.mountZIP(containerURI);
+        String extension = UMFileUtil.getExtension(containerURI);
+        if(extension != null && extension.endsWith("epub")) {
+            String zipName = UMFileUtil.getFilename(containerURI);
+            httpService.addFilter(zipName, "xhtml", "autoplay(\\s?)=(\\s?)([\"'])autoplay",
+                "data-autoplay$1=$2$3autoplay");
+            httpService.addFilter(zipName, "xhtml", "&(\\s)", "&amp;$1");
+        }
+
         return openPath;
     }
 

@@ -132,7 +132,15 @@ public class CatalogController implements UstadController, UMProgressListener {
     private CatalogModel model;
     
     public static String[] catalogMenuOpts = new String[]{"My Catalogs",
-        "My Courses", "Logout"};
+        "My Courses", "Logout", "About"};
+    
+    public static final int MENUINDEX_MYCATALOG = 0;
+    
+    public static final int MENUINDEX_MYCOURSES = 1;
+    
+    public static final int MENUINDEX_LOGOUT = 2;
+    
+    public static final int MENUINDEX_ABOUT = 3;
     
     
     public CatalogController() {
@@ -428,6 +436,13 @@ public class CatalogController implements UstadController, UMProgressListener {
      * @param index Index of the item clicked corresponding with the menuitem string array
      */
     public void handleClickMenuItem(int index) {
+        switch(index) {
+            case MENUINDEX_LOGOUT:
+                LoginController loginController = new LoginController();
+                loginController.handleLogout();
+                loginController.show();
+                break;
+        }
         System.out.println("You click: " + index);
     }
     

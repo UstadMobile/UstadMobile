@@ -60,6 +60,10 @@ public class HTTPService extends Service {
         return getBaseURL() + "mount/" + zipName;
     }
 
+    public void addFilter(String mountPath, String extension, String regex, String replacement) {
+        httpd.addFilter(mountPath, extension, regex, replacement);
+    }
+
 
 
 }

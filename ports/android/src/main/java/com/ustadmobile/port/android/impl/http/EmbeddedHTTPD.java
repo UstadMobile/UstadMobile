@@ -6,10 +6,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -21,7 +25,7 @@ import fi.iki.elonen.*;
  */
 public class EmbeddedHTTPD extends NanoHTTPD {
 
-    private HashMap<String, String> mountedEPUBs;
+    private HashMap<String, MountedZip> mountedEPUBs;
 
     public static final String PREFIX_MOUNT = "/mount/";
 
@@ -67,7 +71,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
 
     public EmbeddedHTTPD(int portNum) {
         super(portNum);
-        mountedEPUBs = new HashMap<String, String>();
+        mountedEPUBs = new HashMap<>();
     }
 
     public String getMimeType(String uri) {
@@ -96,12 +100,33 @@ public class EmbeddedHTTPD extends NanoHTTPD {
             String pathInZip = uri.substring(nextSlash+1);
 
             try {
-
-                ZipFile zipFile = new ZipFile(mountedEPUBs.get(zipMountPath));
+                MountedZip mountedZip = mountedEPUBs.get(zipMountPath);
+                ZipFile zipFile = new ZipFile(mountedZip.zipPath);
                 ZipEntry entry = zipFile.getEntry(pathInZip);
                 if(entry != null) {
+                    String extension = UMFileUtil.getExtension(pathInZip);
+                    InputStream zipEntryStream = zipFile.getInputStream(entry);
+                    InputStream retInputStream = zipEntryStream;
+
+                    //see if this is an entry we need to filter.
+                    if(extension != null) {
+                        if(mountedZip.hasFilter(extension)) {
+                            byte[] buf = new byte[1024];
+                            int bytesRead = -1;
+                            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                            while((bytesRead = zipEntryStream.read(buf, 0, buf.length)) != -1) {
+                                bout.write(buf, 0, bytesRead);
+                            }
+                            zipEntryStream.close();
+                            String contentStr = new String(bout.toByteArray(), "UTF-8");
+                            contentStr = mountedZip.filterEntry(extension, contentStr);
+                            retInputStream = new ByteArrayInputStream(contentStr.getBytes("UTF-8"));
+                        }
+                    }
+
+
                     return new Response(Response.Status.OK, getMimeType(uri),
-                            zipFile.getInputStream(entry));
+                            retInputStream);
                 }else {
                     return new Response(Response.Status.NOT_FOUND, "text/plain", "Not found within zip: "
                         + pathInZip);
@@ -125,7 +150,78 @@ public class EmbeddedHTTPD extends NanoHTTPD {
     }
 
     public void mountZip(String mountPath, String zipPath) {
-        mountedEPUBs.put(mountPath, zipPath);
+        mountedEPUBs.put(mountPath, new MountedZip(mountPath, zipPath));
+    }
+
+    public void addFilter(String mountPath, String extension, String regex, String replacement) {
+        MountedZip mountedZip = mountedEPUBs.get(mountPath);
+        mountedZip.addFilter(extension, regex, replacement);
+    }
+
+    /**
+     * Class that represents a mounted zip on HTTP
+     */
+    public class MountedZip {
+
+        public String mountPath;
+
+        public String zipPath;
+
+        public HashMap<String, List<MountedZipFilter>> filters;
+
+        public MountedZip(String mountPath, String zipPath) {
+            this.mountPath = mountPath;
+            this.zipPath = zipPath;
+        }
+
+        public void addFilter(String extension, String regex, String replacement) {
+            if(filters == null) {
+                filters = new HashMap<>();
+            }
+
+            List<MountedZipFilter> filterList = filters.get(extension);
+            if(filterList == null) {
+                filterList = new ArrayList<>();
+                filters.put(extension, filterList);
+            }
+
+            MountedZipFilter filter = new MountedZipFilter(
+                Pattern.compile(regex, Pattern.CASE_INSENSITIVE), replacement);
+            filterList.add(filter);
+        }
+
+        public boolean hasFilter(String extension) {
+            return filters.containsKey(extension);
+        }
+
+        public String filterEntry(String extension, String content) {
+            List<MountedZipFilter> entryFilterList = filters.get(extension);
+            if(entryFilterList == null) {
+                return content;
+            }
+
+            MountedZipFilter currentFilter = null;
+            for(int i = 0; i < entryFilterList.size(); i++) {
+                currentFilter = entryFilterList.get(i);
+                content = currentFilter.pattern.matcher(content).replaceAll(currentFilter.replacement);
+            }
+
+            return content;
+        }
+
+    }
+
+    private class MountedZipFilter {
+
+        private MountedZipFilter(Pattern pattern, String replacement) {
+            this.pattern = pattern;
+            this.replacement = replacement;
+        }
+
+        public Pattern pattern;
+
+        public String replacement;
+
     }
 
 

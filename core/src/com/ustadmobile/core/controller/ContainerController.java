@@ -62,6 +62,8 @@ public class ContainerController implements UstadController{
     
     private UstadOCF ocf;
     
+    private String[] opfTitles;
+    
     public ContainerController(UstadJSOPDSEntry entry, String openPath, String fileURI, String mimeType) {
         this.entry = entry;
         this.openPath = openPath;
@@ -114,6 +116,9 @@ public class ContainerController implements UstadController{
         XmlPullParser xpp = impl.newPullParser();
         xpp.setInput(new ByteArrayInputStream(contentBytes), "UTF-8");
         ocf = UstadOCF.loadFromXML(xpp);
+        
+        opfTitles = new String[ocf.rootFiles.length];
+        
         return ocf;
     }
     
@@ -128,7 +133,7 @@ public class ContainerController implements UstadController{
         byte[] contentBytes = impl.readURLToString(opfPath, null).getResponse();
         xpp.setInput(new ByteArrayInputStream(contentBytes), "UTF-8");
         opf = UstadJSOPF.loadFromOPF(xpp);
-        
+                
         return opf;
     }
     
@@ -145,6 +150,7 @@ public class ContainerController implements UstadController{
         if(this.containerView == null) {
             containerView = ViewFactory.makeContainerView(entry, openPath, 
                 mimeType);
+            containerView.setTitle(this.entry.title);
         }
         containerView.setController(this);
         

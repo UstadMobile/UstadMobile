@@ -77,6 +77,14 @@ public class LoginController implements UstadController{
     }
     
     /**
+     * Removes the credentials of the current user from the system
+     */
+    public void handleLogout() {
+        
+    }
+    
+    
+    /**
      * Register a new user
      * @param userInfoParams Hashtable with 
      *  phonenumber Mandatory: must start with +countrycode
@@ -99,6 +107,8 @@ public class LoginController implements UstadController{
         String serverSays = new String(registrationResult.getResponse(), "UTF-8");
         return serverSays;
     }
+    
+    
     
     
     public void handleClickLogin(final String username, final String password) {

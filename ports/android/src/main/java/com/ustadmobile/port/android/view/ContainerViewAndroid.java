@@ -23,6 +23,8 @@ public class ContainerViewAndroid implements ContainerView{
 
     private ContainerActivity containerActivity;
 
+    private String title;
+
     static {
         viewMap = new HashMap<Integer, ContainerViewAndroid>();
     }
@@ -36,6 +38,16 @@ public class ContainerViewAndroid implements ContainerView{
     @Override
     public void setController(ContainerController controller) {
         this.containerController = controller;
+    }
+
+    @Override
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    @Override
+    public String getTitle() {
+        return this.title;
     }
 
 

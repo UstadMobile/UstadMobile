@@ -23,6 +23,8 @@ Update core library
 Run tests:
 ./gradlew connectedAndroidTest
 
-Build:
+Build Debug Version:
 ./gradlew assembleDebug
 
+Build Release Version:
+./gradlew assembleRelease
