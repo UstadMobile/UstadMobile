@@ -31,6 +31,11 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -38,25 +43,35 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.LoginController;
-import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import java.util.WeakHashMap;
 
 public class LoginActivity extends AppCompatActivity {
 
-
+    private int viewId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int x = 0;
-        Integer viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
+        Integer viewIdObj = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         setContentView(R.layout.umactivity_login);
-        LoginViewAndroid.getViewById(viewId.intValue()).setLoginViewActivity(this);
+        LoginViewAndroid.getViewById(viewIdObj.intValue()).setLoginViewActivity(this);
+        this.viewId = viewIdObj.intValue();
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
+
+        ViewPager viewPager = (ViewPager)findViewById(R.id.login_pager);
+        viewPager.setAdapter(new LoginPagerAdapter(getSupportFragmentManager()));
+        TabLayout tabLayout = (TabLayout)findViewById(R.id.login_sliding_tabs);
+        tabLayout.setupWithViewPager(viewPager);
+    }
+
+    public int getViewID() {
+        return this.viewId;
     }
 
     public void onStart() {
@@ -96,6 +111,42 @@ public class LoginActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public class LoginPagerAdapter extends FragmentStatePagerAdapter {
+
+        private WeakHashMap<Integer, LoginFragment> fragmentMap;
+
+        private String[] tabTitles = new String[] {"Login", "Register", "Join Class"};
+
+        public LoginPagerAdapter(FragmentManager fm) {
+            super(fm);
+            fragmentMap = new WeakHashMap<>();
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            LoginFragment fragment = fragmentMap.get(position);
+            if(fragment == null) {
+                fragment = LoginFragment.newInstance(position);
+                fragmentMap.put(position, fragment);
+            }
+
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            // Generate title based on item position
+            return tabTitles[position];
+        }
+    }
+
 
 
 }

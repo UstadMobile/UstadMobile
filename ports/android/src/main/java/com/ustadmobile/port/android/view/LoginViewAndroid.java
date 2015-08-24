@@ -78,8 +78,8 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
 
     public void setLoginViewActivity(LoginActivity activity) {
         this.activity = activity;
-        Button loginButton = (Button)activity.findViewById(R.id.login_button);
-        loginButton.setOnClickListener(this);
+        //Button loginButton = (Button)activity.findViewById(R.id.login_button);
+        //loginButton.setOnClickListener(this);
     }
 
     @Override
