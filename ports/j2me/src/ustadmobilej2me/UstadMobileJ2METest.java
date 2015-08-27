@@ -3,20 +3,20 @@
  * and open the template in the editor.
  */
 package ustadmobilej2me;
-import com.sun.lwuit.Form;
-import com.ustadmobile.app.tests.AllTestCases;
-import com.ustadmobile.app.tests.TestUtils;
+import com.ustadmobile.port.j2me.app.tests.AllTestCases;
+import com.ustadmobile.port.j2me.app.tests.TestUtils;
 import java.io.IOException;
 import java.util.Hashtable;
 import com.sun.lwuit.Display;
-import com.ustadmobile.app.HTTPUtils;
-import com.ustadmobile.app.RMSUtils;
-import com.ustadmobile.app.controller.UstadMobileAppController;
-import com.ustadmobile.app.forms.TestForm;
-import com.ustadmobile.core.controller.LoginController;
-
-//TextBox for screen:
-import javax.microedition.lcdui.TextBox;
+import com.ustadmobile.port.j2me.app.HTTPUtils;
+import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
+import com.ustadmobile.port.j2me.app.tests.TestEPUBRead;
+import j2meunit.framework.Test;
+import j2meunit.framework.TestCase;
+import j2meunit.framework.TestFailure;
+import j2meunit.framework.TestResult;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * @author varuna
@@ -36,21 +36,41 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         
         while(true){
             try{
-                int rc = aResult.runCount();
+                int rc = aResult.runCount();              
                 int ac = aResult.assertionCount();
-                //System.out.println("assertionCount: " + ac + "/" + rc);
 
                 if (rc == ctc){
-                    System.out.println("");
-                    System.out.println("All done?");
+                    //usually solves the problem of the object getting filled 
+                    //and populated on screen.
+                    Thread.sleep(500);
+                    
                     int numError = aResult.errorCount();
                     String numAssert = String.valueOf(aResult.assertionCount());
                     String numFail = String.valueOf(aResult.failureCount());
                     boolean result = aResult.wasSuccessful();
-                    System.out.println("Error: " + numError + ", Fail: " + 
-                            numFail + ", Assert: " + numAssert + 
-                            ", Result: " + result);
+                    
+                    String errorString="";
+                    int i=1;
+                    for (Enumeration error = aResult.errors(); 
+                            error.hasMoreElements(); i++){
 
+                        TestFailure failure = (TestFailure) error.nextElement();
+                        errorString = errorString + ""+ (i + ") " + 
+                                failure.failedTest());
+                        if (failure.thrownException() != null)
+                        {
+                            errorString = errorString +(failure.thrownException());
+                        }      
+                    }
+                                    
+                    if (errorString.length() < 2 ){
+                        errorString="No errrors/Failures";
+                    }
+                    System.out.println("");
+                    System.out.println("RESULTS: Error: " + numError + 
+                            ", Fail: " + numFail + ", Assert: " + numAssert + 
+                            ", Result: " + result + ", Errors/Failures:" + 
+                            errorString);
                     /* Return in this format:
                     * POST:
                     *      var numPass = post['numPass'];
@@ -60,15 +80,12 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                     Hashtable testResult = new Hashtable();
                     testResult.put("numPass", numAssert);
                     testResult.put("numFail", numFail);
-                    testResult.put("logtext", 
-                            "Result");
+                    testResult.put("logtext", errorString);
                     testResult.put("device", 
                             UstadMobileAppController.getPlatform().toString());
                     
                     try {
-                        String postResult = null;
-
-                        postResult = HTTPUtils.sendPost(
+                        HTTPUtils.sendPost(
                             TestUtils.testSettings.get("testposturl").toString(), 
                                 testResult);
 
@@ -79,9 +96,19 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                     break;
                 }
             }catch(Exception e){
-                System.out.print(".");
-            }       
+                System.out.print(".");                
+            }      
         }
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        
+        //Exiting automatically..
+        System.out.println("Exiting..");
+        notifyDestroyed();
+        destroyApp(bScreenOutput);
     }
     
     /**

@@ -68,3 +68,11 @@ testres/node-qunit-server/node_modules
 
 #Test HTTP server: checked out from git itself
 testres/DodgyHTTPD
+
+#Project properties
+ustadmobilemicro-build.properties
+
+#any TestConstants
+TestConstants.java
+ports/j2me/src/com/ustadmobile/app/tests/TestConstants.java
+

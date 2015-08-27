@@ -4,8 +4,10 @@
  */
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
+import java.io.IOException;
 
 /*
 You would use the system implementation like so:
@@ -18,9 +20,14 @@ You would use the system implementation like so:
  */
 public class UstadMobileSystemImplFactory {
     public static UstadMobileSystemImpl createUstadSystemImpl() {
-        UstadMobileSystemImplJ2ME ustadMobileSystemImpl = new UstadMobileSystemImplJ2ME();
+
+        UstadMobileSystemImplJ2ME ustadMobileSystemImpl = null;
+        try {
+            ustadMobileSystemImpl = new UstadMobileSystemImplJ2ME();
+        }catch(Exception e) {
+                   
+        }
         return ustadMobileSystemImpl;
-        //throw new RuntimeException("Error 42");
     }
     
 }
