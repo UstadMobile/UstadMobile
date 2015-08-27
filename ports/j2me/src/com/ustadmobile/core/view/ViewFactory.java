@@ -4,8 +4,8 @@
  */
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.view.LoginViewJ2ME;
-import com.ustadmobile.view.CatalogViewJ2ME;
+import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
+import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
 /**
  *
  * @author varuna

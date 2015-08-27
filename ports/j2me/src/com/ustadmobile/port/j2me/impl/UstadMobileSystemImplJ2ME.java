@@ -5,16 +5,16 @@
 package com.ustadmobile.port.j2me.impl;
 
 //import com.ustadmobile.app.controller.UstadMobileAppController;
-import com.ustadmobile.app.AppPref;
-import com.ustadmobile.app.DeviceRoots;
-import com.ustadmobile.app.FileUtils;
-import com.ustadmobile.app.HTTPUtils;
+import com.ustadmobile.port.j2me.app.AppPref;
+import com.ustadmobile.port.j2me.app.DeviceRoots;
+import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.core.impl.UMTransferJob;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.app.UserPref;
+import com.ustadmobile.port.j2me.app.UserPref;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
