@@ -340,6 +340,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return removeRecursively(new File(path));
     }
 
+    @Override
+    public InputStream getFileInputStreamFromZip(String zipURI, String filename) {
+        return null;
+    }
+
     public boolean removeRecursively(File f) {
         if(f.isDirectory()) {
             File[] dirContents = f.listFiles();
@@ -351,11 +356,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             }
         }
         return f.delete();
-    }
-
-    @Override
-    public UMTransferJob unzipFile(String s, String s1) {
-        return null;
     }
 
     private SharedPreferences getAppSharedPreferences() {

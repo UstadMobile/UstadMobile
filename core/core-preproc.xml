@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+
+<!--
+
+ Preprocessor for test arch: see core/test/README.md
+
+ give me these properties: 
+ ustadmobile.platform - number code for platform
+ ustadmobile.core.dir - path to the core source
+ ustadmobile.port.testsrc - path to testing dir of port
+ ustadmobile.port.mainsrc - path to main source dir of port
+
+-->
+
+<project name="ustadmobilepreproc" default="umpreprocall" basedir=".">
+    <taskdef name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
+
+    <target name="umpreprocall" depends="testpreproc,corepreproc">
+    </target>
+   
+    <target name="testpreproc">
+        <delete dir="preproctmp"/>
+	
+        <preprocess indir="${ustadmobile.core.dir}/test/" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${ustadmobile.platform}"/>
+        </preprocess>
+
+        <copy todir="${ustadmobile.port.testsrc}">
+            <fileset dir="preproctmp"/>
+        </copy>
+    </target>
+
+
+    <target name="corepreproc">
+	<!-- Using failonerror=false not cooperating with nested fileset -->
+	<mkdir dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
+        <delete>
+            <fileset dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
+        </delete>
+
+	<mkdir dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
+
+        <copy todir="${ustadmobile.port.mainsrc}/com/ustadmobile/core">
+            <fileset dir="${ustadmobile.core.dir}/src/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
+        </copy>
+    </target>
+</project>
+

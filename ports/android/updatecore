@@ -1,7 +1,6 @@
 #!/bin/bash
 
-ant -lib ../../core/lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar \
-     -f build-preprocess-tests.xml
+ant -lib ../../core/lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar -f preproc.xml
 
 if [ "$?" == "0" ]; then
     echo "Success"

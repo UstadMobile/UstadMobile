@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+
+<project name="preprocandroid" default="umpreprocall">
+    <property name="ustadmobile.platform" value="1"/>
+    <property name="ustadmobile.core.dir" value="../../core"/>
+    <property name="ustadmobile.port.testsrc" value="src/androidTest/java"/>
+    <property name="ustadmobile.port.mainsrc" value="src/main/java"/>
+
+    <import file="../../core/core-preproc.xml"/>
+
+    
+
+</project>
+
