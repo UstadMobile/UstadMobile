@@ -40,10 +40,18 @@
         </delete>
 
 	<mkdir dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
-
+        <delete dir="preproctmp"/>
+        <preprocess indir="${ustadmobile.core.dir}/src/com/ustadmobile/core" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${ustadmobile.platform}"/>
+        </preprocess>
+        
+        
         <copy todir="${ustadmobile.port.mainsrc}/com/ustadmobile/core">
-            <fileset dir="${ustadmobile.core.dir}/src/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
+            <fileset dir="preproctmp" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
         </copy>
+        <delete dir="preproctmp"/>
+
     </target>
 </project>
 
