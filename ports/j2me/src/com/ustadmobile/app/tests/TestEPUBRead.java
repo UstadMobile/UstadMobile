@@ -42,6 +42,7 @@ import com.ustadmobile.app.ZipUtils;
 import com.ustadmobile.app.controller.UstadMobileAppController;
 import com.ustadmobile.app.forms.HTMLComp;
 import com.ustadmobile.app.forms.HTMLForm;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.opf.UstadJSOPFItem;
@@ -85,6 +86,8 @@ public class TestEPUBRead extends TestCase {
         System.out.println(itemToOpen);
         int z =0;
         
+        //CatalogController s = new CatalogController();
+        //s.show();
         
         NetworkManager.getInstance().start();
         Storage.init(this);

@@ -30,21 +30,19 @@
  */
 package com.ustadmobile.app.tests;
 
-import com.ustadmobile.app.HTTPUtils;
-import com.ustadmobile.core.impl.HTTPResult;
 import j2meunit.framework.TestCase;
 
 /**
  *
  * @author varuna
  */
-public class TestSimpleHTTP extends TestCase {
-    public TestSimpleHTTP(){
-        setName("TestSimpleHTTP Test");
+public class TestImplementation extends TestCase {
+    public TestImplementation(){
+        setName("TestSimple Test");
     }
     
     public void runTest() throws Throwable{
-        assertEquals("HTTP Simple Test OK", 2, 1+1);
+        assertEquals("Simple Test OK", 2, 1+1);
         
     }
 }

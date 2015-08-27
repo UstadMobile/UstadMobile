@@ -66,3 +66,9 @@ ports/android/src/main/java/com/ustadmobile/core/impl/*
 #Testing node server files
 testres/node-qunit-server/node_modules
 
+#Project properties
+ustadmobilemicro-build.properties
+
+#any TestConstants
+TestConstants.java
+ports/j2me/src/com/ustadmobile/app/tests/TestConstants.java

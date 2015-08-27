@@ -48,7 +48,9 @@ public class AllTestCases extends TestCase {
     public Test suite() {
         
         try {
+            HTTPUtils.httpDebug("loadingTestSettings");
             TestUtils.getInstance().loadTestSettingsResource();
+            HTTPUtils.httpDebug("loaded");
             //TestUtils.loadTestSettingsFile();
         }catch(Exception e) {
             e.printStackTrace();
@@ -56,7 +58,9 @@ public class AllTestCases extends TestCase {
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
-                        
+           
+        //allTestSuite.addTest(new CoreLoginTest());        
+        allTestSuite.addTest(new TestImplementation());
         allTestSuite.addTest(new TestSimpleHTTP());
         allTestSuite.addTest(new TestCustomLWUIT());
         allTestSuite.addTest(new TestFormShow());

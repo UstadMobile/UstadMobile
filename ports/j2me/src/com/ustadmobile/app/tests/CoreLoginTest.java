@@ -30,21 +30,39 @@
  */
 package com.ustadmobile.app.tests;
 
-import com.ustadmobile.app.HTTPUtils;
-import com.ustadmobile.core.impl.HTTPResult;
-import j2meunit.framework.TestCase;
+/* $if umplatform == 2  $*/
+    import j2meunit.framework.TestCase;
+ /* $else$ 
+    import junit.framework.TestCase;
+ $endif$ */
 
-/**
- *
- * @author varuna
+import com.ustadmobile.core.controller.LoginController;
+import java.io.IOException;
+
+/** 
+*
+ * @author mike
  */
-public class TestSimpleHTTP extends TestCase {
-    public TestSimpleHTTP(){
-        setName("TestSimpleHTTP Test");
+public class CoreLoginTest extends TestCase{
+    
+    public CoreLoginTest() {
     }
     
-    public void runTest() throws Throwable{
-        assertEquals("HTTP Simple Test OK", 2, 1+1);
-        
+    public void setUp() {
     }
+    
+    public void tearDown() {
+    }
+
+    public void testLogin() throws IOException{
+        int loginOKResult = LoginController.authenticate(
+                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                TestConstants.LOGIN_URL);
+        assertEquals("Login OK returns 200", 200, loginOKResult);
+    }
+    
+    public void runTest() throws IOException{
+        testLogin();
+    }
+    
 }

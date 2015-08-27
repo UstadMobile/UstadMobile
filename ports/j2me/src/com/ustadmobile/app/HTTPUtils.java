@@ -157,6 +157,19 @@ public class HTTPUtils {
         return -1;
     }
     
+    public static void httpDebug(String msg){
+        try {
+            msg = FileUtils.replaceString(msg, ":", "|");
+            msg = FileUtils.replaceString(msg, " ", "/");
+            HTTPUtils.makeHTTPRequest(
+                "http://umcloud1.ustadmobile.com/debug/"+
+                msg,
+                null, null);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
     public static HTTPResult makeHTTPRequest(String url,
             Hashtable optionalParameters, 
             Hashtable optionalHeaders) throws IOException{

@@ -103,23 +103,18 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void showContainerContextMenu(UstadJSOPDSItem item) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void hideContainerContextMenu() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setEntryStatus(String entryId, int status) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void updateDownloadAllProgress(int loaded, int total) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void setDownloadEntryProgressVisible(String entryId, boolean visible) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void updateDownloadEntryProgress(String entryId, int loaded, int total) {
@@ -134,14 +129,43 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, int commandId) {
-        throw new UnsupportedOperationException("Not supported yet."); 
         //ToDo: This
     }
 
     public boolean isShowing() {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        return false;
         //ToDo: This
     }
-
+    
+    /**
+     * Set the entries that are to be marked as selected
+     * 
+     * @param entries Array of entries to be marked as selected
+     */
+    public void setSelectedEntries(UstadJSOPDSEntry[] entries){
+        //ToDo
+    }
+    /**
+     * Get the entries that have been selected by the user (e.g. by long press)
+     * 
+     * @return Array of entries selected by the user
+     */
+    public UstadJSOPDSEntry[] getSelectedEntries(){
+        return null;
+    }
+    
+    /**
+     * Sets the options available in the menu (this could be a drawer, J2ME menu, etc)
+     * 
+     * When an item is clicked/tapped called controller.handleMenuItemClick(index)
+     * 
+     * @param String array of options to show in the menu
+     */
+    public void setMenuOptions(String[] menuOptions){
+        //ToDo
+    }
+    
+    
+    
     
 }

@@ -73,8 +73,8 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     }
 
     public boolean isShowing() {
-        throw new UnsupportedOperationException("Not supported yet."); 
         //ToDo: This
+        return false;
     }
     
 }

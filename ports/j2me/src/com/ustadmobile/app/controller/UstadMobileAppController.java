@@ -112,22 +112,7 @@ public class UstadMobileAppController {
      * with the maximum amount of space (this should be the memory card generally)
      */
     public static String getAppDataDir() throws IOException{
-//        HTTPUtils.makeHTTPRequest("http://umcloud1.ustadmobile.com/b4bestRoot/"+
-//                    "",
-//                    null, null);
         DeviceRoots bestRoot = FileUtils.getBestRoot();
-//        HTTPUtils.makeHTTPRequest("http://umcloud1.ustadmobile.com/afterBestRoot/"+
-//                    "",
-//                    null, null);
-//        try {
-//            String br = FileUtils.replaceString(bestRoot.path, " ", "@");
-//            br = FileUtils.replaceString(br, ":", "|");
-//            HTTPUtils.makeHTTPRequest("http://umcloud1.ustadmobile.com/bestRoot/"+
-//                    br,
-//                    null, null);
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        }
         if (bestRoot==null){
             return null;
         }
