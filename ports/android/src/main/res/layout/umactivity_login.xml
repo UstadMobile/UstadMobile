@@ -5,8 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
 
-    tools:context="com.ustadmobile.port.android.view.LoginActivity"
-    android:background="@android:color/background_light">
+    tools:context="com.ustadmobile.port.android.view.LoginActivity">
 
     <include android:id="@+id/login_toolbar" layout="@layout/toolbar"/>
 

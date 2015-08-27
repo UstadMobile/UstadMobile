@@ -43,6 +43,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
@@ -50,6 +51,9 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -70,8 +74,6 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         impl.handleActivityStart(this);
-        //runTest();
-
         impl.startUI();
     }
 
@@ -90,45 +92,29 @@ public class SplashScreenActivity extends ActionBarActivity {
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    String httpRoot = "http://192.168.0.103:5062/";
+                    String startServerURL = "http://" + "192.168.43.124" + ":"
+                            + "8065" + "/?action=startserver";
 
-                    String acquireOPDSURL = UMFileUtil.joinPaths(new String[]{
-                            httpRoot, "acquire.opds"});
-                    UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                    String httpRootDir = null;
 
-                    UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL,
-                            CatalogController.SHARED_RESOURCE, null, null,
-                            CatalogController.CACHE_ENABLED);
-
-                    UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries,
-                            null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
-                    int totalSize = acquireJob.getTotalSize();
-
-                    acquireJob.start();
-                    int timeRemaining = 60000;
-                    while(timeRemaining > 0 && !acquireJob.isFinished()) {
-                        try {Thread.sleep(1000); }
-                        catch(InterruptedException e) {}
+                    if(httpRootDir == null) {
+                        try {
+                            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(startServerURL,
+                                    new Hashtable(), new Hashtable(), "GET");
+                            String serverSays = new String(result.getResponse(), "UTF-8");
+                            JSONObject response = new JSONObject(serverSays);
+                            int serverPort = response.getInt("port");
+                            httpRootDir = "http://" + "192.168.43.124" + ":" + serverPort + "/";
+                        }catch(IOException e) {
+                            System.err.println("Test exception creating new test port");
+                            e.printStackTrace();
+                            //ex = e;
+                        }catch(JSONException e) {
+                            System.err.println("Test exception parsing json");
+                            e.printStackTrace();
+                            //ex = e;
+                        }
                     }
-                    //assertTrue("Job has completed", acquireJob.isFinished());
-
-                    CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id,
-                            CatalogController.SHARED_RESOURCE);
-
-                    String acquiredFileURI = entryInfo.fileURI;
-
-                    UstadJSOPDSEntry entry = feed.entries[0];
-
-                    String openPath = impl.openContainer(entry, acquiredFileURI,
-                            entryInfo.mimeType);
-                    //assertNotNull("Got an open path from the system", openPath);
-
-                    ContainerController controller = ContainerController.makeFromEntry(entry,
-                            openPath, entryInfo.fileURI, entryInfo.mimeType);
-                    UstadOCF ocf = controller.getOCF();
-                    //assertNotNull("Controller can fetch OCF once open", ocf);
-                    String helloName = "bob";
-                    helloName += "joe";
                 }catch(Exception e) {
                     e.printStackTrace();
                 }

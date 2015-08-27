@@ -72,9 +72,10 @@ public class TestCatalogController extends TestCase{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(TestConstants.LOGIN_USER);
         
+        String opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
         
         CatalogController controller = CatalogController.makeControllerByURL(
-            TestConstants.CATALOG_OPDS_ROOT, impl, CatalogController.USER_RESOURCE, 
+            opdsURL, impl, CatalogController.USER_RESOURCE, 
             TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
             CatalogController.CACHE_ENABLED);
         assertNotNull("Create catalog controller", controller);

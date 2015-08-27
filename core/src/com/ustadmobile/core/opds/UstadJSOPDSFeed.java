@@ -156,6 +156,18 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         return resultFeed;
     }
     
+    /**
+     * Add an entry to the end of this feed
+     * 
+     * @param entry 
+     */
+    public void addEntry(UstadJSOPDSEntry entry) {
+        UstadJSOPDSEntry[] newEntries = new UstadJSOPDSEntry[entries.length + 1];
+        System.arraycopy(this.entries, 0, newEntries, 0, this.entries.length);
+        newEntries[entries.length] = entry;
+        this.entries = newEntries;
+    }
+    
     public UstadJSOPDSEntry getEntryById (String id) {
         UstadJSOPDSEntry entry;
         for (int i=0;i<=this.entries.length; i++){

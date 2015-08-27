@@ -75,8 +75,9 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
         TestRunnable beforeStartJob = new TestRunnable();
         TestRunnable afterFinishJob = new TestRunnable();
         
-        String url1 = TestConstants.TEST_HTTP_ROOT + "phonepic-large.png";
-        String url2 = TestConstants.TEST_HTTP_ROOT + "root.opds";
+        String httpRoot = TestUtils.getInstance().getHTTPRoot();
+        String url1 = httpRoot + "phonepic-large.png";
+        String url2 = httpRoot + "root.opds";
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         String filePath1 = impl.getSharedContentDir() +"/testlist-phonepic-large.png";

@@ -66,3 +66,5 @@ ports/android/src/main/java/com/ustadmobile/core/impl/*
 #Testing node server files
 testres/node-qunit-server/node_modules
 
+#Test HTTP server: checked out from git itself
+testres/DodgyHTTPD

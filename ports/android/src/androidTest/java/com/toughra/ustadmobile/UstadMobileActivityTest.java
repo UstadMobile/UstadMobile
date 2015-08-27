@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.*;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import com.ustadmobile.test.core.TestConstants;
+import com.ustadmobile.test.core.TestUtils;
 
 import java.io.File;
 import java.util.Hashtable;
@@ -40,7 +41,7 @@ public class UstadMobileActivityTest extends ActivityInstrumentationTestCase2<Us
             file3.delete();
         }
 
-        String fileDownloadURL = TestConstants.TEST_HTTP_ROOT + "phonepic-large.png";
+        String fileDownloadURL = TestUtils.getInstance().getHTTPRoot() + "phonepic-large.png";
         UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
                 file3.getAbsolutePath(), new Hashtable());
         job.addProgressListener(this);

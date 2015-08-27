@@ -79,7 +79,7 @@ public class TestCatalogControllerAcquire extends TestCase{
     
     public void testCatalogControllerAcquire() throws Exception{
         String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
-            TestConstants.TEST_HTTP_ROOT, "acquire.opds"});
+             TestUtils.getInstance().getHTTPRoot(), "acquire.opds"});
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL, 

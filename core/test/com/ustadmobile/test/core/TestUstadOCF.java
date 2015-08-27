@@ -73,7 +73,7 @@ public class TestUstadOCF extends TestCase {
         //loads testassets/container.xml
         
         String containerXMLURL = UMFileUtil.joinPaths(new String[] { 
-            TestConstants.TEST_HTTP_ROOT, "container.xml"});
+            TestUtils.getInstance().getHTTPRoot(), "container.xml"});
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         HTTPResult httpData = impl.makeRequest(containerXMLURL, new Hashtable(), new Hashtable(), 
             "GET");

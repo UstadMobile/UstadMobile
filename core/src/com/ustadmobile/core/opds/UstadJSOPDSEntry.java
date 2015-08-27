@@ -48,6 +48,26 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         super();
         this.parentFeed = parentFeed;
     }
+    
+    public UstadJSOPDSEntry(UstadJSOPDSFeed parentFeed, UstadJSOPDSEntry srcItem) {
+        this(parentFeed);
+        this.title = srcItem.title;
+        this.id = srcItem.id;
+        this.linkVector = new Vector();
+        for(int i = 0; i < srcItem.linkVector.size(); i++) {
+            this.linkVector.addElement(srcItem.linkVector.elementAt(i));
+        }
+        
+        this.updated = srcItem.updated;
+        this.summary = summary;
+        this.authors = new Vector();
+        for(int i = 0; i < srcItem.authors.size(); i++) {
+            this.authors.addElement(srcItem.authors.elementAt(i));
+        }
+        
+        this.publisher = srcItem.publisher;
+    }
+    
 
     public Vector getAcquisitionLinks() {
         return this.getLinks(LINK_ACQUIRE, null, true, false);

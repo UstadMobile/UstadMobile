@@ -44,4 +44,14 @@ public class UstadMobileDefaults {
     
     public static final String DEFAULT_OPDS_SERVER = 
             "http://umcloud1.ustadmobile.com/opds/";
+    
+    public static final String DEFAULT_REGISTER_SERVER = 
+            "http://umcloud1.ustadmobile.com/phoneinappreg/";
+    
+    /**
+     * Used by LoginController to auto discover the user's country
+     */
+    public static final String DEFAULT_GEOIP_SERVER = 
+            "https://freegeoip.net/json/";
+    
 }

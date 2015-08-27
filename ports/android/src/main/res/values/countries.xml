@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="countries_array">
+        <item>Iraq</item>
+        <item>United Arab Emirates</item>
+    </string-array>
+</resources>

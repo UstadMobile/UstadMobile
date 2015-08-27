@@ -32,6 +32,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
@@ -39,8 +40,17 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.ViewFactory;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.AppView;
 import java.io.IOException;
 import java.util.Hashtable;
+
+
+/* $if umplatform == 2  $
+    import org.json.me.JSONObject;;
+ $else$ */
+    import org.json.JSONObject;
+/* $endif$ */
+
 
 /**
  * 
@@ -50,6 +60,15 @@ public class LoginController implements UstadController{
     
     //private LoginView view;
     public LoginView view;
+    
+    public static final String REGISTER_COUNTRY = "country";
+    
+    public static final String REGISTER_PHONENUM = "phonenumber";
+    
+    public static final String REGISTER_NAME = "name";
+    
+    public static final String REGISTER_GENDER = "gender";
+    
     
     public LoginController() {
         
@@ -108,7 +127,98 @@ public class LoginController implements UstadController{
         return serverSays;
     }
     
+    /**
+     * Attempt to get the country of the user by looking up their IP address.
+     * This uses the api of https://freegeoip.net/ and sends a JSON request
+     * 
+     * @param serverURL e.g. http://freegeoip.net/json/
+     * @throws IOException if something goes wrong with the lookup
+     * @return two letter country code of the country based on user's IP address.
+     */
+    public static String getCountryCode(String serverURL) throws IOException{
+        String retVal = null;
+        try {
+            HTTPResult httpResponse = UstadMobileSystemImpl.getInstance().makeRequest(
+                serverURL, new Hashtable(), new Hashtable(), "GET");
+            JSONObject jsonResp = new JSONObject(new String(httpResponse.getResponse(), 
+                "UTF-8"));
+            retVal = jsonResp.getString("country_code");
+        }catch(Exception e) {
+            throw new IOException(e);
+        }
+        
+        return retVal;
+    }
     
+    public static int getCountryIndexByCode(String countryCode) {
+        for(int i = 0; i < UstadMobileConstants.COUNTRYCODES.length; i++) {
+            if(countryCode.equals(UstadMobileConstants.COUNTRYCODES[i])) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+    
+    
+    /**
+     * Handle when the user clicks the registration button - register a new 
+     * account, then bring them into the app
+     * 
+     * @param userInfoParams Hashtable with
+     *  LoginController.REGISTER_COUNTRY - Integer object with country code
+     *  LoginController.REGISTER_PHONENUM - String with phone number not including country code
+     *  LoginController.REGISTER_NAME - String containing name
+     *  LoginController.REGISTER_GENDER - String with 'm' or 'f'
+     */
+    public void handleClickRegister(final Hashtable userInfoParams) {
+        final LoginController thisCtrl = this;
+        Thread registerThread = new Thread() {
+            public void run() {
+                String serverURL = UstadMobileSystemImpl.getInstance().getAppPref("regserver",
+                        UstadMobileDefaults.DEFAULT_REGISTER_SERVER);
+                
+                StringBuilder phoneNumSB = new StringBuilder().append('+').append(
+                    userInfoParams.get(LoginController.REGISTER_COUNTRY));
+                
+                String userPhoneNum = userInfoParams.get(
+                        LoginController.REGISTER_PHONENUM).toString();
+                
+                //chop off leading zeros from the supplied phone number
+                int phoneNumStart = 0;
+                char currentChar;
+                for(; phoneNumStart < userPhoneNum.length(); phoneNumStart++) {
+                    currentChar = userPhoneNum.charAt(phoneNumStart);
+                    if(!(currentChar == '0' || currentChar == ' ')) {
+                        break;
+                    }
+                }
+                
+                phoneNumStart = Math.min(phoneNumStart, userPhoneNum.length()-2);
+                
+                phoneNumSB.append(userPhoneNum.substring(phoneNumStart)+1);
+                userInfoParams.put(LoginController.REGISTER_PHONENUM, 
+                    phoneNumSB.toString());
+                
+                try {
+                    String serverResponse = registerNewUser(userInfoParams, serverURL);
+                    JSONObject obj = new JSONObject(serverResponse);
+                    String newUsername = obj.getString("username");
+                    String newPassword = obj.getString("password");
+                    thisCtrl.handleUserLoginAuthComplete(newUsername, newPassword);
+                }catch(Exception e) {
+                    UstadMobileSystemImpl.getInstance().getAppView().dismissProgressDialog();
+                    UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                        "Error registering new user:" + e.toString(), AppView.LENGTH_LONG);
+                    e.printStackTrace();
+                }
+                
+            }
+        };
+        
+        UstadMobileSystemImpl.getInstance().getAppView().showProgressDialog("Registering");
+        registerThread.start();
+    }
     
     
     public void handleClickLogin(final String username, final String password) {
@@ -158,6 +268,26 @@ public class LoginController implements UstadController{
         UstadMobileSystemImpl.getInstance().getAppView().showProgressDialog("Authenticating");
         loginThread.start();
     }
+    
+    /**
+     * Utility merge of what happens after a user is logged in through username/password
+     * and what happens after they are newly registered etc.
+     */
+    private void handleUserLoginAuthComplete(final String username, final String password) {
+        UstadMobileSystemImpl.getInstance().setActiveUser(username);
+        UstadMobileSystemImpl.getInstance().setActiveUserAuth(password);
+
+        try {
+            CatalogController userCatalog = CatalogController.makeUserCatalog(
+                UstadMobileSystemImpl.getInstance());
+            userCatalog.show();
+        }catch(Exception e) {
+            e.printStackTrace();
+            UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                "Sorry: Error loading course catalog", AppView.LENGTH_LONG);
+        }
+    }
+    
     
     public void show() {
         this.view = ViewFactory.makeLoginView();

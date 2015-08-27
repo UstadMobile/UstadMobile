@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
 
 import com.toughra.ustadmobile.R;
@@ -41,6 +42,8 @@ public class ContainerPageFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    private String autoplayRunJavascript;
+
     /**
      * Generates a new Fragment for a page fragment
      *
@@ -67,6 +70,7 @@ public class ContainerPageFragment extends Fragment {
         if (getArguments() != null) {
             this.mPageURL = getArguments().getString(ARG_PAGEURL);
         }
+        this.autoplayRunJavascript = ((ContainerActivity)getActivity()).getAutoplayRunJavascript();
     }
 
     @Override
@@ -83,8 +87,9 @@ public class ContainerPageFragment extends Fragment {
                 webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
             }
 
-            webView.loadUrl(mPageURL);
             webView.getSettings().setJavaScriptEnabled(true);
+            webView.loadUrl(mPageURL);
+            webView.setWebViewClient(new ContainerPageWebViewClient(webView));
         }
         return viewGroup;
     }
@@ -120,6 +125,7 @@ public class ContainerPageFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        this.viewGroup = null;
         this.webView = null;
     }
 
@@ -138,6 +144,37 @@ public class ContainerPageFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
+    }
+
+    /**
+     * The WebView Client for Android handles a few tweaks including:
+     *  Run autoplay on pages that the user winds up on by clicking links
+     *  Launch external websites in the system default web browser
+     */
+    public class ContainerPageWebViewClient extends WebViewClient {
+
+        private WebView containerView;
+
+        private boolean isFirstPage;
+
+        public ContainerPageWebViewClient(WebView containerView) {
+            this.containerView = containerView;
+            this.isFirstPage = true;
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            this.isFirstPage = false;
+            return super.shouldOverrideUrlLoading(view, url);
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            if(!this.isFirstPage) {
+                this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
+            }
+        }
     }
 
 }

@@ -38,6 +38,7 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ViewFactory;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -241,7 +242,14 @@ public abstract class UstadMobileSystemImpl {
     
     public abstract boolean removeRecursively(String dirURI);
     
-    public abstract UMTransferJob unzipFile(String zipSrc, String dstDir);
+    /**
+     * Gets an input stream for a specific file in a zip
+     * 
+     * @param zipURI e.g. /path/to/file.zip
+     * @param filename File within the zip e.g. META-INF/container.xml
+     * @return 
+     */
+    public abstract InputStream getFileInputStreamFromZip(String zipURI, String filename);
     
     /**
      * Set the currently active user: the one that we need to know about for

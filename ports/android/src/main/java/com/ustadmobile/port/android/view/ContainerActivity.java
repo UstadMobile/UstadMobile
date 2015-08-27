@@ -62,8 +62,6 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
             }
             is.close();
             onpageSelectedJS = "javascript:" + new String(bout.toByteArray(), "UTF-8");
-            int four = 2+2;
-            int five = four + 1;
         }catch(IOException e) {
             System.err.println("Error loading javascript for page changing");
             e.printStackTrace();
@@ -73,6 +71,10 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
         setSupportActionBar(toolbar);
+    }
+
+    public String getAutoplayRunJavascript() {
+        return onpageSelectedJS;
     }
 
     public void onStart() {

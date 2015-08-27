@@ -85,7 +85,7 @@ public class TestContainerController extends TestCase {
     }
     
     public void testContainerController() throws IOException, XmlPullParserException{
-        String httpRoot = TestConstants.TEST_HTTP_ROOT;
+        String httpRoot = TestUtils.getInstance().getHTTPRoot();
         
         String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
             httpRoot, "acquire.opds"});

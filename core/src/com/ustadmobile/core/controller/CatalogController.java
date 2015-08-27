@@ -142,6 +142,8 @@ public class CatalogController implements UstadController, UMProgressListener {
     
     public static final int MENUINDEX_ABOUT = 3;
     
+    public static final String LOCALOPDS_ID_SUFFIX = "-local";
+    
     
     public CatalogController() {
         
@@ -612,12 +614,28 @@ public class CatalogController implements UstadController, UMProgressListener {
      * This can then be saved to a file ending .local.opds
      * 
      * @param catalog the Remote catalog we want a local feed for
+     * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
      * @return A feed containing an entry for each entry in the remote catalog
      * already acquired; with the links pointing to the local file container
      * 
      */
-    public static UstadJSOPDSFeed generateLocalCatalog(UstadJSOPDSFeed catalog) {
-        return null;
+    public static UstadJSOPDSFeed generateLocalCatalog(UstadJSOPDSFeed catalog, int resourceMode, int acquisitionStatusMode) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String baseDir = resourceMode == SHARED_RESOURCE ? impl.getSharedContentDir() :
+            impl.getUserContentDirectory(impl.getActiveUser());
+        String localCatalogID = catalog.id + LOCALOPDS_ID_SUFFIX;
+        String filename = sanitizeIDForFilename(localCatalogID) + ".local.opds";
+        String filePath = UMFileUtil.joinPaths(new String[]{"file:///", baseDir, filename});
+        
+        UstadJSOPDSFeed newFeed = new UstadJSOPDSFeed(filePath);
+        for(int i = 0; i < catalog.entries.length; i++){
+            CatalogEntryInfo info = getEntryInfo(catalog.entries[i].id, acquisitionStatusMode);
+            if(info.acquisitionStatus == STATUS_ACQUIRED) {
+                //add an entry with a pointer to the local file
+            }
+        }
+        
+        return newFeed;
     }
     
     /**

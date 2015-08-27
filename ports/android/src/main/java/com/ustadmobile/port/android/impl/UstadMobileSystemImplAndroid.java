@@ -201,7 +201,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public String getUserContentDirectory(String username) {
         File userDir = new File(Environment.getExternalStorageDirectory(),
-            "ustadmobileContent/users/" + username);
+            "ustadmobileContent/user-" + username);
         return userDir.getAbsolutePath();
     }
 

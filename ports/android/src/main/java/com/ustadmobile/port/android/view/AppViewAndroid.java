@@ -35,6 +35,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
 
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -111,7 +112,13 @@ public class AppViewAndroid implements AppView{
     }
 
     @Override
-    public void showNotification(String text, int length) {
+    public void showNotification(final String text, final int length) {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(impl.getCurrentActivity(), text, length).show();
+            }
+        });
+
 
     }
 }
