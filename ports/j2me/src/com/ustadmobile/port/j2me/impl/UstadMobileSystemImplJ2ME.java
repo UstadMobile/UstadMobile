@@ -19,6 +19,7 @@ import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
+import java.io.InputStream;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -317,6 +318,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public void closeContainer(String openURI) {
         //ToDo
+    }
+
+    public InputStream getFileInputStreamFromZip(String zipURI, String filename) {
+        return null;
     }
 
 }

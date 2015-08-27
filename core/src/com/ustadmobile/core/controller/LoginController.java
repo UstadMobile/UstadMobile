@@ -144,7 +144,7 @@ public class LoginController implements UstadController{
                 "UTF-8"));
             retVal = jsonResp.getString("country_code");
         }catch(Exception e) {
-            throw new IOException(e);
+            throw new IOException(e.toString());
         }
         
         return retVal;
@@ -178,7 +178,7 @@ public class LoginController implements UstadController{
                 String serverURL = UstadMobileSystemImpl.getInstance().getAppPref("regserver",
                         UstadMobileDefaults.DEFAULT_REGISTER_SERVER);
                 
-                StringBuilder phoneNumSB = new StringBuilder().append('+').append(
+                StringBuffer phoneNumSB = new StringBuffer().append('+').append(
                     userInfoParams.get(LoginController.REGISTER_COUNTRY));
                 
                 String userPhoneNum = userInfoParams.get(
