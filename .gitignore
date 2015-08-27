@@ -63,6 +63,21 @@ ports/android/src/main/java/com/ustadmobile/core/view/*
 ports/android/src/main/java/com/ustadmobile/core/impl/*
 !ports/android/src/main/java/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
 
+#Files preproc'd into j2me version
+ports/j2me/test/com/ustadmobile/test/core/*
+
+ports/j2me/src/com/ustadmobile/core/*
+!ports/j2me/src/com/ustadmobile/core/view
+!ports/j2me/src/com/ustadmobile/core/impl
+
+ports/j2me/src/com/ustadmobile/core/view/*
+!ports/j2me/src/com/ustadmobile/core/view/ViewFactory.java
+
+ports/j2me/src/com/ustadmobile/core/impl/*
+!ports/j2me/src/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
+
+
+
 #Testing node server files
 testres/node-qunit-server/node_modules
 

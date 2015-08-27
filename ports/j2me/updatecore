@@ -1,0 +1,10 @@
+#!/bin/bash
+
+ant -lib ../../core/lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar -f preproc.xml
+
+if [ "$?" == "0" ]; then
+    echo "Success"
+else
+    echo "Did you run core getlibs yet?  See the README file"
+fi
+
