@@ -87,6 +87,8 @@ public class TestContainerController extends TestCase {
     public void testContainerController() throws IOException, XmlPullParserException{
         String httpRoot = TestUtils.getInstance().getHTTPRoot();
         
+        
+        
         String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
             httpRoot, "acquire.opds"});
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -94,6 +96,18 @@ public class TestContainerController extends TestCase {
         UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL, 
             CatalogController.SHARED_RESOURCE, null, null, 
             CatalogController.CACHE_ENABLED);
+        
+        //make sure if the entry is around... we remove it...
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        if(entryInfo != null && entryInfo.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+            CatalogController.removeEntry(feed.entries[0].id, CatalogController.SHARED_RESOURCE);
+        }
+        
+        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        boolean entryPresent = entryInfo == null || entryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        assertTrue("Entry not acquired at start of test", entryPresent);
         
         UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries, 
             null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
@@ -107,7 +121,7 @@ public class TestContainerController extends TestCase {
         }
         assertTrue("Job has completed", acquireJob.isFinished());
         
-        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
             CatalogController.SHARED_RESOURCE);
         
         String acquiredFileURI = entryInfo.fileURI;
