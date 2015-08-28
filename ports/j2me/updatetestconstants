@@ -1,0 +1,6 @@
+#!/bin/bash
+
+sed s/__TESTSERVERIP__/$IPADDR/g ../../core/test/com/ustadmobile/test/core/TestConstants.java | \
+    sed s/__TESTSERVERPORT__/$CTRLPORT/g \
+    > ./src/com/ustadmobile/test/core/TestConstants.java
+

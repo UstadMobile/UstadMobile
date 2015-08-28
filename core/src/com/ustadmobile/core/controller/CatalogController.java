@@ -42,10 +42,12 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ViewFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
@@ -131,18 +133,23 @@ public class CatalogController implements UstadController, UMProgressListener {
     //this is where the feed (and its entries) live.
     private CatalogModel model;
     
-    public static String[] catalogMenuOpts = new String[]{"My Catalogs",
-        "My Courses", "Logout", "About"};
+    public static String[] catalogMenuOpts = new String[]{"My Courses",
+        "On This Device", "Logout", "About"};
     
-    public static final int MENUINDEX_MYCATALOG = 0;
+    public static final int MENUINDEX_MYCOURSES = 0;
     
-    public static final int MENUINDEX_MYCOURSES = 1;
+    public static final int MENUINDEX_MYDEVICE = 1;
     
     public static final int MENUINDEX_LOGOUT = 2;
     
     public static final int MENUINDEX_ABOUT = 3;
     
     public static final String LOCALOPDS_ID_SUFFIX = "-local";
+    
+    /**
+     * Hardcoded OPDS extension (to save time in loops)
+     */
+    public static final String OPDS_EXTENSION = ".opds";
     
     
     public CatalogController() {
@@ -264,9 +271,11 @@ public class CatalogController implements UstadController, UMProgressListener {
      * 
      * @return CatalogController representing files on the device
      */
-    public static CatalogController makeDeviceCatalog() {
-        
-        return null;
+    public static CatalogController makeDeviceCatalog() throws IOException{
+        UstadJSOPDSFeed deviceFeed = CatalogController.scanDir(
+            UstadMobileSystemImpl.getInstance().getSharedContentDir(), 
+                "Device Catalog");
+        return new CatalogController(new CatalogModel(deviceFeed));
     }
     
     /**
@@ -345,6 +354,9 @@ public class CatalogController implements UstadController, UMProgressListener {
                         }catch(Exception e) {
                             e.printStackTrace();
                             impl.getAppView().dismissProgressDialog();
+                            impl.getAppView().showNotification(
+                                "Sorry! Error loading catalog : " + e.toString(),
+                                AppView.LENGTH_LONG);
                         }
                     }
                 };
@@ -444,6 +456,16 @@ public class CatalogController implements UstadController, UMProgressListener {
                 loginController.handleLogout();
                 loginController.show();
                 break;
+            case MENUINDEX_MYDEVICE:
+                try {
+                    CatalogController deviceCatCtrl = CatalogController.makeDeviceCatalog();
+                    deviceCatCtrl.show();
+                }catch(IOException e) {
+                    UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                        "Sorry - Error loading device catalog", AppView.LENGTH_LONG);
+                }
+                break;
+                            
         }
         System.out.println("You click: " + index);
     }
@@ -549,7 +571,7 @@ public class CatalogController implements UstadController, UMProgressListener {
     }
     
     protected static String getFileNameForOPDSFeedId(String feedId) {
-        return ".cache-" + sanitizeIDForFilename(feedId) + ".opds";
+        return ".cache-" + sanitizeIDForFilename(feedId) + OPDS_EXTENSION;
     }
     
     protected static String getPrefKeyNameForOPDSURLToIDMap(String opdsId) {
@@ -619,7 +641,7 @@ public class CatalogController implements UstadController, UMProgressListener {
      * already acquired; with the links pointing to the local file container
      * 
      */
-    public static UstadJSOPDSFeed generateLocalCatalog(UstadJSOPDSFeed catalog, int resourceMode, int acquisitionStatusMode) {
+    public static UstadJSOPDSFeed generateLocalCatalog(UstadJSOPDSFeed catalog, int resourceMode, int acquisitionStatusMode) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String baseDir = resourceMode == SHARED_RESOURCE ? impl.getSharedContentDir() :
             impl.getUserContentDirectory(impl.getActiveUser());
@@ -627,13 +649,43 @@ public class CatalogController implements UstadController, UMProgressListener {
         String filename = sanitizeIDForFilename(localCatalogID) + ".local.opds";
         String filePath = UMFileUtil.joinPaths(new String[]{"file:///", baseDir, filename});
         
-        UstadJSOPDSFeed newFeed = new UstadJSOPDSFeed(filePath);
-        for(int i = 0; i < catalog.entries.length; i++){
+        UstadJSOPDSFeed newFeed = new UstadJSOPDSFeed(filePath, 
+            catalog.title + LOCALOPDS_ID_SUFFIX, catalog.id + LOCALOPDS_ID_SUFFIX);
+        
+        int i;//loop 1- through entries
+        int j;//loop 2 - through each entry which is acquired
+        Vector entryLinks;//links in each entry
+        Vector linksToRemove = new Vector();
+        
+        for(i = 0; i < catalog.entries.length; i++){
             CatalogEntryInfo info = getEntryInfo(catalog.entries[i].id, acquisitionStatusMode);
-            if(info.acquisitionStatus == STATUS_ACQUIRED) {
+            if(info != null && info.acquisitionStatus == STATUS_ACQUIRED) {
                 //add an entry with a pointer to the local file
+                UstadJSOPDSEntry entryCopy = new UstadJSOPDSEntry(newFeed, 
+                    catalog.entries[i]);
+                //remove acquisition links and replace with pointers to the local file
+                entryLinks = entryCopy.getLinks();
+                linksToRemove.clear();
+                
+                for(j = 0; j < entryLinks.size(); j++) {
+                    String[] thisLink = (String[])entryLinks.elementAt(j);
+                    if(thisLink[UstadJSOPDSItem.LINK_REL].startsWith(UstadJSOPDSEntry.LINK_ACQUIRE)) {
+                        linksToRemove.addElement(thisLink);
+                    }
+                }
+                
+                for(j = 0; j < linksToRemove.size(); j++) {
+                    entryLinks.removeElement(linksToRemove.elementAt(j));
+                }
+                
+                entryCopy.addLink(UstadJSOPDSItem.LINK_ACQUIRE, info.fileURI, 
+                    info.mimeType);
+                newFeed.addEntry(entryCopy);
             }
         }
+        
+        String savePath = UMFileUtil.joinPaths(new String[]{baseDir, filename});
+        impl.writeStringToFile(newFeed.toString(), savePath, "UTF-8");
         
         return newFeed;
     }
@@ -697,11 +749,68 @@ public class CatalogController implements UstadController, UMProgressListener {
      * 4. Make a new OPDS navigation feed with an entry for each acquisition feed
      * 
      * @param dirname URI to the directory to scan
+     * @param title requested title for this generated feed
+     * 
      * @return Feed representing the contents of the directory
      */ 
-    public UstadJSOPDSFeed scanDir(String dirname) {
-        return null;
+    public static UstadJSOPDSFeed scanDir(String dirname, String title) throws IOException {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] dirContents = impl.listDirectory(dirname);
+        
+        String generatedHREF = UMFileUtil.joinPaths(new String[]{dirname, OPDS_EXTENSION});
+        UstadJSOPDSFeed retVal = new UstadJSOPDSFeed(
+                UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, generatedHREF), 
+                title, "scandir-" + sanitizeIDForFilename(dirname));
+        
+        
+        Vector opdsFiles = new Vector();
+        for(int i = 0; i < dirContents.length; i++) {
+            if(dirContents[i].startsWith(".cache")) {
+                continue;
+            }
+            
+            if(dirContents[i].endsWith(OPDS_EXTENSION)) {
+                opdsFiles.addElement(UMFileUtil.joinPaths(new String[]{dirname, 
+                    dirContents[i]}));
+            }
+        }
+        
+        String[] opdsFilesArr = new String[opdsFiles.size()];
+        opdsFiles.toArray(opdsFilesArr);
+        
+        String[] containerFiles = null;
+        
+        return scanFiles(opdsFilesArr, containerFiles, generatedHREF, title,
+            "scandir-" + sanitizeIDForFilename(dirname));
     }
+    
+    public static UstadJSOPDSFeed scanFiles(String[] opdsFiles, String[] containerFiles, String baseHREF, String title, String feedID) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadJSOPDSFeed retVal = new UstadJSOPDSFeed(
+                UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHREF), 
+                title, feedID);
+        
+        int i;
+        for(i = 0; i < opdsFiles.length; i++) {
+            try {
+                //let's try reading it and loading it in
+                UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(impl.readFileAsText(opdsFiles[i]));
+                UstadJSOPDSEntry feedEntry = UstadJSOPDSEntry.makeEntryForItem(
+                    feed, retVal, "subsection", UstadJSOPDSEntry.TYPE_NAVIGATIONFEED, 
+                    UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, 
+                        opdsFiles[i]));
+                retVal.addEntry(feedEntry);
+            }catch(IOException e) {
+                
+            }catch(XmlPullParserException xe) {
+                
+            }
+        }
+        
+        
+        return retVal;
+    }
+    
     
     /**
      * Register that a download has started
@@ -901,6 +1010,7 @@ public class CatalogController implements UstadController, UMProgressListener {
         }
         
         public void run() {
+            Hashtable parentFeeds = new Hashtable();
             for(int i = 0; i < entries.length; i++) {
                 CatalogEntryInfo info = new CatalogEntryInfo();
                 info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
@@ -908,6 +1018,18 @@ public class CatalogController implements UstadController, UMProgressListener {
                 info.fileURI = srcJobs[i].getDestination();
                 info.mimeType = mimeTypes[i];
                 CatalogController.setEntryInfo(entries[i].id, info, resourceMode);
+                parentFeeds.put(entries[i].parentFeed, entries[i].parentFeed);
+            }
+            
+            Enumeration parentFeedKeys = parentFeeds.keys();
+            while(parentFeedKeys.hasMoreElements()) {
+                UstadJSOPDSFeed parentFeed = (UstadJSOPDSFeed)parentFeedKeys.nextElement();
+                try {
+                    CatalogController.generateLocalCatalog(parentFeed, resourceMode, 
+                    CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

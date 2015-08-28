@@ -38,6 +38,8 @@ package com.ustadmobile.port.j2me.app.tests;
 
 import com.ustadmobile.core.controller.LoginController;
 import java.io.IOException;
+import com.ustadmobile.test.core.TestConstants;
+
 
 /** 
 *

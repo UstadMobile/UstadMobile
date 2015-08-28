@@ -42,7 +42,7 @@ public abstract class UstadJSOPDSItem {
     
     public String id;
     
-    public Vector linkVector;
+    protected Vector linkVector;
     
     public static int LINK_REL = 0;
     public static int LINK_MIMETYPE = 1;
@@ -61,13 +61,19 @@ public abstract class UstadJSOPDSItem {
     public static String TYPE_ATOMFEED = "application/atom+xml";
     
     /**
-    * OPDS constant for the standard acquisition link
+    * OPDS constant for the standard acquisition link:
+    * 
+    * http://opds-spec.org/acquisition
+    * 
     * @type String
     */
     public static String LINK_ACQUIRE = "http://opds-spec.org/acquisition";
 
     /**
     * OPDS constant for open access acquisition link
+    * 
+    * http://opds-spec.org/acquisition/open-access
+    * 
     * @type String
     */
     public static String LINK_ACQUIRE_OPENACCESS = 
@@ -120,6 +126,20 @@ public abstract class UstadJSOPDSItem {
     
     public String[] getLink(int index) {
         return (String[])linkVector.elementAt(index);
+    }
+    
+    /**
+     * Get a vector containing all links for this entry as String arrays: indexed
+     * as per LINK_ constants.
+     * 
+     * @see UstadJSOPDSItem#LINK_REL
+     * @see UstadJSOPDSItem#LINK_MIMETYPE
+     * @see UstadJSOPDSItem#LINK_HREF
+     * 
+     * @return Vector containing all links for this entry as String arrays
+     */
+    public Vector getLinks() {
+        return this.linkVector;
     }
      
     public Vector getLinks(String linkRel, String mimeType) {

@@ -53,8 +53,19 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         href = null;
     }
     
-    public UstadJSOPDSFeed(String srcHref) {
+    /**
+     * Full argument constructor used to create a new OPDS feed with mandatory
+     * elements: 
+     * 
+     * @param srcHref The base HREF for relative links of this feed
+     * @param title The OPDS Title
+     * @param id The OPDS ID of the feed itself
+     */
+    public UstadJSOPDSFeed(String srcHref, String title, String id) {
         this.href = srcHref;
+        this.entries = new UstadJSOPDSEntry[0];
+        this.title = title;
+        this.id = id;
     }
     
     public static UstadJSOPDSFeed loadFromXML(String str) throws XmlPullParserException, IOException {

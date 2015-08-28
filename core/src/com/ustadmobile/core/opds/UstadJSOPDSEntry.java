@@ -49,24 +49,60 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         this.parentFeed = parentFeed;
     }
     
+    /**
+     * Constructor that will copy the given srcItem.  The vectors used to store 
+     * links, authors etc. will be new vectors but their content will be 
+     * references to the same items.
+     * 
+     * All other properties will be copied by reference.
+     * 
+     * @param parentFeed
+     * @param srcItem 
+     */
     public UstadJSOPDSEntry(UstadJSOPDSFeed parentFeed, UstadJSOPDSEntry srcItem) {
         this(parentFeed);
-        this.title = srcItem.title;
-        this.id = srcItem.id;
+        
+        setEntryFromSrcItem(srcItem);
+        
         this.linkVector = new Vector();
         for(int i = 0; i < srcItem.linkVector.size(); i++) {
             this.linkVector.addElement(srcItem.linkVector.elementAt(i));
         }
-        
+    }
+    
+    
+    /**
+     * Constructs an entry that can be added to another feed with one link with
+     * the given parameters - useful when you want to link one feed to another
+     * 
+     * @param item
+     * @param href
+     * @param mimeType
+     * @param rel
+     * @return 
+     */
+    public static UstadJSOPDSEntry makeEntryForItem(UstadJSOPDSItem item, UstadJSOPDSFeed parentFeed, String rel, String mimeType, String href) {
+        UstadJSOPDSEntry retVal = new UstadJSOPDSEntry(parentFeed);
+        retVal.setEntryFromSrcItem(item);
+        retVal.addLink(rel, mimeType, href);
+        return retVal;
+    }
+    
+    private void setEntryFromSrcItem(UstadJSOPDSItem srcItem) {
+        this.title = srcItem.title;
+        this.id = srcItem.id;
         this.updated = srcItem.updated;
-        this.summary = summary;
+        this.summary = srcItem.summary;
         this.authors = new Vector();
-        for(int i = 0; i < srcItem.authors.size(); i++) {
-            this.authors.addElement(srcItem.authors.elementAt(i));
+        if(srcItem.authors != null) {
+            for(int i = 0; i < srcItem.authors.size(); i++) {
+                this.authors.addElement(srcItem.authors.elementAt(i));
+            }
         }
         
         this.publisher = srcItem.publisher;
     }
+    
     
 
     public Vector getAcquisitionLinks() {

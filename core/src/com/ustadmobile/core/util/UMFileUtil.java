@@ -42,6 +42,11 @@ public class UMFileUtil {
     public static final char FILE_SEP  = '/';
     
     /**
+     * Constant string - the file:/// protocol
+     */
+    public static final String PROTOCOL_FILE = "file:///";
+    
+    /**
      * Join multiple paths - make sure there is just one FILE_SEP character 
      * between them.  Only handles situations where there could be a single extra
      * slash - e.g. "path1/" + "/somefile.txt" - does not look inside the 
@@ -268,6 +273,20 @@ public class UMFileUtil {
             return filename.substring(lastDot+1);
         }else {
             return null;
+        }
+    }
+    
+    /**
+     * Ensure a given path has a given prefix (e.g. file:///) - if it doesn't
+     * then join the prefix to the string, otherwise return it as is
+     * 
+     * @param 
+     */
+    public static String ensurePathHasPrefix(String prefix, String path) {
+        if(path.startsWith(prefix)) {
+            return path;
+        }else {
+            return joinPaths(new String[]{prefix, path});
         }
     }
     

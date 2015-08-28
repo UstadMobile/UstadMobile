@@ -4,6 +4,7 @@
  */
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
 import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
 /**
@@ -24,7 +25,7 @@ public class ViewFactory  {
        return new CatalogViewJ2ME();
     }
     
-    public static ContainerView makeContainerView() {
+    public static ContainerView makeContainerView(UstadJSOPDSEntry entry, String openPath, String mime) {
         throw new RuntimeException("Not Implemented");
     }
     
