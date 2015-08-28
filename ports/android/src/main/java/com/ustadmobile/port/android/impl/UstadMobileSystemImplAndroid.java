@@ -493,6 +493,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 sb.append(URLEncoder.encode(value, "UTF-8"));
             }
 
+            conn.setDoOutput(true);
             OutputStream out = conn.getOutputStream();
             out.write(sb.toString().getBytes());
             out.flush();
