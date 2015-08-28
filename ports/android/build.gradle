@@ -32,7 +32,6 @@ android {
         minSdkVersion 9
     }
 
-
 }
 
 repositories {

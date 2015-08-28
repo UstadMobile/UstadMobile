@@ -573,7 +573,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     @Override
     public void closeContainer(String openURI) {
-
+        httpService.ummountZIP(openURI);
     }
 
     public class HTTPServiceConnection implements ServiceConnection {

@@ -8,6 +8,8 @@ import android.os.IBinder;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.IOException;
+import java.nio.channels.SocketChannel;
+import java.util.HashMap;
 
 public class HTTPService extends Service {
 
@@ -17,12 +19,16 @@ public class HTTPService extends Service {
 
     private EmbeddedHTTPD httpd;
 
+    private HashMap<String, String> mountedZipMap;
+
     public HTTPService() {
     }
 
     @Override
     public void onCreate() {
         httpd = new EmbeddedHTTPD(DEFAULT_PORT);
+        mountedZipMap = new HashMap<>();
+
         try {
             httpd.start();
         } catch (IOException e) {
@@ -57,7 +63,16 @@ public class HTTPService extends Service {
     public String mountZIP(String zipPath) {
         String zipName = UMFileUtil.getFilename(zipPath);
         httpd.mountZip(zipName, zipPath);
-        return getBaseURL() + "mount/" + zipName;
+
+        String openedPath =getBaseURL() + "mount/" + zipName;
+        mountedZipMap.put(openedPath, zipName);
+
+        return openedPath;
+    }
+
+    public void ummountZIP(String openedPath) {
+        String mountedPath = mountedZipMap.get(openedPath);
+        httpd.unmountZip(mountedPath);
     }
 
     public void addFilter(String mountPath, String extension, String regex, String replacement) {

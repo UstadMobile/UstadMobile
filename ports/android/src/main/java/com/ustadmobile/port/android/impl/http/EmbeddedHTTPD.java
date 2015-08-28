@@ -153,6 +153,10 @@ public class EmbeddedHTTPD extends NanoHTTPD {
         mountedEPUBs.put(mountPath, new MountedZip(mountPath, zipPath));
     }
 
+    public void unmountZip(String mountPath) {
+        mountedEPUBs.remove(mountPath);
+    }
+
     public void addFilter(String mountPath, String extension, String regex, String replacement) {
         MountedZip mountedZip = mountedEPUBs.get(mountPath);
         mountedZip.addFilter(extension, regex, replacement);

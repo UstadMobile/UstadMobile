@@ -126,6 +126,12 @@ public class TestContainerController extends TestCase {
         UstadJSOPF opf = controller.getOPF(0);
         assertNotNull("Can load package OPF", opf);
         assertTrue("Package has spine with entries", opf.spine.length > 0);
+        
+        
+        //delete it now we are done
+        impl.closeContainer(openPath);
+        CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
+        
     }
     
 }
