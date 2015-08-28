@@ -47,6 +47,18 @@
   
             <!-- Prebop preprocessor -->
             <url url="http://www.ustadmobile.com/build-dep/com.objfac.ant.preprocess_0.9.1.zip"/>
+  
+            <!-- Stock LWUIT Build from the Nokia Series 40 branch -->
+            <url url="http://www.ustadmobile.com/build-dep/LWUIT-MIDP.jar"/>
+
+            <!-- J2ME Unit -->
+            <url url="http://www.ustadmobile.com/build-dep/j2meunit.jar"/>
+
+            <!-- JSON ME -->
+            <url url="http://www.ustadmobile.com/build-dep/json-me.jar"/>
+
+            <!-- Proguard -->
+            <url url="http://www.ustadmobile.com/build-dep/proguard4.10.zip"/>
         </get>
 
         <unzip dest="${lib.dir}">

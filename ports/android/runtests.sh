@@ -18,7 +18,7 @@ SERVERPID=$(cat DodgyHTTPD/dodgyhttpd.pid)
 cd $WORKINGDIR
 
 ant -lib ../../core/lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar \
-     -f build-preprocess-tests.xml
+     -f preproc.xml
 
 sed s/__TESTSERVERIP__/$IPADDR/g ../../core/test/com/ustadmobile/test/core/TestConstants.java | \
     sed s/__TESTSERVERPORT__/$CTRLPORT/g \
