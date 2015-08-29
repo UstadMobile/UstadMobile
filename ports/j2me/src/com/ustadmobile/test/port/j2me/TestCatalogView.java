@@ -52,7 +52,7 @@ public class TestCatalogView extends TestCase {
     public void runTest() throws Throwable{
         assertEquals("Simple Test OK", 2, 1+1);
         
-        String fileURI = "/com/ustadmobile/port/j2me/app/tests/" + 
+        String fileURI = "/com/ustadmobile/test/port/j2me/" + 
                 TestUtils.testSettings.get("opdsxml").toString();
         InputStream bais = getClass().getResourceAsStream(
                 fileURI);       
@@ -66,7 +66,7 @@ public class TestCatalogView extends TestCase {
         com.sun.lwuit.Display.getInstance().callSeriallyAndWait(new Runnable() {
             public void run() {
                 try {
-                    String fileURI = "/com/ustadmobile/port/j2me/app/tests/" + 
+                    String fileURI = "/com/ustadmobile/test/port/j2me/" + 
                     TestUtils.testSettings.get("opdsxml").toString();
                     InputStream bais = getClass().getResourceAsStream(
                             fileURI);       

@@ -51,7 +51,7 @@ public class TestOPDSParse extends TestCase{
     }
     
     protected void runTest() throws Throwable {
-        String fileURI = "/com/ustadmobile/port/j2me/app/tests/" + 
+        String fileURI = "/com/ustadmobile/test/port/j2me/" + 
                 TestUtils.testSettings.get("opdsxml").toString();
         InputStream bais = getClass().getResourceAsStream(
                 fileURI);       
