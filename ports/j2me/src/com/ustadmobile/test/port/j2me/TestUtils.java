@@ -60,7 +60,7 @@ public class TestUtils {
     
     public void loadTestSettingsResource() throws Exception { 
         InputStream is = getClass().getResourceAsStream(
-                "/com/ustadmobile/port/j2me/app/tests/test-settings.xml");
+                "/com/ustadmobile/test/port/j2me/test-settings.xml");
         XmlPullParser xpp = UstadMobileAppController.parseXml(is);
         testSettings = new Hashtable();
         String appDataURI = UstadMobileAppController.getAppDataDir();

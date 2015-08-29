@@ -52,7 +52,7 @@ public class TestOPFParse extends TestCase{
                 TestUtils.testSettings.get("appDataURI").toString() + "/" +
                 TestUtils.testSettings.get("opfxml").toString());
         */
-        String fileURI = "/com/ustadmobile/port/j2me/app/tests/" + 
+        String fileURI = "/com/ustadmobile/test/port/j2me/" + 
                 TestUtils.testSettings.get("opfxml").toString();
         InputStream bais = getClass().getResourceAsStream(
                 fileURI); 

@@ -1074,7 +1074,6 @@ public class CatalogController implements UstadController, UMProgressListener {
         return transferJob;
     }
 
-    //@Override
     public void progressUpdated(UMProgressEvent evt) {
         if(this.view != null) {
             UMTransferJobList jobList = (UMTransferJobList)evt.getSrc();

@@ -268,10 +268,6 @@ public class HTTPUtils {
         InputStream is = null;
         OutputStream os = null;
         StringBuffer sb = new StringBuffer();
-        
-        if(url == null){ //Testing..
-            url = "http://54.77.18.106:8621/";
-        }
 
         try {
             
