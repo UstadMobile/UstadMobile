@@ -148,7 +148,6 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         return this.jobValues[index];
     }
     
-    //@Override
     public void start() {
         if(currentItem != -1) {
             throw new RuntimeException("already started");
@@ -188,19 +187,16 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         this.runAfterFinishJob = job;
     }
 
-    //@Override
     public void addProgressListener(UMProgressListener listener) {
         //progressListeners.add(listener);
         //J2ME:
         progressListeners.addElement(listener);
     }
 
-    //@Override
     public int getBytesDownloadedCount() {
         return -1;
     }
 
-    //@Override
     public int getTotalSize() {
         // go over all the component downloads to find the total size
         int numUncertain = 0;
@@ -222,12 +218,10 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         return totalSizeCombined;
     }
 
-    //@Override
     public boolean isFinished() {
         return isFinished;
     }
 
-    //@Override
     public void progressUpdated(UMProgressEvent evt) {
         this.currentJobProgress = evt.getProgress();
         
@@ -264,12 +258,10 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         }
     }
 
-    //@Override
     public String getSource() {
         return null;
     }
 
-    //@Override
     public String getDestination() {
         return null;
     }

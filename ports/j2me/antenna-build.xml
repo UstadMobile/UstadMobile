@@ -63,11 +63,11 @@ NetBeans.  See README for instructions on building from source.
             <fileset dir="${lib.dir}" >
                 <!--<include name="*.jar" />-->
                 
+		<include name="json-me.jar"/>
 	 	<include name="j2meunit.jar" />
                 <include name="kxml2-min-2.3.0.jar" />
                 <include name="LWUIT-MIDP-IO.jar" />
                 <include name="LWUIT-MIDP.jar" />            
-	  	<include name="UstadMobileCore.jar" /> 
 		
             </fileset>
         </path>
@@ -141,9 +141,10 @@ NetBeans.  See README for instructions on building from source.
 
         </wtkjad>
 
-    	<copy file="${src.dir}/com/ustadmobile/app/tests/test.opds" tofile="${classes.dir.ANTENNA}/com/ustadmobile/app/tests/test.opds"/>
-        <copy file="${src.dir}/com/ustadmobile/app/tests/test.opf" tofile="${classes.dir.ANTENNA}/com/ustadmobile/app/tests/test.opf"/>
-        <copy file="${src.dir}/com/ustadmobile/app/tests/test-settings.xml" tofile="${classes.dir.ANTENNA}/com/ustadmobile/app/tests/test-settings.xml"/>
+	<!-- ./src/com/ustadmobile/test/port/j2me/test.opds -->
+    	<copy file="${src.dir}/com/ustadmobile/test/port/j2me/test.opds" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test.opds"/>
+        <copy file="${src.dir}/com/ustadmobile/test/port/j2me/test.opf" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test.opf"/>
+        <copy file="${src.dir}/com/ustadmobile/test/port/j2me/test-settings.xml" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test-settings.xml"/>
 
         <echo message="looking for proguard in: ${wtk.proguard.home}/lib/proguard.jar"/>
         <wtkpackage basedir="${classes.dir.ANTENNA}" 
@@ -232,6 +233,9 @@ NetBeans.  See README for instructions on building from source.
 
 	    <!-- Prebop preprocessor -->
             <url url="http://www.ustadmobile.com/build-dep/com.objfac.ant.preprocess_0.9.1.zip"/>
+	
+	    <!-- JSON-J2ME -->
+	    <url url="http://www.ustadmobile.com/build-dep/json-me.jar"/>
 
         </get>
         
