@@ -28,37 +28,63 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
+import com.ustadmobile.port.j2me.app.AppPref;
+import com.ustadmobile.port.j2me.app.FileUtils;
 import j2meunit.framework.TestCase;
+import java.util.Hashtable;
 
 /**
  *
  * @author varuna
  */
-public class TestXmlParse extends TestCase {
-    
-    public TestXmlParse(){
-        setName("Testing XML Parse");
+public class TestAppPref extends TestCase {
+    public TestAppPref(){
+        setName("TestAppPref Test");
     }
     
     public void runTest() throws Throwable{
-    
-        if (TestUtils.testSettings.get("appDataURI").toString() != null ){
-            assertTrue("Hashtable get appDataURI", true);
+        assertEquals("Simple Test OK", 2, 1+1);
+        
+        AppPref appPreferences = new AppPref();
+        
+        //Set up app settings..
+        Hashtable appSettings = appPreferences.getAppSettings();
+        
+        assertEquals("app settings test", "http://umcloud1.ustadmobile.com", 
+                appSettings.get("umcloud"));
+        
+        //Update settings
+        appPreferences.updateSetting("umcloud", 
+                "http://umcloud1.ustadmobile.com/");
+        
+        appSettings.clear();
+        appSettings = appPreferences.getAppSettings();
+        
+        assertEquals("app settings update test", 
+                "http://umcloud1.ustadmobile.com/", appSettings.get("umcloud"));
+        
+        //Get all keys
+        String [] prefKeys = 
+                FileUtils.enumerationToStringArray(appSettings.keys());
+        boolean found=false;
+        for (int i=0; i<prefKeys.length; i++){
+            if(prefKeys[i].indexOf("tincan") >=0 ){
+                found=true;
+                break;
+            }
+        }
+        if (found){
+            assertTrue(true);
+        }else{
+            assertTrue(false);
         }
         
-        assertEquals("Hashtable XML Parse test-settings.xml", "test.opds",
-                TestUtils.getInstance().testSettings.get("opdsxml"));
-        assertEquals("Hashtable XML Parse test-settings.xml OPF", "test.opf",
-                TestUtils.getInstance().testSettings.get("opfxml"));
-        assertEquals("Hashtable XML Parse test-settings.xml username", "mike", 
-                TestUtils.getInstance().testSettings.get("username"));
-        assertEquals("Hashtable XML Parse test-settings.xml password", "secret",
-                TestUtils.getInstance().testSettings.get("password"));
+        //Add a setting
+        appPreferences.addSetting("newkey", "newvalue");
         
-        
-        
+        //Remove a setting
+        appPreferences.deleteSetting("newkey");
     }
-    
 }

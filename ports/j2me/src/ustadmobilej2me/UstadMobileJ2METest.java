@@ -3,14 +3,14 @@
  * and open the template in the editor.
  */
 package ustadmobilej2me;
-import com.ustadmobile.port.j2me.app.tests.AllTestCases;
-import com.ustadmobile.port.j2me.app.tests.TestUtils;
+import com.ustadmobile.test.port.j2me.AllTestCases;
+import com.ustadmobile.test.port.j2me.TestUtils;
 import java.io.IOException;
 import java.util.Hashtable;
 import com.sun.lwuit.Display;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
-import com.ustadmobile.port.j2me.app.tests.TestEPUBRead;
+import com.ustadmobile.test.port.j2me.TestEPUBRead;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
 import j2meunit.framework.TestFailure;

@@ -28,63 +28,43 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.port.j2me.app.AppPref;
-import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import j2meunit.framework.TestCase;
-import java.util.Hashtable;
+import com.ustadmobile.port.j2me.app.FileUtils;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
 
 /**
  *
  * @author varuna
  */
-public class TestAppPref extends TestCase {
-    public TestAppPref(){
-        setName("TestAppPref Test");
+public class TestRename extends TestCase {
+    private UstadMobileSystemImpl ustadMobileSystemImpl;
+    public TestRename(){
+        setName("TestRename Test");
     }
     
     public void runTest() throws Throwable{
-        assertEquals("Simple Test OK", 2, 1+1);
-        
-        AppPref appPreferences = new AppPref();
-        
-        //Set up app settings..
-        Hashtable appSettings = appPreferences.getAppSettings();
-        
-        assertEquals("app settings test", "http://umcloud1.ustadmobile.com", 
-                appSettings.get("umcloud"));
-        
-        //Update settings
-        appPreferences.updateSetting("umcloud", 
-                "http://umcloud1.ustadmobile.com/");
-        
-        appSettings.clear();
-        appSettings = appPreferences.getAppSettings();
-        
-        assertEquals("app settings update test", 
-                "http://umcloud1.ustadmobile.com/", appSettings.get("umcloud"));
-        
-        //Get all keys
-        String [] prefKeys = 
-                FileUtils.enumerationToStringArray(appSettings.keys());
-        boolean found=false;
-        for (int i=0; i<prefKeys.length; i++){
-            if(prefKeys[i].indexOf("tincan") >=0 ){
-                found=true;
-                break;
-            }
+        //ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
+        String getSharedContentDir = ustadMobileSystemImpl.getSharedContentDir();
+        String fileURIFrom = FileUtils.joinPath(getSharedContentDir, "from.txt");
+        FileConnection fc = null;
+        fc = (FileConnection) Connector.open(fileURIFrom,
+                Connector.READ_WRITE);
+        if (!fc.exists()){
+            fc.create();
         }
-        if (found){
+        if (fc!=null){
+            fc.close();
+        }
+        String fileURITo = FileUtils.joinPath(getSharedContentDir, "to.txt");
+        ustadMobileSystemImpl.renameFile(fileURIFrom, fileURITo);
+        if (FileUtils.checkFile(fileURITo)){
             assertTrue(true);
         }else{
             assertTrue(false);
         }
-        
-        //Add a setting
-        appPreferences.addSetting("newkey", "newvalue");
-        
-        //Remove a setting
-        appPreferences.deleteSetting("newkey");
     }
 }

@@ -28,23 +28,37 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.port.j2me.app.HTTPUtils;
-import com.ustadmobile.core.impl.HTTPResult;
 import j2meunit.framework.TestCase;
 
 /**
  *
  * @author varuna
  */
-public class TestSimpleHTTP extends TestCase {
-    public TestSimpleHTTP(){
-        setName("TestSimpleHTTP Test");
+public class TestXmlParse extends TestCase {
+    
+    public TestXmlParse(){
+        setName("Testing XML Parse");
     }
     
     public void runTest() throws Throwable{
-        assertEquals("HTTP Simple Test OK", 2, 1+1);
+    
+        if (TestUtils.testSettings.get("appDataURI").toString() != null ){
+            assertTrue("Hashtable get appDataURI", true);
+        }
+        
+        assertEquals("Hashtable XML Parse test-settings.xml", "test.opds",
+                TestUtils.getInstance().testSettings.get("opdsxml"));
+        assertEquals("Hashtable XML Parse test-settings.xml OPF", "test.opf",
+                TestUtils.getInstance().testSettings.get("opfxml"));
+        assertEquals("Hashtable XML Parse test-settings.xml username", "mike", 
+                TestUtils.getInstance().testSettings.get("username"));
+        assertEquals("Hashtable XML Parse test-settings.xml password", "secret",
+                TestUtils.getInstance().testSettings.get("password"));
+        
+        
         
     }
+    
 }

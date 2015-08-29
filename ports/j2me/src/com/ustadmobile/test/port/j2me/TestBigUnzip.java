@@ -28,21 +28,50 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
+import com.ustadmobile.port.j2me.app.DeviceRoots;
+import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.port.j2me.app.HTTPUtils;
 import j2meunit.framework.TestCase;
-
+import com.ustadmobile.port.j2me.app.ZipUtils;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import java.util.Vector;
 /**
  *
  * @author varuna
  */
-public class TestImplementation extends TestCase {
-    public TestImplementation(){
-        setName("TestSimple Test");
+public class TestBigUnzip extends TestCase {
+    private UstadMobileSystemImpl ustadMobileSystemImpl;
+    public TestBigUnzip(){
+        setName("Big Unzip Test");
     }
     
     public void runTest() throws Throwable{
-        assertEquals("Simple Test OK", 2, 1+1);
+        //ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
+        //String getSharedContentDir = ustadMobileSystemImpl.getSharedContentDir();
+
+        //Test big zip file.
+        DeviceRoots bestRoot = FileUtils.getBestRoot();
+        String bestRootURI = bestRoot.path;
+        String hugeZipFileURI = FileUtils.joinPath(bestRootURI, "hugefile.zip");
+        String hugeUnzipURI = FileUtils.joinPath(bestRootURI, "hugefile");
+        
+        //delete existing.
+        FileUtils.deleteRecursively(hugeUnzipURI, true);
+        
+        if (!FileUtils.checkFile(hugeZipFileURI)){
+            assertTrue(false);
+        }else{
+            //net.sf.jazzlib.CRC32
+            ZipUtils.unZipFile(hugeZipFileURI, null);
+        }
+        
+        if (FileUtils.checkDir(hugeUnzipURI)){
+            assertTrue(true);
+        }else{
+            assertTrue(false);
+        }
         
     }
 }

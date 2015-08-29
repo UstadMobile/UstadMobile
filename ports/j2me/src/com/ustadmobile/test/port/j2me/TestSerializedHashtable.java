@@ -28,50 +28,38 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
-import com.ustadmobile.core.opf.UstadJSOPF;
 import j2meunit.framework.TestCase;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import org.kxml2.io.KXmlParser;
+import java.util.Hashtable;
+import com.ustadmobile.port.j2me.app.SerializedHashtable;
+import java.util.Enumeration;
+
 /**
  *
  * @author varuna
  */
-public class TestOPFParse extends TestCase{
-    
-    public TestOPFParse(){
-        setName("OPFParse Test");
+public class TestSerializedHashtable extends TestCase{
+
+    public TestSerializedHashtable() {
     }
-    
+ 
     public void runTest() throws Throwable{
+
+        //We get a hash table!
+        UstadMobileAppController.setDefaultAppSettings();
+        Hashtable defaultSettings = UstadMobileAppController.appSettings;
+        byte[] byteArray = SerializedHashtable.hashTabletoStream(defaultSettings);
+        Hashtable serialisedHashtable = SerializedHashtable.streamToHashtable(byteArray);
         
-        /*InputStream bais = TestUtils.getFileBytes(
-                TestUtils.testSettings.get("appDataURI").toString() + "/" +
-                TestUtils.testSettings.get("opfxml").toString());
-        */
-        String fileURI = "/com/ustadmobile/port/j2me/app/tests/" + 
-                TestUtils.testSettings.get("opfxml").toString();
-        InputStream bais = getClass().getResourceAsStream(
-                fileURI); 
-        
-        /*ByteArrayInputStream bais = 
-                TestUtils.getHTTPBytes(
-                    TestUtils.testSettings.get("opfxml").toString());*/
-        KXmlParser parser = new KXmlParser();
-        parser = (KXmlParser) UstadMobileAppController.parseXml(bais);
-        UstadJSOPF feed = UstadJSOPF.loadFromOPF(parser);
-        
-        assertEquals("Spine made successfully", 
-                "cover.xhtml", feed.spine[0].href);
-        assertEquals("Mime Exception Stored successfully", 
-                "application/mime+ex", 
-                feed.getMimeType("mime_exception.mex"));
-        assertEquals("Mime Default test ok", 
-                feed.DEFAULT_MIMETYPE, 
-                feed.getMimeType("blahfile.txt"));
+        Enumeration e = defaultSettings.elements();
+        while (e.hasMoreElements()){
+            String key = (String) e.nextElement();
+            assertEquals("Serialised Hashtable tests", defaultSettings.get(key),
+                    serialisedHashtable.get(key));
+        }
+
     }
     
 }

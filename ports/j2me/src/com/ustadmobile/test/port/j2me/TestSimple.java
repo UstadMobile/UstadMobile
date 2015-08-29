@@ -28,43 +28,21 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import j2meunit.framework.TestCase;
-import com.ustadmobile.port.j2me.app.FileUtils;
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
 
 /**
  *
  * @author varuna
  */
-public class TestRename extends TestCase {
-    private UstadMobileSystemImpl ustadMobileSystemImpl;
-    public TestRename(){
-        setName("TestRename Test");
+public class TestSimple extends TestCase {
+    public TestSimple(){
+        setName("TestSimple Test");
     }
     
     public void runTest() throws Throwable{
-        //ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
-        String getSharedContentDir = ustadMobileSystemImpl.getSharedContentDir();
-        String fileURIFrom = FileUtils.joinPath(getSharedContentDir, "from.txt");
-        FileConnection fc = null;
-        fc = (FileConnection) Connector.open(fileURIFrom,
-                Connector.READ_WRITE);
-        if (!fc.exists()){
-            fc.create();
-        }
-        if (fc!=null){
-            fc.close();
-        }
-        String fileURITo = FileUtils.joinPath(getSharedContentDir, "to.txt");
-        ustadMobileSystemImpl.renameFile(fileURIFrom, fileURITo);
-        if (FileUtils.checkFile(fileURITo)){
-            assertTrue(true);
-        }else{
-            assertTrue(false);
-        }
+        assertEquals("Simple Test OK", 2, 1+1);
+        
     }
 }

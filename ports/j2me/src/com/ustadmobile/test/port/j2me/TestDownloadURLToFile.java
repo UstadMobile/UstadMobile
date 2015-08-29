@@ -28,38 +28,53 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
+import com.ustadmobile.port.j2me.app.DeviceRoots;
 import j2meunit.framework.TestCase;
-import java.util.Hashtable;
-import com.ustadmobile.port.j2me.app.SerializedHashtable;
-import java.util.Enumeration;
+import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.port.j2me.app.HTTPUtils;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
+import javax.microedition.io.Connector;
+import javax.microedition.io.file.FileConnection;
+
 
 /**
  *
  * @author varuna
  */
-public class TestSerializedHashtable extends TestCase{
-
-    public TestSerializedHashtable() {
-    }
- 
-    public void runTest() throws Throwable{
-
-        //We get a hash table!
-        UstadMobileAppController.setDefaultAppSettings();
-        Hashtable defaultSettings = UstadMobileAppController.appSettings;
-        byte[] byteArray = SerializedHashtable.hashTabletoStream(defaultSettings);
-        Hashtable serialisedHashtable = SerializedHashtable.streamToHashtable(byteArray);
-        
-        Enumeration e = defaultSettings.elements();
-        while (e.hasMoreElements()){
-            String key = (String) e.nextElement();
-            assertEquals("Serialised Hashtable tests", defaultSettings.get(key),
-                    serialisedHashtable.get(key));
-        }
-
+public class TestDownloadURLToFile extends TestCase {
+    public TestDownloadURLToFile(){
+        setName("Test Download URL to file");
     }
     
+    public void runTest() throws Throwable{
+        
+        DeviceRoots[] allRoots = FileUtils.getAllRoots();
+        DeviceRoots mainRoot = FileUtils.getBestRoot();
+        String path = FileUtils.joinPath(mainRoot.path, FileUtils.USTAD_CONTENT_DIR);
+
+        for (int i = 0; i<allRoots.length; i++){
+            String rPath = FileUtils.replaceString(allRoots[i].path, ":/", "//");
+            rPath = FileUtils.replaceString(rPath, " ", "_");
+            //HTTPUtils.makeHTTPRequest(
+            //    "http://umcloud1.ustadmobile.com/roots/"+path,
+            //    null, null);
+        }   
+        String url = "http://www.ustadmobile.com/hello.txt";
+        HTTPUtils.downloadURLToFile(url, path, "");
+        String fileContents = FileUtils.getFileContents(
+                FileUtils.joinPath(path, "hello.txt"));
+        if (fileContents!=null){
+            if(fileContents.startsWith("Hello")){
+                assertTrue(true);
+            }else{
+                assertTrue(false);
+            }
+        }else{
+            assertTrue(false);
+        }
+        
+            
+    }
 }

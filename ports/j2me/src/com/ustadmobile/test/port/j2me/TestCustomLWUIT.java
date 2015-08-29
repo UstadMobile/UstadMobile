@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
 import com.sun.lwuit.Form;
 import com.ustadmobile.port.j2me.app.forms.TestForm3;

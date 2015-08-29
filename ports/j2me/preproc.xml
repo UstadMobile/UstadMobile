@@ -4,7 +4,7 @@
 <project name="preprocandroid" default="umpreprocall">
     <property name="ustadmobile.platform" value="2"/>
     <property name="ustadmobile.core.dir" value="../../core"/>
-    <property name="ustadmobile.port.testsrc" value="./test"/>
+    <property name="ustadmobile.port.testsrc" value="./src"/>
     <property name="ustadmobile.port.mainsrc" value="./src"/>
 
     <import file="../../core/core-preproc.xml"/>

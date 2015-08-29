@@ -28,7 +28,7 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;

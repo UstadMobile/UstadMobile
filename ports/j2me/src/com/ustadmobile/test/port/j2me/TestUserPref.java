@@ -28,21 +28,66 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.tests;
+package com.ustadmobile.test.port.j2me;
 
+import com.ustadmobile.port.j2me.app.FileUtils;
 import j2meunit.framework.TestCase;
+import java.util.Hashtable;
+import com.ustadmobile.port.j2me.app.UserPref;
 
 /**
  *
  * @author varuna
  */
-public class TestSimple extends TestCase {
-    public TestSimple(){
-        setName("TestSimple Test");
+public class TestUserPref extends TestCase {
+    public TestUserPref(){
+        setName("User Preferences Test");
     }
     
     public void runTest() throws Throwable{
         assertEquals("Simple Test OK", 2, 1+1);
+        UserPref userPreferences = new UserPref();
+        
+        //Set up app settings..
+        Hashtable userSettings = userPreferences.getUserSettings();
+        
+        
+        //assertEquals("app settings test", "", 
+        //        userSettings.get("username"));
+        
+        //Update settings
+        userPreferences.updateSetting("username", 
+                "karmakid02");
+        userPreferences.updateSetting("password", 
+                "karmakid02");
+     
+        userSettings.clear();
+        userSettings = userPreferences.getUserSettings();
+        
+        assertEquals("app settings update test", 
+                "karmakid02", userSettings.get("username"));
+        
+        //Get all keys
+        String [] prefKeys = 
+                FileUtils.enumerationToStringArray(userSettings.keys());
+        boolean found=false;
+        for (int i=0; i<prefKeys.length; i++){
+            if(prefKeys[i].indexOf("password") >=0 ){
+                found=true;
+                break;
+            }
+        }
+        if (found){
+            assertTrue(true);
+        }else{
+            assertTrue(false);
+        }
+        
+        //Add a setting
+        userPreferences.addSetting("newkey", "newvalue");
+        
+        //Remove a setting
+        userPreferences.deleteSetting("newkey");
         
     }
 }
