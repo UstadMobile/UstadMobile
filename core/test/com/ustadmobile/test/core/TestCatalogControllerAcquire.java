@@ -45,7 +45,7 @@ import com.ustadmobile.core.util.UMFileUtil;
    $endif$ */
 
 /* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
+    import j2meunit.framework.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -119,8 +119,8 @@ public class TestCatalogControllerAcquire extends TestCase{
             CatalogController.SHARED_RESOURCE);
         assertNull("Catalog entry no longer available after deleted",
             entryInfo);
-        assertFalse("Entry file no longer present after delete",
-                impl.fileExists(acquiredFileURI));
+        assertTrue("Entry file no longer present after delete",
+                !impl.fileExists(acquiredFileURI));
     }
     
 }

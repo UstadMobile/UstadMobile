@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.Hashtable;
 
 /* $if umplatform == 2  $
-    import org.json.*;
+    import org.json.me.*;
  $else$ */
     import org.json.*;
 /* $endif$ */

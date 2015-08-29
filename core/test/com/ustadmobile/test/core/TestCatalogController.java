@@ -46,7 +46,7 @@ import org.xmlpull.v1.XmlPullParser;
    $endif$ */
 
 /* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
+    import j2meunit.framework.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */

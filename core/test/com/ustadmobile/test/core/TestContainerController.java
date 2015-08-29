@@ -37,7 +37,7 @@ package com.ustadmobile.test.core;
    $endif$ */
 
 /* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
+    import j2meunit.framework.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -54,7 +54,6 @@ import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.IOException;
-import static junit.framework.Assert.assertTrue;
 import org.xmlpull.v1.XmlPullParserException;
 
 

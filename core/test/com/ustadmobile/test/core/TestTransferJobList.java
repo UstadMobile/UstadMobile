@@ -36,16 +36,18 @@ package com.ustadmobile.test.core;
    $endif$ */
 
 /* $if umplatform == 2  $
-    import org.j2meunit.framework.TestCase;
+    import j2meunit.framework.TestCase;
  $else$ */
+    import junit.framework.TestCase;
+/* $endif$ */
+
 import com.ustadmobile.core.impl.UMProgressEvent;
 import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UMTransferJobList;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.Hashtable;
-    import junit.framework.TestCase;
-/* $endif$ */
+
 
 /**
  *
