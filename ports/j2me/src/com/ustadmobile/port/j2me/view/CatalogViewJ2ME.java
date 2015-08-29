@@ -83,7 +83,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
 
     public void actionPerformed(ActionEvent evt) {
         if(evt.getCommand().getId() == CMD_REFRESH){
-            this.controller = this.controller.makeDeviceCatalog();
+            //this.controller = this.controller.makeDeviceCatalog();
             this.controller.show();
             //this.controller.handleClickRefresh();
         }else{
