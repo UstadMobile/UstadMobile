@@ -665,7 +665,7 @@ public class CatalogController implements UstadController, UMProgressListener {
                     catalog.entries[i]);
                 //remove acquisition links and replace with pointers to the local file
                 entryLinks = entryCopy.getLinks();
-                linksToRemove.clear();
+                linksToRemove.removeAllElements();
                 
                 for(j = 0; j < entryLinks.size(); j++) {
                     String[] thisLink = (String[])entryLinks.elementAt(j);
@@ -776,7 +776,7 @@ public class CatalogController implements UstadController, UMProgressListener {
         }
         
         String[] opdsFilesArr = new String[opdsFiles.size()];
-        opdsFiles.toArray(opdsFilesArr);
+        opdsFiles.copyInto(opdsFilesArr);
         
         String[] containerFiles = null;
         
@@ -811,24 +811,6 @@ public class CatalogController implements UstadController, UMProgressListener {
         return retVal;
     }
     
-    
-    /**
-     * Register that a download has started
-     * @param itemDownloaded
-     * @param destURI 
-     */
-    public static void registerEntryDownload(UstadJSOPDSItem itemDownloaded, String destURI) {
-        
-    }
-    
-    /**
-     * Register that a download is finished
-     * 
-     * @param item
-     */
-    public static void unregisterEntryDownload(UstadJSOPDSItem item) {
-        
-    }
     
     /**
      * Generates a String preference key for the given entryID.  Used to map
