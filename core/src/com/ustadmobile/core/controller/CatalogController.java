@@ -547,10 +547,33 @@ public class CatalogController implements UstadController, UMProgressListener {
             "UTF-8");
         opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
         opdsFeed.href = url;
+        stripEntryUMCloudIDPrefix(opdsFeed);
         CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
             "UTF-8"));
         
         return opdsFeed;
+    }
+    
+    /**
+     * Workaround for UMCloud issue: UMCloud includes an http tin can activity
+     * prefix on the id that is not present in the epub files themselves.
+     * 
+     * TODO: Remove this as soon as the issue is removed from the server.
+     * 
+     * @param feed 
+     */
+    private static void stripEntryUMCloudIDPrefix(UstadJSOPDSFeed feed) {
+        
+        String prefix = "http://www.ustadmobile.com/um-tincan/activities/";
+        
+        if(feed.isAcquisitionFeed()) {
+            for(int i = 0; i < feed.entries.length; i++) {
+                if(feed.entries[i].id.startsWith(prefix)) {
+                    feed.entries[i].id = feed.entries[i].id.substring(
+                            prefix.length());
+                }
+            }
+        }
     }
     
     /**
