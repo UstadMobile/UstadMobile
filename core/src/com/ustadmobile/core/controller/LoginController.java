@@ -46,7 +46,7 @@ import java.util.Hashtable;
 
 
 /* $if umplatform == 2  $
-    import org.json.me.JSONObject;;
+    import org.json.me.JSONObject;
  $else$ */
     import org.json.JSONObject;
 /* $endif$ */
