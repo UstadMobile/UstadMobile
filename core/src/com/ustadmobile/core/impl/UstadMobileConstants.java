@@ -37,6 +37,11 @@ package com.ustadmobile.core.impl;
 public class UstadMobileConstants {
     
     /**
+     * Hardcode UTF8 Encoding String - value "UTF-8"
+     */
+    public static final String UTF8 = "UTF-8";
+    
+    /**
      * Sorted by country name: list of international dialing codes
      * see testres/countrycodes.ods
      */

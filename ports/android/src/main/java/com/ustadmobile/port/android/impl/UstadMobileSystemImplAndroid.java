@@ -49,6 +49,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
+import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 
 import android.os.Build;
@@ -574,6 +575,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public void closeContainer(String openURI) {
         httpService.ummountZIP(openURI);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public ZipFileHandle openZip(String name) throws IOException{
+        return new ZipFileHandleAndroid(name);
     }
 
     public class HTTPServiceConnection implements ServiceConnection {

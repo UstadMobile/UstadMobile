@@ -424,6 +424,29 @@ public abstract class UstadMobileSystemImpl {
     public abstract XmlPullParser newPullParser() throws XmlPullParserException;
     
     /**
+     * Make a new XmlPullParser from a given inputstream
+     * @param in InputStream to read from
+     * @param encoding Encoding to be used e.g. UTF-8
+     * 
+     * @return a new XmlPullParser with set with the given inputstream
+     */
+    public XmlPullParser newPullParser(InputStream in, String encoding) throws XmlPullParserException {
+        XmlPullParser xpp = newPullParser();
+        xpp.setInput(in, encoding);
+        return xpp;
+    }
+    
+    /**
+     * Make a new XmlPullParser from a given inputstream assuming UTF-8 encoding
+     * @param in InputStream to read from
+     * @return a new XmlPullParser with set with the given inputstream
+     * @throws XmlPullParserException 
+     */
+    public XmlPullParser newPullParser(InputStream in) throws XmlPullParserException {
+        return newPullParser(in, UstadMobileConstants.UTF8);
+    }
+    
+    /**
      * Get access to the App View to do common UI activities (e.g. show
      * progress dialog, flash message, etc)
      * 
@@ -457,6 +480,17 @@ public abstract class UstadMobileSystemImpl {
     public abstract String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType);
     
     public abstract void closeContainer(String openURI);
+    
+    /**
+     * Open the given Zip file and return a ZipFileHandle for it.  This normally
+     * means the underlying system will read through the entries in the zip
+     * 
+     * @param name Filename of the zip file
+     * 
+     * @return ZipFileHandle representing the zip opened
+     */
+    public abstract ZipFileHandle openZip(String name) throws IOException;
+    
 }
 
 

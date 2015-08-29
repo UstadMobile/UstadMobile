@@ -37,16 +37,22 @@ import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UMTransferJobList;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.ZipEntryHandle;
+import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.model.CatalogModel;
+import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ViewFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -150,6 +156,17 @@ public class CatalogController implements UstadController, UMProgressListener {
      * Hardcoded OPDS extension (to save time in loops)
      */
     public static final String OPDS_EXTENSION = ".opds";
+    
+    /**
+     * Hardcoded EPUB extension ".epub"
+     */
+    public static final String EPUB_EXTENSION = ".epub";
+    
+    /**
+     * Hardcoded fixed path to the container.xml file as per the open container
+     * format spec : META-INF/container.xml
+     */
+    public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
     
     
     public CatalogController() {
@@ -764,6 +781,8 @@ public class CatalogController implements UstadController, UMProgressListener {
         
         
         Vector opdsFiles = new Vector();
+        Vector epubFiles = new Vector();
+        
         for(int i = 0; i < dirContents.length; i++) {
             if(dirContents[i].startsWith(".cache")) {
                 continue;
@@ -772,41 +791,159 @@ public class CatalogController implements UstadController, UMProgressListener {
             if(dirContents[i].endsWith(OPDS_EXTENSION)) {
                 opdsFiles.addElement(UMFileUtil.joinPaths(new String[]{dirname, 
                     dirContents[i]}));
+            }else if(dirContents[i].endsWith(EPUB_EXTENSION)) {
+                epubFiles.addElement(UMFileUtil.joinPaths(new String[]{dirname, 
+                    dirContents[i]}));
             }
         }
         
         String[] opdsFilesArr = new String[opdsFiles.size()];
         opdsFiles.copyInto(opdsFilesArr);
+        String[] epubFilesArr = new String[epubFiles.size()];
+        epubFiles.copyInto(epubFilesArr);
         
-        String[] containerFiles = null;
+        String looseFilePath = UMFileUtil.joinPaths(new String[] {dirname, 
+            ".cache-loose"});
         
-        return scanFiles(opdsFilesArr, containerFiles, generatedHREF, title,
+        boolean[] userOPDSFiles = new boolean[opdsFilesArr.length];
+        boolean[] userEPUBFiles = new boolean[epubFilesArr.length];
+        
+        return scanFiles(opdsFilesArr, userOPDSFiles, epubFilesArr, userEPUBFiles, 
+            looseFilePath, generatedHREF, title, 
             "scandir-" + sanitizeIDForFilename(dirname));
     }
     
-    public static UstadJSOPDSFeed scanFiles(String[] opdsFiles, String[] containerFiles, String baseHREF, String title, String feedID) {
+    /**
+     * Scan a given set of opds files and container files (e.g. epubs) in a 
+     * directory and return OPDSFeed object representing what was found
+     * 
+     * The resulting feed will contain an entry for each of the opdsFiles given.
+     * Additionally if any of the containerFiles are not present in any of the
+     * opdsFiles feeds then another entry will be added for unsorted / loose 
+     * items.  It will be saved into looseContainerFile
+     * 
+     * @param opdsFiles Array of file paths to OPDS files
+     * @param opdsFileModes Boolean array - set to true for any file that should be considered user specific
+     * @param containerFiles Array of file paths to container files (e.g. epubs)
+     * @param containerFileModes Boolean array - set to true for any file that should be considered user specific
+     * @param looseContainerFile A file path where we can save the loose
+     * @param baseHREF The base HREF for the generated feed
+     * @param title Title for the generated feed
+     * @param feedID ID for the generated feed
+     * @return A feed object with entries for each opdsFile and if required a loose/unsorted feed
+     */
+    public static UstadJSOPDSFeed scanFiles(String[] opdsFiles, boolean[] opdsFileModes, String[] containerFiles, boolean[] containerFileModes, String looseContainerFile, String baseHREF, String title, String feedID) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UstadJSOPDSFeed retVal = new UstadJSOPDSFeed(
                 UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHREF), 
                 title, feedID);
         
+        //hashtable in the form of ID to path
+        Hashtable knownContainerIDs = new Hashtable();
         int i;
+        int j;
+        UstadJSOPDSFeed feed;
+        UstadJSOPDSEntry feedEntry;
+        
         for(i = 0; i < opdsFiles.length; i++) {
             try {
                 //let's try reading it and loading it in
-                UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(impl.readFileAsText(opdsFiles[i]));
-                UstadJSOPDSEntry feedEntry = UstadJSOPDSEntry.makeEntryForItem(
+                feed = UstadJSOPDSFeed.loadFromXML(impl.readFileAsText(opdsFiles[i]));
+                feedEntry = UstadJSOPDSEntry.makeEntryForItem(
                     feed, retVal, "subsection", UstadJSOPDSEntry.TYPE_NAVIGATIONFEED, 
                     UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, 
                         opdsFiles[i]));
                 retVal.addEntry(feedEntry);
+                for(j = 0; j < feed.entries.length; j++) {
+                    knownContainerIDs.put(feed.entries[j].id, 
+                            UMFileUtil.resolveLink(opdsFiles[i], 
+                            UMFileUtil.getFilename(opdsFiles[i])));
+                }
             }catch(IOException e) {
                 
             }catch(XmlPullParserException xe) {
                 
             }
         }
+        feed = null;
+        feedEntry = null;
         
+        ZipFileHandle zipHandle;
+        ZipEntryHandle zipEntryHandle;
+        InputStream zIs = null;
+        UstadOCF ocf;
+        UstadJSOPF opf;
+        UstadJSOPDSFeed looseContainerFeed = new UstadJSOPDSFeed(baseHREF, 
+            "Loose files", feedID+"-loose");
+        
+        for(i = 0; i < containerFiles.length; i++) {
+            zipHandle = null;
+            ocf = null;
+            zIs = null;
+            zipEntryHandle = null;
+            
+            try {
+                zipHandle = impl.openZip(containerFiles[i]);
+                zIs = zipHandle.openInputStream(OCF_CONTAINER_PATH);
+                ocf = UstadOCF.loadFromXML(impl.newPullParser(zIs));
+                UMIOUtils.closeInputStream(zIs);
+                zIs = null;
+                
+                for(j = 0; j < ocf.rootFiles.length; j++) {
+                    zIs = zipHandle.openInputStream(ocf.rootFiles[j].fullPath);
+                    opf = UstadJSOPF.loadFromOPF(impl.newPullParser(zIs), 
+                            UstadJSOPF.PARSE_METADATA);
+                    UMIOUtils.closeInputStream(zIs);
+                    zIs = null;
+                    
+                    if(!knownContainerIDs.containsKey(opf.id) && looseContainerFeed.getEntryById(opf.id) == null) {
+                        UstadJSOPDSEntry looseEntry= new UstadJSOPDSEntry(looseContainerFeed,
+                            opf, null, containerFiles[i]);
+                        looseContainerFeed.addEntry(looseEntry);
+                    }
+                    
+                    //Make sure that this entry is marked as acquired
+                    int resourceMode = containerFileModes[i] ? USER_RESOURCE 
+                            : SHARED_RESOURCE;
+                    
+                    CatalogEntryInfo thisEntryInfo = getEntryInfo(opf.id,
+                        resourceMode);
+                    if(thisEntryInfo == null) {
+                        thisEntryInfo = new CatalogEntryInfo();
+                        thisEntryInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+                        thisEntryInfo.fileURI = containerFiles[i];
+                        thisEntryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
+                        thisEntryInfo.srcURLs = new String[] { containerFiles[i] };
+                        setEntryInfo(opf.id, thisEntryInfo, resourceMode);
+                    }
+                }
+                
+                
+                
+            }catch(IOException e) {
+               
+            }catch(XmlPullParserException x) {
+                
+            }finally {
+                UMIOUtils.closeInputStream(zIs);
+                UMIOUtils.closeZipFileHandle(zipHandle);
+            }
+        }
+        
+        if(looseContainerFeed.entries.length > 0) {
+            try {
+                impl.writeStringToFile(looseContainerFeed.toString(), looseContainerFile, 
+                    "UTF-8");
+            }catch(IOException e) {
+                impl.getAppView().showNotification("Error saving index", 
+                        AppView.LENGTH_LONG);
+            }
+            
+            retVal.addEntry(UstadJSOPDSEntry.makeEntryForItem(
+                    looseContainerFeed, retVal, "subsection", UstadJSOPDSEntry.TYPE_NAVIGATIONFEED,
+                    UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, 
+                        looseContainerFile)));
+        }
         
         return retVal;
     }

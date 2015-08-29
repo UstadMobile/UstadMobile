@@ -170,7 +170,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     /**
      * Add an entry to the end of this feed
      * 
-     * @param entry 
+     * @param entry  The entry to be added
      */
     public void addEntry(UstadJSOPDSEntry entry) {
         UstadJSOPDSEntry[] newEntries = new UstadJSOPDSEntry[entries.length + 1];
@@ -181,7 +181,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public UstadJSOPDSEntry getEntryById (String id) {
         UstadJSOPDSEntry entry;
-        for (int i=0;i<=this.entries.length; i++){
+        for (int i = 0;i < this.entries.length; i++){
             if (this.entries[i].id.equals(id)){
                 entry = this.entries[i];
                 return entry;
