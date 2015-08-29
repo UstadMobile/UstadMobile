@@ -229,6 +229,10 @@ NetBeans.  See README for instructions on building from source.
             
             <!-- ProGuard 4.10 zipped binary from UstadMobile.com -->
             <url url="http://www.ustadmobile.com/build-dep/proguard4.10.zip"/>
+
+	    <!-- Prebop preprocessor -->
+            <url url="http://www.ustadmobile.com/build-dep/com.objfac.ant.preprocess_0.9.1.zip"/>
+
         </get>
         
         <unzip dest="${lib.dir}">

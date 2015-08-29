@@ -91,3 +91,5 @@ ustadmobilemicro-build.properties
 TestConstants.java
 ports/j2me/src/com/ustadmobile/app/tests/TestConstants.java
 
+#Ignore Core Tests copied to port
+ports/j2me/src/com/ustadmobile/test/core/*.java

@@ -13,6 +13,7 @@ import com.ustadmobile.core.opds.*;
 import com.ustadmobile.core.controller.CatalogController;
 import java.util.Hashtable;
 import com.ustadmobile.core.view.CatalogView;
+import java.io.IOException;
 
 /**
  *
@@ -83,7 +84,11 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
 
     public void actionPerformed(ActionEvent evt) {
         if(evt.getCommand().getId() == CMD_REFRESH){
-            this.controller = this.controller.makeDeviceCatalog();
+            try {
+                this.controller = this.controller.makeDeviceCatalog();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
             this.controller.show();
             //this.controller.handleClickRefresh();
         }else{
