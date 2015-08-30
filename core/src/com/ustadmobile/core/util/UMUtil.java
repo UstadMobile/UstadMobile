@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.util;
 
+import java.util.Vector;
+
 /**
  * Misc utility methods
  * 
@@ -55,6 +57,34 @@ public class UMUtil {
         
         return -1;
     }
+    
+    public static final String[] filterArrByPrefix(String[] arr, String prefix) {
+        boolean[] matches = new boolean[arr.length];
+        
+        int i;
+        int matchCount = 0;
+        int arrayLen = arr.length;
+        
+        for(i = 0; i < arrayLen; i++) {
+            if(arr[i] != null && arr[i].startsWith(prefix)) {
+                matches[i] = true;
+                matchCount++;
+            }
+        }
+        
+        String[] retVal = new String[matchCount];
+        matchCount = 0;
+        for(i = 0; i < arrayLen; i++) {
+            if(matches[i]) {
+                retVal[matchCount] = arr[i];
+                matchCount++;
+            }
+        }
+        
+        return retVal;
+    }
+    
+    
     
     
 }

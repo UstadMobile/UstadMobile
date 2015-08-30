@@ -27,7 +27,9 @@
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
- */package com.ustadmobile.core.util;
+ */
+
+package com.ustadmobile.core.util;
 
 import com.ustadmobile.core.impl.ZipFileHandle;
 import java.io.IOException;
@@ -71,9 +73,17 @@ public class UMIOUtils {
     
     /**
      * Close the given ZipHandle
+     * 
+     * @param zip The ZipFileHandle to close
      */
     public static final void closeZipFileHandle(ZipFileHandle zip) {
-        
+        try {
+            if(zip != null) {
+                zip.close();
+            }
+        }catch(IOException e) {
+            
+        }
     }
     
     

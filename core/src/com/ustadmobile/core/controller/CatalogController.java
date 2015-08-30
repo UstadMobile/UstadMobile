@@ -47,6 +47,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ViewFactory;
@@ -167,6 +168,11 @@ public class CatalogController implements UstadController, UMProgressListener {
      * format spec : META-INF/container.xml
      */
     public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
+    
+    /**
+     * Prefix used for pref keys that are used to store entry info
+     */
+    private static final String PREFIX_ENTRYINFO = "e2ei-";
     
     
     public CatalogController() {
@@ -289,6 +295,7 @@ public class CatalogController implements UstadController, UMProgressListener {
      * @return CatalogController representing files on the device
      */
     public static CatalogController makeDeviceCatalog() throws IOException{
+        verifyKnownEntries(SHARED_RESOURCE);
         UstadJSOPDSFeed deviceFeed = CatalogController.scanDir(
             UstadMobileSystemImpl.getInstance().getSharedContentDir(), 
                 "Device Catalog");
@@ -836,6 +843,44 @@ public class CatalogController implements UstadController, UMProgressListener {
             "scandir-" + sanitizeIDForFilename(dirname));
     }
     
+    
+    /**
+     * This is to verify that the entries we think we know about... are in fact there
+     * e.g. in case the user deletes files etc.
+     * 
+     * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
+     */
+    public static void verifyKnownEntries(int resourceMode) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        boolean isShared = resourceMode == SHARED_RESOURCE;
+        String[] entryInfoKeys = UMUtil.filterArrByPrefix(
+            isShared ? impl.getAppPrefKeyList() : impl.getUserPrefKeyList(),
+            PREFIX_ENTRYINFO);
+        
+        CatalogEntryInfo info;
+        for(int i = 0; i < entryInfoKeys.length; i++) {
+            info = CatalogEntryInfo.fromString(
+                isShared ? impl.getAppPref(entryInfoKeys[i]) : impl.getUserPref(entryInfoKeys[i]));
+            if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+                boolean canAccessFile = false;
+                try {
+                    canAccessFile = impl.fileExists(info.fileURI);
+                }catch(IOException e) {
+                    //this might happen if a whole volume was unmounted or something like this
+                }
+                
+                if(!canAccessFile) {
+                    //remove the entry from our listing
+                    if(isShared) {
+                        impl.setAppPref(entryInfoKeys[i], null);
+                    }else {
+                        impl.setUserPref(entryInfoKeys[i], null);
+                    }
+                }
+            }
+        }
+    }
+    
     /**
      * Scan a given set of opds files and container files (e.g. epubs) in a 
      * directory and return OPDSFeed object representing what was found
@@ -980,7 +1025,7 @@ public class CatalogController implements UstadController, UMProgressListener {
      * @return 
      */
     private static String getEntryInfoKey(String entryID) {
-        return "e2ei-" + entryID;
+        return PREFIX_ENTRYINFO + entryID;
     }
     
     /**
