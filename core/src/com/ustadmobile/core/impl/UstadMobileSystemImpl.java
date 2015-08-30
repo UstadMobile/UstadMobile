@@ -324,7 +324,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return String array list of keys
      */
-    public abstract String[] getPrefKeyList();
+    public abstract String[] getUserPrefKeyList();
     
     /**
      * Trigger persisting the currently active user preferences.  This does NOT
@@ -340,6 +340,13 @@ public abstract class UstadMobileSystemImpl {
      * @return value of that preference
      */
     public abstract String getAppPref(String key);
+    
+    /**
+     * Get a list of preferences currently set for the app itself
+     * 
+     * @return String array list of app preference keys
+     */
+    public abstract String[] getAppPrefKeyList();
     
     /**
      * Get a preference for the app.  If not set, return the provided defaultVal

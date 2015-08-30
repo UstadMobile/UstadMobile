@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.app.UserPref;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
 import java.io.InputStream;
@@ -64,10 +65,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public String getUserPref(String key, String value) {
         return UserPref.getSetting(key);
-    }
-
-    public String[] getPrefKeyList() {
-        return null;
     }
 
     public void saveUserPrefs() {
@@ -321,6 +318,18 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public InputStream getFileInputStreamFromZip(String zipURI, String filename) {
+        return null;
+    }
+
+    public String[] getUserPrefKeyList() {
+        return null;
+    }
+
+    public String[] getAppPrefKeyList() {
+        return null;
+    }
+
+    public ZipFileHandle openZip(String name) throws IOException {
         return null;
     }
 

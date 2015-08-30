@@ -432,9 +432,33 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return getUserPreferences().getString(key, null);
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
-    public String[] getPrefKeyList() {
-        return new String[0];
+    public String[] getAppPrefKeyList() {
+        return getKeysFromSharedPreferences(getAppSharedPreferences());
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public String[] getUserPrefKeyList() {
+        return getKeysFromSharedPreferences(getUserPreferences());
+    }
+
+    /**
+     * Private utility function to get a String array of keys from a SharedPreferences object
+     * @param prefs
+     * @return
+     */
+    private String[] getKeysFromSharedPreferences(SharedPreferences prefs) {
+        Set keySet = prefs.getAll().keySet();
+        String[] retVal = new String[keySet.size()];
+        keySet.toArray(retVal);
+        return retVal;
     }
 
     @Override
