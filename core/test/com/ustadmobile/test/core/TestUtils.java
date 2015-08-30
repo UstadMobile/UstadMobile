@@ -27,6 +27,8 @@ public class TestUtils {
     
     private String httpRootDir;
     
+    private int serverPort = -1;
+    
     public TestUtils() {
         
     }
@@ -38,6 +40,10 @@ public class TestUtils {
         }
         
         return mainInstance;
+    }
+    
+    public int getHTTPPort() {
+        return serverPort;
     }
     
     public String getHTTPRoot() {
@@ -53,7 +59,7 @@ public class TestUtils {
                     new Hashtable(), new Hashtable(), "GET");
                 String serverSays = new String(result.getResponse(), "UTF-8");
                 JSONObject response = new JSONObject(serverSays);
-                int serverPort = response.getInt("port");
+                serverPort = response.getInt("port");
                 httpRootDir = "http://" + TestConstants.TEST_SERVER + ":" + serverPort + "/";
             }catch(IOException e) {
                 System.err.println("Test exception creating new test port");
@@ -75,5 +81,9 @@ public class TestUtils {
         }
         
         return httpRootDir;
+    }
+    
+    public static void sendResults(int numPass, int numFail, String testlog) throws IOException {
+        
     }
 }
