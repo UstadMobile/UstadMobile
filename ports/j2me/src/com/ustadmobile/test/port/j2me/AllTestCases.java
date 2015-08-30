@@ -81,6 +81,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestCatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestLogin());
         
         return allTestSuite;
 
