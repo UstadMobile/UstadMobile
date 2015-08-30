@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.opds;
 
+import com.ustadmobile.core.opf.UstadJSOPF;
 import java.util.Vector;
 
 /**
@@ -68,6 +69,21 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         for(int i = 0; i < srcItem.linkVector.size(); i++) {
             this.linkVector.addElement(srcItem.linkVector.elementAt(i));
         }
+    }
+    
+    /**
+     * Create a new entry for a given OPF
+     * 
+     * @param parentFeed
+     * @param opf 
+     */
+    public UstadJSOPDSEntry(UstadJSOPDSFeed parentFeed, UstadJSOPF opf, String mimeType, String containerHREF) {
+        this(parentFeed);
+        this.linkVector = new Vector();
+        this.title = opf.title;
+        this.id = opf.id;
+        
+        this.addLink(UstadJSOPDSEntry.LINK_ACQUIRE, mimeType, containerHREF);
     }
     
     

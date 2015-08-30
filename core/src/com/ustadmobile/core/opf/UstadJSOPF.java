@@ -51,6 +51,21 @@ public class UstadJSOPF {
     
     public UstadJSOPFItem[] spine;
     
+    public String title;
+    
+    public String id;
+    
+    /**
+     * Flag value to indicate we should parse the metadata (e.g. title, identifier, description)
+     */
+    public static final int PARSE_METADATA = 1;
+    
+    /**
+     * Flag value to indicate we should parse the manifest
+     */
+    public static final int PARSE_MANIFEST = 2;
+    
+    
     static {
         setupDefaultMimeTypes();
     }
@@ -91,11 +106,21 @@ public class UstadJSOPF {
     public UstadJSOPF() {
         mimeExceptions = new Hashtable();
     }
+    
+    
+    public static UstadJSOPF loadFromOPF(XmlPullParser xpp) throws XmlPullParserException, IOException {
+        return loadFromOPF(xpp, PARSE_METADATA | PARSE_MANIFEST);
+    }
+    
     /*
      * xpp: Parser of the OPF
      */
-    public static UstadJSOPF loadFromOPF(XmlPullParser xpp) throws XmlPullParserException, IOException {
+    public static UstadJSOPF loadFromOPF(XmlPullParser xpp, int parseFlags) throws XmlPullParserException, IOException {
         UstadJSOPF result = new UstadJSOPF();
+        
+        
+        boolean parseMetadata = (parseFlags & PARSE_METADATA) == PARSE_METADATA;
+        boolean parseManifest = (parseFlags & PARSE_MANIFEST) == PARSE_MANIFEST;
         
         
         String extension = null;
@@ -111,6 +136,15 @@ public class UstadJSOPF {
         Hashtable allItems = new Hashtable();
         Vector spineItems = new Vector();        
 
+        
+        /*
+         * the dc:identifier attribute as per 
+         * http://www.idpf.org/epub/30/spec/epub30-publications.html#sec-opf-metadata-identifiers-uid
+         */
+        String uniqueIdentifier = null;
+
+        
+        boolean inMetadata = false;
         do
         {
             filename=null;
@@ -123,63 +157,92 @@ public class UstadJSOPF {
             isLinear = true;
             isLinearStrVal = null;
             
-            if(evtType == XmlPullParser.START_TAG){
-                if(xpp.getName().equals("manifest")){
-                    System.out.println("In Manifest: " + xpp.getName());
-                }else if(xpp.getName() != null && xpp.getName().equals("item")){
-                    
-                    filename=xpp.getAttributeValue(null, "href");
-                    itemMime=xpp.getAttributeValue(null, "media-type");
-                    id = xpp.getAttributeValue(null, "id");
-                    properties = xpp.getAttributeValue(null, "properties");
-                    
-
-                    extension=getExtension(filename);
-                    if(extension != null && defaultMimeTypes.containsKey(extension)){
-                        defMimeType = (String)defaultMimeTypes.get(extension);
-                    }
-                    if(extension == null || defMimeType == null ||
-                            !itemMime.equals(defMimeType)){
-                        result.mimeExceptions.put(filename, itemMime);
-                    }
-                    UstadJSOPFItem item2 = new UstadJSOPFItem();
-                    item2.href = filename;
-                    item2.mimeType = itemMime;
-                    item2.properties = properties;
-                    
-
-                    allItems.put(id, item2);
-
-                }else if(xpp.getName() != null && xpp.getName().equals("itemref")){
-                    //for each itemRef in spine
-                    idref=xpp.getAttributeValue(null, "idref");
-                    isLinearStrVal = xpp.getAttributeValue(null, "linear");
-                    
-                    Object spineItem = allItems.get(idref);
-                    if(spineItem == null){
-                        throw new RuntimeException("Invalid OPF: item not found: #" + idref);
-                    }
-                    
-                    if(isLinearStrVal != null) {
-                        char isLinearChar = isLinearStrVal.charAt(0);
-                        isLinear = !(isLinearChar == 'n' | isLinearChar == 'N');
-                        ((UstadJSOPFItem)allItems.get(idref)).linear = isLinear;
-                    }
                         
-                    spineItems.addElement(allItems.get(idref));
-                    
-                }
-            }else if(evtType == XmlPullParser.END_TAG){
-                if(xpp.getName().equals("manifest")){
-                    System.out.println("End of manifest.");
-                }else if(xpp.getName().equals("spine")){
-                    result.spine = new UstadJSOPFItem[spineItems.size()];
-                    spineItems.copyInto(result.spine);
-                    
-                }
-            }else if(evtType == XmlPullParser.TEXT){
+            
+            //If we are parsing the manifest
+            if(parseManifest) {
+                if(evtType == XmlPullParser.START_TAG){
+                    if(xpp.getName() != null && xpp.getName().equals("item")){
 
+                        filename=xpp.getAttributeValue(null, "href");
+                        itemMime=xpp.getAttributeValue(null, "media-type");
+                        id = xpp.getAttributeValue(null, "id");
+                        properties = xpp.getAttributeValue(null, "properties");
+
+
+                        extension=getExtension(filename);
+                        if(extension != null && defaultMimeTypes.containsKey(extension)){
+                            defMimeType = (String)defaultMimeTypes.get(extension);
+                        }
+                        if(extension == null || defMimeType == null ||
+                                !itemMime.equals(defMimeType)){
+                            result.mimeExceptions.put(filename, itemMime);
+                        }
+                        UstadJSOPFItem item2 = new UstadJSOPFItem();
+                        item2.href = filename;
+                        item2.mimeType = itemMime;
+                        item2.properties = properties;
+
+
+                        allItems.put(id, item2);
+
+                    }else if(xpp.getName() != null && xpp.getName().equals("itemref")){
+                        //for each itemRef in spine
+                        idref=xpp.getAttributeValue(null, "idref");
+                        isLinearStrVal = xpp.getAttributeValue(null, "linear");
+
+                        Object spineItem = allItems.get(idref);
+                        if(spineItem == null){
+                            throw new RuntimeException("Invalid OPF: item not found: #" + idref);
+                        }
+
+                        if(isLinearStrVal != null) {
+                            char isLinearChar = isLinearStrVal.charAt(0);
+                            isLinear = !(isLinearChar == 'n' | isLinearChar == 'N');
+                            ((UstadJSOPFItem)allItems.get(idref)).linear = isLinear;
+                        }
+
+                        spineItems.addElement(allItems.get(idref));
+
+                    }
+                }else if(evtType == XmlPullParser.END_TAG){
+                    if(xpp.getName().equals("manifest")){
+                        System.out.println("End of manifest.");
+                    }else if(xpp.getName().equals("spine")){
+                        result.spine = new UstadJSOPFItem[spineItems.size()];
+                        spineItems.copyInto(result.spine);
+
+                    }
+                }
             }
+            
+            if(parseMetadata) {
+                if(evtType == XmlPullParser.START_TAG) {
+                    if(uniqueIdentifier == null && xpp.getName().equals("package")) {
+                        uniqueIdentifier = xpp.getAttributeValue(null, 
+                                "unique-identifier");
+                    }else if(inMetadata == false && xpp.getName().equals("metadata")) {
+                        inMetadata = true;
+                    }
+                    
+                    if(inMetadata) {
+                        if(xpp.getName().equals("dc:title")) {
+                            result.title = xpp.nextText();
+                        }else if(xpp.getName().equals("dc:identifier")) {
+                            String idAttr = xpp.getAttributeValue(null, "id");
+                            if(idAttr != null && idAttr.equals(uniqueIdentifier)) {
+                                result.id = xpp.nextText();
+                            }
+                        }
+                    }
+                }else if(evtType == XmlPullParser.END_TAG) {
+                    if(inMetadata == true && xpp.getName().equals("metadata")) {
+                        inMetadata = false;
+                    }
+                }
+            }
+            
+            
             evtType = xpp.next();
             
         }while(evtType != XmlPullParser.END_DOCUMENT);
