@@ -485,6 +485,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         editor.commit();
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method) throws IOException {
         URL url = new URL(httpURL);

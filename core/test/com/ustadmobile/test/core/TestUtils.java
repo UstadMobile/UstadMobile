@@ -83,7 +83,34 @@ public class TestUtils {
         return httpRootDir;
     }
     
-    public static void sendResults(int numPass, int numFail, String testlog) throws IOException {
+    /**
+     * Use the saveresults section of DodgyHTTPD to save results 
+     * 
+     * @param numPass Number of tests passed
+     * @param numFail Number of tests failed
+     * @param device Device name performing the tests - used to name the output file
+     * @param testlog Complete test log to be sent to the server
+     * @throws IOException If an IOException happens communicating with the server
+     */
+    public void sendResults(int numPass, int numFail, String device, String testlog) throws IOException {
+        IOException e = null;
+        Hashtable postParams = new Hashtable();
+        postParams.put("action", "saveresults");
+        postParams.put("numPass", String.valueOf(numPass));
+        postParams.put("numFail", String.valueOf(numFail));
+        postParams.put("logtext", testlog);
+        if(device != null) {
+            postParams.put("device", device);
+        }
+        
+        
+        
+        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(httpRootDir, null, 
+            postParams, "POST");
+        if(result.getStatus() != 200) {
+            throw new IOException("Error sending results to server: status: " 
+                + result.getStatus());
+        }
         
     }
 }
