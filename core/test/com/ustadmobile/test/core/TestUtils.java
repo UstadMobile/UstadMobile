@@ -103,9 +103,11 @@ public class TestUtils {
             postParams.put("device", device);
         }
         
+        Hashtable headers = new Hashtable();
+        headers.put("Connection", "close");
         
         
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(httpRootDir, null, 
+        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(httpRootDir, headers, 
             postParams, "POST");
         if(result.getStatus() != 200) {
             throw new IOException("Error sending results to server: status: " 

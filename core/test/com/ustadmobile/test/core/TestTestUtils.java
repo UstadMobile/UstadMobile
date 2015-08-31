@@ -55,7 +55,7 @@ public class TestTestUtils extends TestCase {
         String httpRoot = TestUtils.getInstance().getHTTPRoot();
         
         //TODO: this can make the OCF test fail!!!  Uncomment me when fixed
-        //TestUtils.getInstance().sendResults(10, 0, null, "test utils self test");
+        TestUtils.getInstance().sendResults(10, 0, "unittest", "test utils self test");
         assertTrue("Test utils sent result without throwing exception", true);
     }
     
