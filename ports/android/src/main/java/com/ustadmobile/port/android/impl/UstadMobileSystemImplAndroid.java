@@ -261,6 +261,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return (new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
     }
 
+    @Override
+    public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException {
+        return new FileOutputStream(fileURI);
+    }
+
 
     @Override
     public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {

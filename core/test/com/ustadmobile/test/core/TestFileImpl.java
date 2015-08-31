@@ -28,43 +28,13 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+
+package com.ustadmobile.test.core;
 
 /**
- * Logging interface to be implemented by the System Implementation
+ *
  * @author mike
  */
-public abstract class UMLog {
-    
-    public static final int DEBUG = 1;
-    
-    public static final int VERBOSE = 2;
-    
-    public static final int INFO = 4;
-    
-    public static final int CRITICAL = 8;
-    
-    
-    /**
-     * Log the given message 
-     * 
-     * @param level
-     * @param code An Error code to assist debugging
-     * @param message  (May be null)
-     */
-    public abstract void l(int level, int code, String message);
-    
-    /**
-     * Log the message given and the exception
-     * 
-     * @param level
-     * @param code An Error code to assist debugging
-     * @param message
-     * @param exception
-     */
-    public abstract void l(int level, int code, String message, Exception exception);
-    
-    
-    
+public class TestFileImpl {
     
 }

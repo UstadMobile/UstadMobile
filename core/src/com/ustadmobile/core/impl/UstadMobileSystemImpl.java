@@ -37,6 +37,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Hashtable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -166,6 +167,15 @@ public abstract class UstadMobileSystemImpl {
      * @return 
      */
     public abstract long modTimeDifference(String fileURI1, String fileURI2);
+    
+    /**
+     * Get an output stream to the given file
+     * 
+     * @param fileURI URI to the file we want an output stream for
+     * @param autocreate whether or not to autocreate the file
+     */
+    public abstract OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException;
+    
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 

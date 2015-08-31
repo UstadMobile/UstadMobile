@@ -82,6 +82,10 @@ public class TestDownload extends TestCase implements UMProgressListener {
         UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
                 destFileURI, new Hashtable());
         
+        int jobSize = job.getTotalSize();
+        
+        assertTrue("Can get size before starting", jobSize > 0);
+        
         job.addProgressListener(this);
         job.start();
 

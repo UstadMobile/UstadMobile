@@ -86,5 +86,19 @@ public class UMIOUtils {
         }
     }
     
+    /**
+     * Read from the given input stream and write to the given output stream.  
+     * This will not close the streams themselves
+     */
+    public static final void readFully(InputStream in, OutputStream out, int bufsize) throws IOException{
+        byte[] buf = new byte[bufsize];
+        int bytesRead;
+        
+        while((bytesRead = in.read(buf)) != -1) {
+            out.write(buf, 0, bytesRead);
+        }
+        out.flush();
+    }
+    
     
 }

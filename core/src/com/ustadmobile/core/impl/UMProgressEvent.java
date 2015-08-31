@@ -70,17 +70,32 @@ public class UMProgressEvent {
         return this.evtType;
     }
     
+    public void setEvtType(int evtType) {
+        this.evtType = evtType;
+    }
+    
+    
     public int getJobLength() {
         return this.jobLength;
+    }
+    
+    public void setJobLength(int jobLength) {
+        this.jobLength = jobLength;
     }
     
     public int getProgress() {
         return this.progress;
     }
     
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+    
     public int getStatusCode() {
         return this.statusCode;
     }
     
-    
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
 }

@@ -29,6 +29,7 @@
 
  */
 package com.ustadmobile.test.port.j2me;
+import com.ustadmobile.test.core.*;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
@@ -58,7 +59,9 @@ public class AllTestCases extends TestCase {
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
-           
+        
+        allTestSuite.addTest(new TestDownload());
+        
         //allTestSuite.addTest(new CoreLoginTest());        
         allTestSuite.addTest(new TestImplementation());
         allTestSuite.addTest(new TestSimpleHTTP());
