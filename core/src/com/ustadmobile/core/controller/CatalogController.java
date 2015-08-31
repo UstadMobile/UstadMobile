@@ -288,18 +288,75 @@ public class CatalogController implements UstadController, UMProgressListener {
         
     }
     
+    public static CatalogController makeDeviceCatalog() throws IOException {
+        UstadJSOPDSFeed deviceFeed = makeDeviceFeed(null, null, 
+                USER_RESOURCE | SHARED_RESOURCE);
+        return new CatalogController(new CatalogModel(deviceFeed));
+    }
+    
     /**
      * Make a catalog representing the files that are now in the shared and user
      * directories
      * 
+     * @param sharedDir - Shared directory to use: or null to use default shared directory
+     * @param userDir - User content directory to use: or null to use default user directory
+     * @param dirFlags - Set which directories to scan: inc USER_RESOURCE , SHARED_RESOURCE
+     * 
      * @return CatalogController representing files on the device
      */
-    public static CatalogController makeDeviceCatalog() throws IOException{
+    public static UstadJSOPDSFeed makeDeviceFeed(String sharedDir, String userDir, int dirFlags) throws IOException{
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        boolean incShared = (dirFlags & SHARED_RESOURCE) == SHARED_RESOURCE;
+        boolean incUser = (dirFlags & USER_RESOURCE) == USER_RESOURCE;
+        
+        
         verifyKnownEntries(SHARED_RESOURCE);
-        UstadJSOPDSFeed deviceFeed = CatalogController.scanDir(
-            UstadMobileSystemImpl.getInstance().getSharedContentDir(), 
-                "Device Catalog");
-        return new CatalogController(new CatalogModel(deviceFeed));
+        
+        Vector opdsFilesVector = new Vector();
+        int opdsUserStartIndex = 0;
+        Vector containerFilesVector = new Vector();
+        int containerUserStartIndex = 0;
+        
+        sharedDir = (sharedDir == null) ? impl.getSharedContentDir() : sharedDir;
+        if(incUser && userDir == null) {
+            userDir = impl.getUserContentDirectory(impl.getActiveUser());
+        }
+        
+        if(incShared) {
+            findOPDSFilesInDir(sharedDir, opdsFilesVector, containerFilesVector);
+            opdsUserStartIndex = opdsFilesVector.size();
+            containerUserStartIndex = containerFilesVector.size();
+        }
+        
+        if(incUser) {
+            findOPDSFilesInDir(userDir, opdsFilesVector, containerFilesVector);
+        }
+        
+        String[] opdsFiles = new String[opdsFilesVector.size()];
+        opdsFilesVector.toArray(opdsFiles);
+        opdsFilesVector = null;
+        
+        String[] containerFiles = new String[containerFilesVector.size()];
+        containerFilesVector.toArray(containerFiles);
+        containerFilesVector = null;
+        
+        String generatedHREFBase = incUser ? impl.getUserContentDirectory(
+                impl.getActiveUser()) : impl.getSharedContentDir();
+        
+        String looseFilePath = UMFileUtil.joinPaths(new String[] {generatedHREFBase, 
+            ".cache-loose"});
+        
+        boolean[] userOPDSFiles = new boolean[opdsFiles.length];
+        UMUtil.fillBooleanArray(userOPDSFiles, true, opdsUserStartIndex, 
+                userOPDSFiles.length);
+        boolean[] userEPUBFiles = new boolean[containerFiles.length];
+        UMUtil.fillBooleanArray(userEPUBFiles, true, containerUserStartIndex, 
+                containerUserStartIndex);
+        
+        return scanFiles(opdsFiles, userOPDSFiles, containerFiles, userEPUBFiles, 
+            looseFilePath, generatedHREFBase, "My Device", 
+            "scandir-" + sanitizeIDForFilename(generatedHREFBase));
+        
     }
     
     /**
@@ -778,6 +835,34 @@ public class CatalogController implements UstadController, UMProgressListener {
         
         
         return null;
+    }
+    
+    
+    /**
+     * Find OPDS and container (e.g. .epub files) in the given directory.  Add
+     * them to the given vectors
+     * 
+     * @param dir The directory to look in
+     * @param opdsFiles A vector into which OPDS files will be added : As a string path dir joined to the filename
+     * @param containerFiles A vector into which containerFiles will be added : As a string path dir joined to the filename
+     */
+    public static void findOPDSFilesInDir(String dir, Vector opdsFiles, Vector containerFiles) throws IOException{
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] dirContents = impl.listDirectory(dir);
+        
+        for(int i = 0; i < dirContents.length; i++) {
+            if(dirContents[i].startsWith(".cache")) {
+                continue;
+            }
+            
+            if(dirContents[i].endsWith(OPDS_EXTENSION)) {
+                opdsFiles.addElement(UMFileUtil.joinPaths(new String[]{dir, 
+                    dirContents[i]}));
+            }else if(dirContents[i].endsWith(EPUB_EXTENSION)) {
+                containerFiles.addElement(UMFileUtil.joinPaths(new String[]{dir, 
+                    dirContents[i]}));
+            }
+        }
     }
     
     /**

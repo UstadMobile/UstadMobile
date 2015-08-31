@@ -35,8 +35,6 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
-import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.ViewFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -76,18 +74,28 @@ public abstract class UstadMobileSystemImpl {
     /**
      * Starts the user interface for the app
      */
-    public void startUI() {
-        //new LoginController().show();
-        
+    public void startUI() {        
+        final UstadMobileSystemImpl impl = this;
         
         if(getActiveUser() == null) {
             new LoginController().show();
         }else {
-            try {
-                CatalogController.makeUserCatalog(this).show();
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
+            getAppView().showProgressDialog("Loading");
+            Thread startThread = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        CatalogController ctrl = CatalogController.makeUserCatalog(impl);
+                        impl.getAppView().dismissProgressDialog();
+                        ctrl.show();
+                    }catch(Exception e) {
+                        impl.getAppView().dismissProgressDialog();
+                        impl.getAppView().showNotification("Couldn't load course catalog", 
+                            AppView.LENGTH_LONG);
+                        e.printStackTrace();
+                    }
+                }
+            });
+            startThread.start();
         }
     }
     

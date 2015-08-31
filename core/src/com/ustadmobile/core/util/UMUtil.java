@@ -84,7 +84,19 @@ public class UMUtil {
         return retVal;
     }
     
-    
+    /**
+     * Utility method to fill boolean array with a set value
+     * 
+     * @param arr The boolean array
+     * @param value Value to put in
+     * @param from starting index (inclusive)
+     * @param to  end index (exclusive)
+     */
+    public static void fillBooleanArray(boolean[] arr, boolean value, int from, int to) {
+        for(int i = from; i < to; i++) {
+            arr[i] = value;
+        }
+    }
     
     
 }
