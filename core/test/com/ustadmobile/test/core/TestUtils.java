@@ -49,11 +49,11 @@ public class TestUtils {
     public String getHTTPRoot() {
         Exception ex = null;
         
+        //httpRootDir = "http://" + TestConstants.TEST_SERVER + "/testres/";
+        
         String startServerURL = "http://" + TestConstants.TEST_SERVER + ":"
                     + TestConstants.TEST_CONTROL_PORT + "/?action=newserver";
         if(httpRootDir == null) {
-            
-                
             try {
                 HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(startServerURL,
                     new Hashtable(), new Hashtable(), "GET");
@@ -107,8 +107,10 @@ public class TestUtils {
         headers.put("Connection", "close");
         
         
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(httpRootDir, headers, 
-            postParams, "POST");
+        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(
+                "http://" + TestConstants.TEST_SERVER + ":"
+                    + TestConstants.TEST_CONTROL_PORT + "/", 
+                headers, postParams, "POST");
         if(result.getStatus() != 200) {
             throw new IOException("Error sending results to server: status: " 
                 + result.getStatus());

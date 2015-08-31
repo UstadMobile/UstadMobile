@@ -333,11 +333,11 @@ public class CatalogController implements UstadController, UMProgressListener {
         }
         
         String[] opdsFiles = new String[opdsFilesVector.size()];
-        opdsFilesVector.toArray(opdsFiles);
+        opdsFilesVector.copyInto(opdsFiles);
         opdsFilesVector = null;
         
         String[] containerFiles = new String[containerFilesVector.size()];
-        containerFilesVector.toArray(containerFiles);
+        containerFilesVector.copyInto(containerFiles);
         containerFilesVector = null;
         
         String generatedHREFBase = incUser ? impl.getUserContentDirectory(

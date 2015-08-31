@@ -361,6 +361,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private SharedPreferences getAppSharedPreferences() {
         if(appPreferences == null) {
+            if(currentContext == null) {
+                throw new IllegalStateException("current Context is null: must use handleActivityStart first");
+            }
             appPreferences = currentContext.getSharedPreferences(APP_PREFERENCES_NAME,
                 Context.MODE_PRIVATE);
         }
@@ -501,6 +504,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 conn.setRequestProperty(headerField, headerValue);
             }
         }
+        //conn.setRequestProperty("Connection", "close");
 
         conn.setRequestMethod(method);
 

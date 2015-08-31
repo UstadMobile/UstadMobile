@@ -77,6 +77,13 @@ public class TestCatalogControllerAcquire extends TestCase{
         $endif */
     }
     
+    protected void setUp() throws Exception {
+        super.setUp();
+        /* $if umplatform == 1  $
+        android.app.Activity activity = getActivity();
+         $endif */
+    }
+    
     public void testCatalogControllerAcquire() throws Exception{
         String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
              TestUtils.getInstance().getHTTPRoot(), "acquire.opds"});
