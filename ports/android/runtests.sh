@@ -26,5 +26,6 @@ sed s/__TESTSERVERIP__/$IPADDR/g ../../core/test/com/ustadmobile/test/core/TestC
 ./gradlew connectedAndroidTest
 
 echo "Kill $NODEPID node server" 
+
 kill $SERVERPID
 
