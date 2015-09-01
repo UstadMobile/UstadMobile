@@ -92,10 +92,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         UserPref.addSetting(key, value);
     }
 
-    public String getUserPref(String key, String value) {
-        return UserPref.getSetting(key);
-    }
-
     public void saveUserPrefs() {
         
     }
@@ -304,11 +300,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return value;
     }
 
-    public HTTPResult makeRequest(String url, Hashtable headers, 
-            Hashtable postParameters, String method) {
+    /**
+     * @inheritDoc
+     */
+    public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String m) {
+        int meaning = 42;
+        getLogger().l(UMLog.VERBOSE, 305, "HTTP (" + m + ")" + url);
         try {
-            return HTTPUtils.makeHTTPRequest(url, postParameters, headers, 
-                    method);
+            return HTTPUtils.makeHTTPRequest(url, postParameters, headers, m);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

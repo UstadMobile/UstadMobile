@@ -411,10 +411,18 @@ public abstract class UstadMobileSystemImpl {
      * @param postParameters Parameters to be put in HTTP Request (can be null) 
      *  only applicable when method = POST
      * @param method e.g. GET, POST, PUT
+     * @throws IOException if something goes wrong with the request
      * @return HTTPResult object containing the server response
      */
-    public abstract HTTPResult makeRequest(String url, 
-            Hashtable headers, Hashtable postParameters, String method) throws IOException;
+    public abstract HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters, String method) throws IOException;
+    
+    
+    /**
+     * Do an HTTP request using the default method (GET)
+     */
+    public HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters) throws IOException{
+        return makeRequest(url, headers, postParameters, HTTPResult.GET);
+    }
     
     /**
      * Reads a URL to String: this can be a file:/// url in which case the contents

@@ -45,6 +45,8 @@ public class HTTPResult {
     
     private Hashtable responseHeaders;
     
+    public static final String GET = "GET";
+    
     /**
      * 
      * @param response The byte response data from the server

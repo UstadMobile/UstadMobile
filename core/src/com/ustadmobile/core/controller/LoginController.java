@@ -91,7 +91,7 @@ public class LoginController implements UstadController{
                     password);
         headers.put("Authorization", encodedUserAndPass);
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
-                url, headers, null, "GET");
+                url, headers, null);
         return authResult.getStatus();
 
     }

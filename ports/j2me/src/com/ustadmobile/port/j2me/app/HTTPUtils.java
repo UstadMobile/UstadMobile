@@ -178,12 +178,7 @@ public class HTTPUtils {
         return makeHTTPRequest(url, optionalParameters, optionalHeaders, "GET");
     }
     
-    public static HTTPResult makeHTTPRequest(String url, 
-            Hashtable optionalParameters, Hashtable optionalHeaders, 
-            String type) throws IOException{
-        if(url == null){
-            return null;
-        }
+    public static HTTPResult makeHTTPRequest(String url, Hashtable optionalParameters, Hashtable optionalHeaders, String type) throws IOException{
         HTTPResult httpResult = null;
         HttpConnection httpConn = null;
         InputStream is = null;
@@ -192,19 +187,15 @@ public class HTTPUtils {
         try{
             // Open an HTTP Connection object
             httpConn = (HttpConnection)Connector.open(url);
+            httpConn.setRequestMethod(type);
             // Setup HTTP Request to GET/POST
             if(type.equals("POST")){
-                httpConn.setRequestMethod(HttpConnection.POST);
                 httpConn.setRequestProperty("User-Agent",
                     "Profile/MIDP-1.0 Confirguration/CLDC-1.0");
                 httpConn.setRequestProperty("Accept_Language","en-US");
                 //Content-Type is must to pass parameters in POST Request
                 httpConn.setRequestProperty("Content-Type", 
                         "application/x-www-form-urlencoded");
-            }else if (type.equals("GET")){
-                httpConn.setRequestMethod(HttpConnection.GET);
-            }else{
-                httpConn.setRequestMethod(HttpConnection.GET);
             }
             
             //Add Parameters
@@ -249,9 +240,7 @@ public class HTTPUtils {
                 os.write(params.getBytes());
                 os.flush();
             
-            } else if(type.equals("GET")){
-                
-            }
+            } 
             
             // Read Response from the Server
             int response_code=httpConn.getResponseCode();
@@ -267,7 +256,6 @@ public class HTTPUtils {
             response = bout.toByteArray();
             Hashtable responseHeaders = null;
             httpResult = new HTTPResult(response, response_code, responseHeaders);
-            
         }catch(IOException e){  
             e.printStackTrace();
         }finally{

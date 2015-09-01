@@ -53,9 +53,6 @@ public class AppPref {
     //set up default settings.
     private static void setDefaultPreferences() {
         Hashtable defaultAppSettings = new Hashtable();
-        
-        defaultAppSettings.put("server", 
-                "http://umcloud1.ustadmobile.com/umlrs/statements?limit=1");
         defaultAppSettings.put("umcloud", "http://umcloud1.ustadmobile.com");
         defaultAppSettings.put("tincan", 
                 "http://umcloud1.ustadmobile.com/umlrs");
