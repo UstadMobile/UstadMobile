@@ -65,6 +65,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * @param frm 
      */
     public void handleFormShow(Form frm) {
+        if(this.currentForm != frm) {
+            appView.dismissAll();
+        }
         this.currentForm = frm;
     }
     

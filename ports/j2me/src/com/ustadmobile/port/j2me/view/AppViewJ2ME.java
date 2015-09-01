@@ -97,6 +97,11 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
             return false;
         }
     }
+    
+    public void dismissAll() {
+        dismissAlertDialog();
+        dismissProgressDialog();
+    }
 
     public void showAlertDialog(String title, String text) {
         alertDialog = new Dialog();
