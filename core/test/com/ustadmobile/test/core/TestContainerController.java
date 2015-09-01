@@ -146,5 +146,9 @@ public class TestContainerController extends TestCase {
         CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
         
     }
+
+    public void runTest() throws IOException, XmlPullParserException{
+        this.testContainerController();
+    }
     
 }

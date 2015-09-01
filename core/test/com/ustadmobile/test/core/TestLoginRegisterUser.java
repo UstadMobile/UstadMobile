@@ -61,5 +61,9 @@ public class TestLoginRegisterUser extends TestCase {
         assertNotNull("Can register user: server says " + serverSays, 
             serverSays);
     }
+  
+    public void runTest() throws IOException{
+        this.testLoginRegister();
+    }
     
 }

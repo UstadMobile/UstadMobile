@@ -136,4 +136,8 @@ public class TestTransferJobList extends TestCase implements UMProgressListener{
         }
     }
 
+    public void runTest() throws Exception{
+        this.testTransferJobList();
+    }
+
 }

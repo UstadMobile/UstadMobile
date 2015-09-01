@@ -63,5 +63,9 @@ public class TestUMFileUtilJoin extends TestCase{
         assertEquals("Will not remove trailing slash", "/testpath/somedir/",
             UMFileUtil.joinPaths(new String[]{"/testpath/", "/somedir/"}));
     }
+
+    public void runTest(){
+        this.testUMFileUtilJoin();
+    }
     
 }

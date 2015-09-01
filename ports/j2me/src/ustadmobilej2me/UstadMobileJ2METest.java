@@ -17,6 +17,7 @@ import j2meunit.framework.TestFailure;
 import j2meunit.framework.TestResult;
 import java.util.Enumeration;
 import java.util.Vector;
+import javax.microedition.lcdui.List;
 
 /**
  * @author varuna
@@ -38,12 +39,12 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
             try{
                 int rc = aResult.runCount();              
                 int ac = aResult.assertionCount();
-
+               
                 if (rc == ctc){
                     //usually solves the problem of the object getting filled 
                     //and populated on screen.
                     Thread.sleep(500);
-                    
+                                   
                     int numError = aResult.errorCount();
                     String numAssert = String.valueOf(aResult.assertionCount());
                     String numFail = String.valueOf(aResult.failureCount());

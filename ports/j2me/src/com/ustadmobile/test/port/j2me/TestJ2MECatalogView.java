@@ -44,8 +44,8 @@ import org.xmlpull.v1.XmlPullParserException;
  *
  * @author varuna
  */
-public class TestCatalogView extends TestCase {
-    public TestCatalogView(){
+public class TestJ2MECatalogView extends TestCase {
+    public TestJ2MECatalogView(){
         setName("CatalogView Test");
     }
     

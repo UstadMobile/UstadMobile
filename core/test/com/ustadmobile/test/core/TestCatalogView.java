@@ -91,4 +91,8 @@ public class TestCatalogView extends TestCase {
         
         
     }
+
+    public void runTest() throws Exception{
+        this.testCatalogView();
+    }
 }
