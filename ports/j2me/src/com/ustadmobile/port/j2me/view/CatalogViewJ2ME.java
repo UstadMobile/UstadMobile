@@ -7,10 +7,13 @@ package com.ustadmobile.port.j2me.view;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.*;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.Hashtable;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
@@ -28,12 +31,21 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     
     private int CMD_REFRESH = 0;
     private int CMD_DOWNLOAD_ALL = 1;
+    
+    private int CMD_CONFIRM_OK = 2;
+    
+    private int CMD_CONFIRM_CANCEL = 3;
+    
+    private Dialog confirmDialog;
+    
     private UstadJSOPDSEntry[] entries;
     private CatalogController controller;
     //private UstadJSOPDSFeed feed;
     boolean acquisition = false;
     
     private Hashtable entryIdToButtons;
+    
+    private int confirmDialogCmdId = 0;
         
     public CatalogViewJ2ME() {
         Label spaceLabel = new Label(" ");
@@ -52,6 +64,10 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
     
     public void setController(CatalogController controller) {
+        if(this.controller != null) {
+            return;
+        }
+        
         this.controller = controller;
         entries = this.controller.getModel().opdsFeed.entries;
         entryIdToButtons.clear();
@@ -85,10 +101,6 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         
     }
 
-    public void showDialog(String title, String text) {
-        //alert box
-    }
-
     public void actionPerformed(ActionEvent evt) {
         int cmdId = evt.getCommand().getId();
         if(cmdId >= OPDSCMDID_OFFSET) {
@@ -96,12 +108,13 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
             this.controller.handleClickEntry(clickedEntry);
         }else if(cmdId >= MENUCMD_OFFSET) {
             this.controller.handleClickMenuItem(cmdId - MENUCMD_OFFSET);
+        }else if(cmdId == CMD_CONFIRM_OK || cmdId == CMD_CONFIRM_CANCEL) {
+            confirmDialog.setVisible(false);
+            confirmDialog.dispose();
+            confirmDialog = null;
+            this.controller.handleConfirmDialogClick(cmdId == CMD_CONFIRM_OK, 
+                this.confirmDialogCmdId);
         }
-    }
-
-    public void showDialog(String title, String text, int commandId) {
-        //Display.getInstance().callSerially(null);
-        //To change body of generated methods, choose Tools | Templates.
     }
 
     public void showContainerContextMenu(UstadJSOPDSItem item) {
@@ -131,7 +144,29 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, int commandId) {
-        //ToDo: This
+        //TODO: this can be called twice: should not be happening.  See why is the actionPerformed event double firing?
+        if(confirmDialog != null) {
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 306, null);
+            return;
+        }
+        
+        this.confirmDialogCmdId = commandId;
+        
+        confirmDialog = new Dialog(title);
+        confirmDialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        TextArea dialogText = new TextArea(message);
+        dialogText.setEditable(false);
+        dialogText.setFocusable(false);
+        confirmDialog.addComponent(dialogText);
+        
+        Button okButton = new Button(new Command(positiveChoice, CMD_CONFIRM_OK));
+        okButton.addActionListener(this);
+        confirmDialog.addComponent(okButton);
+        
+        Button cancelButton = new Button(new Command(negativeChoice, CMD_CONFIRM_CANCEL));
+        cancelButton.addActionListener(this);
+        confirmDialog.addComponent(cancelButton);
+        confirmDialog.showPacked(BorderLayout.CENTER, false);
     }
 
     public boolean isShowing() {
