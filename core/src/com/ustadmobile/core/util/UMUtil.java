@@ -28,76 +28,74 @@
     GNU General Public License for more details.
 
  */
-
 package com.ustadmobile.core.util;
 
-import com.ustadmobile.core.impl.ZipFileHandle;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.Vector;
 
 /**
- *
+ * Misc utility methods
+ * 
  * @author mike
  */
-public class UMIOUtils {
+public class UMUtil {
     
     /**
-     * Close the given input stream if not null
+     * Gets the index of a particular item in an array
      * 
-     * @param in An input stream to close
-     */
-    public static final void closeInputStream(InputStream in) {
-        try {
-            if(in != null) {
-                in.close();
-            }
-        }catch(IOException e) {
-        }
-    }
-    
-    /**
-     * Close the given output stream if not null
+     * Needed because J2ME does not support the Collections framework
      * 
-     * @param out An input stream to close
+     * @param obj
+     * @param arr
+     * @return 
      */
-    public static final void closeOutputStream(OutputStream out) {
-        try {
-            if(out != null) {
-                out.close();
+    public static final int getIndexInArray(Object obj, Object[] arr) {
+        for(int i = 0; i < arr.length; i++) {
+            if(arr[i] != null && arr[i].equals(obj)) {
+                return i;
             }
-        }catch(IOException e) {
-            
         }
-    }
-    
-    /**
-     * Close the given ZipHandle
-     * 
-     * @param zip The ZipFileHandle to close
-     */
-    public static final void closeZipFileHandle(ZipFileHandle zip) {
-        try {
-            if(zip != null) {
-                zip.close();
-            }
-        }catch(IOException e) {
-            
-        }
-    }
-    
-    /**
-     * Read from the given input stream and write to the given output stream.  
-     * This will not close the streams themselves
-     */
-    public static final void readFully(InputStream in, OutputStream out, int bufsize) throws IOException{
-        byte[] buf = new byte[bufsize];
-        int bytesRead;
         
-        while((bytesRead = in.read(buf)) != -1) {
-            out.write(buf, 0, bytesRead);
+        return -1;
+    }
+    
+    public static final String[] filterArrByPrefix(String[] arr, String prefix) {
+        boolean[] matches = new boolean[arr.length];
+        
+        int i;
+        int matchCount = 0;
+        int arrayLen = arr.length;
+        
+        for(i = 0; i < arrayLen; i++) {
+            if(arr[i] != null && arr[i].startsWith(prefix)) {
+                matches[i] = true;
+                matchCount++;
+            }
         }
-        out.flush();
+        
+        String[] retVal = new String[matchCount];
+        matchCount = 0;
+        for(i = 0; i < arrayLen; i++) {
+            if(matches[i]) {
+                retVal[matchCount] = arr[i];
+                matchCount++;
+            }
+        }
+        
+        return retVal;
+    }
+    
+    /**
+     * Utility method to fill boolean array with a set value
+     * 
+     * @param arr The boolean array
+     * @param value Value to put in
+     * @param from starting index (inclusive)
+     * @param to  end index (exclusive)
+     */
+    public static void fillBooleanArray(boolean[] arr, boolean value, int from, int to) {
+        for(int i = from; i < to; i++) {
+            arr[i] = value;
+        }
     }
     
     

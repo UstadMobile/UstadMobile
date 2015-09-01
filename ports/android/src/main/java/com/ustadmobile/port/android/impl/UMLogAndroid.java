@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.impl;
 
+import android.util.Log;
+
 import com.ustadmobile.core.impl.UMLog;
 
 /**
@@ -7,8 +9,34 @@ import com.ustadmobile.core.impl.UMLog;
  */
 public class UMLogAndroid  extends UMLog{
 
-    @Override
-    public void l(int level, String message) {
+    public static String LOGTAG = "UMLogAndroid";
 
+
+    @Override
+    public void l(int level, int code, String message) {
+        String logMessage = code + " : " + message;
+        if(level == UMLog.DEBUG) {
+            Log.d(LOGTAG,logMessage);
+        }else if(level == UMLog.INFO) {
+            Log.i(LOGTAG, logMessage);
+        }else if(level == UMLog.CRITICAL) {
+            Log.e(LOGTAG, logMessage);
+        }else if(level == UMLog.VERBOSE) {
+            Log.v(LOGTAG, logMessage);
+        }
+    }
+
+    @Override
+    public void l(int level, int code, String message, Exception exception) {
+        String logMessage = code + " : " + message;
+        if(level == UMLog.DEBUG) {
+            Log.d(LOGTAG,logMessage , exception);
+        }else if(level == UMLog.INFO) {
+            Log.i(LOGTAG, logMessage, exception);
+        }else if(level == UMLog.CRITICAL) {
+            Log.e(LOGTAG, logMessage, exception);
+        }else if(level == UMLog.VERBOSE) {
+            Log.v(LOGTAG, logMessage, exception);
+        }
     }
 }

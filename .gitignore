@@ -93,3 +93,7 @@ ports/j2me/src/com/ustadmobile/app/tests/TestConstants.java
 
 #Ignore Core Tests copied to port
 ports/j2me/src/com/ustadmobile/test/core/*.java
+
+#Ignore mock unit test results sent by testing the test method
+testres/unittest-testresults.txt
+testres/unittest-result

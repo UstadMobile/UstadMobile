@@ -28,43 +28,36 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+package com.ustadmobile.test.core;
+
+
+import java.io.IOException;
+
+/* $if umplatform == 2  $
+    import j2meunit.framework.TestCase;
+ $else$ */
+    import junit.framework.TestCase;
+/* $endif$ */
 
 /**
- * Logging interface to be implemented by the System Implementation
+ *
  * @author mike
  */
-public abstract class UMLog {
+public class TestTestUtils extends TestCase {
     
-    public static final int DEBUG = 1;
-    
-    public static final int VERBOSE = 2;
-    
-    public static final int INFO = 4;
-    
-    public static final int CRITICAL = 8;
+    public TestTestUtils() {
+        
+    }
     
     
-    /**
-     * Log the given message 
-     * 
-     * @param level
-     * @param code An Error code to assist debugging
-     * @param message  (May be null)
-     */
-    public abstract void l(int level, int code, String message);
     
-    /**
-     * Log the message given and the exception
-     * 
-     * @param level
-     * @param code An Error code to assist debugging
-     * @param message
-     * @param exception
-     */
-    public abstract void l(int level, int code, String message, Exception exception);
-    
-    
+    public void testSendResults() throws IOException{
+        //make sure we have a connection
+        String httpRoot = TestUtils.getInstance().getHTTPRoot();
+        
+        TestUtils.getInstance().sendResults(10, 0, "unittest", "test utils self test");
+        assertTrue("Test utils sent result without throwing exception", true);
+    }
     
     
 }

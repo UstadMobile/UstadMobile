@@ -29,6 +29,7 @@
 
  */
 package com.ustadmobile.test.port.j2me;
+import com.ustadmobile.test.core.*;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
@@ -57,7 +58,6 @@ public class AllTestCases extends TestCase {
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
-           
         allTestSuite.addTest(new TestLogin());
         allTestSuite.addTest(new TestUMFileResolveLink());
         allTestSuite.addTest(new TestUMFileUtilFilename());
@@ -65,7 +65,8 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestUstadOCF());
         allTestSuite.addTest(new TestLoginRegisterUser());
         allTestSuite.addTest(new TestCatalogView());
-        
+        allTestSuite.addTest(new TestDownload());
+
         //Needs UMTransferJob done.
         //allTestSuite.addTest(new TestCatalogControllerAcquire());
         //allTestSuite.addTest(new TestCatalogController());
@@ -74,7 +75,7 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestTransferJobList());
                 
         allTestSuite.addTest(new TestZipEpubHTML());
-        
+              
         allTestSuite.addTest(new TestImplementation());
         allTestSuite.addTest(new TestSimpleHTTP());
         allTestSuite.addTest(new TestCustomLWUIT());

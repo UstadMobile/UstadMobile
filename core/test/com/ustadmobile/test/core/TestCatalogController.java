@@ -68,6 +68,13 @@ public class TestCatalogController extends TestCase{
         $endif */
     }
     
+    protected void setUp() throws Exception {
+        super.setUp();
+        /* $if umplatform == 1  $
+        android.app.Activity activity = getActivity();
+         $endif */
+    }
+    
     public void testCatalogController() throws IOException, XmlPullParserException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(TestConstants.LOGIN_USER);

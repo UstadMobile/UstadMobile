@@ -261,6 +261,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return (new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
     }
 
+    @Override
+    public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException {
+        return new FileOutputStream(fileURI);
+    }
+
 
     @Override
     public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {
@@ -361,6 +366,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private SharedPreferences getAppSharedPreferences() {
         if(appPreferences == null) {
+            if(currentContext == null) {
+                throw new IllegalStateException("current Context is null: must use handleActivityStart first");
+            }
             appPreferences = currentContext.getSharedPreferences(APP_PREFERENCES_NAME,
                 Context.MODE_PRIVATE);
         }
@@ -432,9 +440,33 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return getUserPreferences().getString(key, null);
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
-    public String[] getPrefKeyList() {
-        return new String[0];
+    public String[] getAppPrefKeyList() {
+        return getKeysFromSharedPreferences(getAppSharedPreferences());
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public String[] getUserPrefKeyList() {
+        return getKeysFromSharedPreferences(getUserPreferences());
+    }
+
+    /**
+     * Private utility function to get a String array of keys from a SharedPreferences object
+     * @param prefs
+     * @return
+     */
+    private String[] getKeysFromSharedPreferences(SharedPreferences prefs) {
+        Set keySet = prefs.getAll().keySet();
+        String[] retVal = new String[keySet.size()];
+        keySet.toArray(retVal);
+        return retVal;
     }
 
     @Override
@@ -461,6 +493,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         editor.commit();
     }
 
+    /**
+     * @inheritDoc
+     */
     @Override
     public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method) throws IOException {
         URL url = new URL(httpURL);
@@ -474,6 +509,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 conn.setRequestProperty(headerField, headerValue);
             }
         }
+        //conn.setRequestProperty("Connection", "close");
 
         conn.setRequestMethod(method);
 

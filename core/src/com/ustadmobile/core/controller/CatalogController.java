@@ -47,6 +47,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ViewFactory;
@@ -168,6 +169,11 @@ public class CatalogController implements UstadController, UMProgressListener {
      */
     public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
     
+    /**
+     * Prefix used for pref keys that are used to store entry info
+     */
+    private static final String PREFIX_ENTRYINFO = "e2ei-";
+    
     
     public CatalogController() {
         
@@ -282,17 +288,75 @@ public class CatalogController implements UstadController, UMProgressListener {
         
     }
     
+    public static CatalogController makeDeviceCatalog() throws IOException {
+        UstadJSOPDSFeed deviceFeed = makeDeviceFeed(null, null, 
+                USER_RESOURCE | SHARED_RESOURCE);
+        return new CatalogController(new CatalogModel(deviceFeed));
+    }
+    
     /**
      * Make a catalog representing the files that are now in the shared and user
      * directories
      * 
+     * @param sharedDir - Shared directory to use: or null to use default shared directory
+     * @param userDir - User content directory to use: or null to use default user directory
+     * @param dirFlags - Set which directories to scan: inc USER_RESOURCE , SHARED_RESOURCE
+     * 
      * @return CatalogController representing files on the device
      */
-    public static CatalogController makeDeviceCatalog() throws IOException{
-        UstadJSOPDSFeed deviceFeed = CatalogController.scanDir(
-            UstadMobileSystemImpl.getInstance().getSharedContentDir(), 
-                "Device Catalog");
-        return new CatalogController(new CatalogModel(deviceFeed));
+    public static UstadJSOPDSFeed makeDeviceFeed(String sharedDir, String userDir, int dirFlags) throws IOException{
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        boolean incShared = (dirFlags & SHARED_RESOURCE) == SHARED_RESOURCE;
+        boolean incUser = (dirFlags & USER_RESOURCE) == USER_RESOURCE;
+        
+        
+        verifyKnownEntries(SHARED_RESOURCE);
+        
+        Vector opdsFilesVector = new Vector();
+        int opdsUserStartIndex = 0;
+        Vector containerFilesVector = new Vector();
+        int containerUserStartIndex = 0;
+        
+        sharedDir = (sharedDir == null) ? impl.getSharedContentDir() : sharedDir;
+        if(incUser && userDir == null) {
+            userDir = impl.getUserContentDirectory(impl.getActiveUser());
+        }
+        
+        if(incShared) {
+            findOPDSFilesInDir(sharedDir, opdsFilesVector, containerFilesVector);
+            opdsUserStartIndex = opdsFilesVector.size();
+            containerUserStartIndex = containerFilesVector.size();
+        }
+        
+        if(incUser) {
+            findOPDSFilesInDir(userDir, opdsFilesVector, containerFilesVector);
+        }
+        
+        String[] opdsFiles = new String[opdsFilesVector.size()];
+        opdsFilesVector.copyInto(opdsFiles);
+        opdsFilesVector = null;
+        
+        String[] containerFiles = new String[containerFilesVector.size()];
+        containerFilesVector.copyInto(containerFiles);
+        containerFilesVector = null;
+        
+        String generatedHREFBase = incUser ? impl.getUserContentDirectory(
+                impl.getActiveUser()) : impl.getSharedContentDir();
+        
+        String looseFilePath = UMFileUtil.joinPaths(new String[] {generatedHREFBase, 
+            ".cache-loose"});
+        
+        boolean[] userOPDSFiles = new boolean[opdsFiles.length];
+        UMUtil.fillBooleanArray(userOPDSFiles, true, opdsUserStartIndex, 
+                userOPDSFiles.length);
+        boolean[] userEPUBFiles = new boolean[containerFiles.length];
+        UMUtil.fillBooleanArray(userEPUBFiles, true, containerUserStartIndex, 
+                containerUserStartIndex);
+        
+        return scanFiles(opdsFiles, userOPDSFiles, containerFiles, userEPUBFiles, 
+            looseFilePath, generatedHREFBase, "My Device", 
+            "scandir-" + sanitizeIDForFilename(generatedHREFBase));
+        
     }
     
     /**
@@ -773,6 +837,34 @@ public class CatalogController implements UstadController, UMProgressListener {
         return null;
     }
     
+    
+    /**
+     * Find OPDS and container (e.g. .epub files) in the given directory.  Add
+     * them to the given vectors
+     * 
+     * @param dir The directory to look in
+     * @param opdsFiles A vector into which OPDS files will be added : As a string path dir joined to the filename
+     * @param containerFiles A vector into which containerFiles will be added : As a string path dir joined to the filename
+     */
+    public static void findOPDSFilesInDir(String dir, Vector opdsFiles, Vector containerFiles) throws IOException{
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] dirContents = impl.listDirectory(dir);
+        
+        for(int i = 0; i < dirContents.length; i++) {
+            if(dirContents[i].startsWith(".cache")) {
+                continue;
+            }
+            
+            if(dirContents[i].endsWith(OPDS_EXTENSION)) {
+                opdsFiles.addElement(UMFileUtil.joinPaths(new String[]{dir, 
+                    dirContents[i]}));
+            }else if(dirContents[i].endsWith(EPUB_EXTENSION)) {
+                containerFiles.addElement(UMFileUtil.joinPaths(new String[]{dir, 
+                    dirContents[i]}));
+            }
+        }
+    }
+    
     /**
      * 
      * CatalogController.scanDir logic:
@@ -834,6 +926,44 @@ public class CatalogController implements UstadController, UMProgressListener {
         return scanFiles(opdsFilesArr, userOPDSFiles, epubFilesArr, userEPUBFiles, 
             looseFilePath, generatedHREF, title, 
             "scandir-" + sanitizeIDForFilename(dirname));
+    }
+    
+    
+    /**
+     * This is to verify that the entries we think we know about... are in fact there
+     * e.g. in case the user deletes files etc.
+     * 
+     * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
+     */
+    public static void verifyKnownEntries(int resourceMode) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        boolean isShared = resourceMode == SHARED_RESOURCE;
+        String[] entryInfoKeys = UMUtil.filterArrByPrefix(
+            isShared ? impl.getAppPrefKeyList() : impl.getUserPrefKeyList(),
+            PREFIX_ENTRYINFO);
+        
+        CatalogEntryInfo info;
+        for(int i = 0; i < entryInfoKeys.length; i++) {
+            info = CatalogEntryInfo.fromString(
+                isShared ? impl.getAppPref(entryInfoKeys[i]) : impl.getUserPref(entryInfoKeys[i]));
+            if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+                boolean canAccessFile = false;
+                try {
+                    canAccessFile = impl.fileExists(info.fileURI);
+                }catch(IOException e) {
+                    //this might happen if a whole volume was unmounted or something like this
+                }
+                
+                if(!canAccessFile) {
+                    //remove the entry from our listing
+                    if(isShared) {
+                        impl.setAppPref(entryInfoKeys[i], null);
+                    }else {
+                        impl.setUserPref(entryInfoKeys[i], null);
+                    }
+                }
+            }
+        }
     }
     
     /**
@@ -980,7 +1110,7 @@ public class CatalogController implements UstadController, UMProgressListener {
      * @return 
      */
     private static String getEntryInfoKey(String entryID) {
-        return "e2ei-" + entryID;
+        return PREFIX_ENTRYINFO + entryID;
     }
     
     /**

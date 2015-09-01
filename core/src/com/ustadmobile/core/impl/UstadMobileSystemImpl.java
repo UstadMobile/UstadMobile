@@ -35,10 +35,9 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.AppView;
-import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.ViewFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Hashtable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -76,18 +75,28 @@ public abstract class UstadMobileSystemImpl {
     /**
      * Starts the user interface for the app
      */
-    public void startUI() {
-        //new LoginController().show();
-        
+    public void startUI() {        
+        final UstadMobileSystemImpl impl = this;
         
         if(getActiveUser() == null) {
             new LoginController().show();
         }else {
-            try {
-                CatalogController.makeUserCatalog(this).show();
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
+            getAppView().showProgressDialog("Loading");
+            Thread startThread = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        CatalogController ctrl = CatalogController.makeUserCatalog(impl);
+                        impl.getAppView().dismissProgressDialog();
+                        ctrl.show();
+                    }catch(Exception e) {
+                        impl.getAppView().dismissProgressDialog();
+                        impl.getAppView().showNotification("Couldn't load course catalog", 
+                            AppView.LENGTH_LONG);
+                        e.printStackTrace();
+                    }
+                }
+            });
+            startThread.start();
         }
     }
     
@@ -158,6 +167,15 @@ public abstract class UstadMobileSystemImpl {
      * @return 
      */
     public abstract long modTimeDifference(String fileURI1, String fileURI2);
+    
+    /**
+     * Get an output stream to the given file
+     * 
+     * @param fileURI URI to the file we want an output stream for
+     * @param autocreate whether or not to autocreate the file
+     */
+    public abstract OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException;
+    
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 
@@ -324,7 +342,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return String array list of keys
      */
-    public abstract String[] getPrefKeyList();
+    public abstract String[] getUserPrefKeyList();
     
     /**
      * Trigger persisting the currently active user preferences.  This does NOT
@@ -340,6 +358,13 @@ public abstract class UstadMobileSystemImpl {
      * @return value of that preference
      */
     public abstract String getAppPref(String key);
+    
+    /**
+     * Get a list of preferences currently set for the app itself
+     * 
+     * @return String array list of app preference keys
+     */
+    public abstract String[] getAppPrefKeyList();
     
     /**
      * Get a preference for the app.  If not set, return the provided defaultVal

@@ -83,10 +83,12 @@ public class TestCatalogView extends TestCase {
             CatalogController.CACHE_ENABLED);
         controller.show();
         int timeLeft = VIEWSHOWTIMEOUT;
-        while(!controller.getView().isShowing()) {
+        while(!controller.getView().isShowing() && timeLeft > 0) {
             try { Thread.sleep(VIEWCHECKINTERVAL); }
             catch(InterruptedException e) {};
+            timeLeft -= VIEWCHECKINTERVAL;
         }
+        
         assertTrue("View is showing", controller.getView().isShowing());
         
         

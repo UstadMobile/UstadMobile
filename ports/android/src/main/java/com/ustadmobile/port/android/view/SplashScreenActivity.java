@@ -39,24 +39,8 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.controller.ContainerController;
-import com.ustadmobile.core.controller.LoginController;
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.ocf.UstadOCF;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.Hashtable;
 
 
 public class SplashScreenActivity extends ActionBarActivity {
@@ -75,6 +59,7 @@ public class SplashScreenActivity extends ActionBarActivity {
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         impl.handleActivityStart(this);
         impl.startUI();
+
     }
 
     public void onStop() {
@@ -85,45 +70,6 @@ public class SplashScreenActivity extends ActionBarActivity {
     public void onDestroy() {
         super.onDestroy();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
-    }
-
-
-    public void runTest(){
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    String startServerURL = "http://" + "192.168.43.124" + ":"
-                            + "8065" + "/?action=startserver";
-
-                    String httpRootDir = null;
-
-                    if(httpRootDir == null) {
-                        try {
-                            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(startServerURL,
-                                    new Hashtable(), new Hashtable(), "GET");
-                            String serverSays = new String(result.getResponse(), "UTF-8");
-                            JSONObject response = new JSONObject(serverSays);
-                            int serverPort = response.getInt("port");
-                            httpRootDir = "http://" + "192.168.43.124" + ":" + serverPort + "/";
-                        }catch(IOException e) {
-                            System.err.println("Test exception creating new test port");
-                            e.printStackTrace();
-                            //ex = e;
-                        }catch(JSONException e) {
-                            System.err.println("Test exception parsing json");
-                            e.printStackTrace();
-                            //ex = e;
-                        }
-                    }
-                }catch(Exception e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }).start();
-
-
-
     }
 
     @Override

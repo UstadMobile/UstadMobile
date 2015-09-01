@@ -27,6 +27,8 @@ public class TestUtils {
     
     private String httpRootDir;
     
+    private int serverPort = -1;
+    
     public TestUtils() {
         
     }
@@ -40,20 +42,24 @@ public class TestUtils {
         return mainInstance;
     }
     
+    public int getHTTPPort() {
+        return serverPort;
+    }
+    
     public String getHTTPRoot() {
         Exception ex = null;
+        
+        //httpRootDir = "http://" + TestConstants.TEST_SERVER + "/testres/";
         
         String startServerURL = "http://" + TestConstants.TEST_SERVER + ":"
                     + TestConstants.TEST_CONTROL_PORT + "/?action=newserver";
         if(httpRootDir == null) {
-            
-                
             try {
                 HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(startServerURL,
                     new Hashtable(), new Hashtable(), "GET");
                 String serverSays = new String(result.getResponse(), "UTF-8");
                 JSONObject response = new JSONObject(serverSays);
-                int serverPort = response.getInt("port");
+                serverPort = response.getInt("port");
                 httpRootDir = "http://" + TestConstants.TEST_SERVER + ":" + serverPort + "/";
             }catch(IOException e) {
                 System.err.println("Test exception creating new test port");
@@ -75,5 +81,40 @@ public class TestUtils {
         }
         
         return httpRootDir;
+    }
+    
+    /**
+     * Use the saveresults section of DodgyHTTPD to save results 
+     * 
+     * @param numPass Number of tests passed
+     * @param numFail Number of tests failed
+     * @param device Device name performing the tests - used to name the output file
+     * @param testlog Complete test log to be sent to the server
+     * @throws IOException If an IOException happens communicating with the server
+     */
+    public void sendResults(int numPass, int numFail, String device, String testlog) throws IOException {
+        IOException e = null;
+        Hashtable postParams = new Hashtable();
+        postParams.put("action", "saveresults");
+        postParams.put("numPass", String.valueOf(numPass));
+        postParams.put("numFail", String.valueOf(numFail));
+        postParams.put("logtext", testlog);
+        if(device != null) {
+            postParams.put("device", device);
+        }
+        
+        Hashtable headers = new Hashtable();
+        headers.put("Connection", "close");
+        
+        
+        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(
+                "http://" + TestConstants.TEST_SERVER + ":"
+                    + TestConstants.TEST_CONTROL_PORT + "/", 
+                headers, postParams, "POST");
+        if(result.getStatus() != 200) {
+            throw new IOException("Error sending results to server: status: " 
+                + result.getStatus());
+        }
+        
     }
 }
