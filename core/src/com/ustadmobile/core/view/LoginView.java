@@ -46,8 +46,4 @@ public interface LoginView extends UstadView {
     
     public void setController(LoginController controller);
     
-    public void showDialog(String title, String text);
-    
-    public void performAction(Object obj);
-    
 }
