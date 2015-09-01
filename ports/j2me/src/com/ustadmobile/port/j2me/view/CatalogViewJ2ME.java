@@ -140,6 +140,9 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public boolean isShowing() {
+        if (this.isVisible()){
+            return true;
+        }
         return false;
         //ToDo: This
     }

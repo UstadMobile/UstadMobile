@@ -104,4 +104,8 @@ public class TestCatalogController extends TestCase{
         assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
     }
     
+    public void runTest() throws IOException, XmlPullParserException{
+        this.testCatalogController();
+    }
+
 }

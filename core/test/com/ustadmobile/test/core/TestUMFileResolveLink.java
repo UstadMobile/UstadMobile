@@ -75,5 +75,9 @@ public class TestUMFileResolveLink extends TestCase{
             UMFileUtil.resolveLink("http://server1.com/some/other.html", 
                 "../file.jpg"));
     }
+
+    public void runTest(){
+        this.testUMFileUtilResolveLink();
+    }
     
 }

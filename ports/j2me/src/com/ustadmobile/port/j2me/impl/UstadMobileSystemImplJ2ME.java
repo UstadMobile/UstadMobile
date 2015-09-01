@@ -382,6 +382,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         OutputStream out = Connector.openOutputStream(fileURI);
         return out;
     }
+
+    public String[] getPrefKeyList() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     public class DownloadJob extends Thread implements UMTransferJob {
 

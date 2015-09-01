@@ -29,4 +29,8 @@ public class UMLogJ2ME extends UMLog{
         System.out.println("code:" + code + " : " + message + " : " + exception.toString());
     }
 
+    public void l(int level, String message) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

@@ -62,6 +62,10 @@ public class TestUMFileUtilFilename extends TestCase{
         assertEquals("Will return null in case of no extension",
             null, UMFileUtil.getExtension("http://server.com/some/dir"));
     }
+
+    public void runTest(){
+        this.testFileUtilFilename();
+    }
     
     
 }

@@ -35,6 +35,7 @@ import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
 import j2meunit.framework.TestSuite;
 import java.io.IOException;
+import com.ustadmobile.test.core.*;
 
 /**
  *
@@ -49,9 +50,7 @@ public class AllTestCases extends TestCase {
     public Test suite() {
         
         try {
-            HTTPUtils.httpDebug("loadingTestSettings");
             TestUtils.getInstance().loadTestSettingsResource();
-            HTTPUtils.httpDebug("loaded");
             //TestUtils.loadTestSettingsFile();
         }catch(Exception e) {
             e.printStackTrace();
@@ -59,10 +58,24 @@ public class AllTestCases extends TestCase {
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
-        
+        allTestSuite.addTest(new TestLogin());
+        allTestSuite.addTest(new TestUMFileResolveLink());
+        allTestSuite.addTest(new TestUMFileUtilFilename());
+        allTestSuite.addTest(new TestUMFileUtilJoin());
+        allTestSuite.addTest(new TestUstadOCF());
+        allTestSuite.addTest(new TestLoginRegisterUser());
+        allTestSuite.addTest(new TestCatalogView());
         allTestSuite.addTest(new TestDownload());
-        
-        //allTestSuite.addTest(new CoreLoginTest());        
+
+        //Needs UMTransferJob done.
+        //allTestSuite.addTest(new TestCatalogControllerAcquire());
+        //allTestSuite.addTest(new TestCatalogController());
+        //allTestSuite.addTest(new TestCatalogView());
+        //allTestSuite.addTest(new TestContainerController());
+        //allTestSuite.addTest(new TestTransferJobList());
+                
+        allTestSuite.addTest(new TestZipEpubHTML());
+              
         allTestSuite.addTest(new TestImplementation());
         allTestSuite.addTest(new TestSimpleHTTP());
         allTestSuite.addTest(new TestCustomLWUIT());
@@ -81,10 +94,9 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestAppPref());
         allTestSuite.addTest(new TestUserPref());
         allTestSuite.addTest(new TestLoginView());
-        allTestSuite.addTest(new TestCatalogView());
+        allTestSuite.addTest(new TestJ2MECatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
-        allTestSuite.addTest(new com.ustadmobile.test.core.TestLogin());
         
         return allTestSuite;
 

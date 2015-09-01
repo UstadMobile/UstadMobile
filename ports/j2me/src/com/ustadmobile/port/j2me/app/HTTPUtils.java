@@ -42,6 +42,7 @@ import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.util.URLTextUtil;
 import javax.microedition.pim.FieldFullException;
 
 /**
@@ -87,6 +88,7 @@ public class HTTPUtils {
     ***/
     public static void getConnectionInformation(HttpConnection hc) {
 
+        System.out.println("");
         System.out.println("Request Method for this connection is " + 
                 hc.getRequestMethod());
         System.out.println("URL in this connection is " + hc.getURL());
@@ -185,6 +187,7 @@ public class HTTPUtils {
         HTTPResult httpResult = null;
         HttpConnection httpConn = null;
         InputStream is = null;
+        OutputStream os = null;
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         try{
             // Open an HTTP Connection object
@@ -192,6 +195,12 @@ public class HTTPUtils {
             // Setup HTTP Request to GET/POST
             if(type.equals("POST")){
                 httpConn.setRequestMethod(HttpConnection.POST);
+                httpConn.setRequestProperty("User-Agent",
+                    "Profile/MIDP-1.0 Confirguration/CLDC-1.0");
+                httpConn.setRequestProperty("Accept_Language","en-US");
+                //Content-Type is must to pass parameters in POST Request
+                httpConn.setRequestProperty("Content-Type", 
+                        "application/x-www-form-urlencoded");
             }else if (type.equals("GET")){
                 httpConn.setRequestMethod(HttpConnection.GET);
             }else{
@@ -207,6 +216,7 @@ public class HTTPUtils {
                 while(keys.hasMoreElements()) {
                         key = keys.nextElement().toString();
                         value = optionalParameters.get(key).toString();
+                        value = URLTextUtil.urlEncodeUTF8(value);
                         if (firstAmp){
                             params = key + "=" + value;
                             firstAmp=false;
@@ -215,7 +225,7 @@ public class HTTPUtils {
                         }
                 }
             }
-            
+                        
             //Add Headers
             if (optionalHeaders != null){
                 Enumeration headerKeys = optionalHeaders.keys();
@@ -229,8 +239,22 @@ public class HTTPUtils {
                 }
             }
             
+            
+            if(type.equals("POST")){
+                //Content-Length to be set
+                httpConn.setRequestProperty("Content-length", 
+                        String.valueOf(params.getBytes().length));
+                httpConn.setRequestProperty(url, type);
+                os = httpConn.openOutputStream();
+                os.write(params.getBytes());
+                os.flush();
+            
+            } else if(type.equals("GET")){
+                
+            }
+            
             // Read Response from the Server
-            int response_code=httpConn.getResponseCode();  
+            int response_code=httpConn.getResponseCode();
             is = httpConn.openInputStream();
             
             byte[] buf = new byte[1024];
@@ -242,7 +266,6 @@ public class HTTPUtils {
             byte[] response = null;
             response = bout.toByteArray();
             Hashtable responseHeaders = null;
-            
             httpResult = new HTTPResult(response, response_code, responseHeaders);
             
         }catch(IOException e){  
@@ -256,6 +279,9 @@ public class HTTPUtils {
             }
             if(bout!=null){
                 bout.close();
+            }
+            if (os!=null){
+                os.close();
             }
             
         }

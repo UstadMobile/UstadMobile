@@ -129,5 +129,9 @@ public class TestCatalogControllerAcquire extends TestCase{
         assertTrue("Entry file no longer present after delete",
                 !impl.fileExists(acquiredFileURI));
     }
+
+    public void runTest() throws Exception{
+        this.testCatalogControllerAcquire();
+    }
     
 }

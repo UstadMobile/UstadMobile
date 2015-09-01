@@ -85,5 +85,9 @@ public class TestUstadOCF extends TestCase {
         assertEquals("Root file Full path is correct", "EPUB/package.opf", 
             ocf.rootFiles[0].fullPath);
     }
+
+    public void runTest() throws IOException, XmlPullParserException{
+        this.testUstadOCF();
+    }
     
 }
