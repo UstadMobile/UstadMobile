@@ -8,7 +8,9 @@ import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 /**
  *
  * @author varuna
@@ -37,7 +39,12 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
         Button loginButton = new Button(loginCmd);
         loginButton.addActionListener(this);
         this.addComponent(loginButton);
-        
+    }
+    
+    public void show() {
+        UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImplJ2ME.getInstanceJ2ME().handleFormShow(this);
+        super.show();
     }
     
     private LoginController controller;

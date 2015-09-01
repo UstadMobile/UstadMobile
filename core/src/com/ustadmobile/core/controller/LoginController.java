@@ -32,6 +32,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -225,6 +226,7 @@ public class LoginController implements UstadController{
         final LoginView myView = view;
         Thread loginThread = new Thread() {
             public void run() {
+                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 303, null);
                 String serverBaseURL = 
                 UstadMobileSystemImpl.getInstance().getAppPref("server",
                 UstadMobileDefaults.DEFAULT_XAPI_SERVER);
@@ -265,6 +267,7 @@ public class LoginController implements UstadController{
                 }
             }
         };
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 302, null);
         UstadMobileSystemImpl.getInstance().getAppView().showProgressDialog("Authenticating");
         loginThread.start();
     }

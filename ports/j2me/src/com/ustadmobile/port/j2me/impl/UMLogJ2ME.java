@@ -16,11 +16,17 @@ public class UMLogJ2ME extends UMLog{
 
 
     public void l(int level, int code, String message) {
-        System.err.println(code + " : " + message);
+        System.out.print("[");
+        System.out.print(new java.util.Date().toString());
+        System.out.print("]");
+        System.out.println("code:" + code + " : " + message);
     }
 
     public void l(int level, int code, String message, Exception exception) {
-        System.err.println(code + " : " + message + " : " + exception.toString());
+        System.out.print("[");
+        System.out.print(new java.util.Date().toString());
+        System.out.print("]");
+        System.out.println("code:" + code + " : " + message + " : " + exception.toString());
     }
 
 }
