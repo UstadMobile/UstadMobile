@@ -288,10 +288,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setActiveUserAuth(String password) {
+        AppPref.addSetting("CURRENTUSERAUTH", password);
     }
 
     public String getActiveUserAuth() {
-        return null;
+        return AppPref.getSetting("CURRENTUSERAUTH");
     }
 
     public String getAppPref(String key) {       
