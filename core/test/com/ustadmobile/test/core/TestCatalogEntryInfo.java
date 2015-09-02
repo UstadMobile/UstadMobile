@@ -61,5 +61,9 @@ public class TestCatalogEntryInfo extends TestCase {
         assertEquals(testInfo.fileURI, restoreEntry.fileURI);
         assertEquals(testInfo.mimeType, restoreEntry.mimeType);
     }
+
+    public void runTest(){
+        this.testCatalogEntryInfo();
+    }
     
 }

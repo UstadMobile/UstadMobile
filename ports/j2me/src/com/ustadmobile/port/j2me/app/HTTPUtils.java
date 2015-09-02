@@ -238,7 +238,7 @@ public class HTTPUtils {
                 httpConn.setRequestProperty(url, type);
                 os = httpConn.openOutputStream();
                 os.write(params.getBytes());
-                os.flush();
+                //os.flush();
             
             } 
             

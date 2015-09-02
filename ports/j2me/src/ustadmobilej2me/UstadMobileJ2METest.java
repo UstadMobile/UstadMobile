@@ -56,11 +56,11 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                             error.hasMoreElements(); i++){
 
                         TestFailure failure = (TestFailure) error.nextElement();
-                        errorString = errorString + ""+ (i + ") " + 
+                        errorString = errorString + '\n' + ""+ (i + ") " + 
                                 failure.failedTest());
                         if (failure.thrownException() != null)
                         {
-                            errorString = errorString +(failure.thrownException());
+                            errorString = errorString + '\n' + (failure.thrownException());
                         }      
                     }
                                     
