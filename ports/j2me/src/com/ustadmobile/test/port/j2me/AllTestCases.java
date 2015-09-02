@@ -65,7 +65,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestUMFileUtilFilename());
         allTestSuite.addTest(new TestUMFileUtilJoin());
         //allTestSuite.addTest(new TestUstadOCF());
-        //allTestSuite.addTest(new TestLoginRegisterUser());
+        allTestSuite.addTest(new TestLoginRegisterUser());
         /*   
         allTestSuite.addTest(new TestCatalogView());
         //temporarily disabling download..
