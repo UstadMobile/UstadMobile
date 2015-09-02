@@ -64,5 +64,13 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     public boolean isShowing() {
         return this.isVisible();
     }
+
+    public void showDialog(String title, String text) {
+        //ToDo
+    }
+
+    public void performAction(Object obj) {
+        //ToDo
+    }
     
 }
