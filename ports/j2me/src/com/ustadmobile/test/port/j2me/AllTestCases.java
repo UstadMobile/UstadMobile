@@ -59,12 +59,6 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
 
-        allTestSuite.addTest(new TestPreferences());
-        allTestSuite.addTest(new TestUMFileResolveLink());
-        allTestSuite.addTest(new TestUMFileUtilFilename());
-        allTestSuite.addTest(new TestUMFileUtilJoin());     
-        allTestSuite.addTest(new TestLogin());
-        
         //The ones that don't work:
         //allTestSuite.addTest(new TestCatalogView()); //Null Pointer Exception
         //allTestSuite.addTest(new TestUstadOCF()); //Null Pointer Exception!
@@ -73,12 +67,27 @@ public class AllTestCases extends TestCase {
         //temporarily disabling download..
         //allTestSuite.addTest(new TestDownload());
         
-        //Needs UMTransferJob done.
-        //allTestSuite.addTest(new TestCatalogControllerAcquire());
+        //Don't even run on IDE.
         //allTestSuite.addTest(new TestCatalogController());
-        //allTestSuite.addTest(new TestCatalogView());
         //allTestSuite.addTest(new TestContainerController());
-        //allTestSuite.addTest(new TestTransferJobList());
+        //allTestSuite.addTest(new TestCatalogController());
+        //allTestSuite.addTest(new TestContainerController());
+        
+        //Empty test:
+        //allTestSuite.addTest(new TestFileImpl());
+        
+        allTestSuite.addTest(new TestCatalogControllerAcquire());   
+        allTestSuite.addTest(new TestTransferJobList());
+        allTestSuite.addTest(new TestCatalogEntryInfo());
+        allTestSuite.addTest(new TestTestUtils());
+                
+        /*
+        //Working.
+        allTestSuite.addTest(new TestPreferences());
+        allTestSuite.addTest(new TestUMFileResolveLink());
+        allTestSuite.addTest(new TestUMFileUtilFilename());
+        allTestSuite.addTest(new TestUMFileUtilJoin());     
+        allTestSuite.addTest(new TestLogin());
               
         allTestSuite.addTest(new TestImplementation());
         allTestSuite.addTest(new TestSimpleHTTP());
@@ -101,8 +110,8 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestJ2MECatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
-        //allTestSuite.addTest(new TestZipEpubHTML());
-
+        */
+        
         return allTestSuite;
 
     }

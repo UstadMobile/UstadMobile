@@ -59,5 +59,8 @@ public class TestTestUtils extends TestCase {
         assertTrue("Test utils sent result without throwing exception", true);
     }
     
-    
+    public void runTest() throws IOException{
+        this.testSendResults();
+    }
+
 }
