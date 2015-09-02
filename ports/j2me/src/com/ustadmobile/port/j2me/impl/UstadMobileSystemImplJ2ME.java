@@ -1,6 +1,32 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+    This file is part of Ustad Mobile.
+
+    Ustad Mobile Copyright (C) 2011-2014 UstadMobile Inc.
+
+    Ustad Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version with the following additional terms:
+
+    All names, links, and logos of Ustad Mobile and Toughra Technologies FZ
+    LLC must be kept as they are in the original distribution.  If any new
+    screens are added you must include the Ustad Mobile logo as it has been
+    used in the original distribution.  You may not create any new
+    functionality whose purpose is to diminish or remove the Ustad Mobile
+    Logo.  You must leave the Ustad Mobile logo as the logo for the
+    application to be used with any launcher (e.g. the mobile app launcher).
+
+    If you want a commercial license to remove the above restriction you must
+    contact us.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Ustad Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
  */
 package com.ustadmobile.port.j2me.impl;
 
@@ -392,6 +418,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    /**
+     * J2ME implementation of the DownloadJob interface 
+     */
     public class DownloadJob extends Thread implements UMTransferJob {
 
         final private String srcURL;
@@ -408,8 +437,21 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         private final Vector progressListeners;
         
-        private UMProgressEvent evt;
+        private final UMProgressEvent evt;
         
+        /**
+         * The delay (in ms) minimum between progress updates; this is used to
+         * ensure that we don't fire out too many updates
+         */
+        public static final int UPDATE_MIN_INTERVAL = 250;
+        
+        /**
+         * Create a new download job
+         * 
+         * @param srcURL The HTTP source URL to download from
+         * @param destFileURI The file path to save to 
+         * @param myImpl our parent SystemImplementation
+         */
         public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplJ2ME myImpl) {
             this.srcURL = srcURL;
             this.destFileURI = destFileURI;
@@ -422,6 +464,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             evt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS, 0, 0, 0);
         }
         
+        /**
+         * Send update event to all registered listeners
+         */
         protected void fireProgressEvent() {
             int i;
             int numListeners = progressListeners.size();
@@ -434,6 +479,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             super.start();
         }
         
+        /**
+         * Run as a thread the actual download (in the background)
+         */
         public void run() {
             final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             OutputStream fOut = null;
@@ -452,7 +500,29 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 fOut = myImpl.openFileOutputStream(destFileURI, true);
                 con = (HttpConnection)Connector.open(srcURL);
                 httpIn = con.openInputStream();
-                UMIOUtils.readFully(httpIn, fOut, 1024);
+                myImpl.getLogger().l(UMLog.VERBOSE, 312, srcURL);
+                //UMIOUtils.readFully(httpIn, fOut, 1024);
+                
+                byte[] buf = new byte[1024];
+                int bytesRead = 0;
+                int totalRead = 0;
+                long lastUpdate = 0;
+                
+                long timeNow;
+                while((bytesRead = httpIn.read(buf)) != -1) {
+                    fOut.write(buf, 0, bytesRead);
+                    totalRead += bytesRead;
+                    timeNow = System.currentTimeMillis();
+                    if(timeNow - lastUpdate > UPDATE_MIN_INTERVAL) {
+                        evt.setProgress(totalRead);
+                        System.out.println("Firing progress evt: " + totalRead);
+                        fireProgressEvent();
+                        lastUpdate = timeNow;
+                    }
+                }
+                
+                
+                
                 finished = true;
                 this.bytesDownloaded = totalSize;
                 evt.setEvtType(UMProgressEvent.TYPE_COMPLETE);
@@ -469,14 +539,23 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }
         }
 
+        /**
+         * @inheritDoc
+         */
         public void addProgressListener(UMProgressListener listener) {
             progressListeners.addElement(listener);
         }
 
+        /**
+         * @inheritDoc
+         */
         public int getBytesDownloadedCount() {
             return bytesDownloaded;
         }
 
+        /**
+         * @inheritDoc
+         */
         public int getTotalSize() {
             HttpConnection con = null;
             try {
@@ -496,14 +575,23 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             return totalSize;
         }
 
+        /**
+         * @inheritDoc
+         */
         public boolean isFinished() {
             return finished;
         }
 
+        /**
+         * @inheritDoc
+         */
         public String getSource() {
             return srcURL;
         }
 
+        /**
+         * @inheritDoc
+         */
         public String getDestination() {
             return destFileURI;
         }

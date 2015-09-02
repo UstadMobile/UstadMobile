@@ -12,18 +12,20 @@ import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.*;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.Hashtable;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  *
  * @author varuna
  */
-public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener {
+public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener, Runnable {
 
     public static int OPDSCMDID_OFFSET = 30;
     
@@ -47,6 +49,22 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     
     private int confirmDialogCmdId = 0;
         
+    /**
+     * A list of status items to update
+     */
+    private Hashtable statusesToUpdate;
+    
+    /**
+     * Flags for what things we have to do if the run method is called
+     */
+    private int runFlags = 0;
+    
+    /**
+     * Flag to indicate when run method is called we should run a status update on
+     * the entries contained in statusesToUpdate
+     */
+    private static final int RUN_STATUSUPDATE = 1;
+        
     public CatalogViewJ2ME() {
         Label spaceLabel = new Label(" ");
         addComponent(spaceLabel);
@@ -56,6 +74,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         setLayout(boxLayout);
         entryIdToButtons = new Hashtable();
         addCommandListener(this);
+        statusesToUpdate = new Hashtable();        
     }
     
     public void show() {
@@ -123,7 +142,43 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     public void hideContainerContextMenu() {
     }
 
+    public synchronized void addRunFlag(int flag) {
+        runFlags = runFlags | flag;
+    }
+    
+    public synchronized void setRunFlags(int runFlags) {
+        this.runFlags = runFlags;
+    }
+    
+    public synchronized int getRunFlags() {
+        return this.runFlags;
+    }
+    
     public void setEntryStatus(String entryId, int status) {
+        if(Display.getInstance().isEdt()) {
+            ((OPDSItemButton)entryIdToButtons.get(entryId)).setAcquisitionStatus(status);
+        }else {
+            statusesToUpdate.put(entryIdToButtons.get(entryId), new Integer(status));
+            addRunFlag(RUN_STATUSUPDATE);
+            Display.getInstance().callSerially(this);
+        }
+    }
+    
+    public void run() {
+        int flags = getRunFlags();
+        if((flags & RUN_STATUSUPDATE) == RUN_STATUSUPDATE) {
+            Enumeration e = statusesToUpdate.keys();
+            OPDSItemButton btn;
+            int status;
+            while(e.hasMoreElements()) {
+                btn = (OPDSItemButton)e.nextElement();
+                status = ((Integer)statusesToUpdate.get(btn)).intValue();
+                btn.setAcquisitionStatus(status);
+            }
+            statusesToUpdate.clear();
+        }
+        
+        setRunFlags(0);
     }
 
     public void updateDownloadAllProgress(int loaded, int total) {
