@@ -161,9 +161,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                     FileUtils.USTAD_CONTENT_DIR + FileUtils.FILE_SEP + username;
             
             //Return null if it doesn't exist
-            if (!FileUtils.checkDir(sharedUserContentDir)){
-                return null;
-            }
+            //if (!FileUtils.checkDir(sharedUserContentDir)){
+            //    return null;
+            //}
             
             //Check if it is created. If it isn't, create it.
             if(FileUtils.createFileOrDir(sharedUserContentDir, 
@@ -229,7 +229,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public void writeStringToFile(String str, String fileURI, String encoding) 
             throws IOException{
         try{
-            FileUtils.writeStringToFile(str, fileURI, true);
+            FileUtils.writeStringToFile(str, fileURI, false);
             
         }catch (Exception e){}
     }
