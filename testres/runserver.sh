@@ -12,14 +12,23 @@ RESULTDIR="."
 
 if [ "$1" == '-r' ]; then
     RESULTDIR=$2
+    PORT=$3
+else
+    PORT=$1
 fi
+
+if [ -z "$PORT" ]; then
+    PORT=8065
+fi
+
+echo "Starting server at port: ${PORT}"
 
 SERVER_ARGS="$SERVER_ARGS '"
 
 mvn compile
-echo mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p 8065 -r $RESULTDIR"
+echo mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p ${PORT} -r $RESULTDIR"
 
-mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p 8065 -r $RESULTDIR" &
+mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p ${PORT} -r $RESULTDIR" &
 SERVERPID=$!
 echo "Server ID is $SERVERPID"
 echo $SERVERPID > dodgyhttpd.pid
