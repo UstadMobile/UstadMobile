@@ -54,7 +54,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                     int i=1;
                     for (Enumeration error = aResult.errors(); 
                             error.hasMoreElements(); i++){
-
+                        result = false; //Failure if errors.
                         TestFailure failure = (TestFailure) error.nextElement();
                         errorString = errorString + '\n' + ""+ (i + ") " + 
                                 failure.failedTest());

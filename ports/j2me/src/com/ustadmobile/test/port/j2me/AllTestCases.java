@@ -61,8 +61,8 @@ public class AllTestCases extends TestCase {
         
         
         //To be tested on devices:
-        allTestSuite.addTest(new TestCatalogController());
         allTestSuite.addTest(new TestContainerController());
+        allTestSuite.addTest(new TestCatalogController());
         
         
 
