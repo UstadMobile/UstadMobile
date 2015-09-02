@@ -59,13 +59,10 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
-        //Don't even run on IDE.
-        allTestSuite.addTest(new TestContainerController());
-        //allTestSuite.addTest(new TestContainerController());
         
         //To be tested on devices:
-        //allTestSuite.addTest(new TestCatalogController());
-        //allTestSuite.addTest(new TestCatalogController());
+        allTestSuite.addTest(new TestCatalogController());
+        allTestSuite.addTest(new TestContainerController());
         
         
 
