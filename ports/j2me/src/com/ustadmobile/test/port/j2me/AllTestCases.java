@@ -58,6 +58,7 @@ public class AllTestCases extends TestCase {
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
+        allTestSuite.addTest(new TestPreferences());
         allTestSuite.addTest(new TestLogin());
         allTestSuite.addTest(new TestUMFileResolveLink());
         allTestSuite.addTest(new TestUMFileUtilFilename());
@@ -66,7 +67,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestLoginRegisterUser());
         allTestSuite.addTest(new TestCatalogView());
         allTestSuite.addTest(new TestDownload());
-
+        
         //Needs UMTransferJob done.
         //allTestSuite.addTest(new TestCatalogControllerAcquire());
         //allTestSuite.addTest(new TestCatalogController());
@@ -97,7 +98,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestJ2MECatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
-        
+
         return allTestSuite;
 
     }

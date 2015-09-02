@@ -65,7 +65,7 @@ public class TestUserPref extends TestCase {
         userSettings = userPreferences.getUserSettings();
         
         assertEquals("app settings update test", 
-                "karmakid02", userSettings.get("username"));
+                "karmakid02", userSettings.get("karmakid02-username"));
         
         //Get all keys
         String [] prefKeys = 
