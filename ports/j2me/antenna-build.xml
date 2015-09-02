@@ -150,6 +150,50 @@ NetBeans.  See README for instructions on building from source.
             libclasspath="${toString:ustadlibclasspath.ref}"
             bootclasspath="${wtk.active.bootclasspath}:${wtk.proguard.home}/lib/proguard.jar:${classpath.antennaui}" 
             includes="${javac.includes}">
+		<preserve class="com.ustadmobile.test.core.TestUstadOCF"/>
+		<preserve class="com.ustadmobile.test.core.TestCatalogControllerAcquire"/>
+		<preserve class="com.ustadmobile.test.core.TestCatalogController"/>
+		<preserve class="com.ustadmobile.test.core.TestCatalogEntryInfo"/>
+		<preserve class="com.ustadmobile.test.core.TestCatalogView"/>
+		<preserve class="com.ustadmobile.test.core.TestContainerController"/>
+		<preserve class="com.ustadmobile.test.core.TestDownload"/>
+		<preserve class="com.ustadmobile.test.core.TestFileImpl"/>
+		<preserve class="com.ustadmobile.test.core.TestLogin"/>
+		<preserve class="com.ustadmobile.test.core.TestLoginRegisterUser"/>
+		<preserve class="com.ustadmobile.test.core.TestPreferences"/>
+		<preserve class="com.ustadmobile.test.core.TestTransferJobList"/>
+		<preserve class="com.ustadmobile.test.core.TestUMFileResolveLink"/>
+		<preserve class="com.ustadmobile.test.core.TestUMFileUtilFilename"/>
+		<preserve class="com.ustadmobile.test.core.TestUMFileUtilJoin"/>
+		<preserve class="com.ustadmobile.test.core.TestUtils"/>
+	
+		<preserve class="com.ustadmobile.test.port.j2me.AllTestCases"/>
+                <preserve class="com.ustadmobile.test.port.j2me.CoreLoginTest"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestAppPref"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestBigUnzip"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestCustomLWUIT"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestDownloadURLToFile"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestEPUBRead"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestFormShow"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestHttpResult"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestImplementation"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestJ2MECatalogView"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestLoginView"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestOPDSParse"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestOPFParse"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestRename"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestRMS"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestSerializedHashtable"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestSimpleHTTP"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestSimple"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestSystemimplJ2ME"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestUnzip"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestUserPref"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestUtils"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestXmlParse"/>
+                <preserve class="com.ustadmobile.test.port.j2me.TestZipEpubHTML"/>
+	
+
                 <fileset dir="${classes.dir.ANTENNA}"/>
 
         </wtkpackage>

@@ -63,9 +63,9 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestUMFileResolveLink());
         allTestSuite.addTest(new TestUMFileUtilFilename());
         allTestSuite.addTest(new TestUMFileUtilJoin());
-        allTestSuite.addTest(new TestUstadOCF()); //something wrong here..
+        allTestSuite.addTest(new TestUstadOCF()); //Null Pointer Exception!
         allTestSuite.addTest(new TestLogin());
-        //  allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
+        allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
         
         
         //allTestSuite.addTest(new TestCatalogView()); //Doesnt work on Alcatel.
