@@ -64,8 +64,9 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestUstadOCF()); //Null Pointer Exception!
         //allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
            
-        //temporarily disabling download..
+        //temporarily disabling download because too large
         //allTestSuite.addTest(new TestDownload());
+        //allTestSuite.addTest(new TestTransferJobList());
         
         //Don't even run on IDE.
         //allTestSuite.addTest(new TestCatalogController());
@@ -77,7 +78,6 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestFileImpl());
         
         allTestSuite.addTest(new TestCatalogControllerAcquire());   
-        allTestSuite.addTest(new TestTransferJobList());
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestTestUtils());
                 
