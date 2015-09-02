@@ -7,12 +7,16 @@ package com.ustadmobile.port.j2me.view;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.*;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.Hashtable;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.IOException;
 
 /**
@@ -21,22 +25,29 @@ import java.io.IOException;
  */
 public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener {
 
+    public static int OPDSCMDID_OFFSET = 30;
+    
+    public static int MENUCMD_OFFSET = 10;
+    
     private int CMD_REFRESH = 0;
-    private int CMD_DOWNLOAD_ALL = 9999999;
+    private int CMD_DOWNLOAD_ALL = 1;
+    
+    private int CMD_CONFIRM_OK = 2;
+    
+    private int CMD_CONFIRM_CANCEL = 3;
+    
+    private Dialog confirmDialog;
+    
     private UstadJSOPDSEntry[] entries;
     private CatalogController controller;
     //private UstadJSOPDSFeed feed;
     boolean acquisition = false;
     
     private Hashtable entryIdToButtons;
+    
+    private int confirmDialogCmdId = 0;
         
     public CatalogViewJ2ME() {
-        /*
-        textField = new TextField();
-        addComponent(textField);
-        
-        * */
-        
         Label spaceLabel = new Label(" ");
         addComponent(spaceLabel);
         
@@ -44,19 +55,31 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         BoxLayout boxLayout = new BoxLayout(BoxLayout.Y_AXIS);
         setLayout(boxLayout);
         entryIdToButtons = new Hashtable();
+        addCommandListener(this);
+    }
+    
+    public void show() {
+        UstadMobileSystemImplJ2ME.getInstanceJ2ME().handleFormShow(this);
+        super.show();
     }
     
     public void setController(CatalogController controller) {
+        if(this.controller != null) {
+            return;
+        }
+        
         this.controller = controller;
         entries = this.controller.getModel().opdsFeed.entries;
         entryIdToButtons.clear();
+        setTitle(this.controller.getModel().opdsFeed.title);
         
         int i;
         for(i=0; i<entries.length; i++){
             String title = entries[i].title;
-            Command entry = new Command(title, i+1);
+            Command entry = new Command(title, i+OPDSCMDID_OFFSET);
             OPDSItemButton entryButton = new OPDSItemButton(entry);
-            this.addComponent(entryButton);
+            entryButton.addActionListener(this);
+            addComponent(entryButton);
             entryIdToButtons.put(entries[i].id, entryButton);
         }
         
@@ -68,7 +91,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         refreshButton.addActionListener(this);
         this.addComponent(refreshButton);
         
-
+        
         if (acquisition){
             Command downloadAll = new Command("Download All", CMD_DOWNLOAD_ALL);
             Button downloadAllButton = new Button(downloadAll);
@@ -78,35 +101,20 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         
     }
 
-    public void showDialog(String title, String text) {
-        //alert box
-    }
-
     public void actionPerformed(ActionEvent evt) {
-        if(evt.getCommand().getId() == CMD_REFRESH){
-            //this.controller = this.controller.makeDeviceCatalog();
-            try {
-                this.controller = this.controller.makeDeviceCatalog();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-            
-            this.controller.show();
-            //this.controller.handleClickRefresh();
-        }else{
-            int entryid = evt.getCommand().getId() - 1;
-            if (entryid > 0){
-                int a=0;
-                //make a new epub controller and show it.
-            }
-            
+        int cmdId = evt.getCommand().getId();
+        if(cmdId >= OPDSCMDID_OFFSET) {
+            UstadJSOPDSEntry clickedEntry = controller.getModel().opdsFeed.entries[cmdId - OPDSCMDID_OFFSET];
+            this.controller.handleClickEntry(clickedEntry);
+        }else if(cmdId >= MENUCMD_OFFSET) {
+            this.controller.handleClickMenuItem(cmdId - MENUCMD_OFFSET);
+        }else if(cmdId == CMD_CONFIRM_OK || cmdId == CMD_CONFIRM_CANCEL) {
+            confirmDialog.setVisible(false);
+            confirmDialog.dispose();
+            confirmDialog = null;
+            this.controller.handleConfirmDialogClick(cmdId == CMD_CONFIRM_OK, 
+                this.confirmDialogCmdId);
         }
-        
-    }
-
-    public void showDialog(String title, String text, int commandId) {
-        //Display.getInstance().callSerially(null);
-        //To change body of generated methods, choose Tools | Templates.
     }
 
     public void showContainerContextMenu(UstadJSOPDSItem item) {
@@ -136,15 +144,33 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, int commandId) {
-        //ToDo: This
+        //TODO: this can be called twice: should not be happening.  See why is the actionPerformed event double firing?
+        if(confirmDialog != null) {
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 306, null);
+            return;
+        }
+        
+        this.confirmDialogCmdId = commandId;
+        
+        confirmDialog = new Dialog(title);
+        confirmDialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        TextArea dialogText = new TextArea(message);
+        dialogText.setEditable(false);
+        dialogText.setFocusable(false);
+        confirmDialog.addComponent(dialogText);
+        
+        Button okButton = new Button(new Command(positiveChoice, CMD_CONFIRM_OK));
+        okButton.addActionListener(this);
+        confirmDialog.addComponent(okButton);
+        
+        Button cancelButton = new Button(new Command(negativeChoice, CMD_CONFIRM_CANCEL));
+        cancelButton.addActionListener(this);
+        confirmDialog.addComponent(cancelButton);
+        confirmDialog.showPacked(BorderLayout.CENTER, false);
     }
 
     public boolean isShowing() {
-        if (this.isVisible()){
-            return true;
-        }
-        return false;
-        //ToDo: This
+        return this.isVisible();
     }
     
     /**
@@ -172,7 +198,10 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
      * @param String array of options to show in the menu
      */
     public void setMenuOptions(String[] menuOptions){
-        //ToDo
+        removeAllCommands();
+        for(int i = 0; i < menuOptions.length; i++) {
+            addCommand(new Command(menuOptions[i], i + MENUCMD_OFFSET));
+        }
     }
     
     

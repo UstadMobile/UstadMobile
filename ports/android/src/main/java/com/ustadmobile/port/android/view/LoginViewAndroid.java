@@ -84,23 +84,11 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
 
     public void setLoginViewActivity(LoginActivity activity) {
         this.activity = activity;
-        //Button loginButton = (Button)activity.findViewById(R.id.login_button);
-        //loginButton.setOnClickListener(this);
     }
 
     @Override
     public void setController(LoginController loginController) {
         this.controller = loginController;
-    }
-
-    @Override
-    public void showDialog(String s, String s1) {
-
-    }
-
-    @Override
-    public void performAction(Object o) {
-
     }
 
     @Override

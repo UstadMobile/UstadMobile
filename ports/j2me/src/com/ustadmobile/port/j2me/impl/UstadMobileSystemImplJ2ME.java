@@ -5,6 +5,7 @@
 package com.ustadmobile.port.j2me.impl;
 
 //import com.ustadmobile.app.controller.UstadMobileAppController;
+import com.sun.lwuit.Form;
 import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
 import com.ustadmobile.port.j2me.app.FileUtils;
@@ -24,6 +25,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
+import com.ustadmobile.port.j2me.view.AppViewJ2ME;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
@@ -41,12 +43,36 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     private UMLog umLogger;
     
+    private AppViewJ2ME appView;
+    
+    private Form currentForm;
+    
     public String getImplementationName() {
         return "J2ME";
     }
 
     public UstadMobileSystemImplJ2ME() {
         umLogger = new UMLogJ2ME();
+        appView = new AppViewJ2ME(this);
+    }
+    
+    public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
+        return (UstadMobileSystemImplJ2ME)mainInstance;
+    }
+    
+    /**
+     * This needs to be called so the system knows the current form
+     * @param frm 
+     */
+    public void handleFormShow(Form frm) {
+        if(this.currentForm != frm) {
+            appView.dismissAll();
+        }
+        this.currentForm = frm;
+    }
+    
+    public Form getCurrentForm() {
+        return currentForm;
     }
 
     public boolean dirExists(String dirURI) throws IOException {
@@ -69,10 +95,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public void setUserPref(String key, String value) {
         UserPref.addSetting(key, value);
-    }
-
-    public String getUserPref(String key, String value) {
-        return UserPref.getSetting(key);
     }
 
     public void saveUserPrefs() {
@@ -271,10 +293,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setActiveUserAuth(String password) {
+        AppPref.addSetting("CURRENTUSERAUTH", password);
     }
 
     public String getActiveUserAuth() {
-        return null;
+        return AppPref.getSetting("CURRENTUSERAUTH");
     }
 
     public String getAppPref(String key) {       
@@ -283,11 +306,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return value;
     }
 
-    public HTTPResult makeRequest(String url, Hashtable headers, 
-            Hashtable postParameters, String method) {
+    /**
+     * @inheritDoc
+     */
+    public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String m) {
+        int meaning = 42;
+        getLogger().l(UMLog.VERBOSE, 305, "HTTP (" + m + ")" + url);
         try {
-            return HTTPUtils.makeHTTPRequest(url, postParameters, headers, 
-                    method);
+            return HTTPUtils.makeHTTPRequest(url, postParameters, headers, m);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -309,7 +335,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public AppView getAppView() {
-        return null;
+        return appView;
     }
 
     public UMLog getLogger() {

@@ -28,22 +28,40 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.controller.LoginController;
+package com.ustadmobile.port.j2me.view;
+import com.sun.lwuit.Graphics;
+import com.sun.lwuit.Painter;
+import com.sun.lwuit.geom.Rectangle;
 
 /**
- *
- * @author varuna
+ * Used by AppViewJ2ME to put a Notification box up
+ * 
+ * @author mike
  */
-public interface LoginView extends UstadView {
+public class NotificationPainter implements Painter{
+
+    private String text;
+
+    public synchronized String getText() {
+        return text;
+    }
+
+    public synchronized void setText(String text) {
+        this.text = text;
+    }
     
-    public static final int SECTION_LOGIN = 0;
+    public static int PADDING_BOTTOM = 20;
     
-    public static final int SECTION_REGISTER = 1;
-    
-    public static final int SECTION_JOINCLASS = 2;
-    
-    public void setController(LoginController controller);
+    public void paint(Graphics g, Rectangle rect) {
+        final int strHeight = g.getFont().getHeight();
+        final String textStr = getText();
+        final int strWidth = Math.min(g.getFont().stringWidth(textStr), 
+                rect.getSize().getWidth());
+        final int x = (rect.getSize().getWidth() - strWidth)/2;
+        final int y = rect.getSize().getHeight() - strHeight - PADDING_BOTTOM;
+        
+        g.drawString(textStr, x, y);
+    }
     
 }
