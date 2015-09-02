@@ -33,6 +33,7 @@ import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
+import com.sun.lwuit.events.ActionListener;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -77,6 +78,12 @@ public class OPDSItemButton extends Button {
     public OPDSItemButton(String title) {
         this(new Command(title), null);
     }
+
+    public void addActionListener(ActionListener l) {
+        super.addActionListener(l); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
     
     public OPDSItemButton(Command cmd, UstadJSOPDSEntry entry){
         this.setCommand(cmd);

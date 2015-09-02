@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.port.j2me.impl;
 
-//import com.ustadmobile.app.controller.UstadMobileAppController;
 import com.sun.lwuit.Form;
 import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
@@ -50,8 +49,10 @@ import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
@@ -72,6 +73,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     private AppViewJ2ME appView;
     
     private Form currentForm;
+    
+    private ZipFileHandle openZip;
+    
+    private String openZipURI;
+    
+    public static final String OPENZIP_PROTO = "zip:///";
     
     public String getImplementationName() {
         return "J2ME";
@@ -368,13 +375,62 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return umLogger;
     }
 
+    /**
+     * @inheritDoc
+     */
     public String openContainer(UstadJSOPDSEntry entry, String containerURI, 
             String mimeType) {
-        return null;
+        if(openZip != null) {
+            throw new IllegalStateException("J2ME: Open one thing at a time please");
+        }
+        
+        try {
+            openZip = openZip(containerURI);
+            openZipURI = containerURI;
+        }catch(IOException e) {
+            getLogger().l(UMLog.CRITICAL, 400, containerURI, e);
+        }finally {
+            
+        }
+
+        return OPENZIP_PROTO;
+    }
+    
+    public ZipFileHandle getOpenZip() {
+        return openZip;
     }
 
+    public HTTPResult readURLToString(String url, Hashtable headers) throws IOException {
+        if(url.startsWith(OPENZIP_PROTO)) {
+            InputStream in = null;
+            ByteArrayOutputStream bout = null;
+            IOException ioe = null;
+            try {
+                in = openZip.openInputStream(url.substring(
+                    OPENZIP_PROTO.length()));
+                bout = new ByteArrayOutputStream();
+                UMIOUtils.readFully(in, bout, 1024);
+            }catch(IOException e) {
+                getLogger().l(UMLog.INFO, 320, url, e);
+                ioe = e;
+            }finally {
+                UMIOUtils.closeInputStream(in);
+            }
+            
+            if(ioe == null) {
+                return new HTTPResult(bout.toByteArray(), 200, new Hashtable());
+            }else {
+                throw ioe;
+            }
+        }else {
+            return super.readURLToString(url, headers); 
+        }
+    }
+    
+    
+
     public void closeContainer(String openURI) {
-        //ToDo
+        openZip = null;
     }
 
     public InputStream getFileInputStreamFromZip(String zipURI, String filename) {
@@ -390,7 +446,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public ZipFileHandle openZip(String name) throws IOException {
-        return null;
+        return new ZipFileHandleJ2ME(name);
     }
 
     public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException{
@@ -414,6 +470,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return out;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public InputStream openFileInputStream(String fileURI) throws IOException {
+        InputStream in = Connector.openInputStream(fileURI);
+        return in;
+    }
+    
     public String[] getPrefKeyList() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
