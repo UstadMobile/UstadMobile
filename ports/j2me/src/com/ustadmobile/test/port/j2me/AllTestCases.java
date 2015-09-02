@@ -58,6 +58,7 @@ public class AllTestCases extends TestCase {
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
+
         allTestSuite.addTest(new TestPreferences());
         allTestSuite.addTest(new TestLogin());
         allTestSuite.addTest(new TestUMFileResolveLink());
