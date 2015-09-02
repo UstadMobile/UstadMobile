@@ -79,7 +79,7 @@ public class CatalogEntryInfo {
             urls[i] = URLTextUtil.urlDecodeUTF8(urls[i]);
         }
         entryInfo.srcURLs = urls;
-        entryInfo.fileURI = URLTextUtil.urlEncodeUTF8(strComps[2]);
+        entryInfo.fileURI = URLTextUtil.urlDecodeUTF8(strComps[2]);
         entryInfo.mimeType = strComps[3];
         
         return entryInfo;

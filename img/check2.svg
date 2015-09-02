@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="check2.svg">
+   sodipodi:docname="check2.svg"
+   inkscape:export-filename="/home/mike/src/UstadMobile/ports/j2me/src/res/img/check.png"
+   inkscape:export-xdpi="75"
+   inkscape:export-ydpi="75">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -34,7 +37,7 @@
      units="px"
      inkscape:window-width="1855"
      inkscape:window-height="1056"
-     inkscape:window-x="1985"
+     inkscape:window-x="65"
      inkscape:window-y="24"
      inkscape:window-maximized="1" />
   <metadata

@@ -9,17 +9,14 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.*;
 import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AppView;
 import java.util.Hashtable;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import java.io.IOException;
 import java.util.Enumeration;
 
 /**
@@ -32,30 +29,30 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     
     public static int MENUCMD_OFFSET = 10;
     
-    private int CMD_REFRESH = 0;
-    private int CMD_DOWNLOAD_ALL = 1;
+    final private int CMD_REFRESH = 0;
+    final private int CMD_DOWNLOAD_ALL = 1;
     
-    private int CMD_CONFIRM_OK = 2;
+    final private int CMD_CONFIRM_OK = 2;
     
-    private int CMD_CONFIRM_CANCEL = 3;
+    final private int CMD_CONFIRM_CANCEL = 3;
     
-    private int CMD_DELETE_ENTRY = 4;
+    final private int CMD_DELETE_ENTRY = 4;
     
     private Dialog confirmDialog;
     
     private UstadJSOPDSEntry[] entries;
     private CatalogController controller;
-    //private UstadJSOPDSFeed feed;
+
     boolean acquisition = false;
     
-    private Hashtable entryIdToButtons;
+    final private Hashtable entryIdToButtons;
     
     private int confirmDialogCmdId = 0;
         
     /**
      * A list of status items to update
      */
-    private Hashtable statusesToUpdate;
+    final private Hashtable statusesToUpdate;
     
     /**
      * Flags for what things we have to do if the run method is called
