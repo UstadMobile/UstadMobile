@@ -43,7 +43,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                 if (rc == ctc){
                     //usually solves the problem of the object getting filled 
                     //and populated on screen.
-                    Thread.sleep(500);
+                    Thread.sleep(5000); //5 seconds
                                    
                     int numError = aResult.errorCount();
                     String numAssert = String.valueOf(aResult.assertionCount());
