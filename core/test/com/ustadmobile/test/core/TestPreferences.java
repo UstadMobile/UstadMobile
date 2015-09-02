@@ -108,5 +108,8 @@ public class TestPreferences extends TestCase {
             UMUtil.getIndexInArray(testKeys[2], impl.getAppPrefKeyList()));
     }
     
+    public void runTest(){
+        this.testPreferences();
+    }
     
 }

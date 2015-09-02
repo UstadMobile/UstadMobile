@@ -37,6 +37,7 @@ import com.ustadmobile.port.j2me.app.HTTPUtils;
 import j2meunit.framework.TestCase;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.test.core.TestConstants;
 /**
  *
  * @author varuna
@@ -68,11 +69,8 @@ public class TestLoginView extends TestCase {
         try { Thread.sleep(2000); }
         catch(InterruptedException e) {}
 
-        //UstadMobileSystemImpl impl = new UstadMobileSystemImplJ2ME();
-        //String server = impl.getAppPref("server");
-        String server = 
-                UstadMobileSystemImpl.getInstance().getAppPref("server");
-        
+
+        String server = TestConstants.LOGIN_URL;
         //Correct Login cred
         int loginReturn = LoginController.authenticate(
                 "karmakid02", "karmakid02",server );

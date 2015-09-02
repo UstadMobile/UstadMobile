@@ -115,6 +115,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public void setActiveUser(String username) {
         AppPref.addSetting("CURRENTUSER", username);
+        UserPref.setActiveUser(username);
+        
     }
 
     public void setUserPref(String key, String value) {
@@ -380,11 +382,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public String[] getUserPrefKeyList() {
-        return null;
+        return UserPref.getAllKeys();
     }
 
     public String[] getAppPrefKeyList() {
-        return null;
+        return AppPref.getAllKeys();
     }
 
     public ZipFileHandle openZip(String name) throws IOException {

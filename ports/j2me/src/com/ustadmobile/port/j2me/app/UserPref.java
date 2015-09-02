@@ -31,7 +31,9 @@
 package com.ustadmobile.port.j2me.app;
 
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 
@@ -96,53 +98,67 @@ public class UserPref {
         
     }
     
-    public static void addSetting(String key, String newValue){
-        //Initiate app RMS..
-        RMSUtils appRms = new RMSUtils(REC_STORE);
-        
-        //Get Current configuration
-        Hashtable currentSettings = getUserSettings();
-        if(currentSettings.containsKey(key)){
-            currentSettings.remove(key);
-            currentSettings.put(key, newValue);
-            
-            //Put it back in
-            
-            //Clear it, Close it
-            appRms.deleteRMS();
-            appRms.closeRMS();
-            
-            //Open it again
-            appRms.openRMS();
-            
-            //Generate bytes
-            byte[] newSettingsBytes = 
-                    SerializedHashtable.hashTabletoStream(currentSettings);
-            
-            //Insert the data in.
-            appRms.insertBytes(newSettingsBytes);
-            
-            
-            
+    public static void addSetting(String key, String newValue){   
+        if (newValue == null){
+            deleteSetting(key);
         }else{
-            currentSettings.put(key, newValue);
-            //Clear it, Close it
-            appRms.deleteRMS();
+            //Initiate app RMS..
+            RMSUtils appRms = new RMSUtils(REC_STORE);
+
+            //Get Current configuration
+            Hashtable currentSettings = getUserSettings();
+
+            if (key.equals("CURRENTUSER")){
+                key = "CURRENTUSER";
+            }else{
+                if (currentSettings.containsKey("CURRENTUSER")){
+                    String username = currentSettings.get("CURRENTUSER").toString();
+                    key = username + "-" + key;
+                }
+            }
+
+            if(currentSettings.containsKey(key)){
+                currentSettings.remove(key);
+                currentSettings.put(key, newValue);
+
+                //Put it back in
+
+                //Clear it, Close it
+                appRms.deleteRMS();
+                appRms.closeRMS();
+
+                //Open it again
+                appRms.openRMS();
+
+                //Generate bytes
+                byte[] newSettingsBytes = 
+                        SerializedHashtable.hashTabletoStream(currentSettings);
+
+                //Insert the data in.
+                appRms.insertBytes(newSettingsBytes);
+
+
+
+            }else{
+                currentSettings.put(key, newValue);
+                //Clear it, Close it
+                appRms.deleteRMS();
+                appRms.closeRMS();
+
+                //Open it again
+                appRms.openRMS();
+
+                //Generate bytes
+                byte[] newSettingsBytes = 
+                        SerializedHashtable.hashTabletoStream(currentSettings);
+
+                //Insert the data in.
+                appRms.insertBytes(newSettingsBytes);
+
+            }
+            //close the app RMS
             appRms.closeRMS();
-            
-            //Open it again
-            appRms.openRMS();
-            
-            //Generate bytes
-            byte[] newSettingsBytes = 
-                    SerializedHashtable.hashTabletoStream(currentSettings);
-            
-            //Insert the data in.
-            appRms.insertBytes(newSettingsBytes);
-            
         }
-        //close the app RMS
-        appRms.closeRMS();
     }
     
     public static void deleteSetting(String key){
@@ -151,6 +167,16 @@ public class UserPref {
         
         //Get Current configuration
         Hashtable currentSettings = getUserSettings();
+        
+        if (key.equals("CURRENTUSER")){
+                key = "CURRENTUSER";
+            }else{
+                if (currentSettings.containsKey("CURRENTUSER")){
+                    String username = currentSettings.get("CURRENTUSER").toString();
+                    key = username + "-" + key;
+                }
+            }
+        
         if(currentSettings.containsKey(key)){
             currentSettings.remove(key);
             
@@ -173,12 +199,20 @@ public class UserPref {
         appRms.closeRMS();
     }
     
-    public static String getSetting(String key){
+    public static String getSetting(String key){       
         //Initiate app RMS..
         RMSUtils appRms = new RMSUtils(REC_STORE);
         String value = null;
         //Get Current configuration
         Hashtable currentSettings = getUserSettings();
+        if (key.equals("CURRENTUSER")){
+            key = "CURRENTUSER";
+        }else{
+            if (currentSettings.containsKey("CURRENTUSER")){
+                String username = currentSettings.get("CURRENTUSER").toString();
+                key = username + "-" + key;
+            }
+        }
         if(currentSettings.containsKey(key)){
             value = currentSettings.get(key).toString();
         }
@@ -187,42 +221,58 @@ public class UserPref {
         return value;
     }
     
+    public static String[] getAllKeys(){
+        RMSUtils appRms = new RMSUtils(REC_STORE);
+        Hashtable curretSettings = getUserSettings();
+        String allUserKeys[] = 
+                FileUtils.enumerationToStringArray(curretSettings.keys());
+        
+        String username = getActiveUser();
+        if (username == null){
+            return null;
+        }
+        Vector userKeysVector = new Vector();
+        for( int i = 0; i < allUserKeys.length - 1; i++)
+        {
+            if(allUserKeys[i].startsWith(username+"-")){
+                userKeysVector.addElement(allUserKeys[i]);
+            }
+        }
+        
+        String userKeys[] = FileUtils.vectorToStringArray(userKeysVector);
+        String simpleUserKeys[] = new String[userKeys.length];
+        int prefixLength = (username + "-").length();
+        for ( int i = 0; i < userKeys.length; i++){
+            userKeys[i] = userKeys[i].substring(prefixLength);
+        }
+        return userKeys;
+    }
+    
     public static Hashtable getUserSettings(){
         
         //getDefault values
-        setDefaultPreferences();
+        //setDefaultPreferences();
         
         //Initiate app RMS..
         RMSUtils appRms = new RMSUtils(REC_STORE);
         
         //Check if there is anything..
         appRms.openRMS();
-        byte[] appSettingsByteArrayRMS = appRms.readBytes();
-        Hashtable appSettingsRMS = SerializedHashtable.streamToHashtable
-                (appSettingsByteArrayRMS);
-        //appRms.closeRMS();
-        if (appSettingsRMS.isEmpty()){
-            System.out.print("empty");
-        }else{
-            System.out.print("not empty");
+        byte[] userSettingsByteArrayRMS = appRms.readBytes();
+        Hashtable allUserSettingsRMS = SerializedHashtable.streamToHashtable
+                (userSettingsByteArrayRMS);
+        Hashtable userSettingRMS = new Hashtable();
+        System.out.print("Size is: " + allUserSettingsRMS.size());
+        String username="";
+        if(allUserSettingsRMS.containsKey("CURRENTUSER") && 
+                !allUserSettingsRMS.get("CURRENTUSER").equals("")){
+            username = allUserSettingsRMS.get("CURRENTUSER").toString();
         }
-        System.out.print("Size is: " + appSettingsRMS.size());
         
-        
-        if (appSettingsRMS.isEmpty() || appSettingsRMS.size() < userSettings.size()){
-            //wipe it.
-            appRms.deleteRMS();
-            
-            //default hashtable to bytearray
-            byte[] appSettingsByteArray = 
-                SerializedHashtable.hashTabletoStream(userSettings);
-            
-            //load it with the default.
-            appRms.insertBytes(appSettingsByteArray);
-            
+        if (allUserSettingsRMS.isEmpty() || allUserSettingsRMS.size() < 1 ){
+            return userSettingRMS;
         }else{
-            userSettings.clear();
-            userSettings=appSettingsRMS;
+            userSettings=allUserSettingsRMS;
             //appSettings.equals(appSettingsRMS);
         }
         
@@ -258,7 +308,70 @@ public class UserPref {
         }
     }
     
+    public static boolean addToUserSettings(String key, String value){
+       return false; 
+    }
+    
+    public static String getActiveUser(){
+        //Initiate app RMS..
+        RMSUtils appRms = new RMSUtils(REC_STORE);
+        
+        //Check if there is anything..
+        appRms.openRMS();
+        byte[] userSettingsByteArrayRMS = appRms.readBytes();
+        Hashtable userSettingsRMS = SerializedHashtable.streamToHashtable
+                (userSettingsByteArrayRMS);
+        
+        //Clear it, Close it
+        appRms.deleteRMS();
+        appRms.closeRMS();
+
+        
+        if (userSettingsRMS.containsKey("CURRENTUSER")){
+            return userSettingsRMS.get("CURRENTUSER").toString();
+        }
+        return null;
+    }
+    
     public static void setActiveUser(String username){
+        //Initiate app RMS..
+        RMSUtils appRms = new RMSUtils(REC_STORE);
+        
+        //Check if there is anything..
+        appRms.openRMS();
+        byte[] userSettingsByteArrayRMS = appRms.readBytes();
+        Hashtable userSettingsRMS = SerializedHashtable.streamToHashtable
+                (userSettingsByteArrayRMS);
+        
+        //Clear it, Close it
+        appRms.deleteRMS();
+        appRms.closeRMS();
+        
+        System.out.print("Size is: " + userSettingsRMS.size());
+        
+        if (userSettingsRMS.containsKey("CURRENTUSER") && 
+                userSettingsRMS.get("CURRENTUSER").equals(username)){
+            //already set
+            int a=0;
+        }else{
+            userSettingsRMS.put("CURRENTUSER", username);
+            userSettingsRMS.put(username+"-username", username);
+            userSettingsRMS.put(username+"-password", "");
+        }
+        
+        //Open it again
+        appRms.openRMS();
+
+        //Generate bytes
+        byte[] newSettingsBytes = 
+                SerializedHashtable.hashTabletoStream(userSettingsRMS);
+
+        //Insert the data in.
+        appRms.insertBytes(newSettingsBytes);
+      
+        
+        //close the app RMS
+        appRms.closeRMS();
         //Check if this username exists
         
     }

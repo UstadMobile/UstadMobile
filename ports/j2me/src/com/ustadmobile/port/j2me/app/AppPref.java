@@ -103,52 +103,56 @@ public class AppPref {
     }
     
     public static void addSetting(String key, String newValue){
-        //Initiate app RMS..
-        RMSUtils appRms = new RMSUtils(REC_STORE);
-        
-        //Get Current configuration
-        Hashtable currentSettings = getAppSettings();
-        if(currentSettings.containsKey(key)){
-            currentSettings.remove(key);
-            currentSettings.put(key, newValue);
-            
-            //Put it back in
-            
-            //Clear it, Close it
-            appRms.deleteRMS();
-            appRms.closeRMS();
-            
-            //Open it again
-            appRms.openRMS();
-            
-            //Generate bytes
-            byte[] newSettingsBytes = 
-                    SerializedHashtable.hashTabletoStream(currentSettings);
-            
-            //Insert the data in.
-            appRms.insertBytes(newSettingsBytes);
-            
-            
-            
+        if(newValue == null){
+            deleteSetting(key);
         }else{
-            currentSettings.put(key, newValue);
-            //Clear it, Close it
-            appRms.deleteRMS();
+            //Initiate app RMS..
+            RMSUtils appRms = new RMSUtils(REC_STORE);
+
+            //Get Current configuration
+            Hashtable currentSettings = getAppSettings();
+            if(currentSettings.containsKey(key)){
+                currentSettings.remove(key);
+                currentSettings.put(key, newValue);
+
+                //Put it back in
+
+                //Clear it, Close it
+                appRms.deleteRMS();
+                appRms.closeRMS();
+
+                //Open it again
+                appRms.openRMS();
+
+                //Generate bytes
+                byte[] newSettingsBytes = 
+                        SerializedHashtable.hashTabletoStream(currentSettings);
+
+                //Insert the data in.
+                appRms.insertBytes(newSettingsBytes);
+
+
+
+            }else{
+                currentSettings.put(key, newValue);
+                //Clear it, Close it
+                appRms.deleteRMS();
+                appRms.closeRMS();
+
+                //Open it again
+                appRms.openRMS();
+
+                //Generate bytes
+                byte[] newSettingsBytes = 
+                        SerializedHashtable.hashTabletoStream(currentSettings);
+
+                //Insert the data in.
+                appRms.insertBytes(newSettingsBytes);
+
+            }
+            //close the app RMS
             appRms.closeRMS();
-            
-            //Open it again
-            appRms.openRMS();
-            
-            //Generate bytes
-            byte[] newSettingsBytes = 
-                    SerializedHashtable.hashTabletoStream(currentSettings);
-            
-            //Insert the data in.
-            appRms.insertBytes(newSettingsBytes);
-            
         }
-        //close the app RMS
-        appRms.closeRMS();
     }
     
     public static void deleteSetting(String key){
@@ -191,6 +195,12 @@ public class AppPref {
         //close the app RMS
         appRms.closeRMS();
         return value;
+    }
+    
+    public static String[] getAllKeys(){
+        RMSUtils appRms = new RMSUtils(REC_STORE);
+        Hashtable curretSettings = getAppSettings();
+        return FileUtils.enumerationToStringArray(curretSettings.keys());
     }
     
     public static Hashtable getAppSettings(){

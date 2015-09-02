@@ -10,6 +10,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.UstadMobileSystemImplFactory;
+import com.ustadmobile.test.core.TestConstants;
 import j2meunit.framework.TestCase;
 
 /**
@@ -23,8 +24,8 @@ public class TestHttpResult extends TestCase {
     
     public void runTest() throws Throwable{
         assertEquals("Simple Test OK", 2, 1+1);
-        String server = 
-                UstadMobileSystemImpl.getInstance().getAppPref("server");
+
+        String server = TestConstants.LOGIN_URL;
         HTTPResult httpResult = null;
         httpResult = HTTPUtils.makeHTTPRequest(
                 server, null, null, "GET");
