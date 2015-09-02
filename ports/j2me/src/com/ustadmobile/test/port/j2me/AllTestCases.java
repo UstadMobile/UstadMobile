@@ -67,7 +67,8 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestUstadOCF());
         allTestSuite.addTest(new TestLoginRegisterUser());
         allTestSuite.addTest(new TestCatalogView());
-        allTestSuite.addTest(new TestDownload());
+        //temporarily disabling download..
+        //allTestSuite.addTest(new TestDownload());
         
         //Needs UMTransferJob done.
         //allTestSuite.addTest(new TestCatalogControllerAcquire());
