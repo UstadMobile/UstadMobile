@@ -79,8 +79,6 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestCatalogView());
         //allTestSuite.addTest(new TestContainerController());
         //allTestSuite.addTest(new TestTransferJobList());
-                
-        allTestSuite.addTest(new TestZipEpubHTML());
               
         allTestSuite.addTest(new TestImplementation());
         allTestSuite.addTest(new TestSimpleHTTP());
@@ -103,6 +101,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestJ2MECatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
+        //allTestSuite.addTest(new TestZipEpubHTML());
 
         return allTestSuite;
 
