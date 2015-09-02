@@ -36,12 +36,12 @@ public class TestForm4 extends Form implements ActionListener{
         setTitle("Test Form 4");
 
         Command button1Cmd = new Command("Button1", CMD_RANDOM1);
-        OPDSItemButton opdsButton1 = new OPDSItemButton(button1Cmd);
+        OPDSItemButton opdsButton1 = new OPDSItemButton(button1Cmd, null);
         opdsButton1.addActionListener(this);
         this.addComponent(opdsButton1);
         
         Command button2Cmd = new Command("Button2", CMD_RANDOM1);
-        OPDSItemButton opdsButton2 = new OPDSItemButton(button2Cmd);
+        OPDSItemButton opdsButton2 = new OPDSItemButton(button2Cmd, null);
         opdsButton2.addActionListener(this);
         this.addComponent(opdsButton2);
         

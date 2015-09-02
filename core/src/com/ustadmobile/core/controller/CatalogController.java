@@ -1239,6 +1239,7 @@ public class CatalogController implements UstadController, UMProgressListener {
                 jobList.getCurrentJobTotalSize());
             if(isComplete) {
                 this.view.setEntryStatus(entry.id, STATUS_ACQUIRED);
+                this.view.setDownloadEntryProgressVisible(entry.id, false);
             }
         }
     }

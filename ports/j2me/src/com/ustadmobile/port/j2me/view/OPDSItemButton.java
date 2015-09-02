@@ -36,6 +36,7 @@ import com.sun.lwuit.Image;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
@@ -61,12 +62,27 @@ public class OPDSItemButton extends Button {
      */
     private Image checkImg;        
     
-    public OPDSItemButton(String text){
-        this(new Command(text));
+    private UstadJSOPDSEntry entry;
+    
+    /**
+     * Whether or not the progress bar is visible
+     */
+    private boolean progressBarVisible;
+    
+    
+    public OPDSItemButton(UstadJSOPDSEntry entry){
+        this(new Command(entry.title), entry);
     }
     
-    public OPDSItemButton(Command cmd){
+    public OPDSItemButton(String title) {
+        this(new Command(title), null);
+    }
+    
+    public OPDSItemButton(Command cmd, UstadJSOPDSEntry entry){
         this.setCommand(cmd);
+        this.entry = entry;
+        
+        progressBarVisible = false;
         
         Object checkVal = null;
         if(checkImgRef != null) {
@@ -84,6 +100,16 @@ public class OPDSItemButton extends Button {
             }
         }
     }
+
+    public UstadJSOPDSEntry getEntry() {
+        return entry;
+    }
+
+    public void setEntry(UstadJSOPDSEntry entry) {
+        this.entry = entry;
+    }
+    
+    
     
     /**
      * Get the acquisition status of the item - returns a CatalogEntryInfo status flag
@@ -111,19 +137,46 @@ public class OPDSItemButton extends Button {
         }
     }
 
+    /**
+     * Whether or not the progress bar is visible for this entry
+     * 
+     * @return true if visible; false otherwise
+     */
+    public synchronized boolean isProgressBarVisible() {
+        return progressBarVisible;
+    }
+
+    /**
+     * Set whether or not the progress bar is visible for this entry
+     * 
+     * @param progressBarVisible true for visible; false otherwise
+     */
+    public synchronized void setProgressBarVisible(boolean progressBarVisible) {
+        if(progressBarVisible != this.progressBarVisible) {
+            this.progressBarVisible = progressBarVisible;
+            this.repaint();
+        }
+    }
+    
+    
+
     public void paint(Graphics g) {
         super.paint(g); 
 
-        int x = this.getWidth();
-        int y = this.getHeight();
-        int yAxis = y - progressHeight;
-        
-        String ourText = getText();
+        if(isProgressBarVisible()) {
+            int x = this.getWidth();
+            int y = this.getHeight();
+            int yAxis = y - progressHeight;
 
-        float percentageWidth = ((float)x/100) * progressPercentage;
+            String ourText = getText();
+
+            float percentageWidth = ((float)x/100) * progressPercentage;
+
+            g.setColor(0);
+            g.fillRect(getX(), getY() + (y - progressHeight), (int)percentageWidth, 
+                    progressHeight, progressTransparency);
+        }
         
-        g.fillRect(getX(), getY() + (y - progressHeight), (int)percentageWidth, 
-                progressHeight, progressTransparency);
         
         if(getAcquisitionStatus()== CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
             g.drawImage(checkImg, getX(), getY() + (getHeight()- checkImg.getHeight()));
@@ -133,9 +186,7 @@ public class OPDSItemButton extends Button {
     
     public void updateProgress(int progressPercentage){
         this.progressPercentage = progressPercentage;
-        //Repaint
         this.repaint();
-        
     }
     
     

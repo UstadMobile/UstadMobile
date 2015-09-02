@@ -443,7 +443,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
          * The delay (in ms) minimum between progress updates; this is used to
          * ensure that we don't fire out too many updates
          */
-        public static final int UPDATE_MIN_INTERVAL = 250;
+        public static final int UPDATE_MIN_INTERVAL = 1000;
         
         /**
          * Create a new download job

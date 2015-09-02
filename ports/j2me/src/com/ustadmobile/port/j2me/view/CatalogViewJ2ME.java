@@ -15,6 +15,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.AppView;
 import java.util.Hashtable;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
@@ -37,6 +38,8 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     private int CMD_CONFIRM_OK = 2;
     
     private int CMD_CONFIRM_CANCEL = 3;
+    
+    private int CMD_DELETE_ENTRY = 4;
     
     private Dialog confirmDialog;
     
@@ -95,8 +98,8 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         int i;
         for(i=0; i<entries.length; i++){
             String title = entries[i].title;
-            Command entry = new Command(title, i+OPDSCMDID_OFFSET);
-            OPDSItemButton entryButton = new OPDSItemButton(entry);
+            Command entryCmd = new Command(title, i+OPDSCMDID_OFFSET);
+            OPDSItemButton entryButton = new OPDSItemButton(entryCmd, entries[i]);
             entryButton.addActionListener(this);
             addComponent(entryButton);
             entryIdToButtons.put(entries[i].id, entryButton);
@@ -133,7 +136,33 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
             confirmDialog = null;
             this.controller.handleConfirmDialogClick(cmdId == CMD_CONFIRM_OK, 
                 this.confirmDialogCmdId);
+        }else if(cmdId == CMD_DELETE_ENTRY) {
+            OPDSItemButton selectedButton = getFocusedButton();
+            if(selectedButton != null) {
+                this.controller.handleClickDeleteEntries(
+                    new UstadJSOPDSEntry[]{selectedButton.getEntry()});
+            }else {
+                UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                        "No Entry Selected!", AppView.LENGTH_LONG);
+            }
         }
+    }
+    
+    /**
+     * Find the button which is currently focused - if any
+     * @return 
+     */
+    public OPDSItemButton getFocusedButton() {
+        Enumeration e = entryIdToButtons.keys();
+        OPDSItemButton currentButton;
+        while(e.hasMoreElements()) {
+            currentButton = (OPDSItemButton)entryIdToButtons.get(e.nextElement());
+            if(currentButton.hasFocus()) {
+                return currentButton;
+            }
+        }
+        
+        return null;
     }
 
     public void showContainerContextMenu(UstadJSOPDSItem item) {
@@ -185,13 +214,13 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
 
     public void setDownloadEntryProgressVisible(String entryId, boolean visible) {
+        ((OPDSItemButton)entryIdToButtons.get(entryId)).setProgressBarVisible(visible);
     }
 
     public void updateDownloadEntryProgress(String entryId, int loaded, int total) {
         OPDSItemButton entryButton = 
             (OPDSItemButton)entryIdToButtons.get(entryId);
-        //update with percentage
-        entryButton.updateProgress((loaded/total)*100);
+        entryButton.updateProgress((int) (((float)loaded/(float)total) * 100));
     }
 
     public CatalogController getController() {
@@ -254,12 +283,15 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
      */
     public void setMenuOptions(String[] menuOptions){
         removeAllCommands();
+        
+        Command deleteCommand = new Command("Delete", CMD_DELETE_ENTRY);
+        addCommand(deleteCommand);
+        
         for(int i = 0; i < menuOptions.length; i++) {
             addCommand(new Command(menuOptions[i], i + MENUCMD_OFFSET));
         }
+            
+        
+        
     }
-    
-    
-    
-    
 }
