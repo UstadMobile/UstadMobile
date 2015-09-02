@@ -176,6 +176,13 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException;
     
+    /**
+     * Get an input stream from a given file
+     * 
+     * @param fileURI URI to the file for which we want an input stream
+     */
+    public abstract InputStream openFileInputStream(String fileURI) throws IOException;
+    
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 

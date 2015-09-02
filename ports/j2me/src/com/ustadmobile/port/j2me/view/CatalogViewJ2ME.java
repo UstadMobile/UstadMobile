@@ -73,8 +73,8 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         BoxLayout boxLayout = new BoxLayout(BoxLayout.Y_AXIS);
         setLayout(boxLayout);
         entryIdToButtons = new Hashtable();
-        addCommandListener(this);
         statusesToUpdate = new Hashtable();        
+        addCommandListener(this);
     }
     
     public void show() {
@@ -97,7 +97,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
             String title = entries[i].title;
             Command entryCmd = new Command(title, i+OPDSCMDID_OFFSET);
             OPDSItemButton entryButton = new OPDSItemButton(entryCmd, entries[i]);
-            entryButton.addActionListener(this);
+            //entryButton.addActionListener(this);
             addComponent(entryButton);
             entryIdToButtons.put(entries[i].id, entryButton);
         }
