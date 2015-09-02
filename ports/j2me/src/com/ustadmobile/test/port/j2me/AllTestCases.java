@@ -64,10 +64,12 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestUMFileResolveLink());
         allTestSuite.addTest(new TestUMFileUtilFilename());
         allTestSuite.addTest(new TestUMFileUtilJoin());
-        //allTestSuite.addTest(new TestUstadOCF());
+        //allTestSuite.addTest(new TestUstadOCF()); //something wrong here..
         allTestSuite.addTest(new TestLoginRegisterUser());
-        /*   
+        
+        
         allTestSuite.addTest(new TestCatalogView());
+        /*
         //temporarily disabling download..
         //allTestSuite.addTest(new TestDownload());
         
