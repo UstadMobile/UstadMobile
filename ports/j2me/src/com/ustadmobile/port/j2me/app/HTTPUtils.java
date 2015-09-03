@@ -43,7 +43,6 @@ import javax.microedition.io.file.FileConnection;
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.util.URLTextUtil;
-import com.ustadmobile.test.core.TestUtils;
 import javax.microedition.pim.FieldFullException;
 
 /**
@@ -162,7 +161,6 @@ public class HTTPUtils {
     
     public static void httpDebug(String msg){
         try {
-            msg = URLTextUtil.urlEncodeUTF8(msg);
             msg = FileUtils.replaceString(msg, ":", "|");
             msg = FileUtils.replaceString(msg, " ", "/");
             HTTPUtils.makeHTTPRequest(

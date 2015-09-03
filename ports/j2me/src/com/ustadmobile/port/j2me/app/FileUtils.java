@@ -21,6 +21,7 @@ try 3: Images
 */
 
 package com.ustadmobile.port.j2me.app;
+import com.ustadmobile.core.util.URLTextUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -470,7 +471,9 @@ public class FileUtils {
             FileConnection fc = null;
             fileName = fileName.trim();
             HTTPUtils.httpDebug("CreateFileOrDirFileNameIs");
+            HTTPUtils.httpDebug(fileName);
             HTTPUtils.httpDebug(fileName.substring(10));
+            HTTPUtils.httpDebug(URLTextUtil.urlEncodeUTF8(fileName));
 
             if (isDir && !fileName.endsWith("/")) {
                     fileName += "/";
