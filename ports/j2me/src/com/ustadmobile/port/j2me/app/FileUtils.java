@@ -233,7 +233,7 @@ public class FileUtils {
       FileConnection file = (FileConnection) Connector.open(path, 
               Connector.READ_WRITE);
       if (!file.exists()) {
-          return true;
+          return false;
       }
 
       if (!recursive || !file.isDirectory()){
@@ -614,6 +614,9 @@ public class FileUtils {
     public static boolean writeStringToFile(String string, String fileURI, 
             boolean append){
         try{
+            if (!append){
+                deleteRecursively(fileURI, false);
+            }
             FileConnection fileCon = (FileConnection) Connector.open(fileURI, 
                     Connector.READ_WRITE);
             

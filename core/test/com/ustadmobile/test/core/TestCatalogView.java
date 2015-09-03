@@ -38,6 +38,7 @@ package com.ustadmobile.test.core;
 
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
+    import com.ustadmobile.port.j2me.app.HTTPUtils;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -94,7 +95,48 @@ public class TestCatalogView extends TestCase {
         
     }
 
+    public void testCatalogViewDebug() throws Exception{
+        /* $if umplatform == 1 $
+        Activity activity = getActivity();
+        $endif   */
+        HTTPUtils.httpDebug("startingTestCatalogView");
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.setActiveUser(TestConstants.LOGIN_USER);
+        HTTPUtils.httpDebug("activeuserset");
+        String opdsURL =  TestUtils.getInstance().getHTTPRoot()  
+            + TestConstants.CATALOG_OPDS_ROOT;
+        HTTPUtils.httpDebug("opdsurlsetto");
+        if(opdsURL.indexOf("http://") != -1 && opdsURL.indexOf("root.opds") != -1){
+            HTTPUtils.httpDebug("opdsURL is valid");
+        }else{
+            HTTPUtils.httpDebug("opdsURL is NOT valid");
+        }
+        HTTPUtils.httpDebug("gettingcontrollerbyurl");
+        CatalogController controller = CatalogController.makeControllerByURL(
+            opdsURL, impl, CatalogController.USER_RESOURCE, 
+            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+            CatalogController.CACHE_ENABLED);
+        if (controller == null){
+            HTTPUtils.httpDebug("controllerisNull");
+        }else{
+            HTTPUtils.httpDebug("NotNull");
+        }
+        controller.show();
+        HTTPUtils.httpDebug("afterShow");
+        int timeLeft = VIEWSHOWTIMEOUT;
+        while(!controller.getView().isShowing() && timeLeft > 0) {
+            try { Thread.sleep(VIEWCHECKINTERVAL); }
+            catch(InterruptedException e) {};
+            timeLeft -= VIEWCHECKINTERVAL;
+        }
+        
+        assertTrue("View is showing", controller.getView().isShowing());
+        
+        
+    }
+
     public void runTest() throws Exception{
-        this.testCatalogView();
+        //this.testCatalogView();
+	this.testCatalogViewDebug();
     }
 }

@@ -38,6 +38,7 @@ package com.ustadmobile.test.core;
 
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
+    import com.ustadmobile.port.j2me.app.HTTPUtils;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -147,8 +148,77 @@ public class TestContainerController extends TestCase {
         
     }
 
+    public void testContainerControllerDebug() throws IOException, XmlPullParserException{
+        HTTPUtils.httpDebug("startingtestContainerController");
+        String httpRoot = TestUtils.getInstance().getHTTPRoot();
+        HTTPUtils.httpDebug(httpRoot);
+        
+        
+        String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
+            httpRoot, "acquire.opds"});
+        HTTPUtils.httpDebug(acquireOPDSURL);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        HTTPUtils.httpDebug("got impl");
+        UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL, 
+            CatalogController.SHARED_RESOURCE, null, null, 
+            CatalogController.CACHE_ENABLED);
+        HTTPUtils.httpDebug("gotfeed");
+        //make sure if the entry is around... we remove it...
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        HTTPUtils.httpDebug("gotentryinfo");
+        if(entryInfo != null && entryInfo.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+            CatalogController.removeEntry(feed.entries[0].id, CatalogController.SHARED_RESOURCE);
+        }
+        
+        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        boolean entryPresent = entryInfo == null || entryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        assertTrue("Entry not acquired at start of test", entryPresent);
+        HTTPUtils.httpDebug("acquiring..");
+        UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries, 
+            null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
+        int totalSize = acquireJob.getTotalSize();
+        HTTPUtils.httpDebug("startingToAcquire");
+        acquireJob.start();
+        int timeRemaining = TIMEOUT;
+        while(timeRemaining > 0 && !acquireJob.isFinished()) {
+            try {Thread.sleep(CHECKINTERVAL); }
+            catch(InterruptedException e) {}
+        }
+        HTTPUtils.httpDebug("acquired?");
+        assertTrue("Job has completed", acquireJob.isFinished());
+        
+        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        HTTPUtils.httpDebug("acquiredFileURIis");
+        String acquiredFileURI = entryInfo.fileURI;
+        HTTPUtils.httpDebug(acquiredFileURI);
+        UstadJSOPDSEntry entry = feed.entries[0];
+        
+        String openPath = impl.openContainer(entry, acquiredFileURI, 
+            entryInfo.mimeType);
+        assertNotNull("Got an open path from the system", openPath);
+        HTTPUtils.httpDebug("gettingController");
+        ContainerController controller = ContainerController.makeFromEntry(entry, 
+            openPath, entryInfo.fileURI, entryInfo.mimeType);
+        UstadOCF ocf = controller.getOCF();
+        assertNotNull("Controller can fetch OCF once open", ocf);
+        HTTPUtils.httpDebug("gettingopf");
+        UstadJSOPF opf = controller.getOPF(0);
+        assertNotNull("Can load package OPF", opf);
+        assertTrue("Package has spine with entries", opf.spine.length > 0);
+        
+        HTTPUtils.httpDebug("deleting");
+        //delete it now we are done
+        impl.closeContainer(openPath);
+        CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
+        
+    }
+
     public void runTest() throws IOException, XmlPullParserException{
-        this.testContainerController();
+	this.testContainerControllerDebug();
+	//this.testContainerController();
     }
     
 }
