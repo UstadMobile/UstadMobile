@@ -59,8 +59,8 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
-        allTestSuite.addTest(new TestContainerController());
-        //allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception
+        //allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
+        allTestSuite.addTest(new TestCatalogController()); 
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
         allTestSuite.addTest(new TestUMFileResolveLink());
@@ -76,7 +76,6 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
         //allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
 
-        
         //Empty test:
         //allTestSuite.addTest(new TestFileImpl());
         
