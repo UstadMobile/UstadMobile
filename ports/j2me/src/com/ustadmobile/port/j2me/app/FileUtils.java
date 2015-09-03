@@ -478,7 +478,7 @@ public class FileUtils {
             if (isDir && !fileName.endsWith("/")) {
                     fileName += "/";
             }
-            
+            HTTPUtils.httpDebug(URLTextUtil.urlEncodeUTF8(fileName));
             //fileName = fileName.substring(0, fileName.length()-1);
 
             try{
@@ -499,6 +499,7 @@ public class FileUtils {
                 e.printStackTrace();
                 HTTPUtils.httpDebug("Exception");
                 HTTPUtils.httpDebug(e.getMessage());
+                HTTPUtils.httpDebug(e.toString());
             }finally{
                 if(fc!=null){
                     fc.close();
