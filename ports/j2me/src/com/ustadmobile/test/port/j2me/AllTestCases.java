@@ -59,7 +59,7 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
-        allTestSuite.addTest(new TestContainerController()); // NullPointer Exception
+        allTestSuite.addTest(new TestContainerController());
         //allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
