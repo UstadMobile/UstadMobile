@@ -59,9 +59,8 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
-        allTestSuite.addTest(new TestUstadOCF()); //Null Pointer Exception! //gets container.xml
-        allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion //gets acquire.opds, small.epub
-        allTestSuite.addTest(new TestContainerController()); // NullPointer Exception //gets acquire.opds, small.epub
+        allTestSuite.addTest(new TestUstadOCF()); //works ok
+        allTestSuite.addTest(new TestCatalogView()); //Null Pointer Exception
         
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
@@ -70,11 +69,9 @@ public class AllTestCases extends TestCase {
         
         //The ones that don't work:
         //allTestSuite.addTest(new TestCatalogView()); //Null Pointer Exception
-        //allTestSuite.addTest(new TestUstadOCF()); //Null Pointer Exception!
-        //allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion
-        //allTestSuite.addTest(new TestContainerController()); // NullPointer Exception
-        //allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception
         
+        //allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion
+        //allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception        
         //allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
         //allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
 
