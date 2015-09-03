@@ -54,7 +54,7 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
     
     private Dialog alertDialog;
     
-    private static int CMDID_CLOSE_ALERT = 20;
+    private static final int CMDID_CLOSE_ALERT = 20;
     
     private UstadMobileSystemImplJ2ME impl;
     
@@ -71,31 +71,52 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
     
     private static final int RUN_HIDENX = 1;
     
+    private static final int RUN_DISMISS_PROGRESS = 2;
+    
+    private static final int RUN_DISMISS_ALERT = 4;
+        
+    private Command okCommand;
+    
     
     public AppViewJ2ME(UstadMobileSystemImplJ2ME impl) {
         progressDialog = null;
         this.impl = impl;
+        okCommand = new Command("OK", CMDID_CLOSE_ALERT);
     }
     
-    public void showProgressDialog(String title) {
-        dismissAlertDialog();
-        progressDialog = new Dialog();
-        Button loadingButton = new Button(title);
-        loadingButton.getStyle().setBorder(Border.createEmpty());
-        loadingButton.getSelectedStyle().setBorder(Border.createEmpty());
-        progressDialog.addComponent(loadingButton);
-        progressDialog.showPacked(BorderLayout.CENTER, false);        
+    public void showProgressDialog(final String title) {
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                if(progressDialog == null) {
+                    progressDialog = new Dialog();
+                }
+
+                progressDialog.removeAll();
+                progressDialog.removeAllCommands();
+
+                progressDialog.setAutoDispose(true);
+                Button loadingButton = new Button(title);
+                loadingButton.getStyle().setBorder(Border.createEmpty());
+                loadingButton.getSelectedStyle().setBorder(Border.createEmpty());
+                progressDialog.addComponent(loadingButton);
+                progressDialog.showPacked(BorderLayout.CENTER, false);      
+            }
+        });
     }
 
     public boolean dismissProgressDialog() {
-        if(progressDialog != null) {
-            progressDialog.setVisible(false);
-            progressDialog.dispose();
-            progressDialog = null;
-            return true;
-        }else {
+        if(progressDialog == null) {
             return false;
         }
+        
+        Display.getInstance().callSerially(new Runnable(){
+            public void run() {
+                progressDialog.dispose();
+                progressDialog = null;
+            }
+        });
+        
+        return true;
     }
     
     public void dismissAll() {
@@ -103,28 +124,40 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
         dismissProgressDialog();
     }
 
-    public void showAlertDialog(String title, String text) {
-        alertDialog = new Dialog();
-        alertDialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-        alertDialog.setTitle(title);
-        TextArea textArea = new TextArea(text);
-        textArea.setEditable(false);
-        textArea.setFocusable(false);
-        alertDialog.addComponent(textArea);
-        
-        Button okButton = new Button(new Command("OK", CMDID_CLOSE_ALERT));
-        alertDialog.addComponent(okButton);
-        okButton.addActionListener(this);
-        alertDialog.showPacked(BorderLayout.CENTER, false);
-        okButton.setFocus(true);
+    public void showAlertDialog(final String title, final String text) {
+        final AppViewJ2ME appView = this;
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                if(alertDialog == null) {
+                    alertDialog = new Dialog();
+                }
+
+                alertDialog.removeAll();
+                alertDialog.removeAllCommands();
+
+                alertDialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+                alertDialog.setTitle(title);
+                TextArea textArea = new TextArea(text);
+                textArea.setEditable(false);
+                textArea.setFocusable(false);
+                alertDialog.addComponent(textArea);
+                alertDialog.setAutoDispose(false);
+                alertDialog.addCommand(okCommand);
+                alertDialog.addCommandListener(appView);
+                alertDialog.showPacked(BorderLayout.CENTER, false);
+            }
+        });
     }
 
     public void dismissAlertDialog() {
-        if(alertDialog != null) {
-            alertDialog.setVisible(false);
-            alertDialog.dispose();
-            alertDialog = null;
-        }
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                if(alertDialog != null) {
+                    alertDialog.dispose();
+                    alertDialog = null;
+                }
+            }
+        });
     }
 
     public void showNotification(String text, int length) {
@@ -150,8 +183,13 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
         runTasks = tasks;
     }
     
+    protected synchronized int getRunTasks() {
+        return runTasks;
+    }
+    
     public void run() {
-        if((runTasks & RUN_HIDENX) == RUN_HIDENX) {
+        int tasks = getRunTasks();
+        if((tasks & RUN_HIDENX) == RUN_HIDENX) {
             Object formObj = nxForm.get();
             if(formObj != null) {
                 ((Form)formObj).setGlassPane(null);
@@ -161,6 +199,14 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
                 nxTimer.cancel();
                 nxTimer = null;
             }
+        }
+        
+        if((tasks & RUN_DISMISS_PROGRESS) == RUN_DISMISS_PROGRESS) {
+            dismissProgressDialog();
+        }
+        
+        if((tasks & RUN_DISMISS_ALERT) == RUN_DISMISS_ALERT) {
+            dismissAlertDialog();
         }
         
         setRunTasks(0);

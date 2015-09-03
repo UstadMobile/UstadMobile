@@ -9,6 +9,7 @@ NetBeans.  See README for instructions on building from source.
 <project name="UstadMobileMicro" default="jar" basedir=".">
     <description>Builds, tests, and runs the project .</description>
     
+    <property environment="env"/>
     
     <condition property="build.properties.filename" 
         value="ustadmobilemicro-build.properties" 
@@ -19,7 +20,7 @@ NetBeans.  See README for instructions on building from source.
         </resourceexists>
     </condition>
 
-    <property file="ustadmobilemicro-build.properties"/> 
+    <property file="ustadmobilemicro-build.properties" environment="env"/> 
         
     <condition property="classpath.antenna" 
                value="${classpath}"
@@ -138,6 +139,14 @@ NetBeans.  See README for instructions on building from source.
     	<copy file="${src.dir}/com/ustadmobile/test/port/j2me/test.opds" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test.opds"/>
         <copy file="${src.dir}/com/ustadmobile/test/port/j2me/test.opf" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test.opf"/>
         <copy file="${src.dir}/com/ustadmobile/test/port/j2me/test-settings.xml" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test-settings.xml"/>
+
+	
+        <copy file="${src.dir}/nokia_non_touch_theme.res" todir="${classes.dir.ANTENNA}"/>
+        
+
+        <copy todir="${classes.dir.ANTENNA}">
+            <fileset dir="${src.dir}/res"/>
+        </copy>
 
         <echo message="looking for proguard in: ${wtk.proguard.home}/lib/proguard.jar"/>
         <wtkpackage basedir="${classes.dir.ANTENNA}" 
