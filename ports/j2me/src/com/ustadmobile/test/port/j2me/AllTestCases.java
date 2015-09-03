@@ -61,6 +61,10 @@ public class AllTestCases extends TestCase {
         
         allTestSuite.addTest(new TestContainerController()); // NullPointer Exception
         //allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception
+        allTestSuite.addTest(new TestCatalogEntryInfo());
+        allTestSuite.addTest(new TestPreferences());
+        allTestSuite.addTest(new TestUMFileResolveLink());
+        allTestSuite.addTest(new TestUMFileUtilFilename());
         
         //The ones that don't work:
         //allTestSuite.addTest(new TestCatalogView()); //Null Pointer Exception
