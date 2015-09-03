@@ -744,26 +744,50 @@ public class CatalogController implements UstadController, UMProgressListener {
     public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog) throws IOException{
 	/* $if umplatform == 2 $ */
            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gettingcacheCatalog");
+	   if (serializedCatalog == null ){
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("SerializedCatalogIsNull");
+           }else if (serializedCatalog.equals("")){
+               com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("SerializedCatalogIsEmpty");
+           }else{
+               com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("SerializedCatalogIsNOTNull");
+           }
 	    
    	/* $endif$ */
         String destPath = null;
         boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
+	/* $if umplatform == 2 $ */
+        if (isUserMode){
+            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("isUserMode");
+        }else{
+            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("isNOTUserMode");
+        } 
+   	/* $endif$ */
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(!isUserMode) {
             destPath = impl.getSharedContentDir();
         }else {
             destPath = impl.getUserContentDirectory(impl.getActiveUser());
         }
-	/* $if umplatform == 2 $
-	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug(destPath);
-   	$endif$ */
+	/* $if umplatform == 2 $ */
+            if (destPath == null || destPath.equals("")){
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gotDestPathNull");
+            }else{
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gotDestPathNotNull");
+            }
+   	/* $endif$ */
         
         destPath += "/" + getFileNameForOPDSFeedId(catalog.id);
         if(serializedCatalog == null) {
             serializedCatalog = catalog.toString();
         }
+	/* $if umplatform == 2 $ */
+            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("writingTodestPath");
+   	/* $endif$ */
         impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
         String keyName = "opds-cache-" + catalog.id;
+	/* $if umplatform == 2 $ */
+            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("settingPref");
+   	/* $endif$ */
         impl.setPref(isUserMode, keyName, destPath);
         impl.setPref(isUserMode, getPrefKeyNameForOPDSURLToIDMap(catalog.id), 
             catalog.href);
