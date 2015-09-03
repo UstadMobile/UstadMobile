@@ -261,9 +261,14 @@ public class CatalogController implements UstadController, UMProgressListener {
      * @return 
      */
     public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, int resourceMode, String httpUser, String httpPassword, int flags) throws IOException, XmlPullParserException{
+        /* $if umplatform == 2 $ */
+	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("makeControllerByURL");
+   	/* $endif$ */
         UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, resourceMode, 
             httpUser, httpPassword, flags);
-        
+        /* $if umplatform == 2 $ */
+	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gotOPDSFeed");
+   	/* $endif$ */
         CatalogController result = new CatalogController(
             new CatalogModel(opdsFeed));
         
@@ -600,16 +605,44 @@ public class CatalogController implements UstadController, UMProgressListener {
      */
     public static UstadJSOPDSFeed getCatalogByURL(String url, int resourceMode, String httpUsername, String httpPassword, int flags) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
+
+	/* $if umplatform == 2 $ */
+	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("getCatalogByURL");
+   	/* $endif$ */
                 
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable headers = makeAuthHeaders(httpUsername, httpPassword);
         
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         byte[] opdsContents = impl.readURLToString(url, headers).getResponse();
+	/* $if umplatform == 2 $ */
+            if (opdsContents==null){
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("opdsContentsisNull");
+            }else{
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("opdsContentsisNOTNull");
+            }
+	    
+   	/* $endif$ */
         parser.setInput(
             new ByteArrayInputStream(opdsContents), 
             "UTF-8");
+	/* $if umplatform == 2 $ */
+            if (parser==null){
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("parserisNull");
+            }else{
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("parserisNOTNull");
+            }
+	    
+   	/* $endif$ */
         opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+	/* $if umplatform == 2 $ */
+            if (opdsFeed==null){
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("opdsFeedisNull");
+            }else{
+                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("opdsFeedisNOTNull");
+            }
+	    
+   	/* $endif$ */
         opdsFeed.href = url;
         stripEntryUMCloudIDPrefix(opdsFeed);
         CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
@@ -709,6 +742,10 @@ public class CatalogController implements UstadController, UMProgressListener {
      * @param serializedCatalog String contents of the catalog (in XML) : optional : if they are 'handy', otherwise null
      */
     public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog) throws IOException{
+	/* $if umplatform == 2 $ */
+           com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gettingcacheCatalog");
+	    
+   	/* $endif$ */
         String destPath = null;
         boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();

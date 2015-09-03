@@ -98,7 +98,7 @@ public class TestCatalogView extends TestCase {
     public void testCatalogViewDebug() throws Exception{
         /* $if umplatform == 1 $
         Activity activity = getActivity();
-        $endif  */
+        $endif   */
         HTTPUtils.httpDebug("startingTestCatalogView");
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(TestConstants.LOGIN_USER);
@@ -106,8 +106,12 @@ public class TestCatalogView extends TestCase {
         String opdsURL =  TestUtils.getInstance().getHTTPRoot()  
             + TestConstants.CATALOG_OPDS_ROOT;
         HTTPUtils.httpDebug("opdsurlsetto");
-        HTTPUtils.httpDebug(opdsURL);
-        HTTPUtils.httpDebug("getting controller");
+        if(opdsURL.indexOf("http://") != -1 && opdsURL.indexOf("root.opds") != -1){
+            HTTPUtils.httpDebug("opdsURL is valid");
+        }else{
+            HTTPUtils.httpDebug("opdsURL is NOT valid");
+        }
+        HTTPUtils.httpDebug("gettingcontrollerbyurl");
         CatalogController controller = CatalogController.makeControllerByURL(
             opdsURL, impl, CatalogController.USER_RESOURCE, 
             TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
