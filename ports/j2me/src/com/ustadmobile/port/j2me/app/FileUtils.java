@@ -550,23 +550,37 @@ public class FileUtils {
     
     public static String getFileContents(String fileURI) throws Exception{
         //load from the file
-
-        FileConnection fCon = (FileConnection)Connector.open(fileURI,
-            Connector.READ);
+        HTTPUtils.httpDebug("getFileContents");
+        FileConnection fCon = null;
         InputStream is = null;
-        String str = null;
-        if(fCon.exists()) 
-            {
-                int size = (int)fCon.fileSize();
-                is= fCon.openInputStream();
-                byte bytes[] = new byte[size];
-                is.read(bytes, 0, size);
-                str = new String(bytes, 0, size);
-                is.close();
+        String str=null;
+        
+        try{
+            fCon = (FileConnection)Connector.open(fileURI,
+                Connector.READ);
+            if(fCon.exists()) 
+                {
+                    int size = (int)fCon.fileSize();
+                    is= fCon.openInputStream();
+                    byte bytes[] = new byte[size];
+                    is.read(bytes, 0, size);
+                    str = new String(bytes, 0, size);
+                    HTTPUtils.httpDebug("GotIT");
+                }
+        }catch(Exception e){
+            e.printStackTrace();
+            HTTPUtils.httpDebug("Exception");
+            HTTPUtils.httpDebug(e.getMessage());
+        }finally{
+            if (fCon != null){
                 fCon.close();
-                return str;
             }
-        return null;
+            if (is != null){
+                is.close();
+            }
+            
+        }
+        return str;
     }
     
     public static String joinPath(String path1, String path2) {

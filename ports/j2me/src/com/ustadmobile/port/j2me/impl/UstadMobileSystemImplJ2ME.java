@@ -176,12 +176,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }
             String sharedUserContentDir = dt.path + toSlashOrNot + 
                     FileUtils.USTAD_CONTENT_DIR + FileUtils.FILE_SEP + username;
-            if (sharedUserContentDir == null || sharedUserContentDir.equals("")){
-                HTTPUtils.httpDebug("nullsharedUserContentDir");
-            }else{
-                HTTPUtils.httpDebug("usershareddirisNOTNull");
-                HTTPUtils.httpDebug(sharedUserContentDir);
-            }
             
             //Check if it is created. If it isn't, create it.
             if(FileUtils.createFileOrDir(sharedUserContentDir, 

@@ -62,7 +62,7 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
-        allTestSuite.addTest(new TestPreferences()); //works
+        //allTestSuite.addTest(new TestPreferences()); //works
         allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
         allTestSuite.addTest(new TestLogin());
         
