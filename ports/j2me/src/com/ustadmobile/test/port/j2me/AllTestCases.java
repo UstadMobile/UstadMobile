@@ -59,16 +59,16 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
-        allTestSuite.addTest(new TestUstadOCF()); //works ok
-        allTestSuite.addTest(new TestCatalogView()); //Null Pointer Exception
+        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
+        allTestSuite.addTest(new TestPreferences()); //works
         
-        allTestSuite.addTest(new TestCatalogEntryInfo());
-        allTestSuite.addTest(new TestPreferences());
-        allTestSuite.addTest(new TestUMFileResolveLink());
-        allTestSuite.addTest(new TestUMFileUtilFilename());
+        allTestSuite.addTest(new TestCatalogView()); //Nokia: Null Pointer Exception Alcatel: Pass
+        
+        allTestSuite.addTest(new TestUMFileResolveLink()); //works
+        allTestSuite.addTest(new TestUMFileUtilFilename()); //works
         
         //The ones that don't work:
-        //allTestSuite.addTest(new TestCatalogView()); //Null Pointer Exception
+        
         
         //allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion
         //allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception        
@@ -84,6 +84,7 @@ public class AllTestCases extends TestCase {
         
         /*
         //Working.
+        allTestSuite.addTest(new TestUstadOCF()); //works ok
         //allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
