@@ -29,6 +29,7 @@
 
  */
 package com.ustadmobile.test.port.j2me;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.test.core.*;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import j2meunit.framework.Test;
@@ -51,7 +52,9 @@ public class AllTestCases extends TestCase {
         
         try {
             TestUtils.getInstance().loadTestSettingsResource();
-            //TestUtils.loadTestSettingsFile();
+            
+            //Testing..
+            //UstadMobileSystemImpl.getInstance().setActiveUser("testuser");
         }catch(Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e.toString());

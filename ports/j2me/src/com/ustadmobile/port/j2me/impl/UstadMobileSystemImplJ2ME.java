@@ -121,6 +121,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setActiveUser(String username) {
+        super.setActiveUser(username);
         AppPref.addSetting("CURRENTUSER", username);
         UserPref.setActiveUser(username);
         
@@ -165,7 +166,15 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         try{
             HTTPUtils.httpDebug("GettingUserContentDir");
             DeviceRoots dt = FileUtils.getBestRoot();
-            String sharedUserContentDir = dt.path + FileUtils.FILE_SEP + 
+            String toSlashOrNot="";
+            if (dt.path.endsWith("//")){
+                toSlashOrNot="";
+            }else if(dt.path.endsWith("/")){
+                toSlashOrNot="";
+            }else{
+                toSlashOrNot = "/";
+            }
+            String sharedUserContentDir = dt.path + toSlashOrNot + 
                     FileUtils.USTAD_CONTENT_DIR + FileUtils.FILE_SEP + username;
             if (sharedUserContentDir == null || sharedUserContentDir.equals("")){
                 HTTPUtils.httpDebug("nullsharedUserContentDir");
@@ -173,10 +182,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 HTTPUtils.httpDebug("usershareddirisNOTNull");
                 HTTPUtils.httpDebug(sharedUserContentDir);
             }
-            //Return null if it doesn't exist
-            //if (!FileUtils.checkDir(sharedUserContentDir)){
-            //    return null;
-            //}
             
             //Check if it is created. If it isn't, create it.
             if(FileUtils.createFileOrDir(sharedUserContentDir, 

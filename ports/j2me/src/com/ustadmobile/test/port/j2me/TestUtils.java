@@ -85,7 +85,7 @@ public class TestUtils {
     public static void loadTestSettingsFile() throws Exception{
         //load from the file
         String appDataURI = UstadMobileAppController.getAppDataDir();
-        String settingsDataURI = appDataURI +"/test-settings.xml";
+        String settingsDataURI = FileUtils.joinPath(appDataURI, "test-settings.xml");
         FileConnection fCon = (FileConnection)Connector.open(settingsDataURI,
             Connector.READ);
         InputStream is = fCon.openInputStream();
