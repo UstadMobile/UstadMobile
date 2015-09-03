@@ -217,7 +217,8 @@ public class TestContainerController extends TestCase {
     }
 
     public void runTest() throws IOException, XmlPullParserException{
-	this.testContainerControllerDebug();
+	//this.testContainerControllerDebug();
+	this.testContainerController();
     }
     
 }
