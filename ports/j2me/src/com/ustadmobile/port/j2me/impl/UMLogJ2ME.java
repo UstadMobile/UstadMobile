@@ -14,6 +14,11 @@ import com.ustadmobile.core.impl.UMLog;
  */
 public class UMLogJ2ME extends UMLog{
 
+    public UMLogJ2ME() {
+        
+    }
+    
+    
 
     public void l(int level, int code, String message) {
         System.out.print("[");
@@ -27,10 +32,6 @@ public class UMLogJ2ME extends UMLog{
         System.out.print(new java.util.Date().toString());
         System.out.print("]");
         System.out.println("code:" + code + " : " + message + " : " + exception.toString());
-    }
-
-    public void l(int level, String message) {
-        
     }
 
 }
