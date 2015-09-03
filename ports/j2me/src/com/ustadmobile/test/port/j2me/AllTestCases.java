@@ -58,9 +58,11 @@ public class AllTestCases extends TestCase {
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
+        //Testing these..
+        allTestSuite.addTest(new TestUstadOCF()); //Null Pointer Exception! //gets container.xml
+        allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion //gets acquire.opds, small.epub
+        allTestSuite.addTest(new TestContainerController()); // NullPointer Exception //gets acquire.opds, small.epub
         
-        //allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
-        allTestSuite.addTest(new TestCatalogController()); 
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
         allTestSuite.addTest(new TestUMFileResolveLink());
@@ -85,7 +87,7 @@ public class AllTestCases extends TestCase {
         
         /*
         //Working.
-        
+        //allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
         allTestSuite.addTest(new TestUMFileResolveLink());
