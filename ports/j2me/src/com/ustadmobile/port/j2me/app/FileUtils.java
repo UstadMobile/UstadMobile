@@ -499,7 +499,7 @@ public class FileUtils {
                 e.printStackTrace();
                 HTTPUtils.httpDebug("Exception");
                 HTTPUtils.httpDebug(e.getMessage());
-                HTTPUtils.httpDebug(e.toString());
+                HTTPUtils.httpDebug(URLTextUtil.urlEncodeUTF8(e.toString()));
             }finally{
                 if(fc!=null){
                     fc.close();
