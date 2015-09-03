@@ -717,6 +717,9 @@ public class CatalogController implements UstadController, UMProgressListener {
         }else {
             destPath = impl.getUserContentDirectory(impl.getActiveUser());
         }
+	/* $if umplatform == 2 $
+	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug(destPath);
+   	$endif$ */
         
         destPath += "/" + getFileNameForOPDSFeedId(catalog.id);
         if(serializedCatalog == null) {
