@@ -63,29 +63,24 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestPreferences()); //works
         
         allTestSuite.addTest(new TestCatalogView()); //Nokia: Null Pointer Exception Alcatel: Pass
+        allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion
+        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
         
         allTestSuite.addTest(new TestUMFileResolveLink()); //works
         allTestSuite.addTest(new TestUMFileUtilFilename()); //works
         
-        //The ones that don't work:
-        
-        
-        //allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion
-        //allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception        
+        //The ones that don't work:            
         //allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
         //allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
-
-        //Empty test:
-        //allTestSuite.addTest(new TestFileImpl());
         
         //temporarily disabling download because too large
         //allTestSuite.addTest(new TestDownload());
         //allTestSuite.addTest(new TestTransferJobList());
         
-        /*
+        
         //Working.
         allTestSuite.addTest(new TestUstadOCF()); //works ok
-        //allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
+        allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
         allTestSuite.addTest(new TestUMFileResolveLink());
@@ -114,7 +109,6 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestJ2MECatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
-        */
         
         return allTestSuite;
 

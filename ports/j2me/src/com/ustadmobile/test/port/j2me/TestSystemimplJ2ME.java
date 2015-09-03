@@ -64,10 +64,9 @@ public class TestSystemimplJ2ME extends TestCase {
             assertTrue(false);
         }
         
-        //Null for now.
         String getUserContentDirectory = 
                 ustadMobileSystemImpl.getUserContentDirectory("varuna");
-        assertEquals("Testing getUserContent Directory", null, getUserContentDirectory);
+        assertNotNull("Testing getUserContent Directory", getUserContentDirectory);
         
         String getSystemLocale = ustadMobileSystemImpl.getSystemLocale();
         //assertEquals("testing getSystemLocale:", "en-US", getSystemLocale);
