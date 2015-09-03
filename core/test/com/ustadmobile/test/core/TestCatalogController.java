@@ -133,6 +133,9 @@ public class TestCatalogController extends TestCase{
         HTTPUtils.httpDebug("assertedsameidwhenreparsed");
         CatalogController.cacheCatalog(feedItem, CatalogController.USER_RESOURCE, null);
         HTTPUtils.httpDebug("cachecatalogdone");
+	HTTPUtils.httpDebug("cachecatalogbyiD");
+	HTTPUtils.httpDebug(feedItem.id.toString());
+
         UstadJSOPDSFeed cachedFeed = 
             CatalogController.getCachedCatalogByID(feedItem.id, 
             CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);

@@ -817,6 +817,11 @@ public class CatalogController implements UstadController, UMProgressListener {
         if(filename == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
             filename = impl.getAppPref(key);
         }
+
+	/* $if umplatform == 2 $
+	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("filename");
+            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug(filename);
+        $endif$ */
         
         if(filename != null) {
             String contentsXML = impl.readFileAsText(filename, "UTF-8");
