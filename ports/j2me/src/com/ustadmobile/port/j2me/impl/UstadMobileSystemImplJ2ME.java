@@ -171,6 +171,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 HTTPUtils.httpDebug("nullsharedUserContentDir");
             }else{
                 HTTPUtils.httpDebug("usershareddirisNOTNull");
+                HTTPUtils.httpDebug(sharedUserContentDir);
             }
             //Return null if it doesn't exist
             //if (!FileUtils.checkDir(sharedUserContentDir)){
