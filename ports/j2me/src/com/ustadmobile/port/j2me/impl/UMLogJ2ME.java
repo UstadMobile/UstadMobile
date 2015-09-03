@@ -30,7 +30,7 @@ public class UMLogJ2ME extends UMLog{
     }
 
     public void l(int level, String message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
     }
 
 }
