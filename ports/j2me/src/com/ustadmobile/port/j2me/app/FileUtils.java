@@ -469,6 +469,8 @@ public class FileUtils {
             boolean created = false;
             FileConnection fc = null;
             fileName = fileName.trim();
+            HTTPUtils.httpDebug("CreateFileOrDirFileNameIs");
+            HTTPUtils.httpDebug(fileName);
 
             if (isDir && !fileName.endsWith("/")) {
                     fileName += "/";
@@ -492,6 +494,8 @@ public class FileUtils {
                 
             }catch(Exception e){
                 e.printStackTrace();
+                HTTPUtils.httpDebug("Exception");
+                HTTPUtils.httpDebug(e.getMessage());
             }finally{
                 if(fc!=null){
                     fc.close();
