@@ -470,7 +470,7 @@ public class FileUtils {
             FileConnection fc = null;
             fileName = fileName.trim();
             HTTPUtils.httpDebug("CreateFileOrDirFileNameIs");
-            HTTPUtils.httpDebug(fileName);
+            HTTPUtils.httpDebug(fileName.substring(10));
 
             if (isDir && !fileName.endsWith("/")) {
                     fileName += "/";
