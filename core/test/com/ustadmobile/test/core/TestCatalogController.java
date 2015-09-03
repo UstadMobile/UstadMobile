@@ -105,6 +105,8 @@ public class TestCatalogController extends TestCase{
         assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
     }
 
+    
+    /* $if umplatform == 2 $
     public void testCatalogControllerDebug() throws IOException, XmlPullParserException {
         HTTPUtils.httpDebug("startingCatalogControllerTests");
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -147,5 +149,6 @@ public class TestCatalogController extends TestCase{
         //this.testCatalogController();
         this.testCatalogControllerDebug();
     }
+    $endif */
     
 }

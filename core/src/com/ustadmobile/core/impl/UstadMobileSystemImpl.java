@@ -54,10 +54,24 @@ public abstract class UstadMobileSystemImpl {
     
     protected static UstadMobileSystemImpl mainInstance;
     
+    /**
+     * Get an instance of the system implementation - relies on the platform
+     * specific factory method
+     * 
+     * @return A singleton instance
+     */
     public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
+            boolean sharedDirOK = false;
             mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
             mainInstance.init();
+            try {
+                String sharedContentDir = mainInstance.getSharedContentDir();
+                sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
+                mainInstance.getLogger().l(UMLog.INFO, 130, sharedContentDir + ":" + sharedDirOK);
+            }catch(IOException e) {
+                mainInstance.getLogger().l(UMLog.CRITICAL, 500, null, e);
+            }
         }
         
         return mainInstance;

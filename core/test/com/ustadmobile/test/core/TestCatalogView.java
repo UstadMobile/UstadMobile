@@ -95,10 +95,8 @@ public class TestCatalogView extends TestCase {
         
     }
 
+    /* $if umplatform == 2 $
     public void testCatalogViewDebug() throws Exception{
-        /* $if umplatform == 1 $
-        Activity activity = getActivity();
-        $endif   */
         HTTPUtils.httpDebug("startingTestCatalogView");
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(TestConstants.LOGIN_USER);
@@ -139,4 +137,5 @@ public class TestCatalogView extends TestCase {
         //this.testCatalogView();
 	this.testCatalogViewDebug();
     }
+    $endif */
 }

@@ -147,7 +147,8 @@ public class TestContainerController extends TestCase {
         CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
         
     }
-
+    
+    /* $if umplatform == 2 $
     public void testContainerControllerDebug() throws IOException, XmlPullParserException{
         HTTPUtils.httpDebug("startingtestContainerController");
         String httpRoot = TestUtils.getInstance().getHTTPRoot();
@@ -215,10 +216,12 @@ public class TestContainerController extends TestCase {
         CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
         
     }
-
+    
+    
     public void runTest() throws IOException, XmlPullParserException{
 	this.testContainerControllerDebug();
 	//this.testContainerController();
     }
+    $endif */
     
 }

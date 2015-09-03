@@ -111,10 +111,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     public void init() {
-        File sharedContentDir = new File(getSharedContentDir());
-        if(!sharedContentDir.isDirectory()) {
-            sharedContentDir.mkdirs();
-        }
+
     }
 
     @Override
@@ -264,6 +261,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException {
         return new FileOutputStream(fileURI);
+    }
+
+    @Override
+    public InputStream openFileInputStream(String fileURI) throws IOException {
+        return new FileInputStream(fileURI);
     }
 
 

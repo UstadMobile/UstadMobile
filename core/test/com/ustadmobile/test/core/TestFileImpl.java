@@ -31,10 +31,44 @@
 
 package com.ustadmobile.test.core;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
+import java.io.IOException;
+/* $if umplatform == 2  $
+    import j2meunit.framework.TestCase;
+ $else$ */
+    import junit.framework.TestCase;
+/* $endif$ */
+
 /**
  *
  * @author mike
  */
-public class TestFileImpl {
+public class TestFileImpl extends TestCase {
+    
+    public void testFileImpl() throws IOException{
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        assertTrue("Shared content dir exists", 
+                impl.dirExists(impl.getSharedContentDir()));
+        
+        impl.setActiveUser(TestConstants.LOGIN_USER);
+        
+        assertTrue("User directory exists when active user is set",
+                impl.dirExists(impl.getUserContentDirectory(impl.getActiveUser())));
+        
+        String testMkDirPath = UMFileUtil.joinPaths(
+                new String[]{impl.getSharedContentDir(), "tmpFileDirTest"});
+        impl.makeDirectory(testMkDirPath);
+        assertTrue("Newly created dir exists: " + testMkDirPath,
+            impl.dirExists(testMkDirPath));
+        
+        impl.removeRecursively(testMkDirPath);
+        assertTrue("Newly created dir removed", !impl.dirExists(testMkDirPath));
+    }
+    
+    public void runTest() throws IOException {
+        testFileImpl();
+    }
     
 }
