@@ -549,8 +549,11 @@ public class FileUtils {
     }
     
     public static String getFileContents(String fileURI) throws Exception{
+        
+        //encoding fileURI
+        fileURI = URLTextUtil.urlEncodeUTF8(fileURI);
         //load from the file
-        HTTPUtils.httpDebug("getFileContents");
+        HTTPUtils.httpDebug("EncodedGetFileContents");
         FileConnection fCon = null;
         InputStream is = null;
         String str=null;
@@ -639,7 +642,9 @@ public class FileUtils {
         OutputStream outputStream = null;
         boolean result = false;
         try{
-            HTTPUtils.httpDebug("WritingStringToFile");
+            //encoding fileURI
+            fileURI = URLTextUtil.urlEncodeUTF8(fileURI);
+            HTTPUtils.httpDebug("EnodedAndWritingStringToFile");
             HTTPUtils.httpDebug(URLTextUtil.urlEncodeUTF8(fileURI));
             HTTPUtils.httpDebug("herewego");
             
