@@ -634,21 +634,39 @@ public class FileUtils {
     }
     
     public static boolean writeStringToFile(String string, String fileURI, 
-            boolean append){
+            boolean append) throws IOException{
+        FileConnection fileCon = null;
+        OutputStream outputStream = null;
+        boolean result = false;
         try{
+            HTTPUtils.httpDebug("WritingStringToFile");
+            HTTPUtils.httpDebug(URLTextUtil.urlEncodeUTF8(fileURI));
+            HTTPUtils.httpDebug("herewego");
+            
+            if (string == null || string.equals("")){
+                HTTPUtils.httpDebug("stringisEmpty");
+            }else{
+                HTTPUtils.httpDebug("StringIsNOTEmpty");
+            }
             if (!append){
                 deleteRecursively(fileURI, false);
+                HTTPUtils.httpDebug("deletedExistingFile");
             }
-            FileConnection fileCon = (FileConnection) Connector.open(fileURI, 
+            fileCon = (FileConnection) Connector.open(fileURI, 
                     Connector.READ_WRITE);
             
             if (!fileCon.exists()){
                 fileCon.create();
             }
             if (!fileCon.canWrite() && string != null){
-                return false;
+                HTTPUtils.httpDebug("FileConCANNOTWriteOrstringEmpty");
+                result = false;
+                if (fileCon != null){
+                    fileCon.close();
+                }
+                return result;
             }
-            OutputStream outputStream = null;
+            
             if(append){
                 outputStream = fileCon.openOutputStream(fileCon.fileSize());
             }else{
@@ -657,18 +675,24 @@ public class FileUtils {
             
             byte[] stringBytes = string.getBytes();
             outputStream.write(stringBytes);
+
+            result = true;
             
-            /*
-            PrintStream printStream = new PrintStream(outputStream);
-            printStream.print(string);
-            printStream.close();
-            */
-            outputStream.close();
-            fileCon.close();
-            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            HTTPUtils.httpDebug("ExceptionInWritingToFile");
+            HTTPUtils.httpDebug(e.getMessage());
+            HTTPUtils.httpDebug(URLTextUtil.urlEncodeUTF8(e.toString()));
             
-        }catch(Exception e){}
-        return false;
+        }finally{
+            if (fileCon != null){
+                fileCon.close();
+            }
+            if (outputStream != null){
+                outputStream.close();
+            }
+        }
+        return result;
     }
     
     public static long getFileSize(String fileURI) throws IOException{
