@@ -9,8 +9,14 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
+import com.ustadmobile.port.j2me.util.J2MEIOUtils;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.microedition.io.CommConnection;
+import javax.microedition.io.Connector;
 /**
  *
  * @author varuna
@@ -63,14 +69,6 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
 
     public boolean isShowing() {
         return this.isVisible();
-    }
-
-    public void showDialog(String title, String text) {
-        //ToDo
-    }
-
-    public void performAction(Object obj) {
-        //ToDo
     }
     
 }

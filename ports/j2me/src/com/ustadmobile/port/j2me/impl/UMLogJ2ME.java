@@ -7,6 +7,16 @@
 package com.ustadmobile.port.j2me.impl;
 
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.j2me.app.SerializedHashtable;
+import com.ustadmobile.port.j2me.util.J2MEIOUtils;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import javax.microedition.io.CommConnection;
+import javax.microedition.io.Connection;
+import javax.microedition.io.Connector;
+import javax.microedition.io.SocketConnection;
 
 /**
  *
@@ -14,24 +24,56 @@ import com.ustadmobile.core.impl.UMLog;
  */
 public class UMLogJ2ME extends UMLog{
 
+    private PrintStream logOut = null;
+    
+    private SocketConnection socketConn;
+    
+    private OutputStream socketOut;
+    
     public UMLogJ2ME() {
+        logOut = System.out;
+    }
+    
+    public synchronized void setOutputDest(PrintStream dest) {
+        this.logOut = dest;
+    }
+    
+    public synchronized void connectLogToSocket(String serverName) throws IOException{
+        closeSocketConn();
+        SocketConnection socketConnection = null;
+        try {
+            socketConnection = (SocketConnection)Connector.open("socket://" 
+                + serverName);
+            socketOut = socketConnection.openOutputStream();
+            logOut = new PrintStream(socketOut);
+            System.out.println("Connected socket");
+        }catch(IOException e) {
+            System.out.println("Exception connecting socket!");
+            e.printStackTrace();
+            closeSocketConn();
+            throw e;
+        }
         
     }
     
-    
-
-    public void l(int level, int code, String message) {
-        System.out.print("[");
-        System.out.print(new java.util.Date().toString());
-        System.out.print("]");
-        System.out.println("code:" + code + " : " + message);
+    public synchronized void closeSocketConn() {
+        logOut = System.out;
+        UMIOUtils.closeOutputStream(socketOut);
+        J2MEIOUtils.closeConnection(socketConn);
     }
 
-    public void l(int level, int code, String message, Exception exception) {
-        System.out.print("[");
-        System.out.print(new java.util.Date().toString());
-        System.out.print("]");
-        System.out.println("code:" + code + " : " + message + " : " + exception.toString());
+    public synchronized void l(int level, int code, String message) {
+        logOut.print("[");
+        logOut.print(new java.util.Date().toString());
+        logOut.print("]");
+        logOut.println(":codelu:" + code + " : " + message);
+    }
+
+    public synchronized void l(int level, int code, String message, Exception exception) {
+        logOut.print("[");
+        logOut.print(new java.util.Date().toString());
+        logOut.print("]");
+        logOut.println(":codelu:" + code + " : " + message + " : " + exception.toString());
     }
 
 }

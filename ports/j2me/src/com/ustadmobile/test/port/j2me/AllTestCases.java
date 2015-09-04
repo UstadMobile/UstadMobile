@@ -29,13 +29,22 @@
 
  */
 package com.ustadmobile.test.port.j2me;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.test.core.*;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
+import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
 import j2meunit.framework.TestSuite;
 import java.io.IOException;
 import com.ustadmobile.test.core.*;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import javax.microedition.io.Connection;
+import javax.microedition.io.Connector;
+import javax.microedition.io.SocketConnection;
 
 /**
  *
@@ -55,6 +64,20 @@ public class AllTestCases extends TestCase {
         }catch(Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e.toString());
+        }
+        
+        try {
+            String deviceName = "j2metestrun";
+            String testServerURL = 
+                "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
+            int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, "newrawserver", deviceName);
+            
+            UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
+            umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
+            umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
+        }catch(IOException e) {
+            System.err.println("Error connecting to testlog socket");
+            e.printStackTrace();
         }
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");

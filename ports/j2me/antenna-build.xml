@@ -107,7 +107,7 @@ NetBeans.  See README for instructions on building from source.
             <attribute name="MicroEdition-Configuration" value="CLDC-1.1"/>
             <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
             <attribute name="Antenna-MIDlet-Category" value="Application"/>
-            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket"/>
+            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket, javax.microedition.io.Connector.comm"/>
             <attribute name="Nokia-Update" value="http://www.ustadmobile.com/jad/midp2/UstadMobileMicro.jad"/>
             <attribute name="MIDlet-Jar-URL" value="${MidletSuite}.jar"/>
 
@@ -127,7 +127,7 @@ NetBeans.  See README for instructions on building from source.
             <attribute name="MicroEdition-Configuration" value="CLDC-1.1"/>
             <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
             <attribute name="Antenna-MIDlet-Category" value="Application"/>
-            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket"/>
+            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket, javax.microedition.io.Connector.comm"/>
             <attribute name="Nokia-Update" value="http://www.ustadmobile.com/jad/midp2/UstadMobileMicro.jad"/>
             <attribute name="MIDlet-Jar-URL" value="${MidletSuite2}.jar"/>
 

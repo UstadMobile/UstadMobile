@@ -26,9 +26,9 @@ echo "Starting server at port: ${PORT}"
 SERVER_ARGS="$SERVER_ARGS '"
 
 mvn compile
-echo mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p ${PORT} -r $RESULTDIR"
+echo mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p ${PORT} -r $RESULTDIR --codelookup ../../errorcodes.properties"
 
-mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p ${PORT} -r $RESULTDIR" &
+mvn exec:java -Dexec.mainClass="com.ustadmobile.dodgyhttpd.DodgyHTTPDServer" -Dexec.args="-d ../assets -p ${PORT} -r $RESULTDIR --codelookup ../../errorcodes.properties" &
 SERVERPID=$!
 echo "Server ID is $SERVERPID"
 echo $SERVERPID > dodgyhttpd.pid
