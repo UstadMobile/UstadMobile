@@ -54,7 +54,7 @@ public interface UMTransferJob {
      * 
      * @return Number of bytes processed so far
      */
-    public int getBytesDownloadedCount();
+    public long getBytesDownloadedCount();
     
     /**
      * Get the total size of the job in bytes or -1 if unknown

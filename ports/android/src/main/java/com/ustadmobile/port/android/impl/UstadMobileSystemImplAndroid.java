@@ -809,7 +809,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
 
         @Override
-        public int getBytesDownloadedCount() {
+        public long getBytesDownloadedCount() {
             return getProgressAndTotal()[0];
         }
 

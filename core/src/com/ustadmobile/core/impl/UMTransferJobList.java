@@ -193,7 +193,7 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
         progressListeners.addElement(listener);
     }
 
-    public int getBytesDownloadedCount() {
+    public long getBytesDownloadedCount() {
         return -1;
     }
 

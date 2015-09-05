@@ -57,12 +57,11 @@ public abstract class UstadMobileSystemImpl {
     
     protected static UstadMobileSystemImpl mainInstance;
     
+    
     /**
-     * Flag to use with openFileOutputStream
-     * 
-     * @see UstadMobileSystemImpl#openFileOutputStream(java.lang.String, int) 
+     * Default behaviour - any existing content is overwritten
      */
-    public static final int FILE_AUTOCREATE = 1;
+    public static final int FILE_OVERWRITE = 1;
     
     /**
      * Flag to use with openFileOutputStream
@@ -259,8 +258,7 @@ public abstract class UstadMobileSystemImpl {
      * then output will be appended to the end of the file, otherwise the file
      * will be overwritten if it exists already.
      * 
-     * FILE_AUTOCREATE is the default behaviour; some platforms (e.g. Droid) will 
-     * autocreate the file always.
+     * FILE_APPEND can be specified in the flags to append to the end of the file
      * 
      * @param fileURI URI to the file we want an output stream for
      * @param flags can set FILE_APPEND and FILE_AUTOCREATE
@@ -288,7 +286,7 @@ public abstract class UstadMobileSystemImpl {
         IOException ioe = null;
         getLogger().l(UMLog.DEBUG, 500, fileURI + " enc " + encoding);
         try {
-            out = openFileOutputStream(fileURI, FILE_AUTOCREATE);
+            out = openFileOutputStream(fileURI, FILE_OVERWRITE);
             out.write(str.getBytes(encoding));
             out.flush();
             getLogger().l(UMLog.DEBUG, 501, fileURI);

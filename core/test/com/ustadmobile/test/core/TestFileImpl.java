@@ -70,11 +70,18 @@ public class TestFileImpl extends TestCase {
         String contentToWrite = "The answer to the meaning of life, the universe and everything is 42";
         String fileWritePath = UMFileUtil.joinPaths(new String[]{sharedContentDir, 
             "fileimpltest.txt"});
+        
+        if(impl.fileExists(fileWritePath)) {
+            impl.removeFile(fileWritePath);
+        }
+        
         impl.writeStringToFile(contentToWrite, fileWritePath, "UTF-8");
         long fileSize= impl.fileSize(fileWritePath);
         
+        String fileContents = impl.readFileAsText(fileWritePath);
+        
         assertEquals("Can read same content back from file",
-            contentToWrite, impl.readFileAsText(fileWritePath));
+            contentToWrite, fileContents);
         
         OutputStream appendOut = impl.openFileOutputStream(fileWritePath, 
             UstadMobileSystemImpl.FILE_APPEND);

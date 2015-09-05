@@ -70,7 +70,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
         allTestSuite.addTest(new TestLogin());
         allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());
-        
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
         
 //        
 //        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
@@ -84,7 +84,7 @@ public class AllTestCases extends TestCase {
 //        //allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
 //        
 //        //temporarily disabling download because too large
-//        //allTestSuite.addTest(new TestDownload());
+//        //
 //        //allTestSuite.addTest(new TestTransferJobList());
 //        
 //        //Working.

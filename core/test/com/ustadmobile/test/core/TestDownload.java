@@ -103,7 +103,7 @@ public class TestDownload extends TestCase implements UMProgressListener {
         assertTrue("Download job reports completion", job.isFinished());
 
         int totalSize = job.getTotalSize();
-        int downloadedSize = job.getBytesDownloadedCount();
+        long downloadedSize = job.getBytesDownloadedCount();
         assertTrue("Downloaded size is the same as total size: "
                 + totalSize + " : " + downloadedSize,
                 totalSize == downloadedSize);

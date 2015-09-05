@@ -468,7 +468,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException{
-        boolean autocreate = (flags & FILE_AUTOCREATE) == FILE_AUTOCREATE;
         boolean append = (flags & FILE_APPEND) == FILE_APPEND;
         
         FileConnection con = null;
@@ -478,13 +477,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         try {
             con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
             
-            if(!autocreate && !con.exists()) {
-                e = new IOException("File dose not exist: autocreate is false");
-            }else if(!append) {
-                if(con.exists()) {
+            if(con.exists()) {
+                if(!append) {
                     con.delete();
+                    con.create();
                 }
-
+            }else {
                 con.create();
             }
         }catch(IOException e2) {
@@ -573,7 +571,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         final private String destFileURI;
         
-        private int bytesDownloaded;
+        private long bytesDownloaded;
         
         private int totalSize;
         
@@ -584,6 +582,18 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         private final Vector progressListeners;
         
         private final UMProgressEvent evt;
+        
+        public static final int RETRY_LIMIT_DEFAULT = 10;
+        
+        /**
+         * The maximum number of retries allowed for this job until it fails
+         */
+        private int maxRetries;
+        
+        /**
+         * The current number of tries
+         */
+        private int tryCount;
         
         /**
          * The delay (in ms) minimum between progress updates; this is used to
@@ -608,6 +618,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             finished = false;
             progressListeners = new Vector();
             evt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS, 0, 0, 0);
+            maxRetries = RETRY_LIMIT_DEFAULT;
         }
         
         /**
@@ -625,34 +636,36 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             super.start();
         }
         
-        /**
-         * Run as a thread the actual download (in the background)
-         */
-        public void run() {
+        public void continueDownload() throws IOException{
             final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             OutputStream fOut = null;
             HttpConnection con = null;
             InputStream httpIn = null;
+            IOException ioe = null;
+            
             try {
-                if(totalSize == -1) {
-                    getTotalSize();
-                }
-                
-                //see if we need to delete the destination beforehand
+                impl.l(UMLog.INFO, 332, srcURL + "->" + destFileURI);
+                bytesDownloaded = 0;
                 if(impl.fileExists(destFileURI)) {
-                    impl.removeFile(destFileURI);
+                    bytesDownloaded = impl.fileSize(destFileURI);
                 }
-                
-                fOut = myImpl.openFileOutputStream(destFileURI, FILE_AUTOCREATE);
+
+
+                fOut = myImpl.openFileOutputStream(destFileURI, FILE_APPEND);
                 con = (HttpConnection)Connector.open(srcURL);
+                if(bytesDownloaded > 0) {
+                    con.setRequestProperty("Range", "bytes=" + bytesDownloaded + '-');
+                }
+                con.setRequestProperty("Connection", "close");
+
                 httpIn = con.openInputStream();
                 myImpl.getLogger().l(UMLog.VERBOSE, 312, srcURL);
-                
+
                 byte[] buf = new byte[1024];
                 int bytesRead = 0;
                 int totalRead = 0;
                 long lastUpdate = 0;
-                
+
                 long timeNow;
                 while((bytesRead = httpIn.read(buf)) != -1) {
                     fOut.write(buf, 0, bytesRead);
@@ -666,21 +679,58 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                     }
                 }
                 
-                
-                
                 finished = true;
                 this.bytesDownloaded = totalSize;
                 evt.setEvtType(UMProgressEvent.TYPE_COMPLETE);
                 evt.setJobLength(totalSize);
                 evt.setProgress(totalSize);
                 evt.setStatusCode(200);
+                StringBuffer sbMsg = new StringBuffer();
+                sbMsg.append(srcURL).append("->").append(destFileURI).append(" (");
+                sbMsg.append(totalSize).append(" bytes)");
+                impl.getLogger().l(UMLog.INFO, 333, sbMsg.toString());
                 fireProgressEvent();
-            }catch(IOException e) {
-                impl.getLogger().l(UMLog.INFO, 1, srcURL, e);
+            }catch(Exception e) {
+                e = ioe;
+                impl.l(UMLog.ERROR, 115, srcURL + "->" +  destFileURI, e);
             }finally {
                 UMIOUtils.closeInputStream(httpIn);
                 J2MEIOUtils.closeConnection(con);
                 UMIOUtils.closeOutputStream(fOut);
+            }
+            
+            UMIOUtils.throwIfNotNullIO(ioe);
+        }
+        
+        
+        /**
+         * Run as a thread the actual download (in the background)
+         */
+        public void run() {
+            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            
+            //see if we need to delete the destination beforehand
+            try {
+                if(impl.fileExists(destFileURI)) {
+                    impl.removeFile(destFileURI);
+                }
+            }catch(IOException e) {
+                impl.l(UMLog.ERROR, 116 , destFileURI, e);
+            }
+            
+            while(!this.isFinished() && tryCount < maxRetries) {
+                try {
+                    if(totalSize == -1) {
+                        getTotalSize();
+                    }
+                    tryCount++;
+                    continueDownload();
+                }catch(IOException e) {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append(srcURL).append("->").append(destFileURI);
+                    sb.append(" try : ").append(tryCount);
+                    impl.l(UMLog.ERROR, 117, sb.toString() , e);
+                }
             }
         }
 
@@ -694,7 +744,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         /**
          * @inheritDoc
          */
-        public int getBytesDownloadedCount() {
+        public long getBytesDownloadedCount() {
             return bytesDownloaded;
         }
 
