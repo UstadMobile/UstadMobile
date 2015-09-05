@@ -37,12 +37,12 @@ NetBeans.  See README for instructions on building from source.
     <property name="src.dir" value="./src/"/>
     
     
-    <property name="MidletSuite" value="UstadMobileMicro"/>
-    <property name="Midlet_1_name" value="Ustad Mobile"/>
+    <property name="MidletSuite" value="UstadMobileMicro-Test"/>
+    <property name="Midlet_1_name" value="Ustad Mobile Test"/>
     <property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2METest"/>
 
-    <property name="MidletSuite2" value="UstadMobileRun"/>
-    <property name="Midlet_2_name" value="Ustad Mobile Run"/>
+    <property name="MidletSuite2" value="UstadMobileMicro"/>
+    <property name="Midlet_2_name" value="Ustad Mobile"/>
     <property name="Midlet_2_class" value="ustadmobilej2me.UstadMobileJ2MERun"/>    
     
     <property name="wtk.cldc.version" value="1.1"/>

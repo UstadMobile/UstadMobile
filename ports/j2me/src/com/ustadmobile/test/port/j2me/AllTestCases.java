@@ -62,22 +62,6 @@ public class AllTestCases extends TestCase {
         }
         
         
-        UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
-        if(!umLog.isRemoteSocketConnected()) {
-           try {
-                String deviceName = "j2metestrun";
-                String testServerURL = 
-                    "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
-                int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, "newrawserver", deviceName);
-
-
-                umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
-                umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
-            }catch(IOException e) {
-                System.err.println("Error connecting to testlog socket");
-                e.printStackTrace();
-            } 
-        }
         
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");

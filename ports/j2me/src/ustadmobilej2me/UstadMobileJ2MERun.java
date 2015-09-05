@@ -30,9 +30,9 @@ public class UstadMobileJ2MERun extends MIDlet {
                 (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance();
         
         /*
-        
         Uncomment this to connect to a local or remote log server
         */
+        
         
         try {
             int rawPort = UMUtil.requestDodgyHTTPDPort("http://192.168.0.17:8065/", "newrawserver", "j2merun");

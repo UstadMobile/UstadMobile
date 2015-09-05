@@ -24,7 +24,7 @@ import javax.microedition.io.SocketConnection;
  */
 public class UMLogJ2ME extends UMLog{
 
-    private PrintStream logOut = null;
+    private OutputStream logOut = null;
     
     private SocketConnection socketConn;
     
@@ -78,20 +78,41 @@ public class UMLogJ2ME extends UMLog{
     }
 
     public synchronized void l(int level, int code, String message) {
-        logOut.print("[");
-        logOut.print(new java.util.Date().toString());
-        logOut.print("]");
-        logOut.println(":codelu:" + code + " : " + message);
+        StringBuffer sb = new StringBuffer();
+        sb.append(":codelu:");
+        sb.append(code);
+        sb.append(" : ");
+        sb.append(message);
+        sb.append("\n");
+        try {
+            logOut.write(sb.toString().getBytes());
+            logOut.flush();
+        }catch(IOException e) {
+            System.err.println("Exception sending log line");
+            e.printStackTrace();
+        }
     }
 
     public synchronized void l(int level, int code, String message, Exception exception) {
-        logOut.print("[");
-        logOut.print(new java.util.Date().toString());
-        logOut.print("]");
-        String exceptionInfo = "/Exception: " + exception.getClass().getName() 
-            + " Message: " + exception.getMessage() + "/toString " + exception.toString();
-        
-        logOut.println(":codelu:" + code + " : " + message + " : " + exceptionInfo);
+        StringBuffer sb = new StringBuffer();
+        sb.append(":codelu:");
+        sb.append(code);
+        sb.append(" : ");
+        sb.append(message);
+        sb.append("/Exception: ");
+        sb.append(exception.getClass().getName());
+        sb.append(" Message: ");
+        sb.append(exception.getMessage());
+        sb.append("/toString ");
+        sb.append(exception.toString());
+        sb.append('\n');
+        try {
+            logOut.write(sb.toString().getBytes());
+            logOut.flush();
+        }catch(IOException e) {
+            System.err.println("Exception sending log line");
+            e.printStackTrace();
+        }
     }
     
     
