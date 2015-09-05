@@ -29,9 +29,8 @@ public class UstadMobileJ2MERun extends MIDlet {
         UstadMobileSystemImplJ2ME impl = 
                 (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance();
         
-        /*
-        Uncomment this to connect to a local or remote log server
-        */
+        
+        //Uncomment this below to connect to a local or remote log server
         
         /*
         
@@ -47,7 +46,7 @@ public class UstadMobileJ2MERun extends MIDlet {
             System.err.println("Error connecting to testlog socket");
             e.printStackTrace();
         }
-        */
+            */
         
         
         try{

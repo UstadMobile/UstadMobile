@@ -229,9 +229,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException {
+    public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        return new FileOutputStream(fileURI);
+        return new FileOutputStream(fileURI, (flags & FILE_APPEND) == FILE_APPEND);
     }
 
     @Override

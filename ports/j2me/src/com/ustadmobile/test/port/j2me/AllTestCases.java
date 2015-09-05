@@ -69,6 +69,7 @@ public class AllTestCases extends TestCase {
         //allTestSuite.addTest(new TestPreferences()); //works
         allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
         allTestSuite.addTest(new TestLogin());
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());
         
         
 //        

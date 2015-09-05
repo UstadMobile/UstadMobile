@@ -58,6 +58,20 @@ public abstract class UstadMobileSystemImpl {
     protected static UstadMobileSystemImpl mainInstance;
     
     /**
+     * Flag to use with openFileOutputStream
+     * 
+     * @see UstadMobileSystemImpl#openFileOutputStream(java.lang.String, int) 
+     */
+    public static final int FILE_AUTOCREATE = 1;
+    
+    /**
+     * Flag to use with openFileOutputStream
+     * 
+     * @see UstadMobileSystemImpl#openFileOutputStream(java.lang.String, int) 
+     */
+    public static final int FILE_APPEND = 2;
+    
+    /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
      * 
@@ -241,12 +255,17 @@ public abstract class UstadMobileSystemImpl {
     public abstract long modTimeDifference(String fileURI1, String fileURI2);
     
     /**
-     * Get an output stream to the given file
+     * Get an output stream to the given file.  If the FILE_APPEND flag is set
+     * then output will be appended to the end of the file, otherwise the file
+     * will be overwritten if it exists already.
+     * 
+     * FILE_AUTOCREATE is the default behaviour; some platforms (e.g. Droid) will 
+     * autocreate the file always.
      * 
      * @param fileURI URI to the file we want an output stream for
-     * @param autocreate whether or not to autocreate the file
+     * @param flags can set FILE_APPEND and FILE_AUTOCREATE
      */
-    public abstract OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException;
+    public abstract OutputStream openFileOutputStream(String fileURI, int flags) throws IOException;
     
     /**
      * Get an input stream from a given file
@@ -269,7 +288,7 @@ public abstract class UstadMobileSystemImpl {
         IOException ioe = null;
         getLogger().l(UMLog.DEBUG, 500, fileURI + " enc " + encoding);
         try {
-            out = openFileOutputStream(fileURI, true);
+            out = openFileOutputStream(fileURI, FILE_AUTOCREATE);
             out.write(str.getBytes(encoding));
             out.flush();
             getLogger().l(UMLog.DEBUG, 501, fileURI);

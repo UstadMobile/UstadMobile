@@ -56,6 +56,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
+import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import org.kxml2.io.KXmlParser;
@@ -466,16 +467,20 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return new ZipFileHandleJ2ME(name);
     }
 
-    public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException{
+    public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException{
+        boolean autocreate = (flags & FILE_AUTOCREATE) == FILE_AUTOCREATE;
+        boolean append = (flags & FILE_APPEND) == FILE_APPEND;
+        
         FileConnection con = null;
         IOException e = null;
+        OutputStream out = null;
         
         try {
             con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
             
             if(!autocreate && !con.exists()) {
                 e = new IOException("File dose not exist: autocreate is false");
-            }else {
+            }else if(!append) {
                 if(con.exists()) {
                     con.delete();
                 }
@@ -489,9 +494,17 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             if(e != null) throw e;
         }
 
+        if(!append) {
+            out = Connector.openOutputStream(fileURI);
+            
+        }else {
+            con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+            out = new ConnectorCloseOutputStream(
+                con.openOutputStream(con.fileSize()), con);
+        }
         
-        OutputStream out = Connector.openOutputStream(fileURI);
-        return out;        
+        return out;
+        
     }
 
     /**
@@ -505,9 +518,50 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public String[] getPrefKeyList() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    /**
+     * Use when an output stream is bound to a connector, and we want to make sure
+     * the connector gets closed when the outputstream is closed.
+     * 
+     * Simply calls Connection.close when the streams close method is called
+     */
+    public class ConnectorCloseOutputStream extends OutputStream {
 
-    private Exception IOException(String file_dose_not_exist_autocreate_is_false) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        private OutputStream dst;
+        
+        private Connection con;
+        
+        public ConnectorCloseOutputStream(OutputStream dst, Connection con) {
+            this.dst = dst;
+        }
+        
+        public void write(int b) throws IOException {
+            dst.write(b);
+        }
+
+        public void close() throws IOException {
+            IOException ioe = null;
+            try {
+                dst.close();
+            }catch(IOException e) {
+                ioe = e;
+            }finally {
+                J2MEIOUtils.closeConnection(con);
+            }
+            UMIOUtils.throwIfNotNullIO(ioe);
+        }
+
+        public void flush() throws IOException {
+            dst.flush(); 
+        }
+
+        public void write(byte[] b, int off, int len) throws IOException {
+            dst.write(b, off, len); 
+        }
+
+        public void write(byte[] b) throws IOException {
+            dst.write(b); 
+        }
     }
     
     /**
@@ -589,11 +643,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                     impl.removeFile(destFileURI);
                 }
                 
-                fOut = myImpl.openFileOutputStream(destFileURI, true);
+                fOut = myImpl.openFileOutputStream(destFileURI, FILE_AUTOCREATE);
                 con = (HttpConnection)Connector.open(srcURL);
                 httpIn = con.openInputStream();
                 myImpl.getLogger().l(UMLog.VERBOSE, 312, srcURL);
-                //UMIOUtils.readFully(httpIn, fOut, 1024);
                 
                 byte[] buf = new byte[1024];
                 int bytesRead = 0;
