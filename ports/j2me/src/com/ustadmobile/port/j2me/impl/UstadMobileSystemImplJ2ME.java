@@ -164,7 +164,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public String getUserContentDirectory(String username){
         try{
-            HTTPUtils.httpDebug("GettingUserContentDir");
+            getLogger().l(UMLog.DEBUG, 507, username);
             DeviceRoots dt = FileUtils.getBestRoot();
             String toSlashOrNot="";
             if (dt.path.endsWith("//")){
@@ -177,56 +177,46 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             String sharedUserContentDir = dt.path + toSlashOrNot + 
                     FileUtils.USTAD_CONTENT_DIR + FileUtils.FILE_SEP + username;
             
+            getLogger().l(UMLog.DEBUG, 507, "dir: " + sharedUserContentDir);
+            
+            
             //Check if it is created. If it isn't, create it.
+            /*
             if(FileUtils.createFileOrDir(sharedUserContentDir, 
                     Connector.READ_WRITE, true)){
-                HTTPUtils.httpDebug("gotUserDirOK");
+                getLogger().l(UMLog.DEBUG, 507, "dir made ok");
                 return sharedUserContentDir;
             }
-            
+            */
+            return sharedUserContentDir;
         }catch (Exception e){
-            HTTPUtils.httpDebug("ExceptionGetOrCreatingUserDir");
+            getLogger().l(UMLog.DEBUG, 507, "exception in getUserContentDirectory", e);
         }
         return null;
     }
     
     public String getSystemLocale(){
-        return System.getProperty("microedition.locale").toString();
+        return System.getProperty("microedition.locale");
     }
     
     public Hashtable getSystemInfo(){
         Hashtable systemInfo = new Hashtable();
-        try{
-            systemInfo.put("platform", 
-                    System.getProperty("microedition.platform").toString());
-            systemInfo.put("encoding", 
-                    System.getProperty("microedition.encoding").toString());
-            systemInfo.put("configuration", 
-                    System.getProperty("microedition.configuration").toString());
-            systemInfo.put("profiles", 
-                    System.getProperty("microedition.profiles").toString());
-            systemInfo.put("locale", 
-                    System.getProperty("microedition.locale").toString());
-            systemInfo.put("memorytotal", 
-                    Long.toString(Runtime.getRuntime().totalMemory()));
-            systemInfo.put("memoryfree", 
-                    Long.toString(Runtime.getRuntime().freeMemory()));
-            return systemInfo;
-        }catch (Exception e){}
-        return null;
-    }
-    
-    public String readFileAsText(String fileURI, String encoding) 
-            throws IOException{
-        try{
-            String contents = FileUtils.getFileContents(fileURI);
-            return contents;
-        }catch(Exception e){}
-        return null;
-    }
-    
-    public String readFileAsText(String fileURI) throws IOException{
-        return this.readFileAsText(fileURI, "UTF-8");
+        
+        systemInfo.put("platform", 
+                System.getProperty("microedition.platform"));
+        systemInfo.put("encoding", 
+                System.getProperty("microedition.encoding"));
+        systemInfo.put("configuration", 
+                System.getProperty("microedition.configuration"));
+        systemInfo.put("profiles", 
+                System.getProperty("microedition.profiles"));
+        systemInfo.put("locale", 
+                System.getProperty("microedition.locale"));
+        systemInfo.put("memorytotal", 
+                Long.toString(Runtime.getRuntime().totalMemory()));
+        systemInfo.put("memoryfree", 
+                Long.toString(Runtime.getRuntime().freeMemory()));
+        return systemInfo;
     }
     
     public long modTimeDifference(String fileURI1, String fileURI2){
@@ -240,15 +230,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         }catch(Exception e){}
         return -1;
     }
-    
-    public void writeStringToFile(String str, String fileURI, String encoding) 
-            throws IOException{
-        try{
-            FileUtils.writeStringToFile(str, fileURI, false);
-            
-        }catch (Exception e){}
-    }
-    
+        
     public boolean fileExists(String fileURI) throws IOException{
         return FileUtils.checkFile(fileURI);
     }
@@ -294,17 +276,45 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             return FileUtils.getFileSize(fileURI);
         }catch(Exception e){}
         return -1;
-    }
+    } 
     
     public boolean makeDirectory(String dirURI) throws IOException{
- 
-        boolean createFileOrDir = FileUtils.createFileOrDir(dirURI, 
-                Connector.READ_WRITE, true);
-        if (!createFileOrDir){
-            IOException e = new IOException();
+        getLogger().l(UMLog.VERBOSE, 401, dirURI);
+        FileConnection fc = null;
+        
+        //J2ME Nokia will not create a directory with a trailing slash in the name
+        if(dirURI.charAt(dirURI.length()-1) != '/') {
+            //dirURI = dirURI.substring(0, dirURI.length()-1);
+            dirURI += '/'; 
+            getLogger().l(UMLog.DEBUG, 504, dirURI);
+        }
+        
+        
+        IOException e = null;
+        boolean dirOK = false;
+        try {
+            fc = (FileConnection)Connector.open(dirURI);
+            getLogger().l(UMLog.DEBUG, 506, dirURI);
+            if(!(fc.isDirectory() && fc.exists())) {
+                fc.mkdir();
+                dirOK = true;
+                getLogger().l(UMLog.DEBUG, 503, dirURI);
+            }else {
+                getLogger().l(UMLog.DEBUG, 502, dirURI);
+                dirOK = true;
+            }
+        }catch(IOException e2) {
+            e = e2;
+            getLogger().l(UMLog.ERROR, 104, dirURI, e);
+        }finally {
+            J2MEIOUtils.closeConnection(fc);
+        }
+        
+        if(e != null) {
             throw e;
         }
-        return createFileOrDir;
+        
+        return dirOK;
 
     }
     
@@ -351,12 +361,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * @inheritDoc
      */
     public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String m) {
-        int meaning = 42;
         getLogger().l(UMLog.VERBOSE, 305, "HTTP (" + m + ")" + url);
         try {
             return HTTPUtils.makeHTTPRequest(url, postParameters, headers, m);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            getLogger().l(UMLog.ERROR, 105, url, ex);
         }
         return null;
     }
@@ -462,10 +471,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         IOException e = null;
         if(autocreate) {
             try {
-                con = (FileConnection)Connector.open(fileURI);
-                if(!con.exists()) {
-                    con.create();
+                con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+                if(con.exists()) {
+                    con.delete();
                 }
+                
+                con.create();
             }catch(IOException e2) {
                 e = e2;
             }finally {
@@ -476,6 +487,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         OutputStream out = Connector.openOutputStream(fileURI);
         return out;
+        //return out;
+        //con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+        //return con.openOutputStream(0);
+        
     }
 
     /**

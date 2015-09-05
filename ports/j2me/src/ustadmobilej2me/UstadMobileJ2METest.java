@@ -8,9 +8,12 @@ import com.ustadmobile.test.port.j2me.TestUtils;
 import java.io.IOException;
 import java.util.Hashtable;
 import com.sun.lwuit.Display;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import com.ustadmobile.test.port.j2me.TestEPUBRead;
+import j2meunit.framework.AssertionFailedError;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
 import j2meunit.framework.TestFailure;
@@ -34,6 +37,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         start(new String[] {
             atc.getClass().getName()
         });
+        
         
         while(true){
             try{
@@ -124,5 +128,41 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
     }
     
     public void destroyApp(boolean unconditional) {
+    }
+    
+    public void addError(Test test, Throwable thrwbl) {
+        super.addError(test, thrwbl);
+        if(thrwbl != null && thrwbl instanceof Exception){ 
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR,
+                110, test.toString(), (Exception)thrwbl);
+        }else {
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR,
+                110, test.toString());
+        }
+        
+    }
+
+    public void addFailure(Test test, AssertionFailedError afe){
+        super.addFailure(test, afe);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR,
+                111, test.toString() + " : " + afe.toString());
+    }
+
+    public void endTest(Test test) {
+        super.endTest(test);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 309, 
+                test.toString());
+    }
+
+    public void endTestStep(Test test) {
+        super.endTestStep(test);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 310, 
+                test.toString());
+    }
+
+    public void startTest(Test test) {
+        super.startTest(test);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 308, 
+                test.toString());
     }
 }

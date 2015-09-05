@@ -100,5 +100,16 @@ public class UMIOUtils {
         out.flush();
     }
     
+    public static final void throwIfNotNullIO(IOException e) throws IOException{
+        if(e != null) {
+            throw e;
+        }
+    }
+    
+    public static final void throwIfNotNull(Exception e) throws Exception {
+        if(e != null) {
+            throw e;
+        }
+    }
     
 }

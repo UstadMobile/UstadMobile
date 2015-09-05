@@ -30,12 +30,25 @@ public class UMLogJ2ME extends UMLog{
     
     private OutputStream socketOut;
     
+    private boolean remoteSocketConnected;
+    
     public UMLogJ2ME() {
         logOut = System.out;
+        remoteSocketConnected = false;
     }
     
     public synchronized void setOutputDest(PrintStream dest) {
         this.logOut = dest;
+    }
+    
+    
+    /**
+     * Whether or not this log stream is connected to a remote socket
+     * 
+     * @return true if this is connected to a remote socket, false otherwise
+     */
+    public boolean isRemoteSocketConnected() {
+        return remoteSocketConnected;
     }
     
     public synchronized void connectLogToSocket(String serverName) throws IOException{
@@ -46,6 +59,7 @@ public class UMLogJ2ME extends UMLog{
                 + serverName);
             socketOut = socketConnection.openOutputStream();
             logOut = new PrintStream(socketOut);
+            remoteSocketConnected = true;
             System.out.println("Connected socket");
         }catch(IOException e) {
             System.out.println("Exception connecting socket!");
@@ -58,6 +72,7 @@ public class UMLogJ2ME extends UMLog{
     
     public synchronized void closeSocketConn() {
         logOut = System.out;
+        remoteSocketConnected = false;
         UMIOUtils.closeOutputStream(socketOut);
         J2MEIOUtils.closeConnection(socketConn);
     }
@@ -73,7 +88,12 @@ public class UMLogJ2ME extends UMLog{
         logOut.print("[");
         logOut.print(new java.util.Date().toString());
         logOut.print("]");
-        logOut.println(":codelu:" + code + " : " + message + " : " + exception.toString());
+        String exceptionInfo = "/Exception: " + exception.getClass().getName() 
+            + " Message: " + exception.getMessage() + "/toString " + exception.toString();
+        
+        logOut.println(":codelu:" + code + " : " + message + " : " + exceptionInfo);
     }
+    
+    
 
 }

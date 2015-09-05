@@ -268,32 +268,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return new FileInputStream(fileURI);
     }
 
-
-    @Override
-    public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {
-        ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes(encoding));
-        FileOutputStream fout = null;
-        IOException ioe = null;
-        try {
-            int bytesRead = -1;
-            byte[] buf = new byte[1024];
-            fout = new FileOutputStream(fileURI);
-            while((bytesRead = bin.read(buf))!= -1) {
-                fout.write(buf, 0, bytesRead);
-            }
-        }catch(IOException e) {
-            ioe = e;
-        }finally{
-            if(fout != null) {
-                fout.close();
-            }
-        }
-
-        if(ioe != null) {
-            throw ioe;
-        }
-    }
-
     @Override
     public boolean fileExists(String fileURI) throws IOException {
         return new File(fileURI).exists();

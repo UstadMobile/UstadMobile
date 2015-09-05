@@ -49,7 +49,7 @@ NetBeans.  See README for instructions on building from source.
     <property name="wtk.midp.version" value="2.0"/>
     
     <!-- do per version pre-processing -->
-    <target name="preprocess">
+    <target name="preprocess" depends="clean">
         
         <!-- end of properties to make it build outside of netbeans -->
         
@@ -80,7 +80,7 @@ NetBeans.  See README for instructions on building from source.
 
     </target>
             
-    <target name="build" depends="preprocess">
+    <target name="build" depends="clean,preprocess">
         <mkdir dir="${classes.dir.ANTENNA}"/>
                 
         <wtkbuild srcdir="${src.preprocessed.ANTENNA}"
@@ -143,8 +143,8 @@ NetBeans.  See README for instructions on building from source.
 	
         <copy file="${src.dir}/nokia_non_touch_theme.res" todir="${classes.dir.ANTENNA}"/>
         
-
-        <copy todir="${classes.dir.ANTENNA}">
+        <mkdir dir="${classes.dir.ANTENNA}/res"/>
+        <copy todir="${classes.dir.ANTENNA}/res" verbose="true">
             <fileset dir="${src.dir}/res"/>
         </copy>
 

@@ -29,6 +29,7 @@
 
  */
 package com.ustadmobile.core.opds;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -69,6 +70,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     }
     
     public static UstadJSOPDSFeed loadFromXML(String str) throws XmlPullParserException, IOException {
+        
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
         parser.setInput(bin, "UTF-8");
@@ -77,6 +79,8 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public static UstadJSOPDSFeed loadFromXML(XmlPullParser xpp) throws 
             XmlPullParserException, IOException{
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.VERBOSE,
+            511, null);
         UstadJSOPDSFeed resultFeed = new UstadJSOPDSFeed();
         
         int evtType = xpp.getEventType();
@@ -163,6 +167,9 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         
         resultFeed.entries = new UstadJSOPDSEntry[entryVector.size()];
         entryVector.copyInto(resultFeed.entries);
+        
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.VERBOSE,
+            512, null);
         
         return resultFeed;
     }

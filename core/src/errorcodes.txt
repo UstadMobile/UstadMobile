@@ -1,7 +1,0 @@
-
-101 : J2ME Exception closing connection
-102 : J2ME getTotalSize exception
-103 : J2ME Download runner exception
-
-302 : debug starting loginThread
-303 : debug loginThread run method moving

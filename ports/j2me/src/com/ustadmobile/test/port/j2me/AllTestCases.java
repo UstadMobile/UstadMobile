@@ -46,7 +46,7 @@ import java.io.IOException;
 public class AllTestCases extends TestCase {
     
     public AllTestCases(){
-        setName("All Test Caes");
+        setName("All Test Cases");
     }
 
     public Test suite() {
@@ -61,19 +61,24 @@ public class AllTestCases extends TestCase {
             throw new RuntimeException(e.toString());
         }
         
-        try {
-            String deviceName = "j2metestrun";
-            String testServerURL = 
-                "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
-            int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, "newrawserver", deviceName);
-            
-            UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
-            umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
-            umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
-        }catch(IOException e) {
-            System.err.println("Error connecting to testlog socket");
-            e.printStackTrace();
+        
+        UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
+        if(!umLog.isRemoteSocketConnected()) {
+           try {
+                String deviceName = "j2metestrun";
+                String testServerURL = 
+                    "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
+                int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, "newrawserver", deviceName);
+
+
+                umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
+                umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
+            }catch(IOException e) {
+                System.err.println("Error connecting to testlog socket");
+                e.printStackTrace();
+            } 
         }
+        
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..

@@ -34,7 +34,10 @@ package com.ustadmobile.core.impl;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -68,7 +71,12 @@ public abstract class UstadMobileSystemImpl {
             try {
                 String sharedContentDir = mainInstance.getSharedContentDir();
                 sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
-                mainInstance.getLogger().l(UMLog.INFO, 130, sharedContentDir + ":" + sharedDirOK);
+                String sharedCacheDir = UMFileUtil.joinPaths(new String[]{
+                    sharedContentDir, UstadMobileConstants.CACHEDIR});
+                boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
+                StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
+                initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
+                mainInstance.getLogger().l(UMLog.INFO, 130, initMsg.toString());
             }catch(IOException e) {
                 mainInstance.getLogger().l(UMLog.CRITICAL, 500, null, e);
             }
@@ -92,10 +100,16 @@ public abstract class UstadMobileSystemImpl {
     public void startUI() {        
         final UstadMobileSystemImpl impl = this;
         
-        if(getActiveUser() == null) {
+        String activeUser = getActiveUser();
+        getLogger().l(UMLog.VERBOSE, 402, activeUser);
+        if(activeUser == null) {
             new LoginController().show();
         }else {
+            //Ensure directory presence in case user deleted it whilst we were away
+            setActiveUser(activeUser);
+            getLogger().l(UMLog.VERBOSE, 403, activeUser);
             getAppView().showProgressDialog("Loading");
+            
             Thread startThread = new Thread(new Runnable() {
                 public void run() {
                     try {
@@ -106,7 +120,7 @@ public abstract class UstadMobileSystemImpl {
                         impl.getAppView().dismissProgressDialog();
                         impl.getAppView().showNotification("Couldn't load course catalog", 
                             AppView.LENGTH_LONG);
-                        e.printStackTrace();
+                        getLogger().l(UMLog.ERROR, 107, null, e);
                     }
                 }
             });
@@ -162,7 +176,26 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return File contents as a string
      */
-    public abstract String readFileAsText(String fileURI, String encoding) throws IOException;
+    public  String readFileAsText(String fileURI, String encoding) throws IOException{
+        getLogger().l(UMLog.DEBUG, 508, fileURI + " (" + encoding + ")");
+        InputStream in = null;
+        String result = null;
+        IOException ioe = null;
+        try {
+            in = openFileInputStream(fileURI);
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            UMIOUtils.readFully(in, bout, 1024);
+            result = new String(bout.toByteArray());
+        }catch(IOException e) {
+            getLogger().l(UMLog.ERROR, 108, fileURI, e);
+            ioe = e;
+        }finally {
+            UMIOUtils.closeInputStream(in);
+        }
+        
+        UMIOUtils.throwIfNotNullIO(ioe);
+        return result;
+    }
     
     /**
      * Read the given fileURI as a string and return it - assume UTF-8 encoding
@@ -206,7 +239,22 @@ public abstract class UstadMobileSystemImpl {
      * @param fileURI URI to the required file
      * @param encoding Encoding to use for string e.g. UTF-8
      */
-    public abstract void writeStringToFile(String str, String fileURI, String encoding) throws IOException;
+    public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {
+        OutputStream out = null;
+        IOException ioe = null;
+        getLogger().l(UMLog.DEBUG, 500, fileURI + " enc " + encoding);
+        try {
+            out = openFileOutputStream(fileURI, true);
+            out.write(str.getBytes(encoding));
+            out.flush();
+            getLogger().l(UMLog.DEBUG, 501, fileURI);
+        }catch(IOException e) {
+            getLogger().l(UMLog.ERROR, 106, fileURI + " enc:" + encoding, e);
+        }finally {
+            UMIOUtils.closeOutputStream(out);
+            UMIOUtils.throwIfNotNullIO(ioe);
+        }
+    }
     
     /**
      * Check to see if the given file exists
@@ -299,12 +347,16 @@ public abstract class UstadMobileSystemImpl {
     public void setActiveUser(String username) {
         //Make sure there is a valid directory for this user
         String userDirPath = getUserContentDirectory(username);
+        getLogger().l(UMLog.INFO, 306, username);
         try {
-            makeDirectory(userDirPath);
+            boolean dirOK = makeDirectory(userDirPath);
+            makeDirectory(UMFileUtil.joinPaths(
+                new String[]{userDirPath, UstadMobileConstants.CACHEDIR}));
+            getLogger().l(UMLog.VERBOSE, 404, username + ":" + userDirPath 
+                + ":" + dirOK);
         }catch(IOException e) {
-            e.printStackTrace();
+            getLogger().l(UMLog.CRITICAL, 3, username + ":" + userDirPath);
         }
-        
     }
     
     /**
