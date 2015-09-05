@@ -33,7 +33,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         Uncomment this to connect to a local or remote log server
         */
         
-        
+        /*
         try {
             int rawPort = UMUtil.requestDodgyHTTPDPort("http://192.168.0.17:8065/", "newrawserver", "j2merun");
             UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
@@ -46,7 +46,7 @@ public class UstadMobileJ2MERun extends MIDlet {
             System.err.println("Error connecting to testlog socket");
             e.printStackTrace();
         }
-        
+        */
         
         try{
             Resources r = Resources.open("/nokia_non_touch_theme.res");

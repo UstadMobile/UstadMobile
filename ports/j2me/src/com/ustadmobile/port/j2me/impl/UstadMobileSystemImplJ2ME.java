@@ -469,28 +469,29 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException{
         FileConnection con = null;
         IOException e = null;
-        if(autocreate) {
-            try {
-                con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+        
+        try {
+            con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+            
+            if(!autocreate && !con.exists()) {
+                e = new IOException("File dose not exist: autocreate is false");
+            }else {
                 if(con.exists()) {
                     con.delete();
                 }
-                
+
                 con.create();
-            }catch(IOException e2) {
-                e = e2;
-            }finally {
-                J2MEIOUtils.closeConnection(con);
-                if(e != null) throw e;
             }
+        }catch(IOException e2) {
+            e = e2;
+        }finally {
+            J2MEIOUtils.closeConnection(con);
+            if(e != null) throw e;
         }
+
         
         OutputStream out = Connector.openOutputStream(fileURI);
-        return out;
-        //return out;
-        //con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
-        //return con.openOutputStream(0);
-        
+        return out;        
     }
 
     /**
@@ -502,6 +503,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     public String[] getPrefKeyList() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private Exception IOException(String file_dose_not_exist_autocreate_is_false) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
