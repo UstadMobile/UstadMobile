@@ -290,4 +290,15 @@ public class UMFileUtil {
         }
     }
     
+    /**
+     * Remove a prefix if it is present (e.g. starting file:// in the case
+     * of android)
+     */
+    public static String stripPrefixIfPresent(String prefix, String path) {
+        if(!path.startsWith(prefix)) {
+            return path;
+        }else {
+            return path.substring(prefix.length());
+        }
+    }
 }

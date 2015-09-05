@@ -86,6 +86,31 @@ public abstract class UstadMobileSystemImpl {
     }
     
     /**
+     * Convenience shortcut for logging
+     * @see UMLog#l(int, int, java.lang.String) 
+     * 
+     * @param level log level
+     * @param code log code
+     * @param message message to log
+     */
+    public void l(int level, int code, String message) {
+        getLogger().l(level, code, message);
+    }
+    
+    /**
+     * Convenience shortcut for logging
+     * @see UMLog#l(int, int, java.lang.String, java.lang.Exception) 
+     * 
+     * @param level log level
+     * @param code log code
+     * @param message log message
+     * @param exception exception that occurred to log
+     */
+    public void l(int level, int code, String message, Exception exception) {
+        getLogger().l(level, code, message, exception);
+    }
+    
+    /**
      * Do any required startup operations: init will be called on creation
      * 
      * This must make the shared content directory if it does not already exist
@@ -512,8 +537,7 @@ public abstract class UstadMobileSystemImpl {
         if(urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
             return makeRequest(url, headers, null, "GET");
         }else if(urlLower.startsWith("file:///")) {
-            String filePath = url.substring(7);
-            String contents = readFileAsText(filePath);
+            String contents = readFileAsText(url);
             return new HTTPResult(contents.getBytes(), 200, null);
         }else {
             throw new IllegalArgumentException();
