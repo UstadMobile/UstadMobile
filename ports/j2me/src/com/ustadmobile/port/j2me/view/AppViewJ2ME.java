@@ -111,8 +111,10 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
         
         Display.getInstance().callSerially(new Runnable(){
             public void run() {
-                progressDialog.dispose();
-                progressDialog = null;
+                if(progressDialog != null) {
+                    progressDialog.dispose();
+                    progressDialog = null;
+                }
             }
         });
         

@@ -8,9 +8,15 @@ import com.ustadmobile.test.port.j2me.TestUtils;
 import java.io.IOException;
 import java.util.Hashtable;
 import com.sun.lwuit.Display;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
+import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
+import com.ustadmobile.test.core.TestConstants;
 import com.ustadmobile.test.port.j2me.TestEPUBRead;
+import j2meunit.framework.AssertionFailedError;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
 import j2meunit.framework.TestFailure;
@@ -29,11 +35,35 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         //start(new String[] { com.ustadmobile.app.tests.AllTestCases.class.getName() });
         
         Display.init(this);
+        
+        UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
+        
+        
+        if(!umLog.isRemoteSocketConnected()) {
+           try {
+                String deviceName = "j2metestrun";
+                String testServerURL = 
+                    "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
+                int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, "newrawserver", deviceName);
+
+
+                umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
+                umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
+                umLog.l(UMLog.INFO, 350, 
+                    UstadMobileSystemImpl.getInstance().getSystemInfo().toString());
+            }catch(IOException e) {
+                System.err.println("Error connecting to testlog socket");
+                e.printStackTrace();
+            } 
+        }
+        
+        
         AllTestCases atc = new AllTestCases() ;
         int ctc = atc.suite().countTestCases();
         start(new String[] {
             atc.getClass().getName()
         });
+        
         
         while(true){
             try{
@@ -124,5 +154,41 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
     }
     
     public void destroyApp(boolean unconditional) {
+    }
+    
+    public void addError(Test test, Throwable thrwbl) {
+        super.addError(test, thrwbl);
+        if(thrwbl != null && thrwbl instanceof Exception){ 
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR,
+                110, test.toString(), (Exception)thrwbl);
+        }else {
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR,
+                110, test.toString());
+        }
+        
+    }
+
+    public void addFailure(Test test, AssertionFailedError afe){
+        super.addFailure(test, afe);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR,
+                111, test.toString() + " : " + afe.toString());
+    }
+
+    public void endTest(Test test) {
+        super.endTest(test);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 309, 
+                test.toString());
+    }
+
+    public void endTestStep(Test test) {
+        super.endTestStep(test);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 310, 
+                test.toString());
+    }
+
+    public void startTest(Test test) {
+        super.startTest(test);
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 308, 
+                test.toString());
     }
 }

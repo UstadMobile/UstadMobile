@@ -224,95 +224,45 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public String readFileAsText(String filename, String encoding) throws IOException {
-        IOException ioe = null;
-        FileInputStream fin = null;
-        ByteArrayOutputStream bout = null;
-
-        try {
-            fin = new FileInputStream(filename);
-            bout = new ByteArrayOutputStream();
-            int bytesRead = -1;
-            byte[] buf = new byte[1024];
-            while((bytesRead = fin.read(buf, 0, buf.length)) != -1) {
-                bout.write(buf, 0, bytesRead);
-            }
-        }catch(IOException e) {
-            ioe = e;
-        }finally {
-            if(fin != null) {
-                fin.close();
-            }
-        }
-
-        if(ioe == null) {
-            String retVal = new String(bout.toByteArray(), encoding);
-            return retVal;
-        }else {
-            throw ioe;
-        }
-    }
-
-    @Override
     public long modTimeDifference(String fileURI1, String fileURI2) {
         return (new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
     }
 
     @Override
-    public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException {
-        return new FileOutputStream(fileURI);
+    public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException {
+        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
+        return new FileOutputStream(fileURI, (flags & FILE_APPEND) == FILE_APPEND);
     }
 
     @Override
     public InputStream openFileInputStream(String fileURI) throws IOException {
+        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
         return new FileInputStream(fileURI);
-    }
-
-
-    @Override
-    public void writeStringToFile(String str, String fileURI, String encoding) throws IOException {
-        ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes(encoding));
-        FileOutputStream fout = null;
-        IOException ioe = null;
-        try {
-            int bytesRead = -1;
-            byte[] buf = new byte[1024];
-            fout = new FileOutputStream(fileURI);
-            while((bytesRead = bin.read(buf))!= -1) {
-                fout.write(buf, 0, bytesRead);
-            }
-        }catch(IOException e) {
-            ioe = e;
-        }finally{
-            if(fout != null) {
-                fout.close();
-            }
-        }
-
-        if(ioe != null) {
-            throw ioe;
-        }
     }
 
     @Override
     public boolean fileExists(String fileURI) throws IOException {
+        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
         return new File(fileURI).exists();
     }
 
     @Override
     public boolean dirExists(String dirURI) throws IOException {
+        dirURI = UMFileUtil.stripPrefixIfPresent("file://", dirURI);
         File dir = new File(dirURI);
         return dir.exists() && dir.isDirectory();
     }
 
     @Override
     public boolean removeFile(String fileURI)  {
+        fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
         File f = new File(fileURI);
         return f.delete();
     }
 
     @Override
     public String[] listDirectory(String dirURI) throws IOException {
+        dirURI = UMFileUtil.stripPrefixIfPresent("file://", dirURI);
         File dir = new File(dirURI);
         return dir.list();
     }
@@ -859,7 +809,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
 
         @Override
-        public int getBytesDownloadedCount() {
+        public long getBytesDownloadedCount() {
             return getProgressAndTotal()[0];
         }
 

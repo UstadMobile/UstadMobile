@@ -30,7 +30,18 @@
  */
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import java.io.IOException;
+import java.util.Hashtable;
 import java.util.Vector;
+
+/* $if umplatform == 2  $
+    import org.json.me.*;
+ $else$ */
+    import org.json.*;
+/* $endif$ */
 
 /**
  * Misc utility methods
@@ -97,6 +108,41 @@ public class UMUtil {
             arr[i] = value;
         }
     }
+    
+    
+    /**
+     * Request a new port on the DodgyHTTPD Test Server for logging /asset request
+     * 
+     * @param serverURL - Control Server URL eg http://server:8065/
+     * @param action - "newserver" for HTTP server or "newrawserver" for socket logger
+     * @param client client name if requesting newrawserver (otherwise null)
+     * @return the port that was opened or -1 for an error
+     */
+    public static int requestDodgyHTTPDPort(String serverURL, String action, String client) {
+        try {
+            String requestURL = serverURL;
+            if(requestURL.indexOf('?') == -1) {
+                requestURL += "?action=" + action;
+            }else {
+                requestURL += "&action=" + action;
+            }
+            
+            if(client != null) {
+                requestURL += "&client=" + client;
+            }
+            
+            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(
+                requestURL, new Hashtable(), new Hashtable(), "GET");
+            String serverSays = new String(result.getResponse(), "UTF-8");
+            JSONObject response = new JSONObject(serverSays);
+            int serverPort = response.getInt("port");
+            return serverPort;
+        }catch(Exception e) {
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR, 510, action + "," + serverURL);
+            return -1;
+        }
+    }
+    
     
     
 }

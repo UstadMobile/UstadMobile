@@ -31,10 +31,12 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.app.Base64;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMProgressEvent;
 import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UMTransferJobList;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
@@ -343,7 +345,7 @@ public class CatalogController implements UstadController, UMProgressListener {
                 impl.getActiveUser()) : impl.getSharedContentDir();
         
         String looseFilePath = UMFileUtil.joinPaths(new String[] {generatedHREFBase, 
-            ".cache-loose"});
+            "cache-loose"});
         
         boolean[] userOPDSFiles = new boolean[opdsFiles.length];
         UMUtil.fillBooleanArray(userOPDSFiles, true, opdsUserStartIndex, 
@@ -599,12 +601,9 @@ public class CatalogController implements UstadController, UMProgressListener {
      */
     public static UstadJSOPDSFeed getCatalogByURL(String url, int resourceMode, String httpUsername, String httpPassword, int flags) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
-
-	/* $if umplatform == 2 $ */
-	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("getCatalogByURL");
-   	/* $endif$ */
-                
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.getLogger().l(UMLog.INFO, 307, url);
+        
         Hashtable headers = makeAuthHeaders(httpUsername, httpPassword);
         
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
@@ -615,14 +614,7 @@ public class CatalogController implements UstadController, UMProgressListener {
             "UTF-8");
 
         opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
-	/* $if umplatform == 2 $ */
-            if (opdsFeed==null){
-                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("opdsFeedisNull");
-            }else{
-                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("opdsFeedisNOTNull");
-            }
-	    
-   	/* $endif$ */
+        impl.getLogger().l(UMLog.DEBUG, 504, "Catalog Null:" + (opdsFeed == null));
         opdsFeed.href = url;
         stripEntryUMCloudIDPrefix(opdsFeed);
         CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
@@ -688,7 +680,7 @@ public class CatalogController implements UstadController, UMProgressListener {
     }
     
     protected static String getFileNameForOPDSFeedId(String feedId) {
-        return ".cache-" + sanitizeIDForFilename(feedId) + OPDS_EXTENSION;
+        return "cache-" + sanitizeIDForFilename(feedId) + OPDS_EXTENSION;
     }
     
     protected static String getPrefKeyNameForOPDSURLToIDMap(String opdsId) {
@@ -722,37 +714,31 @@ public class CatalogController implements UstadController, UMProgressListener {
      * @param serializedCatalog String contents of the catalog (in XML) : optional : if they are 'handy', otherwise null
      */
     public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog) throws IOException{
-	/* $if umplatform == 2 $ */
-           com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gettingcacheCatalog");
-   	/* $endif$ */
-        String destPath = null;
-        boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.getLogger().l(UMLog.VERBOSE, 405, catalog.id + '/' + catalog.href);
+        
+	String destPath;
+        boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
+        
         if(!isUserMode) {
             destPath = impl.getSharedContentDir();
         }else {
             destPath = impl.getUserContentDirectory(impl.getActiveUser());
         }
-	/* $if umplatform == 2 $ */
-            if (destPath == null || destPath.equals("")){
-                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gotDestPathNull");
-            }else{
-                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("gotDestPathNotNull");
-            }
-   	/* $endif$ */
         
-        destPath += "/" + getFileNameForOPDSFeedId(catalog.id);
+	destPath = UMFileUtil.joinPaths(new String[]{destPath, 
+            UstadMobileConstants.CACHEDIR, getFileNameForOPDSFeedId(catalog.id)
+        });
+        
+        impl.getLogger().l(UMLog.DEBUG, 505, destPath);
+        
         if(serializedCatalog == null) {
             serializedCatalog = catalog.toString();
         }
-	/* $if umplatform == 2 $ */
-            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("writingTodestPath");
-   	/* $endif$ */
+	
         impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
         String keyName = "opds-cache-" + catalog.id;
-	/* $if umplatform == 2 $ */
-            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("settingPref");
-   	/* $endif$ */
+	
         impl.setPref(isUserMode, keyName, destPath);
         impl.setPref(isUserMode, getPrefKeyNameForOPDSURLToIDMap(catalog.id), 
             catalog.href);
@@ -832,36 +818,31 @@ public class CatalogController implements UstadController, UMProgressListener {
       * 
       */
     public static UstadJSOPDSFeed getCachedCatalogByID(String catalogID, int resourceMode) throws IOException, XmlPullParserException{
-        String filename = null;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        impl.getLogger().l(UMLog.VERBOSE, 406, catalogID);
+        
+        String filename = null;
+        
         String key = "opds-cache-" + catalogID;
         
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
             filename = impl.getUserPref(key);
+            impl.getLogger().l(UMLog.DEBUG, 509, filename);
         }
         
         if(filename == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
             filename = impl.getAppPref(key);
+            impl.getLogger().l(UMLog.DEBUG, 510, filename);
         }
 
-        /* $if umplatform == 2 $ */
-	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("filename");
-            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug(com.ustadmobile.core.util.URLTextUtil.urlEncodeUTF8(filename));
-            com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("movingOnnnnnn");
-        /* $endif$ */
 
         if(filename != null) {
             String contentsXML = impl.readFileAsText(filename, "UTF-8");
-	    /* $if umplatform == 2 $ */
-                com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("GettingfeedFromLoadFromXMLContentsXML");
-            /* $endif$ */
-
             UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(contentsXML);
             return feed;
         }
-	/* $if umplatform == 2 $ */
-	    com.ustadmobile.port.j2me.app.HTTPUtils.httpDebug("filenameIsNull");
-        /* $endif$ */
+	
         return null;
     }
     
@@ -892,7 +873,7 @@ public class CatalogController implements UstadController, UMProgressListener {
         String[] dirContents = impl.listDirectory(dir);
         
         for(int i = 0; i < dirContents.length; i++) {
-            if(dirContents[i].startsWith(".cache")) {
+            if(dirContents[i].startsWith("cache")) {
                 continue;
             }
             
@@ -906,68 +887,6 @@ public class CatalogController implements UstadController, UMProgressListener {
         }
     }
     
-    /**
-     * 
-     * CatalogController.scanDir logic:
-     *
-     *  1. Go through all .opds files - load them and make a dictionary in the form of 
-     *     catalogid -> opds object.  These are acquisition feeds (courses)
-     *  
-     * 2. Make another new empty OPDS navigation feed - looseContainers
-     * 
-     * 3. Go through all .epub files - are they present in any of the catalogs (check using ID)?
-     *   No: Add them to the looseContainers object
-     *   Yes: Do nothing
-     *
-     * 4. Make a new OPDS navigation feed with an entry for each acquisition feed
-     * 
-     * @param dirname URI to the directory to scan
-     * @param title requested title for this generated feed
-     * 
-     * @return Feed representing the contents of the directory
-     */ 
-    public static UstadJSOPDSFeed scanDir(String dirname, String title) throws IOException {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] dirContents = impl.listDirectory(dirname);
-        
-        String generatedHREF = UMFileUtil.joinPaths(new String[]{dirname, OPDS_EXTENSION});
-        UstadJSOPDSFeed retVal = new UstadJSOPDSFeed(
-                UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, generatedHREF), 
-                title, "scandir-" + sanitizeIDForFilename(dirname));
-        
-        
-        Vector opdsFiles = new Vector();
-        Vector epubFiles = new Vector();
-        
-        for(int i = 0; i < dirContents.length; i++) {
-            if(dirContents[i].startsWith(".cache")) {
-                continue;
-            }
-            
-            if(dirContents[i].endsWith(OPDS_EXTENSION)) {
-                opdsFiles.addElement(UMFileUtil.joinPaths(new String[]{dirname, 
-                    dirContents[i]}));
-            }else if(dirContents[i].endsWith(EPUB_EXTENSION)) {
-                epubFiles.addElement(UMFileUtil.joinPaths(new String[]{dirname, 
-                    dirContents[i]}));
-            }
-        }
-        
-        String[] opdsFilesArr = new String[opdsFiles.size()];
-        opdsFiles.copyInto(opdsFilesArr);
-        String[] epubFilesArr = new String[epubFiles.size()];
-        epubFiles.copyInto(epubFilesArr);
-        
-        String looseFilePath = UMFileUtil.joinPaths(new String[] {dirname, 
-            ".cache-loose"});
-        
-        boolean[] userOPDSFiles = new boolean[opdsFilesArr.length];
-        boolean[] userEPUBFiles = new boolean[epubFilesArr.length];
-        
-        return scanFiles(opdsFilesArr, userOPDSFiles, epubFilesArr, userEPUBFiles, 
-            looseFilePath, generatedHREF, title, 
-            "scandir-" + sanitizeIDForFilename(dirname));
-    }
     
     
     /**
@@ -978,6 +897,7 @@ public class CatalogController implements UstadController, UMProgressListener {
      */
     public static void verifyKnownEntries(int resourceMode) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.l(UMLog.INFO, 313, "mode: " + resourceMode);
         boolean isShared = resourceMode == SHARED_RESOURCE;
         String[] entryInfoKeys = UMUtil.filterArrByPrefix(
             isShared ? impl.getAppPrefKeyList() : impl.getUserPrefKeyList(),
@@ -991,12 +911,15 @@ public class CatalogController implements UstadController, UMProgressListener {
                 boolean canAccessFile = false;
                 try {
                     canAccessFile = impl.fileExists(info.fileURI);
+                    impl.l(UMLog.DEBUG, 513, info.fileURI +':' + canAccessFile);
                 }catch(IOException e) {
+                    impl.l(UMLog.ERROR, 112, info.fileURI, e);
                     //this might happen if a whole volume was unmounted or something like this
                 }
                 
                 if(!canAccessFile) {
                     //remove the entry from our listing
+                    impl.l(UMLog.VERBOSE, 407, info.fileURI);
                     if(isShared) {
                         impl.setAppPref(entryInfoKeys[i], null);
                     }else {
@@ -1053,10 +976,8 @@ public class CatalogController implements UstadController, UMProgressListener {
                             UMFileUtil.resolveLink(opdsFiles[i], 
                             UMFileUtil.getFilename(opdsFiles[i])));
                 }
-            }catch(IOException e) {
-                
-            }catch(XmlPullParserException xe) {
-                
+            }catch(Exception e) {
+                impl.l(UMLog.ERROR, 114, opdsFiles[i]);
             }
         }
         feed = null;
@@ -1071,6 +992,7 @@ public class CatalogController implements UstadController, UMProgressListener {
             "Loose files", feedID+"-loose");
         
         for(i = 0; i < containerFiles.length; i++) {
+            impl.l(UMLog.VERBOSE, 408, containerFiles[i]);
             zipHandle = null;
             ocf = null;
             zIs = null;
@@ -1103,6 +1025,7 @@ public class CatalogController implements UstadController, UMProgressListener {
                     CatalogEntryInfo thisEntryInfo = getEntryInfo(opf.id,
                         resourceMode);
                     if(thisEntryInfo == null) {
+                        impl.l(UMLog.VERBOSE, 409, containerFiles[i]);
                         thisEntryInfo = new CatalogEntryInfo();
                         thisEntryInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
                         thisEntryInfo.fileURI = containerFiles[i];
@@ -1111,13 +1034,8 @@ public class CatalogController implements UstadController, UMProgressListener {
                         setEntryInfo(opf.id, thisEntryInfo, resourceMode);
                     }
                 }
-                
-                
-                
-            }catch(IOException e) {
-               
-            }catch(XmlPullParserException x) {
-                
+            }catch(Exception e) {
+               impl.l(UMLog.ERROR, 113, containerFiles[i], e);
             }finally {
                 UMIOUtils.closeInputStream(zIs);
                 UMIOUtils.closeZipFileHandle(zipHandle);

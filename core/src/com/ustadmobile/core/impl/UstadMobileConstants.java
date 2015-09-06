@@ -42,6 +42,11 @@ public class UstadMobileConstants {
     public static final String UTF8 = "UTF-8";
     
     /**
+     * Hardcoded subdirectory used for caching
+     */
+    public static final String CACHEDIR = "cache";
+    
+    /**
      * Sorted by country name: list of international dialing codes
      * see testres/countrycodes.ods
      */

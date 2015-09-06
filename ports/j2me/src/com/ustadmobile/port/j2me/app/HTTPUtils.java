@@ -42,6 +42,8 @@ import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.URLTextUtil;
 import javax.microedition.pim.FieldFullException;
 
@@ -160,6 +162,8 @@ public class HTTPUtils {
     }
     
     public static void httpDebug(String msg){
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 800, msg);
+        /*
         try {
             msg = FileUtils.replaceString(msg, ":", "|");
             msg = FileUtils.replaceString(msg, " ", "/");
@@ -169,7 +173,7 @@ public class HTTPUtils {
                 null, null);
         } catch (IOException ex) {
             ex.printStackTrace();
-        }
+        }*/
     }
     
     public static HTTPResult makeHTTPRequest(String url,

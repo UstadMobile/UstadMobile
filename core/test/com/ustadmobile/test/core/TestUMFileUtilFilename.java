@@ -61,6 +61,10 @@ public class TestUMFileUtilFilename extends TestCase{
             "mp3", UMFileUtil.getExtension("http://server.com/dir/file.mp3"));
         assertEquals("Will return null in case of no extension",
             null, UMFileUtil.getExtension("http://server.com/some/dir"));
+        
+        assertEquals("Can strip file:// prefix as expected",
+            "/path/to/file.mp3", 
+            UMFileUtil.stripPrefixIfPresent("file://", "file:///path/to/file.mp3"));
     }
 
     public void runTest(){

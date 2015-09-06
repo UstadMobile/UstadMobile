@@ -34,6 +34,7 @@ package com.ustadmobile.test.core;
 import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import java.io.ByteArrayInputStream;
@@ -47,7 +48,6 @@ import org.xmlpull.v1.XmlPullParser;
 
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
-    import com.ustadmobile.port.j2me.app.HTTPUtils;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -77,6 +77,7 @@ public class TestCatalogController extends TestCase{
     }
     
     public void testCatalogController() throws IOException, XmlPullParserException {
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 311, null);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(TestConstants.LOGIN_USER);
         
@@ -102,53 +103,10 @@ public class TestCatalogController extends TestCase{
             CatalogController.getCachedCatalogByID(feedItem.id, 
             CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
         
-        assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
-    }
-
-    
-    /* $if umplatform == 2 $
-    public void testCatalogControllerDebug() throws IOException, XmlPullParserException {
-        HTTPUtils.httpDebug("startingCatalogControllerTests");
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.setActiveUser(TestConstants.LOGIN_USER);
-        
-        String opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
-        HTTPUtils.httpDebug(opdsURL);
-        CatalogController controller = CatalogController.makeControllerByURL(
-            opdsURL, impl, CatalogController.USER_RESOURCE, 
-            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-            CatalogController.CACHE_ENABLED);
-        assertNotNull("Create catalog controller", controller);
-        HTTPUtils.httpDebug("controlerNotNull");
-        
-        UstadJSOPDSFeed feedItem = controller.getModel().opdsFeed;
-        String feedXML = feedItem.toString();
-        HTTPUtils.httpDebug("gotfeedXml");
-        ByteArrayInputStream bin = new ByteArrayInputStream(
-            feedXML.getBytes("UTF-8"));
-        XmlPullParser parser = impl.newPullParser();
-        HTTPUtils.httpDebug("gotParser");
-        parser.setInput(bin, "UTF-8");
-        HTTPUtils.httpDebug("creatingopdsfeed");
-        UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
-        assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
-        HTTPUtils.httpDebug("assertedsameidwhenreparsed");
-        CatalogController.cacheCatalog(feedItem, CatalogController.USER_RESOURCE, null);
-        HTTPUtils.httpDebug("cachecatalogdone");
-	HTTPUtils.httpDebug("cachecatalogbyiD");
-	HTTPUtils.httpDebug(feedItem.id.toString());
-
-        UstadJSOPDSFeed cachedFeed = 
-            CatalogController.getCachedCatalogByID(feedItem.id, 
-            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
-        HTTPUtils.httpDebug("cachefeedDone");
         assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
     }
     
     public void runTest() throws IOException, XmlPullParserException{
-        //this.testCatalogController();
-        this.testCatalogControllerDebug();
+        testCatalogController();
     }
-    $endif */
-    
 }

@@ -34,6 +34,7 @@ package com.ustadmobile.test.core;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import java.io.IOException;
+import java.io.OutputStream;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
@@ -48,9 +49,9 @@ public class TestFileImpl extends TestCase {
     
     public void testFileImpl() throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String sharedContentDir = impl.getSharedContentDir();
         
-        assertTrue("Shared content dir exists", 
-                impl.dirExists(impl.getSharedContentDir()));
+        assertTrue("Shared content dir exists", impl.dirExists(sharedContentDir));
         
         impl.setActiveUser(TestConstants.LOGIN_USER);
         
@@ -65,6 +66,34 @@ public class TestFileImpl extends TestCase {
         
         impl.removeRecursively(testMkDirPath);
         assertTrue("Newly created dir removed", !impl.dirExists(testMkDirPath));
+        
+        String contentToWrite = "The answer to the meaning of life, the universe and everything is 42";
+        String fileWritePath = UMFileUtil.joinPaths(new String[]{sharedContentDir, 
+            "fileimpltest.txt"});
+        
+        if(impl.fileExists(fileWritePath)) {
+            impl.removeFile(fileWritePath);
+        }
+        
+        impl.writeStringToFile(contentToWrite, fileWritePath, "UTF-8");
+        long fileSize= impl.fileSize(fileWritePath);
+        
+        String fileContents = impl.readFileAsText(fileWritePath);
+        
+        assertEquals("Can read same content back from file",
+            contentToWrite, fileContents);
+        
+        OutputStream appendOut = impl.openFileOutputStream(fileWritePath, 
+            UstadMobileSystemImpl.FILE_APPEND);
+        appendOut.write(contentToWrite.getBytes("UTF-8"));
+        appendOut.flush();
+        appendOut.close();
+        
+        assertEquals("File on appending the content second time is double size",
+            fileSize * 2, impl.fileSize(fileWritePath));
+        
+        impl.removeFile(fileWritePath);
+        assertTrue("File once removed is gone", !impl.fileExists(fileWritePath));
     }
     
     public void runTest() throws IOException {

@@ -37,19 +37,19 @@ NetBeans.  See README for instructions on building from source.
     <property name="src.dir" value="./src/"/>
     
     
-    <property name="MidletSuite" value="UstadMobileMicro"/>
-    <property name="Midlet_1_name" value="Ustad Mobile"/>
+    <property name="MidletSuite" value="UstadMobileMicro-Test"/>
+    <property name="Midlet_1_name" value="Ustad Mobile Test"/>
     <property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2METest"/>
 
-    <property name="MidletSuite2" value="UstadMobileRun"/>
-    <property name="Midlet_2_name" value="Ustad Mobile Run"/>
+    <property name="MidletSuite2" value="UstadMobileMicro"/>
+    <property name="Midlet_2_name" value="Ustad Mobile"/>
     <property name="Midlet_2_class" value="ustadmobilej2me.UstadMobileJ2MERun"/>    
     
     <property name="wtk.cldc.version" value="1.1"/>
     <property name="wtk.midp.version" value="2.0"/>
     
     <!-- do per version pre-processing -->
-    <target name="preprocess">
+    <target name="preprocess" depends="clean">
         
         <!-- end of properties to make it build outside of netbeans -->
         
@@ -80,7 +80,7 @@ NetBeans.  See README for instructions on building from source.
 
     </target>
             
-    <target name="build" depends="preprocess">
+    <target name="build" depends="clean,preprocess">
         <mkdir dir="${classes.dir.ANTENNA}"/>
                 
         <wtkbuild srcdir="${src.preprocessed.ANTENNA}"
@@ -107,7 +107,7 @@ NetBeans.  See README for instructions on building from source.
             <attribute name="MicroEdition-Configuration" value="CLDC-1.1"/>
             <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
             <attribute name="Antenna-MIDlet-Category" value="Application"/>
-            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket"/>
+            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket, javax.microedition.io.Connector.comm"/>
             <attribute name="Nokia-Update" value="http://www.ustadmobile.com/jad/midp2/UstadMobileMicro.jad"/>
             <attribute name="MIDlet-Jar-URL" value="${MidletSuite}.jar"/>
 
@@ -127,7 +127,7 @@ NetBeans.  See README for instructions on building from source.
             <attribute name="MicroEdition-Configuration" value="CLDC-1.1"/>
             <attribute name="MicroEdition-Profile" value="MIDP-2.0"/>
             <attribute name="Antenna-MIDlet-Category" value="Application"/>
-            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket"/>
+            <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket, javax.microedition.io.Connector.comm"/>
             <attribute name="Nokia-Update" value="http://www.ustadmobile.com/jad/midp2/UstadMobileMicro.jad"/>
             <attribute name="MIDlet-Jar-URL" value="${MidletSuite2}.jar"/>
 
@@ -143,8 +143,8 @@ NetBeans.  See README for instructions on building from source.
 	
         <copy file="${src.dir}/nokia_non_touch_theme.res" todir="${classes.dir.ANTENNA}"/>
         
-
-        <copy todir="${classes.dir.ANTENNA}">
+        <mkdir dir="${classes.dir.ANTENNA}/res"/>
+        <copy todir="${classes.dir.ANTENNA}/res" verbose="true">
             <fileset dir="${src.dir}/res"/>
         </copy>
 

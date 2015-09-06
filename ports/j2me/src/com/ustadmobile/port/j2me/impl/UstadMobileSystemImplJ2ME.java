@@ -56,6 +56,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
+import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import org.kxml2.io.KXmlParser;
@@ -164,7 +165,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public String getUserContentDirectory(String username){
         try{
-            HTTPUtils.httpDebug("GettingUserContentDir");
+            getLogger().l(UMLog.DEBUG, 507, username);
             DeviceRoots dt = FileUtils.getBestRoot();
             String toSlashOrNot="";
             if (dt.path.endsWith("//")){
@@ -177,56 +178,46 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             String sharedUserContentDir = dt.path + toSlashOrNot + 
                     FileUtils.USTAD_CONTENT_DIR + FileUtils.FILE_SEP + username;
             
+            getLogger().l(UMLog.DEBUG, 507, "dir: " + sharedUserContentDir);
+            
+            
             //Check if it is created. If it isn't, create it.
+            /*
             if(FileUtils.createFileOrDir(sharedUserContentDir, 
                     Connector.READ_WRITE, true)){
-                HTTPUtils.httpDebug("gotUserDirOK");
+                getLogger().l(UMLog.DEBUG, 507, "dir made ok");
                 return sharedUserContentDir;
             }
-            
+            */
+            return sharedUserContentDir;
         }catch (Exception e){
-            HTTPUtils.httpDebug("ExceptionGetOrCreatingUserDir");
+            getLogger().l(UMLog.DEBUG, 507, "exception in getUserContentDirectory", e);
         }
         return null;
     }
     
     public String getSystemLocale(){
-        return System.getProperty("microedition.locale").toString();
+        return System.getProperty("microedition.locale");
     }
     
     public Hashtable getSystemInfo(){
         Hashtable systemInfo = new Hashtable();
-        try{
-            systemInfo.put("platform", 
-                    System.getProperty("microedition.platform").toString());
-            systemInfo.put("encoding", 
-                    System.getProperty("microedition.encoding").toString());
-            systemInfo.put("configuration", 
-                    System.getProperty("microedition.configuration").toString());
-            systemInfo.put("profiles", 
-                    System.getProperty("microedition.profiles").toString());
-            systemInfo.put("locale", 
-                    System.getProperty("microedition.locale").toString());
-            systemInfo.put("memorytotal", 
-                    Long.toString(Runtime.getRuntime().totalMemory()));
-            systemInfo.put("memoryfree", 
-                    Long.toString(Runtime.getRuntime().freeMemory()));
-            return systemInfo;
-        }catch (Exception e){}
-        return null;
-    }
-    
-    public String readFileAsText(String fileURI, String encoding) 
-            throws IOException{
-        try{
-            String contents = FileUtils.getFileContents(fileURI);
-            return contents;
-        }catch(Exception e){}
-        return null;
-    }
-    
-    public String readFileAsText(String fileURI) throws IOException{
-        return this.readFileAsText(fileURI, "UTF-8");
+        
+        systemInfo.put("platform", 
+                System.getProperty("microedition.platform"));
+        systemInfo.put("encoding", 
+                System.getProperty("microedition.encoding"));
+        systemInfo.put("configuration", 
+                System.getProperty("microedition.configuration"));
+        systemInfo.put("profiles", 
+                System.getProperty("microedition.profiles"));
+        systemInfo.put("locale", 
+                System.getProperty("microedition.locale"));
+        systemInfo.put("memorytotal", 
+                Long.toString(Runtime.getRuntime().totalMemory()));
+        systemInfo.put("memoryfree", 
+                Long.toString(Runtime.getRuntime().freeMemory()));
+        return systemInfo;
     }
     
     public long modTimeDifference(String fileURI1, String fileURI2){
@@ -240,15 +231,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         }catch(Exception e){}
         return -1;
     }
-    
-    public void writeStringToFile(String str, String fileURI, String encoding) 
-            throws IOException{
-        try{
-            FileUtils.writeStringToFile(str, fileURI, false);
-            
-        }catch (Exception e){}
-    }
-    
+        
     public boolean fileExists(String fileURI) throws IOException{
         return FileUtils.checkFile(fileURI);
     }
@@ -294,17 +277,45 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             return FileUtils.getFileSize(fileURI);
         }catch(Exception e){}
         return -1;
-    }
+    } 
     
     public boolean makeDirectory(String dirURI) throws IOException{
- 
-        boolean createFileOrDir = FileUtils.createFileOrDir(dirURI, 
-                Connector.READ_WRITE, true);
-        if (!createFileOrDir){
-            IOException e = new IOException();
+        getLogger().l(UMLog.VERBOSE, 401, dirURI);
+        FileConnection fc = null;
+        
+        //J2ME Nokia will not create a directory with a trailing slash in the name
+        if(dirURI.charAt(dirURI.length()-1) != '/') {
+            //dirURI = dirURI.substring(0, dirURI.length()-1);
+            dirURI += '/'; 
+            getLogger().l(UMLog.DEBUG, 504, dirURI);
+        }
+        
+        
+        IOException e = null;
+        boolean dirOK = false;
+        try {
+            fc = (FileConnection)Connector.open(dirURI);
+            getLogger().l(UMLog.DEBUG, 506, dirURI);
+            if(!(fc.isDirectory() && fc.exists())) {
+                fc.mkdir();
+                dirOK = true;
+                getLogger().l(UMLog.DEBUG, 503, dirURI);
+            }else {
+                getLogger().l(UMLog.DEBUG, 502, dirURI);
+                dirOK = true;
+            }
+        }catch(IOException e2) {
+            e = e2;
+            getLogger().l(UMLog.ERROR, 104, dirURI, e);
+        }finally {
+            J2MEIOUtils.closeConnection(fc);
+        }
+        
+        if(e != null) {
             throw e;
         }
-        return createFileOrDir;
+        
+        return dirOK;
 
     }
     
@@ -351,12 +362,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * @inheritDoc
      */
     public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String m) {
-        int meaning = 42;
         getLogger().l(UMLog.VERBOSE, 305, "HTTP (" + m + ")" + url);
         try {
             return HTTPUtils.makeHTTPRequest(url, postParameters, headers, m);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            getLogger().l(UMLog.ERROR, 105, url, ex);
         }
         return null;
     }
@@ -457,25 +467,42 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return new ZipFileHandleJ2ME(name);
     }
 
-    public OutputStream openFileOutputStream(String fileURI, boolean autocreate) throws IOException{
+    public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException{
+        boolean append = (flags & FILE_APPEND) == FILE_APPEND;
+        
         FileConnection con = null;
         IOException e = null;
-        if(autocreate) {
-            try {
-                con = (FileConnection)Connector.open(fileURI);
-                if(!con.exists()) {
+        OutputStream out = null;
+        
+        try {
+            con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+            
+            if(con.exists()) {
+                if(!append) {
+                    con.delete();
                     con.create();
                 }
-            }catch(IOException e2) {
-                e = e2;
-            }finally {
-                J2MEIOUtils.closeConnection(con);
-                if(e != null) throw e;
+            }else {
+                con.create();
             }
+        }catch(IOException e2) {
+            e = e2;
+        }finally {
+            J2MEIOUtils.closeConnection(con);
+            if(e != null) throw e;
+        }
+
+        if(!append) {
+            out = Connector.openOutputStream(fileURI);
+            
+        }else {
+            con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+            out = new ConnectorCloseOutputStream(
+                con.openOutputStream(con.fileSize()), con);
         }
         
-        OutputStream out = Connector.openOutputStream(fileURI);
         return out;
+        
     }
 
     /**
@@ -491,6 +518,51 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     /**
+     * Use when an output stream is bound to a connector, and we want to make sure
+     * the connector gets closed when the outputstream is closed.
+     * 
+     * Simply calls Connection.close when the streams close method is called
+     */
+    public class ConnectorCloseOutputStream extends OutputStream {
+
+        private OutputStream dst;
+        
+        private Connection con;
+        
+        public ConnectorCloseOutputStream(OutputStream dst, Connection con) {
+            this.dst = dst;
+        }
+        
+        public void write(int b) throws IOException {
+            dst.write(b);
+        }
+
+        public void close() throws IOException {
+            IOException ioe = null;
+            try {
+                dst.close();
+            }catch(IOException e) {
+                ioe = e;
+            }finally {
+                J2MEIOUtils.closeConnection(con);
+            }
+            UMIOUtils.throwIfNotNullIO(ioe);
+        }
+
+        public void flush() throws IOException {
+            dst.flush(); 
+        }
+
+        public void write(byte[] b, int off, int len) throws IOException {
+            dst.write(b, off, len); 
+        }
+
+        public void write(byte[] b) throws IOException {
+            dst.write(b); 
+        }
+    }
+    
+    /**
      * J2ME implementation of the DownloadJob interface 
      */
     public class DownloadJob extends Thread implements UMTransferJob {
@@ -499,7 +571,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         final private String destFileURI;
         
-        private int bytesDownloaded;
+        private long bytesDownloaded;
         
         private int totalSize;
         
@@ -510,6 +582,18 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         private final Vector progressListeners;
         
         private final UMProgressEvent evt;
+        
+        public static final int RETRY_LIMIT_DEFAULT = 10;
+        
+        /**
+         * The maximum number of retries allowed for this job until it fails
+         */
+        private int maxRetries;
+        
+        /**
+         * The current number of tries
+         */
+        private int tryCount;
         
         /**
          * The delay (in ms) minimum between progress updates; this is used to
@@ -534,6 +618,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             finished = false;
             progressListeners = new Vector();
             evt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS, 0, 0, 0);
+            maxRetries = RETRY_LIMIT_DEFAULT;
         }
         
         /**
@@ -551,35 +636,36 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             super.start();
         }
         
-        /**
-         * Run as a thread the actual download (in the background)
-         */
-        public void run() {
+        public void continueDownload() throws IOException{
             final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             OutputStream fOut = null;
             HttpConnection con = null;
             InputStream httpIn = null;
+            IOException ioe = null;
+            
             try {
-                if(totalSize == -1) {
-                    getTotalSize();
-                }
-                
-                //see if we need to delete the destination beforehand
+                impl.l(UMLog.INFO, 332, srcURL + "->" + destFileURI);
+                bytesDownloaded = 0;
                 if(impl.fileExists(destFileURI)) {
-                    impl.removeFile(destFileURI);
+                    bytesDownloaded = impl.fileSize(destFileURI);
                 }
-                
-                fOut = myImpl.openFileOutputStream(destFileURI, true);
+
+
+                fOut = myImpl.openFileOutputStream(destFileURI, FILE_APPEND);
                 con = (HttpConnection)Connector.open(srcURL);
+                if(bytesDownloaded > 0) {
+                    con.setRequestProperty("Range", "bytes=" + bytesDownloaded + '-');
+                }
+                con.setRequestProperty("Connection", "close");
+
                 httpIn = con.openInputStream();
                 myImpl.getLogger().l(UMLog.VERBOSE, 312, srcURL);
-                //UMIOUtils.readFully(httpIn, fOut, 1024);
-                
+
                 byte[] buf = new byte[1024];
                 int bytesRead = 0;
                 int totalRead = 0;
                 long lastUpdate = 0;
-                
+
                 long timeNow;
                 while((bytesRead = httpIn.read(buf)) != -1) {
                     fOut.write(buf, 0, bytesRead);
@@ -593,21 +679,58 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                     }
                 }
                 
-                
-                
                 finished = true;
                 this.bytesDownloaded = totalSize;
                 evt.setEvtType(UMProgressEvent.TYPE_COMPLETE);
                 evt.setJobLength(totalSize);
                 evt.setProgress(totalSize);
                 evt.setStatusCode(200);
+                StringBuffer sbMsg = new StringBuffer();
+                sbMsg.append(srcURL).append("->").append(destFileURI).append(" (");
+                sbMsg.append(totalSize).append(" bytes)");
+                impl.getLogger().l(UMLog.INFO, 333, sbMsg.toString());
                 fireProgressEvent();
-            }catch(IOException e) {
-                impl.getLogger().l(UMLog.INFO, 1, srcURL, e);
+            }catch(Exception e) {
+                e = ioe;
+                impl.l(UMLog.ERROR, 115, srcURL + "->" +  destFileURI, e);
             }finally {
                 UMIOUtils.closeInputStream(httpIn);
                 J2MEIOUtils.closeConnection(con);
                 UMIOUtils.closeOutputStream(fOut);
+            }
+            
+            UMIOUtils.throwIfNotNullIO(ioe);
+        }
+        
+        
+        /**
+         * Run as a thread the actual download (in the background)
+         */
+        public void run() {
+            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            
+            //see if we need to delete the destination beforehand
+            try {
+                if(impl.fileExists(destFileURI)) {
+                    impl.removeFile(destFileURI);
+                }
+            }catch(IOException e) {
+                impl.l(UMLog.ERROR, 116 , destFileURI, e);
+            }
+            
+            while(!this.isFinished() && tryCount < maxRetries) {
+                try {
+                    if(totalSize == -1) {
+                        getTotalSize();
+                    }
+                    tryCount++;
+                    continueDownload();
+                }catch(IOException e) {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append(srcURL).append("->").append(destFileURI);
+                    sb.append(" try : ").append(tryCount);
+                    impl.l(UMLog.ERROR, 117, sb.toString() , e);
+                }
             }
         }
 
@@ -621,7 +744,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         /**
          * @inheritDoc
          */
-        public int getBytesDownloadedCount() {
+        public long getBytesDownloadedCount() {
             return bytesDownloaded;
         }
 

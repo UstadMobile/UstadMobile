@@ -29,14 +29,15 @@
 
  */
 package com.ustadmobile.test.port.j2me;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.test.core.*;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
+import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
 import j2meunit.framework.TestSuite;
 import java.io.IOException;
-import com.ustadmobile.test.core.*;
 
 /**
  *
@@ -45,7 +46,7 @@ import com.ustadmobile.test.core.*;
 public class AllTestCases extends TestCase {
     
     public AllTestCases(){
-        setName("All Test Caes");
+        setName("All Test Cases");
     }
 
     public Test suite() {
@@ -60,12 +61,16 @@ public class AllTestCases extends TestCase {
             throw new RuntimeException(e.toString());
         }
         
+        
+        
+        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
         //allTestSuite.addTest(new TestPreferences()); //works
         allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
         allTestSuite.addTest(new TestLogin());
-        
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
         
 //        
 //        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
@@ -79,7 +84,7 @@ public class AllTestCases extends TestCase {
 //        //allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
 //        
 //        //temporarily disabling download because too large
-//        //allTestSuite.addTest(new TestDownload());
+//        //
 //        //allTestSuite.addTest(new TestTransferJobList());
 //        
 //        //Working.
