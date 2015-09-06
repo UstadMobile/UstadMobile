@@ -104,7 +104,7 @@ public class TestSystemimplJ2ME extends TestCase {
         //writeStringToFile
         //readFileAsText
         String toWrite = "UstadMobile";
-        ustadMobileSystemImpl.writeStringToFile(toWrite, fileURI2, "");
+        ustadMobileSystemImpl.writeStringToFile(toWrite, fileURI2, "UTF-8");
         String readFileAsText = ustadMobileSystemImpl.readFileAsText(fileURI2);
         if (readFileAsText.toLowerCase().indexOf("ustadmobile") >= 0 ){
             assertTrue(true);
