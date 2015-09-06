@@ -117,7 +117,7 @@ public class TestDownload extends TestCase implements UMProgressListener {
         /*
          Test the same again... but when there is an interrption to the download
         */
-        boolean limitsSet = TestUtils.getInstance().setLimits(80000, 750000);
+        boolean limitsSet = TestUtils.getInstance().setLimits(4000, 20000);
         assertTrue("Successfully set download limits on server", limitsSet);
         
         job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
