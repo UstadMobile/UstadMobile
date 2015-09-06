@@ -101,7 +101,7 @@ public class TestReadMp3FromZip extends TestCase {
             assertTrue(true);
         }
 
-        String contentTyp = 
+        String contentType = 
                 UstadMobileAppController.getContentType(smallMp3TestFile);
         
         //Read it man
@@ -116,7 +116,15 @@ public class TestReadMp3FromZip extends TestCase {
            }
         }
         
-         
+        HTTPUtils.httpDebug("Starting to play the mp3..");
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.playMedia(is, contentType);
+        HTTPUtils.httpDebug("the mp3 is playing?");
+        
+        Thread.sleep(5000); //sleep for 5 seconds.
+        
+        assertTrue(true);
+        
          
          
     }
