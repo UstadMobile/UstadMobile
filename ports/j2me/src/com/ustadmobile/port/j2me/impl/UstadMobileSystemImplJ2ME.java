@@ -59,6 +59,9 @@ import java.util.Vector;
 import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.media.Manager;
+import javax.microedition.media.Player;
+import javax.microedition.media.control.VolumeControl;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -80,6 +83,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     private String openZipURI;
     
     public static final String OPENZIP_PROTO = "zip:///";
+    
+    private Player player;
+    public int volumeLevel=70;
     
     public String getImplementationName() {
         return "J2ME";
@@ -515,6 +521,69 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public String[] getPrefKeyList() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public boolean playMedia(InputStream mediaURLInputStream, String encoding) {
+        HTTPUtils.httpDebug("starting to play media..");
+        boolean status = false;
+        stopMedia();
+        VolumeControl vc = null;
+        
+        try{
+            player = Manager.createPlayer(mediaURLInputStream, encoding);
+            player.realize();
+            vc = (VolumeControl) player.getControl("VolumeControl");
+            if (vc != null){
+                vc.setLevel(volumeLevel);
+            }
+            player.start();
+            long playerTime = player.getDuration();
+            HTTPUtils.httpDebug("Player is running");
+            status = true;
+            String duration = String.valueOf(playerTime);
+            HTTPUtils.httpDebug("The player is supposed to be for: " + duration);
+            
+        }catch(Exception e){
+            HTTPUtils.httpDebug("Exception: " + e.getMessage() + 
+                        ": " + e.toString());
+            status = false;
+            stopMedia();
+        }finally{
+            if (mediaURLInputStream != null){
+                try{
+                    mediaURLInputStream.close();
+                }catch(Exception e){
+                    HTTPUtils.httpDebug("eror nulling mediaURLInputStream.");
+                }
+            }
+        }
+        
+        return status;
+    }
+
+    public boolean stopMedia() {
+        HTTPUtils.httpDebug("Stopping what is playing..");
+        boolean status = false;
+        if (player != null){
+            try{
+                player.stop();
+                player.close();
+                player.deallocate();
+                player = null;
+                HTTPUtils.httpDebug("Player stopped. Garbage collecting..");
+                //Garbage collect too?
+                System.gc();
+                status = true;
+            }catch(Exception e){
+                HTTPUtils.httpDebug("Exception:" + e.getMessage() + 
+                        ": " + e.toString());
+                status = false;
+            }finally{
+                
+            }
+        }
+        
+        return status;
     }
     
     /**

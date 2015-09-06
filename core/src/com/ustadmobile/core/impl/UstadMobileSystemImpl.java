@@ -638,6 +638,21 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract ZipFileHandle openZip(String name) throws IOException;
     
+    /**
+     * Plays the media's inputstream. Can be audio or video.
+     * @param mediaURLInputStream the InputStream to be played.
+     * @param encoding The encoding by which the player will get generated. 
+     * @return 
+     */
+    public abstract boolean playMedia(InputStream mediaURLInputStream,
+            String encoding);
+    
+    /**
+     * Stops the media playing. 
+     * @return 
+     */
+    public abstract boolean stopMedia();
+    
 }
 
 
