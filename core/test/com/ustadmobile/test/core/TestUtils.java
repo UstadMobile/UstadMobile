@@ -6,6 +6,7 @@
 package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -46,11 +47,31 @@ public class TestUtils {
         return serverPort;
     }
     
+    /**
+     * Set the speed limits and force error parameters on the testing HTTP server
+     * 
+     * @param speedLimit Speed limit in bytes per second or 0 for no limit
+     * @param forceErrorAfter Number of bytes after which an error will be forced (e.g. test resume handling)
+     * @return true if set OK, false otherwise
+     */
+    public boolean setLimits(int speedLimit, int forceErrorAfter) {
+        String setParamsURL = "http://" + TestConstants.TEST_SERVER + ":"
+                + TestConstants.TEST_CONTROL_PORT + "/?action=setparams&port=" + serverPort
+                + "&speedlimit=" + speedLimit + "&forceerrorafter=" + forceErrorAfter;
+        boolean setValues = false;
+        try {
+            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(setParamsURL,
+                new Hashtable(), new Hashtable(), "GET");
+            setValues = result.getStatus() == 200;
+        }catch(IOException e) {
+            UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 118, setParamsURL, e);
+        }
+        return setValues;
+    }
+    
     public String getHTTPRoot() {
         Exception ex = null;
-        
-        //httpRootDir = "http://" + TestConstants.TEST_SERVER + "/testres/";
-        
+                
         String startServerURL = "http://" + TestConstants.TEST_SERVER + ":"
                     + TestConstants.TEST_CONTROL_PORT + "/?action=newserver";
         if(httpRootDir == null) {

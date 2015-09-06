@@ -602,6 +602,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         public static final int UPDATE_MIN_INTERVAL = 1000;
         
         /**
+         * The default time to wait in between download attemtps
+         */
+        public static final int RETRY_WAIT_DEFAULT = 1000;
+        
+        /**
+         * The time to wait in between download attempts
+         */
+        private int retryWait;
+        
+        /**
          * Create a new download job
          * 
          * @param srcURL The HTTP source URL to download from
@@ -619,6 +629,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             progressListeners = new Vector();
             evt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS, 0, 0, 0);
             maxRetries = RETRY_LIMIT_DEFAULT;
+            retryWait = RETRY_WAIT_DEFAULT;
+        }
+        
+        public void setMaxRetries(int maxRetries) {
+            this.maxRetries = maxRetries;
         }
         
         /**
@@ -654,12 +669,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 fOut = myImpl.openFileOutputStream(destFileURI, FILE_APPEND);
                 con = (HttpConnection)Connector.open(srcURL);
                 if(bytesDownloaded > 0) {
+                    myImpl.l(UMLog.VERBOSE, 410, srcURL + ':' + bytesDownloaded);
                     con.setRequestProperty("Range", "bytes=" + bytesDownloaded + '-');
                 }
                 con.setRequestProperty("Connection", "close");
 
                 httpIn = con.openInputStream();
-                myImpl.getLogger().l(UMLog.VERBOSE, 312, srcURL);
+                
+                myImpl.getLogger().l(UMLog.VERBOSE, 314, srcURL);
 
                 byte[] buf = new byte[1024];
                 int bytesRead = 0;
@@ -672,7 +689,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                     totalRead += bytesRead;
                     timeNow = System.currentTimeMillis();
                     if(timeNow - lastUpdate > UPDATE_MIN_INTERVAL) {
-                        evt.setProgress(totalRead);
+                        evt.setProgress((int)(totalRead + bytesDownloaded));
                         System.out.println("Firing progress evt: " + totalRead);
                         fireProgressEvent();
                         lastUpdate = timeNow;
@@ -690,8 +707,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 sbMsg.append(totalSize).append(" bytes)");
                 impl.getLogger().l(UMLog.INFO, 333, sbMsg.toString());
                 fireProgressEvent();
-            }catch(Exception e) {
-                e = ioe;
+            }catch(IOException e) {
+                ioe = e;
                 impl.l(UMLog.ERROR, 115, srcURL + "->" +  destFileURI, e);
             }finally {
                 UMIOUtils.closeInputStream(httpIn);
@@ -731,6 +748,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                     sb.append(" try : ").append(tryCount);
                     impl.l(UMLog.ERROR, 117, sb.toString() , e);
                 }
+                try { Thread.sleep(retryWait); }
+                catch(InterruptedException e) {}
             }
         }
 

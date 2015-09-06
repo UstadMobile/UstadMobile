@@ -138,8 +138,8 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         
         //Exiting automatically..
         System.out.println("Exiting..");
-        notifyDestroyed();
-        destroyApp(bScreenOutput);
+        //notifyDestroyed();
+        //destroyApp(bScreenOutput);
     }
     
     /**

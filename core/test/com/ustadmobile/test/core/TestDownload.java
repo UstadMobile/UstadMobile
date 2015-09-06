@@ -72,13 +72,13 @@ public class TestDownload extends TestCase implements UMProgressListener {
     public void testDownloadImpl() throws IOException{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String destFileURI = UMFileUtil.joinPaths(new String[] {
-            impl.getSharedContentDir(), "phonepic-large.png"});
+            impl.getSharedContentDir(), "phonepic-smaller.png"});
         
         if(impl.fileExists(destFileURI)) {
             impl.removeFile(destFileURI);
         }
         
-        String fileDownloadURL = TestUtils.getInstance().getHTTPRoot() + "phonepic-large.png";
+        String fileDownloadURL = TestUtils.getInstance().getHTTPRoot() + "phonepic-smaller.png";
         UMTransferJob job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
                 destFileURI, new Hashtable());
         
@@ -102,17 +102,45 @@ public class TestDownload extends TestCase implements UMProgressListener {
         
         assertTrue("Download job reports completion", job.isFinished());
 
-        int totalSize = job.getTotalSize();
+        int finalSize = job.getTotalSize();
         long downloadedSize = job.getBytesDownloadedCount();
         assertTrue("Downloaded size is the same as total size: "
-                + totalSize + " : " + downloadedSize,
-                totalSize == downloadedSize);
+                + finalSize + " : " + downloadedSize,
+                finalSize == downloadedSize);
         
         assertTrue("Downloaded file exists ", impl.fileExists(destFileURI));
         assertEquals("Downloaded file size equals job download size",
-                totalSize, impl.fileSize(destFileURI));
+                finalSize, impl.fileSize(destFileURI));
         
+        impl.removeFile(destFileURI);
+        
+        /*
+         Test the same again... but when there is an interrption to the download
+        */
+        boolean limitsSet = TestUtils.getInstance().setLimits(80000, 750000);
+        assertTrue("Successfully set download limits on server", limitsSet);
+        
+        job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
+                destFileURI, new Hashtable());
+        job.start();
+        for(timeCount = 0; timeCount < timeout && !job.isFinished(); timeCount+= interval) {
+            try {
+                Thread.sleep(1500);
+            }catch(InterruptedException e) {}
+        }
+        
+        assertTrue("Download job reports completion (with interruptions)", 
+            job.isFinished());
+        assertEquals("Downloaded file size equals job download size (with interruptions)",
+                finalSize, impl.fileSize(destFileURI));
     }
+
+    protected void tearDown() throws Exception {
+        super.tearDown(); 
+        TestUtils.getInstance().setLimits(0, 0);
+    }
+    
+    
     
     public void runTest() throws IOException {
         this.testDownloadImpl();
