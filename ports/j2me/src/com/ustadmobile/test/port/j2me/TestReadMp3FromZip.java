@@ -31,8 +31,10 @@
 package com.ustadmobile.test.port.j2me;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
+import com.ustadmobile.port.j2me.app.ZipEPUBRequestHandler;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import j2meunit.framework.TestCase;
 import java.io.InputStream;
@@ -100,15 +102,27 @@ public class TestReadMp3FromZip extends TestCase {
         }else{
             assertTrue(true);
         }
-
-        String contentType = 
-                UstadMobileAppController.getContentType(smallMp3TestFile);
-        
-        //Read it man
-        InputStream is = 
-            UstadMobileAppController.getInputStreamReaderByURL(smallMp3TestFile);
         
 
+        String mp3EPUBTestFile = FileUtils.joinPath(contentDir, "forasportal.epub");
+         if (!FileUtils.checkFile(mp3EPUBTestFile)){
+             //download the file
+             String mp3EPUBTestFileURL = 
+                     "http://umcloud1.ustadmobile.com/media/eXeUpload/forasportal.epub";
+             HTTPUtils.downloadURLToFile(mp3EPUBTestFileURL, contentDir, "");
+             
+         }
+         
+         if (!FileUtils.checkFile(mp3EPUBTestFile)){
+             assertTrue(false);
+         }else{
+             HTTPUtils.httpDebug("forasportal.epub exists..");
+             assertTrue(true);
+         }
+
+        HTTPUtils.httpDebug("Starting to play the mp3..");
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
         String supportedTypes[] = Manager.getSupportedContentTypes(null);
         for (int i = 0; i < supportedTypes.length; i++) {
            if (supportedTypes[i].startsWith("audio")) {
@@ -116,14 +130,42 @@ public class TestReadMp3FromZip extends TestCase {
            }
         }
         
-        HTTPUtils.httpDebug("Starting to play the mp3..");
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.playMedia(is, contentType);
-        HTTPUtils.httpDebug("the mp3 is playing?");
+        //Read it man
+        InputStream is = null;
+        is = UstadMobileAppController.getInputStreamReaderByURL(smallMp3TestFile);
+        String contentType = 
+                UstadMobileAppController.getContentType(smallMp3TestFile);
         
-        Thread.sleep(5000); //sleep for 5 seconds.
+        InputStream isMp3Epub = null;
+        ZipFileHandle mp3ZipFile = null;
+        
+        try{
+            mp3ZipFile = impl.openZip(mp3EPUBTestFile);        
+            isMp3Epub = mp3ZipFile.openInputStream("EPUB/53.mp3");
+
+
+            impl.playMedia(is, contentType);
+            HTTPUtils.httpDebug("the mp3 is playing?");
+
+            Thread.sleep(10000); //sleep for 5 seconds.
+        }catch(Exception e){
+            HTTPUtils.httpDebug("Problem in zip stuff");
+            HTTPUtils.httpDebug(e.getMessage() + " : " + e.toString());
+            
+        }finally{
+            if(isMp3Epub != null){
+                isMp3Epub.close();
+            }
+            if (mp3ZipFile != null){
+                mp3ZipFile.close();
+            }
+            if (is != null){
+                is.close();
+            }
+        }
         
         assertTrue(true);
+        
         
          
          
