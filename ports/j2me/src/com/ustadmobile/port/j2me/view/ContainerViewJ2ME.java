@@ -34,9 +34,12 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.html.DefaultHTMLCallback;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.DocumentRequestHandler;
+import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
+import com.sun.lwuit.html.HTMLElement;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
@@ -89,6 +92,8 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     public static final int CMDFORWARD_ID = 2;
     
+    private HTMLCallback htmlCallback;
+    
     
     public ContainerViewJ2ME(UstadJSOPDSEntry entry, String openPath, String mime) {
         containerZip = UstadMobileSystemImplJ2ME.getInstanceJ2ME().getOpenZip();
@@ -128,6 +133,7 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
             UstadJSOPF opf = controller.getOPF(0);
             spineURLs = opf.getLinearSpineURLS();
             requestHandler = new ContainerDocumentRequestHandler(this);
+            htmlCallback = new ContainerHTMLCallback();
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
@@ -146,6 +152,7 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
         currentForm = new Form();
         currentForm.setLayout(new BorderLayout());
         HTMLComponent comp = new HTMLComponent(requestHandler);
+        comp.setHTMLCallback(htmlCallback);
         comp.setImageConstrainPolicy(
             HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
         comp.setIgnoreCSS(true);
@@ -190,6 +197,14 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
             }catch(IOException e) {
                 return new ByteArrayInputStream("ERROR".getBytes());
             }
+        }
+        
+    }
+    
+    public class ContainerHTMLCallback extends DefaultHTMLCallback {
+
+        public void mediaPlayRequested(int type, int op, HTMLComponent htmlC, String src, HTMLElement mediaElement) {
+            int x =0; //To change body of generated methods, choose Tools | Templates.
         }
         
     }
