@@ -199,5 +199,66 @@ public class UstadMobileAppController {
                 break;
         }
     }
+    
+        /**
+     * Returns an input stream by checking the URL.  
+     * URL starts file:// - will use IOWatcher to preload the file contents
+     *  if this is not a media file ending with mp3, 3gp or wav
+     * If URL starts file:// and is a media file will return FileConnection.openInputStream
+     * If URL starts with / will return getClass().getResourceAsStream
+     * Else will interpret as a relative link, prefix the currentPackageURI, and apply
+     * the same logic as if for file://
+     * 
+     * @param URL URL as above
+     * @return InputStream for the URL
+     * @throws IOException if there is an IOException dealing with the file system
+     */
+    public static InputStream getInputStreamReaderByURL(String URL) throws IOException{
+        boolean isMedia = URL.endsWith("mp3") || URL.endsWith("3gp") || 
+                URL.endsWith("wav") || URL.endsWith("mpg") 
+                        || URL.endsWith("mp4");
+                
+        if(URL.startsWith("file://")) {
+            if(isMedia) {
+                //logMsg("Opening " + URL + " Direct");
+                return Connector.openInputStream(URL);
+            }else {
+                //make for url
+                return null;
+            }
+        }else {
+            //this is a relative link
+            //ToDo
+            return null;
+        }
+    }
+    
+    /**
+     * Utility method used with player - returns mime type for files ending
+     * .mp3, .au, .wav, .3gp, .mpg
+     * 
+     * @param fileName
+     * @return 
+     */
+    public static String getContentType(String fileName) {
+        String fileNameLower = fileName.toLowerCase();
+        if(fileNameLower.endsWith(".mp3")) {
+            return "audio/mp3";
+        }else if(fileNameLower.endsWith(".au")) {
+            return "audio/basic";
+        }else if(fileNameLower.endsWith(".wav")) {
+            return "audio/X-wav";
+        }else if(fileNameLower.endsWith(".mpg")) {
+            return "video/mpeg";
+        }else if(fileNameLower.endsWith(".3gp")) {
+            return "video/3gpp";
+        }else if(fileNameLower.endsWith(".mp4")) {
+            return "video/mp4";
+        }
+
+
+        //not known
+        return null;
+    }
    
 }
