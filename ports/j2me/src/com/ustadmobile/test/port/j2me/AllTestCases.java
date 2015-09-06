@@ -66,11 +66,13 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
-        //allTestSuite.addTest(new TestPreferences()); //works
         allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
         allTestSuite.addTest(new TestLogin());
-        allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());
-        allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
+        allTestSuite.addTest(new TestFileImpl());
+        allTestSuite.addTest(new TestDownload());
+        //wait for new commit for smaller download
+        //allTestSuite.addTest(new TestDownload());
+        
         
 //        
 //        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
