@@ -37,6 +37,7 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.DocumentRequestHandler;
 import com.sun.lwuit.html.HTMLComponent;
+import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -143,10 +144,13 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
         
         Form oldForm = currentForm;
         currentForm = new Form();
+        currentForm.setLayout(new BorderLayout());
         HTMLComponent comp = new HTMLComponent(requestHandler);
+        comp.setImageConstrainPolicy(
+            HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
         comp.setIgnoreCSS(true);
         comp.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
-        currentForm.addComponent(comp);
+        currentForm.addComponent(BorderLayout.CENTER, comp);
         currentForm.show();
         
         currentForm.addCommand(cmdBack);

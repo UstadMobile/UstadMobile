@@ -7,6 +7,7 @@ package com.ustadmobile.port.j2me.view;
 import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -33,6 +34,7 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     
     public LoginViewJ2ME() {
         setTitle("Login");
+        setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         
         usernameField = new TextField();
         addComponent(usernameField);
