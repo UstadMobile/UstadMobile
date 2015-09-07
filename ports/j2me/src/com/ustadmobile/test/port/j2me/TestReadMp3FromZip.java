@@ -147,7 +147,7 @@ public class TestReadMp3FromZip extends TestCase {
             impl.playMedia(is, contentType);
             HTTPUtils.httpDebug("the mp3 is playing?");
 
-            Thread.sleep(10000); //sleep for 5 seconds.
+            Thread.sleep(15000); //sleep for 15 seconds.
         }catch(Exception e){
             HTTPUtils.httpDebug("Problem in zip stuff");
             HTTPUtils.httpDebug(e.getMessage() + " : " + e.toString());
