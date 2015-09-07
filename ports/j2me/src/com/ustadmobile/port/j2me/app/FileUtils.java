@@ -41,7 +41,7 @@ public class FileUtils {
     private static final String SDCARD_STRING = "SDCard";
     /** The File seperator character */
     public static char FILE_SEP = '/';
-    public static final String USTAD_CONTENT_DIR = "ustadmobileContent";
+    public static final String USTAD_CONTENT_DIR = "ustadMobileContent";
     public static final String EPUB_CONTAINER = "META-INF/container.xml";
 
     //The fileURI?
