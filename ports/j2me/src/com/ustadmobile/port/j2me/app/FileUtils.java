@@ -217,14 +217,16 @@ public class FileUtils {
     }
     
     public static boolean checkFile(String fileURI) throws IOException{
+        HTTPUtils.httpDebug("checking file: " + fileURI);
         fileURI = fileURI.trim();
         FileConnection fc = (FileConnection)Connector.open(fileURI,
                 Connector.READ);
         if(fc.exists()){
             fc.close();
+            HTTPUtils.httpDebug("file exists.");
             return true;
         }
-        
+        HTTPUtils.httpDebug("file does not exist!");
         return false;
     }
 
