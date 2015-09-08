@@ -64,56 +64,55 @@ public class AllTestCases extends TestCase {
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..        
+        allTestSuite.addTest(new TestReadMp3FromEPUB());
         
-        allTestSuite.addTest(new TestCatalogControllerAcquire());
         
-        allTestSuite.addTest(new TestLoginRegisterUser());       
-        allTestSuite.addTest(new TestTestUtils());         
-          
-        //Tests that don't work
-        //allTestSuite.addTest(new TestDownload()); //Incorrect download when interrupted only. 
-        
-        allTestSuite.addTest(new TestReadMp3FromZip());
-        allTestSuite.addTest(new TestContainerController()); 
-        allTestSuite.addTest(new TestLogin());
-        allTestSuite.addTest(new TestFileImpl());
-        allTestSuite.addTest(new TestCatalogEntryInfo());
-        allTestSuite.addTest(new TestCatalogView()); 
-        allTestSuite.addTest(new TestUMFileResolveLink());
-        allTestSuite.addTest(new TestUMFileUtilFilename());
-        
-        //temporarily disabling download because too large
-        //allTestSuite.addTest(new TestTransferJobList());
-        
-        //Working.
-        allTestSuite.addTest(new TestUstadOCF());
-        allTestSuite.addTest(new TestCatalogEntryInfo());
-        allTestSuite.addTest(new TestPreferences());
-        allTestSuite.addTest(new TestUMFileResolveLink());
-        allTestSuite.addTest(new TestUMFileUtilFilename());
-        allTestSuite.addTest(new TestUMFileUtilJoin());     
-        allTestSuite.addTest(new TestLogin());
-              
-        allTestSuite.addTest(new TestImplementation());
-        allTestSuite.addTest(new TestSimpleHTTP());
-        allTestSuite.addTest(new TestCustomLWUIT());
-        allTestSuite.addTest(new TestFormShow());
-        allTestSuite.addTest(new TestSimple());
-        allTestSuite.addTest(new TestXmlParse());
-        allTestSuite.addTest(new TestOPDSParse());
-        allTestSuite.addTest(new TestOPFParse());
-        allTestSuite.addTest(new TestDownloadURLToFile());
-        allTestSuite.addTest(new TestRMS());
-        allTestSuite.addTest(new TestSerializedHashtable());
-        allTestSuite.addTest(new TestSystemimplJ2ME());
-        allTestSuite.addTest(new TestUnzip());
-        allTestSuite.addTest(new TestAppPref());
-        allTestSuite.addTest(new TestUserPref());
-        allTestSuite.addTest(new TestLoginView());
-        //allTestSuite.addTest(new TestJ2MECatalogView()); // already a core test
-        allTestSuite.addTest(new TestHttpResult());
-        allTestSuite.addTest(new TestEPUBRead());
-        allTestSuite.addTest(new TestCatalogController()); 
+//        allTestSuite.addTest(new TestCatalogControllerAcquire());
+//        allTestSuite.addTest(new TestLoginRegisterUser());       
+//        allTestSuite.addTest(new TestTestUtils());         
+//          
+//        //Tests that don't work
+//        //allTestSuite.addTest(new TestDownload()); //Incorrect download when interrupted only. 
+//        
+//        allTestSuite.addTest(new TestReadMp3FromZip());
+//        allTestSuite.addTest(new TestContainerController()); 
+//        allTestSuite.addTest(new TestLogin());
+//        allTestSuite.addTest(new TestFileImpl());
+//        allTestSuite.addTest(new TestCatalogEntryInfo());
+//        allTestSuite.addTest(new TestCatalogView()); 
+//        allTestSuite.addTest(new TestUMFileResolveLink());
+//        allTestSuite.addTest(new TestUMFileUtilFilename());
+//        
+//        //temporarily disabling download because too large
+//        //allTestSuite.addTest(new TestTransferJobList());
+//        
+//        allTestSuite.addTest(new TestUstadOCF());
+//        allTestSuite.addTest(new TestCatalogEntryInfo());
+//        allTestSuite.addTest(new TestPreferences());
+//        allTestSuite.addTest(new TestUMFileResolveLink());
+//        allTestSuite.addTest(new TestUMFileUtilFilename());
+//        allTestSuite.addTest(new TestUMFileUtilJoin());     
+//        allTestSuite.addTest(new TestLogin());
+//        allTestSuite.addTest(new TestImplementation());
+//        allTestSuite.addTest(new TestSimpleHTTP());
+//        allTestSuite.addTest(new TestCustomLWUIT());
+//        allTestSuite.addTest(new TestFormShow());
+//        allTestSuite.addTest(new TestSimple());
+//        allTestSuite.addTest(new TestXmlParse());
+//        allTestSuite.addTest(new TestOPDSParse());
+//        allTestSuite.addTest(new TestOPFParse());
+//        allTestSuite.addTest(new TestDownloadURLToFile());
+//        allTestSuite.addTest(new TestRMS());
+//        allTestSuite.addTest(new TestSerializedHashtable());
+//        allTestSuite.addTest(new TestSystemimplJ2ME());
+//        allTestSuite.addTest(new TestUnzip());
+//        allTestSuite.addTest(new TestAppPref());
+//        allTestSuite.addTest(new TestUserPref());
+//        allTestSuite.addTest(new TestLoginView());
+//        //allTestSuite.addTest(new TestJ2MECatalogView()); // already a core test
+//        allTestSuite.addTest(new TestHttpResult());
+//        allTestSuite.addTest(new TestEPUBRead());
+//        allTestSuite.addTest(new TestCatalogController()); 
          
         
         return allTestSuite;

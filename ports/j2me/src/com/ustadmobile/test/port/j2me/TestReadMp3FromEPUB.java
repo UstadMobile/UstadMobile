@@ -30,8 +30,17 @@
  */
 package com.ustadmobile.test.port.j2me;
 
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.ocf.UstadOCF;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
@@ -79,13 +88,63 @@ public class TestReadMp3FromEPUB extends TestCase {
               HTTPUtils.httpDebug("Device supports " + supportedTypes[i]);
            }
         }
-   
+        
+        String httpRoot = 
+                com.ustadmobile.test.core.TestUtils.getInstance().getHTTPRoot();
+        String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
+            httpRoot, "mp3test.opds"});
+        
+        UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL, 
+            CatalogController.SHARED_RESOURCE, null, null, 
+            CatalogController.CACHE_ENABLED);
+        
+        //make sure if the entry is around... we remove it...
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        if(entryInfo != null && entryInfo.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+            CatalogController.removeEntry(feed.entries[0].id, CatalogController.SHARED_RESOURCE);
+        }
+        
+        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+            CatalogController.SHARED_RESOURCE);
+        boolean entryPresent = entryInfo == null || entryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        assertTrue("Entry not acquired at start of test", entryPresent);
+        
+        //UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries, 
+        //    null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
+        //int totalSize = acquireJob.getTotalSize();
+        //acquireJob.start();
+        
+        ///entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+        //    CatalogController.SHARED_RESOURCE);
+        
+        //String acquiredFileURI = entryInfo.fileURI;
+        
+        UstadJSOPDSEntry entry = feed.entries[0];
+        String mimetype = "application/epub+zip";
+        String openPath = impl.openContainer(null, mp3EPUBTestFile, 
+            mimetype);
+        assertNotNull("Got an open path from the system", openPath);
+        
+        ContainerController controller = ContainerController.makeFromEntry(entry, 
+            openPath, mp3EPUBTestFile, mimetype);
+        UstadOCF ocf = controller.getOCF();
+        assertNotNull("Controller can fetch OCF once open", ocf);
+        
+        UstadJSOPF opf = controller.getOPF(0);
+        assertNotNull("Can load package OPF", opf);
+        assertTrue("Package has spine with entries", opf.spine.length > 0);
+        
+        controller.show();
+
+        
+        Thread.sleep(20000);
+        
+        
+        
         
         
         assertTrue(true);
-        
-        
-         
          
     }
 }
