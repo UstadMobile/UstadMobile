@@ -53,7 +53,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         Alert connectingAlert = new Alert("Connecting", "Requesting socket: " 
                 + testServerURL, null, AlertType.INFO);
         connectingAlert.setTimeout(Alert.FOREVER);
-        lcduiDisplay.setCurrent(connectingAlert);
+        //lcduiDisplay.setCurrent(connectingAlert);
         
         UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
         
@@ -67,7 +67,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                 String socketServer = TestConstants.TEST_SERVER + ":" + rawPort;
                 Alert foundPortAlert = new Alert("Connecting", "To socket: " 
                         + socketServer , null , AlertType.INFO);
-                lcduiDisplay.setCurrent(foundPortAlert);
+                //lcduiDisplay.setCurrent(foundPortAlert);
                 umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
                 umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
                 umLog.l(UMLog.INFO, 350, 
