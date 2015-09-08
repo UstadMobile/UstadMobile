@@ -56,6 +56,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         Alert connectingAlert = new Alert("Connecting", "Requesting socket: " 
                 + testServerURL, null, AlertType.INFO);
         connectingAlert.setTimeout(Alert.FOREVER);
+
         lcduiDisplay.setCurrent(connectingAlert, connectingForm);
         
         UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
