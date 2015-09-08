@@ -51,6 +51,7 @@ import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -140,14 +141,22 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     protected void initEPUB() {
         try {
+            HTTPUtils.httpDebug("getting ocf");
             UstadOCF ocf = controller.getOCF();
+            HTTPUtils.httpDebug("getting opf");
             UstadJSOPF opf = controller.getOPF(0);
+            HTTPUtils.httpDebug("getting spine");
             spineURLs = opf.getLinearSpineURLS();
+            HTTPUtils.httpDebug("getting requesthandler");
             requestHandler = new ContainerDocumentRequestHandler(this);
+            HTTPUtils.httpDebug("getting htmlcallback");
             htmlCallback = new ContainerHTMLCallback(this);
+            HTTPUtils.httpDebug("getting opfurl");
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
+            HTTPUtils.httpDebug("opfURL:" + opfURL);
+            HTTPUtils.httpDebug("title: " + title);
             showPage(1);
         }catch(Exception e) {
             UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 350, null, e);
