@@ -50,6 +50,12 @@ import java.util.Vector;
  */
 public class UMUtil {
     
+    public static final int PORT_ALLOC_IO_ERR = -1;
+    
+    public static final int PORT_ALLOC_SECURITY_ERR = -2;
+    
+    public static final int PORT_ALLOC_OTHER_ERR = 3;
+    
     /**
      * Gets the index of a particular item in an array
      * 
@@ -138,8 +144,15 @@ public class UMUtil {
             int serverPort = response.getInt("port");
             return serverPort;
         }catch(Exception e) {
-            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR, 510, action + "," + serverURL);
-            return -1;
+            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR, 510, action + "," + serverURL, e);
+            e.printStackTrace();
+            if(e instanceof SecurityException) {
+                return PORT_ALLOC_SECURITY_ERR;
+            }else if(e instanceof IOException) {
+                return PORT_ALLOC_IO_ERR;
+            }else {
+                return PORT_ALLOC_OTHER_ERR;
+            }
         }
     }
     
