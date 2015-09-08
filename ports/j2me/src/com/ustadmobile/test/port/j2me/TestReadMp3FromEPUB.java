@@ -107,13 +107,18 @@ public class TestReadMp3FromEPUB extends TestCase {
         entryInfo = CatalogController.getEntryInfo(epubID, 
             CatalogController.SHARED_RESOURCE);
         HTTPUtils.httpDebug("launching MP3 EPUB..");
-        UstadJSOPDSEntry entry = feed.entries[0];
+        
         String mimetype = "application/epub+zip";
         String openPath = impl.openContainer(null, mp3EPUBTestFile, 
             mimetype);
         assertNotNull("Got an open path from the system", openPath);
         
         Thread.sleep(2000);
+        HTTPUtils.httpDebug("gettting entry..");
+        UstadJSOPDSEntry entry = feed.entries[0];
+        HTTPUtils.httpDebug("making controller");
+        Thread.sleep(3000);
+        
         ContainerController controller = ContainerController.makeFromEntry(entry, 
             openPath, mp3EPUBTestFile, mimetype);
         UstadOCF ocf = controller.getOCF();
