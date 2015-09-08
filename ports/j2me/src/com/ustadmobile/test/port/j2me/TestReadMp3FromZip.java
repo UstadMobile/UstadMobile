@@ -34,6 +34,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import j2meunit.framework.TestCase;
 import java.io.InputStream;
 import javax.microedition.media.Manager;
@@ -117,7 +118,7 @@ public class TestReadMp3FromZip extends TestCase {
         }
         
         HTTPUtils.httpDebug("Starting to play the mp3..");
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImplJ2ME impl = (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance();
         impl.playMedia(is, contentType);
         HTTPUtils.httpDebug("the mp3 is playing?");
         

@@ -23,6 +23,8 @@ import j2meunit.framework.TestFailure;
 import j2meunit.framework.TestResult;
 import java.util.Enumeration;
 import java.util.Vector;
+import javax.microedition.lcdui.Alert;
+import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.List;
 
 /**
@@ -30,33 +32,61 @@ import javax.microedition.lcdui.List;
  */
 public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
  
+    
+    
     //Start the tests:
     public void startApp(){
-        //start(new String[] { com.ustadmobile.app.tests.AllTestCases.class.getName() });
+        String testServerURL = 
+            "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
+        javax.microedition.lcdui.Display lcduiDisplay = 
+            javax.microedition.lcdui.Display.getDisplay(this);
         
-        Display.init(this);
+        
+        Alert userAlert = new Alert("UstadMobile Tests", 
+            "Welcome to the test app: please select 'always' or 'yes' on any security prompts. Starting in 10seconds", 
+            null, AlertType.INFO);
+        userAlert.setTimeout(Alert.FOREVER);
+        lcduiDisplay.setCurrent(userAlert);
+        try { Thread.sleep(10000); }
+        catch(InterruptedException e) {}
+        
+        Alert connectingAlert = new Alert("Connecting", "Requesting socket: " 
+                + testServerURL, null, AlertType.INFO);
+        connectingAlert.setTimeout(Alert.FOREVER);
+        lcduiDisplay.setCurrent(connectingAlert);
         
         UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
+        
         
         
         if(!umLog.isRemoteSocketConnected()) {
            try {
                 String deviceName = "j2metestrun";
-                String testServerURL = 
-                    "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
+                
                 int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, "newrawserver", deviceName);
-
-
+                String socketServer = TestConstants.TEST_SERVER + ":" + rawPort;
+                Alert foundPortAlert = new Alert("Connecting", "To socket: " 
+                        + socketServer , null , AlertType.INFO);
+                lcduiDisplay.setCurrent(foundPortAlert);
                 umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
                 umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
                 umLog.l(UMLog.INFO, 350, 
                     UstadMobileSystemImpl.getInstance().getSystemInfo().toString());
-            }catch(IOException e) {
+                Alert connectedAlert = new Alert("Connected!", "Connected to " 
+                        + socketServer + " OK!", null, AlertType.INFO);
+                connectedAlert.setTimeout(10000);
+                lcduiDisplay.setCurrent(connectedAlert);
+                try { Thread.sleep(10000); }
+                catch(InterruptedException e) {}
+            }catch(Exception e) {
                 System.err.println("Error connecting to testlog socket");
                 e.printStackTrace();
-            } 
+            }
         }
         
+        UstadMobileSystemImpl.getInstance().init();
+        
+        Display.init(this);
         
         AllTestCases atc = new AllTestCases() ;
         int ctc = atc.suite().countTestCases();

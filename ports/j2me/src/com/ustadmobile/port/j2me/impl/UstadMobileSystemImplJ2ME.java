@@ -96,6 +96,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         appView = new AppViewJ2ME(this);
     }
     
+    /**
+     * {@inheritDoc}
+     */
+    public void init() {
+        super.init();
+    }
+    
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
         return (UstadMobileSystemImplJ2ME)mainInstance;
     }

@@ -66,9 +66,9 @@ public class AllTestCases extends TestCase {
         
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
-        allTestSuite.addTest(new TestReadMp3FromZip());
+        //allTestSuite.addTest(new TestReadMp3FromZip());
         
-//        allTestSuite.addTest(new TestLogin());
+        allTestSuite.addTest(new TestLogin());
 //        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
 //        allTestSuite.addTest(new TestFileImpl());
 //        allTestSuite.addTest(new TestDownload());
