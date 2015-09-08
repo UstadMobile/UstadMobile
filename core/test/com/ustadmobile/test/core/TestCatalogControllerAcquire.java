@@ -46,6 +46,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
+    import com.ustadmobile.core.impl.UMLog;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -105,8 +106,11 @@ public class TestCatalogControllerAcquire extends TestCase{
             catch(InterruptedException e) {}
         }
         assertTrue("Job has completed", acquireJob.isFinished());
-        
-        
+	/* $if umplatform == 2 $
+	    impl.getLogger().l(UMLog.INFO, 800, "sleeping");
+	    Thread.sleep(5000);
+        $endif */
+
         CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
             CatalogController.SHARED_RESOURCE);
         
