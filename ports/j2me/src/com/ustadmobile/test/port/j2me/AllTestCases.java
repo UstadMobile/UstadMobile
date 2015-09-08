@@ -64,59 +64,57 @@ public class AllTestCases extends TestCase {
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..        
+        
         allTestSuite.addTest(new TestCatalogControllerAcquire());
+        allTestSuite.addTest(new TestLoginRegisterUser());       
+        allTestSuite.addTest(new TestTestUtils());         
+        allTestSuite.addTest(new TestContainerController());   
+        //Tests that don't work
+        //allTestSuite.addTest(new TestDownload()); //Incorrect download when interrupted only. 
         
+        allTestSuite.addTest(new TestReadMp3FromZip());
+        allTestSuite.addTest(new TestLogin());
+        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
+        allTestSuite.addTest(new TestFileImpl());
+        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
+        allTestSuite.addTest(new TestCatalogView()); //Nokia: Null Pointer Exception Alcatel: Pass
+        allTestSuite.addTest(new TestUMFileResolveLink()); //works
+        allTestSuite.addTest(new TestUMFileUtilFilename()); //works
         
-//        allTestSuite.addTest(new TestLoginRegisterUser());       
-//        allTestSuite.addTest(new TestTestUtils());         
-//        allTestSuite.addTest(new TestContainerController());   
-//        //Tests that don't work
-//        //allTestSuite.addTest(new TestDownload()); //Incorrect download when interrupted only. 
-//        
-//        allTestSuite.addTest(new TestReadMp3FromZip());
-//        allTestSuite.addTest(new TestLogin());
-//        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
-//        allTestSuite.addTest(new TestFileImpl());
-//        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
-//        allTestSuite.addTest(new TestCatalogView()); //Nokia: Null Pointer Exception Alcatel: Pass
-//        allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion
-//        allTestSuite.addTest(new TestUMFileResolveLink()); //works
-//        allTestSuite.addTest(new TestUMFileUtilFilename()); //works
-//        
-//        //temporarily disabling download because too large
-//        //allTestSuite.addTest(new TestTransferJobList());
-//        
-//        //Working.
-//        allTestSuite.addTest(new TestUstadOCF()); //works ok
-//        allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
-//        allTestSuite.addTest(new TestCatalogEntryInfo());
-//        allTestSuite.addTest(new TestPreferences());
-//        allTestSuite.addTest(new TestUMFileResolveLink());
-//        allTestSuite.addTest(new TestUMFileUtilFilename());
-//        allTestSuite.addTest(new TestUMFileUtilJoin());     
-//        allTestSuite.addTest(new TestLogin());
-//              
-//        allTestSuite.addTest(new TestImplementation());
-//        allTestSuite.addTest(new TestSimpleHTTP());
-//        allTestSuite.addTest(new TestCustomLWUIT());
-//        allTestSuite.addTest(new TestFormShow());
-//        allTestSuite.addTest(new TestSimple());
-//        allTestSuite.addTest(new TestXmlParse());
-//        allTestSuite.addTest(new TestOPDSParse());
-//        allTestSuite.addTest(new TestOPFParse());
-//        allTestSuite.addTest(new TestDownloadURLToFile());
-//        allTestSuite.addTest(new TestRMS());
-//        allTestSuite.addTest(new TestSerializedHashtable());
-//        //allTestSuite.addTest(new TestRename());
-//        allTestSuite.addTest(new TestSystemimplJ2ME());
-//        allTestSuite.addTest(new TestUnzip());
-//        //allTestSuite.addTest(new TestBigUnzip());
-//        allTestSuite.addTest(new TestAppPref());
-//        allTestSuite.addTest(new TestUserPref());
-//        allTestSuite.addTest(new TestLoginView());
-//        allTestSuite.addTest(new TestJ2MECatalogView());
-//        allTestSuite.addTest(new TestHttpResult());
-//        allTestSuite.addTest(new TestEPUBRead());
+        //temporarily disabling download because too large
+        //allTestSuite.addTest(new TestTransferJobList());
+        
+        //Working.
+        allTestSuite.addTest(new TestUstadOCF()); //works ok
+        allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
+        allTestSuite.addTest(new TestCatalogEntryInfo());
+        allTestSuite.addTest(new TestPreferences());
+        allTestSuite.addTest(new TestUMFileResolveLink());
+        allTestSuite.addTest(new TestUMFileUtilFilename());
+        allTestSuite.addTest(new TestUMFileUtilJoin());     
+        allTestSuite.addTest(new TestLogin());
+              
+        allTestSuite.addTest(new TestImplementation());
+        allTestSuite.addTest(new TestSimpleHTTP());
+        allTestSuite.addTest(new TestCustomLWUIT());
+        allTestSuite.addTest(new TestFormShow());
+        allTestSuite.addTest(new TestSimple());
+        allTestSuite.addTest(new TestXmlParse());
+        allTestSuite.addTest(new TestOPDSParse());
+        allTestSuite.addTest(new TestOPFParse());
+        allTestSuite.addTest(new TestDownloadURLToFile());
+        allTestSuite.addTest(new TestRMS());
+        allTestSuite.addTest(new TestSerializedHashtable());
+        //allTestSuite.addTest(new TestRename());
+        allTestSuite.addTest(new TestSystemimplJ2ME());
+        allTestSuite.addTest(new TestUnzip());
+        //allTestSuite.addTest(new TestBigUnzip());
+        allTestSuite.addTest(new TestAppPref());
+        allTestSuite.addTest(new TestUserPref());
+        allTestSuite.addTest(new TestLoginView());
+        //allTestSuite.addTest(new TestJ2MECatalogView()); // already a core test
+        allTestSuite.addTest(new TestHttpResult());
+        allTestSuite.addTest(new TestEPUBRead());
                 
         
         return allTestSuite;
