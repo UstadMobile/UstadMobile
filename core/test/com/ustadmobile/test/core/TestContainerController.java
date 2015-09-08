@@ -145,6 +145,8 @@ public class TestContainerController extends TestCase {
         //delete it now we are done
         impl.closeContainer(openPath);
         CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
+
+	assertTrue(true);
         
     }
     
@@ -214,6 +216,8 @@ public class TestContainerController extends TestCase {
         //delete it now we are done
         impl.closeContainer(openPath);
         CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
+
+        assertTrue(true);
         
     }
     
