@@ -64,10 +64,13 @@ public class AllTestCases extends TestCase {
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
+        //The ones that don't work:            
+        allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
+        allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
         
-        //allTestSuite.addTest(new TestContainerController());
-        allTestSuite.addTest(new TestDownload());
-        
+//        allTestSuite.addTest(new TestContainerController());
+//        //allTestSuite.addTest(new TestDownload()); //Incorrect download when interrupted only. 
+//        
 //        allTestSuite.addTest(new TestReadMp3FromZip());
 //        allTestSuite.addTest(new TestLogin());
 //        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
@@ -78,12 +81,7 @@ public class AllTestCases extends TestCase {
 //        allTestSuite.addTest(new TestUMFileResolveLink()); //works
 //        allTestSuite.addTest(new TestUMFileUtilFilename()); //works
 //        
-//        //The ones that don't work:            
-//        //allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
-//        //allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
-//        
 //        //temporarily disabling download because too large
-//        //
 //        //allTestSuite.addTest(new TestTransferJobList());
 //        
 //        //Working.
