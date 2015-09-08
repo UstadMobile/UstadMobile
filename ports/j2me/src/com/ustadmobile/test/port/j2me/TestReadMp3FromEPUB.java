@@ -100,37 +100,47 @@ public class TestReadMp3FromEPUB extends TestCase {
         
         Thread.sleep(5000);
         
-        //make sure if the entry is around... we remove it...
-        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
-            CatalogController.SHARED_RESOURCE);
-       String epubID="742107bb-37e5-4989-b918-d7a611cdff2d";
-        entryInfo = CatalogController.getEntryInfo(epubID, 
-            CatalogController.SHARED_RESOURCE);
-        HTTPUtils.httpDebug("launching MP3 EPUB..");
-        
+        UstadJSOPDSEntry opdsEntry = new UstadJSOPDSEntry(feed);
+        Thread.sleep(5000);
+        String zipType = "zip:///";
         String mimetype = "application/epub+zip";
         String openPath = impl.openContainer(null, mp3EPUBTestFile, 
-            mimetype);
-        assertNotNull("Got an open path from the system", openPath);
-        
-        Thread.sleep(2000);
-        HTTPUtils.httpDebug("gettting entry..");
-        UstadJSOPDSEntry entry = feed.entries[0];
-        HTTPUtils.httpDebug("feed id :" + feed.entries[0].id);
-        HTTPUtils.httpDebug("making controller");
-        Thread.sleep(3000);
-        
-        ContainerController controller = ContainerController.makeFromEntry(entry, 
-            openPath, mp3EPUBTestFile, mimetype);
-        UstadOCF ocf = controller.getOCF();
-        assertNotNull("Controller can fetch OCF once open", ocf);
-        
-        UstadJSOPF opf = controller.getOPF(0);
-        assertNotNull("Can load package OPF", opf);
-        assertTrue("Package has spine with entries", opf.spine.length > 0);
-        
-        Thread.sleep(5000);
+           mimetype);
+        ContainerController controller = ContainerController.makeFromEntry(opdsEntry, openPath, mp3EPUBTestFile, mimetype);
+        HTTPUtils.httpDebug("showing..");
         controller.show();
+        
+//        //make sure if the entry is around... we remove it...
+//        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
+//            CatalogController.SHARED_RESOURCE);
+//       String epubID="742107bb-37e5-4989-b918-d7a611cdff2d";
+//        entryInfo = CatalogController.getEntryInfo(epubID, 
+//            CatalogController.SHARED_RESOURCE);
+//        HTTPUtils.httpDebug("launching MP3 EPUB..");
+//        
+//        
+//        String openPath = impl.openContainer(null, mp3EPUBTestFile, 
+//            mimetype);
+//        assertNotNull("Got an open path from the system", openPath);
+//        
+//        Thread.sleep(2000);
+//        HTTPUtils.httpDebug("gettting entry..");
+//        UstadJSOPDSEntry entry = feed.entries[0];
+//        HTTPUtils.httpDebug("feed id :" + feed.entries[0].id);
+//        HTTPUtils.httpDebug("making controller");
+//        Thread.sleep(3000);
+//        
+//        ContainerController controller = ContainerController.makeFromEntry(entry, 
+//            openPath, mp3EPUBTestFile, mimetype);
+//        UstadOCF ocf = controller.getOCF();
+//        assertNotNull("Controller can fetch OCF once open", ocf);
+//        
+//        UstadJSOPF opf = controller.getOPF(0);
+//        assertNotNull("Can load package OPF", opf);
+//        assertTrue("Package has spine with entries", opf.spine.length > 0);
+//        
+//        Thread.sleep(5000);
+//        controller.show();
 
         
         Thread.sleep(20000);
