@@ -64,14 +64,14 @@ public class AllTestCases extends TestCase {
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
-        allTestSuite.addTest(new TestReadMp3FromZip());
-        allTestSuite.addTest(new TestLogin());
-        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
-        allTestSuite.addTest(new TestFileImpl());
+        
         allTestSuite.addTest(new TestContainerController());
-        allTestSuite.addTest(new TestDownload());
-       
-       
+        
+//        allTestSuite.addTest(new TestDownload());
+//        allTestSuite.addTest(new TestReadMp3FromZip());
+//        allTestSuite.addTest(new TestLogin());
+//        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
+//        allTestSuite.addTest(new TestFileImpl());
 //        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
 //        allTestSuite.addTest(new TestCatalogView()); //Nokia: Null Pointer Exception Alcatel: Pass
 //        allTestSuite.addTest(new TestCatalogControllerAcquire()); //Null Pointer Excpetion
