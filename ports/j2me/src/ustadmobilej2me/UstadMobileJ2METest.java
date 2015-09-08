@@ -25,6 +25,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Form;
 import javax.microedition.lcdui.List;
 
 /**
@@ -33,55 +34,76 @@ import javax.microedition.lcdui.List;
 public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
  
     
+    private javax.microedition.lcdui.Display lcduiDisplay;
+    
+    /**
+     * Time to show user alerts for in ms.
+     */
+    private static final int ALERT_DISPLAY_TIME = 10000;
     
     //Start the tests:
     public void startApp(){
         String testServerURL = 
             "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
-        javax.microedition.lcdui.Display lcduiDisplay = 
+        lcduiDisplay = 
             javax.microedition.lcdui.Display.getDisplay(this);
         
-        
+        javax.microedition.lcdui.Form connectingForm = new javax.microedition.lcdui.Form("Test");
+        connectingForm.append("Connecting....");
         Alert userAlert = new Alert("UstadMobile Tests", 
             "Welcome to the test app: please select 'always' or 'yes' on any security prompts. Starting in 10seconds", 
             null, AlertType.INFO);
-        userAlert.setTimeout(Alert.FOREVER);
-        lcduiDisplay.setCurrent(userAlert);
-        try { Thread.sleep(10000); }
+        userAlert.setTimeout(ALERT_DISPLAY_TIME);
+        lcduiDisplay.setCurrent(userAlert, connectingForm);
+        try { Thread.sleep(ALERT_DISPLAY_TIME); }
         catch(InterruptedException e) {}
         
         Alert connectingAlert = new Alert("Connecting", "Requesting socket: " 
                 + testServerURL, null, AlertType.INFO);
         connectingAlert.setTimeout(Alert.FOREVER);
-        //lcduiDisplay.setCurrent(connectingAlert);
+
+        lcduiDisplay.setCurrent(connectingAlert, connectingForm);
         
         UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
-        
-        
         
         if(!umLog.isRemoteSocketConnected()) {
            try {
                 String deviceName = "j2metestrun";
                 
-                int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, "newrawserver", deviceName);
+                int rawPort = UMUtil.requestDodgyHTTPDPort(testServerURL, 
+                        "newrawserver", deviceName);
+                
+                if(rawPort <= 0) {
+                    String message = "IOError";
+                    if(rawPort == UMUtil.PORT_ALLOC_SECURITY_ERR) {
+                        message = "Permission Denied";
+                    }
+                    
+                    quitWithErrorMessage("Error 122", 
+                            "Error 122: " + message, null);
+                    return;
+                }
+                
                 String socketServer = TestConstants.TEST_SERVER + ":" + rawPort;
                 Alert foundPortAlert = new Alert("Connecting", "To socket: " 
                         + socketServer , null , AlertType.INFO);
-                //lcduiDisplay.setCurrent(foundPortAlert);
+                lcduiDisplay.setCurrent(foundPortAlert, connectingForm);
                 umLog.connectLogToSocket(TestConstants.TEST_SERVER + ":" + rawPort);
                 umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
                 umLog.l(UMLog.INFO, 350, 
                     UstadMobileSystemImpl.getInstance().getSystemInfo().toString());
                 Alert connectedAlert = new Alert("Connected!", "Connected to " 
                         + socketServer + " OK!", null, AlertType.INFO);
-                connectedAlert.setTimeout(10000);
-                //lcduiDisplay.setCurrent(connectedAlert); //nokia error:
-                //http://stackoverflow.com/questions/2824785/error-current-displayable-is-an-alert
-                try { Thread.sleep(10000); }
+                connectedAlert.setTimeout(ALERT_DISPLAY_TIME);
+                lcduiDisplay.setCurrent(connectedAlert, connectingForm);
+                try { Thread.sleep(ALERT_DISPLAY_TIME); }
                 catch(InterruptedException e) {}
             }catch(Exception e) {
                 System.err.println("Error connecting to testlog socket");
                 e.printStackTrace();
+                quitWithErrorMessage("Error 124", 
+                        "Exception connecting to test server", e);
+                return;
             }
         }
         
@@ -174,6 +196,18 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         //destroyApp(bScreenOutput);
     }
     
+    void quitWithErrorMessage(String title, String message, Exception e) {
+        String exMessage = e != null ? e.toString() : "";
+        Alert errorMessage = new Alert(title, message + ":" + exMessage, null, AlertType.ERROR);
+        errorMessage.setTimeout(Alert.FOREVER);
+        Form errForm = new Form("Exiting automatically");
+        lcduiDisplay.setCurrent(errorMessage, errForm);
+        try { Thread.sleep(ALERT_DISPLAY_TIME); }
+        catch(InterruptedException e2) {}
+        destroyApp(false);
+        notifyDestroyed();
+    }
+    
     /**
      * Helpful for executing tests from command line / microemulator
      */
@@ -186,6 +220,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
     }
     
     public void destroyApp(boolean unconditional) {
+        super.destroyApp(unconditional);
     }
     
     public void addError(Test test, Throwable thrwbl) {

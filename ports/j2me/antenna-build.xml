@@ -95,9 +95,10 @@ NetBeans.  See README for instructions on building from source.
     <target name="jar" depends="build">
         <mkdir dir="${dist.dir.ANTENNA}"/>
 
+        <!-- Test Midlet Suite -->
         <wtkjad jadfile="${dist.dir.ANTENNA}/${MidletSuite}.jad" 
             jarfile="${dist.dir.ANTENNA}/${MidletSuite}.jar"
-            name="Ustad Mobile"
+            name="Ustad Mobile Tests"
             vendor="Ustad Mobile Inc">
 
             <midlet name="${Midlet_1_name}" class="${Midlet_1_class}"></midlet>
