@@ -271,22 +271,35 @@ public class FileUtils {
     
     public static boolean removeFileOrDir(String path, int mode, 
             boolean isDir) throws IOException{
+        boolean status = false;
         path = path.trim();
         if (isDir && !path.endsWith("/")){
             path += "/";
         }
-        FileConnection fc = (FileConnection) Connector.open(path, mode);
-        if (fc.exists()){
-            if (isDir && !fc.isDirectory()){
-                return false;
-            }
-            fc.delete();
-            fc.close();
-            return true;
+        FileConnection fc = null;
+        HTTPUtils.httpDebug("Remote File or Dir: " + path);
+        if (isDir && !fc.isDirectory()){
+            HTTPUtils.httpDebug("Is a directory.");
+            status = false;
+            return status;
         }
-        fc.close();
-        
-        return false;
+        try{
+            fc = (FileConnection) Connector.open(path, mode);
+            if (fc.exists()){
+                HTTPUtils.httpDebug("file exists. Proceeding to delete");
+                HTTPUtils.httpDebug("Deleting..");
+                fc.delete();
+                status = true;
+            }
+        }catch(Exception e){
+            HTTPUtils.httpDebug("Exception in deleting file:");
+            HTTPUtils.httpDebug(e.toString() + " - " + e.getMessage());
+        }finally{
+            if (fc != null){
+                fc.close();
+            }
+        }
+        return status;
     }
     
     

@@ -66,6 +66,7 @@ public class AllTestCases extends TestCase {
         //Testing these..        
         
         allTestSuite.addTest(new TestCatalogControllerAcquire());
+        /*
         allTestSuite.addTest(new TestLoginRegisterUser());       
         allTestSuite.addTest(new TestTestUtils());         
           
@@ -113,7 +114,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
         allTestSuite.addTest(new TestCatalogController()); 
-                
+               */ 
         
         return allTestSuite;
 
