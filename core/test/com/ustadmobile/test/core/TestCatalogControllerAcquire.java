@@ -108,7 +108,9 @@ public class TestCatalogControllerAcquire extends TestCase{
         assertTrue("Job has completed", acquireJob.isFinished());
 	/* $if umplatform == 2 $
 	    impl.getLogger().l(UMLog.INFO, 800, "sleeping");
-	    Thread.sleep(5000);
+	    //we sleep because once the opds is downloaded, it will create the opds cache which will conflict with deleting the epub itself. 
+	    //Ideally we should check if the caching is also finished in addition to the download job being finished.
+	    Thread.sleep(8000);
         $endif */
 
         CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
