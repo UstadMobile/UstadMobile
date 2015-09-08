@@ -512,6 +512,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
             out = new ConnectorCloseOutputStream(
                 con.openOutputStream(con.fileSize()), con);
+            con.close();
         }
         
         return out;

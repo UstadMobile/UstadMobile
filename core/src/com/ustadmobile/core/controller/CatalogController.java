@@ -768,6 +768,8 @@ public class CatalogController implements UstadController, UMProgressListener {
         String filename = sanitizeIDForFilename(localCatalogID) + ".local.opds";
         String filePath = UMFileUtil.joinPaths(new String[]{"file:///", baseDir, filename});
         
+        impl.getLogger().l(UMLog.DEBUG, 514, filePath);
+        
         UstadJSOPDSFeed newFeed = new UstadJSOPDSFeed(filePath, 
             catalog.title + LOCALOPDS_ID_SUFFIX, catalog.id + LOCALOPDS_ID_SUFFIX);
         
@@ -804,6 +806,7 @@ public class CatalogController implements UstadController, UMProgressListener {
         }
         
         String savePath = UMFileUtil.joinPaths(new String[]{baseDir, filename});
+        impl.getLogger().l(UMLog.DEBUG, 516, savePath);
         impl.writeStringToFile(newFeed.toString(), savePath, "UTF-8");
         
         return newFeed;
