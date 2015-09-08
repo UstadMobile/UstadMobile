@@ -78,21 +78,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
-            boolean sharedDirOK = false;
             mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
-            mainInstance.init();
-            try {
-                String sharedContentDir = mainInstance.getSharedContentDir();
-                sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
-                String sharedCacheDir = UMFileUtil.joinPaths(new String[]{
-                    sharedContentDir, UstadMobileConstants.CACHEDIR});
-                boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
-                StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
-                initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
-                mainInstance.getLogger().l(UMLog.INFO, 130, initMsg.toString());
-            }catch(IOException e) {
-                mainInstance.getLogger().l(UMLog.CRITICAL, 500, null, e);
-            }
         }
         
         return mainInstance;
@@ -129,7 +115,19 @@ public abstract class UstadMobileSystemImpl {
      * This must make the shared content directory if it does not already exist
      */
     public void init() {
-        
+        boolean sharedDirOK = false;
+        try {
+            String sharedContentDir = mainInstance.getSharedContentDir();
+            sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
+            String sharedCacheDir = UMFileUtil.joinPaths(new String[]{
+                sharedContentDir, UstadMobileConstants.CACHEDIR});
+            boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
+            StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
+            initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
+            mainInstance.getLogger().l(UMLog.INFO, 130, initMsg.toString());
+        }catch(IOException e) {
+            mainInstance.getLogger().l(UMLog.CRITICAL, 500, null, e);
+        }
     }
     
     /**

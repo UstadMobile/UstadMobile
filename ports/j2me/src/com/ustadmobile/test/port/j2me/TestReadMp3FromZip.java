@@ -36,6 +36,7 @@ import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.ZipEPUBRequestHandler;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import j2meunit.framework.TestCase;
 import java.io.InputStream;
 import javax.microedition.media.Manager;
@@ -129,7 +130,7 @@ public class TestReadMp3FromZip extends TestCase {
               HTTPUtils.httpDebug("Device supports " + supportedTypes[i]);
            }
         }
-        
+   
         //Read it man
         InputStream is = null;
         is = UstadMobileAppController.getInputStreamReaderByURL(smallMp3TestFile);

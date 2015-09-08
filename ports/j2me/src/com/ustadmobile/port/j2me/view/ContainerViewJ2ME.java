@@ -49,11 +49,15 @@ import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  *
@@ -94,6 +98,13 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     private HTMLCallback htmlCallback;
     
+    static Hashtable mediaExtensions;
+    
+    static {
+        mediaExtensions = new Hashtable();
+        mediaExtensions.put("mp3", "audio/mpeg");
+    }
+    
     
     public ContainerViewJ2ME(UstadJSOPDSEntry entry, String openPath, String mime) {
         containerZip = UstadMobileSystemImplJ2ME.getInstanceJ2ME().getOpenZip();
@@ -133,7 +144,7 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
             UstadJSOPF opf = controller.getOPF(0);
             spineURLs = opf.getLinearSpineURLS();
             requestHandler = new ContainerDocumentRequestHandler(this);
-            htmlCallback = new ContainerHTMLCallback();
+            htmlCallback = new ContainerHTMLCallback(this);
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
@@ -203,8 +214,55 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     public class ContainerHTMLCallback extends DefaultHTMLCallback {
 
-        public void mediaPlayRequested(int type, int op, HTMLComponent htmlC, String src, HTMLElement mediaElement) {
-            int x =0; //To change body of generated methods, choose Tools | Templates.
+        private ContainerViewJ2ME view;
+        
+        private Timer timer = null;
+        
+        public ContainerHTMLCallback(ContainerViewJ2ME view) {
+            this.view = view;
+            
+        }
+
+        public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
+            boolean isComplete = status == STATUS_COMPLETED;
+            boolean isDisplayed = status == STATUS_DISPLAYED;
+            super.pageStatusChanged(htmlC, status, url); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+        
+        
+        public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, HTMLElement mediaElement) {
+            if(timer == null) {
+                timer = new Timer();
+            }
+            
+            timer.schedule(new TimerTask() {
+                public void run() {
+                    boolean isPlaying = false;
+                    InputStream in= null;
+                    try {
+                        String pathInZip = src.substring(
+                            UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
+                        in = view.containerZip.openInputStream(pathInZip);
+                        Object mediaTypeObj = 
+                                mediaExtensions.get(UMFileUtil.getExtension(src));
+                        if(mediaTypeObj != null) {
+                            isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in, 
+                                (String)mediaTypeObj);
+                        }else {
+                            UstadMobileSystemImpl.getInstance().l(UMLog.INFO, 120, src);
+                        }
+
+                    }catch(IOException e) {
+                        UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 120, src, e);
+                    }finally {
+                        if(!isPlaying) {
+                            UMIOUtils.closeInputStream(in);
+                        }
+                    }
+                }
+                
+            }, 2500);
         }
         
     }
