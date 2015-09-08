@@ -251,8 +251,8 @@ public class HTTPUtils {
                 httpDebug("setting content length " + String.valueOf(params.getBytes().length));
                 httpConn.setRequestProperty("Content-length", 
                         String.valueOf(params.getBytes().length));
-                httpDebug("setting property url to type" + type);
-                httpConn.setRequestProperty(url, type);
+                httpDebug("setting property url to type " + type);
+                //httpConn.setRequestProperty(url, type);
                 httpDebug("openingOutputStream");
                 os = httpConn.openOutputStream();
                 httpDebug("writing params-getBytes()");
