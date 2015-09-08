@@ -36,6 +36,11 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
     
     private javax.microedition.lcdui.Display lcduiDisplay;
     
+    /**
+     * Time to show user alerts for in ms.
+     */
+    private static final int ALERT_DISPLAY_TIME = 10000;
+    
     //Start the tests:
     public void startApp(){
         String testServerURL = 
@@ -48,9 +53,9 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         Alert userAlert = new Alert("UstadMobile Tests", 
             "Welcome to the test app: please select 'always' or 'yes' on any security prompts. Starting in 10seconds", 
             null, AlertType.INFO);
-        userAlert.setTimeout(10000);
+        userAlert.setTimeout(ALERT_DISPLAY_TIME);
         lcduiDisplay.setCurrent(userAlert, connectingForm);
-        try { Thread.sleep(10000); }
+        try { Thread.sleep(ALERT_DISPLAY_TIME); }
         catch(InterruptedException e) {}
         
         Alert connectingAlert = new Alert("Connecting", "Requesting socket: " 
@@ -89,9 +94,9 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                     UstadMobileSystemImpl.getInstance().getSystemInfo().toString());
                 Alert connectedAlert = new Alert("Connected!", "Connected to " 
                         + socketServer + " OK!", null, AlertType.INFO);
-                connectedAlert.setTimeout(10000);
+                connectedAlert.setTimeout(ALERT_DISPLAY_TIME);
                 lcduiDisplay.setCurrent(connectedAlert, connectingForm);
-                try { Thread.sleep(10000); }
+                try { Thread.sleep(ALERT_DISPLAY_TIME); }
                 catch(InterruptedException e) {}
             }catch(Exception e) {
                 System.err.println("Error connecting to testlog socket");
@@ -196,7 +201,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         errorMessage.setTimeout(Alert.FOREVER);
         Form errForm = new Form("Exiting automatically");
         lcduiDisplay.setCurrent(errorMessage, errForm);
-        try { Thread.sleep(10000); }
+        try { Thread.sleep(ALERT_DISPLAY_TIME); }
         catch(InterruptedException e2) {}
         destroyApp(false);
         notifyDestroyed();
