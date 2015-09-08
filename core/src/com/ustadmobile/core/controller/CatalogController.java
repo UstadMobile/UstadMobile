@@ -766,7 +766,13 @@ public class CatalogController implements UstadController, UMProgressListener {
             impl.getUserContentDirectory(impl.getActiveUser());
         String localCatalogID = catalog.id + LOCALOPDS_ID_SUFFIX;
         String filename = sanitizeIDForFilename(localCatalogID) + ".local.opds";
-        String filePath = UMFileUtil.joinPaths(new String[]{"file:///", baseDir, filename});
+        
+        /* $if umplatform == 2  $ */
+            String filePath = UMFileUtil.joinPaths(new String[]{baseDir, filename});
+         /* $else$
+            String filePath = UMFileUtil.joinPaths(new String[]{"file:///", baseDir, filename});
+        $endif$ */
+        
         
         impl.getLogger().l(UMLog.DEBUG, 514, filePath);
         
