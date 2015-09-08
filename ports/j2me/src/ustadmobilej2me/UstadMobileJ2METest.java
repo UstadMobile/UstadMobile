@@ -39,7 +39,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
     /**
      * Time to show user alerts for in ms.
      */
-    private static final int ALERT_DISPLAY_TIME = 10000;
+    private static final int ALERT_DISPLAY_TIME = 4000;
     
     //Start the tests:
     public void startApp(){
@@ -51,7 +51,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         javax.microedition.lcdui.Form connectingForm = new javax.microedition.lcdui.Form("Test");
         connectingForm.append("Connecting....");
         Alert userAlert = new Alert("UstadMobile Tests", 
-            "Welcome to the test app: please select 'always' or 'yes' on any security prompts. Starting in 10seconds", 
+            "Welcome to the test app: please select 'always' or 'yes' on any security prompts. Starting in 4 seconds", 
             null, AlertType.INFO);
         userAlert.setTimeout(ALERT_DISPLAY_TIME);
         lcduiDisplay.setCurrent(userAlert, connectingForm);

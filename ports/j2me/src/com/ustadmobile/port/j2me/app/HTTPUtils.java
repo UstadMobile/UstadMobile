@@ -274,6 +274,7 @@ public class HTTPUtils {
             
             byte[] response = null;
             response = bout.toByteArray();
+            String res = new String(response);
             Hashtable responseHeaders = null;
             httpResult = new HTTPResult(response, response_code, responseHeaders);
         }catch(IOException e){  
