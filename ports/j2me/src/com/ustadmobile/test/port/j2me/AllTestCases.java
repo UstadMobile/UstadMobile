@@ -65,7 +65,7 @@ public class AllTestCases extends TestCase {
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..
         //The ones that don't work:            
-        allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: HTTP Property too large.?
+        allTestSuite.addTest(new TestLoginRegisterUser()); // Nokia: java.lang.IllegalArgumentException Message: HTTP Property too large
         allTestSuite.addTest(new TestTestUtils()); // Nokia: HTTP Property contains an unacceptable character.
         
 //        allTestSuite.addTest(new TestContainerController());

@@ -182,7 +182,11 @@ public class HTTPUtils {
         return makeHTTPRequest(url, optionalParameters, optionalHeaders, "GET");
     }
     
-    public static HTTPResult makeHTTPRequest(String url, Hashtable optionalParameters, Hashtable optionalHeaders, String type) throws IOException{
+    public static HTTPResult makeHTTPRequest(String url, 
+            Hashtable optionalParameters, Hashtable optionalHeaders, 
+            String type) throws IOException{
+        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 518, 
+                url + " of type: " + type);
         HTTPResult httpResult = null;
         HttpConnection httpConn = null;
         InputStream is = null;
@@ -194,13 +198,18 @@ public class HTTPUtils {
             httpConn.setRequestMethod(type);
             // Setup HTTP Request to GET/POST
             if(type.equals("POST")){
+                httpDebug("making request to and setting headers");
+                
                 httpConn.setRequestProperty("User-Agent",
                     "Profile/MIDP-1.0 Confirguration/CLDC-1.0");
+                httpDebug("set Useragent");
                 httpConn.setRequestProperty("Accept_Language","en-US");
+                httpDebug("set Accepted Language");
                 //Content-Type is must to pass parameters in POST Request
                 httpConn.setRequestProperty("Content-Type", 
                         "application/x-www-form-urlencoded");
             }
+            httpDebug("set content type. Now setting params");
             
             //Add Parameters
             String params = null;
@@ -221,6 +230,7 @@ public class HTTPUtils {
                 }
             }
                         
+            httpDebug("params are - " + params);
             //Add Headers
             if (optionalHeaders != null){
                 Enumeration headerKeys = optionalHeaders.keys();
@@ -229,6 +239,7 @@ public class HTTPUtils {
                         hKey = headerKeys.nextElement().toString();
                         hValue = optionalHeaders.get(hKey).toString();
                         if(!hKey.equals("") && !hValue.equals("")){
+                            httpDebug("setting key" + hKey);
                             httpConn.setRequestProperty(hKey, hValue);
                         }
                 }
@@ -237,10 +248,14 @@ public class HTTPUtils {
             
             if(type.equals("POST")){
                 //Content-Length to be set
+                httpDebug("setting content length " + String.valueOf(params.getBytes().length));
                 httpConn.setRequestProperty("Content-length", 
                         String.valueOf(params.getBytes().length));
+                httpDebug("setting property url to type" + type);
                 httpConn.setRequestProperty(url, type);
+                httpDebug("openingOutputStream");
                 os = httpConn.openOutputStream();
+                httpDebug("writing params-getBytes()");
                 os.write(params.getBytes());
                 //os.flush();
             
@@ -248,6 +263,7 @@ public class HTTPUtils {
             
             // Read Response from the Server
             int response_code=httpConn.getResponseCode();
+            httpDebug("response code is : " + String.valueOf(response_code));
             is = httpConn.openInputStream();
             
             byte[] buf = new byte[1024];
@@ -262,6 +278,7 @@ public class HTTPUtils {
             httpResult = new HTTPResult(response, response_code, responseHeaders);
         }catch(IOException e){  
             e.printStackTrace();
+            httpDebug("Exception: " + e.getMessage() + " , " + e.toString());
         }finally{
             if(httpConn!=null){  
                 httpConn.close();
