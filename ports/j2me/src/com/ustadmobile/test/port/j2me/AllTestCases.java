@@ -65,7 +65,7 @@ public class AllTestCases extends TestCase {
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..        
         allTestSuite.addTest(new TestLoginRegisterUser()); 
-        /*
+        
         allTestSuite.addTest(new TestTestUtils());         
         allTestSuite.addTest(new TestContainerController());   
         //Tests that don't work
@@ -115,7 +115,7 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestJ2MECatalogView());
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
-                */
+                
         
         return allTestSuite;
 
