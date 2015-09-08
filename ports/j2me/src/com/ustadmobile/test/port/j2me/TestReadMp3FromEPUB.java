@@ -98,6 +98,8 @@ public class TestReadMp3FromEPUB extends TestCase {
             CatalogController.SHARED_RESOURCE, null, null, 
             CatalogController.CACHE_ENABLED);
         
+        Thread.sleep(5000);
+        
         //make sure if the entry is around... we remove it...
         CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
             CatalogController.SHARED_RESOURCE);
