@@ -68,25 +68,24 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestCatalogControllerAcquire());
         allTestSuite.addTest(new TestLoginRegisterUser());       
         allTestSuite.addTest(new TestTestUtils());         
-        allTestSuite.addTest(new TestContainerController());   
+          
         //Tests that don't work
         //allTestSuite.addTest(new TestDownload()); //Incorrect download when interrupted only. 
         
         allTestSuite.addTest(new TestReadMp3FromZip());
+        allTestSuite.addTest(new TestContainerController()); 
         allTestSuite.addTest(new TestLogin());
-        allTestSuite.addTest(new TestCatalogController()); //NullPointer Exception 
         allTestSuite.addTest(new TestFileImpl());
-        allTestSuite.addTest(new TestCatalogEntryInfo()); //works
-        allTestSuite.addTest(new TestCatalogView()); //Nokia: Null Pointer Exception Alcatel: Pass
-        allTestSuite.addTest(new TestUMFileResolveLink()); //works
-        allTestSuite.addTest(new TestUMFileUtilFilename()); //works
+        allTestSuite.addTest(new TestCatalogEntryInfo());
+        allTestSuite.addTest(new TestCatalogView()); 
+        allTestSuite.addTest(new TestUMFileResolveLink());
+        allTestSuite.addTest(new TestUMFileUtilFilename());
         
         //temporarily disabling download because too large
         //allTestSuite.addTest(new TestTransferJobList());
         
         //Working.
-        allTestSuite.addTest(new TestUstadOCF()); //works ok
-        allTestSuite.addTest(new TestContainerController()); //Works, just downloads 500 so might be temp. disbaled.
+        allTestSuite.addTest(new TestUstadOCF());
         allTestSuite.addTest(new TestCatalogEntryInfo());
         allTestSuite.addTest(new TestPreferences());
         allTestSuite.addTest(new TestUMFileResolveLink());
@@ -105,16 +104,15 @@ public class AllTestCases extends TestCase {
         allTestSuite.addTest(new TestDownloadURLToFile());
         allTestSuite.addTest(new TestRMS());
         allTestSuite.addTest(new TestSerializedHashtable());
-        //allTestSuite.addTest(new TestRename());
         allTestSuite.addTest(new TestSystemimplJ2ME());
         allTestSuite.addTest(new TestUnzip());
-        //allTestSuite.addTest(new TestBigUnzip());
         allTestSuite.addTest(new TestAppPref());
         allTestSuite.addTest(new TestUserPref());
         allTestSuite.addTest(new TestLoginView());
         //allTestSuite.addTest(new TestJ2MECatalogView()); // already a core test
         allTestSuite.addTest(new TestHttpResult());
         allTestSuite.addTest(new TestEPUBRead());
+        allTestSuite.addTest(new TestCatalogController()); 
                 
         
         return allTestSuite;
