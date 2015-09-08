@@ -116,6 +116,7 @@ public class TestReadMp3FromEPUB extends TestCase {
         Thread.sleep(2000);
         HTTPUtils.httpDebug("gettting entry..");
         UstadJSOPDSEntry entry = feed.entries[0];
+        HTTPUtils.httpDebug("feed id :" + feed.entries[0].id);
         HTTPUtils.httpDebug("making controller");
         Thread.sleep(3000);
         
