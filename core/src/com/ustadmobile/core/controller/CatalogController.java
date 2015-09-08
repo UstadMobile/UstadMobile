@@ -1295,6 +1295,7 @@ public class CatalogController implements UstadController, UMProgressListener {
         CatalogEntryInfo entry = getEntryInfo(entryID, resourceMode);
         if(entry != null && entry.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+  	    impl.getLogger().l(UMLog.INFO, 520, entry.fileURI);
             impl.removeFile(entry.fileURI);
             setEntryInfo(entryID, null, resourceMode);
         }
