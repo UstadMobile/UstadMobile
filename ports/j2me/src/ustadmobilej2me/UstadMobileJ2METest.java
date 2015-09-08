@@ -75,7 +75,8 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                 Alert connectedAlert = new Alert("Connected!", "Connected to " 
                         + socketServer + " OK!", null, AlertType.INFO);
                 connectedAlert.setTimeout(10000);
-                lcduiDisplay.setCurrent(connectedAlert);
+                //lcduiDisplay.setCurrent(connectedAlert); //nokia error:
+                //http://stackoverflow.com/questions/2824785/error-current-displayable-is-an-alert
                 try { Thread.sleep(10000); }
                 catch(InterruptedException e) {}
             }catch(Exception e) {
