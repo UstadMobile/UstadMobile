@@ -41,6 +41,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import com.ustadmobile.core.impl.UMLog;
 
 /**
  * Represents a container (e.g. epub file)
@@ -103,21 +104,28 @@ public class ContainerController implements UstadController{
      * @return 
      */
     public UstadOCF getOCF() throws IOException, XmlPullParserException{
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
         if(ocf != null) {
+            impl.getLogger().l(UMLog.DEBUG, 528, "");
             return ocf;
         }
-        
+        impl.getLogger().l(UMLog.DEBUG, 530, "");
         String containerXMLURI = UMFileUtil.joinPaths(
                 new String[]{openPath, "META-INF/container.xml"});
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance(); 
+        
+        impl.getLogger().l(UMLog.DEBUG, 522, containerXMLURI);
         byte[] contentBytes = impl.readURLToString(containerXMLURI, 
             null).getResponse();
-                
+        
+        impl.getLogger().l(UMLog.DEBUG, 534, "Starting to get ocf");
         XmlPullParser xpp = impl.newPullParser();
         xpp.setInput(new ByteArrayInputStream(contentBytes), "UTF-8");
         ocf = UstadOCF.loadFromXML(xpp);
+        impl.getLogger().l(UMLog.DEBUG, 534, "Got ocf");
         
         opfTitles = new String[ocf.rootFiles.length];
+        impl.getLogger().l(UMLog.DEBUG, 534, "got opftitles");
         
         return ocf;
     }
