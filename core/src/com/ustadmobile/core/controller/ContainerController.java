@@ -116,7 +116,7 @@ public class ContainerController implements UstadController{
                 new String[]{openPath, "META-INF/container.xml"});
         
         impl.getLogger().l(UMLog.DEBUG, 522, containerXMLURI);
-        HTTPResult res = impl.readURLToString(containerXMLURI, 
+        HTTPResult res = UstadMobileSystemImpl.getInstance().readURLToString(containerXMLURI, 
             null);
         impl.getLogger().l(UMLog.DEBUG, 534, "result got");
         byte[] contentBytes2 = res.getResponse();
