@@ -42,6 +42,7 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.HTTPResult;
 
 /**
  * Represents a container (e.g. epub file)
@@ -115,8 +116,16 @@ public class ContainerController implements UstadController{
                 new String[]{openPath, "META-INF/container.xml"});
         
         impl.getLogger().l(UMLog.DEBUG, 522, containerXMLURI);
+        HTTPResult res = impl.readURLToString(containerXMLURI, 
+            null);
+        impl.getLogger().l(UMLog.DEBUG, 534, "result got");
+        byte[] contentBytes2 = res.getResponse();
+        String b = new String(contentBytes2);
+        impl.getLogger().l(UMLog.DEBUG, 534, "b is :" + b);
         byte[] contentBytes = impl.readURLToString(containerXMLURI, 
             null).getResponse();
+        String a = new String(contentBytes);
+        impl.getLogger().l(UMLog.DEBUG, 534, a);
         
         impl.getLogger().l(UMLog.DEBUG, 534, "Starting to get ocf");
         XmlPullParser xpp = impl.newPullParser();
