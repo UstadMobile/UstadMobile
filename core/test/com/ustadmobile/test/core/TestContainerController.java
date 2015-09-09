@@ -39,7 +39,6 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
     import com.ustadmobile.port.j2me.app.HTTPUtils;
-    import com.ustadmobile.core.impl.UMLog;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -54,6 +53,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.impl.UMLog;
 
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParserException;
@@ -121,17 +121,8 @@ public class TestContainerController extends TestCase {
             catch(InterruptedException e) {}
         }
         assertTrue("Job has completed", acquireJob.isFinished());
-	/* $if umplatform == 2 $ */
-	    impl.getLogger().l(UMLog.INFO, 800, "sleeping");
-	    try {
-                //we sleep because once the opds is downloaded, it will create the opds cache which will conflict with deleting the epub itself.
-                //Ideally we should check if the caching is also finished in addition to the download job being finished.
-                Thread.sleep(8000);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        /* $endif  */
-        
+        impl.getLogger().l(UMLog.INFO, 800, "sleeping");
+	
         entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
             CatalogController.SHARED_RESOURCE);
         
@@ -161,94 +152,8 @@ public class TestContainerController extends TestCase {
         
     }
     
-    /* $if umplatform == 2 $
-    public void testContainerControllerDebug() throws IOException, XmlPullParserException{
-        HTTPUtils.httpDebug("startingtestContainerController");
-        String httpRoot = TestUtils.getInstance().getHTTPRoot();
-        HTTPUtils.httpDebug(httpRoot);
-        
-        
-        String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
-            httpRoot, "acquire.opds"});
-        HTTPUtils.httpDebug(acquireOPDSURL);
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        HTTPUtils.httpDebug("got impl");
-        UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL, 
-            CatalogController.SHARED_RESOURCE, null, null, 
-            CatalogController.CACHE_ENABLED);
-        HTTPUtils.httpDebug("gotfeed");
-        //make sure if the entry is around... we remove it...
-        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
-            CatalogController.SHARED_RESOURCE);
-        HTTPUtils.httpDebug("gotentryinfo");
-        if(entryInfo != null && entryInfo.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
-            CatalogController.removeEntry(feed.entries[0].id, CatalogController.SHARED_RESOURCE);
-        }
-        
-        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
-            CatalogController.SHARED_RESOURCE);
-        boolean entryPresent = entryInfo == null || entryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
-        assertTrue("Entry not acquired at start of test", entryPresent);
-        HTTPUtils.httpDebug("acquiring..");
-        UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries, 
-            null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
-        int totalSize = acquireJob.getTotalSize();
-        HTTPUtils.httpDebug("startingToAcquire");
-        acquireJob.start();
-        int timeRemaining = TIMEOUT;
-        while(timeRemaining > 0 && !acquireJob.isFinished()) {
-            try {Thread.sleep(CHECKINTERVAL); }
-            catch(InterruptedException e) {}
-        }
-        HTTPUtils.httpDebug("acquired?");
-        assertTrue("Job has completed", acquireJob.isFinished());
-	
-	/* $if umplatform == 2 $ */
-	    impl.getLogger().l(UMLog.INFO, 800, "sleeping");
-	    try {
-                //we sleep because once the opds is downloaded, it will create the opds cache which will conflict with deleting the epub itself.
-                //Ideally we should check if the caching is also finished in addition to the download job being finished.
-                Thread.sleep(8000);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-
-        /* $endif  */
-        
-        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
-            CatalogController.SHARED_RESOURCE);
-        HTTPUtils.httpDebug("acquiredFileURIis");
-        String acquiredFileURI = entryInfo.fileURI;
-        HTTPUtils.httpDebug(acquiredFileURI);
-        UstadJSOPDSEntry entry = feed.entries[0];
-        
-        String openPath = impl.openContainer(entry, acquiredFileURI, 
-            entryInfo.mimeType);
-        assertNotNull("Got an open path from the system", openPath);
-        HTTPUtils.httpDebug("gettingController");
-        ContainerController controller = ContainerController.makeFromEntry(entry, 
-            openPath, entryInfo.fileURI, entryInfo.mimeType);
-        UstadOCF ocf = controller.getOCF();
-        assertNotNull("Controller can fetch OCF once open", ocf);
-        HTTPUtils.httpDebug("gettingopf");
-        UstadJSOPF opf = controller.getOPF(0);
-        assertNotNull("Can load package OPF", opf);
-        assertTrue("Package has spine with entries", opf.spine.length > 0);
-        
-        HTTPUtils.httpDebug("deleting");
-        //delete it now we are done
-        impl.closeContainer(openPath);
-        CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
-
-        assertTrue(true);
-        
+    
+    public void runTests() throws IOException, XmlPullParserException{
+	this.testContainerController();
     }
-    
-    
-    public void runTest() throws IOException, XmlPullParserException{
-	this.testContainerControllerDebug();
-	//this.testContainerController();
-    }
-    $endif */
-    
 }

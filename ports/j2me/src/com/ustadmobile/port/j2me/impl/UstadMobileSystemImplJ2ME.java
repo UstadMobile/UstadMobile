@@ -48,6 +48,7 @@ import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
@@ -119,6 +120,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * @param frm 
      */
     public void handleFormShow(Form frm) {
+        l(UMLog.DEBUG, 525, frm.getTitle());
         if(this.currentForm != frm) {
             appView.dismissAll();
         }
@@ -133,10 +135,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc} 
      */
     public boolean dirExists(String dirURI) throws IOException {
+        l(UMLog.DEBUG, 527, dirURI);
+        
         dirURI = dirURI.trim();
         if (!dirURI.endsWith("/")){
             dirURI += '/';
+            l(UMLog.DEBUG, 529, dirURI);
         }
+        
         boolean exists = false;
         FileConnection fc = null;
         IOException ioe = null;
@@ -168,12 +174,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public void setActiveUser(String username) {
         super.setActiveUser(username);
+        l(UMLog.DEBUG, 531, username);
         AppPref.addSetting("CURRENTUSER", username);
         UserPref.setActiveUser(username);
         
     }
 
     public void setUserPref(String key, String value) {
+        l(UMLog.DEBUG, 533, key + '=' + value);
         UserPref.addSetting(key, value);
     }
 
@@ -240,7 +248,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     public String getSystemLocale(){
-        return System.getProperty("microedition.locale");
+        String locale = System.getProperty("microedition.locale");
+        l(UMLog.DEBUG, 535, locale);
+        return locale;
     }
     
     public Hashtable getSystemInfo(){
@@ -275,33 +285,93 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return -1;
     }
         
+    /**
+     * {@inheritDoc }
+     */
     public boolean fileExists(String fileURI) throws IOException{
-        return FileUtils.checkFile(fileURI);
+        l(UMLog.DEBUG, 537, fileURI);
+        boolean fileExists = false;
+        IOException e = null;
+        try {
+            FileConnection fc = (FileConnection)Connector.open(fileURI,
+                Connector.READ);
+            fileExists = fc.exists();
+        }catch(IOException ioe) {
+            e = ioe;
+        }catch(SecurityException se) {
+            e = new IOException(PREFIX_SECURITY_EXCEPTION  + se.toString());
+        }
+        
+        UMIOUtils.logAndThrowIfNotNullIO(e, UMLog.ERROR, volumeLevel, fileURI);
+        
+        return fileExists;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     public boolean removeFile(String fileURI) {
+        l(UMLog.DEBUG, 537, fileURI);
         boolean success = false;
+        FileConnection con = null;
+        
         try {
-            success = FileUtils.removeFileOrDir(fileURI, Connector.READ_WRITE,
-            false);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            con = (FileConnection)Connector.open(fileURI, Connector.READ_WRITE);
+            if(con.exists()) {
+                con.delete();
+            }
+            success = true;
+        } catch (IOException ioe) {
+            l(UMLog.ERROR, 129, fileURI, ioe);
+        }catch(SecurityException se) {
+            l(UMLog.ERROR, 129, fileURI, se);
+        }finally {
+            J2MEIOUtils.closeConnection(con);
         }
-        if (success == false){
-            //Wanna do something?
-        }
+        
         return success;
     }
 
+    /** 
+     * {@inheritDoc}
+     */
     public String[] listDirectory(String dirURI) throws IOException{
+        l(UMLog.DEBUG, 539, dirURI);
         
-        String[] list = FileUtils.listFilesInDirectory(dirURI);
+        if (!dirURI.endsWith("/")){
+            dirURI += '/';
+            l(UMLog.DEBUG, 541, dirURI);
+        }
         
-        return list;
+        FileConnection fc = null;
+        String dirList[] = null;
+        Exception e = null;
+        
+        try {
+            fc = (FileConnection) Connector.open(dirURI, 
+                Connector.READ);
+            Enumeration dirListEnu = fc.list();
+            dirList = UMUtil.enumerationToStringArray(dirListEnu);
+        }catch(IOException ioe) {
+            l(UMLog.ERROR, 131, dirURI, ioe);
+        }catch(SecurityException se) {
+            l(UMLog.ERROR, 131, dirURI, se);
+        }finally {
+            J2MEIOUtils.closeConnection(fc);
+        }
+        
+        return dirList;
     }
     
+    /**
+     * 
+     * @param fromFileURI
+     * @param toFileURI
+     * @return 
+     */
     public boolean renameFile(String fromFileURI, String toFileURI){
         boolean success = false;
+        
         try {
             success = FileUtils.renameFileOrDir(fromFileURI, toFileURI, 
             Connector.READ_WRITE, false);
@@ -651,6 +721,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    
+    /**
+     * Plays the media's inputstream. Can be audio or video.
+     * @param mediaURLInputStream the InputStream to be played.
+     * @param encoding The encoding by which the player will get generated. 
+     * @return 
+     */
     public boolean playMedia(InputStream mediaURLInputStream, String encoding) {
         HTTPUtils.httpDebug("starting to play media..");
         boolean status = false;
@@ -689,6 +766,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return status;
     }
 
+    /**
+     * Stops the media playing. 
+     * @return 
+     */
     public boolean stopMedia() {
         HTTPUtils.httpDebug("Stopping what is playing..");
         boolean status = false;

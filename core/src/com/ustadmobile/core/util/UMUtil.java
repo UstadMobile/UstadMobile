@@ -34,6 +34,7 @@ import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -115,6 +116,23 @@ public class UMUtil {
         }
     }
     
+    /**
+     * Convert an enumeration into an array of Strings (where each element in
+     * the enumeration is a string)
+     * 
+     * @param enu Enumeration to convert
+     * @return String array
+     */
+    public static String[] enumerationToStringArray(Enumeration enu){
+        String[] list;
+        Vector listVector = new Vector();
+        while(enu.hasMoreElements()){
+            listVector.addElement(enu.nextElement());
+        }
+        list = new String[listVector.size()];
+        listVector.copyInto(list);
+        return list;
+    }
     
     /**
      * Request a new port on the DodgyHTTPD Test Server for logging /asset request
