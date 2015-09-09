@@ -39,6 +39,7 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
     import com.ustadmobile.port.j2me.app.HTTPUtils;
+    import com.ustadmobile.core.impl.UMLog;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -120,6 +121,16 @@ public class TestContainerController extends TestCase {
             catch(InterruptedException e) {}
         }
         assertTrue("Job has completed", acquireJob.isFinished());
+	/* $if umplatform == 2 $ */
+	    impl.getLogger().l(UMLog.INFO, 800, "sleeping");
+	    try {
+                //we sleep because once the opds is downloaded, it will create the opds cache which will conflict with deleting the epub itself.
+                //Ideally we should check if the caching is also finished in addition to the download job being finished.
+                Thread.sleep(8000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        /* $endif  */
         
         entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
             CatalogController.SHARED_RESOURCE);
@@ -145,6 +156,8 @@ public class TestContainerController extends TestCase {
         //delete it now we are done
         impl.closeContainer(openPath);
         CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
+
+	assertTrue(true);
         
     }
     
@@ -189,6 +202,18 @@ public class TestContainerController extends TestCase {
         }
         HTTPUtils.httpDebug("acquired?");
         assertTrue("Job has completed", acquireJob.isFinished());
+	
+	/* $if umplatform == 2 $ */
+	    impl.getLogger().l(UMLog.INFO, 800, "sleeping");
+	    try {
+                //we sleep because once the opds is downloaded, it will create the opds cache which will conflict with deleting the epub itself.
+                //Ideally we should check if the caching is also finished in addition to the download job being finished.
+                Thread.sleep(8000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+
+        /* $endif  */
         
         entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 
             CatalogController.SHARED_RESOURCE);
@@ -214,6 +239,8 @@ public class TestContainerController extends TestCase {
         //delete it now we are done
         impl.closeContainer(openPath);
         CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
+
+        assertTrue(true);
         
     }
     
