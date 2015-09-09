@@ -142,6 +142,11 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     protected void initEPUB() {
         try {
             HTTPUtils.httpDebug("getting ocf");
+            if (controller == null){
+                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 524, "");
+            }else{
+                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 526, "");
+            }
             UstadOCF ocf = controller.getOCF();
             HTTPUtils.httpDebug("getting opf");
             UstadJSOPF opf = controller.getOPF(0);
