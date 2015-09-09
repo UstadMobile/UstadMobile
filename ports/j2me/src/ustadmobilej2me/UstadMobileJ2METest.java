@@ -15,7 +15,6 @@ import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import com.ustadmobile.test.core.TestConstants;
-import com.ustadmobile.test.port.j2me.TestEPUBRead;
 import j2meunit.framework.AssertionFailedError;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
@@ -26,7 +25,6 @@ import java.util.Vector;
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.List;
 
 /**
  * @author varuna

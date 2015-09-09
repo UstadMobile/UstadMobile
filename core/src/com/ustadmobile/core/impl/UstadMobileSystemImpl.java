@@ -71,6 +71,16 @@ public abstract class UstadMobileSystemImpl {
     public static final int FILE_APPEND = 2;
     
     /**
+     * Due to the nature of mobile app permission systems permission could be 
+     * denied anytime IO takes place almost.  Therefor the IO methods of the
+     * implementation should throw an IOException wrapper around any 
+     * SecurityException that happens so it can be handled and presented to the
+     * user as an error gracefully.
+     */
+    public static final String PREFIX_SECURITY_EXCEPTION = "SecurityException:";
+    
+    
+    /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
      * 
@@ -92,8 +102,8 @@ public abstract class UstadMobileSystemImpl {
      * @param code log code
      * @param message message to log
      */
-    public void l(int level, int code, String message) {
-        getLogger().l(level, code, message);
+    public static void l(int level, int code, String message) {
+        getInstance().getLogger().l(level, code, message);
     }
     
     /**
@@ -105,8 +115,8 @@ public abstract class UstadMobileSystemImpl {
      * @param message log message
      * @param exception exception that occurred to log
      */
-    public void l(int level, int code, String message, Exception exception) {
-        getLogger().l(level, code, message, exception);
+    public static void l(int level, int code, String message, Exception exception) {
+        getInstance().getLogger().l(level, code, message, exception);
     }
     
     /**
@@ -115,6 +125,7 @@ public abstract class UstadMobileSystemImpl {
      * This must make the shared content directory if it does not already exist
      */
     public void init() {
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 519, null);
         boolean sharedDirOK = false;
         try {
             String sharedContentDir = mainInstance.getSharedContentDir();
@@ -124,9 +135,9 @@ public abstract class UstadMobileSystemImpl {
             boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
             StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
             initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
-            mainInstance.getLogger().l(UMLog.INFO, 130, initMsg.toString());
+            mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
         }catch(IOException e) {
-            mainInstance.getLogger().l(UMLog.CRITICAL, 500, null, e);
+            mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
         }
     }
     
@@ -261,14 +272,14 @@ public abstract class UstadMobileSystemImpl {
      * @param fileURI URI to the file we want an output stream for
      * @param flags can set FILE_APPEND and FILE_AUTOCREATE
      */
-    public abstract OutputStream openFileOutputStream(String fileURI, int flags) throws IOException;
+    public abstract OutputStream openFileOutputStream(String fileURI, int flags) throws IOException, SecurityException;
     
     /**
      * Get an input stream from a given file
      * 
      * @param fileURI URI to the file for which we want an input stream
      */
-    public abstract InputStream openFileInputStream(String fileURI) throws IOException;
+    public abstract InputStream openFileInputStream(String fileURI) throws IOException, SecurityException;
     
     
     /**
@@ -548,6 +559,7 @@ public abstract class UstadMobileSystemImpl {
      * @throws IOException 
      */
     public HTTPResult readURLToString(String url, Hashtable headers) throws IOException {
+        l(UMLog.DEBUG, 521, url);
         String urlLower = url.toLowerCase();
         if(urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
             return makeRequest(url, headers, null, "GET");
@@ -555,7 +567,9 @@ public abstract class UstadMobileSystemImpl {
             String contents = readFileAsText(url);
             return new HTTPResult(contents.getBytes(), 200, null);
         }else {
-            throw new IllegalArgumentException();
+            IOException e = new IOException("Unrecognized protocol: " + url);
+            l(UMLog.ERROR, 127, url, e);
+            throw e;
         }
     }
     
@@ -576,6 +590,7 @@ public abstract class UstadMobileSystemImpl {
      * @return a new XmlPullParser with set with the given inputstream
      */
     public XmlPullParser newPullParser(InputStream in, String encoding) throws XmlPullParserException {
+        l(UMLog.DEBUG, 523, encoding);
         XmlPullParser xpp = newPullParser();
         xpp.setInput(in, encoding);
         return xpp;

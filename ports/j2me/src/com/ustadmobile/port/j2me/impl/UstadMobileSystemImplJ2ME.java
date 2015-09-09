@@ -48,6 +48,7 @@ import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
@@ -55,6 +56,7 @@ import com.ustadmobile.port.j2me.view.AppViewJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.Vector;
 import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
@@ -86,6 +88,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     private Player player;
     public int volumeLevel=70;
+    
+    /**
+     * The shared content dir according to 
+     */
+    private String sharedContentDir = null;
     
     public String getImplementationName() {
         return "J2ME";
@@ -122,12 +129,37 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return currentForm;
     }
 
+    /**
+     * {@inheritDoc} 
+     */
     public boolean dirExists(String dirURI) throws IOException {
-        return FileUtils.checkDir(dirURI);
+        dirURI = dirURI.trim();
+        if (!dirURI.endsWith("/")){
+            dirURI += '/';
+        }
+        boolean exists = false;
+        FileConnection fc = null;
+        IOException ioe = null;
+        try {
+            fc = (FileConnection) Connector.open(dirURI, 
+                Connector.READ_WRITE);
+            exists = fc.exists() && fc.isDirectory();
+        }catch(IOException e) {
+            ioe = e;
+            l(UMLog.ERROR, 126, dirURI, e);
+        }catch(SecurityException se) {
+            ioe = new IOException(PREFIX_SECURITY_EXCEPTION +se.toString());
+            l(UMLog.ERROR, 126, dirURI, se);
+        }finally {
+            J2MEIOUtils.closeConnection(fc);
+        }
+        
+        UMIOUtils.throwIfNotNullIO(ioe);
+        return exists;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc} 
      */
     public UMTransferJob downloadURLToFile(String url, String fileURI, 
             Hashtable headers) {
@@ -150,9 +182,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     /**
-     * Provides the path to the shared content directory 
-     * 
-     * @return URI of the shared content directory
+     * {@inheritDoc} 
      */
     public String getSharedContentDir(){ 
         //This will be in something like ustadmobileContent
@@ -374,14 +404,96 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     /**
      * @inheritDoc
      */
-    public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String m) {
-        getLogger().l(UMLog.VERBOSE, 305, "HTTP (" + m + ")" + url);
+    public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String type) throws IOException{
+        getLogger().l(UMLog.VERBOSE, 305, "HTTP (" + type + ")" + url);
+        HTTPResult httpResult = null;
+        HttpConnection httpConn = null;
+        InputStream is = null;
+        OutputStream os = null;
+        IOException e = null;
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        
         try {
-            return HTTPUtils.makeHTTPRequest(url, postParameters, headers, m);
-        } catch (IOException ex) {
-            getLogger().l(UMLog.ERROR, 105, url, ex);
+            
+            // Open an HTTP Connection object
+            httpConn = (HttpConnection)Connector.open(url);
+            httpConn.setRequestMethod(type);
+            // Setup HTTP Request to GET/POST
+            if(type.equals("POST")){
+                httpConn.setRequestProperty("User-Agent",
+                    "Profile/MIDP-1.0 Confirguration/CLDC-1.0");
+                httpConn.setRequestProperty("Accept_Language","en-US");
+                //Content-Type is must to pass parameters in POST Request
+                httpConn.setRequestProperty("Content-Type", 
+                        "application/x-www-form-urlencoded");
+            }
+            
+            //Add Parameters
+            String params = null;
+            if (postParameters != null){
+                Enumeration keys = postParameters.keys();
+                String key, value;
+                boolean firstAmp = true;
+                while(keys.hasMoreElements()) {
+                    key = keys.nextElement().toString();
+                    value = postParameters.get(key).toString();
+                    value = URLTextUtil.urlEncodeUTF8(value);
+                    if (firstAmp){
+                        params = key + "=" + value;
+                        firstAmp=false;
+                    }else{
+                        params = params + "&"+ key + "=" + value;
+                    }
+                }
+            }
+                        
+            //Add Headers
+            if (headers != null){
+                Enumeration headerKeys = headers.keys();
+                String hKey, hValue;
+                while(headerKeys.hasMoreElements()) {
+                    hKey = headerKeys.nextElement().toString();
+                    hValue = headers.get(hKey).toString();
+                    if(!hKey.equals("") && !hValue.equals("")){
+                        httpConn.setRequestProperty(hKey, hValue);
+                    }
+                }
+            }
+            
+            if(type.equals("POST")){
+                //Content-Length to be set
+                httpConn.setRequestProperty("Content-length", 
+                        String.valueOf(params.getBytes().length));
+                httpConn.setRequestProperty(url, type);
+                os = httpConn.openOutputStream();
+                os.write(params.getBytes());
+                //os.flush?
+            } 
+            
+            // Read Response from the Server
+            int response_code=httpConn.getResponseCode();
+            is = httpConn.openInputStream();
+            
+            UMIOUtils.readFully(is, bout, 1024);
+            
+            byte[] response = null;
+            response = bout.toByteArray();
+            Hashtable responseHeaders = null;
+            httpResult = new HTTPResult(response, response_code, responseHeaders);
+        }catch(IOException ioe){
+            l(UMLog.ERROR, 124, url, ioe);
+            e = ioe;
+        }catch(SecurityException se) {
+            e = new IOException(UstadMobileSystemImpl.PREFIX_SECURITY_EXCEPTION 
+                + se.toString());
+        }finally{
+            UMIOUtils.closeInputStream(is);
+            UMIOUtils.closeOutputStream(bout);
+            J2MEIOUtils.closeConnection(httpConn);
         }
-        return null;
+        
+        UMIOUtils.throwIfNotNullIO(e);
+        return httpResult;
     }
 
     public void setAppPref(String key, String value) {
@@ -500,6 +612,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }
         }catch(IOException e2) {
             e = e2;
+        }catch(SecurityException se) {
+            e = new IOException(PREFIX_SECURITY_EXCEPTION + se.toString());
         }finally {
             J2MEIOUtils.closeConnection(con);
             if(e != null) throw e;
@@ -519,10 +633,17 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public InputStream openFileInputStream(String fileURI) throws IOException {
-        InputStream in = Connector.openInputStream(fileURI);
+        InputStream in = null;
+        IOException e = null;
+        try {
+            in = Connector.openInputStream(fileURI);
+        }catch(SecurityException se) {
+            e = new IOException(PREFIX_SECURITY_EXCEPTION + se.toString());
+        }
+        UMIOUtils.throwIfNotNullIO(e);
         return in;
     }
     

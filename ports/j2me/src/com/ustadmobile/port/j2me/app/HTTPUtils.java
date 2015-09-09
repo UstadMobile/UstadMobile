@@ -262,6 +262,8 @@ public class HTTPUtils {
             httpResult = new HTTPResult(response, response_code, responseHeaders);
         }catch(IOException e){  
             e.printStackTrace();
+        }catch(SecurityException se) {
+            //se = new IOException(UstadMobileSystemImpl.PREFIX_SECURITY_EXCEPTION+se.toString());
         }finally{
             if(httpConn!=null){  
                 httpConn.close();
