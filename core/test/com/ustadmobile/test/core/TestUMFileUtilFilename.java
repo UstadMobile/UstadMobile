@@ -49,6 +49,13 @@ public class TestUMFileUtilFilename extends TestCase{
     public void testFileUtilFilename() {
         assertEquals("Will return the same for a name only entry", 
             UMFileUtil.getFilename("testfile.txt"), "testfile.txt");
+        assertEquals("Will return the the basename of a directory with trailing /",
+            "somedir/", UMFileUtil.getFilename("/somepath/somedir/"));
+        assertEquals("Can handle . as filename",
+            ".", UMFileUtil.getFilename("."));
+        assertEquals("Can handle ./ as filename",
+            "./", UMFileUtil.getFilename("./"));
+        
         assertEquals("Will return the same for a name only entry with trailing /", 
             UMFileUtil.getFilename("somedir/"), "somedir/");
         assertEquals("Will cut the path off and return filnemae", 
@@ -56,6 +63,7 @@ public class TestUMFileUtilFilename extends TestCase{
         assertEquals("Will cut off query string", 
             UMFileUtil.getFilename("http://someplace.com/somedir/file.txt"), 
             "file.txt");
+        
         
         assertEquals("Will correctly find extension: mp3",
             "mp3", UMFileUtil.getExtension("http://server.com/dir/file.mp3"));

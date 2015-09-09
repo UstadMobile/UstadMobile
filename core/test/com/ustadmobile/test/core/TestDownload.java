@@ -90,7 +90,7 @@ public class TestDownload extends TestCase implements UMProgressListener {
         job.start();
 
 
-        int timeout = 120000;
+        int timeout = 1 * 60 * 1000;// 1 mins
         int interval = 1500;
         int timeCount = 0;
 
@@ -120,6 +120,7 @@ public class TestDownload extends TestCase implements UMProgressListener {
         boolean limitsSet = TestUtils.getInstance().setLimits(4000, 20000);
         assertTrue("Successfully set download limits on server", limitsSet);
         
+        timeout = 4 * 60 * 1000;// 4 mins to allow for waiting in between disconnects
         job = UstadMobileSystemImpl.getInstance().downloadURLToFile(fileDownloadURL,
                 destFileURI, new Hashtable());
         job.start();

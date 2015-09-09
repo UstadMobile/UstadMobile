@@ -64,34 +64,32 @@ public class AllTestCases extends TestCase {
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         //Testing these..        
-        allTestSuite.addTest(new TestReadMp3FromEPUB());
+        //allTestSuite.addTest(new TestReadMp3FromEPUB());
         
         
-//        allTestSuite.addTest(new TestCatalogControllerAcquire());
-//        allTestSuite.addTest(new TestLoginRegisterUser());       
-//        allTestSuite.addTest(new TestTestUtils());         
-//          
-//        //Tests that don't work
-//        //allTestSuite.addTest(new TestDownload()); //Incorrect download when interrupted only. 
+        allTestSuite.addTest(new TestCatalogControllerAcquire());
+        //allTestSuite.addTest(new TestLoginRegisterUser());       
+        allTestSuite.addTest(new TestTestUtils());         
+
+        allTestSuite.addTest(new TestDownload()); 
 //        
 //        allTestSuite.addTest(new TestReadMp3FromZip());
-//        allTestSuite.addTest(new TestContainerController()); 
-//        allTestSuite.addTest(new TestLogin());
-//        allTestSuite.addTest(new TestFileImpl());
-//        allTestSuite.addTest(new TestCatalogEntryInfo());
-//        allTestSuite.addTest(new TestCatalogView()); 
-//        allTestSuite.addTest(new TestUMFileResolveLink());
-//        allTestSuite.addTest(new TestUMFileUtilFilename());
+        allTestSuite.addTest(new TestContainerController()); 
+        allTestSuite.addTest(new TestLogin());
+        allTestSuite.addTest(new TestFileImpl());
+        allTestSuite.addTest(new TestCatalogEntryInfo());
+        allTestSuite.addTest(new TestCatalogView()); 
+        allTestSuite.addTest(new TestUMFileResolveLink());
 //        
 //        //temporarily disabling download because too large
 //        //allTestSuite.addTest(new TestTransferJobList());
 //        
-//        allTestSuite.addTest(new TestUstadOCF());
-//        allTestSuite.addTest(new TestCatalogEntryInfo());
-//        allTestSuite.addTest(new TestPreferences());
-//        allTestSuite.addTest(new TestUMFileResolveLink());
-//        allTestSuite.addTest(new TestUMFileUtilFilename());
-//        allTestSuite.addTest(new TestUMFileUtilJoin());     
+        allTestSuite.addTest(new TestUstadOCF());
+        allTestSuite.addTest(new TestCatalogEntryInfo());
+        allTestSuite.addTest(new TestPreferences());
+        allTestSuite.addTest(new TestUMFileResolveLink());
+        allTestSuite.addTest(new TestUMFileUtilFilename());
+        allTestSuite.addTest(new TestUMFileUtilJoin());     
 //        allTestSuite.addTest(new TestLogin());
 //        allTestSuite.addTest(new TestImplementation());
 //        allTestSuite.addTest(new TestSimpleHTTP());

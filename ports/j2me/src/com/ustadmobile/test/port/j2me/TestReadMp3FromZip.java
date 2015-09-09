@@ -122,7 +122,7 @@ public class TestReadMp3FromZip extends TestCase {
          }
 
         HTTPUtils.httpDebug("Starting to play the mp3..");
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImplJ2ME impl = (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance();
         
         String supportedTypes[] = Manager.getSupportedContentTypes(null);
         for (int i = 0; i < supportedTypes.length; i++) {

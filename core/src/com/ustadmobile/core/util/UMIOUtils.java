@@ -31,6 +31,8 @@
 
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import java.io.IOException;
 import java.io.InputStream;
@@ -102,6 +104,24 @@ public class UMIOUtils {
     
     public static final void throwIfNotNullIO(IOException e) throws IOException{
         if(e != null) {
+            throw e;
+        }
+    }
+    
+    /**
+     * Logs and throws the given exception if it is not null
+     * 
+     * @param e Exception (Null if no exception happened)
+     * @param level Exception level 
+     * @param code Exception code
+     * @param message Message if any
+     * 
+     * @see UMLog
+     * @throws IOException 
+     */
+    public static final void logAndThrowIfNotNullIO(IOException e, int level, int code, String message) throws IOException{
+        if(e != null) {
+            UstadMobileSystemImpl.l(level, code, message, e);
             throw e;
         }
     }
