@@ -73,6 +73,13 @@ public class TestUMFileUtilFilename extends TestCase{
         assertEquals("Can strip file:// prefix as expected",
             "/path/to/file.mp3", 
             UMFileUtil.stripPrefixIfPresent("file://", "file:///path/to/file.mp3"));
+        
+        assertEquals("Can get the parent of a file name", "file:///some/path/",
+            UMFileUtil.getParentFilename("file:///some/path/file.mp3"));
+        assertTrue("Parent filename return nulls when there is no parent in path",
+            UMFileUtil.getParentFilename("file.mp3") == null);
+        assertTrue("Parent filename return nulls when path is one char long",
+            UMFileUtil.getParentFilename(".") == null);
     }
 
     public void runTest(){

@@ -381,15 +381,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract boolean removeRecursively(String dirURI);
     
     /**
-     * Gets an input stream for a specific file in a zip
-     * 
-     * @param zipURI e.g. /path/to/file.zip
-     * @param filename File within the zip e.g. META-INF/container.xml
-     * @return 
-     */
-    public abstract InputStream getFileInputStreamFromZip(String zipURI, String filename);
-    
-    /**
      * Set the currently active user: the one that we need to know about for
      * preferences etc. currently
      * 

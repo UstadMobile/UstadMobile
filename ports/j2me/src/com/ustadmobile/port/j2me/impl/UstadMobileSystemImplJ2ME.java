@@ -47,6 +47,7 @@ import com.ustadmobile.core.impl.UMProgressEvent;
 import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
@@ -337,6 +338,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      */
     public String[] listDirectory(String dirURI) throws IOException{
         l(UMLog.DEBUG, 539, dirURI);
+        IOException e = null;
         
         if (!dirURI.endsWith("/")){
             dirURI += '/';
@@ -345,7 +347,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         FileConnection fc = null;
         String dirList[] = null;
-        Exception e = null;
         
         try {
             fc = (FileConnection) Connector.open(dirURI, 
@@ -353,12 +354,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             Enumeration dirListEnu = fc.list();
             dirList = UMUtil.enumerationToStringArray(dirListEnu);
         }catch(IOException ioe) {
-            l(UMLog.ERROR, 131, dirURI, ioe);
+            e = ioe;
         }catch(SecurityException se) {
-            l(UMLog.ERROR, 131, dirURI, se);
+            e = new IOException(PREFIX_SECURITY_EXCEPTION+se.toString());
         }finally {
             J2MEIOUtils.closeConnection(fc);
         }
+        
+        UMIOUtils.logAndThrowIfNotNullIO(e, UMLog.ERROR, 131, dirURI);
         
         return dirList;
     }
@@ -370,33 +373,56 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * @return 
      */
     public boolean renameFile(String fromFileURI, String toFileURI){
+        l(UMLog.DEBUG, 543, fromFileURI + "->" + toFileURI);
         boolean success = false;
+        fromFileURI = fromFileURI.trim();
+        toFileURI = toFileURI.trim();
         
-        try {
-            success = FileUtils.renameFileOrDir(fromFileURI, toFileURI, 
-            Connector.READ_WRITE, false);
-            if (success == false){
-                //Wanna do something?
+        String fromParent = UMFileUtil.getParentFilename(fromFileURI);
+        String toParent = UMFileUtil.getParentFilename(toFileURI);
+        if((fromParent == null && toParent == null) || fromParent != null && fromParent.equals(toParent)) {
+            //is the same parent directory - OK to move
+            String newFilename = UMFileUtil.getFilename(toFileURI);
+            FileConnection fc = null;
+            try {
+                fc = (FileConnection)Connector.open(fromFileURI, 
+                        Connector.READ_WRITE);
+                fc.rename(newFilename);
+                success = true;
+            }catch(IOException e) {
+                l(UMLog.ERROR, 133, fromFileURI + "->" + toFileURI, e);
+            }catch(SecurityException se) {
+                l(UMLog.ERROR, 133, fromFileURI + "->" + toFileURI, se);
+            }finally {
+                J2MEIOUtils.closeConnection(fc);
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        }else {
+            l(UMLog.ERROR, 135, fromFileURI + "->" + toFileURI);
         }
+        
         return success;
        
     }
     
     public long fileSize(String fileURI){
-        try{
-            return FileUtils.getFileSize(fileURI);
-        }catch(Exception e){}
-        return -1;
+        FileConnection fc = null;
+        long size = -1;
+        try {
+            fc = (FileConnection) Connector.open(fileURI, Connector.READ);
+            size = fc.fileSize();
+        }catch(Exception e) {
+            l(UMLog.ERROR, 137, fileURI, e);
+        }finally {
+            J2MEIOUtils.closeConnection(fc);
+        }
+        l(UMLog.VERBOSE, 545, fileURI + " (" + size + "bytes");
+        return size;
     } 
     
     public boolean makeDirectory(String dirURI) throws IOException{
         getLogger().l(UMLog.VERBOSE, 401, dirURI);
         FileConnection fc = null;
         
-        //J2ME Nokia will not create a directory with a trailing slash in the name
         if(dirURI.charAt(dirURI.length()-1) != '/') {
             //dirURI = dirURI.substring(0, dirURI.length()-1);
             dirURI += '/'; 
@@ -433,24 +459,37 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     public boolean removeRecursively(String dirURI){
+        l(UMLog.DEBUG, 547, dirURI);
+        
         if (!dirURI.endsWith("/")){
             dirURI += "/";
         }
-        try { 
-            boolean success = FileUtils.deleteRecursively(dirURI, true);
-            if (success){
-                //Wanna do something?
-            }else{
-                IOException e = new IOException();
-                throw e;
+        
+        try {
+            String[] fileNames = listDirectory(dirURI);
+            String fullPath;
+            for(int i = 0; i < fileNames.length; i++) {
+                fullPath = UMFileUtil.joinPaths(new String[]{dirURI, fileNames[i]});
+                if(fileNames[i].endsWith("/")) {
+                    if(!removeRecursively(fullPath)) {
+                        l(UMLog.ERROR, 139, fullPath);
+                        return false;
+                    }
+                }else {
+                    if(!removeFile(fullPath)) {
+                        l(UMLog.ERROR, 141, fullPath);
+                        return false;
+                    }
+                }
             }
-            return success;
-        } catch (IOException ex) {
-            ex.printStackTrace();
+            return removeFile(dirURI);
+        }catch(Exception e) {
+            l(UMLog.ERROR, 143, dirURI, e);
         }
         return false;
-        
     }
+    
+    
 
     public String getActiveUser() {
         //Code here:
@@ -458,6 +497,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setActiveUserAuth(String password) {
+        l(UMLog.DEBUG, 549, null);
         AppPref.addSetting("CURRENTUSERAUTH", password);
     }
 
@@ -465,9 +505,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return AppPref.getSetting("CURRENTUSERAUTH");
     }
 
-    public String getAppPref(String key) {       
+    public String getAppPref(String key) {   
         String value;
         value = AppPref.getSetting(key);
+        l(UMLog.DEBUG, 551, key + '=' + value);
         return value;
     }
 
@@ -567,6 +608,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setAppPref(String key, String value) {
+        l(UMLog.DEBUG, 553, key + '=' + value);
         AppPref.addSetting(key, value);
     }
 
@@ -577,6 +619,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public String getUserPref(String key) {
         String value = UserPref.getSetting(key);
+        l(UMLog.DEBUG, 555, key + '=' + value);
         return value;
     }
 
@@ -593,6 +636,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      */
     public String openContainer(UstadJSOPDSEntry entry, String containerURI, 
             String mimeType) {
+        l(UMLog.DEBUG, 557, containerURI + " : " + mimeType);
         if(openZip != null) {
             throw new IllegalStateException("J2ME: Open one thing at a time please");
         }
@@ -602,8 +646,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             openZipURI = containerURI;
         }catch(IOException e) {
             getLogger().l(UMLog.CRITICAL, 400, containerURI, e);
-        }finally {
-            
         }
 
         return OPENZIP_PROTO;
@@ -615,6 +657,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public HTTPResult readURLToString(String url, Hashtable headers) throws IOException {
         if(url.startsWith(OPENZIP_PROTO)) {
+            l(UMLog.DEBUG, 557, url);
             InputStream in = null;
             ByteArrayOutputStream bout = null;
             IOException ioe = null;
@@ -641,13 +684,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     
-
     public void closeContainer(String openURI) {
+        l(UMLog.DEBUG, 559, openURI);
         openZip = null;
-    }
-
-    public InputStream getFileInputStreamFromZip(String zipURI, String filename) {
-        return null;
     }
 
     public String[] getUserPrefKeyList() {
@@ -659,10 +698,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public ZipFileHandle openZip(String name) throws IOException {
+        l(UMLog.DEBUG, 559, name);
         return new ZipFileHandleJ2ME(name);
     }
 
     public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException{
+        l(UMLog.DEBUG, 561, fileURI);
         boolean append = (flags & FILE_APPEND) == FILE_APPEND;
         
         FileConnection con = null;
@@ -706,6 +747,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc}
      */
     public InputStream openFileInputStream(String fileURI) throws IOException {
+        l(UMLog.DEBUG, 563, fileURI);
         InputStream in = null;
         IOException e = null;
         try {
@@ -729,7 +771,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * @return 
      */
     public boolean playMedia(InputStream mediaURLInputStream, String encoding) {
-        HTTPUtils.httpDebug("starting to play media..");
+        l(UMLog.DEBUG, 563, encoding);
         boolean status = false;
         stopMedia();
         VolumeControl vc = null;
@@ -743,14 +785,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }
             player.start();
             long playerTime = player.getDuration();
-            HTTPUtils.httpDebug("Player is running");
-            status = true;
-            String duration = String.valueOf(playerTime);
-            HTTPUtils.httpDebug("The player is supposed to be for: " + duration);
-            
+            l(UMLog.DEBUG, 565, ""+playerTime);
+            status = true;            
         }catch(Exception e){
-            HTTPUtils.httpDebug("Exception: " + e.getMessage() + 
-                        ": " + e.toString());
+            l(UMLog.ERROR, 145, encoding, e);
             status = false;
             stopMedia();
         }finally{
@@ -771,7 +809,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * @return 
      */
     public boolean stopMedia() {
-        HTTPUtils.httpDebug("Stopping what is playing..");
+        l(UMLog.DEBUG, 567, null);
         boolean status = false;
         if (player != null){
             try{
@@ -779,17 +817,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 player.close();
                 player.deallocate();
                 player = null;
-                HTTPUtils.httpDebug("Player stopped. Garbage collecting..");
+                l(UMLog.DEBUG, 571, null);
                 //Garbage collect too?
                 System.gc();
                 status = true;
             }catch(Exception e){
-                HTTPUtils.httpDebug("Exception:" + e.getMessage() + 
-                        ": " + e.toString());
+                l(UMLog.ERROR, 147, null, e);
                 status = false;
-            }finally{
-                
             }
+        }else {
+            l(UMLog.DEBUG, 569, null);
         }
         
         return status;
@@ -808,6 +845,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         private Connection con;
         
         public ConnectorCloseOutputStream(OutputStream dst, Connection con) {
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 571, null);
             this.dst = dst;
         }
         
@@ -824,6 +862,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }finally {
                 J2MEIOUtils.closeConnection(con);
             }
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 573, null);
             UMIOUtils.throwIfNotNullIO(ioe);
         }
 
@@ -897,6 +936,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
          * @param myImpl our parent SystemImplementation
          */
         public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplJ2ME myImpl) {
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 575, srcURL + "->" + destFileURI);
             this.srcURL = srcURL;
             this.destFileURI = destFileURI;
             
@@ -1003,10 +1043,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
          */
         public void run() {
             final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            impl.l(UMLog.DEBUG, 577, srcURL + "->" + destFileURI);
             
             //see if we need to delete the destination beforehand
             try {
                 if(impl.fileExists(destFileURI)) {
+                    impl.l(UMLog.DEBUG, 579, destFileURI);
                     impl.removeFile(destFileURI);
                 }
             }catch(IOException e) {
@@ -1057,6 +1099,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 if(contentLen != null) {
                     totalSize = Integer.parseInt(contentLen);
                 }
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 581, contentLen);
             }catch(Exception e) {
                 UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 102, null, e);
             }finally {

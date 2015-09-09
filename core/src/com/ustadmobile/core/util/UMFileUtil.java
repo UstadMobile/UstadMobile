@@ -263,6 +263,27 @@ public class UMFileUtil {
     }
     
     /**
+     * Returns the parent filename of a given string uri 
+     * 
+     * @param uri e.g. /some/file/path or http://server.com/some/file.txt
+     * @return The parent e.g. /some/file or http://server.com/some/, null in case of no parent in the path
+     */
+    public static String getParentFilename(String uri) {
+        if(uri.length() == 1) {
+            return null;
+        }
+        
+        int charPos = uri.lastIndexOf('/', uri.length() -2);
+        if(charPos != -1) {
+            return uri.substring(0, charPos != uri.length() -1 ? 
+                    charPos -2 : charPos -1);
+        }else {
+            return null;
+        }
+    }
+    
+    
+    /**
      * Gets the extension from a url or path string.  Will chop off the query
      * and preceeding directories, and then get the file extension.  Is returned
      * without the .
