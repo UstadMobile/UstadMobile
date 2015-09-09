@@ -108,6 +108,8 @@ public class TestReadMp3FromEPUB extends TestCase {
            mimetype);
         ContainerController controller = ContainerController.makeFromEntry(opdsEntry, openPath, mp3EPUBTestFile, mimetype);
         HTTPUtils.httpDebug("showing..");
+        UstadOCF ocf = controller.getOCF();
+        UstadJSOPF opf = controller.getOPF(0);
         controller.show();
         
 //        //make sure if the entry is around... we remove it...
