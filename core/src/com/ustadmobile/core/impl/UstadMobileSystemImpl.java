@@ -81,6 +81,11 @@ public abstract class UstadMobileSystemImpl {
     
     
     /**
+     * Suggested name to create for content on Devices
+     */
+    public static final String CONTENT_DIR_NAME = "ustadMobileContent";
+    
+    /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
      * 
@@ -301,6 +306,7 @@ public abstract class UstadMobileSystemImpl {
             getLogger().l(UMLog.DEBUG, 501, fileURI);
         }catch(IOException e) {
             getLogger().l(UMLog.ERROR, 106, fileURI + " enc:" + encoding, e);
+            ioe = e;
         }finally {
             UMIOUtils.closeOutputStream(out);
             UMIOUtils.throwIfNotNullIO(ioe);
