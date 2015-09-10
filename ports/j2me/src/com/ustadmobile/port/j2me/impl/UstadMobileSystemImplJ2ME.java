@@ -63,6 +63,7 @@ import java.util.Vector;
 import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
+import javax.microedition.io.file.FileSystemRegistry;
 import javax.microedition.media.Manager;
 import javax.microedition.media.Player;
 import javax.microedition.media.control.VolumeControl;
@@ -92,7 +93,18 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public int volumeLevel=70;
     
     /**
-     * The shared content dir according to 
+     * System property used to get the memory card location
+     */
+    public static final String SYSTEMPROP_SDCARD = "fileconn.dir.memorycard";
+    
+    
+    /**
+     * System property used to get the photo dir location on device
+     */
+    public static final String SYSTEMPROP_PHOTODIR = "fileconn.dir.photos";
+    
+    /**
+     * The shared content dir 
      */
     private String sharedContentDir = null;
     
@@ -194,29 +206,100 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc} 
      */
     public String getSharedContentDir(){ 
-        //This will be in something like ustadmobileContent
-        //appData is different
-        try{
+        if(sharedContentDir != null) {
+            return sharedContentDir;
+        } else {
+            Vector systemFsRoots = new Vector();
+            String dirURI = System.getProperty(SYSTEMPROP_SDCARD);
+            
+            if(dirURI != null) {
+                l(UMLog.DEBUG, 587, SYSTEMPROP_SDCARD + '=' + dirURI);
+                systemFsRoots.addElement(dirURI);
+            }
+
+            dirURI = System.getProperty(SYSTEMPROP_PHOTODIR);
+            if(dirURI != null) {
+                l(UMLog.DEBUG, 587, SYSTEMPROP_PHOTODIR + '=' + dirURI);
+                systemFsRoots.addElement(dirURI);
+            }
+            
             DeviceRoots dt = FileUtils.getBestRoot();
-            String sharedContentDir = FileUtils.joinPath(dt.path, 
-                    FileUtils.USTAD_CONTENT_DIR);
-            
-            //Check if it is created. If it isnt, create it.       
-            if(FileUtils.createFileOrDir(sharedContentDir, 
-                    Connector.READ_WRITE, true)){
-                return sharedContentDir;
+            if(dt != null && dt.path != null) {
+                systemFsRoots.addElement(dt.path);
             }
             
-            //Return null if it doens't exist.
-            if (!FileUtils.checkDir(sharedContentDir)){
-                return null;
+            if(systemFsRoots.size() > 0) {
+                boolean canUse = false;
+                String currentDir = null;
+                boolean exists = false;
+                boolean isDir = false;
+                boolean canWrite = false;
+                
+                for(int i = 0; i < systemFsRoots.size(); i++) {
+                    FileConnection fc = null;
+                    currentDir = (String)systemFsRoots.elementAt(i);
+                    canUse = false;
+                    canWrite = false;
+                    
+                    try {
+                        fc = (FileConnection)Connector.open(currentDir);
+                        exists = fc.exists();
+                        String childFileUri = UMFileUtil.joinPaths(new String[] {
+                            currentDir, "umfiletest.txt"});
+                        if(exists) {
+                            writeStringToFile("OK", childFileUri, "UTF-8");
+                            canWrite = true;
+                            canUse = true;
+                        }
+                    }catch(Exception e) {
+                        l(UMLog.ERROR, 151, (String)systemFsRoots.elementAt(i), e);
+                    }finally {
+                        J2MEIOUtils.closeConnection(fc);
+                    }
+                    
+                    if(canUse) {
+                        l(UMLog.VERBOSE, 417, currentDir);
+                        sharedContentDir = UMFileUtil.joinPaths(new String[]{ 
+                            currentDir, CONTENT_DIR_NAME});
+                        return sharedContentDir;
+                    }else {
+                        l(UMLog.VERBOSE, 419, currentDir + "exists:" + exists
+                            + " dir:" + isDir + " write:" + canWrite);
+                    }
+                }
+            } else {
+                //This will be in something like ustadmobileContent
+                //appData is different
+                try{
+                    dt = FileUtils.getBestRoot();
+                    sharedContentDir = FileUtils.joinPath(dt.path, 
+                            FileUtils.USTAD_CONTENT_DIR);
+
+                    //Check if it is created. If it isnt, create it.       
+                    if(FileUtils.createFileOrDir(sharedContentDir, 
+                            Connector.READ_WRITE, true)){
+                        return sharedContentDir;
+                    }
+
+                    //Return null if it doens't exist.
+                    if (!FileUtils.checkDir(sharedContentDir)){
+                        return null;
+                    }
+                }catch (Exception e){}
             }
-        }catch (Exception e){}
+        }
+        
+        l(UMLog.VERBOSE, 421, sharedContentDir);
         return null;
     }
     
     public String getUserContentDirectory(String username){
+        String sharedDir = getSharedContentDir();
+        return UMFileUtil.joinPaths(new String[] {sharedDir, username});
+        /*
         try{
+            
+            
             getLogger().l(UMLog.DEBUG, 507, username);
             DeviceRoots dt = FileUtils.getBestRoot();
             String toSlashOrNot="";
@@ -234,18 +317,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             
             
             //Check if it is created. If it isn't, create it.
-            /*
-            if(FileUtils.createFileOrDir(sharedUserContentDir, 
-                    Connector.READ_WRITE, true)){
-                getLogger().l(UMLog.DEBUG, 507, "dir made ok");
-                return sharedUserContentDir;
-            }
-            */
-            return sharedUserContentDir;
         }catch (Exception e){
             getLogger().l(UMLog.DEBUG, 507, "exception in getUserContentDirectory", e);
         }
         return null;
+        */
     }
     
     public String getSystemLocale(){
