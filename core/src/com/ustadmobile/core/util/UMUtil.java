@@ -135,6 +135,20 @@ public class UMUtil {
     }
     
     /**
+     * Add all elements from an enumeration to the given vector
+     * 
+     * @param e Enumeration 
+     * @param v Vector
+     * @return The same vector as was given as an argument
+     */
+    public static Vector addEnumerationToVector(Enumeration e, Vector v) {
+        while(e.hasMoreElements()) {
+            v.addElement(e.nextElement());
+        }
+        return v;
+    }
+    
+    /**
      * Request a new port on the DodgyHTTPD Test Server for logging /asset request
      * 
      * @param serverURL - Control Server URL eg http://server:8065/

@@ -32,12 +32,12 @@ public class UstadMobileJ2MERun extends MIDlet {
         
         //Uncomment this below to connect to a local or remote log server
         
-        
-        
+        /*
         try {
-            int rawPort = UMUtil.requestDodgyHTTPDPort("http://devserver2.ustadmobile.com:8075/", "newrawserver", "j2merun");
+            String serverName = "devserver2.ustadmobile.com";
+            int rawPort = UMUtil.requestDodgyHTTPDPort("http://" + serverName + ":8075/", "newrawserver", "j2merun");
             UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
-            umLog.connectLogToSocket("devserver2.ustadmobile.com:" + rawPort);
+            umLog.connectLogToSocket(serverName + ':' + rawPort);
             umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
             Hashtable systemProps = UstadMobileSystemImpl.getInstance().getSystemInfo();
             String htStr = systemProps.toString();
@@ -46,7 +46,9 @@ public class UstadMobileJ2MERun extends MIDlet {
             System.err.println("Error connecting to testlog socket");
             e.printStackTrace();
         }
+        */
         
+        impl.init();
         
         
         try{
