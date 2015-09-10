@@ -31,6 +31,7 @@
 package com.ustadmobile.port.j2me.impl;
 
 import com.sun.lwuit.Form;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
 import com.ustadmobile.port.j2me.app.FileUtils;
@@ -45,6 +46,8 @@ import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMProgressEvent;
 import com.ustadmobile.core.impl.UMProgressListener;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -108,6 +111,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      */
     private String sharedContentDir = null;
     
+    /**
+     * The base directory where cache data etc is stored (e.g. opds catalogs etc)
+     */
+    private String baseSystemDir = null;
+    
     public String getImplementationName() {
         return "J2ME";
     }
@@ -121,7 +129,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc}
      */
     public void init() {
-        super.init();
+        getCacheDir(CatalogController.SHARED_RESOURCE);
+        try {
+            makeDirectory(baseSystemDir);
+            super.init();
+        }catch(Exception e) {
+            l(UMLog.CRITICAL, 7, baseSystemDir, e);
+        }
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
@@ -186,6 +200,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setActiveUser(String username) {
+        String userBaseDir = UMFileUtil.joinPaths(new String[] {baseSystemDir,
+            username});
+        try {
+            makeDirectory(userBaseDir);
+        }catch(IOException e) {
+            l(UMLog.ERROR, 155, userBaseDir, e);
+        }
         super.setActiveUser(username);
         l(UMLog.DEBUG, 531, username);
         AppPref.addSetting("CURRENTUSER", username);
@@ -201,6 +222,47 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public void saveUserPrefs() {
         
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getCacheDir(int mode) {
+        if(baseSystemDir == null) {
+            Vector potentialCacheDirs = new Vector();
+            
+            String dirURI = System.getProperty(SYSTEMPROP_PHOTODIR);
+            if(dirURI != null) {
+                potentialCacheDirs.addElement(dirURI);
+            }
+            
+            UMUtil.addEnumerationToVector(FileSystemRegistry.listRoots(), 
+                    potentialCacheDirs);
+            String currentDir;
+            
+            for(int i = 0; i < potentialCacheDirs.size(); i++) {
+                currentDir = (String)potentialCacheDirs.elementAt(i);
+                if(UMIOUtils.canWriteChildFile(currentDir)) {
+                    baseSystemDir = UMFileUtil.joinPaths(new String[] {
+                        currentDir, CONTENT_DIR_NAME});
+                }
+            }
+        }
+        
+        if(mode == CatalogController.SHARED_RESOURCE) {
+            return UMFileUtil.joinPaths(new String[] {baseSystemDir, 
+                UstadMobileConstants.CACHEDIR});
+        }else {
+            return UMFileUtil.joinPaths(new String[]{baseSystemDir, 
+                getActiveUser(), UstadMobileConstants.CACHEDIR});
+        }
+    }
+
+    public UMStorageDir[] getStorageDirs(int mode) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
+    
     
     /**
      * {@inheritDoc} 

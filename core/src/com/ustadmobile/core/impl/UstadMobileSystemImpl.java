@@ -135,8 +135,8 @@ public abstract class UstadMobileSystemImpl {
         try {
             String sharedContentDir = mainInstance.getSharedContentDir();
             sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
-            String sharedCacheDir = UMFileUtil.joinPaths(new String[]{
-                sharedContentDir, UstadMobileConstants.CACHEDIR});
+            String sharedCacheDir = mainInstance.getCacheDir(
+                    CatalogController.SHARED_RESOURCE);
             boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
             StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
             initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
@@ -190,8 +190,28 @@ public abstract class UstadMobileSystemImpl {
     
     
     /**
+     * Gets the cache directory for the platform for either user specific
+     * cache contents / shared cache contents
+     * 
+     * @param mode USER_RESOURCE or SHARED_RESOURCE
+     * @see CatalogController#USER_RESOURCE
+     * @see CatalogController#SHARED_RESOURCE
+     * @return String filepath to the cache dir for that mode
+     */
+    public abstract String getCacheDir(int mode);
+    
+    /**
+     * Get storage directories
+     * 
+     * @param mode bitmask flag of USER_RESOURCE or SHARED_RESOURCE
+     * @return Array of storage 
+     */
+    public abstract UMStorageDir[] getStorageDirs(int mode);
+    
+    /**
      * Provides the path to the shared content directory 
      * 
+     * @deprecated - Use getStorageDirs and getCacheDirinstead
      * @return URI of the shared content directory
      */
     public abstract String getSharedContentDir();
@@ -200,6 +220,7 @@ public abstract class UstadMobileSystemImpl {
      * Provides the path to content directory for a given user
      * 
      * @param username
+     * @deprecated use getStorageDirs and getCacheDir instead
      * 
      * @return URI of the given users content directory
      */
@@ -394,16 +415,14 @@ public abstract class UstadMobileSystemImpl {
      */
     public void setActiveUser(String username) {
         //Make sure there is a valid directory for this user
-        String userDirPath = getUserContentDirectory(username);
+        String userCachePath = getCacheDir(CatalogController.USER_RESOURCE);
         getLogger().l(UMLog.INFO, 306, username);
         try {
-            boolean dirOK = makeDirectory(userDirPath);
-            makeDirectory(UMFileUtil.joinPaths(
-                new String[]{userDirPath, UstadMobileConstants.CACHEDIR}));
-            getLogger().l(UMLog.VERBOSE, 404, username + ":" + userDirPath 
+            boolean dirOK = makeDirectory(userCachePath);
+            getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath 
                 + ":" + dirOK);
         }catch(IOException e) {
-            getLogger().l(UMLog.CRITICAL, 3, username + ":" + userDirPath);
+            getLogger().l(UMLog.CRITICAL, 3, username + ":" + userCachePath);
         }
     }
     
