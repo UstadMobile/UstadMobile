@@ -20,7 +20,10 @@
    
     <target name="testpreproc">
         <delete dir="preproctmp"/>
-	
+
+        <delete>
+            <fileset dir="${ustadmobile.port.testsrc}/com/ustadmobile/test/core" excludes="**/TestConstants.java"/>
+        </delete>	
         <preprocess indir="${ustadmobile.core.dir}/test/" outdir="preproctmp">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <var name="umplatform" value="${ustadmobile.platform}"/>
