@@ -860,11 +860,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             updateDisplay("Player started at: " + (Long) eventData);
           } else if (event == (PlayerListener.END_OF_MEDIA)) {
             updateDisplay("Player reached end of loop.");
+            stopMedia();
           } else if (event == (PlayerListener.CLOSED)) {
             updateDisplay("Player closed.");
+            stopMedia();
           } else if (event == (PlayerListener.ERROR)) {
-
             updateDisplay("Error Message: " + (String) eventData);
+            stopMedia();
+            
           }
         }
         
@@ -907,13 +910,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             status = false;
             stopMedia();
         }finally{
-            if (mediaURLInputStream != null){
-                try{
-                    mediaURLInputStream.close();
-                }catch(Exception e){
-                    HTTPUtils.httpDebug("eror nulling mediaURLInputStream.");
-                }
-            }
+//            if (mediaURLInputStream != null){
+//                try{
+//                    mediaURLInputStream.close();
+//                }catch(Exception e){
+//                    HTTPUtils.httpDebug("eror nulling mediaURLInputStream.");
+//                }
+//            }
         }
         
         return status;
