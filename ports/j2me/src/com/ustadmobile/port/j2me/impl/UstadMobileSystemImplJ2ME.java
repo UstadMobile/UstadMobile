@@ -857,7 +857,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
           } else if (event == (PlayerListener.STOPPED)) {
             updateDisplay("Player paused at: " + (Long) eventData);
             stopMedia(); //do we wnat to close it if stopped reached ? Is this
-                        // the same as it being paused? 
+                        // the same as it being paused? 5
           } else if (event == (PlayerListener.STARTED)) {
             updateDisplay("Player started at: " + (Long) eventData);
           } else if (event == (PlayerListener.END_OF_MEDIA)) {
@@ -933,13 +933,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         boolean status = false;
         if (player != null){
             try{
+                l(UMLog.DEBUG, 567, "stopping");
                 player.stop();
+                l(UMLog.DEBUG, 567, "stopped");
                 player.close();
+                l(UMLog.DEBUG, 567, "closed");
                 player.deallocate();
+                l(UMLog.DEBUG, 567, "deallocated");
                 player = null;
+                l(UMLog.DEBUG, 567, "nulled");
                 l(UMLog.DEBUG, 571, null);
                 //Garbage collect too?
                 System.gc();
+                l(UMLog.DEBUG, 567, "gc-edx");
                 status = true;
             }catch(Exception e){
                 l(UMLog.ERROR, 147, null, e);
