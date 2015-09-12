@@ -856,6 +856,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }
           } else if (event == (PlayerListener.STOPPED)) {
             updateDisplay("Player paused at: " + (Long) eventData);
+            stopMedia(); //do we wnat to close it if stopped reached ? Is this
+                        // the same as it being paused? 
           } else if (event == (PlayerListener.STARTED)) {
             updateDisplay("Player started at: " + (Long) eventData);
           } else if (event == (PlayerListener.END_OF_MEDIA)) {
