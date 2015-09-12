@@ -936,10 +936,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 l(UMLog.DEBUG, 567, "stopping");
                 player.stop();
                 l(UMLog.DEBUG, 567, "stopped");
-                player.close();
-                l(UMLog.DEBUG, 567, "closed");
                 player.deallocate();
                 l(UMLog.DEBUG, 567, "deallocated");
+                player.close();
+                l(UMLog.DEBUG, 567, "closed");
                 player = null;
                 l(UMLog.DEBUG, 567, "nulled");
                 l(UMLog.DEBUG, 571, null);
