@@ -64,8 +64,10 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
+import javax.microedition.lcdui.StringItem;
 import javax.microedition.media.Manager;
 import javax.microedition.media.Player;
+import javax.microedition.media.PlayerListener;
 import javax.microedition.media.control.VolumeControl;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -840,6 +842,39 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     
+    public class PlayerListnerEventHandler implements PlayerListener {
+        public PlayerListnerEventHandler() {
+        }
+
+        public void playerUpdate(Player player, String event, Object eventData) {
+          if (event == (PlayerListener.VOLUME_CHANGED)) {
+            VolumeControl vc = (VolumeControl) eventData;
+            updateDisplay("Volume Changed to: " + vc.getLevel());
+            if (vc.getLevel() > 60) {
+              updateDisplay("Volume higher than 60 is too loud");
+              vc.setLevel(60);
+            }
+          } else if (event == (PlayerListener.STOPPED)) {
+            updateDisplay("Player paused at: " + (Long) eventData);
+          } else if (event == (PlayerListener.STARTED)) {
+            updateDisplay("Player started at: " + (Long) eventData);
+          } else if (event == (PlayerListener.END_OF_MEDIA)) {
+            updateDisplay("Player reached end of loop.");
+          } else if (event == (PlayerListener.CLOSED)) {
+            updateDisplay("Player closed.");
+          } else if (event == (PlayerListener.ERROR)) {
+
+            updateDisplay("Error Message: " + (String) eventData);
+          }
+        }
+        
+        public void updateDisplay(String text){
+            l(UMLog.DEBUG, 590, text);
+            
+        }
+
+}
+    
     /**
      * Plays the media's inputstream. Can be audio or video.
      * @param mediaURLInputStream the InputStream to be played.
@@ -851,9 +886,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         boolean status = false;
         stopMedia();
         VolumeControl vc = null;
+        PlayerListener pl = null;
+        PlayerListnerEventHandler eh = new PlayerListnerEventHandler();
+        
         
         try{
             player = Manager.createPlayer(mediaURLInputStream, encoding);
+            player.addPlayerListener(eh);
             player.realize();
             vc = (VolumeControl) player.getControl("VolumeControl");
             if (vc != null){

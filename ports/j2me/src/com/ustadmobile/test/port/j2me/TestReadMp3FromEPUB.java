@@ -67,7 +67,7 @@ public class TestReadMp3FromEPUB extends TestCase {
          if (!FileUtils.checkFile(mp3EPUBTestFile)){
              //download the file
              String mp3EPUBTestFileURL = 
-                     "http://umcloud1.ustadmobile.com/media/eXeUpload/forasportal.epub";
+            "http://umcloud1.ustadmobile.com/media/eXeUpload/forasportal.epub";
              HTTPUtils.downloadURLToFile(mp3EPUBTestFileURL, contentDir, "");
              
          }
