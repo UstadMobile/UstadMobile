@@ -43,14 +43,47 @@ public class UMStorageDir {
     private String name;
 
     private boolean available;
-
     
-    public UMStorageDir(String dirURI, String name, boolean removableMedia, boolean available) {
+    private boolean userSpecific;
+    
+    public UMStorageDir(String dirURI, String name, boolean removableMedia, boolean available, boolean userSpecific) {
         this.dirURI = dirURI;
         this.name = name;
         this.removableMedia = removableMedia;
         this.available = available;
+        this.userSpecific = userSpecific;
     }
+    
+    
+    public String toString() {
+        StringBuffer sb = new StringBuffer(dirURI);
+        sb.append(dirURI).append(" (").append(name).append(" )");
+        sb.append(" available: ").append(available);
+        sb.append(" removable: ").append(removableMedia);
+        sb.append(" user specific: ").append(userSpecific);
+        return sb.toString();
+    }
+    
+    /**
+     * Whether this directory is only for the given logged in user 
+     * or the directory is shared for all users on this device
+     *
+     * @return true if this directory is only for the current user, false otherwise
+     */
+    public boolean isUserSpecific() {
+        return userSpecific;
+    }
+
+    /**
+     * Set whether or not this directory is user specific
+     *
+     * @param userSpecific true if this directory is only for the current user, false otherwise
+     */
+    public void setUserSpecific(boolean userSpecific) {
+        this.userSpecific = userSpecific;
+    }
+
+
     
     /**
      * Whether or not this storage location is currently available for use

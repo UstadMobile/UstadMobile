@@ -31,13 +31,15 @@
 package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import java.io.IOException;
 
 
 /* $if umplatform == 2  $
-    import j2meunit.framework.TestCase;
+    import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -46,18 +48,25 @@ import java.io.IOException;
  *
  * @author mike
  */
-public class TestCacheDir extends TestCase{
+public class TestCacheAndStorageDir extends TestCase{
     
     public void testCacheDir()  {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.init();
         String cacheDir = impl.getCacheDir(CatalogController.SHARED_RESOURCE);
+        impl.l(UMLog.DEBUG, 595, cacheDir);
         assertTrue("Can make files in cache dir", 
                 UMIOUtils.canWriteChildFile(cacheDir));
         impl.setActiveUser(TestConstants.LOGIN_USER);
         cacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE);
+        impl.l(UMLog.DEBUG, 597, cacheDir);
         assertTrue("User cache dir is created",
                 UMIOUtils.canWriteChildFile(cacheDir));
+        impl.l(UMLog.DEBUG, 593, cacheDir);
+        UMStorageDir[] storageDirs = impl.getStorageDirs(
+            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
+        impl.l(UMLog.DEBUG, 599, cacheDir);
+        assertTrue("found available storage dirs: ", storageDirs.length >= 2);
     }
     
     public void runTest() {

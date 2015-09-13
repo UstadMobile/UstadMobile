@@ -415,14 +415,16 @@ public abstract class UstadMobileSystemImpl {
      */
     public void setActiveUser(String username) {
         //Make sure there is a valid directory for this user
-        String userCachePath = getCacheDir(CatalogController.USER_RESOURCE);
         getLogger().l(UMLog.INFO, 306, username);
-        try {
-            boolean dirOK = makeDirectory(userCachePath);
-            getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath 
-                + ":" + dirOK);
-        }catch(IOException e) {
-            getLogger().l(UMLog.CRITICAL, 3, username + ":" + userCachePath);
+        if(username != null) {
+            String userCachePath = getCacheDir(CatalogController.USER_RESOURCE);
+            try {
+                boolean dirOK = makeDirectory(userCachePath);
+                getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath 
+                    + ":" + dirOK);
+            }catch(IOException e) {
+                getLogger().l(UMLog.CRITICAL, 3, username + ":" + userCachePath);
+            }
         }
     }
     

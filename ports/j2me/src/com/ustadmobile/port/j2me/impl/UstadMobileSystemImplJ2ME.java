@@ -200,18 +200,21 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public void setActiveUser(String username) {
-        String userBaseDir = UMFileUtil.joinPaths(new String[] {baseSystemDir,
-            username});
-        try {
-            makeDirectory(userBaseDir);
-        }catch(IOException e) {
-            l(UMLog.ERROR, 155, userBaseDir, e);
-        }
-        super.setActiveUser(username);
-        l(UMLog.DEBUG, 531, username);
         AppPref.addSetting("CURRENTUSER", username);
         UserPref.setActiveUser(username);
         
+        if(username != null) {
+            String userBaseDir = UMFileUtil.joinPaths(new String[] {baseSystemDir,
+            username});
+            try {
+                makeDirectory(userBaseDir);
+            }catch(IOException e) {
+                l(UMLog.ERROR, 155, userBaseDir, e);
+            }
+        }
+        
+        super.setActiveUser(username);
+        l(UMLog.DEBUG, 531, username);
     }
 
     public void setUserPref(String key, String value) {
@@ -222,12 +225,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public void saveUserPrefs() {
         
     }
-
+    
     /**
-     * {@inheritDoc}
+     * Find a writable directory on the file system that is on the phone
+     * (not removable) storage
+     * 
+     * @return Writable directory the phone's storage
      */
-    public String getCacheDir(int mode) {
+    private String findSystemBaseDir() {
         if(baseSystemDir == null) {
+            l(UMLog.DEBUG, 589, null);
             Vector potentialCacheDirs = new Vector();
             
             String dirURI = System.getProperty(SYSTEMPROP_PHOTODIR);
@@ -244,9 +251,20 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 if(UMIOUtils.canWriteChildFile(currentDir)) {
                     baseSystemDir = UMFileUtil.joinPaths(new String[] {
                         currentDir, CONTENT_DIR_NAME});
+                    break;
                 }
             }
+            l(UMLog.DEBUG, 589, baseSystemDir);
         }
+        
+        return baseSystemDir;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getCacheDir(int mode) {
+        findSystemBaseDir();
         
         if(mode == CatalogController.SHARED_RESOURCE) {
             return UMFileUtil.joinPaths(new String[] {baseSystemDir, 
@@ -257,8 +275,65 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public UMStorageDir[] getStorageDirs(int mode) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //see if we can find the sdcard
+        boolean incUserStorage = (mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE;
+        boolean incSharedStorage = (mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE;
+        
+        Vector storageDirs = new Vector();
+        String username = getActiveUser();
+        
+        if(incSharedStorage) {
+            storageDirs.addElement(new UMStorageDir(baseSystemDir, 
+                "Phone Memory", false, true, false));
+            l(UMLog.DEBUG, 591, storageDirs.elementAt(0).toString());
+        }
+        
+        if(incUserStorage) {
+            storageDirs.addElement(new UMStorageDir(UMFileUtil.joinPaths(
+                new String[]{baseSystemDir, username}), "Phone Memory", false,
+                true, true));
+            l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
+        }
+        
+        boolean hasSDCard = false;
+        boolean sdCardAvailable = false;
+        
+        String sdcardURI = System.getProperty(SYSTEMPROP_SDCARD);
+        if(sdcardURI != null) {
+            hasSDCard = true;
+            try {
+                sdCardAvailable = fileExists(sdcardURI) && 
+                        UMIOUtils.canWriteChildFile(sdcardURI);
+            }catch(IOException e) {
+                l(UMLog.ERROR, 157, sdcardURI, e);
+            }
+        }
+        
+        if(hasSDCard) {
+            String sdcardBaseDir = UMFileUtil.joinPaths(new String[]{sdcardURI, 
+                CONTENT_DIR_NAME});
+            if(incSharedStorage) {
+                storageDirs.addElement(new UMStorageDir(sdcardBaseDir, "Memory Card", 
+                        true, sdCardAvailable, false));
+                l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
+            }
+            
+            if(incUserStorage) {
+                String userSDDir = UMFileUtil.joinPaths(
+                    new String[] {sdcardBaseDir, username});
+                storageDirs.addElement(new UMStorageDir(userSDDir, "Memory Card",
+                    true, sdCardAvailable, true));
+                l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
+            }
+        }
+        
+        UMStorageDir[] retVal = new UMStorageDir[storageDirs.size()];
+        storageDirs.copyInto(retVal);
+        return retVal;
     }
     
     
