@@ -66,7 +66,6 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
-import javax.microedition.lcdui.StringItem;
 import javax.microedition.media.Manager;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
@@ -74,7 +73,8 @@ import javax.microedition.media.control.VolumeControl;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-
+import org.json.me.*;
+ 
 /**
  *
  * @author varuna
@@ -125,6 +125,23 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         umLogger = new UMLogJ2ME();
         appView = new AppViewJ2ME(this);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isJavascriptSupported() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean queueTinCanStatement(JSONObject stmt) {
+        return false;
+    }
+    
+    
+    
     
     /**
      * {@inheritDoc}
@@ -1353,6 +1370,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
          * @inheritDoc
          */
         public int getTotalSize() {
+            if(totalSize > 0) {
+                return totalSize;
+            }
+            
             HttpConnection con = null;
             try {
                 con = (HttpConnection)Connector.open(srcURL);

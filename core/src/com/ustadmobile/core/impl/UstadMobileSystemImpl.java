@@ -45,6 +45,13 @@ import java.util.Hashtable;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+/* $if umplatform == 2  $
+    import org.json.me.*;
+ $else$ */
+    import org.json.*;
+/* $endif$ */
+
+
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
  * http streams etc. independently of the underlying system (e.g. Android,
@@ -188,6 +195,22 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getImplementationName();
     
+    /**
+     * Answer whether or not Javascript is supported (e.g. in WebViews) on this
+     * platform 
+     * 
+     * @return true if supported (eg. Android) false otherwise (e.g. J2ME)
+     */
+    public abstract boolean isJavascriptSupported();
+    
+    /**
+     * Queue the given TinCan statement represented in the JSON object 
+     * for transmission to the tin can server
+     * 
+     * @param stmt statement to Queue
+     * @return true if successfully queued, false otherwise
+     */
+    public abstract boolean queueTinCanStatement(JSONObject stmt);
     
     /**
      * Gets the cache directory for the platform for either user specific
