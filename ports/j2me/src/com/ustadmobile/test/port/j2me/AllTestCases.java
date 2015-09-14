@@ -64,6 +64,7 @@ public class AllTestCases extends TestCase {
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestCatalogController()); 
         //Testing these..        
         //allTestSuite.addTest(new TestReadMp3FromEPUB());

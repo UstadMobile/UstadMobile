@@ -20,6 +20,10 @@ public class TestCase extends j2meunit.framework.TestCase {
     public static final int DEFAULT_STR_LENLIMIT = 72;
     
     public String trimStr(Object o, int lengthLimit) {
+        if(o == null) {
+            return "null";
+        }
+        
         String str = o.toString();
         if(str.length() > lengthLimit) {
             str = str.substring(0, lengthLimit) + "...";

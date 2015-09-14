@@ -44,11 +44,34 @@ import java.io.IOException;
     import junit.framework.TestCase;
 /* $endif$ */
 
+/* $if umplatform == 1 $
+        import android.test.ActivityInstrumentationTestCase2;
+        import com.toughra.ustadmobile.UstadMobileActivity;
+   $endif$ */
+
+
 /**
  *
  * @author mike
  */
+/* $if umplatform == 1  $
+public class TestCacheAndStorageDir extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
+ $else$ */
 public class TestCacheAndStorageDir extends TestCase{
+/* $endif$ */
+
+    public TestCacheAndStorageDir() {
+        /* $if umplatform == 1 $ 
+        super("com.toughra.ustadmobile", UstadMobileActivity.class);
+        $endif */
+    }
+    
+    protected void setUp() throws Exception {
+        super.setUp();
+        /* $if umplatform == 1  $
+        android.app.Activity activity = getActivity();
+        $endif  */
+    }
     
     public void testCacheDir()  {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();

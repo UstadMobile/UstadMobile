@@ -32,7 +32,7 @@ package com.ustadmobile.test.core;
 
 
 /* $if umplatform == 2  $
-    import j2meunit.framework.TestCase;
+    import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
