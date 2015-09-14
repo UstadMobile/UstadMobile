@@ -54,6 +54,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
@@ -61,6 +62,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.Timer;
 import java.util.Vector;
 import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
@@ -117,6 +119,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      */
     private String baseSystemDir = null;
     
+    private Timer logSendTimer;
+    
+    private TinCanLogManagerJ2ME logManager;
+    
     public String getImplementationName() {
         return "J2ME";
     }
@@ -154,6 +160,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         }catch(Exception e) {
             l(UMLog.CRITICAL, 7, baseSystemDir, e);
         }
+        
+        logSendTimer = new Timer();
+        logManager = new TinCanLogManagerJ2ME();
+        logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {

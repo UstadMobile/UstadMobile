@@ -36,13 +36,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
+import java.util.TimerTask;
 import org.json.me.*;
 
 /**
  *
  * @author mike
  */
-public class TinCanLogManagerJ2ME {
+public class TinCanLogManagerJ2ME extends TimerTask{
     
     String currentFile;
     
@@ -183,7 +184,10 @@ public class TinCanLogManagerJ2ME {
         
         return sent;
     }
-    
+
+    public void run() {
+        transmitQueue();//send the logs up
+    }
     
     
     
