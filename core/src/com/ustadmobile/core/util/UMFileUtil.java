@@ -275,8 +275,7 @@ public class UMFileUtil {
         
         int charPos = uri.lastIndexOf('/', uri.length() -2);
         if(charPos != -1) {
-            return uri.substring(0, charPos != uri.length() -1 ? 
-                    charPos -2 : charPos -1);
+            return uri.substring(0, charPos + 1);
         }else {
             return null;
         }

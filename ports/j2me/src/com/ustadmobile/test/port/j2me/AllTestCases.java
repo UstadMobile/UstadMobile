@@ -63,8 +63,11 @@ public class AllTestCases extends TestCase {
         
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());
+        //allTestSuite.addTest(new com.ustadmobile.test.core.TestCatalogController()); 
         //Testing these..        
-        allTestSuite.addTest(new TestReadMp3FromEPUB());
+        //allTestSuite.addTest(new TestReadMp3FromEPUB());
         
         
 //        allTestSuite.addTest(new TestCatalogControllerAcquire());
@@ -110,7 +113,7 @@ public class AllTestCases extends TestCase {
 //        //allTestSuite.addTest(new TestJ2MECatalogView()); // already a core test
 //        allTestSuite.addTest(new TestHttpResult());
 //        allTestSuite.addTest(new TestEPUBRead());
-//        allTestSuite.addTest(new TestCatalogController()); 
+//        
          
         
         return allTestSuite;

@@ -44,6 +44,7 @@ import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -189,6 +190,39 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
 
+    private String getSystemBaseDir() {
+        return new File(Environment.getExternalStorageDirectory(), "ustadmobileContent").getAbsolutePath();
+    }
+
+    @Override
+    public String getCacheDir(int mode) {
+        String systemBaseDir = getSystemBaseDir();
+        if(mode == CatalogController.SHARED_RESOURCE) {
+            return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
+        }else {
+            return UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-" + getActiveUser(),
+                    UstadMobileConstants.CACHEDIR});
+        }
+    }
+
+    @Override
+    public UMStorageDir[] getStorageDirs(int mode) {
+        List<UMStorageDir> dirList = new ArrayList<>();
+        if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
+            dirList.add(new UMStorageDir(getSystemBaseDir(), "Device", false, true, false));
+        }
+
+        if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
+            String userBase = UMFileUtil.joinPaths(new String[]{getSystemBaseDir(), "user-"
+                    + getActiveUser()});
+            dirList.add(new UMStorageDir(userBase, "Device", false, true, true));
+        }
+
+        UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
+        dirList.toArray(retVal);
+        return retVal;
+    }
+
     @Override
     public String getSharedContentDir() {
         File extStorage = Environment.getExternalStorageDirectory();
@@ -296,11 +330,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public boolean removeRecursively(String path) {
         return removeRecursively(new File(path));
-    }
-
-    @Override
-    public InputStream getFileInputStreamFromZip(String zipURI, String filename) {
-        return null;
     }
 
     public boolean removeRecursively(File f) {

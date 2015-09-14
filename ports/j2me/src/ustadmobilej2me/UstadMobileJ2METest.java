@@ -64,6 +64,7 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         
         UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
         
+        
         if(!umLog.isRemoteSocketConnected()) {
            try {
                 String deviceName = "j2metestrun";

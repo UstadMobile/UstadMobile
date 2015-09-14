@@ -720,15 +720,10 @@ public class CatalogController implements UstadController, UMProgressListener {
 	String destPath;
         boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
         
-        if(!isUserMode) {
-            destPath = impl.getSharedContentDir();
-        }else {
-            destPath = impl.getUserContentDirectory(impl.getActiveUser());
-        }
+        destPath = impl.getCacheDir(resourceMode);
         
 	destPath = UMFileUtil.joinPaths(new String[]{destPath, 
-            UstadMobileConstants.CACHEDIR, getFileNameForOPDSFeedId(catalog.id)
-        });
+            getFileNameForOPDSFeedId(catalog.id)});
         
         impl.getLogger().l(UMLog.DEBUG, 505, destPath);
         

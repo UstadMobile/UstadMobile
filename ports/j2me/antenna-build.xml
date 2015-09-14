@@ -68,12 +68,11 @@ NetBeans.  See README for instructions on building from source.
         
         
         
-        <wtkpreprocess verbose="true"  
+        <wtkpreprocess verbose="false"  
            srcdir="${src.dir}" 
             destdir="${src.preprocessed.ANTENNA}"
             device="Antenna"
             version="2"
-            symbols="ANTENNA,MEDIAENABLED,CRAZYDEBUG,DEBUGLOG,SERVER=svr2.ustadmobile.com:8001,ERRORLOGTHRESHOLD=0"
             printsymbols="true"
         />
 
@@ -176,7 +175,7 @@ NetBeans.  See README for instructions on building from source.
 		<preserve class="com.ustadmobile.test.core.TestUMFileUtilFilename"/>
 		<preserve class="com.ustadmobile.test.core.TestUMFileUtilJoin"/>
 		<preserve class="com.ustadmobile.test.core.TestTestUtils"/>
-	
+	        <preserve class="com.ustadmobile.test.core.TestCacheAndStorageDir"/>
 		<preserve class="com.ustadmobile.test.port.j2me.AllTestCases"/>
                 <preserve class="com.ustadmobile.test.port.j2me.CoreLoginTest"/>
                 <preserve class="com.ustadmobile.test.port.j2me.TestAppPref"/>
