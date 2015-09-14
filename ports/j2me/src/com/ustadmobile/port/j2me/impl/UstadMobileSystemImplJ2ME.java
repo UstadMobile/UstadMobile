@@ -35,7 +35,6 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
 import com.ustadmobile.port.j2me.app.FileUtils;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.core.impl.UMTransferJob;
 import java.io.IOException;
 import java.util.Hashtable;
