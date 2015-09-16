@@ -38,6 +38,7 @@ import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 /**
@@ -50,6 +51,8 @@ public class AppViewAndroid implements AppView{
     private ProgressDialog progressDialog;
 
     private AlertDialog alertDialog;
+
+    private AlertDialog choiceDialog;
 
     public AppViewAndroid(UstadMobileSystemImplAndroid impl) {
         this.impl = impl;
@@ -120,5 +123,38 @@ public class AppViewAndroid implements AppView{
         });
 
 
+    }
+
+    @Override
+    public void showChoiceDialog(final String title, final String[] choices, final int commandId, final AppViewChoiceListener listener) {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(choiceDialog != null) {
+                    choiceDialog.dismiss();
+                }
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(impl.getCurrentActivity());
+                builder.setTitle(title).setItems(choices, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        listener.appViewChoiceSelected(commandId, which);
+                    }
+                });
+                choiceDialog = builder.create();
+                choiceDialog.show();
+            }
+        });
+    }
+
+    @Override
+    public void dismissChoiceDialog() {
+        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                if(choiceDialog != null) {
+                    choiceDialog.dismiss();
+                    choiceDialog = null;
+                }
+            }
+        });
     }
 }

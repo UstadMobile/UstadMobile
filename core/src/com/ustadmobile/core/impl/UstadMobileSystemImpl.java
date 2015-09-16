@@ -153,8 +153,9 @@ public abstract class UstadMobileSystemImpl {
         final UstadMobileSystemImpl impl = this;
         
         String activeUser = getActiveUser();
+        String activeUserAuth = getActiveUserAuth();
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
-        if(activeUser == null) {
+        if(activeUser == null || activeUserAuth == null) {
             new LoginController().show();
         }else {
             //Ensure directory presence in case user deleted it whilst we were away

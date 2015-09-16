@@ -36,6 +36,7 @@ import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.plaf.Border;
 import com.sun.lwuit.events.*;
+import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.lang.ref.WeakReference;
 import java.util.Timer;
@@ -53,6 +54,10 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
     private Dialog progressDialog;
     
     private Dialog alertDialog;
+    
+    private Dialog choiceDialog;
+    
+    private static final int CHOICEDIALOG_CMD_OFFSET = 50;
     
     private static final int CMDID_CLOSE_ALERT = 20;
     
@@ -77,12 +82,69 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
         
     private Command okCommand;
     
+    private AppViewChoiceListener choiceListener;
+    
+    private int choiceDialogComamndId = 0;
     
     public AppViewJ2ME(UstadMobileSystemImplJ2ME impl) {
         progressDialog = null;
         this.impl = impl;
         okCommand = new Command("OK", CMDID_CLOSE_ALERT);
     }
+
+    public void showChoiceDialog(final String title, final String[] choices, final int commandId, final AppViewChoiceListener listener) {
+        this.choiceListener = listener;
+        this.choiceDialogComamndId = commandId;
+        final AppViewJ2ME appView = this;
+        
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                boolean isNew = choiceDialog == null;
+                if(isNew) {
+                    choiceDialog = new Dialog(title);
+                    choiceDialog.setAutoDispose(false);
+                    choiceDialog.setScrollable(true);
+                    choiceDialog.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+                }else {
+                    choiceDialog.setTitle(title);
+                    choiceDialog.removeAll();
+                }
+                
+                Button b;
+                for(int i = 0; i < choices.length; i++) {
+                    b = new Button(new Command(choices[i], i+CHOICEDIALOG_CMD_OFFSET));
+                    b.addActionListener(appView);
+                    choiceDialog.addComponent(b);
+                }
+                
+                if(isNew) {
+                    choiceDialog.show(10, 10, 10, 10, true, false);
+                }else {
+                    choiceDialog.repaint();
+                }
+            }
+        });
+        
+        
+    }
+
+    public void dismissChoiceDialog() {
+        if(choiceDialog == null) {
+            return;
+        }
+        
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                if(choiceDialog != null) {
+                    choiceDialog.dispose();
+                    choiceDialog = null;
+                }
+            }
+        });
+    }
+    
+    
+    
     
     public void showProgressDialog(final String title) {
         Display.getInstance().callSerially(new Runnable() {
@@ -218,6 +280,12 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
         int cmdId = ae.getCommand().getId();
         if(cmdId == CMDID_CLOSE_ALERT) {
             dismissAlertDialog();
+        }else if(cmdId >= CHOICEDIALOG_CMD_OFFSET) {
+            int choiceChosen = cmdId - CHOICEDIALOG_CMD_OFFSET;
+            if(choiceListener != null) {
+                choiceListener.appViewChoiceSelected(choiceDialogComamndId, 
+                        choiceChosen);
+            }
         }
     }
 

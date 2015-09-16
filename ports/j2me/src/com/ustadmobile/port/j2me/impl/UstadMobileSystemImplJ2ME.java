@@ -71,6 +71,7 @@ import javax.microedition.media.Manager;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
 import javax.microedition.media.control.VolumeControl;
+import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -977,6 +978,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public boolean isJavascriptSupported() {
+        return false;
+    }
+
+    public boolean queueTinCanStatement(JSONObject stmt) {
+        return false;
+    }
+
     
     public class PlayerListnerEventHandler implements PlayerListener {
         public PlayerListnerEventHandler() {
@@ -1353,6 +1362,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
          * @inheritDoc
          */
         public int getTotalSize() {
+            if(totalSize > 0) {
+                return totalSize;
+            }
+            
             HttpConnection con = null;
             try {
                 con = (HttpConnection)Connector.open(srcURL);
