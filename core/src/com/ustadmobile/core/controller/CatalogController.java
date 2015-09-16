@@ -149,6 +149,11 @@ public class CatalogController implements UstadController, UMProgressListener, A
     
     private Vector activeTransferJobs;
     
+    /**
+     * Hashtable indexed as entry id -> transferjob
+     */
+    private static Hashtable currentAcquisitionJobs = new Hashtable();
+    
     //The View (J2ME or Android)
     private CatalogView view;
     
@@ -282,6 +287,19 @@ public class CatalogController implements UstadController, UMProgressListener, A
     public void hide() {
         
     }
+    
+    public static boolean isInProgress(String entryID) {
+        return currentAcquisitionJobs.containsKey(entryID);
+    }
+    
+    public static void registerDownloadInProgress(String entryID, UMTransferJob job) {
+        currentAcquisitionJobs.put(entryID, job);
+    }
+    
+    public static void unregisterDownloadInProgress(String entryID) {
+        currentAcquisitionJobs.remove(entryID);
+    }
+    
     
     /**
      * Construct a CatalogController for the OPDS feed at the given URL
@@ -480,16 +498,28 @@ public class CatalogController implements UstadController, UMProgressListener, A
             CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
                     SHARED_RESOURCE | USER_RESOURCE);
             if(entryInfo != null && entryInfo.acquisitionStatus == STATUS_ACQUIRED) {
-                String openPath = UstadMobileSystemImpl.getInstance().openContainer(
-                    entry, entryInfo.fileURI, entryInfo.mimeType);
+                String openPath = null;
+                try {
+                    openPath = UstadMobileSystemImpl.getInstance().openContainer(
+                        entry, entryInfo.fileURI, entryInfo.mimeType);
                 
-                ContainerController catalogCtrl = 
-                    ContainerController.makeFromEntry(entry, openPath, 
-                        entryInfo.fileURI, entryInfo.mimeType);
-                catalogCtrl.show();
+                    ContainerController catalogCtrl = 
+                        ContainerController.makeFromEntry(entry, openPath, 
+                            entryInfo.fileURI, entryInfo.mimeType);
+                    catalogCtrl.show();
                 
-                System.out.println("Opened to : " + openPath);
-            }else {
+                    System.out.println("Opened to : " + openPath);
+                }catch(Exception e) {
+                    if(openPath != null) {
+                        UstadMobileSystemImpl.getInstance().closeContainer(openPath);
+                    }
+                    UstadMobileSystemImpl.getInstance().getAppView().showAlertDialog(
+                            "Error", "Error opening file: " + e.toString());
+                }
+            }else if(isInProgress(entry.id)){
+                UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                        "Download in progress...", AppView.LENGTH_LONG);
+            }else{
                 this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
             }
         }
@@ -1249,6 +1279,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
             
             transferJobs[i] = impl.downloadURLToFile(itemURL, destFilename, 
                 authHeaders);
+            registerDownloadInProgress(entries[i].id, transferJobs[i]);
         }
         
         UMTransferJobList transferJob = new UMTransferJobList(transferJobs, 
@@ -1388,6 +1419,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 info.srcURLs = new String[]{srcJobs[i].getSource()};
                 info.fileURI = srcJobs[i].getDestination();
                 info.mimeType = mimeTypes[i];
+                unregisterDownloadInProgress(entries[i].id);
                 CatalogController.setEntryInfo(entries[i].id, info, resourceMode);
                 parentFeeds.put(entries[i].parentFeed, entries[i].parentFeed);
             }
