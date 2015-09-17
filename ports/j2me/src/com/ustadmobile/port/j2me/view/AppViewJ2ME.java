@@ -111,15 +111,18 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
                 }
                 
                 Button b;
+                Button firstButton = null;
                 for(int i = 0; i < choices.length; i++) {
                     b = new Button(new Command(choices[i], i+CHOICEDIALOG_CMD_OFFSET));
                     b.addActionListener(appView);
                     choiceDialog.addComponent(b);
+                    if(i == 0) firstButton = b;
                 }
                 
                 if(isNew) {
                     choiceDialog.show(10, 10, 10, 10, true, false);
                 }else {
+                    choiceDialog.setFocused(firstButton);
                     choiceDialog.repaint();
                 }
             }
