@@ -275,6 +275,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
+    public InputStream openResourceInputStream(String resURI) throws IOException {
+        return getCurrentContext().getAssets().open(resURI);
+    }
+
+    @Override
     public boolean fileExists(String fileURI) throws IOException {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
         return new File(fileURI).exists();

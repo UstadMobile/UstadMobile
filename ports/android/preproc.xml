@@ -6,6 +6,7 @@
     <property name="ustadmobile.core.dir" value="../../core"/>
     <property name="ustadmobile.port.testsrc" value="src/androidTest/java"/>
     <property name="ustadmobile.port.mainsrc" value="src/main/java"/>
+    <property name="ustadmobile.port.resdir" value="./src/main/assets"/>
 
     <import file="../../core/core-preproc.xml"/>
 

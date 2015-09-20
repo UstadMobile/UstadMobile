@@ -85,6 +85,8 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final String CONTENT_DIR_NAME = "ustadMobileContent";
     
+    private Hashtable messages;
+    
     /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
@@ -308,6 +310,15 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract InputStream openFileInputStream(String fileURI) throws IOException, SecurityException;
     
+    
+    /**
+     * Get an input stream for an item in the resources - this should be the path
+     * without a leading slash for files that get copied from the res directory
+     * of the source.
+     * 
+     * @param resURI the path to the resource; e.g. locale/en.properties
+     */
+    public abstract InputStream openResourceInputStream(String resURI) throws IOException;
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 

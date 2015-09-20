@@ -43,6 +43,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.util.WeakHashMap;
@@ -57,6 +58,11 @@ public class LoginActivity extends AppCompatActivity {
         int x = 0;
         Integer viewIdObj = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         setContentView(R.layout.umactivity_login);
+        if(viewIdObj == null) {
+            //Android system itself restored the activity
+            LoginController ctrl = new LoginController();
+
+        }
         LoginViewAndroid.getViewById(viewIdObj.intValue()).setLoginViewActivity(this);
         this.viewId = viewIdObj.intValue();
 

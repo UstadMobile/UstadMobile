@@ -973,6 +973,15 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         UMIOUtils.throwIfNotNullIO(e);
         return in;
     }
+
+    /**
+     *{@inheritDoc}
+     */
+    public InputStream openResourceInputStream(String resURI) throws IOException {
+        return getClass().getResourceAsStream("/res/" + resURI);
+    }
+    
+    
     
     public String[] getPrefKeyList() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
