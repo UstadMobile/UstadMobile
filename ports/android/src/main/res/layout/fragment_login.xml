@@ -18,7 +18,6 @@
         android:id="@+id/login_username"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/username"
         android:inputType="textNoSuggestions" />
 
     <EditText
@@ -27,7 +26,6 @@
         android:id="@+id/login_password"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/password"
         android:inputType="textPassword" />
 
     <Button
@@ -36,7 +34,7 @@
         android:id="@+id/login_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/login"/>
+        />
 
     <TextView
         android:layout_width="fill_parent"

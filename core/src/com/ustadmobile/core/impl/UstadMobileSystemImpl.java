@@ -31,9 +31,12 @@
 
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.LocaleUtil;
+import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
@@ -85,7 +88,12 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final String CONTENT_DIR_NAME = "ustadMobileContent";
     
-    private Hashtable messages;
+    private MessagesHashtable messages;
+    
+    /**
+     * The direction - either 0 for LTR or 1 for RTL 
+     */
+    private int direction;
     
     /**
      * Get an instance of the system implementation - relies on the platform
@@ -157,13 +165,34 @@ public abstract class UstadMobileSystemImpl {
         String activeUser = getActiveUser();
         String activeUserAuth = getActiveUserAuth();
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
+        
+        //choose the locale
+        String locale = LocaleUtil.chooseSystemLocale(getSystemLocale(), 
+                UstadMobileConstants.supportedLocales, 
+                UstadMobileConstants.fallbackLocale);
+        
+        InputStream localeIn = null;
+        try {
+            localeIn = openResourceInputStream("locale/" +locale + ".properties");
+            messages = MessagesHashtable.load(localeIn);
+            getLogger().l(UMLog.VERBOSE, 423, locale);
+            String localeDir = messages.get(U.id.dir);
+            direction = localeDir != null && localeDir.equals("rtl") ? 
+                UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
+        }catch(IOException e) {
+            getLogger().l(UMLog.CRITICAL, 9, null, e);
+        }finally {
+            UMIOUtils.closeInputStream(localeIn);
+            localeIn = null;
+        }
+        
         if(activeUser == null || activeUserAuth == null) {
             new LoginController().show();
         }else {
             //Ensure directory presence in case user deleted it whilst we were away
             setActiveUser(activeUser);
             getLogger().l(UMLog.VERBOSE, 403, activeUser);
-            getAppView().showProgressDialog("Loading");
+            getAppView().showProgressDialog(getString(U.id.loading));
             
             Thread startThread = new Thread(new Runnable() {
                 public void run() {
@@ -183,6 +212,29 @@ public abstract class UstadMobileSystemImpl {
         }
     }
     
+    
+    /**
+     * Get a string for use in the UI
+     * 
+     * @param msgCode
+     * @see U
+     * @return String if found in current locale, otherwise null
+     */
+    public String getString(int msgCode) {
+        return messages.get(msgCode);
+    }
+    
+    /**
+     * Gets the direction of the UI
+     * 
+     * @see UstadMobileConstants#DIR_LTR
+     * @see UstadMobileConstants#DIR_RTL
+     * 
+     * @return Direction int flag - 0 for LTR or 1 for RTL
+     */
+    public int getDirection() {
+        return direction;
+    }
     
     /**
      * Get the name of the platform implementation being used
@@ -236,6 +288,11 @@ public abstract class UstadMobileSystemImpl {
      * @return System locale
      */
     public abstract String getSystemLocale();
+    
+    public String getSystemPreferredLocale() {
+        return null;
+    }
+    
     
     /**
      * Provide information about the platform as key value pairs in a hashtable

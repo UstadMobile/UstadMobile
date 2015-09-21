@@ -30,10 +30,17 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     
     final private TextField passwordField;
     
+    final private Button loginButton;
+    
     private LoginController controller;
     
+    private String loginHint;
+    
+    private String passwordHint;
+    
+    private String buttonText;
+    
     public LoginViewJ2ME() {
-        setTitle("Login");
         setLayout(new BoxLayout(BoxLayout.Y_AXIS));
         
         usernameField = new TextField();
@@ -45,8 +52,8 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
         Label spaceLabel = new Label(" ");
         addComponent(spaceLabel);
         
-        Command loginCmd = new Command("Login", CMD_LOGIN);
-        Button loginButton = new Button(loginCmd);
+        Command loginCmd = new Command("", CMD_LOGIN);
+        loginButton = new Button(loginCmd);
         loginButton.addActionListener(this);
         this.addComponent(loginButton);
     }
@@ -72,5 +79,18 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     public boolean isShowing() {
         return this.isVisible();
     }
+
+    public void setUsernameHint(String loginHint) {
+        
+    }
+
+    public void setPasswordHint(String passwordHint) {
+    }
+
+    public void setButtonText(String buttonText) {
+        loginButton.setText(buttonText);
+    }
+    
+    
     
 }

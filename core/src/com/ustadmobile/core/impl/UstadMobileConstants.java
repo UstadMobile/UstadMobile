@@ -46,6 +46,20 @@ public class UstadMobileConstants {
      */
     public static final String CACHEDIR = "cache";
     
+    public static final String[] supportedLocales = new String[] {"en", "ar"};
+    
+    public static final String fallbackLocale = "en";
+    
+    /**
+     * Flag to indicate left to right direction
+     */
+    public static final int DIR_LTR = 0;
+    
+    /**
+     * Flag to indicate right to left direction
+     */
+    public static final int DIR_RTL = 1;
+    
     /**
      * Sorted by country name: list of international dialing codes
      * see testres/countrycodes.ods

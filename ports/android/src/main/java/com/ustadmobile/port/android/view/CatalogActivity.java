@@ -18,7 +18,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -50,6 +52,8 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
         super.onCreate(savedInstanceState);
         viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
         setContentView(R.layout.activity_catalog);
+        UMAndroidUtil.setDirectionIfSupported(findViewById(R.id.catalog_relativelayout),
+            UstadMobileSystemImpl.getInstance().getDirection());
 
 
         //Toolbar toolbar =

@@ -31,6 +31,7 @@
 package com.ustadmobile.port.j2me.impl;
 
 import com.sun.lwuit.Form;
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
@@ -290,14 +291,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         if(incSharedStorage) {
             storageDirs.addElement(new UMStorageDir(baseSystemDir, 
-                "Phone Memory", false, true, false));
+                getString(U.id.phone_memory), false, true, false));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(0).toString());
         }
         
         if(incUserStorage) {
             storageDirs.addElement(new UMStorageDir(UMFileUtil.joinPaths(
-                new String[]{baseSystemDir, username}), "Phone Memory", false,
-                true, true));
+                new String[]{baseSystemDir, username}), getString(U.id.phone_memory), 
+                false, true, true));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
         }
         
@@ -319,16 +320,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             String sdcardBaseDir = UMFileUtil.joinPaths(new String[]{sdcardURI, 
                 CONTENT_DIR_NAME});
             if(incSharedStorage) {
-                storageDirs.addElement(new UMStorageDir(sdcardBaseDir, "Memory Card", 
-                        true, sdCardAvailable, false));
+                storageDirs.addElement(new UMStorageDir(sdcardBaseDir, 
+                    getString(U.id.memory_card), true, sdCardAvailable, false));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
             
             if(incUserStorage) {
                 String userSDDir = UMFileUtil.joinPaths(
                     new String[] {sdcardBaseDir, username});
-                storageDirs.addElement(new UMStorageDir(userSDDir, "Memory Card",
-                    true, sdCardAvailable, true));
+                storageDirs.addElement(new UMStorageDir(userSDDir, 
+                    getString(U.id.memory_card), true, sdCardAvailable, true));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
         }

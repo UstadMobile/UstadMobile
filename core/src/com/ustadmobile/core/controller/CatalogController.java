@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
@@ -49,6 +50,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
@@ -160,8 +162,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
     //this is where the feed (and its entries) live.
     private CatalogModel model;
     
-    public static String[] catalogMenuOpts = new String[]{"My Courses",
-        "On This Device", "Logout", "About"};
+    public static int[] catalogMenuOptIDS = new int[]{U.id.mycourses, 
+        U.id.onthisdevice, U.id.logout, U.id.about};
     
     public static final int MENUINDEX_MYCOURSES = 0;
     
@@ -259,8 +261,14 @@ public class CatalogController implements UstadController, UMProgressListener, A
     
     //shows the view
     public void show() {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         this.view = ViewFactory.makeCatalogView();
         this.view.setController(this);
+        String[] catalogMenuOpts = new String[catalogMenuOptIDS.length];
+        for(int i =0; i < catalogMenuOpts.length; i++) {
+            catalogMenuOpts[i] = impl.getString(catalogMenuOptIDS[i]);
+        }
+        
         this.view.setMenuOptions(catalogMenuOpts);
         
         UstadJSOPDSFeed feed = this.getModel().opdsFeed;
@@ -416,9 +424,12 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public void handleClickDownloadAll() {
         selectedEntries = getModel().opdsFeed.entries;
-        view.showConfirmDialog("Download?", "Download all " 
-            + selectedEntries.length + " entries ?", "OK", "Cancel", 
-            CMD_DOWNLOADENTRY);
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        view.showConfirmDialog(impl.getString(U.id.download_q), 
+            LocaleUtil.formatMessage(impl.getString(U.id.download_all_q), 
+                String.valueOf(selectedEntries.length)),
+                impl.getString(U.id.ok), impl.getString(U.id.cancel), 
+                CMD_DOWNLOADENTRY);
     }
     
     /**
@@ -435,12 +446,15 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * Triggered when the user selects to delete a container in the feed
      * This triggers deleting the locally downloaded file (if it exists)
      * 
-     * @param item OPDS item selected
+     * @param entries OPDS item selected
      */
     public void handleClickDeleteEntries(UstadJSOPDSEntry[] entries) {
         selectedEntries = entries;
-        this.view.showConfirmDialog("Delete?", "Delete " + entries.length + 
-                " entries from device?", "Delete", "Cancel", CMD_DELETEENTRY);
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        this.view.showConfirmDialog(impl.getString(U.id.delete_q), 
+            LocaleUtil.formatMessage(impl.getString(U.id.delete_x_entries_from_device), 
+                String.valueOf(entries.length)), impl.getString(U.id.delete), 
+                impl.getString(U.id.cancel), CMD_DELETEENTRY);
     }
     
     public void handleConfirmDeleteEntries() {
@@ -461,11 +475,12 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param item 
      */
     public void handleClickEntry(final UstadJSOPDSEntry entry) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(!entry.parentFeed.isAcquisitionFeed()) {
             //we are loading another opds catalog
             Vector entryLinks = entry.getLinks(null, UstadJSOPDSItem.TYPE_ATOMFEED, 
                 true, true);
-            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            
             if(entryLinks.size() > 0) {
                 String[] firstLink = (String[])entryLinks.elementAt(0);
                 final String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
@@ -486,12 +501,12 @@ public class CatalogController implements UstadController, UMProgressListener, A
                             e.printStackTrace();
                             impl.getAppView().dismissProgressDialog();
                             impl.getAppView().showNotification(
-                                "Sorry! Error loading catalog : " + e.toString(),
+                                impl.getString(U.id.error_loading_catalog) + e.toString(),
                                 AppView.LENGTH_LONG);
                         }
                     }
                 };
-                impl.getAppView().showProgressDialog("Loading");
+                impl.getAppView().showProgressDialog(impl.getString(U.id.loading));
                 bgThread.start();
             }
         }else {
@@ -508,17 +523,18 @@ public class CatalogController implements UstadController, UMProgressListener, A
                             entryInfo.fileURI, entryInfo.mimeType);
                     catalogCtrl.show();
                 
-                    System.out.println("Opened to : " + openPath);
+                    impl.l(UMLog.VERBOSE, 425, openPath);
                 }catch(Exception e) {
                     if(openPath != null) {
                         UstadMobileSystemImpl.getInstance().closeContainer(openPath);
                     }
                     UstadMobileSystemImpl.getInstance().getAppView().showAlertDialog(
-                            "Error", "Error opening file: " + e.toString());
+                            impl.getString(U.id.error), 
+                            impl.getString(U.id.error_opening_file) + e.toString());
                 }
             }else if(isInProgress(entry.id)){
                 UstadMobileSystemImpl.getInstance().getAppView().showNotification(
-                        "Download in progress...", AppView.LENGTH_LONG);
+                        impl.getString(U.id.download_in_progress), AppView.LENGTH_LONG);
             }else{
                 this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
             }
@@ -539,7 +555,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
             storageChoices[i] = availableStorageDirs[i].getName();
         }
         UstadMobileSystemImpl.getInstance().getAppView().showChoiceDialog(
-            "Save to...", storageChoices, CMD_SELECT_STORAGE_DIR, this);
+            UstadMobileSystemImpl.getInstance().getString(U.id.save_to), 
+            storageChoices, CMD_SELECT_STORAGE_DIR, this);
     }
 
     /**
@@ -584,9 +601,11 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public void handleClickDownloadEntries(final UstadJSOPDSEntry[] entries) {
         selectedEntries = entries;
-        String[] choices = new String[]{"All Users", "Only Me", "Cancel"};
-        UstadMobileSystemImpl.getInstance().getAppView().showChoiceDialog(
-            "Download for...", choices, CMD_SELECT_SHARED_OR_USERONLY, this);
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] choices = new String[]{impl.getString(U.id.all_users), 
+            impl.getString(U.id.only_me), impl.getString(U.id.cancel)};
+        impl.getAppView().showChoiceDialog(impl.getString(U.id.download_for),
+            choices, CMD_SELECT_SHARED_OR_USERONLY, this);
     }
     
     /**
@@ -652,12 +671,12 @@ public class CatalogController implements UstadController, UMProgressListener, A
                     deviceCatCtrl.show();
                 }catch(IOException e) {
                     UstadMobileSystemImpl.getInstance().getAppView().showNotification(
-                        "Sorry - Error loading device catalog", AppView.LENGTH_LONG);
+                        UstadMobileSystemImpl.getInstance().getString(U.id.error_loading_catalog), 
+                        AppView.LENGTH_LONG);
                 }
                 break;
                             
         }
-        System.out.println("You click: " + index);
     }
     
     /**
@@ -1163,8 +1182,9 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 impl.writeStringToFile(looseContainerFeed.toString(), looseContainerFile, 
                     "UTF-8");
             }catch(IOException e) {
-                impl.getAppView().showNotification("Error saving index", 
-                        AppView.LENGTH_LONG);
+                impl.getAppView().showNotification(impl.getString(U.id.error)
+                    + " : 159", AppView.LENGTH_LONG);
+                impl.l(UMLog.ERROR, 159, looseContainerFile, e);
             }
             
             retVal.addEntry(UstadJSOPDSEntry.makeEntryForItem(

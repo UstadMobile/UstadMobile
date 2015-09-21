@@ -46,4 +46,68 @@ public interface LoginView extends UstadView {
     
     public void setController(LoginController controller);
     
+    /**
+     * Set the title of the view
+     * 
+     * @param title title to be set
+     */
+    public void setTitle(String title);
+  
+    
+    /**
+     * Set the hint text (e.g. text which is in background before text is
+     * actually entered for the username text field
+     * 
+     * @param loginHint 
+     */
+    public void setUsernameHint(String loginHint);
+    
+    /**
+     * Set the password hint text (e.g. text in background before any text is
+     * actually entered)
+     * 
+     * @param passwordHint 
+     */
+    public void setPasswordHint(String passwordHint);
+    
+    /**
+     * Set the text to appear on the login button
+     * 
+     * @param buttonText 
+     */
+    public void setButtonText(String buttonText);
+    
+    /**
+     * Set the text to appear as the hint for the phone number
+     * 
+     * @param phoneNumberHint
+     */
+    public void setRegisterPhoneNumberHint(String phoneNumberHint);
+    
+    /**
+     * The hint for the registration name field
+     * 
+     * @param nameHint 
+     */
+    public void setRegisterNameHint(String nameHint);
+    
+    /**
+     * The label for the registration form - male gender label
+     * @param maleLabel 
+     */
+    public void setRegisterGenderMaleLabel(String maleLabel);
+    
+    /**
+     * The label for the registration form - female gender label
+     * @param femaleLabel 
+     */
+    public void setRegisterGenderFemaleLabel(String femaleLabel);
+    
+    /**
+     * The text to appear on the registration button
+     * 
+     * @param registerButtonText 
+     */
+    public void setRegisterButtonText(String registerButtonText);
+    
 }

@@ -134,7 +134,7 @@ public class ContainerController implements UstadController{
         impl.getLogger().l(UMLog.DEBUG, 534, "Got ocf");
         
         opfTitles = new String[ocf.rootFiles.length];
-        impl.getLogger().l(UMLog.DEBUG, 534, "got opftitles");
+        impl.getLogger().l(UMLog.DEBUG, 534, null);
         
         return ocf;
     }

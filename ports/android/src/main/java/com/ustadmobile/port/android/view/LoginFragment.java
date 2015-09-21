@@ -6,9 +6,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.RadioButton;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.LoginController;
@@ -68,7 +70,11 @@ public class LoginFragment extends Fragment {
         switch(this.positionID) {
             case LoginView.SECTION_LOGIN:
                 Button loginButton = (Button)viewGroup.findViewById(R.id.login_button);
+                loginButton.setText(loginView.buttonText);
                 loginButton.setOnClickListener(loginView);
+                ((TextView)viewGroup.findViewById(R.id.login_username)).setHint(loginView.usernameHint);
+                ((TextView)viewGroup.findViewById(R.id.login_password)).setHint(loginView.passwordHint);
+
                 break;
             case LoginView.SECTION_REGISTER:
                 Spinner countrySpinner = (Spinner)viewGroup.findViewById(R.id.login_registercountry);
@@ -78,6 +84,16 @@ public class LoginFragment extends Fragment {
                 countrySpinner.setAdapter(adapter);
                 Button registerButton = (Button)viewGroup.findViewById(R.id.login_registerbutton);
                 registerButton.setOnClickListener(loginView);
+                registerButton.setText(loginView.registerButtonText);
+                ((TextView)viewGroup.findViewById(R.id.login_registername)).setHint(
+                        loginView.registerNameHint);
+                ((TextView)viewGroup.findViewById(R.id.login_registerphonenum)).setHint(
+                        loginView.registerPhoneNumHint);
+                ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_male)).setText(
+                        loginView.registerMaleLabel);
+                ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_female)).setText(
+                        loginView.registerFemaleLabel);
+
                 lookupCountry(countrySpinner, getActivity());
                 break;
         }

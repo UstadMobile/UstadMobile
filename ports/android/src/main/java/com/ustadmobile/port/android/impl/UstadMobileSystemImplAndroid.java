@@ -44,6 +44,7 @@ import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -209,13 +210,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public UMStorageDir[] getStorageDirs(int mode) {
         List<UMStorageDir> dirList = new ArrayList<>();
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(getSystemBaseDir(), "Device", false, true, false));
+            dirList.add(new UMStorageDir(getSystemBaseDir(), getString(U.id.device), false, true, false));
         }
 
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
             String userBase = UMFileUtil.joinPaths(new String[]{getSystemBaseDir(), "user-"
                     + getActiveUser()});
-            dirList.add(new UMStorageDir(userBase, "Device", false, true, true));
+            dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
         }
 
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];

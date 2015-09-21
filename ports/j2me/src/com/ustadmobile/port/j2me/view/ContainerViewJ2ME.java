@@ -53,6 +53,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
+import com.ustadmobile.core.U;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,9 +109,10 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     
     public ContainerViewJ2ME(UstadJSOPDSEntry entry, String openPath, String mime) {
-        containerZip = UstadMobileSystemImplJ2ME.getInstanceJ2ME().getOpenZip();
-        cmdBack = new Command("Back", CMDBACK_ID);
-        cmdForward = new Command("Next", CMDFORWARD_ID);
+        UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
+        containerZip = impl.getOpenZip();
+        cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);
+        cmdForward = new Command(impl.getString(U.id.next), CMDFORWARD_ID);
     }
 
     public void setController(ContainerController controller) {

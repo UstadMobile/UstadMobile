@@ -32,6 +32,7 @@ package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,6 +69,16 @@ public class TestLocalization extends TestCase{
     
     public void testLocalization() throws IOException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        //test substitutions
+        assertEquals("Handle normal sub", "download 10 entries?",
+                LocaleUtil.formatMessage("download %s entries?", "10"));
+        assertEquals("Handle sub at beginning", "10: the number to download?",
+                LocaleUtil.formatMessage("%s: the number to download?", "10"));
+        assertEquals("Handle sub at end", "the number to download is: 10",
+                LocaleUtil.formatMessage("the number to download is: %s", "10"));
+        
+        
         InputStream in = impl.openResourceInputStream("locale/en.properties");
         assertNotNull("Can load resource input stream", in);
         MessagesHashtable mht = MessagesHashtable.load(in);
