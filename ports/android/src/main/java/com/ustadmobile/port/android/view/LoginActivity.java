@@ -46,6 +46,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.ViewFactory;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -60,23 +61,26 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int x = 0;
-        Integer viewIdObj = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
+        UstadMobileSystemImplAndroid.handleActivityCreate(this);
+
+        viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, -1);
+        loginView = LoginViewAndroid.getViewById(viewId);
+
+        if(loginView == null) {
+            //Android system itself restored the activity
+            LoginController ctrl = new LoginController();
+            loginView = (LoginViewAndroid)ViewFactory.makeLoginView();
+            ctrl.setView(loginView);
+            ctrl.setViewStrings(loginView);
+        }
+
+        loginView.setLoginViewActivity(this);
         setContentView(R.layout.umactivity_login);
 
         UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),
                 UstadMobileSystemImpl.getInstance().getDirection());
 
-        if(viewIdObj == null) {
-            //Android system itself restored the activity
-            LoginController ctrl = new LoginController();
-
-        }
-        loginView = LoginViewAndroid.getViewById(viewIdObj.intValue());
-        loginView.setLoginViewActivity(this);
         setTitle(loginView.title);
-
-        this.viewId = viewIdObj.intValue();
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
         setSupportActionBar(toolbar);

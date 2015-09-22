@@ -27,7 +27,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         Display.init(this);
         
         UstadMobileSystemImplJ2ME impl = 
-                (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance();
+                (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance(true);
         
         
         //Uncomment this below to connect to a local or remote log server

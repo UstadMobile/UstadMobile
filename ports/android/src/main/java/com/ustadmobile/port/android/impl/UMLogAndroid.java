@@ -23,6 +23,8 @@ public class UMLogAndroid  extends UMLog{
             Log.e(LOGTAG, logMessage);
         }else if(level == UMLog.VERBOSE) {
             Log.v(LOGTAG, logMessage);
+        }else if(level == UMLog.ERROR) {
+            Log.e(LOGTAG, logMessage);
         }
     }
 
@@ -37,6 +39,8 @@ public class UMLogAndroid  extends UMLog{
             Log.e(LOGTAG, logMessage, exception);
         }else if(level == UMLog.VERBOSE) {
             Log.v(LOGTAG, logMessage, exception);
+        }else if(level == UMLog.ERROR) {
+            Log.e(LOGTAG, logMessage, exception);
         }
     }
 }

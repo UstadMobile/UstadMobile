@@ -294,12 +294,9 @@ public class LoginController implements UstadController{
         }
     }
     
-    
-    public void show() {
+    public void setViewStrings(LoginView view) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        
-        this.view = ViewFactory.makeLoginView();
-        this.view.setController(this);
+
         view.setTitle(impl.getString(U.id.login));
         view.setButtonText(impl.getString(U.id.login));
         view.setUsernameHint(impl.getString(U.id.username));
@@ -309,8 +306,23 @@ public class LoginController implements UstadController{
         view.setRegisterPhoneNumberHint(impl.getString(U.id.phone_number));
         view.setRegisterGenderMaleLabel(impl.getString(U.id.male));
         view.setRegisterGenderFemaleLabel(impl.getString(U.id.female));
-        
+    }
+    
+    public void show() {
+        this.view = ViewFactory.makeLoginView();
+        this.view.setController(this);
+        setViewStrings(this.view);
         this.view.show();
+    }
+    
+    /**
+     * Used when a view is somehow otherwise created e.g. by a smartphone OS
+     * and we're working the other way around
+     * 
+     * @param view 
+     */
+    public void setView(LoginView view) {
+        this.view = view;
     }
     
     public void hide() {

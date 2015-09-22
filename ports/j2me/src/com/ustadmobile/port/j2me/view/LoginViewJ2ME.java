@@ -90,6 +90,21 @@ public class LoginViewJ2ME extends Form implements LoginView, ActionListener {
     public void setButtonText(String buttonText) {
         loginButton.setText(buttonText);
     }
+
+    public void setRegisterPhoneNumberHint(String phoneNumberHint) {
+    }
+
+    public void setRegisterNameHint(String nameHint) {
+    }
+
+    public void setRegisterGenderMaleLabel(String maleLabel) {
+    }
+
+    public void setRegisterGenderFemaleLabel(String femaleLabel) {
+    }
+
+    public void setRegisterButtonText(String registerButtonText) {
+    }
     
     
     

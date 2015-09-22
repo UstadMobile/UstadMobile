@@ -65,7 +65,7 @@ public class LoginFragment extends Fragment {
         ViewGroup viewGroup = (ViewGroup)inflater.inflate(layoutIDs[positionID], container, false);
         LoginActivity loginActivity = (LoginActivity)getActivity();
 
-        LoginViewAndroid loginView = LoginViewAndroid.getViewById(loginActivity.getViewID());
+        LoginViewAndroid loginView = ((LoginActivity)getActivity()).loginView;
 
         switch(this.positionID) {
             case LoginView.SECTION_LOGIN:

@@ -44,6 +44,7 @@ import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
@@ -69,6 +70,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     private Activity currentActivity;
 
     private Context currentContext;
+
+    private static Activity createActivity;
 
     public static final String TAG = "UstadMobileImplAndroid";
 
@@ -113,7 +116,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     public void init() {
+        if(currentContext == null) {
+            currentContext = createActivity;
+        }
 
+        if(currentActivity == null) {
+            currentActivity = createActivity;
+        }
+
+        super.init();
     }
 
     @Override
@@ -121,9 +132,19 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return null;
     }
 
+    public static void handleActivityCreate(Activity activity) {
+        if(mainInstance == null) {
+            //this is probably the first activity
+            createActivity = activity;
+        }
+    }
+
     public void handleActivityStart(Activity activity) {
         this.currentActivity = activity;
         setCurrentContext(activity);
+
+        //now we have a started activity this isn't needed
+        createActivity = null;
 
         //bind the activity to the HTTP service
         Intent httpServiceIntent = new Intent(activity, HTTPService.class);

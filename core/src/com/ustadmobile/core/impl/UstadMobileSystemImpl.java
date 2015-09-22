@@ -95,6 +95,8 @@ public abstract class UstadMobileSystemImpl {
      */
     private int direction;
     
+    private boolean initRan;
+    
     /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
@@ -102,8 +104,21 @@ public abstract class UstadMobileSystemImpl {
      * @return A singleton instance
      */
     public static UstadMobileSystemImpl getInstance() {
+        return getInstance(false);
+    }
+    
+    /**
+     * Get an instance of the system implementation - relies on the platform
+     * specific factory method
+     * 
+     * @return A singleton instance
+     */
+    public static UstadMobileSystemImpl getInstance(boolean skipInit) {
         if(mainInstance == null) {
             mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
+            if(!skipInit) {
+                mainInstance.init();
+            }
         }
         
         return mainInstance;
@@ -151,22 +166,15 @@ public abstract class UstadMobileSystemImpl {
             StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
             initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
             mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
+            loadLocale();
         }catch(IOException e) {
             mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
         }
     }
     
-    /**
-     * Starts the user interface for the app
-     */
-    public void startUI() {        
-        final UstadMobileSystemImpl impl = this;
-        
-        String activeUser = getActiveUser();
-        String activeUserAuth = getActiveUserAuth();
-        getLogger().l(UMLog.VERBOSE, 402, activeUser);
-        
+    public boolean loadLocale() {
         //choose the locale
+        boolean success = false;
         String locale = LocaleUtil.chooseSystemLocale(getSystemLocale(), 
                 UstadMobileConstants.supportedLocales, 
                 UstadMobileConstants.fallbackLocale);
@@ -179,6 +187,7 @@ public abstract class UstadMobileSystemImpl {
             String localeDir = messages.get(U.id.dir);
             direction = localeDir != null && localeDir.equals("rtl") ? 
                 UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
+            success = true;
         }catch(IOException e) {
             getLogger().l(UMLog.CRITICAL, 9, null, e);
         }finally {
@@ -186,6 +195,19 @@ public abstract class UstadMobileSystemImpl {
             localeIn = null;
         }
         
+        return success;
+    }
+    
+    /**
+     * Starts the user interface for the app
+     */
+    public void startUI() {        
+        final UstadMobileSystemImpl impl = this;
+        
+        String activeUser = getActiveUser();
+        String activeUserAuth = getActiveUserAuth();
+        getLogger().l(UMLog.VERBOSE, 402, activeUser);
+                
         if(activeUser == null || activeUserAuth == null) {
             new LoginController().show();
         }else {
