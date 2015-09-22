@@ -57,6 +57,7 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ViewFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -88,7 +89,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController implements UstadController, UMProgressListener, AppViewChoiceListener {
+public class CatalogController implements UstadController, UMProgressListener, AppViewChoiceListener, AsyncLoadableController {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -150,6 +151,9 @@ public class CatalogController implements UstadController, UMProgressListener, A
     private UMStorageDir[] availableStorageDirs;
     
     private Vector activeTransferJobs;
+    
+    
+    private int resourceMode;
     
     /**
      * Hashtable indexed as entry id -> transferjob
@@ -214,6 +218,19 @@ public class CatalogController implements UstadController, UMProgressListener, A
     private static final int CHOICE_DOWNLOAD_CANCEL = 2;
     
     
+    public static final Integer LOAD_URL = Integer.valueOf(1);
+    
+    public static final Integer LOAD_IMPL = Integer.valueOf(2);
+    
+    public static final Integer LOAD_RESMODE = Integer.valueOf(3);
+    
+    public static final Integer LOAD_HTTPUSER = Integer.valueOf(4);
+    
+    public static final Integer LOAD_HTTPPASS = Integer.valueOf(5);
+    
+    public static final Integer LOAD_FLAGS = Integer.valueOf(6);
+    
+    
     
     public CatalogController() {
         
@@ -253,6 +270,28 @@ public class CatalogController implements UstadController, UMProgressListener, A
         return this.model;
     }
     
+    
+
+    /**
+     * The resource mode by which this CatalogController was loaded
+     *
+     * @return the value of resourceMode
+     */
+    public int getResourceMode() {
+        return resourceMode;
+    }
+
+    /**
+     * Set the value of resourceMode: the resource mode by which this CatalogController
+     * was loaded
+     *
+     * @param resourceMode new value of resourceMode
+     */
+    public void setResourceMode(int resourceMode) {
+        this.resourceMode = resourceMode;
+    }
+
+    
     //methods go here..
     
     public void handleClickRefresh() {
@@ -288,9 +327,14 @@ public class CatalogController implements UstadController, UMProgressListener, A
         this.view.show();
     }
     
-    public CatalogView getView() {
+    public UstadView getView() {
         return this.view;
     }
+    
+    public void setView(UstadView view) {
+        this.view = (CatalogView)view;
+    }
+    
     
     public void hide() {
         
@@ -324,8 +368,59 @@ public class CatalogController implements UstadController, UMProgressListener, A
             httpUser, httpPassword, flags);
         CatalogController result = new CatalogController(
             new CatalogModel(opdsFeed));
+        result.setResourceMode(resourceMode);
         
         return result;
+    }
+    
+    /**
+     * Makes the controller for the given view used when the underlying system 
+     * (e.g. Android etc.) has made a view by restoring it from a saved state
+     * etc.
+     * 
+     * This is done asynchronously - this is normally going to be called from a UI
+     * thread.
+     * 
+     * @param view The view we are attaching with
+     * @param url as per makeControllerByURL
+     * @param impl as per makeControllerByURL
+     * @param resourceMode as per makeControllerByURL 
+     * @param flags as per makeControllerByURL
+     * 
+     * @see CatalogController#makeControllerByURL(java.lang.String, com.ustadmobile.core.impl.UstadMobileSystemImpl, int, java.lang.String, java.lang.String, int) 
+     * 
+     * @return CatalogController attached with the given view
+     * @throws IOException
+     * @throws XmlPullParserException 
+     */
+    public static void makeControllerForView(final CatalogView view, final String url, final UstadMobileSystemImpl impl, final int resourceMode, final int flags, final ControllerReadyListener listener) {
+        Hashtable args = new Hashtable();
+        if(impl == null) {
+            throw new IllegalArgumentException("impl cannot be null dimwit");
+        }
+        
+        args.put(LOAD_URL, url);
+        args.put(LOAD_IMPL, impl);
+        args.put(LOAD_RESMODE, Integer.valueOf(resourceMode));
+        args.put(LOAD_FLAGS, Integer.valueOf(flags));
+        
+        if(impl.getActiveUser() != null && impl.getActiveUserAuth() != null) {
+            args.put(LOAD_HTTPUSER, impl.getActiveUser());
+            args.put(LOAD_HTTPPASS, impl.getActiveUserAuth());
+        }
+        
+        CatalogController controller = new CatalogController();
+        new LoadControllerThread(args, controller, listener, view).start();
+    }
+
+    
+    public UstadController loadController(Hashtable args) throws Exception {
+        return makeControllerByURL((String)args.get(LOAD_URL), 
+            (UstadMobileSystemImpl)args.get(LOAD_IMPL), 
+            ((Integer)args.get(LOAD_RESMODE)).intValue(), 
+            args.get(LOAD_HTTPUSER) != null ? (String)args.get(LOAD_HTTPUSER) : null, 
+            args.get(LOAD_HTTPPASS) != null ? (String)args.get(LOAD_HTTPPASS) : null, 
+            ((Integer)args.get(LOAD_FLAGS)).intValue());
     }
     
     /**
@@ -846,7 +941,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.getLogger().l(UMLog.VERBOSE, 405, catalog.id + '/' + catalog.href);
+        impl.getLogger().l(UMLog.VERBOSE, 405, "id: " + catalog.id + " href: " + catalog.href);
         
 	String destPath;
         boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;

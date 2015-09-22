@@ -199,6 +199,14 @@ public abstract class UstadMobileSystemImpl {
     }
     
     /**
+     * Check on whether or not the locale string pack has been loaded or not
+     * @return 
+     */
+    public boolean isLocaleLoaded() {
+        return messages != null;
+    }
+    
+    /**
      * Starts the user interface for the app
      */
     public void startUI() {        

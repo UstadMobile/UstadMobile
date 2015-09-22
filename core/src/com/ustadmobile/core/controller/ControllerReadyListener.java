@@ -30,23 +30,16 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.view.UstadView;
-
 /**
- *
+ * This class is used for controllers that are loaded asynchronously (e.g. require
+ * I/O to be performed to load).  When the controller is ready the
+ * controllerReady method will be called once and only once.  If an error occurs
+ * the controller will be null and flags can be set.
+ * 
  * @author mike
  */
-public interface UstadController {
+public interface ControllerReadyListener {
     
-    /**
-     * Show the form for this controller
-     */
-    public void show();
-    
-    
-    public void setView(UstadView view);
-    
-    public UstadView getView();
-    
+    public void controllerReady(UstadController controller, int flags);
     
 }

@@ -36,6 +36,7 @@ import android.app.DownloadManager;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 
 import java.io.*;
@@ -57,6 +58,7 @@ import com.ustadmobile.port.android.view.AppViewAndroid;
 
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.Contacts;
 import android.util.Log;
 
 import org.xmlpull.v1.*;
@@ -105,6 +107,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private HashMap<Activity, HTTPServiceConnection> activityHTTPServiceConnections;
 
+    public static final String START_USERNAME = "START_USERNAME";
+
+    public static final String START_AUTH = "START_AUTH";
+
     public UstadMobileSystemImplAndroid() {
         appView = new AppViewAndroid(this);
         logger = new UMLogAndroid();
@@ -132,11 +138,44 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return null;
     }
 
-    public static void handleActivityCreate(Activity activity) {
-        if(mainInstance == null) {
+    /**
+     * To be called by activities as the first matter of business in the onCreate method
+     *
+     * @param activity
+     */
+    public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
+        if(mainInstance == null || ((UstadMobileSystemImplAndroid)mainInstance).currentContext == null) {
             //this is probably the first activity
             createActivity = activity;
+
+            if(mainInstance == null) {
+                getInstance();//we need to setup main instance here : now an activity has been created we must be ready
+            }
+
+            UstadMobileSystemImplAndroid impl = getInstanceAndroid();
+            impl.setCurrentContext(activity);
+            impl.currentActivity = activity;
+            if(!impl.isLocaleLoaded()) {
+                mainInstance.loadLocale();
+            }
         }
+
+        /*
+         * Sometimes for testing we need to set the username and authentication : this can only be
+         * done with a known context
+         */
+        String currentUsername = savedInstanceState != null ? savedInstanceState.getString(KEY_CURRENTUSER): null;
+        if(currentUsername == null) {
+            currentUsername = activity.getIntent().getStringExtra(KEY_CURRENTUSER);
+        }
+
+        if(currentUsername != null) {
+            mainInstance.setActiveUser(currentUsername);
+            String currentAuth = savedInstanceState != null && savedInstanceState.getString(KEY_CURRENTAUTH) != null ?
+                savedInstanceState.getString(KEY_CURRENTUSER) : activity.getIntent().getStringExtra(KEY_CURRENTAUTH);
+            mainInstance.setActiveUserAuth(currentAuth);
+        }
+
     }
 
     public void handleActivityStart(Activity activity) {

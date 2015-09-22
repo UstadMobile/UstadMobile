@@ -43,6 +43,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.view.UstadView;
 
 /**
  * Represents a container (e.g. epub file)
@@ -96,6 +97,14 @@ public class ContainerController implements UstadController{
     
     public String getMimeType() {
         return mimeType;
+    }
+    
+    public UstadView getView() {
+        return containerView;
+    }
+    
+    public void setView(UstadView view) {
+        this.containerView = (ContainerView)view;
     }
     
     /**

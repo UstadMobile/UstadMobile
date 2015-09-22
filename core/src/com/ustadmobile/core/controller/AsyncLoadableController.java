@@ -30,23 +30,16 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.view.UstadView;
+import java.util.Hashtable;
 
 /**
- *
+ * Represents a controller that can be loaded in an async manner with given
+ * arguments
+ * 
  * @author mike
  */
-public interface UstadController {
+public interface AsyncLoadableController {
     
-    /**
-     * Show the form for this controller
-     */
-    public void show();
-    
-    
-    public void setView(UstadView view);
-    
-    public UstadView getView();
-    
+    public UstadController loadController(Hashtable args) throws Exception;
     
 }

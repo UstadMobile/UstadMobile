@@ -33,6 +33,7 @@
             </intent-filter>
         </activity>
         <activity
+            android:theme="@style/Theme.UstadTheme"
             android:name="com.ustadmobile.port.android.view.CatalogActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/title_activity_catalog" >

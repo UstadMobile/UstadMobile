@@ -61,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UstadMobileSystemImplAndroid.handleActivityCreate(this);
+        UstadMobileSystemImplAndroid.handleActivityCreate(this, savedInstanceState);
 
         viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, -1);
         loginView = LoginViewAndroid.getViewById(viewId);

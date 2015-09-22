@@ -43,6 +43,7 @@ import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.ViewFactory;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
 
@@ -321,8 +322,12 @@ public class LoginController implements UstadController{
      * 
      * @param view 
      */
-    public void setView(LoginView view) {
-        this.view = view;
+    public void setView(UstadView view) {
+        this.view = (LoginView)view;
+    }
+    
+    public UstadView getView() {
+        return this.view;
     }
     
     public void hide() {
