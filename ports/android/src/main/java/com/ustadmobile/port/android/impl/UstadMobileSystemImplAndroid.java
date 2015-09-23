@@ -451,6 +451,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     @Override
     public void setActiveUser(String username) {
+        this.currentUsername = username;
+
         super.setActiveUser(username);
         saveUserPrefs();
         SharedPreferences appPreferences = getAppSharedPreferences();
@@ -462,7 +464,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
         editor.commit();
 
-        this.currentUsername = username;
+
         this.userPreferences = null;
     }
 

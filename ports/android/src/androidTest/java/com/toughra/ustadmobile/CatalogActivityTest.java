@@ -19,6 +19,8 @@ import java.util.Locale;
  */
 public class CatalogActivityTest extends ActivityInstrumentationTestCase2<CatalogActivity> {
 
+    public static final int SLEEP_AFTER = 10000;
+
     public CatalogActivityTest() {
         super(CatalogActivity.class);
     }
@@ -42,6 +44,14 @@ public class CatalogActivityTest extends ActivityInstrumentationTestCase2<Catalo
 
     public void testCatalogActivity() {
         assertNotNull(getActivity());
+
+        /*
+         * Not sleeping here causes an illegalstateexception in Android 2.3: what seems to happen
+         * is that the system calls onSaveInstanceState... then the catalog itself loads and then
+         * we have trouble - the activity is already over.
+         */
+        try { Thread.sleep(SLEEP_AFTER); }
+        catch(InterruptedException e) {}
     }
 
 }

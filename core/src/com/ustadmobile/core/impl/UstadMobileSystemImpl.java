@@ -158,18 +158,23 @@ public abstract class UstadMobileSystemImpl {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 519, null);
         boolean sharedDirOK = false;
         try {
-            String sharedContentDir = mainInstance.getSharedContentDir();
-            sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
-            String sharedCacheDir = mainInstance.getCacheDir(
-                    CatalogController.SHARED_RESOURCE);
-            boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
-            StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
-            initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
-            mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
+            checkCacheDir();
             loadLocale();
         }catch(IOException e) {
             mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
         }
+    }
+    
+    public void checkCacheDir() throws IOException{
+        boolean sharedDirOK = false;
+        String sharedContentDir = mainInstance.getSharedContentDir();
+        sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
+        String sharedCacheDir = mainInstance.getCacheDir(
+                CatalogController.SHARED_RESOURCE);
+        boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
+        StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
+        initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
+        mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
     }
     
     public boolean loadLocale() {
@@ -517,8 +522,9 @@ public abstract class UstadMobileSystemImpl {
         getLogger().l(UMLog.INFO, 306, username);
         if(username != null) {
             String userCachePath = getCacheDir(CatalogController.USER_RESOURCE);
+            String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
             try {
-                boolean dirOK = makeDirectory(userCachePath);
+                boolean dirOK = makeDirectory(userCacheParent) && makeDirectory(userCachePath);
                 getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath 
                     + ":" + dirOK);
             }catch(IOException e) {

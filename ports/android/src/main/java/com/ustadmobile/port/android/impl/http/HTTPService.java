@@ -110,6 +110,7 @@ public class HTTPService extends Service {
         unregisterReceiver(downloadCompleteReceiver);
         httpd.stop();
         httpd = null;
+        mountedZipMap = null;
     }
 
 
@@ -129,6 +130,22 @@ public class HTTPService extends Service {
         return "http://127.0.0.1:" + DEFAULT_PORT  + "/";
     }
 
+    private EmbeddedHTTPD getActiveServer() {
+        if(httpd != null) {
+            return httpd;
+        }else {
+            return lastStartedHTTPD;
+        }
+    }
+
+    private HashMap<String, String> getActiveMap() {
+        if(mountedZipMap != null) {
+            return mountedZipMap;
+        }else {
+            return lastMountedZipMap;
+        }
+    }
+
     public String mountZIP(String zipPath) {
         EmbeddedHTTPD server = httpd;
         HashMap<String, String> zipMap = mountedZipMap;
@@ -137,7 +154,7 @@ public class HTTPService extends Service {
             zipMap = lastMountedZipMap;
         }
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
-                + this + "httpd = " + httpd);
+                + this + "httpd server = " + server);
         String zipName = UMFileUtil.getFilename(zipPath);
         server.mountZip(zipName, zipPath);
 
@@ -149,11 +166,11 @@ public class HTTPService extends Service {
 
     public void ummountZIP(String openedPath) {
         String mountedPath = mountedZipMap.get(openedPath);
-        httpd.unmountZip(mountedPath);
+        getActiveServer().unmountZip(mountedPath);
     }
 
     public void addFilter(String mountPath, String extension, String regex, String replacement) {
-        httpd.addFilter(mountPath, extension, regex, replacement);
+        getActiveServer().addFilter(mountPath, extension, regex, replacement);
     }
 
 

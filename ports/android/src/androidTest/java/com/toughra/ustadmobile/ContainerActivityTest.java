@@ -26,6 +26,8 @@ public class ContainerActivityTest extends ActivityInstrumentationTestCase2<Cont
 
     public static final int CHECKINTERVAL = 1000;
 
+    public static final int SLEEP_AFTER = 10000;
+
     public ContainerActivityTest() {
         super(ContainerActivity.class);
     }
@@ -37,7 +39,7 @@ public class ContainerActivityTest extends ActivityInstrumentationTestCase2<Cont
         String httpRoot = TestUtils.getInstance().getHTTPRoot();
 
 
-
+        impl.checkCacheDir();
         String acquireOPDSURL = UMFileUtil.joinPaths(new String[]{
                 httpRoot, "acquire.opds"});
         UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL,
@@ -92,6 +94,13 @@ public class ContainerActivityTest extends ActivityInstrumentationTestCase2<Cont
         }
         assertNotNull(viewAndroid.getContainerController());
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "ContainerActivityTest complete");
+        /*
+         * Not sleeping here causes an illegalstateexception in Android 2.3: what seems to happen
+         * is that the system calls onSaveInstanceState... then the catalog itself loads and then
+         * we have trouble - the activity is already over.
+         */
+        try { Thread.sleep(SLEEP_AFTER); }
+        catch(InterruptedException e) {}
     }
 
 
