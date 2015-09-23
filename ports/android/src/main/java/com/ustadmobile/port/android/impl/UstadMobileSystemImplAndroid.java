@@ -123,11 +123,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     public void init() {
         if(currentContext == null) {
-            currentContext = createActivity;
-        }
-
-        if(currentActivity == null) {
-            currentActivity = createActivity;
+            setCurrentContext(createActivity);
         }
 
         super.init();
@@ -143,7 +139,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      *
      * @param activity
      */
-    public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
+        public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
         if(mainInstance == null || ((UstadMobileSystemImplAndroid)mainInstance).currentContext == null) {
             //this is probably the first activity
             createActivity = activity;
