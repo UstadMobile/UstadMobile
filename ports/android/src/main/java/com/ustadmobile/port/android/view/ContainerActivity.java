@@ -14,10 +14,16 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.ViewFactory;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.io.ByteArrayOutputStream;
@@ -25,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends AppCompatActivity implements ContainerPageFragment.OnFragmentInteractionListener {
+public class ContainerActivity extends AppCompatActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener {
 
     private ContainerViewAndroid containerView;
 
@@ -39,17 +45,13 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     private String onpageSelectedJS = "javascript: document.body.innerHTML = 'all ur bases are us';";
 
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle saved) {
+        super.onCreate(saved);
         //setContentView(R.layout.activity_container);
 
-
-        viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
-        containerView = ContainerViewAndroid.getViewById(viewId);
-        containerView.setContainerActivity(this);
-        String mTitle = containerView.getTitle() != null ? containerView.getTitle() : "Content";
-        setTitle(mTitle);
 
         try {
             AssetManager asMgr = getApplicationContext().getAssets();
@@ -67,14 +69,54 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
             e.printStackTrace();
         }
 
-        initByContentType();
+        viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
+        containerView = ContainerViewAndroid.getViewById(viewId);
+        if(containerView != null) {
+            setupFromView(containerView);
+        }else {
+            String containerURI = saved != null && saved.getString(ContainerController.ARG_CONTAINERURI) != null ?
+                saved.getString(ContainerController.ARG_CONTAINERURI) : getIntent().getStringExtra(ContainerController.ARG_CONTAINERURI);
+            String mimeType = saved != null && saved.getString(ContainerController.ARG_MIMETYPE) != null ?
+                saved.getString(ContainerController.ARG_MIMETYPE) : getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
+            UstadMobileSystemImpl.l(UMLog.INFO, 365, containerURI + " type " + mimeType);
+            containerView = (ContainerViewAndroid)ViewFactory.makeContainerView();
+            ContainerController.makeControllerForView(containerView, containerURI, mimeType, this);
+        }
+    }
 
+    @Override
+    public void controllerReady(final UstadController controller, int flags) {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                if(controller != null) {
+                    containerView.setController((ContainerController)controller);
+                    setupFromView(containerView);
+                }else {
+                    UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                    impl.getAppView().showAlertDialog(impl.getString(U.id.error),
+                            impl.getString(U.id.could_not_open_file));
+                }
+            }
+        });
+    }
+
+    protected void setupFromView(ContainerViewAndroid view) {
+        containerView.setContainerActivity(this);
+        String mTitle = containerView.getTitle() != null ? containerView.getTitle() : "Content";
+        setTitle(mTitle);
+
+        initByContentType();
         Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
         setSupportActionBar(toolbar);
     }
 
+
     public String getAutoplayRunJavascript() {
         return onpageSelectedJS;
+    }
+
+    public ContainerViewAndroid getContainerView() {
+        return containerView;
     }
 
     public void onStart() {

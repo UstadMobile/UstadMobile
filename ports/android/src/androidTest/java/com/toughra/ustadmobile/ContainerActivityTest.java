@@ -1,0 +1,98 @@
+package com.toughra.ustadmobile;
+
+import android.content.Intent;
+import android.test.ActivityInstrumentationTestCase2;
+
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UMTransferJob;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.port.android.view.ContainerActivity;
+import com.ustadmobile.port.android.view.ContainerViewAndroid;
+import com.ustadmobile.test.core.TestUtils;
+
+/**
+ * Created by mike on 9/23/15.
+ */
+public class ContainerActivityTest extends ActivityInstrumentationTestCase2<ContainerActivity> {
+
+
+    public static final int TIMEOUT = 2* 60 * 1000;
+
+    public static final int CHECKINTERVAL = 1000;
+
+    public ContainerActivityTest() {
+        super(ContainerActivity.class);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance(true);
+
+        String httpRoot = TestUtils.getInstance().getHTTPRoot();
+
+
+
+        String acquireOPDSURL = UMFileUtil.joinPaths(new String[]{
+                httpRoot, "acquire.opds"});
+        UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL,
+                CatalogController.SHARED_RESOURCE, null, null,
+                CatalogController.CACHE_ENABLED);
+
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id,
+                CatalogController.SHARED_RESOURCE);
+        boolean entryPresent = entryInfo != null && entryInfo.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        if(!entryPresent) {
+            UstadMobileSystemImpl.l(UMLog.INFO, 371, "ContainerActivityTest downloading resource");
+            UMStorageDir[] dirs = impl.getStorageDirs(CatalogController.SHARED_RESOURCE);
+            CatalogController.AcquireRequest request = new CatalogController.AcquireRequest(
+                    feed.entries, dirs[0].getDirURI(), null, null, CatalogController.SHARED_RESOURCE);
+
+            UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(request);
+            int totalSize = acquireJob.getTotalSize();
+
+            acquireJob.start();
+            int timeRemaining = TIMEOUT;
+            while(timeRemaining > 0 && !acquireJob.isFinished()) {
+                try {Thread.sleep(CHECKINTERVAL); }
+                catch(InterruptedException e) {}
+                timeRemaining -= CHECKINTERVAL;
+                UstadMobileSystemImpl.l(UMLog.INFO, 371,
+                    "ContainerActivityTest waiting for download: time remaining " + timeRemaining + "ms");
+            }
+
+            UstadMobileSystemImpl.l(UMLog.INFO, 371, "ContainerActivityTest downloading resource complete: " + acquireJob.isFinished());
+        }else {
+            UstadMobileSystemImpl.l(UMLog.INFO, 371, "ContainerActivityTest resource already present");
+        }
+
+        entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, CatalogController.SHARED_RESOURCE);
+        if(entryInfo == null || entryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+            throw new IllegalStateException("Could not acquire resource for the test!");
+        }
+
+        Intent intent = new Intent();
+        intent.putExtra(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
+        intent.putExtra(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
+        setActivityIntent(intent);
+    }
+
+    public void testContainerActivity() {
+        assertNotNull(getActivity());
+        ContainerViewAndroid viewAndroid = ((ContainerActivity)getActivity()).getContainerView();
+        int timeRemaining = TIMEOUT;
+        while(timeRemaining > 0 && viewAndroid.getContainerController() == null) {
+            try {Thread.sleep(CHECKINTERVAL); }
+            catch(InterruptedException e) {}
+        }
+        assertNotNull(viewAndroid.getContainerController());
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "ContainerActivityTest complete");
+    }
+
+
+}

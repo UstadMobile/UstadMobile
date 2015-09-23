@@ -224,7 +224,8 @@ public class UMTransferJobList implements UMTransferJob, UMProgressListener{
 
     public void progressUpdated(UMProgressEvent evt) {
         this.currentJobProgress = evt.getProgress();
-        
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 900, "TransferJobList progress: type: " 
+                + evt.getEvtType() + " progress " + evt.getProgress());
         if(evt.getEvtType() == UMProgressEvent.TYPE_COMPLETE) {
             this.completedJobBytes += evt.getProgress();
 

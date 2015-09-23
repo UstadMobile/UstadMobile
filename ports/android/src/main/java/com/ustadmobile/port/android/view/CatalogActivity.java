@@ -145,6 +145,7 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(EXTRA_CATALOGURL, currentView.getController().getModel().opdsFeed.href);
+        outState.putInt(EXTRA_RESMODE, currentView.getController().getResourceMode());
     }
 
     public void setupFromCatalogView(CatalogViewAndroid view) {

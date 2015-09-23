@@ -74,9 +74,10 @@ public class ContainerViewAndroid implements ContainerView{
         return false;
     }
 
-    protected ContainerController getContainerController() {
+    public ContainerController getContainerController() {
         return containerController;
     }
+
 
 
 }

@@ -108,7 +108,7 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     }
     
     
-    public ContainerViewJ2ME(UstadJSOPDSEntry entry, String openPath, String mime) {
+    public ContainerViewJ2ME() {
         UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
         containerZip = impl.getOpenZip();
         cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);

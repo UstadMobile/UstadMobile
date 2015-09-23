@@ -134,7 +134,7 @@ public class TestContainerController extends TestCase {
         
         UstadJSOPDSEntry entry = feed.entries[0];
         
-        String openPath = impl.openContainer(entry, acquiredFileURI, 
+        String openPath = impl.openContainer(acquiredFileURI, 
             entryInfo.mimeType);
         assertNotNull("Got an open path from the system", openPath);
         

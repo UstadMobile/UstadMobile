@@ -749,12 +749,11 @@ public abstract class UstadMobileSystemImpl {
      * This method should be assumed to take a while and be run in a SEPERATE
      * thread.
      * 
-     * @param entry
-     * @param containerPath
-     * @param mimeType
-     * @return 
+     * @param containerURI The location of the container file
+     * @param mimeType The mime type of the container
+     * @return The path opened
      */
-    public abstract String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType);
+    public abstract String openContainer(String containerURI, String mimeType);
     
     public abstract void closeContainer(String openURI);
     

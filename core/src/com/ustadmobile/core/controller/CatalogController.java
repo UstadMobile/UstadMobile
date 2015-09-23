@@ -611,12 +611,12 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 String openPath = null;
                 try {
                     openPath = UstadMobileSystemImpl.getInstance().openContainer(
-                        entry, entryInfo.fileURI, entryInfo.mimeType);
+                        entryInfo.fileURI, entryInfo.mimeType);
                 
-                    ContainerController catalogCtrl = 
+                    ContainerController containerCtrl = 
                         ContainerController.makeFromEntry(entry, openPath, 
                             entryInfo.fileURI, entryInfo.mimeType);
-                    catalogCtrl.show();
+                    containerCtrl.show();
                 
                     impl.l(UMLog.VERBOSE, 425, openPath);
                 }catch(Exception e) {

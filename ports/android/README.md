@@ -28,3 +28,8 @@ Build Debug Version:
 
 Build Release Version:
 ./gradlew assembleRelease
+
+Watching logcat/Debugging:
+
+The logtag is UMLogAndroid
+$ adb logcat -s 'ActivityManager:I UMLogAndroid:*'

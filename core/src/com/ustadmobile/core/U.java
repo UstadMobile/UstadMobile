@@ -124,5 +124,6 @@ public class U {
         
         public static final int female = 42;
         
+        public static final int could_not_open_file = 43;
     }
 }
