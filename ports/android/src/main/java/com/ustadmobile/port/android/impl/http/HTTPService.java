@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -16,8 +17,13 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 public class HTTPService extends Service {
@@ -74,6 +80,7 @@ public class HTTPService extends Service {
 
         try {
             httpd.start();
+
             lastStartedHTTPD = httpd;
             lastMountedZipMap = mountedZipMap;
             Log.i(UstadMobileSystemImplAndroid.TAG, "Started HTTP server");
@@ -100,6 +107,7 @@ public class HTTPService extends Service {
         registerReceiver(downloadCompleteReceiver, downloadCompleteIntentFilter);
     }
 
+
     public void watchDownloadJob(long downloadID, UstadMobileSystemImplAndroid.DownloadJob job) {
         downloadJobMap.put(downloadID, job);
     }
@@ -107,17 +115,19 @@ public class HTTPService extends Service {
     @Override
     public void onDestroy() {
         Log.i(UstadMobileSystemImplAndroid.TAG, "Destroy HTTP Service");
+        //saveMountedZips();
         unregisterReceiver(downloadCompleteReceiver);
         httpd.stop();
         httpd = null;
+
+
         mountedZipMap = null;
     }
 
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        return new HTTPBinder();
+        return mBinder;
     }
 
     public class HTTPBinder extends Binder {
@@ -130,7 +140,7 @@ public class HTTPService extends Service {
         return "http://127.0.0.1:" + DEFAULT_PORT  + "/";
     }
 
-    private EmbeddedHTTPD getActiveServer() {
+    public EmbeddedHTTPD getActiveServer() {
         if(httpd != null) {
             return httpd;
         }else {
@@ -157,6 +167,13 @@ public class HTTPService extends Service {
                 + this + "httpd server = " + server);
         String zipName = UMFileUtil.getFilename(zipPath);
         server.mountZip(zipName, zipPath);
+
+        String extension = UMFileUtil.getExtension(zipPath);
+        if(extension != null && extension.endsWith("epub")) {
+            addFilter(zipName, "xhtml", "autoplay(\\s?)=(\\s?)([\"'])autoplay",
+                    "data-autoplay$1=$2$3autoplay");
+            addFilter(zipName, "xhtml", "&(\\s)", "&amp;$1");
+        }
 
         String openedPath =getBaseURL() + "mount/" + zipName;
         zipMap.put(openedPath, zipName);

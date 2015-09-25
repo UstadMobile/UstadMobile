@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import android.support.v4.app.Fragment;
+
 
 import java.util.*;
 
@@ -71,7 +73,7 @@ public class ContainerViewAndroid implements ContainerView{
 
     @Override
     public boolean isShowing() {
-        return false;
+         return containerActivity.inUse;
     }
 
     public ContainerController getContainerController() {

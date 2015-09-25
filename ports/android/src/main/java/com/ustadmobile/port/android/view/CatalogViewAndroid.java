@@ -264,11 +264,6 @@ public class CatalogViewAndroid implements CatalogView {
 
     @Override
     public boolean isShowing() {
-        if(UstadMobileSystemImplAndroid.getInstanceAndroid().getCurrentActivity() instanceof CatalogActivity && activity != null) {
-            if(activity.getCurrentFragment() instanceof CatalogOPDSFragment) {
-                return ((CatalogOPDSFragment)activity.getCurrentFragment()).getCatalogView() == this;
-            }
-        }
 
         return false;
     }

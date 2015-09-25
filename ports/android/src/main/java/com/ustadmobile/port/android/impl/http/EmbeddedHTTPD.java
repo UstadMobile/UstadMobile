@@ -27,6 +27,10 @@ public class EmbeddedHTTPD extends NanoHTTPD {
 
     private HashMap<String, MountedZip> mountedEPUBs;
 
+    private int id;
+
+    public static int idCounter = 0;
+
     public static final String PREFIX_MOUNT = "/mount/";
 
     /**
@@ -72,6 +76,12 @@ public class EmbeddedHTTPD extends NanoHTTPD {
     public EmbeddedHTTPD(int portNum) {
         super(portNum);
         mountedEPUBs = new HashMap<>();
+        id = idCounter;
+        idCounter++;
+    }
+
+    public String toString() {
+        return "EmbeddedHTTPServer on port : " + getListeningPort() + " id: " + id;
     }
 
     public String getMimeType(String uri) {
@@ -195,7 +205,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
         }
 
         public boolean hasFilter(String extension) {
-            return filters.containsKey(extension);
+            return filters != null && filters.containsKey(extension);
         }
 
         public String filterEntry(String extension, String content) {

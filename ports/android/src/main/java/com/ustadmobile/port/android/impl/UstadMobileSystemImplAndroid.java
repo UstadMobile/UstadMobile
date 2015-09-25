@@ -45,11 +45,9 @@ import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
@@ -58,7 +56,6 @@ import com.ustadmobile.port.android.view.AppViewAndroid;
 
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.Contacts;
 import android.util.Log;
 
 import org.xmlpull.v1.*;
@@ -105,7 +102,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private HTTPService httpService;
 
-    private HashMap<Activity, HTTPServiceConnection> activityHTTPServiceConnections;
+    private HashMap<Object, HTTPServiceConnection> activityHTTPServiceConnections;
+
+    private HashMap<Object, HTTPService> activityToHttpServiceMap;
 
     public static final String START_USERNAME = "START_USERNAME";
 
@@ -127,6 +126,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         appView = new AppViewAndroid(this);
         logger = new UMLogAndroid();
         activityHTTPServiceConnections = new HashMap<>();
+        activityToHttpServiceMap = new HashMap<>();
     }
 
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
@@ -151,7 +151,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      *
      * @param activity
      */
-        public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
+    public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
         if(mainInstance == null || ((UstadMobileSystemImplAndroid)mainInstance).currentContext == null) {
             //this is probably the first activity
             createActivity = activity;
@@ -166,9 +166,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             if(!impl.isLocaleLoaded()) {
                 mainInstance.loadLocale();
             }
-
-            ((UstadMobileSystemImplAndroid)mainInstance).connectActivityToHttpService(activity);
         }
+
+        ((UstadMobileSystemImplAndroid)mainInstance).connectActivityToHttpService(activity);
 
         /*
          * Sometimes for testing we need to set the username and authentication : this can only be
@@ -203,15 +203,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         Intent httpServiceIntent = new Intent(activity, HTTPService.class);
         HTTPServiceConnection activityCon = activityHTTPServiceConnections.get(activity);
         if(activityCon == null) {
-            activityCon = new HTTPServiceConnection();
+            activityCon = new HTTPServiceConnection(activity);
             activity.bindService(httpServiceIntent, activityCon, Context.BIND_AUTO_CREATE);
             activityHTTPServiceConnections.put(activity, activityCon);
         }
     }
 
+
     public void handleActivityStop(Activity activity) {
-        int x =42 ;
-        int y = x + 1;
+
     }
 
     public void handleActivityDestroy(Activity activity) {
@@ -657,7 +657,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return logger;
     }
 
-    protected boolean waitForHTTPReady(int interval, int timeout) {
+    public boolean waitForHTTPReady(int interval, int timeout) {
         if(isHTTPReady()) {
             return true;
         }
@@ -680,19 +680,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         l(UMLog.INFO, 367, containerURI + " type (" + mimeType + ")" + " ready : " + isHTTPReady());
 
         String openPath = httpService.mountZIP(containerURI);
-        String extension = UMFileUtil.getExtension(containerURI);
-        if(extension != null && extension.endsWith("epub")) {
-            String zipName = UMFileUtil.getFilename(containerURI);
-            httpService.addFilter(zipName, "xhtml", "autoplay(\\s?)=(\\s?)([\"'])autoplay",
-                "data-autoplay$1=$2$3autoplay");
-            httpService.addFilter(zipName, "xhtml", "&(\\s)", "&amp;$1");
-        }
+
 
         return openPath;
     }
 
     public boolean isHTTPReady() {
-        return httpService != null;
+        return httpService != null && httpService.getActiveServer() != null;
     }
 
     @Override
@@ -710,10 +704,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     public class HTTPServiceConnection implements ServiceConnection {
 
+        private Object key;
+
+        public HTTPServiceConnection(Object key) {
+            this.key = key;
+        }
+
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             HTTPService.HTTPBinder httpBinder = (HTTPService.HTTPBinder)service;
+            HTTPService bindedService = httpBinder.getService();
             UstadMobileSystemImplAndroid.this.httpService = httpBinder.getService();
+            UstadMobileSystemImplAndroid.this.activityToHttpServiceMap.put(key, bindedService);
         }
 
         @Override
