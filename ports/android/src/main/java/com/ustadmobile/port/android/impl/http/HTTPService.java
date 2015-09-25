@@ -175,8 +175,15 @@ public class HTTPService extends Service {
             addFilter(zipName, "xhtml", "&(\\s)", "&amp;$1");
         }
 
-        String openedPath =getBaseURL() + "mount/" + zipName;
-        zipMap.put(openedPath, zipName);
+        String openedPath = null;
+        try {
+            openedPath =getBaseURL() + "mount/" + URLEncoder.encode(zipName, "UTF-8");
+            zipMap.put(openedPath, zipName);
+        }catch(IOException e) {
+            //this will only ever happen if UTF-8 is unsupported by the system - which is never going to happen
+            UstadMobileSystemImpl.l(UMLog.CRITICAL, 20, null, e);
+        }
+
 
         return openedPath;
     }
