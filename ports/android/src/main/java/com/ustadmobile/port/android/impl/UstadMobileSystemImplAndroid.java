@@ -50,9 +50,15 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
+import com.ustadmobile.port.android.view.CatalogActivity;
+import com.ustadmobile.port.android.view.ContainerActivity;
+import com.ustadmobile.port.android.view.LoginActivity;
 
 import android.os.Build;
 import android.os.IBinder;
@@ -65,12 +71,6 @@ import org.xmlpull.v1.*;
  * Created by mike on 07/06/15.
  */
 public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
-
-    private Activity currentActivity;
-
-    private Context currentContext;
-
-    private static Activity createActivity;
 
     public static final String TAG = "UstadMobileImplAndroid";
 
@@ -96,8 +96,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     public static final String EXTRA_VIEWID = "VIEWID";
 
-    private AppViewAndroid appView;
-
     private UMLogAndroid logger;
 
     private HTTPService httpService;
@@ -109,6 +107,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public static final String START_USERNAME = "START_USERNAME";
 
     public static final String START_AUTH = "START_AUTH";
+
+    private WeakHashMap<Activity, AppViewAndroid> appViews;
 
     /**
      * When opencontainer is called we need to be sure that the http service is ready.  This is the
@@ -122,23 +122,36 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      */
     public static final int HTTP_CHECK_INTERVAL = 500;
 
+    /**
+     @deprecated
+     */
     public UstadMobileSystemImplAndroid() {
-        appView = new AppViewAndroid(this);
         logger = new UMLogAndroid();
         activityHTTPServiceConnections = new HashMap<>();
         activityToHttpServiceMap = new HashMap<>();
+        appViews = new WeakHashMap<>();
     }
 
+    /**
+     * @deprecated
+     * @return
+     */
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
         return (UstadMobileSystemImplAndroid) mainInstance;
     }
 
-    public void init() {
-        if(currentContext == null) {
-            setCurrentContext(createActivity);
-        }
+    @Override
+    public void init(Object context) {
+        super.init(context);
+    }
 
-        super.init();
+    @Override
+    public boolean loadActiveUserInfo(Object context) {
+        SharedPreferences appPrefs = getAppSharedPreferences((Context)context);
+        currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
+        currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
+        this.userPreferences = null;
+        return true;
     }
 
     @Override
@@ -152,51 +165,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      * @param activity
      */
     public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
-        if(mainInstance == null || ((UstadMobileSystemImplAndroid)mainInstance).currentContext == null) {
-            //this is probably the first activity
-            createActivity = activity;
 
-            if(mainInstance == null) {
-                getInstance();//we need to setup main instance here : now an activity has been created we must be ready
-            }
-
-            UstadMobileSystemImplAndroid impl = getInstanceAndroid();
-            impl.setCurrentContext(activity);
-            impl.currentActivity = activity;
-            if(!impl.isLocaleLoaded()) {
-                mainInstance.loadLocale();
-            }
-        }
-
-        ((UstadMobileSystemImplAndroid)mainInstance).connectActivityToHttpService(activity);
-
-        /*
-         * Sometimes for testing we need to set the username and authentication : this can only be
-         * done with a known context
-         */
-        String currentUsername = savedInstanceState != null ? savedInstanceState.getString(KEY_CURRENTUSER): null;
-        if(currentUsername == null) {
-            currentUsername = activity.getIntent().getStringExtra(KEY_CURRENTUSER);
-        }
-
-        if(currentUsername != null) {
-            mainInstance.setActiveUser(currentUsername);
-            String currentAuth = savedInstanceState != null && savedInstanceState.getString(KEY_CURRENTAUTH) != null ?
-                savedInstanceState.getString(KEY_CURRENTUSER) : activity.getIntent().getStringExtra(KEY_CURRENTAUTH);
-            mainInstance.setActiveUserAuth(currentAuth);
-        }
 
     }
 
     public void handleActivityStart(Activity activity) {
-        this.currentActivity = activity;
-        setCurrentContext(activity);
 
-        //now we have a started activity this isn't needed
-        createActivity = null;
-
-        //bind the activity to the HTTP service
-        connectActivityToHttpService(activity);
     }
 
     protected void connectActivityToHttpService(Activity activity) {
@@ -222,30 +196,38 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
     }
 
-    public void setCurrentContext(Context context) {
-        if(this.currentContext != context) {
-            this.currentContext = context;
-            SharedPreferences appPrefs = getAppSharedPreferences();
-            currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
-            currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
-            this.userPreferences = null;//change of context: force this to get reloaded when requested
+    @Override
+    public void go(Class cls, Hashtable args, Object context) {
+        Class androidClass = null;
+        if(cls.equals(LoginView.class)) {
+            androidClass = LoginActivity.class;
+        }else if(cls.equals(ContainerView.class)) {
+            androidClass = ContainerActivity.class;
+        }else if(cls.equals(CatalogView.class)) {
+            androidClass = CatalogActivity.class;
         }
-    }
 
-    /**
-     * Return the current Android context
-     * @return
-     */
-    public Context getCurrentContext() {
-        return this.currentContext;
-    }
+        Intent startIntent = new Intent((Context)context, androidClass);
 
-    /**
-     * Return the current Android activity (may equal currentcontext)
-     *
-     */
-    public Activity getCurrentActivity() {
-        return this.currentActivity;
+        if(args != null) {
+            Enumeration argE = args.keys();
+
+            String currentKey;
+            Object currentVal;
+            while(argE.hasMoreElements()) {
+                currentKey = (String)argE.nextElement();
+                currentVal = args.get(currentKey);
+
+                if(currentVal instanceof String) {
+                    startIntent.putExtra(currentKey, (String)currentVal);
+                }else if(currentVal instanceof Integer) {
+                    startIntent.putExtra(currentKey, (Integer)currentVal);
+                }
+            }
+        }
+
+
+        ((Context)context).startActivity(startIntent);
     }
 
     /**
@@ -255,13 +237,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      *
      * This will start an activity, with the parameter EXTRA_VIEWID set to the given viewId
      *
+     * @deprecated
      * @param activityClass The Class object of the Activity to start
      * @param viewId An integer ID that activity expects so it can find it's view object after being created
      */
-    public void startActivityForViewId(Class activityClass, int viewId) {
-        Intent startIntent = new Intent(getCurrentContext(), activityClass);
+    public void startActivityForViewId(Class activityClass, int viewId, Context context) {
+        Intent startIntent = new Intent(context, activityClass);
         startIntent.putExtra(EXTRA_VIEWID, viewId);
-        getCurrentContext().startActivity(startIntent);
+        context.startActivity(startIntent);
     }
 
 
@@ -270,18 +253,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public String getCacheDir(int mode) {
+    public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir();
         if(mode == CatalogController.SHARED_RESOURCE) {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
         }else {
-            return UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-" + getActiveUser(),
+            return UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-" + getActiveUser(context),
                     UstadMobileConstants.CACHEDIR});
         }
     }
 
     @Override
-    public UMStorageDir[] getStorageDirs(int mode) {
+    public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(getSystemBaseDir(), getString(U.id.device), false, true, false));
@@ -289,7 +272,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
             String userBase = UMFileUtil.joinPaths(new String[]{getSystemBaseDir(), "user-"
-                    + getActiveUser()});
+                    + getActiveUser(context)});
             dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
         }
 
@@ -318,7 +301,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      * @return
      */
     @Override
-    public String getSystemLocale() {
+    public String getSystemLocale(Object context) {
         return Locale.getDefault().toString();
     }
 
@@ -327,7 +310,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         Hashtable ht = new Hashtable();
         ht.put("os", "Android");
         ht.put("osversion", Build.VERSION.RELEASE);
-        ht.put("locale", this.getSystemLocale());
 
         return ht;
     }
@@ -350,8 +332,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public InputStream openResourceInputStream(String resURI) throws IOException {
-        return getCurrentContext().getAssets().open(resURI);
+    public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
+        return ((Context)context).getAssets().open(resURI);
     }
 
     @Override
@@ -382,8 +364,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers) {
-        DownloadJob job = new DownloadJob(url, fileURI, this);
+    public UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers, Object context) {
+        DownloadJob job = new DownloadJob(url, fileURI, this, (Context)context);
 
         return job;
     }
@@ -425,21 +407,19 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return f.delete();
     }
 
-    private SharedPreferences getAppSharedPreferences() {
+
+    private SharedPreferences getAppSharedPreferences(Context context) {
         if(appPreferences == null) {
-            if(currentContext == null) {
-                throw new IllegalStateException("current Context is null: must use handleActivityStart first");
-            }
-            appPreferences = currentContext.getSharedPreferences(APP_PREFERENCES_NAME,
+            appPreferences = context.getSharedPreferences(APP_PREFERENCES_NAME,
                 Context.MODE_PRIVATE);
         }
         return appPreferences;
     }
 
-    private SharedPreferences getUserPreferences() {
+    private SharedPreferences getUserPreferences(Context context) {
         if(currentUsername != null) {
             if(userPreferences == null) {
-                userPreferences = currentContext.getSharedPreferences(USER_PREFERENCES_NAME +
+                userPreferences = context.getSharedPreferences(USER_PREFERENCES_NAME +
                         currentUsername, Context.MODE_PRIVATE);
                 Log.d(TAG, "Opening preferences for user: " + currentUsername);
             }
@@ -450,12 +430,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public void setActiveUser(String username) {
+    public void setActiveUser(String username, Object context) {
         this.currentUsername = username;
 
-        super.setActiveUser(username);
-        saveUserPrefs();
-        SharedPreferences appPreferences = getAppSharedPreferences();
+        super.setActiveUser(username, context);
+        saveUserPrefs(context);
+        SharedPreferences appPreferences = getAppSharedPreferences((Context)context);
         SharedPreferences.Editor editor = appPreferences.edit();
         if(username != null) {
             editor.putString(KEY_CURRENTUSER, username);
@@ -469,25 +449,25 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public String getActiveUser() {
+    public String getActiveUser(Object context) {
         return currentUsername;
     }
 
     @Override
-    public void setActiveUserAuth(String auth) {
-        setAppPref(KEY_CURRENTAUTH, auth);
+    public void setActiveUserAuth(String auth, Object context) {
+        setAppPref(KEY_CURRENTAUTH, auth, context);
         this.currentAuth = auth;
     }
 
     @Override
-    public String getActiveUserAuth() {
+    public String getActiveUserAuth(Object context) {
         return this.currentAuth;
     }
 
     @Override
-    public void setUserPref(String key, String value) {
+    public void setUserPref(String key, String value, Object context) {
         if(userPreferencesEditor == null) {
-            userPreferencesEditor = getUserPreferences().edit();
+            userPreferencesEditor = getUserPreferences((Context)context).edit();
         }
         if(value != null) {
             userPreferencesEditor.putString(key, value);
@@ -499,16 +479,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public String getUserPref(String key) {
-        return getUserPreferences().getString(key, null);
+    public String getUserPref(String key, Object context) {
+        return getUserPreferences((Context)context).getString(key, null);
     }
 
     /**
      * @inheritDoc
      */
     @Override
-    public String[] getAppPrefKeyList() {
-        return getKeysFromSharedPreferences(getAppSharedPreferences());
+    public String[] getAppPrefKeyList(Object context) {
+        return getKeysFromSharedPreferences(getAppSharedPreferences((Context) context));
     }
 
 
@@ -516,8 +496,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      * @inheritDoc
      */
     @Override
-    public String[] getUserPrefKeyList() {
-        return getKeysFromSharedPreferences(getUserPreferences());
+    public String[] getUserPrefKeyList(Object context) {
+        return getKeysFromSharedPreferences(getUserPreferences((Context) context));
     }
 
     /**
@@ -533,7 +513,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public void saveUserPrefs() {
+    public void saveUserPrefs(Object context) {
         if(userPreferencesEditor != null) {
             userPreferencesEditor.commit();
             userPreferencesEditor = null;
@@ -541,12 +521,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public String getAppPref(String key) {
-        return getAppSharedPreferences().getString(key, null);
+    public String getAppPref(String key, Object context) {
+        return getAppSharedPreferences((Context)context).getString(key, null);
     }
 
-    public void setAppPref(String key, String value) {
-        SharedPreferences prefs = getAppSharedPreferences();
+    public void setAppPref(String key, String value, Object context) {
+        SharedPreferences prefs = getAppSharedPreferences((Context)context);
         SharedPreferences.Editor editor = prefs.edit();
         if(value != null) {
             editor.putString(key, value);
@@ -648,8 +628,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public AppView getAppView() {
-        return appView;
+    public AppView getAppView(Object context) {
+        Activity activity = (Activity)context;
+        AppViewAndroid view = appViews.get(activity);
+        if(view == null) {
+            view = new AppViewAndroid(this, activity);
+            appViews.put(activity, view);
+        }
+
+        return view;
     }
 
     @Override
@@ -791,7 +778,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
          */
         private int cachedTotalSize;
 
-        public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplAndroid hostImpl) {
+        public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplAndroid hostImpl, Context context) {
             this.hostImpl = hostImpl;
             this.srcURL = srcURL;
             this.destFileURI = destFileURI;
@@ -799,7 +786,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             this.progressListeners = new LinkedList<UMProgressListener>();
             this.finished = false;
             cachedTotalSize = -1;
-
+            ctx = context;
         }
 
         @Override
@@ -807,7 +794,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             /* TODO: In Android 2.3 if the destination file already exists: it must be removed or
             *  we must use a temporary dir
             *  */
-            this.ctx = hostImpl.getCurrentContext();
             DownloadManager mgr = (DownloadManager)ctx.getSystemService(Context.DOWNLOAD_SERVICE);
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(this.srcURL));
 
@@ -881,7 +867,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 retVal[IDX_BYTES_TOTAL] = this.finishedTotalSize;
                 retVal[IDX_STATUS] = DownloadManager.STATUS_SUCCESSFUL;
             }else {
-                DownloadManager mgr = (DownloadManager)hostImpl.getCurrentContext().getSystemService(
+                DownloadManager mgr = (DownloadManager)ctx.getSystemService(
                         Context.DOWNLOAD_SERVICE);
                 DownloadManager.Query query = new DownloadManager.Query();
                 query.setFilterById(this.downloadID);

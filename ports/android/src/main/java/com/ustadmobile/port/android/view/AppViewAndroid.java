@@ -33,6 +33,7 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
@@ -54,31 +55,33 @@ public class AppViewAndroid implements AppView{
 
     private AlertDialog choiceDialog;
 
-    public AppViewAndroid(UstadMobileSystemImplAndroid impl) {
+    private Activity activity;
+
+    public AppViewAndroid(UstadMobileSystemImplAndroid impl, Activity activity) {
         this.impl = impl;
+        this.activity = activity;
     }
 
 
     @Override
     public void showProgressDialog(final String title) {
-        final Activity currentActivity = impl.getCurrentActivity();
-        currentActivity.runOnUiThread(new Runnable() {
+        activity.runOnUiThread(new Runnable() {
             public void run() {
                 dismissProgressDialog();
 
-                progressDialog = ProgressDialog.show(currentActivity, title, "");
+                progressDialog = ProgressDialog.show(activity, title, "");
             }
         });
     }
 
     @Override
     public boolean dismissProgressDialog() {
-        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+        activity.runOnUiThread(new Runnable() {
             public void run() {
-            if (progressDialog != null) {
-                progressDialog.dismiss();
-                progressDialog = null;
-            }
+                if (progressDialog != null) {
+                    progressDialog.dismiss();
+                    progressDialog = null;
+                }
             }
         });
         return progressDialog != null;
@@ -86,9 +89,9 @@ public class AppViewAndroid implements AppView{
 
     @Override
     public void showAlertDialog(final String title, final String text) {
-        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+        activity.runOnUiThread(new Runnable() {
             public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(impl.getCurrentActivity());
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setMessage(text).setTitle(title);
                 builder.setPositiveButton("OK", new AlertDialog.OnClickListener() {
                     @Override
@@ -104,7 +107,7 @@ public class AppViewAndroid implements AppView{
 
     @Override
     public void dismissAlertDialog() {
-        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+        activity.runOnUiThread(new Runnable() {
             public void run(){
                 if(alertDialog != null) {
                     alertDialog.dismiss();
@@ -116,9 +119,9 @@ public class AppViewAndroid implements AppView{
 
     @Override
     public void showNotification(final String text, final int length) {
-        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+        activity.runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(impl.getCurrentActivity(), text, length).show();
+                Toast.makeText(activity, text, length).show();
             }
         });
 
@@ -127,14 +130,14 @@ public class AppViewAndroid implements AppView{
 
     @Override
     public void showChoiceDialog(final String title, final String[] choices, final int commandId, final AppViewChoiceListener listener) {
-        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+        activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if(choiceDialog != null) {
                     choiceDialog.dismiss();
                 }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(impl.getCurrentActivity());
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle(title).setItems(choices, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         listener.appViewChoiceSelected(commandId, which);
@@ -148,7 +151,7 @@ public class AppViewAndroid implements AppView{
 
     @Override
     public void dismissChoiceDialog() {
-        impl.getCurrentActivity().runOnUiThread(new Runnable() {
+        activity.runOnUiThread(new Runnable() {
             public void run() {
                 if(choiceDialog != null) {
                     choiceDialog.dismiss();

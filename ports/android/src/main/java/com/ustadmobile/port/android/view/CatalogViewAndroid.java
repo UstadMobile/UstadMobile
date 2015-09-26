@@ -258,7 +258,7 @@ public class CatalogViewAndroid implements CatalogView {
         if(impl.getCurrentContext() instanceof CatalogActivity) {
             ((CatalogActivity)impl.getCurrentContext()).setCurrentOPDSCatalogFragment(this);
         }else {
-            impl.startActivityForViewId(CatalogActivity.class, this.viewId);
+            impl.startActivityForViewId(CatalogActivity.class, this.viewId, this);
         }
     }
 

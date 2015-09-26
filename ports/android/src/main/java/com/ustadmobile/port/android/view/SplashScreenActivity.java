@@ -59,7 +59,7 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         impl.handleActivityStart(this);
-        impl.startUI();
+        impl.startUI(this);
 
     }
 

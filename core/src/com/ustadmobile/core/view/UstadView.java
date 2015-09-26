@@ -43,4 +43,14 @@ public interface UstadView {
      * @return true if the view is on screen now, false otherwise
      */
     public boolean isShowing();
+    
+    
+    /**
+     * Return the system specific context for this view (e.g. Activity on Android
+     * etc)
+     * 
+     * @return 
+     */
+    public Object getContext();
+    
 }

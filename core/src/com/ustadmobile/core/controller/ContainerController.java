@@ -228,7 +228,7 @@ public class ContainerController implements UstadController, AsyncLoadableContro
      * @see ContainerController#ARG_CONTAINERURI
      * @see ContainerController#ARG_MIMETYPE
      */
-    public UstadController loadController(Hashtable args) throws Exception {
+    public UstadController loadController(Hashtable args, Object context) throws Exception {
         fileURI = (String)args.get(ARG_CONTAINERURI);
         mimeType = (String)args.get(ARG_MIMETYPE);
         

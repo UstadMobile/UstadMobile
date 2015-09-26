@@ -137,7 +137,7 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             String errMsg = LocaleUtil.formatMessage(impl.getString(U.id.course_catalog_load_error),
                 "Catalog controller");
-            impl.getAppView().showAlertDialog(impl.getString(U.id.error), errMsg);
+            impl.getAppView(this).showAlertDialog(impl.getString(U.id.error), errMsg);
         }else {
             runOnUiThread(new Runnable() {
                 @Override

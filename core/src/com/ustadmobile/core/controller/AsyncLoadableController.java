@@ -40,6 +40,6 @@ import java.util.Hashtable;
  */
 public interface AsyncLoadableController {
     
-    public UstadController loadController(Hashtable args) throws Exception;
+    public UstadController loadController(Hashtable args, Object context) throws Exception;
     
 }

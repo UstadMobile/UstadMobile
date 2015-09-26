@@ -40,6 +40,8 @@ import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.LoginView;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,15 +99,8 @@ public abstract class UstadMobileSystemImpl {
     
     private boolean initRan;
     
-    /**
-     * Get an instance of the system implementation - relies on the platform
-     * specific factory method
-     * 
-     * @return A singleton instance
-     */
-    public static UstadMobileSystemImpl getInstance() {
-        return getInstance(false);
-    }
+    
+    
     
     /**
      * Get an instance of the system implementation - relies on the platform
@@ -113,12 +108,9 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return A singleton instance
      */
-    public static UstadMobileSystemImpl getInstance(boolean skipInit) {
+    public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
             mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
-            if(!skipInit) {
-                mainInstance.init();
-            }
         }
         
         return mainInstance;
@@ -154,39 +146,49 @@ public abstract class UstadMobileSystemImpl {
      * 
      * This must make the shared content directory if it does not already exist
      */
-    public void init() {
+    public void init(Object context) {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 519, null);
-        boolean sharedDirOK = false;
         try {
-            checkCacheDir();
-            loadLocale();
+            checkCacheDir(context);
+            loadLocale(context);
+            loadActiveUserInfo(context);
+            initRan = true;
         }catch(IOException e) {
             mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
         }
     }
     
-    public void checkCacheDir() throws IOException{
+    public void checkCacheDir(Object context) throws IOException{
         boolean sharedDirOK = false;
         String sharedContentDir = mainInstance.getSharedContentDir();
         sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
         String sharedCacheDir = mainInstance.getCacheDir(
-                CatalogController.SHARED_RESOURCE);
+                CatalogController.SHARED_RESOURCE, context);
         boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
         StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
         initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
         mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
     }
     
-    public boolean loadLocale() {
+    /**
+     * Go and start a new activity / view
+     * 
+     * @param cls What type of view to start
+     * @param args 
+     */
+    public abstract void go(Class cls, Hashtable args, Object context);
+    
+    public boolean loadLocale(Object context) {
         //choose the locale
         boolean success = false;
-        String locale = LocaleUtil.chooseSystemLocale(getSystemLocale(), 
+        String locale = LocaleUtil.chooseSystemLocale(getSystemLocale(context), 
                 UstadMobileConstants.supportedLocales, 
                 UstadMobileConstants.fallbackLocale);
         
         InputStream localeIn = null;
         try {
-            localeIn = openResourceInputStream("locale/" +locale + ".properties");
+            localeIn = openResourceInputStream("locale/" +locale + ".properties",
+                context);
             messages = MessagesHashtable.load(localeIn);
             getLogger().l(UMLog.VERBOSE, 423, locale);
             String localeDir = messages.get(U.id.dir);
@@ -203,6 +205,8 @@ public abstract class UstadMobileSystemImpl {
         return success;
     }
     
+    public abstract boolean loadActiveUserInfo(Object context);
+    
     /**
      * Check on whether or not the locale string pack has been loaded or not
      * @return 
@@ -214,36 +218,49 @@ public abstract class UstadMobileSystemImpl {
     /**
      * Starts the user interface for the app
      */
-    public void startUI() {        
+    public void startUI(Object context) {        
         final UstadMobileSystemImpl impl = this;
         
-        String activeUser = getActiveUser();
-        String activeUserAuth = getActiveUserAuth();
+        String activeUser = getActiveUser(context);
+        String activeUserAuth = getActiveUserAuth(context);
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
                 
         if(activeUser == null || activeUserAuth == null) {
-            new LoginController().show();
+            go(LoginView.class, null, context);
         }else {
-            //Ensure directory presence in case user deleted it whilst we were away
-            setActiveUser(activeUser);
+            Hashtable args = new Hashtable();
+            String catalogURL = getUserPref("opds_server_primary", 
+                UstadMobileDefaults.DEFAULT_OPDS_SERVER, context);
+            args.put(CatalogController.KEY_URL, catalogURL);
+            args.put(CatalogController.KEY_HTTPUSER, activeUser);
+            args.put(CatalogController.KEY_HTTPPPASS, activeUserAuth);
+            args.put(CatalogController.KEY_FLAGS, 
+                new Integer(CatalogController.CACHE_ENABLED));
+            args.put(CatalogController.KEY_RESMOD, 
+                new Integer(CatalogController.USER_RESOURCE));
+            
+            go(CatalogView.class, args, context);
+            
+            /*
             getLogger().l(UMLog.VERBOSE, 403, activeUser);
-            getAppView().showProgressDialog(getString(U.id.loading));
+            getAppView(context).showProgressDialog(getString(U.id.loading));
             
             Thread startThread = new Thread(new Runnable() {
                 public void run() {
                     try {
-                        CatalogController ctrl = CatalogController.makeUserCatalog(impl);
-                        impl.getAppView().dismissProgressDialog();
+                        CatalogController ctrl = CatalogController.makeUserCatalog(impl, context);
+                        impl.getAppView(context).dismissProgressDialog();
                         ctrl.show();
                     }catch(Exception e) {
-                        impl.getAppView().dismissProgressDialog();
-                        impl.getAppView().showNotification("Couldn't load course catalog", 
+                        impl.getAppView(context).dismissProgressDialog();
+                        impl.getAppView(context).showNotification("Couldn't load course catalog", 
                             AppView.LENGTH_LONG);
                         getLogger().l(UMLog.ERROR, 107, null, e);
                     }
                 }
             });
             startThread.start();
+            */
         }
     }
     
@@ -288,7 +305,7 @@ public abstract class UstadMobileSystemImpl {
      * @see CatalogController#SHARED_RESOURCE
      * @return String filepath to the cache dir for that mode
      */
-    public abstract String getCacheDir(int mode);
+    public abstract String getCacheDir(int mode, Object context);
     
     /**
      * Get storage directories
@@ -296,7 +313,7 @@ public abstract class UstadMobileSystemImpl {
      * @param mode bitmask flag of USER_RESOURCE or SHARED_RESOURCE
      * @return Array of storage 
      */
-    public abstract UMStorageDir[] getStorageDirs(int mode);
+    public abstract UMStorageDir[] getStorageDirs(int mode, Object context);
     
     /**
      * Provides the path to the shared content directory 
@@ -322,12 +339,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return System locale
      */
-    public abstract String getSystemLocale();
-    
-    public String getSystemPreferredLocale() {
-        return null;
-    }
-    
+    public abstract String getSystemLocale(Object context);
     
     /**
      * Provide information about the platform as key value pairs in a hashtable
@@ -410,7 +422,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param resURI the path to the resource; e.g. locale/en.properties
      */
-    public abstract InputStream openResourceInputStream(String resURI) throws IOException;
+    public abstract InputStream openResourceInputStream(String resURI, Object context) throws IOException;
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 
@@ -486,7 +498,7 @@ public abstract class UstadMobileSystemImpl {
      * @param headers HTTP headers to set as key/value pairs
      * @return A transfer job that can be started and progress of which can be tracked
      */
-    public abstract UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers);
+    public abstract UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers, Object context);
     
     /**
      * Rename file from/to 
@@ -517,11 +529,12 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param username username as a string, or null for no active user
      */
-    public void setActiveUser(String username) {
+    public void setActiveUser(String username, Object context) {
         //Make sure there is a valid directory for this user
         getLogger().l(UMLog.INFO, 306, username);
         if(username != null) {
-            String userCachePath = getCacheDir(CatalogController.USER_RESOURCE);
+            String userCachePath = getCacheDir(CatalogController.USER_RESOURCE, 
+                    context);
             String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
             try {
                 boolean dirOK = makeDirectory(userCacheParent) && makeDirectory(userCachePath);
@@ -538,7 +551,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return Currently active username
      */
-    public abstract String getActiveUser();
+    public abstract String getActiveUser(Object context);
     
     /**
      * Set the authentication (e.g. password) of the currently active user
@@ -546,14 +559,14 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param password 
      */
-    public abstract void setActiveUserAuth(String password);
+    public abstract void setActiveUserAuth(String password, Object context);
     
     /**
      * Get the authentication (e.g. password) of the currently active user
      * 
      * @return The authentication (e.g. password) of the current user
      */
-    public abstract String getActiveUserAuth();
+    public abstract String getActiveUserAuth(Object context);
     
     /**
      * Set a preference for the currently active user
@@ -561,7 +574,7 @@ public abstract class UstadMobileSystemImpl {
      * @param key preference key as a string
      * @param value preference value as a string
      */
-    public abstract void setUserPref(String key, String value);
+    public abstract void setUserPref(String key, String value, Object context);
     
     /**
      * Get a preference for the currently active user
@@ -569,7 +582,7 @@ public abstract class UstadMobileSystemImpl {
      * @param key preference key as a string
      * @return value of that preference
      */
-    public abstract String getUserPref(String key);
+    public abstract String getUserPref(String key, Object context);
     
     
     /**
@@ -579,8 +592,8 @@ public abstract class UstadMobileSystemImpl {
      * @param defaultVal default value to return in case this is not set for this user
      * @return Value of preference for this user if set, otherwise defaultVal
      */
-    public String getUserPref(String key, String defaultVal) {
-        String valFound = getUserPref(key);
+    public String getUserPref(String key, String defaultVal, Object context) {
+        String valFound = getUserPref(key, context);
         return valFound != null ? valFound : defaultVal;
     }
     
@@ -589,14 +602,14 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return String array list of keys
      */
-    public abstract String[] getUserPrefKeyList();
+    public abstract String[] getUserPrefKeyList(Object context);
     
     /**
      * Trigger persisting the currently active user preferences.  This does NOT
      * need to be called each time when setting a preference, only when a user
      * logs out, program ends, etc.
      */
-    public abstract void saveUserPrefs();
+    public abstract void saveUserPrefs(Object context);
     
     /**
      * Get a preference for the app
@@ -604,14 +617,14 @@ public abstract class UstadMobileSystemImpl {
      * @param key preference key as a string
      * @return value of that preference
      */
-    public abstract String getAppPref(String key);
+    public abstract String getAppPref(String key, Object context);
     
     /**
      * Get a list of preferences currently set for the app itself
      * 
      * @return String array list of app preference keys
      */
-    public abstract String[] getAppPrefKeyList();
+    public abstract String[] getAppPrefKeyList(Object context);
     
     /**
      * Get a preference for the app.  If not set, return the provided defaultVal
@@ -620,8 +633,8 @@ public abstract class UstadMobileSystemImpl {
      * @param defaultVal default value to return if not set
      * @return value of the preference if set, defaultVal otherwise
      */
-    public String getAppPref(String key, String defaultVal) {
-        String valFound = getAppPref(key);
+    public String getAppPref(String key, String defaultVal, Object context) {
+        String valFound = getAppPref(key, context);
         return valFound != null ? valFound : defaultVal;
     }
     
@@ -631,7 +644,7 @@ public abstract class UstadMobileSystemImpl {
      * @param value value to be set
      * 
      */
-    public abstract void setAppPref(String key, String value);
+    public abstract void setAppPref(String key, String value, Object context);
     
     /**
      * Convenience method: setPref will use setUserPref if
@@ -641,11 +654,11 @@ public abstract class UstadMobileSystemImpl {
      * @param key Preference key
      * @param value Value of preference to store
      */
-    public void setPref(boolean isUserSpecific, String key, String value) {
+    public void setPref(boolean isUserSpecific, String key, String value, Object context) {
         if(isUserSpecific) {
-            setUserPref(key, value);
+            setUserPref(key, value, context);
         }else {
-            setAppPref(key, value);
+            setAppPref(key, value, context);
         }
     }
     
@@ -735,7 +748,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @return Platform AppView
      */
-    public abstract AppView getAppView();
+    public abstract AppView getAppView(Object context);
     
     /**
      * Get access to the logger to use on this implementation

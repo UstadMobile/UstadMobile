@@ -36,7 +36,7 @@ public class LoadControllerThread extends Thread{
         
         UstadController result = null;
         try {
-            result = controllerToLoad.loadController(args);
+            result = controllerToLoad.loadController(args, view.getContext());
             if(this.view != null) {
                 result.setView(view);
             }

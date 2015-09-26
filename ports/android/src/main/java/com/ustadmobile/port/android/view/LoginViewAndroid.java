@@ -54,7 +54,7 @@ import java.util.Map;
 /**
  * Created by mike on 07/07/15.
  */
-public class LoginViewAndroid implements LoginView, View.OnClickListener {
+public class LoginViewAndroid  {
     private LoginController controller;
 
     private LoginActivity activity;
@@ -103,13 +103,12 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
         this.activity = activity;
     }
 
-    @Override
     public void setController(LoginController loginController) {
         this.controller = loginController;
     }
 
-    @Override
     public void show() {
+        /*
         final UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
@@ -120,11 +119,10 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
                 impl.getCurrentActivity().startActivity(startIntent);
             }
         });
-
+        */
     }
 
 
-    @Override
     public void onClick(View v) {
         int clickedID = v.getId();
         switch(clickedID) {
@@ -152,11 +150,6 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
 
     }
 
-    @Override
-    public boolean isShowing() {
-        return UstadMobileSystemImplAndroid.getInstanceAndroid().getCurrentActivity() instanceof LoginActivity;
-    }
-
     public void setTitle(String title) {
         this.title = title;
         if(activity != null) {
@@ -164,43 +157,4 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
         }
     }
 
-    @Override
-    public void setUsernameHint(String usernameHint) {
-        this.usernameHint = usernameHint;
-    }
-
-    @Override
-    public void setPasswordHint(String passwordHint) {
-        this.passwordHint = passwordHint;
-    }
-
-    @Override
-    public void setButtonText(String buttonText) {
-        this.buttonText = buttonText;
-    }
-
-    @Override
-    public void setRegisterPhoneNumberHint(String phoneNumberHint) {
-        this.registerPhoneNumHint = phoneNumberHint;
-    }
-
-    @Override
-    public void setRegisterNameHint(String nameHint) {
-        this.registerNameHint = nameHint;
-    }
-
-    @Override
-    public void setRegisterGenderMaleLabel(String maleLabel) {
-        this.registerMaleLabel = maleLabel;
-    }
-
-    @Override
-    public void setRegisterGenderFemaleLabel(String femaleLabel) {
-        this.registerFemaleLabel = femaleLabel;
-    }
-
-    @Override
-    public void setRegisterButtonText(String registerButtonText) {
-        this.registerButtonText = registerButtonText;
-    }
 }
