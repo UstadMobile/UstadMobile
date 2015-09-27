@@ -88,8 +88,10 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
                 UstadMobileSystemImpl.getInstance().getDirection());
 
         CatalogOPDSFragment currentFrag = CatalogOPDSFragment.newInstance(getIntent().getExtras());
-        getSupportFragmentManager().beginTransaction().add(R.id.catalog_fragment_container,
-                currentFrag, FRAGMENT_CATALOG_TAG).commit();
+        if(savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().add(R.id.catalog_fragment_container,
+                    currentFrag, FRAGMENT_CATALOG_TAG).commit();
+        }
     }
 
 
