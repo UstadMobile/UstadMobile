@@ -100,6 +100,20 @@ public abstract class UstadMobileSystemImpl {
     private boolean initRan;
     
     
+    /**
+     * Indicates the number of bytes downloaded so far in a download
+     */
+    public static final int IDX_DOWNLOADED_SO_FAR = 0;
+
+    /**
+     * Indicates the total number of bytes in a download
+     */
+    public static final int IDX_BYTES_TOTAL = 1;
+
+    /**
+     * Indicates the status of a download (e.g. complete, failed, queued, etc)
+     */
+    public static final int IDX_STATUS = 2;
     
     
     /**
@@ -470,9 +484,19 @@ public abstract class UstadMobileSystemImpl {
      * @param url HTTP URL to download from
      * @param fileURI file URI to save to
      * @param headers HTTP headers to set as key/value pairs
+     * @deprecated 
+     * 
      * @return A transfer job that can be started and progress of which can be tracked
      */
     public abstract UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers, Object context);
+    
+    public abstract long queueFileDownload(String url, String fileURI, Hashtable headers, Object context);
+    
+    public abstract int[] getFileDownloadStatus(long downloadID, Object context);
+    
+    public abstract void registerDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context);
+    
+    public abstract void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context);
     
     /**
      * Rename file from/to 
@@ -744,6 +768,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param containerURI The location of the container file
      * @param mimeType The mime type of the container
+     * @deprecated
      * @return The path opened
      */
     public abstract String openContainer(String containerURI, String mimeType);

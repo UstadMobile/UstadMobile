@@ -34,9 +34,11 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
 
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -88,6 +90,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     protected CatalogController mCatalogController;
 
+    private UstadJSOPDSEntry[] mSelectedEntries;
 
     /**
      * Use this factory method to create a new instance of
@@ -159,15 +162,14 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             linearLayout.addView(cardView);
 
             //check the acquisition status
-            /* TODO: Fix putting in entry status on createview
-            entryStatus = catalogView.getEntryStatus(feed.entries[i].id);
+            entryStatus = controller.getEntryAcquisitionStatus(feed.entries[i].id);
             if(entryStatus != -1) {
                 cardView.setOPDSEntryOverlay(entryStatus);
             }
-            */
             idToCardMap.put(feed.entries[i].id, cardView);
         }
 
+        getActivity().supportInvalidateOptionsMenu();
     }
 
     @Override
@@ -180,6 +182,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
+        mSelectedEntries = new UstadJSOPDSEntry[0];
         setHasOptionsMenu(true);
 
         idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
@@ -220,51 +223,36 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        CatalogActivity activity = (CatalogActivity)getActivity();
-        /*
-        TODO: Fix figuring out if this is an acquisition feed or not
-        boolean isAcquisitionFeed = activity.mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
-        if(isAcquisitionFeed) {
-            inflater.inflate(R.menu.menu_opds_acquireopts, menu);
-        }else {
-            inflater.inflate(R.menu.menu_opds_navopts, menu);
-        }*/
+        if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
+            boolean isAcquisitionFeed = mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
+            if(isAcquisitionFeed) {
+                inflater.inflate(R.menu.menu_opds_acquireopts, menu);
+            }else {
+                inflater.inflate(R.menu.menu_opds_navopts, menu);
+            }
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        /*
         switch(item.getItemId()) {
             case R.id.action_opds_acquire:
-                if(catalogView.getSelectedEntries().length > 0) {
-                    catalogView.getController().handleClickDownloadEntries(
-                        catalogView.getSelectedEntries());
+                if(getSelectedEntries().length > 0) {
+                    mCatalogController.handleClickDownloadEntries(getSelectedEntries());
                 }else {
-                    catalogView.getController().handleClickDownloadAll();
+                    mCatalogController.handleClickDownloadAll();
                 }
 
                 return true;
 
             case R.id.action_opds_deleteitem:
-                if(catalogView.getSelectedEntries().length > 0) {
-                    catalogView.getController().handleClickDeleteEntries(
-                        catalogView.getSelectedEntries());
+                if(getSelectedEntries().length > 0) {
+                    mCatalogController.handleClickDeleteEntries(getSelectedEntries());
                 }
+
+                return true;
         }
 
-
-        if(item.getItemId() == R.id.action_opds_acquire) {
-            if(catalogView.getSelectedEntries().length > 0) {
-                catalogView.getController().handleClickDownloadEntries(
-                    catalogView.getSelectedEntries());
-            }else {
-                catalogView.getController().handleClickDownloadAll();
-            }
-            return true;
-        }else {
-            return super.onOptionsItemSelected(item);
-        }
-        */
         return super.onOptionsItemSelected(item);
     }
 
@@ -343,8 +331,21 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
-    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, int commandId) {
-
+    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(message);
+        builder.setTitle(title);
+        builder.setPositiveButton(positiveChoice, new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int id) {
+                mCatalogController.handleConfirmDialogClick(true, commandId);
+            }
+        });
+        builder.setNegativeButton(negativeChoice, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                mCatalogController.handleConfirmDialogClick(false, commandId);
+            }
+        });
+        builder.create().show();
     }
 
     @Override
@@ -363,23 +364,33 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
-    public void setDownloadEntryProgressVisible(String entryId, boolean visible) {
-
+    public void setDownloadEntryProgressVisible(final String entryId, final boolean visible) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                idToCardMap.get(entryId).setProgressBarVisible(visible);
+            }
+        });
     }
 
     @Override
-    public void updateDownloadEntryProgress(String entryId, int loaded, int total) {
-
+    public void updateDownloadEntryProgress(final String entryId, final int loaded, final int total) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                int progressPercent = Math.round(((float)loaded/(float)total) * OPDSEntryCard.PROGRESS_ENTRY_MAX);
+                idToCardMap.get(entryId).setDownloadProgressBarProgress(progressPercent);
+            }
+        });
     }
 
     @Override
     public UstadJSOPDSEntry[] getSelectedEntries() {
-        return new UstadJSOPDSEntry[0];
+        return mSelectedEntries;
     }
 
     @Override
     public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
-
+        this.mSelectedEntries = entries;
+        //TODO: go through and set the status of each
     }
 
     /**

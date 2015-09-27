@@ -110,6 +110,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private WeakHashMap<Activity, AppViewAndroid> appViews;
 
+    private HashMap<UMDownloadCompleteReceiver, BroadcastReceiver> downloadCompleteReceivers;
+
     /**
      * When opencontainer is called we need to be sure that the http service is ready.  This is the
      * maximum amount of time (in ms) that we will wait for the http service to bind and be ready
@@ -130,6 +132,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         activityHTTPServiceConnections = new HashMap<>();
         activityToHttpServiceMap = new HashMap<>();
         appViews = new WeakHashMap<>();
+        downloadCompleteReceivers = new HashMap<>();
     }
 
     /**
@@ -227,24 +230,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         ((Context)context).startActivity(startIntent);
     }
-
-    /**
-     * The implementation of the MVC pattern in Android generally means instantiating a view object
-     * and then starting an activity with an intent that contains an ID that can be used by the
-     * activity to find the view object that started it.
-     *
-     * This will start an activity, with the parameter EXTRA_VIEWID set to the given viewId
-     *
-     * @deprecated
-     * @param activityClass The Class object of the Activity to start
-     * @param viewId An integer ID that activity expects so it can find it's view object after being created
-     */
-    public void startActivityForViewId(Class activityClass, int viewId, Context context) {
-        Intent startIntent = new Intent(context, activityClass);
-        startIntent.putExtra(EXTRA_VIEWID, viewId);
-        context.startActivity(startIntent);
-    }
-
 
     private String getSystemBaseDir() {
         return new File(Environment.getExternalStorageDirectory(), "ustadmobileContent").getAbsolutePath();
@@ -366,6 +351,62 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         DownloadJob job = new DownloadJob(url, fileURI, this, (Context)context);
 
         return job;
+    }
+
+    @Override
+    public long queueFileDownload(String url, String destFileURI, Hashtable headers, Object context) {
+        Context aContext = (Context)context;
+        DownloadManager mgr = (DownloadManager)aContext.getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+
+        File destFile = new File(destFileURI);
+        String destStr = destFile.getAbsolutePath();
+        request.setDestinationUri(Uri.fromFile(destFile));
+
+        return mgr.enqueue(request);
+    }
+
+    @Override
+    public int[] getFileDownloadStatus(long downloadID, Object context) {
+        Context ctx = (Context)context;
+        DownloadManager mgr = (DownloadManager)ctx.getSystemService(
+                Context.DOWNLOAD_SERVICE);
+        DownloadManager.Query query = new DownloadManager.Query();
+        query.setFilterById(downloadID);
+
+        Cursor cursor = mgr.query(query);
+        cursor.moveToFirst();
+
+        int[] retVal = new int[3];
+        retVal[IDX_DOWNLOADED_SO_FAR] = cursor.getInt(cursor.getColumnIndex(
+                DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
+        retVal[IDX_BYTES_TOTAL] = cursor.getInt(cursor.getColumnIndex(
+                DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
+        retVal[IDX_STATUS] = cursor.getInt(cursor.getColumnIndex(
+                DownloadManager.COLUMN_STATUS));
+        return retVal;
+    }
+
+    @Override
+    public void registerDownloadCompleteReceiver(final UMDownloadCompleteReceiver receiver, Object context) {
+        IntentFilter downloadCompleteIntentFilter =
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        BroadcastReceiver completeReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                long downloadID =intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L);
+                receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(downloadID));
+            }
+        };
+
+        downloadCompleteReceivers.put(receiver, completeReceiver);
+        ((Context)context).registerReceiver(completeReceiver, downloadCompleteIntentFilter);
+    }
+
+    @Override
+    public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
+        ((Context)context).unregisterReceiver(downloadCompleteReceivers.get(receiver));
+        downloadCompleteReceivers.remove(receiver);
     }
 
     @Override

@@ -54,6 +54,13 @@ public class UMProgressEvent {
         
     }
     
+    public UMProgressEvent(long downloadID, int evtType, int progress, int jobLength, int status, int responseCode) {
+        
+    }
+    /**
+     * @deprecated 
+     *
+     */
     public UMProgressEvent(UMTransferJob evtSrc, int evtType, int progress, int jobLength, int statusCode) {
         this.evtSrc = evtSrc;
         this.evtType = evtType;

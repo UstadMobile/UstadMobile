@@ -26,12 +26,6 @@ import java.util.WeakHashMap;
 
 public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFragment.OnFragmentInteractionListener, ListView.OnItemClickListener {
 
-    private static Map<Integer, CatalogViewAndroid> viewMap;
-
-    private Map<CatalogViewAndroid, CatalogOPDSFragment> opdsFragmentMap;
-
-    private ProgressDialog progressDialog;
-
     private DrawerLayout mDrawerLayout;
 
     private ListView mDrawerList;
@@ -79,10 +73,6 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
 
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
-        opdsFragmentMap = new WeakHashMap<CatalogViewAndroid, CatalogOPDSFragment>();
-
-
 
         UMAndroidUtil.setDirectionIfSupported(findViewById(R.id.catalog_relativelayout),
                 UstadMobileSystemImpl.getInstance().getDirection());

@@ -33,6 +33,8 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
+import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMProgressEvent;
 import com.ustadmobile.core.impl.UMProgressListener;
@@ -57,6 +59,7 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.ByteArrayInputStream;
@@ -64,6 +67,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -89,7 +94,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController implements UstadController, UMProgressListener, AppViewChoiceListener, AsyncLoadableController {
+public class CatalogController implements UstadController, UMProgressListener, AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -148,17 +153,9 @@ public class CatalogController implements UstadController, UMProgressListener, A
     /**
      * The locations available for a user to store downloaded content
      */
-    private UMStorageDir[] availableStorageDirs;
-    
-    private Vector activeTransferJobs;
-    
+    private UMStorageDir[] availableStorageDirs;    
     
     private int resourceMode;
-    
-    /**
-     * Hashtable indexed as entry id -> transferjob
-     */
-    private static Hashtable currentAcquisitionJobs = new Hashtable();
     
     //The View (J2ME or Android)
     private CatalogView view;
@@ -229,28 +226,35 @@ public class CatalogController implements UstadController, UMProgressListener, A
     public static final String KEY_FLAGS = "flags";
     
     
-    public static final Integer LOAD_URL = Integer.valueOf(1);
+    public static final Integer LOAD_URL = new Integer(1);
     
-    public static final Integer LOAD_IMPL = Integer.valueOf(2);
+    public static final Integer LOAD_IMPL = new Integer(2);
     
-    public static final Integer LOAD_RESMODE = Integer.valueOf(3);
+    public static final Integer LOAD_RESMODE = new Integer(3);
     
-    public static final Integer LOAD_HTTPUSER = Integer.valueOf(4);
+    public static final Integer LOAD_HTTPUSER = new Integer(4);
     
-    public static final Integer LOAD_HTTPPASS = Integer.valueOf(5);
+    public static final Integer LOAD_HTTPPASS = new Integer(5);
     
-    public static final Integer LOAD_FLAGS = Integer.valueOf(6);
+    public static final Integer LOAD_FLAGS = new Integer(6);
     
     private Object context;
     
+    private Timer downloadUpdateTimer;
+    
+    public static final int DOWNLOAD_UPDATE_INTERVAL = 1000;
+    
+    //Hashtable indexed entry id -> download ID (Long object)
+    private Hashtable downloadingEntries;
     
     public CatalogController(Object context) {
         this.context = context;
+        downloadingEntries = new Hashtable();
     }
     
     public CatalogController(CatalogModel model, Object context){
+        this(context);
         this.model=model;
-        this.context = context;
     }
     
     /**
@@ -361,17 +365,10 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     public static boolean isInProgress(String entryID) {
-        return currentAcquisitionJobs.containsKey(entryID);
+        return false;
+        //TODO: Fix me
+        //return currentAcquisitionJobs.containsKey(entryID);
     }
-    
-    public static void registerDownloadInProgress(String entryID, UMTransferJob job) {
-        currentAcquisitionJobs.put(entryID, job);
-    }
-    
-    public static void unregisterDownloadInProgress(String entryID) {
-        currentAcquisitionJobs.remove(entryID);
-    }
-    
     
     /**
      * Construct a CatalogController for the OPDS feed at the given URL
@@ -592,7 +589,6 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     public void handleConfirmDeleteEntries() {
-        int numDeleted = 0;
         for(int i = 0; i < selectedEntries.length; i++) {
             CatalogController.removeEntry(selectedEntries[i].id, 
                 USER_RESOURCE | SHARED_RESOURCE, context);
@@ -632,55 +628,16 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 
                 UstadMobileSystemImpl.getInstance().go(CatalogView.class, args, 
                         context);
-                
-                /*
-                Thread bgThread = new Thread() {
-                    public void run() {
-                        int resourceMode = USER_RESOURCE;
-                        int fetchFlags = CACHE_ENABLED;
-                        String httpUsername = impl.getActiveUser(ctx);
-                        String httpPassword = impl.getActiveUserAuth(ctx);
-                        try {
-                            CatalogController newController = CatalogController.makeControllerByURL(url, impl, resourceMode, 
-                                httpUsername, httpPassword, fetchFlags, ctx);
-                            newController.show();
-                            impl.getAppView(ctx).dismissProgressDialog();
-                        }catch(Exception e) {
-                            e.printStackTrace();
-                            impl.getAppView(ctx).dismissProgressDialog();
-                            impl.getAppView(ctx).showNotification(
-                                impl.getString(U.id.error_loading_catalog) + e.toString(),
-                                AppView.LENGTH_LONG);
-                        }
-                    }
-                };
-                impl.getAppView(ctx).showProgressDialog(impl.getString(U.id.loading));
-                bgThread.start();
-                */
             }
         }else {
             CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
                     SHARED_RESOURCE | USER_RESOURCE, context);
             if(entryInfo != null && entryInfo.acquisitionStatus == STATUS_ACQUIRED) {
-                String openPath = null;
-                try {
-                    openPath = UstadMobileSystemImpl.getInstance().openContainer(
-                        entryInfo.fileURI, entryInfo.mimeType);
-                
-                    ContainerController containerCtrl = 
-                        ContainerController.makeFromEntry(entry, openPath, 
-                            entryInfo.fileURI, entryInfo.mimeType);
-                    //containerCtrl.show();
-                
-                    impl.l(UMLog.VERBOSE, 425, openPath);
-                }catch(Exception e) {
-                    if(openPath != null) {
-                        UstadMobileSystemImpl.getInstance().closeContainer(openPath);
-                    }
-                    UstadMobileSystemImpl.getInstance().getAppView(context).showAlertDialog(
-                            impl.getString(U.id.error), 
-                            impl.getString(U.id.error_opening_file) + e.toString());
-                }
+                Hashtable openArgs = new Hashtable();
+                openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
+                openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
+                UstadMobileSystemImpl.getInstance().go(ContainerView.class, openArgs, 
+                        context);
             }else if(isInProgress(entry.id)){
                 UstadMobileSystemImpl.getInstance().getAppView(context).showNotification(
                         impl.getString(U.id.download_in_progress), AppView.LENGTH_LONG);
@@ -787,12 +744,13 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public void handleConfirmDownloadEntries(UstadJSOPDSEntry[] entries, String destDirURI) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        UMTransferJobList transferJob;
         AcquireRequest request = new AcquireRequest(entries, destDirURI, 
             impl.getActiveUser(context), impl.getActiveUserAuth(context), 
-            selectedDownloadMode, context);
-        transferJob = CatalogController.acquireCatalogEntries(request);
+            selectedDownloadMode, context, this);
+        CatalogController.acquireCatalogEntries(request);
+        
         //TODO: Add event listeners to update progress etc.
+        /*
         if(activeTransferJobs == null) {
             activeTransferJobs = new Vector();
         }
@@ -800,7 +758,10 @@ public class CatalogController implements UstadController, UMProgressListener, A
         setViewEntryProgressVisible(entries, true);
         transferJob.start();
         activeTransferJobs.addElement(transferJob);
+        */
+        
         this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
+        
     }
     
     /**
@@ -1409,7 +1370,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
     
     
     /**
-     * Fetch and download the given container, save required information about it to
+     * Fetch and download the given containers, save required information about it to
      * disk
      * 
      * 1. Download the given srcURL to disk (see options.destdir and destname) to 
@@ -1422,16 +1383,15 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * 
      * @param request The AcquireReuqest 
      * 
-     * @return a Transfer job, that when it's start method is called will acquire the given entries
      */
-    public static UMTransferJobList acquireCatalogEntries(CatalogController.AcquireRequest request) {
+    public static void acquireCatalogEntries(CatalogController.AcquireRequest request) {
         UstadJSOPDSEntry[] entries = request.getEntries();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        UMTransferJob[] transferJobs = new UMTransferJob[entries.length];
         String[] mimeTypes = new String[entries.length];
         
         Hashtable authHeaders = makeAuthHeaders(request.getHttpUsername(), 
                 request.getHttpPassword());
+        int resourceMode = request.getResourceMode();
         
         for(int i = 0; i < entries.length; i++) {
             Vector itemLinks = entries[i].getAcquisitionLinks();
@@ -1451,17 +1411,122 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 request.getDestDirPath(), UMFileUtil.getFilename(itemHref)
             });
             
-            transferJobs[i] = impl.downloadURLToFile(itemURL, destFilename, 
-                authHeaders, request.getContext());
-            registerDownloadInProgress(entries[i].id, transferJobs[i]);
+            CatalogEntryInfo info = new CatalogEntryInfo();
+            info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
+            info.srcURLs = new String[]{itemURL};
+            info.fileURI = destFilename;
+            info.mimeType = mimeTypes[i];
+            
+            
+            
+            long downloadID = impl.queueFileDownload(itemURL, destFilename, authHeaders, 
+                    request.getContext());
+            info.downloadID = downloadID;
+            setEntryInfo(entries[i].id, info, resourceMode, request.getContext());
+            
+            if(request.getController() != null) {
+                request.getController().registerDownloadingEntry(entries[i].id, 
+                        new Long(downloadID));
+            }
+        }
+    }
+    
+    public int getEntryAcquisitionStatus(String entryID) {
+        CatalogEntryInfo info = getEntryInfo(entryID, getResourceMode(), context);
+        if(info != null) {
+            return info.acquisitionStatus;
+        }else {
+            return CatalogEntryInfo.ACQUISITION_STATUS_NOTACQUIRED;
         }
         
-        UMTransferJobList transferJob = new UMTransferJobList(transferJobs, 
-            entries);
-        transferJob.setRunAfterFinishJob(new AcquirePostDownloadRunnable(entries, 
-            transferJobs, mimeTypes, request.getResourceMode(), request.getContext()));
-        return transferJob;
     }
+    
+    public void registerDownloadingEntry(String entryID, Long downloadID) {
+        downloadingEntries.put(entryID, downloadID);
+        if(view != null) {
+            view.setDownloadEntryProgressVisible(entryID, true);
+        }
+        
+        if(downloadUpdateTimer == null) {
+            downloadUpdateTimer = new Timer();
+            downloadUpdateTimer.schedule(new UpdateProgressTimerTask(), 
+                DOWNLOAD_UPDATE_INTERVAL, DOWNLOAD_UPDATE_INTERVAL);
+            UstadMobileSystemImpl.getInstance().registerDownloadCompleteReceiver(
+                    this, context);
+        }
+    }
+    
+    public void unregisterDownloadingEntry(String entryID) {
+        downloadingEntries.remove(entryID);
+        if(view != null) {
+            view.setDownloadEntryProgressVisible(entryID, false);
+        }
+        
+        if(downloadingEntries.size() < 1) {
+            downloadUpdateTimer.cancel();
+            downloadUpdateTimer = null;
+            UstadMobileSystemImpl.getInstance().unregisterDownloadCompleteReceiver(
+                    this, context);
+        }
+    }
+
+    public void downloadStatusUpdated(UMDownloadCompleteEvent evt) {
+        Enumeration downloadEntryKeys = downloadingEntries.keys();
+        String entryID;
+        Long downloadID;
+        while(downloadEntryKeys.hasMoreElements()) {
+            entryID = (String)downloadEntryKeys.nextElement();
+            downloadID = (Long)downloadingEntries.get(entryID);
+            if(downloadID.longValue() == evt.getDownloadID()) {
+                //this means our download has completed - update status and such
+                unregisterDownloadingEntry(entryID);
+                registerItemAcquisitionCompleted(entryID);
+                return;
+            }
+        }
+    }
+    
+    protected void registerItemAcquisitionCompleted(String entryID) {
+        int resMode = getResourceMode();//TODO: This is wrong: we need the download mode of the Download **NOT** the catalog itself.
+        CatalogEntryInfo info = getEntryInfo(entryID, getResourceMode(), context);
+        info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        CatalogController.setEntryInfo(entryID, info, resourceMode, context);
+        if(this.view != null) {
+            this.view.setEntryStatus(entryID, info.acquisitionStatus);
+            this.view.setDownloadEntryProgressVisible(entryID, false);
+        }
+    }
+    
+    private class UpdateProgressTimerTask extends TimerTask {
+
+        @Override
+        public void run() {
+            //here we actually go and set the progress bars...
+            Enumeration entries = CatalogController.this.downloadingEntries.keys();
+            String entryID;
+            Long downloadID;
+            while(entries.hasMoreElements()) {
+                entryID = (String)entries.nextElement();
+                downloadID = (Long)CatalogController.this.downloadingEntries.get(entryID);
+                int[] downloadStatus = UstadMobileSystemImpl.getInstance().getFileDownloadStatus(
+                    downloadID.longValue(), CatalogController.this.context);
+                CatalogController.this.view.updateDownloadEntryProgress(entryID, 
+                    downloadStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], 
+                    downloadStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL]);
+            }
+        }
+        
+    }
+    
+    public void handlePause() {
+        //stop the download update timer here
+    }
+    
+    public void handleResume() {
+        //restart the download update timer here
+    }
+    
+    
 
     public void progressUpdated(UMProgressEvent evt) {
         if(this.view != null) {
@@ -1520,6 +1585,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
         
         private Object context;
         
+        private CatalogController controller;
+        
         /**
          * @param entries The OPDS Entries that should be acquired.  Must be OPDS 
          * Entry items with acquire links.  For now the first acquisition link will
@@ -1529,15 +1596,17 @@ public class CatalogController implements UstadController, UMProgressListener, A
          * @param httpUsername optional HTTP authentication username - can be null
          * @param httpPassword optional HTTP authentication password - can be null
          * @param resourceMode SHARED_RESOURCE or USER_RESOURCE - controls where 
+         * @param controller : the controller that will want to know about updates etc.  Can be null
          * we update info about this acquisition - in user prefs or in app wide prefs
          */
-        public AcquireRequest(UstadJSOPDSEntry[] entries, String destDirPath, String httpUsername, String httpPassword, int resourceMode, Object context) {
+        public AcquireRequest(UstadJSOPDSEntry[] entries, String destDirPath, String httpUsername, String httpPassword, int resourceMode, Object context, CatalogController controller) {
             this.entries = entries;
             this.destDirPath = destDirPath;
             this.httpUsername = httpUsername;
             this.httpPassword = httpPassword;
             this.resourceMode = resourceMode;
             this.context = context;
+            this.controller = controller;
         }
         
         /**
@@ -1573,6 +1642,10 @@ public class CatalogController implements UstadController, UMProgressListener, A
             return context;
         }
         
+        public CatalogController getController() {
+            return controller;
+        }
+        
         
     }
     
@@ -1604,7 +1677,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 info.srcURLs = new String[]{srcJobs[i].getSource()};
                 info.fileURI = srcJobs[i].getDestination();
                 info.mimeType = mimeTypes[i];
-                unregisterDownloadInProgress(entries[i].id);
+                //unregisterDownloadInProgress(entries[i].id);
                 CatalogController.setEntryInfo(entries[i].id, info, resourceMode, 
                         context);
                 parentFeeds.put(entries[i].parentFeed, entries[i].parentFeed);

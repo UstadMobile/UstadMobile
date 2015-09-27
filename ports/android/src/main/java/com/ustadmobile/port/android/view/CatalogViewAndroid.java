@@ -161,7 +161,7 @@ public class CatalogViewAndroid  {
         }
     }
 
-    public void updateDownloadAllProgress(int i, int i1) {
+    public void updateDownloadAllProgress(int downloaded, int total) {
 
     }
 
