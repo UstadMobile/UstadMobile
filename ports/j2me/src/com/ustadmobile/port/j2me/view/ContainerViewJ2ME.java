@@ -247,7 +247,7 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
         
         
         
-        public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, HTMLElement mediaElement) {
+        public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement) {
             if(timer == null) {
                 timer = new Timer();
             }
@@ -256,8 +256,18 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
                 public void run() {
                     boolean isPlaying = false;
                     InputStream in= null;
+                    String source = mediaElement.getAttributeById(HTMLElement.ATTR_SRC);
+                    if(source == null) {
+                        //means the source is not on the tag itself but on the source tags - find them
+                        HTMLElement srcTag = mediaElement.getFirstChildByTagId(
+                                HTMLElement.TAG_SOURCE);
+                        if(srcTag != null) {
+                            source = srcTag.getAttributeById(HTMLElement.ATTR_SRC);
+                        }
+                    }
+                    
                     try {
-                        String pathInZip = src.substring(
+                        String pathInZip = source.substring(
                             UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
                         in = view.containerZip.openInputStream(pathInZip);
                         Object mediaTypeObj = 
