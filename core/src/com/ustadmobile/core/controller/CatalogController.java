@@ -218,17 +218,17 @@ public class CatalogController implements UstadController, UMProgressListener, A
     private static final int CHOICE_DOWNLOAD_CANCEL = 2;
     
     
-    public static final Integer LOAD_URL = Integer.valueOf(1);
+    public static final Integer LOAD_URL = new Integer(1);
     
-    public static final Integer LOAD_IMPL = Integer.valueOf(2);
+    public static final Integer LOAD_IMPL = new Integer(2);
     
-    public static final Integer LOAD_RESMODE = Integer.valueOf(3);
+    public static final Integer LOAD_RESMODE = new Integer(3);
     
-    public static final Integer LOAD_HTTPUSER = Integer.valueOf(4);
+    public static final Integer LOAD_HTTPUSER = new Integer(4);
     
-    public static final Integer LOAD_HTTPPASS = Integer.valueOf(5);
+    public static final Integer LOAD_HTTPPASS = new Integer(5);
     
-    public static final Integer LOAD_FLAGS = Integer.valueOf(6);
+    public static final Integer LOAD_FLAGS = new Integer(6);
     
     
     
@@ -401,8 +401,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
         
         args.put(LOAD_URL, url);
         args.put(LOAD_IMPL, impl);
-        args.put(LOAD_RESMODE, Integer.valueOf(resourceMode));
-        args.put(LOAD_FLAGS, Integer.valueOf(flags));
+        args.put(LOAD_RESMODE, new Integer(resourceMode));
+        args.put(LOAD_FLAGS, new Integer(flags));
         
         if(impl.getActiveUser() != null && impl.getActiveUserAuth() != null) {
             args.put(LOAD_HTTPUSER, impl.getActiveUser());

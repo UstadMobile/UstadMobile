@@ -850,8 +850,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     /**
      * @inheritDoc
      */
-    public String openContainer(UstadJSOPDSEntry entry, String containerURI, 
-            String mimeType) {
+    public String openContainer(String containerURI, String mimeType) {
         l(UMLog.DEBUG, 557, containerURI + " : " + mimeType);
         if(openZip != null) {
             throw new IllegalStateException("J2ME: Open one thing at a time please");
