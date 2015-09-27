@@ -57,8 +57,8 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.ViewFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -313,17 +313,11 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     //shows the view
+    /**
+     * @deprecated 
+     */
     public void show() {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        this.view = ViewFactory.makeCatalogView();
-        this.view.setController(this);
-        String[] catalogMenuOpts = new String[catalogMenuOptIDS.length];
-        for(int i =0; i < catalogMenuOpts.length; i++) {
-            catalogMenuOpts[i] = impl.getString(catalogMenuOptIDS[i]);
-        }
-        
-        this.view.setMenuOptions(catalogMenuOpts);
-        
+        /*
         UstadJSOPDSFeed feed = this.getModel().opdsFeed;
         if(feed.isAcquisitionFeed()) {
             //go through and set the acquisition status
@@ -337,13 +331,25 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 
             }
         }
+        */
         
-        this.view.show();
     }
     
     public UstadView getView() {
         return this.view;
     }
+    
+    public void setUIStrings(UstadView view) {
+        CatalogView cView = (CatalogView)view;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        cView.setMenuOptions(new String[]{
+            impl.getString(catalogMenuOptIDS[MENUINDEX_MYCOURSES]),
+            impl.getString(catalogMenuOptIDS[MENUINDEX_MYDEVICE]),
+            impl.getString(catalogMenuOptIDS[MENUINDEX_LOGOUT]),
+            impl.getString(catalogMenuOptIDS[MENUINDEX_ABOUT])});
+        
+    }
+    
     
     public void setView(UstadView view) {
         this.view = (CatalogView)view;
@@ -443,6 +449,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * Make a CatalogController for the user's default OPDS catalog
      * 
      * @param impl system implementation to be used
+     * @deprecated
      * 
      * @return CatalogController representing the default catalog for the active user
      */
@@ -455,6 +462,22 @@ public class CatalogController implements UstadController, UMProgressListener, A
         return CatalogController.makeControllerByURL(opdsServerURL, impl, 
             USER_RESOURCE, activeUser, activeUserAuth, CACHE_ENABLED, context);
         
+    }
+    
+    public static Hashtable makeUserCatalogArgs(Object context) {
+        Hashtable args = new Hashtable();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String catalogURL = impl.getUserPref("opds_server_primary", 
+            UstadMobileDefaults.DEFAULT_OPDS_SERVER, context);
+        args.put(CatalogController.KEY_URL, catalogURL);
+        args.put(CatalogController.KEY_HTTPUSER, impl.getActiveUser(context));
+        args.put(CatalogController.KEY_HTTPPPASS, impl.getActiveUserAuth(context));
+        args.put(CatalogController.KEY_FLAGS, 
+            new Integer(CatalogController.CACHE_ENABLED));
+        args.put(CatalogController.KEY_RESMOD, 
+            new Integer(CatalogController.USER_RESOURCE));
+        
+        return args;
     }
     
     public static CatalogController makeDeviceCatalog(Object context) throws IOException {
@@ -599,6 +622,18 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 final String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
                     firstLink[UstadJSOPDSItem.LINK_HREF]);
                 
+                Hashtable args = new Hashtable();
+                args.put(KEY_URL, url);
+                args.put(KEY_HTTPUSER, impl.getActiveUser(context));
+                args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(context));
+                args.put(KEY_RESMOD, new Integer(getResourceMode()));
+                args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
+                
+                
+                UstadMobileSystemImpl.getInstance().go(CatalogView.class, args, 
+                        context);
+                
+                /*
                 Thread bgThread = new Thread() {
                     public void run() {
                         int resourceMode = USER_RESOURCE;
@@ -621,6 +656,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 };
                 impl.getAppView(ctx).showProgressDialog(impl.getString(U.id.loading));
                 bgThread.start();
+                */
             }
         }else {
             CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
@@ -634,7 +670,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
                     ContainerController containerCtrl = 
                         ContainerController.makeFromEntry(entry, openPath, 
                             entryInfo.fileURI, entryInfo.mimeType);
-                    containerCtrl.show();
+                    //containerCtrl.show();
                 
                     impl.l(UMLog.VERBOSE, 425, openPath);
                 }catch(Exception e) {
@@ -776,9 +812,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
     public void handleClickMenuItem(int index) {
         switch(index) {
             case MENUINDEX_LOGOUT:
-                LoginController loginController = new LoginController(context);
-                loginController.handleLogout();
-                loginController.show();
+                UstadMobileSystemImpl.getInstance().go(LoginView.class, 
+                    null, context);
                 break;
             case MENUINDEX_MYDEVICE:
                 try {

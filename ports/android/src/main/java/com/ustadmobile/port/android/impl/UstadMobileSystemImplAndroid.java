@@ -133,11 +133,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     /**
-     * @deprecated
      * @return
      */
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
-        return (UstadMobileSystemImplAndroid) mainInstance;
+        return (UstadMobileSystemImplAndroid) getInstance();
     }
 
     @Override
@@ -164,9 +163,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      *
      * @param activity
      */
-    public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
-
-
+    public void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
+        init(activity);
     }
 
     public void handleActivityStart(Activity activity) {

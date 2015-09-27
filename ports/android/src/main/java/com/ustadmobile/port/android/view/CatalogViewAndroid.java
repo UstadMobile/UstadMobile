@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * Created by mike on 07/07/15.
  */
-public class CatalogViewAndroid implements CatalogView {
+public class CatalogViewAndroid  {
     private CatalogController controller;
 
     private CatalogActivity activity;
@@ -103,17 +103,14 @@ public class CatalogViewAndroid implements CatalogView {
         this.fragment = fragment;
     }
 
-    @Override
     public void setController(CatalogController catalogController) {
         this.controller = catalogController;
     }
 
-    @Override
     public CatalogController getController() {
         return controller;
     }
 
-    @Override
     public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId) {
         //android.support.v4.
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
@@ -132,11 +129,10 @@ public class CatalogViewAndroid implements CatalogView {
         builder.create().show();
     }
 
-    @Override
     public void setMenuOptions(String[] menuOptions) {
         this.drawerMenuItems = menuOptions;
         if(activity != null) {
-            activity.setDrawerMenuItems(menuOptions);
+            //activity.setDrawerMenuItems(menuOptions);
         }
     }
 
@@ -144,7 +140,7 @@ public class CatalogViewAndroid implements CatalogView {
         return this.drawerMenuItems;
     }
 
-    @Override
+
     public void setEntryStatus(final String entryId, final int status) {
         acquisitionStatusMap.put(entryId, new Integer(status));
         if(fragment != null) {
@@ -165,12 +161,10 @@ public class CatalogViewAndroid implements CatalogView {
         }
     }
 
-    @Override
     public void updateDownloadAllProgress(int i, int i1) {
 
     }
 
-    @Override
     public void setDownloadEntryProgressVisible(String entryId, final boolean visible) {
         final OPDSEntryCard card = this.fragment.getEntryCardByOPDSID(entryId);
         if(card != null) {
@@ -188,7 +182,6 @@ public class CatalogViewAndroid implements CatalogView {
         }
     }
 
-    @Override
     public void updateDownloadEntryProgress(String entryId, int loaded, int total) {
         OPDSEntryCard card = this.fragment.getEntryCardByOPDSID(entryId);
         if(card != null && updateRunnableMap.containsKey(card)) {
@@ -199,12 +192,10 @@ public class CatalogViewAndroid implements CatalogView {
         }
     }
 
-    @Override
     public UstadJSOPDSEntry[] getSelectedEntries() {
         return this.selectedEntries != null ? this.selectedEntries : new UstadJSOPDSEntry[0];
     }
 
-    @Override
     public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
         UstadJSOPDSFeed thisFeed = getController().getModel().opdsFeed;
         for(int i = 0; i < thisFeed.entries.length; i++) {
@@ -252,17 +243,17 @@ public class CatalogViewAndroid implements CatalogView {
         }
     }
 
-    @Override
     public void show() {
+        /*
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         if(impl.getCurrentContext() instanceof CatalogActivity) {
             ((CatalogActivity)impl.getCurrentContext()).setCurrentOPDSCatalogFragment(this);
         }else {
             impl.startActivityForViewId(CatalogActivity.class, this.viewId, this);
         }
+        */
     }
 
-    @Override
     public boolean isShowing() {
 
         return false;

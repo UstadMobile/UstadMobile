@@ -34,7 +34,7 @@ public class ContainerActivityTest extends ActivityInstrumentationTestCase2<Cont
 
     @Override
     protected void setUp() throws Exception {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance(true);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         String httpRoot = TestUtils.getInstance().getHTTPRoot();
 

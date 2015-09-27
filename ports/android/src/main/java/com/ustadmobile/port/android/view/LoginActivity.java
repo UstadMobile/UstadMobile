@@ -42,16 +42,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.LoginView;
-import com.ustadmobile.core.view.ViewFactory;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Hashtable;
 import java.util.WeakHashMap;
 
 public class LoginActivity extends AppCompatActivity implements LoginView, View.OnClickListener {
@@ -83,7 +86,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.umactivity_login);
 
-        UstadMobileSystemImplAndroid.handleActivityCreate(this, savedInstanceState);
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
 
 
         mLoginController = LoginController.makeControllerForView(this);
@@ -97,6 +100,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
         viewPager.setAdapter(new LoginPagerAdapter(getSupportFragmentManager()));
         TabLayout tabLayout = (TabLayout)findViewById(R.id.login_sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
+        mLoginController.setViewStrings(this);
     }
 
     public void onStart() {
@@ -189,23 +193,32 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
     }
 
     @Override
-    public void show() {
-
-    }
-
-    @Override
-    public boolean isShowing() {
-        return false;
-    }
-
-    @Override
     public Object getContext() {
         return this;
     }
 
     @Override
     public void onClick(View view) {
+        int id = view.getId();
+        if(id == R.id.login_button) {
+            String username = ((EditText)findViewById(R.id.login_username)).getText().toString();
+            String password = ((EditText)findViewById(R.id.login_password)).getText().toString();
+            mLoginController.handleClickLogin(username, password);
+        }else if(id == R.id.login_registerbutton) {
+            Hashtable userVals = new Hashtable();
+            int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();
 
+            userVals.put(LoginController.REGISTER_COUNTRY,
+                    new Integer(UstadMobileConstants.COUNTRYDIALINGCODES[selectedCountryNum]));
+            userVals.put(LoginController.REGISTER_PHONENUM,
+                    ((EditText) findViewById(R.id.login_registerphonenum)).getText().toString());
+            userVals.put(LoginController.REGISTER_NAME,
+                    ((EditText)findViewById(R.id.login_registername)).getText().toString());
+            int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
+            userVals.put(LoginController.REGISTER_GENDER,
+                    genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
+            mLoginController.handleClickRegister(userVals);
+        }
     }
 
     public class LoginPagerAdapter extends FragmentStatePagerAdapter {

@@ -35,15 +35,6 @@ package com.ustadmobile.core.view;
  * @author mike
  */
 public interface UstadView {
-    public void show();
-    
-    /**
-     * Determine if this view is on screen now
-     * 
-     * @return true if the view is on screen now, false otherwise
-     */
-    public boolean isShowing();
-    
     
     /**
      * Return the system specific context for this view (e.g. Activity on Android

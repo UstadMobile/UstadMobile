@@ -36,7 +36,6 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.core.view.ViewFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
@@ -207,18 +206,6 @@ public class ContainerController implements UstadController, AsyncLoadableContro
         return null;
     }
     
-    public void show() {
-        if(this.containerView == null) {
-            containerView = ViewFactory.makeContainerView();
-            if(this.entry != null) {
-                containerView.setTitle(this.entry.title);
-            }
-        }
-        containerView.setController(this);
-        
-        containerView.show();
-    }
-
     /**
      * Load this controller - used by the async thread basesd loader
      * 

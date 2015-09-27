@@ -148,6 +148,11 @@ public abstract class UstadMobileSystemImpl {
      */
     public void init(Object context) {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 519, null);
+        //We don't need to do init again
+        if(initRan) {
+            return;
+        }
+        
         try {
             checkCacheDir(context);
             loadLocale(context);
@@ -228,39 +233,8 @@ public abstract class UstadMobileSystemImpl {
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {
-            Hashtable args = new Hashtable();
-            String catalogURL = getUserPref("opds_server_primary", 
-                UstadMobileDefaults.DEFAULT_OPDS_SERVER, context);
-            args.put(CatalogController.KEY_URL, catalogURL);
-            args.put(CatalogController.KEY_HTTPUSER, activeUser);
-            args.put(CatalogController.KEY_HTTPPPASS, activeUserAuth);
-            args.put(CatalogController.KEY_FLAGS, 
-                new Integer(CatalogController.CACHE_ENABLED));
-            args.put(CatalogController.KEY_RESMOD, 
-                new Integer(CatalogController.USER_RESOURCE));
-            
+            Hashtable args = CatalogController.makeUserCatalogArgs(context);
             go(CatalogView.class, args, context);
-            
-            /*
-            getLogger().l(UMLog.VERBOSE, 403, activeUser);
-            getAppView(context).showProgressDialog(getString(U.id.loading));
-            
-            Thread startThread = new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        CatalogController ctrl = CatalogController.makeUserCatalog(impl, context);
-                        impl.getAppView(context).dismissProgressDialog();
-                        ctrl.show();
-                    }catch(Exception e) {
-                        impl.getAppView(context).dismissProgressDialog();
-                        impl.getAppView(context).showNotification("Couldn't load course catalog", 
-                            AppView.LENGTH_LONG);
-                        getLogger().l(UMLog.ERROR, 107, null, e);
-                    }
-                }
-            });
-            startThread.start();
-            */
         }
     }
     

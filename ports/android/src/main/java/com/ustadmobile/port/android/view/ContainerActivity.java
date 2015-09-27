@@ -27,7 +27,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.ViewFactory;
+import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 
@@ -36,11 +36,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends AppCompatActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener {
+public class ContainerActivity extends AppCompatActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView {
 
-    private ContainerViewAndroid containerView;
-
-    private int viewId;
 
     /** The ViewPager used to swipe between epub pages */
     private ViewPager mPager;
@@ -50,7 +47,6 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     private String onpageSelectedJS = "";
 
-    private Bundle mSavedInstanceState;
 
     private String mContainerURI;
 
@@ -62,10 +58,14 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     protected boolean inUse = false;
 
+    private ContainerController mContainerController;
+
     @Override
     protected void onCreate(Bundle saved) {
-        UstadMobileSystemImplAndroid.handleActivityCreate(this, saved);
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, saved);
         super.onCreate(saved);
+
+        setContentView(R.layout.activity_container_epubpager);
 
         try {
             AssetManager asMgr = getApplicationContext().getAssets();
@@ -83,76 +83,65 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
             e.printStackTrace();
         }
 
-        viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, saved != null ?
-            saved.getInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID) : 0);
-        containerView = ContainerViewAndroid.getViewById(viewId);
-        mSavedInstanceState = saved;
 
-        if(containerView != null) {
-            mContainerURI = containerView.getContainerController().getFileURI();
-            mMimeType = containerView.getContainerController().getMimeType();
-        }else {
-            mContainerURI = mSavedInstanceState != null && mSavedInstanceState.getString(ContainerController.ARG_CONTAINERURI) != null ?
-                    mSavedInstanceState.getString(ContainerController.ARG_CONTAINERURI) : getIntent().getStringExtra(ContainerController.ARG_CONTAINERURI);
-            mMimeType = mSavedInstanceState != null && mSavedInstanceState.getString(ContainerController.ARG_MIMETYPE) != null ?
-                    mSavedInstanceState.getString(ContainerController.ARG_MIMETYPE) : getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
-        }
+        mContainerURI = getIntent().getStringExtra(ContainerController.ARG_CONTAINERURI);
+        mMimeType = getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
 
         //now bind to the HTTPService - the onServiceConnected method will call initContent
         Intent intent = new Intent(this, HTTPService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
-    public void initContent() {
-        if(containerView != null) {
-            setupFromView(containerView, mSavedInstanceState);
-        }else {
-            UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + " type " + mMimeType);
-            containerView = (ContainerViewAndroid)ViewFactory.makeContainerView();
-            ContainerController.makeControllerForView(containerView, mContainerURI, mMimeType, this);
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
+            mHttpService = binder.getService();
+            mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
+            ContainerActivity.this.initContent();
         }
+
+        public void onServiceDisconnected(ComponentName arg0) {
+            mHttpService = null;
+        }
+
+    };
+
+    public void initContent() {
+        UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + " type " + mMimeType);
+        ContainerController.makeControllerForView(this, mContainerURI, mMimeType, this);
     }
 
     @Override
     public void controllerReady(final UstadController controller, int flags) {
+        final Context ctx = this;
         runOnUiThread(new Runnable() {
             public void run() {
                 if(controller != null) {
-                    containerView.setController((ContainerController)controller);
-                    setupFromView(containerView, mSavedInstanceState);
+                    mContainerController = (ContainerController)controller;
+                    setupFromController((ContainerController)controller);
                 }else {
                     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                    impl.getAppView().showAlertDialog(impl.getString(U.id.error),
+                    impl.getAppView(ctx).showAlertDialog(impl.getString(U.id.error),
                             impl.getString(U.id.could_not_open_file));
                 }
             }
         });
     }
 
-    protected void setupFromView(ContainerViewAndroid view, Bundle savedInstanceState) {
-        containerView.setContainerActivity(this);
-        String mTitle = containerView.getTitle() != null ? containerView.getTitle() : "Content";
-        setTitle(mTitle);
-
+    protected void setupFromController(ContainerController controller) {
         //TODO: Deal with other content types here - but for right now we only have EPUB
-        if(containerView.getContainerController().getMimeType().startsWith("application/epub+zip")) {
-            setContentView(R.layout.activity_container_epubpager);
-
+        if(mMimeType.startsWith("application/epub+zip")) {
             Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
             setSupportActionBar(toolbar);
             new EPUBLoaderThread(this).start();
         }
-
-
     }
 
 
     public String getAutoplayRunJavascript() {
         return onpageSelectedJS;
-    }
-
-    public ContainerViewAndroid getContainerView() {
-        return containerView;
     }
 
     public void onStart() {
@@ -180,15 +169,11 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(ContainerController.ARG_CONTAINERURI, mContainerURI);
-        outState.putString(ContainerController.ARG_MIMETYPE, mMimeType);
-        outState.putInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID, viewId);
     }
 
     public void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
-        mSavedInstanceState = null;
         mContainerURI = null;
         mMimeType = null;
 
@@ -222,21 +207,21 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     }
 
-    private ServiceConnection mConnection = new ServiceConnection() {
+    @Override
+    public void setController(ContainerController controller) {
 
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
-            mHttpService = binder.getService();
-            mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
-            ContainerActivity.this.initContent();
-        }
+    }
 
-        public void onServiceDisconnected(ComponentName arg0) {
+    @Override
+    public void setContainerTitle(String title) {
 
-        }
+    }
 
-    };
+    @Override
+    public Object getContext() {
+        return null;
+    }
+
 
     /**
      * A simple pager adapter that uses an array of urls (as a string
@@ -306,12 +291,12 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
                     UstadMobileSystemImplAndroid.HTTP_CHECK_INTERVAL,
                     UstadMobileSystemImplAndroid.HTTP_READY_TIMEOUT);
 
-                ocf = activity.containerView.getContainerController().getOCF();
+                ocf = activity.mContainerController.getOCF();
                 String opfPath = UMFileUtil.joinPaths(new String[]{
-                        activity.containerView.getContainerController().getOpenPath(), ocf.rootFiles[0].fullPath});
+                        activity.mContainerController.getOpenPath(), ocf.rootFiles[0].fullPath});
 
                 //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
-                UstadJSOPF opf = activity.containerView.getContainerController().getOPF(0);
+                UstadJSOPF opf = activity.mContainerController.getOPF(0);
 
                 String[] hrefArray = opf.getLinearSpineURLS();
                 urlArray = new String[hrefArray.length];
@@ -355,7 +340,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
                 UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                 String message = "what a terrible failure: " + exc.toString();
                 exc.printStackTrace();
-                impl.getAppView().showAlertDialog(impl.getString(U.id.error), message);
+                impl.getAppView(activity).showAlertDialog(impl.getString(U.id.error), message);
             }
 
         }

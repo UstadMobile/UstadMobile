@@ -72,6 +72,7 @@ public class AppViewAndroid implements AppView{
                 progressDialog = ProgressDialog.show(activity, title, "");
             }
         });
+
     }
 
     @Override

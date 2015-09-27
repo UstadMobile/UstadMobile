@@ -11,7 +11,7 @@ import java.util.*;
 /**
  * Created by mike on 8/14/15.
  */
-public class ContainerViewAndroid implements ContainerView{
+public class ContainerViewAndroid {
 
     private static Map<Integer, ContainerViewAndroid> viewMap;
 
@@ -37,20 +37,6 @@ public class ContainerViewAndroid implements ContainerView{
         viewMap.put(new Integer(viewId), this);
     }
 
-    @Override
-    public void setController(ContainerController controller) {
-        this.containerController = controller;
-    }
-
-    @Override
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    @Override
-    public String getTitle() {
-        return this.title;
-    }
 
 
     public static ContainerViewAndroid getViewById(int viewId) {
@@ -65,16 +51,6 @@ public class ContainerViewAndroid implements ContainerView{
         return viewId;
     }
 
-    @Override
-    public void show() {
-        UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        impl.startActivityForViewId(ContainerActivity.class, viewId);
-    }
-
-    @Override
-    public boolean isShowing() {
-         return containerActivity.inUse;
-    }
 
     public ContainerController getContainerController() {
         return containerController;
