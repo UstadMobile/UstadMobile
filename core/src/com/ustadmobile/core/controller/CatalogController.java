@@ -434,12 +434,14 @@ public class CatalogController implements UstadController, UMProgressListener, A
 
     
     public UstadController loadController(Hashtable args, Object ctx) throws Exception {
-        return makeControllerByURL((String)args.get(LOAD_URL), 
+        CatalogController newController = makeControllerByURL((String)args.get(LOAD_URL), 
             (UstadMobileSystemImpl)args.get(LOAD_IMPL), 
             ((Integer)args.get(LOAD_RESMODE)).intValue(), 
             args.get(LOAD_HTTPUSER) != null ? (String)args.get(LOAD_HTTPUSER) : null, 
             args.get(LOAD_HTTPPASS) != null ? (String)args.get(LOAD_HTTPPASS) : null, 
             ((Integer)args.get(LOAD_FLAGS)).intValue(), ctx);
+        newController.initEntryStatusCheck();
+        return newController;
     }
     
     /**
@@ -744,23 +746,17 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public void handleConfirmDownloadEntries(UstadJSOPDSEntry[] entries, String destDirURI) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        AcquireRequest request = new AcquireRequest(entries, destDirURI, 
+        final AcquireRequest request = new AcquireRequest(entries, destDirURI, 
             impl.getActiveUser(context), impl.getActiveUserAuth(context), 
             selectedDownloadMode, context, this);
-        CatalogController.acquireCatalogEntries(request);
-        
-        //TODO: Add event listeners to update progress etc.
-        /*
-        if(activeTransferJobs == null) {
-            activeTransferJobs = new Vector();
-        }
-        transferJob.addProgressListener(this);
-        setViewEntryProgressVisible(entries, true);
-        transferJob.start();
-        activeTransferJobs.addElement(transferJob);
-        */
-        
         this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
+        
+        Thread startDownloadThread = new Thread(new Runnable() {
+            public void run() {
+                CatalogController.acquireCatalogEntries(request);
+            }
+        });
+        startDownloadThread.start();
         
     }
     
@@ -1416,8 +1412,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
             info.srcURLs = new String[]{itemURL};
             info.fileURI = destFilename;
             info.mimeType = mimeTypes[i];
-            
-            
+            info.downloadTotalSize = UMIOUtils.getHTTPDownloadSize(itemURL, 
+                    authHeaders);
             
             long downloadID = impl.queueFileDownload(itemURL, destFilename, authHeaders, 
                     request.getContext());
@@ -1432,7 +1428,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     public int getEntryAcquisitionStatus(String entryID) {
-        CatalogEntryInfo info = getEntryInfo(entryID, getResourceMode(), context);
+        CatalogEntryInfo info = getEntryInfo(entryID, 
+                SHARED_RESOURCE | USER_RESOURCE, context);
         if(info != null) {
             return info.acquisitionStatus;
         }else {
@@ -1447,6 +1444,56 @@ public class CatalogController implements UstadController, UMProgressListener, A
             view.setDownloadEntryProgressVisible(entryID, true);
         }
         
+        startDownloadTimer();
+    }
+    
+    /**
+     * Used when the view is attached to see what the status of entries are right
+     * now.
+     * 
+     */
+    private synchronized void initEntryStatusCheck() {
+        CatalogEntryInfo info;
+        UstadJSOPDSFeed feed = getModel().opdsFeed;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        for(int i = 0; i< feed.entries.length; i++) {
+            info = getEntryInfo(feed.entries[i].id, 
+                    SHARED_RESOURCE | USER_RESOURCE, context);
+            if(info != null){
+                if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
+                    int[] fileDownloadStatus = impl.getFileDownloadStatus(info.downloadID, context);
+                    if(fileDownloadStatus != null) {
+                        int downloadStatus = fileDownloadStatus[UstadMobileSystemImpl.IDX_STATUS];
+                        switch(downloadStatus) {
+                            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
+                                registerItemAcquisitionCompleted(feed.entries[i].id);
+                                break;
+                            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                            case UstadMobileSystemImpl.DLSTATUS_PENDING:
+                            case UstadMobileSystemImpl.DLSTATUS_PAUSED:
+                                registerDownloadingEntry(feed.entries[i].id, 
+                                    new Long(info.downloadID));
+                        }
+                    }else {
+                        //perhaps the system is not tracking the download anymore and it's actually complete
+                        int downloadedSize = 
+                            (int)UstadMobileSystemImpl.getInstance().fileSize(info.fileURI);
+                        if(downloadedSize != -1 && downloadedSize == info.downloadTotalSize) 
+                            //this download has in fact completed
+                            registerItemAcquisitionCompleted(feed.entries[i].id);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Starts a Timer to watch the status of downloads.  Calling this twice
+     * will have no effect - a new timer will only start if there is none currently
+     * running for this controller
+     */
+    private synchronized void startDownloadTimer() {
         if(downloadUpdateTimer == null) {
             downloadUpdateTimer = new Timer();
             downloadUpdateTimer.schedule(new UpdateProgressTimerTask(), 
@@ -1456,6 +1503,19 @@ public class CatalogController implements UstadController, UMProgressListener, A
         }
     }
     
+    /**
+     * If the timer to run downloads is running - stop it
+     */
+    private synchronized void stopDownloadTimer() {
+        if(downloadUpdateTimer != null) {
+            downloadUpdateTimer.cancel();
+            downloadUpdateTimer = null;
+            UstadMobileSystemImpl.getInstance().unregisterDownloadCompleteReceiver(
+                    this, context);
+        }
+    }
+    
+    
     public void unregisterDownloadingEntry(String entryID) {
         downloadingEntries.remove(entryID);
         if(view != null) {
@@ -1463,10 +1523,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
         }
         
         if(downloadingEntries.size() < 1) {
-            downloadUpdateTimer.cancel();
-            downloadUpdateTimer = null;
-            UstadMobileSystemImpl.getInstance().unregisterDownloadCompleteReceiver(
-                    this, context);
+            stopDownloadTimer();
         }
     }
 
@@ -1487,10 +1544,16 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     protected void registerItemAcquisitionCompleted(String entryID) {
-        int resMode = getResourceMode();//TODO: This is wrong: we need the download mode of the Download **NOT** the catalog itself.
-        CatalogEntryInfo info = getEntryInfo(entryID, getResourceMode(), context);
+        //first lookup as a user storage only download: if it's not - see if it is a shared space download
+        int entryAcquireResMode = USER_RESOURCE;
+        CatalogEntryInfo info = getEntryInfo(entryID, USER_RESOURCE, context);
+        if(info == null) {
+            info = getEntryInfo(entryID, SHARED_RESOURCE, context);
+            entryAcquireResMode = SHARED_RESOURCE;
+        }
+        
         info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
-        CatalogController.setEntryInfo(entryID, info, resourceMode, context);
+        CatalogController.setEntryInfo(entryID, info, entryAcquireResMode, context);
         if(this.view != null) {
             this.view.setEntryStatus(entryID, info.acquisitionStatus);
             this.view.setDownloadEntryProgressVisible(entryID, false);
@@ -1499,7 +1562,6 @@ public class CatalogController implements UstadController, UMProgressListener, A
     
     private class UpdateProgressTimerTask extends TimerTask {
 
-        @Override
         public void run() {
             //here we actually go and set the progress bars...
             Enumeration entries = CatalogController.this.downloadingEntries.keys();
@@ -1510,23 +1572,27 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 downloadID = (Long)CatalogController.this.downloadingEntries.get(entryID);
                 int[] downloadStatus = UstadMobileSystemImpl.getInstance().getFileDownloadStatus(
                     downloadID.longValue(), CatalogController.this.context);
-                CatalogController.this.view.updateDownloadEntryProgress(entryID, 
-                    downloadStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], 
-                    downloadStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL]);
+                if(CatalogController.this.view != null) {
+                    CatalogController.this.view.updateDownloadEntryProgress(entryID, 
+                        downloadStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], 
+                        downloadStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL]);
+                }
             }
         }
         
     }
     
-    public void handlePause() {
-        //stop the download update timer here
+    public void handleViewPause() {
+        stopDownloadTimer();
     }
     
-    public void handleResume() {
-        //restart the download update timer here
+    public void handleViewResume() {
+        startDownloadTimer();
     }
     
-    
+    public void handleViewDestroy() {
+        stopDownloadTimer();
+    }
 
     public void progressUpdated(UMProgressEvent evt) {
         if(this.view != null) {

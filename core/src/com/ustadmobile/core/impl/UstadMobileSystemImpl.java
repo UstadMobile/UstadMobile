@@ -116,6 +116,42 @@ public abstract class UstadMobileSystemImpl {
     public static final int IDX_STATUS = 2;
     
     
+    
+    /**
+     * Flag to indicate a download requested was successful.
+     * 
+     * Same value as android.app.DownloadManager.STATUS_SUCCESSFUL
+     */
+    public static final int DLSTATUS_SUCCESSFUL = 8;
+    
+    /**
+     * Flag to indicate a download requested has failed 
+     * 
+     * Same value as android.app.DownloadManager.STATUS_FAILED
+     */
+    public static final int DLSTATUS_FAILED = 16;
+    
+    /**
+     * Flag to indicate download is pending
+     * 
+     * Same value as android.app.DownloadManager.STATUS_PENDING
+     */
+    public static final int DLSTATUS_PENDING = 1;
+    
+    /**
+     * Flag to indicate download is running now
+     * 
+     * Same value as android.app.DownloadManager.STATUS_RUNNING
+     */
+    public static final int DLSTATUS_RUNNING = 2;
+    
+    /**
+     * Flag to indicate download is paused (e.g. waiting to retry etc)
+     * 
+     * Same value as android.app.DownloadManager.STATUS_PENDING
+     */
+    public static final int DLSTATUS_PAUSED = 4;
+    
     /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method

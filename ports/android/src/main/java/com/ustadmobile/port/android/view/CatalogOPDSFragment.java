@@ -53,6 +53,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -129,6 +130,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
                     "Catalog controller");
             impl.getAppView(getActivity()).showAlertDialog(impl.getString(U.id.error), errMsg);
         }else {
+            //TODO: check that the activity has not been destroyed etc.
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -166,6 +168,11 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             if(entryStatus != -1) {
                 cardView.setOPDSEntryOverlay(entryStatus);
             }
+
+            if(entryStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
+                cardView.setProgressBarVisible(true);
+            }
+
             idToCardMap.put(feed.entries[i].id, cardView);
         }
 
@@ -280,6 +287,22 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         mListener = null;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mCatalogController != null) {
+            mCatalogController.handleViewPause();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mCatalogController != null) {
+            mCatalogController.handleViewDestroy();
+        }
+    }
+
     public void toggleEntrySelected(OPDSEntryCard card) {
         boolean nowSelected = !card.isSelected();
         card.setSelected(nowSelected);
@@ -354,8 +377,12 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
-    public void setEntryStatus(String entryId, int status) {
-
+    public void setEntryStatus(final String entryId, final int status) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                idToCardMap.get(entryId).setOPDSEntryOverlay(status);
+            }
+        });
     }
 
     @Override
@@ -390,7 +417,18 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     @Override
     public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
         this.mSelectedEntries = entries;
-        //TODO: go through and set the status of each
+        UstadJSOPDSFeed thisFeed = mCatalogController.getModel().opdsFeed;
+        for(int i = 0; i < thisFeed.entries.length; i++) {
+            boolean isSelected = false;
+            for(int j = 0; j < entries.length; j++) {
+                if(thisFeed.entries[i].id.equals(entries[j].id)) {
+                    isSelected = true;
+                    break;
+                }
+            }
+
+            idToCardMap.get(thisFeed.entries[i].id).setSelected(isSelected);
+        }
     }
 
     /**

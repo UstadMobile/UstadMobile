@@ -31,6 +31,7 @@
 
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -38,12 +39,17 @@ import com.ustadmobile.core.impl.ZipFileHandle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Hashtable;
 
 /**
  *
  * @author mike
  */
 public class UMIOUtils {
+    
+    public static final int HTTP_SIZE_NOT_GIVEN = -1;
+    
+    public static final int HTTP_SIZE_IO_EXCEPTION = -2;
     
     /**
      * Close the given input stream if not null
@@ -156,6 +162,31 @@ public class UMIOUtils {
             UstadMobileSystemImpl.l(UMLog.INFO, 353, dirURI);
         }
         return canWriteChild;
+    }
+    
+    /**
+     * Tries to get the size of a file to be downloaded using the HTTP head method
+     * 
+     * @return the file size in bytes if possible: a negative int error flag otherwise
+     * @see UMIOUtils#HTTP_SIZE_NOT_GIVEN
+     * @see UMIOUtils#HTTP_SIZE_IO_EXCEPTION
+     */
+    public static int getHTTPDownloadSize(String url, Hashtable headers) {
+        int retVal = HTTP_SIZE_IO_EXCEPTION;
+        try {
+            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(url, 
+                headers, null,"HEAD");
+            String contentLengthStr = result.getHeaderValue("content-length");
+            if(contentLengthStr != null) {
+                retVal = Integer.parseInt(contentLengthStr);
+            }else {
+                retVal = HTTP_SIZE_NOT_GIVEN;
+            }
+        }catch(IOException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 165, url, e);
+        }
+        
+        return retVal;
     }
     
 }

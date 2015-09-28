@@ -40,6 +40,7 @@ import android.widget.ProgressBar;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 /**
@@ -104,7 +105,7 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     }
 
     public void setOPDSEntryOverlay(int overlay) {
-        if(overlay == CatalogController.STATUS_ACQUIRED) {
+        if(overlay == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
             opdsStatusOverlay = getResources().getDrawable(R.drawable.opds_item_overlay_acquired);
         }else {
             opdsStatusOverlay = null;
