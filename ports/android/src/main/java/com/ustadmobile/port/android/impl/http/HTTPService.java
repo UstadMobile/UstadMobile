@@ -45,19 +45,6 @@ public class HTTPService extends Service {
 
     private static HashMap<String, String> lastMountedZipMap;
 
-
-    /**
-     * BroadCastReceiver that listens for the download complete message
-     */
-    private BroadcastReceiver downloadCompleteReceiver;
-
-    /**
-     * IntentFilter used to when registering for updates
-     */
-    private IntentFilter downloadCompleteIntentFilter;
-
-    private WeakHashMap<Long, UstadMobileSystemImplAndroid.DownloadJob> downloadJobMap;
-
     public static int idcount = 0;
 
     private int id;
@@ -89,34 +76,14 @@ public class HTTPService extends Service {
             e.printStackTrace();
         }
 
-        downloadJobMap = new WeakHashMap<>();
 
-        //register to receive download manager finished events
-        downloadCompleteIntentFilter =
-                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-        downloadCompleteReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                long downloadID =intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L);
-                UstadMobileSystemImplAndroid.DownloadJob job = downloadJobMap.get(downloadID);
-                if(job != null) {
-                    job.cleanup();
-                }
-            }
-        };
-        registerReceiver(downloadCompleteReceiver, downloadCompleteIntentFilter);
     }
 
-
-    public void watchDownloadJob(long downloadID, UstadMobileSystemImplAndroid.DownloadJob job) {
-        downloadJobMap.put(downloadID, job);
-    }
 
     @Override
     public void onDestroy() {
         Log.i(UstadMobileSystemImplAndroid.TAG, "Destroy HTTP Service");
         //saveMountedZips();
-        unregisterReceiver(downloadCompleteReceiver);
         httpd.stop();
         httpd = null;
 

@@ -513,19 +513,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String[] listDirectory(String dirURI) throws IOException;
     
-    /**
-     * Downloads the contents of the given URL to the given file URI.  Overwrite
-     * the fileURI if it already exists.
-     * 
-     * @param url HTTP URL to download from
-     * @param fileURI file URI to save to
-     * @param headers HTTP headers to set as key/value pairs
-     * @deprecated 
-     * 
-     * @return A transfer job that can be started and progress of which can be tracked
-     */
-    public abstract UMTransferJob downloadURLToFile(String url, String fileURI, Hashtable headers, Object context);
-    
     public abstract long queueFileDownload(String url, String fileURI, Hashtable headers, Object context);
     
     public abstract int[] getFileDownloadStatus(long downloadID, Object context);
