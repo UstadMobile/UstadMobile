@@ -12,12 +12,27 @@ package com.ustadmobile.core.impl;
 public class UMDownloadCompleteEvent {
     private long downloadID;
     
-    public UMDownloadCompleteEvent(long downloadID) {
+    private int[] status;
+    
+    public UMDownloadCompleteEvent(long downloadID, int[] status) {
         this.downloadID = downloadID;
+        this.status = status;
     }
     
+    /**
+     * The system download ID
+     * 
+     * @return The system download ID
+     */
     public long getDownloadID() {
         return downloadID;
+    }
+    
+    /**
+     * The status of the download upon completion
+     */
+    public int[] getStatus() {
+        return status;
     }
     
 }

@@ -349,14 +349,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public void registerDownloadCompleteReceiver(final UMDownloadCompleteReceiver receiver, Object context) {
+    public void registerDownloadCompleteReceiver(final UMDownloadCompleteReceiver receiver, final Object context) {
         IntentFilter downloadCompleteIntentFilter =
                 new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
         BroadcastReceiver completeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long downloadID =intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L);
-                receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(downloadID));
+                receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(downloadID,
+                        getFileDownloadStatus(downloadID, context)));
             }
         };
 
