@@ -36,12 +36,7 @@ import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UMProgressEvent;
-import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UMTransferJob;
-import com.ustadmobile.core.impl.UMTransferJobList;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
@@ -94,7 +89,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController implements UstadController, UMProgressListener, AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver {
+public class CatalogController implements UstadController, AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -1593,44 +1588,6 @@ public class CatalogController implements UstadController, UMProgressListener, A
     public void handleViewDestroy() {
         stopDownloadTimer();
     }
-
-    public void progressUpdated(UMProgressEvent evt) {
-        if(this.view != null) {
-            UMTransferJobList jobList = (UMTransferJobList)evt.getSrc();
-            int currentJobItem = jobList.getCurrentItem();
-            UstadJSOPDSEntry entry = (UstadJSOPDSEntry)jobList.getJobValue(
-                currentJobItem);
-            boolean isComplete = 
-                jobList.getCurrentJobProgress() == jobList.getCurrentJobTotalSize();
-            this.view.updateDownloadEntryProgress(entry.id, jobList.getCurrentJobProgress(), 
-                jobList.getCurrentJobTotalSize());
-            if(isComplete) {
-                this.view.setEntryStatus(entry.id, STATUS_ACQUIRED);
-                this.view.setDownloadEntryProgressVisible(entry.id, false);
-            }
-        }
-    }
-    
-    /**
-     * Runs before an acquisition run goes: marks items as in progress
-     */
-    private static class AcquirePreDownloadRunnable implements Runnable{
-        
-        private UstadJSOPDSEntry[] entries;
-        
-        private UMTransferJob[] srcJobs;
-        
-        private String[] mimeTypes;
-        
-        public AcquirePreDownloadRunnable(UstadJSOPDSEntry[] entries, UMTransferJob[] srcJobs, String[] mimeTypes) {
-            this.entries = entries;
-            this.mimeTypes = mimeTypes;
-        }
-        
-        public void run() {
-            
-        }
-    }
     
     /**
      * Class represents a request to acquire a set of OPDS entries
@@ -1713,55 +1670,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
         }
         
         
-    }
-    
-    
-    private static class AcquirePostDownloadRunnable implements Runnable {
-        private UstadJSOPDSEntry[] entries;
-        
-        private UMTransferJob[] srcJobs;
-        
-        private String[] mimeTypes;
-        
-        private int resourceMode;
-        
-        private Object context;
-        
-        public AcquirePostDownloadRunnable(UstadJSOPDSEntry[] entries, UMTransferJob[] srcJobs, String[] mimeTypes, int resourceMode, Object context) {
-            this.entries = entries;
-            this.srcJobs = srcJobs;
-            this.mimeTypes = mimeTypes;
-            this.resourceMode = resourceMode;
-            this.context = context;
-        }
-        
-        public void run() {
-            Hashtable parentFeeds = new Hashtable();
-            for(int i = 0; i < entries.length; i++) {
-                CatalogEntryInfo info = new CatalogEntryInfo();
-                info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
-                info.srcURLs = new String[]{srcJobs[i].getSource()};
-                info.fileURI = srcJobs[i].getDestination();
-                info.mimeType = mimeTypes[i];
-                //unregisterDownloadInProgress(entries[i].id);
-                CatalogController.setEntryInfo(entries[i].id, info, resourceMode, 
-                        context);
-                parentFeeds.put(entries[i].parentFeed, entries[i].parentFeed);
-            }
-            
-            Enumeration parentFeedKeys = parentFeeds.keys();
-            while(parentFeedKeys.hasMoreElements()) {
-                UstadJSOPDSFeed parentFeed = (UstadJSOPDSFeed)parentFeedKeys.nextElement();
-                try {
-                    CatalogController.generateLocalCatalog(parentFeed, resourceMode, 
-                    CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
-                }catch(IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-    
+    }    
     
     /**
      * Delete the given entry
