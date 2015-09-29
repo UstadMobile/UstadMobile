@@ -34,6 +34,7 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
+        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
    $endif$ */
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
@@ -49,7 +50,7 @@ import com.ustadmobile.core.util.UMUtil;
  * @author mike
  */
 /* $if umplatform == 1  $
-public class TestPreferences extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
+public class TestPreferences extends UMActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
 public class TestPreferences extends TestCase {
 /* $endif */
@@ -57,55 +58,56 @@ public class TestPreferences extends TestCase {
     
     public TestPreferences() {
         /* $if umplatform == 1 $ 
-        super("com.toughra.ustadmobile", UstadMobileActivity.class);
+        super(UstadMobileActivity.class);
         $endif */
     }
     
     public void testPreferences() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.setActiveUser(TestConstants.LOGIN_USER);
+        Object context = UMContextGetter.getContext(this);
+        impl.setActiveUser(TestConstants.LOGIN_USER, context);
         
         String[] testKeys = new String[]{"TestKey1", "TestKey2", "TestKey3"};
         String[] testValues = new String[]{"answeris42", "questionis6x7", "beacat"};
         
-        impl.setUserPref(testKeys[0], testValues[0]);
-        impl.setAppPref(testKeys[2], testValues[2]);
+        impl.setUserPref(testKeys[0], testValues[0], context);
+        impl.setAppPref(testKeys[2], testValues[2], context);
 
         assertEquals("Can retrieve set user value", testValues[0],
-                impl.getUserPref(testKeys[0]));
+                impl.getUserPref(testKeys[0], context));
         assertEquals("Can retrieve set app value", testValues[2],
-                impl.getAppPref(testKeys[2]));
+                impl.getAppPref(testKeys[2], context));
         
-        String[] prefKeys = impl.getUserPrefKeyList();
+        String[] prefKeys = impl.getUserPrefKeyList(context);
         int keyIndex = UMUtil.getIndexInArray(testKeys[0], prefKeys);
         assertTrue("User pref set key is in list of keys", keyIndex != -1);
         
-        prefKeys = impl.getAppPrefKeyList();
+        prefKeys = impl.getAppPrefKeyList(context);
         keyIndex = UMUtil.getIndexInArray(testKeys[2], prefKeys);
         assertTrue("App pref set key is in list of keys", keyIndex != -1);
         
-        impl.setActiveUser(TestConstants.LOGIN_USER + "other");
+        impl.setActiveUser(TestConstants.LOGIN_USER + "other",context);
         assertEquals("After changing user preference no longer present", null, 
-            impl.getUserPref(testKeys[0]));
+            impl.getUserPref(testKeys[0], context));
         assertEquals("Can retrieve set app value after new user logged in", 
-                testValues[2], impl.getAppPref(testKeys[2]));
+                testValues[2], impl.getAppPref(testKeys[2], context));
         
-        impl.setActiveUser(TestConstants.LOGIN_USER);
+        impl.setActiveUser(TestConstants.LOGIN_USER, context);
         assertEquals("After logging in value is present", testValues[0],
-                impl.getUserPref(testKeys[0]));
+                impl.getUserPref(testKeys[0], context));
 
-        impl.setUserPref(testKeys[0], null);
+        impl.setUserPref(testKeys[0], null, context);
         assertEquals("Can delete user preference", null, 
-                impl.getUserPref(testKeys[0]));
+                impl.getUserPref(testKeys[0], context));
         
         assertEquals("After delete key is not in user pref list", -1, 
-            UMUtil.getIndexInArray(testKeys[0], impl.getUserPrefKeyList()));
+            UMUtil.getIndexInArray(testKeys[0], impl.getUserPrefKeyList(context)));
         
         
-        impl.setAppPref(testKeys[2], null);
-        assertEquals("Can delete app pref", null, impl.getAppPref(testKeys[2]));
+        impl.setAppPref(testKeys[2], null, context);
+        assertEquals("Can delete app pref", null, impl.getAppPref(testKeys[2], context));
         assertEquals("After delete key is not in app pref list", -1,
-            UMUtil.getIndexInArray(testKeys[2], impl.getAppPrefKeyList()));
+            UMUtil.getIndexInArray(testKeys[2], impl.getAppPrefKeyList(context)));
     }
     
     public void runTest(){

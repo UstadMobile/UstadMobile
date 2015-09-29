@@ -31,6 +31,7 @@
 
 package com.ustadmobile.test.core;
 
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import java.io.IOException;
@@ -41,22 +42,49 @@ import java.io.OutputStream;
     import junit.framework.TestCase;
 /* $endif$ */
 
+/* $if umplatform == 1 $
+        import android.test.ActivityInstrumentationTestCase2;
+        import com.toughra.ustadmobile.UstadMobileActivity;
+        import android.content.Intent;
+        import android.app.Activity;
+        import android.app.Instrumentation;
+        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
+   $endif$ */
+
+
 /**
  *
  * @author mike
  */
+/* $if umplatform == 1  $
+public class TestFileImpl extends UMActivityInstrumentationTestCase2<UstadMobileActivity>{
+ $else$ */
 public class TestFileImpl extends TestCase {
+/* $endif */
+    
+    public TestFileImpl() {
+        /* $if umplatform == 1 $ 
+        super(UstadMobileActivity.class);
+        $endif */
+    }
     
     public void testFileImpl() throws IOException{
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 600, "testFileImpl Asking for context");
+
+        Object context = UMContextGetter.getContext(this);
+        
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 600, "testFileImpl got context");
+        
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
         String sharedContentDir = impl.getSharedContentDir();
         
         assertTrue("Shared content dir exists", impl.dirExists(sharedContentDir));
         
-        impl.setActiveUser(TestConstants.LOGIN_USER);
+        impl.setActiveUser(TestConstants.LOGIN_USER, context);
         
         assertTrue("User directory exists when active user is set",
-                impl.dirExists(impl.getUserContentDirectory(impl.getActiveUser())));
+                impl.dirExists(impl.getUserContentDirectory(impl.getActiveUser(context))));
         
         String testMkDirPath = UMFileUtil.joinPaths(
                 new String[]{impl.getSharedContentDir(), "tmpFileDirTest"});

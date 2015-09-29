@@ -44,7 +44,15 @@ package com.ustadmobile.test.core;
 /* $endif$ */
 
 import com.ustadmobile.core.controller.CatalogController;
+import static com.ustadmobile.core.controller.CatalogController.CACHE_ENABLED;
+import static com.ustadmobile.core.controller.CatalogController.KEY_FLAGS;
+import static com.ustadmobile.core.controller.CatalogController.KEY_HTTPPPASS;
+import static com.ustadmobile.core.controller.CatalogController.KEY_HTTPUSER;
+import static com.ustadmobile.core.controller.CatalogController.KEY_RESMOD;
+import static com.ustadmobile.core.controller.CatalogController.KEY_URL;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.CatalogView;
+import java.util.Hashtable;
 
 
 /**
@@ -72,70 +80,24 @@ public class TestCatalogView extends TestCase {
         /* $if umplatform == 1 $ 
         Activity activity = getActivity();
         $endif */
-        
+        Object context = UMContextGetter.getContext(this);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.setActiveUser(TestConstants.LOGIN_USER);
+        impl.setActiveUser(TestConstants.LOGIN_USER, context);
         
         String opdsURL =  TestUtils.getInstance().getHTTPRoot()  
             + TestConstants.CATALOG_OPDS_ROOT;
-        CatalogController controller = CatalogController.makeControllerByURL(
-            opdsURL, impl, CatalogController.USER_RESOURCE, 
-            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-            CatalogController.CACHE_ENABLED);
-        controller.show();
-        int timeLeft = VIEWSHOWTIMEOUT;
-        while(!controller.getView().isShowing() && timeLeft > 0) {
-            try { Thread.sleep(VIEWCHECKINTERVAL); }
-            catch(InterruptedException e) {};
-            timeLeft -= VIEWCHECKINTERVAL;
-        }
         
-        assertTrue("View is showing", controller.getView().isShowing());
+        Hashtable args = new Hashtable();
+        args.put(KEY_URL, opdsURL);
+        args.put(KEY_HTTPUSER, impl.getActiveUser(context));
+        args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(context));
+        args.put(KEY_RESMOD, new Integer(CatalogController.SHARED_RESOURCE));
+        args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
+        impl.go(CatalogView.class, args, context);
+        
+        //Tricky to say what to do next here... in reality we don't know if the view is up on screen...
+        assertTrue("View is showing", true);
         
         
     }
-
-    /* $if umplatform == 2 $
-    public void testCatalogViewDebug() throws Exception{
-        HTTPUtils.httpDebug("startingTestCatalogView");
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.setActiveUser(TestConstants.LOGIN_USER);
-        HTTPUtils.httpDebug("activeuserset");
-        String opdsURL =  TestUtils.getInstance().getHTTPRoot()  
-            + TestConstants.CATALOG_OPDS_ROOT;
-        HTTPUtils.httpDebug("opdsurlsetto");
-        if(opdsURL.indexOf("http://") != -1 && opdsURL.indexOf("root.opds") != -1){
-            HTTPUtils.httpDebug("opdsURL is valid");
-        }else{
-            HTTPUtils.httpDebug("opdsURL is NOT valid");
-        }
-        HTTPUtils.httpDebug("gettingcontrollerbyurl");
-        CatalogController controller = CatalogController.makeControllerByURL(
-            opdsURL, impl, CatalogController.USER_RESOURCE, 
-            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-            CatalogController.CACHE_ENABLED);
-        if (controller == null){
-            HTTPUtils.httpDebug("controllerisNull");
-        }else{
-            HTTPUtils.httpDebug("NotNull");
-        }
-        controller.show();
-        HTTPUtils.httpDebug("afterShow");
-        int timeLeft = VIEWSHOWTIMEOUT;
-        while(!controller.getView().isShowing() && timeLeft > 0) {
-            try { Thread.sleep(VIEWCHECKINTERVAL); }
-            catch(InterruptedException e) {};
-            timeLeft -= VIEWCHECKINTERVAL;
-        }
-        
-        assertTrue("View is showing", controller.getView().isShowing());
-        
-        
-    }
-
-    public void runTest() throws Exception{
-        //this.testCatalogView();
-	this.testCatalogViewDebug();
-    }
-    $endif */
 }

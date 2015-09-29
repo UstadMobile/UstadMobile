@@ -22,7 +22,7 @@
         <delete dir="preproctmp"/>
 
         <delete>
-            <fileset dir="${ustadmobile.port.testsrc}/com/ustadmobile/test/core" excludes="**/TestConstants.java"/>
+            <fileset dir="${ustadmobile.port.testsrc}/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
         </delete>	
         <preprocess indir="${ustadmobile.core.dir}/test/" outdir="preproctmp">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
@@ -30,7 +30,7 @@
         </preprocess>
 
         <copy todir="${ustadmobile.port.testsrc}">
-            <fileset dir="preproctmp"/>
+            <fileset dir="preproctmp" excludes="**/UMContextGetter.java"/>
         </copy>
     </target>
 

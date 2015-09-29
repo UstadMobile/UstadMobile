@@ -47,7 +47,8 @@ import java.io.IOException;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
-   $endif$ */
+        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
+$endif$ */
 
 
 /**
@@ -55,14 +56,14 @@ import java.io.IOException;
  * @author mike
  */
 /* $if umplatform == 1  $
-public class TestCacheAndStorageDir extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
+public class TestCacheAndStorageDir extends UMActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
 public class TestCacheAndStorageDir extends TestCase{
 /* $endif$ */
 
     public TestCacheAndStorageDir() {
         /* $if umplatform == 1 $ 
-        super("com.toughra.ustadmobile", UstadMobileActivity.class);
+        super(UstadMobileActivity.class);
         $endif */
     }
     
@@ -74,20 +75,22 @@ public class TestCacheAndStorageDir extends TestCase{
     }
     
     public void testCacheDir()  {
+        Object context = UMContextGetter.getContext(this);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.init();
-        String cacheDir = impl.getCacheDir(CatalogController.SHARED_RESOURCE);
+        impl.init(context);
+        String cacheDir = impl.getCacheDir(CatalogController.SHARED_RESOURCE, 
+                context);
         impl.l(UMLog.DEBUG, 595, cacheDir);
         assertTrue("Can make files in cache dir", 
                 UMIOUtils.canWriteChildFile(cacheDir));
-        impl.setActiveUser(TestConstants.LOGIN_USER);
-        cacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE);
+        impl.setActiveUser(TestConstants.LOGIN_USER, context);
+        cacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE, context);
         impl.l(UMLog.DEBUG, 597, cacheDir);
         assertTrue("User cache dir is created",
                 UMIOUtils.canWriteChildFile(cacheDir));
         impl.l(UMLog.DEBUG, 593, cacheDir);
         UMStorageDir[] storageDirs = impl.getStorageDirs(
-            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
+            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
         impl.l(UMLog.DEBUG, 599, cacheDir);
         assertTrue("found available storage dirs: ", storageDirs.length >= 2);
     }
