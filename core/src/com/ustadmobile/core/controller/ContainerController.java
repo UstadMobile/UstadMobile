@@ -56,9 +56,7 @@ public class ContainerController implements UstadController, AsyncLoadableContro
     private ContainerView containerView;
     
     private String openPath;
-    
-    private String fileURI; 
-    
+        
     private String mimeType;
     
     private UstadJSOPDSEntry entry;
@@ -93,10 +91,9 @@ public class ContainerController implements UstadController, AsyncLoadableContro
      * @param fileURI
      * @param mimeType 
      */
-    public ContainerController(UstadJSOPDSEntry entry, String openPath, String fileURI, String mimeType) {
+    public ContainerController(UstadJSOPDSEntry entry, String openPath, String mimeType) {
         this.entry = entry;
         this.openPath = openPath;
-        this.fileURI = fileURI;
         this.mimeType = mimeType;
     }
     
@@ -109,8 +106,8 @@ public class ContainerController implements UstadController, AsyncLoadableContro
      * @param mimeType
      * @return 
      */
-    public static ContainerController makeFromEntry(UstadJSOPDSEntry entry, String openPath, String fileURI, String mimeType) {
-        return new ContainerController(entry, openPath, fileURI, mimeType);
+    public static ContainerController makeFromEntry(UstadJSOPDSEntry entry, String openPath, String mimeType) {
+        return new ContainerController(entry, openPath, mimeType);
     }
     
     public static void makeControllerForView(ContainerView view, String containerURI, String mimeType, ControllerReadyListener listener) {
@@ -125,9 +122,6 @@ public class ContainerController implements UstadController, AsyncLoadableContro
         return openPath;
     }
     
-    public String getFileURI() {
-        return fileURI;
-    }
     
     public String getMimeType() {
         return mimeType;
@@ -216,12 +210,9 @@ public class ContainerController implements UstadController, AsyncLoadableContro
      * @see ContainerController#ARG_MIMETYPE
      */
     public UstadController loadController(Hashtable args, Object context) throws Exception {
-        fileURI = (String)args.get(ARG_CONTAINERURI);
+        openPath = (String)args.get(ARG_CONTAINERURI);
         mimeType = (String)args.get(ARG_MIMETYPE);
-        
-        openPath = UstadMobileSystemImpl.getInstance().openContainer(
-                fileURI, mimeType);
-        
+        getOCF();
         return this;
     }
     

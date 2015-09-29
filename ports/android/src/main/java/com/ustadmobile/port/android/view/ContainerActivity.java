@@ -27,6 +27,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
@@ -60,6 +61,8 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     private ContainerController mContainerController;
 
+    private String mBaseURL = null;
+
     @Override
     protected void onCreate(Bundle saved) {
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, saved);
@@ -67,22 +70,19 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
         setContentView(R.layout.activity_container_epubpager);
 
+        InputStream is = null;
         try {
             AssetManager asMgr = getApplicationContext().getAssets();
-            InputStream is =asMgr.open("onpageshow.js");
+            is =asMgr.open("onpageshow.js");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            byte[] buf = new byte[1024];
-            int bytesRead = 0;
-            while((bytesRead = is.read(buf, 0, buf.length)) != -1) {
-                bout.write(buf, 0, bytesRead);
-            }
-            is.close();
+            UMIOUtils.readFully(is, bout, 1024);
             onpageSelectedJS = "javascript:" + new String(bout.toByteArray(), "UTF-8");
         }catch(IOException e) {
             System.err.println("Error loading javascript for page changing");
             e.printStackTrace();
+        }finally {
+            UMIOUtils.closeInputStream(is);
         }
-
 
         mContainerURI = getIntent().getStringExtra(ContainerController.ARG_CONTAINERURI);
         mMimeType = getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
@@ -98,7 +98,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
         public void onServiceConnected(ComponentName className, IBinder service) {
             HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
             mHttpService = binder.getService();
-            mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
+            mBaseURL = mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
             ContainerActivity.this.initContent();
         }
 
@@ -110,7 +110,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     public void initContent() {
         UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + " type " + mMimeType);
-        ContainerController.makeControllerForView(this, mContainerURI, mMimeType, this);
+        ContainerController.makeControllerForView(this, mBaseURL, mMimeType, this);
     }
 
     @Override
@@ -287,10 +287,6 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
             String[] urlArray = null;
             Exception exc = null;
             try {
-                UstadMobileSystemImplAndroid.getInstanceAndroid().waitForHTTPReady(
-                    UstadMobileSystemImplAndroid.HTTP_CHECK_INTERVAL,
-                    UstadMobileSystemImplAndroid.HTTP_READY_TIMEOUT);
-
                 ocf = activity.mContainerController.getOCF();
                 String opfPath = UMFileUtil.joinPaths(new String[]{
                         activity.mContainerController.getOpenPath(), ocf.rootFiles[0].fullPath});

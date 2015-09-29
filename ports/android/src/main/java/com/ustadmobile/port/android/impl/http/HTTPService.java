@@ -1,12 +1,7 @@
 package com.ustadmobile.port.android.impl.http;
 
-import android.app.DownloadManager;
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -18,13 +13,7 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.nio.channels.SocketChannel;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 public class HTTPService extends Service {
 
@@ -34,16 +23,8 @@ public class HTTPService extends Service {
 
     private EmbeddedHTTPD httpd;
 
-    /**
-     * This is a horrible workaround for making the android tests complete.  In reality one
-     * service is active throughout the lifespan of the whole app.  In testing different services
-     * come and go.
-     */
-    private static EmbeddedHTTPD lastStartedHTTPD;
-
     private HashMap<String, String> mountedZipMap;
 
-    private static HashMap<String, String> lastMountedZipMap;
 
     public static int idcount = 0;
 
@@ -67,9 +48,6 @@ public class HTTPService extends Service {
 
         try {
             httpd.start();
-
-            lastStartedHTTPD = httpd;
-            lastMountedZipMap = mountedZipMap;
             Log.i(UstadMobileSystemImplAndroid.TAG, "Started HTTP server");
         } catch (IOException e) {
             Log.e(UstadMobileSystemImplAndroid.TAG, "Error starting http server", e);
@@ -107,33 +85,13 @@ public class HTTPService extends Service {
         return "http://127.0.0.1:" + DEFAULT_PORT  + "/";
     }
 
-    public EmbeddedHTTPD getActiveServer() {
-        if(httpd != null) {
-            return httpd;
-        }else {
-            return lastStartedHTTPD;
-        }
-    }
-
-    private HashMap<String, String> getActiveMap() {
-        if(mountedZipMap != null) {
-            return mountedZipMap;
-        }else {
-            return lastMountedZipMap;
-        }
-    }
-
     public String mountZIP(String zipPath) {
-        EmbeddedHTTPD server = httpd;
         HashMap<String, String> zipMap = mountedZipMap;
-        if(server == null) {
-            server = lastStartedHTTPD;
-            zipMap = lastMountedZipMap;
-        }
+
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
-                + this + "httpd server = " + server);
+                + this + "httpd server = " + httpd);
         String zipName = UMFileUtil.getFilename(zipPath);
-        server.mountZip(zipName, zipPath);
+        httpd.mountZip(zipName, zipPath);
 
         String extension = UMFileUtil.getExtension(zipPath);
         if(extension != null && extension.endsWith("epub")) {
@@ -157,11 +115,11 @@ public class HTTPService extends Service {
 
     public void ummountZIP(String openedPath) {
         String mountedPath = mountedZipMap.get(openedPath);
-        getActiveServer().unmountZip(mountedPath);
+        httpd.unmountZip(mountedPath);
     }
 
     public void addFilter(String mountPath, String extension, String regex, String replacement) {
-        getActiveServer().addFilter(mountPath, extension, regex, replacement);
+        httpd.addFilter(mountPath, extension, regex, replacement);
     }
 
 

@@ -61,7 +61,6 @@ import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
 
 import android.os.Build;
-import android.os.IBinder;
 import android.util.Log;
 
 import org.xmlpull.v1.*;
@@ -94,13 +93,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private SharedPreferences.Editor userPreferencesEditor;
 
-    public static final String EXTRA_VIEWID = "VIEWID";
-
     private UMLogAndroid logger;
-
-    private HTTPService httpService;
-
-    private HashMap<Object, HTTPServiceConnection> activityHTTPServiceConnections;
 
     private HashMap<Object, HTTPService> activityToHttpServiceMap;
 
@@ -112,24 +105,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private HashMap<UMDownloadCompleteReceiver, BroadcastReceiver> downloadCompleteReceivers;
 
-    /**
-     * When opencontainer is called we need to be sure that the http service is ready.  This is the
-     * maximum amount of time (in ms) that we will wait for the http service to bind and be ready
-     * to mount a container
-     */
-    public static final int HTTP_READY_TIMEOUT = 20*1000;
-
-    /**
-     * The amount of time to sleep in between checking for the http service to be ready
-     */
-    public static final int HTTP_CHECK_INTERVAL = 500;
 
     /**
      @deprecated
      */
     public UstadMobileSystemImplAndroid() {
         logger = new UMLogAndroid();
-        activityHTTPServiceConnections = new HashMap<>();
         activityToHttpServiceMap = new HashMap<>();
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
@@ -174,27 +155,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     }
 
-    protected void connectActivityToHttpService(Activity activity) {
-        Intent httpServiceIntent = new Intent(activity, HTTPService.class);
-        HTTPServiceConnection activityCon = activityHTTPServiceConnections.get(activity);
-        if(activityCon == null) {
-            activityCon = new HTTPServiceConnection(activity);
-            activity.bindService(httpServiceIntent, activityCon, Context.BIND_AUTO_CREATE);
-            activityHTTPServiceConnections.put(activity, activityCon);
-        }
-    }
-
 
     public void handleActivityStop(Activity activity) {
 
     }
 
     public void handleActivityDestroy(Activity activity) {
-        HTTPServiceConnection activityCon = activityHTTPServiceConnections.get(activity);
-        if(activityCon != null) {
-            activity.unbindService(activityCon);
-            activityHTTPServiceConnections.remove(activity);
-        }
+
     }
 
     @Override
@@ -677,42 +644,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return logger;
     }
 
-    public boolean waitForHTTPReady(int interval, int timeout) {
-        if(isHTTPReady()) {
-            return true;
-        }
-
-        int waitTime = 0;
-        while(!isHTTPReady() && waitTime < timeout) {
-            try { Thread.sleep(interval); }
-            catch(InterruptedException e) {}
-            waitTime += interval;
-        }
-
-        return isHTTPReady();
-    }
-
-    @Override
-    public String openContainer(String containerURI, String mimeType) {
-        int waitTime = 0;
-        waitForHTTPReady(HTTP_CHECK_INTERVAL, HTTP_READY_TIMEOUT);
-
-        l(UMLog.INFO, 367, containerURI + " type (" + mimeType + ")" + " ready : " + isHTTPReady());
-
-        String openPath = httpService.mountZIP(containerURI);
-
-
-        return openPath;
-    }
-
-    public boolean isHTTPReady() {
-        return httpService != null && httpService.getActiveServer() != null;
-    }
-
-    @Override
-    public void closeContainer(String openURI) {
-        httpService.ummountZIP(openURI);
-    }
 
     /**
      * @inheritDoc
@@ -720,28 +651,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public ZipFileHandle openZip(String name) throws IOException{
         return new ZipFileHandleAndroid(name);
-    }
-
-    public class HTTPServiceConnection implements ServiceConnection {
-
-        private Object key;
-
-        public HTTPServiceConnection(Object key) {
-            this.key = key;
-        }
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            HTTPService.HTTPBinder httpBinder = (HTTPService.HTTPBinder)service;
-            HTTPService bindedService = httpBinder.getService();
-            UstadMobileSystemImplAndroid.this.httpService = httpBinder.getService();
-            UstadMobileSystemImplAndroid.this.activityToHttpServiceMap.put(key, bindedService);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
     }
 
 }
