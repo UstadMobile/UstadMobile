@@ -105,6 +105,12 @@ public abstract class UstadMobileSystemImpl {
     private boolean initRan;
     
     /**
+     * The App Preference Key for the XAPIServer e.g. to get the active xAPI
+     * server use getAppPref(UstadMobileSystemImpl.PREFKEY_XAPISERVER)
+     */
+    public static final String PREFKEY_XAPISERVER = "xapiserver";
+    
+    /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
      * 

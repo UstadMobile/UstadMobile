@@ -146,6 +146,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      */
     public boolean queueTinCanStatement(JSONObject stmt) {
         //ToDo
+        String stmtStr = stmt.toString();
+        System.out.println(stmtStr);
         return false;
     }
     

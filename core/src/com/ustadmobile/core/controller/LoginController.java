@@ -231,7 +231,8 @@ public class LoginController implements UstadController{
         Thread loginThread = new Thread() {
             public void run() {
                 impl.getLogger().l(UMLog.DEBUG, 303, null);
-                String serverBaseURL = impl.getAppPref("server",
+                String serverBaseURL = impl.getAppPref(
+                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     UstadMobileDefaults.DEFAULT_XAPI_SERVER);
                 String serverURL = UMFileUtil.joinPaths(new String[]{serverBaseURL, 
                     "statements?limit=1"});

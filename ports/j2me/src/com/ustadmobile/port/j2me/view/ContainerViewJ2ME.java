@@ -54,12 +54,15 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
+import org.json.me.JSONObject;
 
 /**
  *
@@ -102,6 +105,13 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     static Hashtable mediaExtensions;
     
+    long lastPageChangeTime = -1;
+    
+    /**
+     * The HTML component with the current page
+     */
+    private HTMLComponent htmlC;
+    
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
@@ -143,48 +153,78 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     protected void initEPUB() {
         try {
-            HTTPUtils.httpDebug("getting ocf");
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 597 , null);
             if (controller == null){
                 UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 524, "");
             }else{
                 UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 526, "");
             }
-            UstadOCF ocf = controller.getOCF();
-            HTTPUtils.httpDebug("getting opf");
-            UstadJSOPF opf = controller.getOPF(0);
-            HTTPUtils.httpDebug("getting spine");
+            
+            ocf = controller.getOCF();
+            opf = controller.getOPF(0);
             spineURLs = opf.getLinearSpineURLS();
-            HTTPUtils.httpDebug("getting requesthandler");
             requestHandler = new ContainerDocumentRequestHandler(this);
-            HTTPUtils.httpDebug("getting htmlcallback");
             htmlCallback = new ContainerHTMLCallback(this);
-            HTTPUtils.httpDebug("getting opfurl");
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
-            HTTPUtils.httpDebug("opfURL:" + opfURL);
-            HTTPUtils.httpDebug("title: " + title);
             showPage(1);
         }catch(Exception e) {
             UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 350, null, e);
         }
     }
     
+    /**
+     * Make a tincan statement about the user viewing the current page and
+     * send it to the system implementation to be queued.
+     */
+    protected void makePageStatement() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(lastPageChangeTime != -1 && impl.getActiveUser() != null) {
+            long duration =  System.currentTimeMillis() - lastPageChangeTime;
+            JSONObject actor = UMTinCanUtil.makeActorFromUserAccount(
+                impl.getActiveUser(), 
+                UstadMobileSystemImpl.getInstance().getAppPref(
+                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER));
+            String currentPage = spineURLs[currentIndex];
+            
+            //TODO: get language of the page itself or from OPF
+            String title = currentPage;
+            if(htmlC != null && htmlC.getTitle() != null) {
+                title = htmlC.getTitle();
+            }
+            
+            JSONObject stmt = UMTinCanUtil.makePageViewStmt(opf.id, currentPage,
+                title, "en-US", duration, actor);
+            UstadMobileSystemImpl.getInstance().queueTinCanStatement(stmt);
+        }
+    }
+    
+    /**
+     * Show the page as per the index in the spineURLs
+     * 
+     * @param pageIndex Index of page number to show
+     */
     public void showPage(int pageIndex) {
         if(pageIndex == currentIndex) {
             return;
         }
         
+        makePageStatement();
+        
+        lastPageChangeTime = System.currentTimeMillis();
+        
         Form oldForm = currentForm;
         currentForm = new Form();
         currentForm.setLayout(new BorderLayout());
-        HTMLComponent comp = new HTMLComponent(requestHandler);
-        comp.setHTMLCallback(htmlCallback);
-        comp.setImageConstrainPolicy(
+        htmlC = new HTMLComponent(requestHandler);
+        htmlC.setHTMLCallback(htmlCallback);
+        htmlC.setImageConstrainPolicy(
             HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
-        comp.setIgnoreCSS(true);
-        comp.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
-        currentForm.addComponent(BorderLayout.CENTER, comp);
+        htmlC.setIgnoreCSS(true);
+        htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
+        currentForm.addComponent(BorderLayout.CENTER, htmlC);
         currentForm.show();
         
         currentForm.addCommand(cmdBack);
@@ -203,6 +243,10 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     }
     
     
+    /**
+     * Handles requests to load resources by pointing them to the openzip and
+     * requests to play media
+     */
     public class ContainerDocumentRequestHandler implements DocumentRequestHandler {
 
         private ContainerViewJ2ME view;
@@ -240,12 +284,8 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
         }
 
         public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
-            boolean isComplete = status == STATUS_COMPLETED;
-            boolean isDisplayed = status == STATUS_DISPLAYED;
             super.pageStatusChanged(htmlC, status, url); //To change body of generated methods, choose Tools | Templates.
         }
-        
-        
         
         public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement) {
             if(timer == null) {
