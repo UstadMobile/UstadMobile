@@ -36,11 +36,24 @@ package com.ustadmobile.test.core;
  * @author mike
  */
 public class TestConstants {
-    public static final String LOGIN_USER = "";
+
+   public static final String LOGIN_USER = "username";
     
-    public static final String LOGIN_PASS = "";
+    public static final String LOGIN_PASS = "secret";
     
-    public static final String LOGIN_URL = 
-        "http://umcloud1.ustadmobile.com/umlrs/statements?limit=1";
+    public static final String XAPI_SERVER = 
+            "http://umcloud1.ustadmobile.com/umlrs";
+    
+    public static final String LOGIN_URL = XAPI_SERVER + "/statements?limit=1";
+    
+    public static final String TEST_SERVER = "__TESTSERVERIP__";
+    
+    public static final String TEST_CONTROL_PORT = "__TESTSERVERPORT__";
+    
+    public static final String CATALOG_OPDS_ROOT = "root.opds";
+    
+    
+    public static final String REGISTER_URL = 
+            "http://umcloud1.ustadmobile.com/phoneinappreg/";
     
 }
