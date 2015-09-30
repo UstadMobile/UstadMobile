@@ -178,13 +178,19 @@ public class HTTPUtils {
     
     public static HTTPResult makeHTTPRequest(String url,
             Hashtable optionalParameters, 
+            Hashtable optionalHeaders, String type) throws IOException{
+        return makeHTTPRequest(url, optionalParameters, optionalHeaders, type, null);
+    }
+    
+    public static HTTPResult makeHTTPRequest(String url,
+            Hashtable optionalParameters, 
             Hashtable optionalHeaders) throws IOException{
-        return makeHTTPRequest(url, optionalParameters, optionalHeaders, "GET");
+        return makeHTTPRequest(url, optionalParameters, optionalHeaders, "GET", null);
     }
     
     public static HTTPResult makeHTTPRequest(String url, 
             Hashtable optionalParameters, Hashtable optionalHeaders, 
-            String type) throws IOException{
+            String type, byte[] postBody) throws IOException{
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 518, 
                 url + " of type: " + type);
         HTTPResult httpResult = null;
@@ -247,17 +253,30 @@ public class HTTPUtils {
             
             
             if(type.equals("POST")){
-                //Content-Length to be set
-                httpDebug("setting content length " + String.valueOf(params.getBytes().length));
-                httpConn.setRequestProperty("Content-length", 
-                        String.valueOf(params.getBytes().length));
-                httpDebug("setting property url to type " + type);
-                //httpConn.setRequestProperty(url, type);
-                httpDebug("openingOutputStream");
-                os = httpConn.openOutputStream();
-                httpDebug("writing params-getBytes()");
-                os.write(params.getBytes());
-                //os.flush();
+                if(params == null && postBody != null){
+                    //Content-Length to be set
+                    httpDebug("setting content length " + String.valueOf(postBody.length));
+                    httpConn.setRequestProperty("Content-length", 
+                            String.valueOf(postBody.length));
+                    httpDebug("setting property url to type " + type);
+                    //httpConn.setRequestProperty(url, type);
+                    httpDebug("openingOutputStream");
+                    os = httpConn.openOutputStream();
+                    httpDebug("writing params-getBytes()");
+                    os.write(postBody);
+                }else{
+                    //Content-Length to be set
+                    httpDebug("setting content length " + String.valueOf(params.getBytes().length));
+                    httpConn.setRequestProperty("Content-length", 
+                            String.valueOf(params.getBytes().length));
+                    httpDebug("setting property url to type " + type);
+                    //httpConn.setRequestProperty(url, type);
+                    httpDebug("openingOutputStream");
+                    os = httpConn.openOutputStream();
+                    httpDebug("writing params-getBytes()");
+                    os.write(params.getBytes());
+                    //os.flush();
+                }
             
             } 
             

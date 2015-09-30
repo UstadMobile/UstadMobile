@@ -21,6 +21,7 @@ try 3: Images
 */
 
 package com.ustadmobile.port.j2me.app;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.URLTextUtil;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,10 @@ public class FileUtils {
     public static char FILE_SEP = '/';
     public static final String USTAD_CONTENT_DIR = "ustadMobileContent";
     public static final String EPUB_CONTAINER = "META-INF/container.xml";
+    /**
+     * System property used to get the photo dir location on device
+     */
+    public static final String SYSTEMPROP_PHOTODIR = "fileconn.dir.photos";
 
     //The fileURI?
     //String fileURI;
@@ -122,6 +127,30 @@ public class FileUtils {
             return bestRoot;
         }
         return null;
+    }
+    
+    public static DeviceRoots getPhoneRoot(){        
+        try{
+            String currentDir = System.getProperty(SYSTEMPROP_PHOTODIR);
+            if(currentDir == null) {
+                //Unable
+                return null;
+            }
+            
+            if(UMIOUtils.canWriteChildFile(currentDir)) {
+                DeviceRoots phoneRoot = new DeviceRoots();
+                phoneRoot.path = currentDir;
+                phoneRoot.name = "phoneRoot";
+                return phoneRoot;
+            }
+            
+            
+        }catch (Exception lre){
+            lre.printStackTrace();
+            System.out.println("getPhoneRoot exception");
+        }
+        return null;
+        
     }
     
     public static DeviceRoots[] getAllRoots(){

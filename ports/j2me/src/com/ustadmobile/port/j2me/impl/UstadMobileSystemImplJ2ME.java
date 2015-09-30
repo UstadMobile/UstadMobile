@@ -145,6 +145,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc}
      */
     public boolean queueTinCanStatement(JSONObject stmt) {
+        //ToDo
         return false;
     }
     
@@ -262,7 +263,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * 
      * @return Writable directory the phone's storage
      */
-    private String findSystemBaseDir() {
+    public String findSystemBaseDir() {
         if(baseSystemDir == null) {
             l(UMLog.DEBUG, 589, null);
             Vector potentialCacheDirs = new Vector();
