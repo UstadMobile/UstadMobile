@@ -266,29 +266,41 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
                         }
                     }
                     
-                    try {
-                        String pathInZip = source.substring(
-                            UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                        in = view.containerZip.openInputStream(pathInZip);
-                        Object mediaTypeObj = 
-                                mediaExtensions.get(UMFileUtil.getExtension(src));
-                        if(mediaTypeObj != null) {
-                            isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in, 
-                                (String)mediaTypeObj);
-                        }else {
-                            UstadMobileSystemImpl.getInstance().l(UMLog.INFO, 120, src);
-                        }
+                    if(source != null) {
+                        try {
+                            String fullURI = UMFileUtil.resolveLink(
+                                htmlC.getPageURL(), source);
+                            String pathInZip = fullURI.substring(
+                                UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
+                            String mediaFileExtension = UMFileUtil.getExtension(src);
+                            Object mediaTypeObj = mediaExtensions.get(mediaFileExtension);
 
-                    }catch(IOException e) {
-                        UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 120, src, e);
-                    }finally {
-                        if(!isPlaying) {
-                            UMIOUtils.closeInputStream(in);
+                            UstadMobileSystemImpl.l(UMLog.VERBOSE, 427, pathInZip 
+                                + ':' + mediaFileExtension + ':' + mediaTypeObj);
+
+                            in = view.containerZip.openInputStream(pathInZip);
+
+                            if(mediaTypeObj != null) {
+                                isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in, 
+                                    (String)mediaTypeObj);
+                            }else {
+                                UstadMobileSystemImpl.l(UMLog.INFO, 120, src);
+                            }
+
+                        }catch(IOException e) {
+                            UstadMobileSystemImpl.l(UMLog.ERROR, 120, src, e);
+                        }finally {
+                            if(!isPlaying) {
+                                UMIOUtils.closeInputStream(in);
+                            }
                         }
+                    }else {
+                        UstadMobileSystemImpl.l(UMLog.INFO, 373, mediaElement.toString());
                     }
+                    
                 }
                 
-            }, 2500);
+            }, 1000);
         }
         
     }
