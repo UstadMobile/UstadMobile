@@ -95,7 +95,9 @@ public class ContainerPageFragment extends Fragment {
     }
 
     public void evaluateJavascript(String script) {
-        webView.loadUrl(script);
+        if(webView != null) {
+            webView.loadUrl(script);
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event

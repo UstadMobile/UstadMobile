@@ -36,6 +36,7 @@ import android.app.DownloadManager;
 import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 
 import java.io.*;
@@ -44,9 +45,9 @@ import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
@@ -68,6 +69,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     private Activity currentActivity;
 
     private Context currentContext;
+
+    private static Activity createActivity;
 
     public static final String TAG = "UstadMobileImplAndroid";
 
@@ -99,12 +102,31 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private HTTPService httpService;
 
-    private HashMap<Activity, HTTPServiceConnection> activityHTTPServiceConnections;
+    private HashMap<Object, HTTPServiceConnection> activityHTTPServiceConnections;
+
+    private HashMap<Object, HTTPService> activityToHttpServiceMap;
+
+    public static final String START_USERNAME = "START_USERNAME";
+
+    public static final String START_AUTH = "START_AUTH";
+
+    /**
+     * When opencontainer is called we need to be sure that the http service is ready.  This is the
+     * maximum amount of time (in ms) that we will wait for the http service to bind and be ready
+     * to mount a container
+     */
+    public static final int HTTP_READY_TIMEOUT = 20*1000;
+
+    /**
+     * The amount of time to sleep in between checking for the http service to be ready
+     */
+    public static final int HTTP_CHECK_INTERVAL = 500;
 
     public UstadMobileSystemImplAndroid() {
         appView = new AppViewAndroid(this);
         logger = new UMLogAndroid();
         activityHTTPServiceConnections = new HashMap<>();
+        activityToHttpServiceMap = new HashMap<>();
     }
 
     public static UstadMobileSystemImplAndroid getInstanceAndroid() {
@@ -112,7 +134,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     public void init() {
+        if(currentContext == null) {
+            setCurrentContext(createActivity);
+        }
 
+        super.init();
     }
 
     @Override
@@ -120,23 +146,72 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return null;
     }
 
+    /**
+     * To be called by activities as the first matter of business in the onCreate method
+     *
+     * @param activity
+     */
+    public static void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
+        if(mainInstance == null || ((UstadMobileSystemImplAndroid)mainInstance).currentContext == null) {
+            //this is probably the first activity
+            createActivity = activity;
+
+            if(mainInstance == null) {
+                getInstance();//we need to setup main instance here : now an activity has been created we must be ready
+            }
+
+            UstadMobileSystemImplAndroid impl = getInstanceAndroid();
+            impl.setCurrentContext(activity);
+            impl.currentActivity = activity;
+            if(!impl.isLocaleLoaded()) {
+                mainInstance.loadLocale();
+            }
+        }
+
+        ((UstadMobileSystemImplAndroid)mainInstance).connectActivityToHttpService(activity);
+
+        /*
+         * Sometimes for testing we need to set the username and authentication : this can only be
+         * done with a known context
+         */
+        String currentUsername = savedInstanceState != null ? savedInstanceState.getString(KEY_CURRENTUSER): null;
+        if(currentUsername == null) {
+            currentUsername = activity.getIntent().getStringExtra(KEY_CURRENTUSER);
+        }
+
+        if(currentUsername != null) {
+            mainInstance.setActiveUser(currentUsername);
+            String currentAuth = savedInstanceState != null && savedInstanceState.getString(KEY_CURRENTAUTH) != null ?
+                savedInstanceState.getString(KEY_CURRENTUSER) : activity.getIntent().getStringExtra(KEY_CURRENTAUTH);
+            mainInstance.setActiveUserAuth(currentAuth);
+        }
+
+    }
+
     public void handleActivityStart(Activity activity) {
         this.currentActivity = activity;
         setCurrentContext(activity);
 
+        //now we have a started activity this isn't needed
+        createActivity = null;
+
         //bind the activity to the HTTP service
+        connectActivityToHttpService(activity);
+    }
+
+    protected void connectActivityToHttpService(Activity activity) {
         Intent httpServiceIntent = new Intent(activity, HTTPService.class);
         HTTPServiceConnection activityCon = activityHTTPServiceConnections.get(activity);
         if(activityCon == null) {
-            activityCon = new HTTPServiceConnection();
+            activityCon = new HTTPServiceConnection(activity);
             activity.bindService(httpServiceIntent, activityCon, Context.BIND_AUTO_CREATE);
             activityHTTPServiceConnections.put(activity, activityCon);
         }
     }
 
+
     public void handleActivityStop(Activity activity) {
-        int x =42 ;
-        int y = x + 1;
+
     }
 
     public void handleActivityDestroy(Activity activity) {
@@ -209,13 +284,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public UMStorageDir[] getStorageDirs(int mode) {
         List<UMStorageDir> dirList = new ArrayList<>();
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(getSystemBaseDir(), "Device", false, true, false));
+            dirList.add(new UMStorageDir(getSystemBaseDir(), getString(U.id.device), false, true, false));
         }
 
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
             String userBase = UMFileUtil.joinPaths(new String[]{getSystemBaseDir(), "user-"
                     + getActiveUser()});
-            dirList.add(new UMStorageDir(userBase, "Device", false, true, true));
+            dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
         }
 
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
@@ -272,6 +347,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public InputStream openFileInputStream(String fileURI) throws IOException {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
         return new FileInputStream(fileURI);
+    }
+
+    @Override
+    public InputStream openResourceInputStream(String resURI) throws IOException {
+        return getCurrentContext().getAssets().open(resURI);
     }
 
     @Override
@@ -371,6 +451,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     @Override
     public void setActiveUser(String username) {
+        this.currentUsername = username;
+
         super.setActiveUser(username);
         saveUserPrefs();
         SharedPreferences appPreferences = getAppSharedPreferences();
@@ -382,7 +464,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
         editor.commit();
 
-        this.currentUsername = username;
+
         this.userPreferences = null;
     }
 
@@ -575,18 +657,36 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return logger;
     }
 
-    @Override
-    public String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType) {
-        String openPath = httpService.mountZIP(containerURI);
-        String extension = UMFileUtil.getExtension(containerURI);
-        if(extension != null && extension.endsWith("epub")) {
-            String zipName = UMFileUtil.getFilename(containerURI);
-            httpService.addFilter(zipName, "xhtml", "autoplay(\\s?)=(\\s?)([\"'])autoplay",
-                "data-autoplay$1=$2$3autoplay");
-            httpService.addFilter(zipName, "xhtml", "&(\\s)", "&amp;$1");
+    public boolean waitForHTTPReady(int interval, int timeout) {
+        if(isHTTPReady()) {
+            return true;
         }
 
+        int waitTime = 0;
+        while(!isHTTPReady() && waitTime < timeout) {
+            try { Thread.sleep(interval); }
+            catch(InterruptedException e) {}
+            waitTime += interval;
+        }
+
+        return isHTTPReady();
+    }
+
+    @Override
+    public String openContainer(String containerURI, String mimeType) {
+        int waitTime = 0;
+        waitForHTTPReady(HTTP_CHECK_INTERVAL, HTTP_READY_TIMEOUT);
+
+        l(UMLog.INFO, 367, containerURI + " type (" + mimeType + ")" + " ready : " + isHTTPReady());
+
+        String openPath = httpService.mountZIP(containerURI);
+
+
         return openPath;
+    }
+
+    public boolean isHTTPReady() {
+        return httpService != null && httpService.getActiveServer() != null;
     }
 
     @Override
@@ -604,10 +704,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     public class HTTPServiceConnection implements ServiceConnection {
 
+        private Object key;
+
+        public HTTPServiceConnection(Object key) {
+            this.key = key;
+        }
+
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             HTTPService.HTTPBinder httpBinder = (HTTPService.HTTPBinder)service;
+            HTTPService bindedService = httpBinder.getService();
             UstadMobileSystemImplAndroid.this.httpService = httpBinder.getService();
+            UstadMobileSystemImplAndroid.this.activityToHttpServiceMap.put(key, bindedService);
         }
 
         @Override
@@ -621,7 +729,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      * Represents a single Download: backed by the Android DownloadManager service
      *
      */
-    public class DownloadJob implements UMTransferJob {
+    public static class DownloadJob implements UMTransferJob {
 
 
         private String srcURL;
@@ -653,15 +761,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         public static final int IDX_BYTES_TOTAL = 1;
 
-        /**
-         * BroadCastReceiver that listens for the download complete message
-         */
-        private BroadcastReceiver downloadCompleteReceiver;
-
-        /**
-         * IntentFilter used to when registering for updates
-         */
-        private IntentFilter downloadCompleteIntentFilter;
+        public static final int IDX_STATUS = 2;
 
         /**
          * UMProgressListener objects
@@ -716,20 +816,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             request.setDestinationUri(Uri.fromFile(destFile));
             final DownloadJob thisJob = this;
 
-
-            downloadCompleteIntentFilter =
-                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-            downloadCompleteReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L) == thisJob.downloadID) {
-                        Log.d(TAG, "Download Complete");
-                        thisJob.cleanup();
-                    }
-                }
-            };
-            ctx.registerReceiver(downloadCompleteReceiver, downloadCompleteIntentFilter);
-
             downloadID = mgr.enqueue(request);
             startProgressTracking(this);
         }
@@ -742,10 +828,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
          */
         private void fireProgressEvent(int evtType, int status) {
             int[] downloadStatus = getProgressAndTotal();
-            UMProgressEvent evt = new UMProgressEvent(this, evtType,
-                    downloadStatus[0], downloadStatus[1], status);
-            for(int i = 0; i < progressListeners.size(); i++) {
-                progressListeners.get(i).progressUpdated(evt);
+
+            if(evtType == UMProgressEvent.TYPE_PROGRESS && downloadStatus[IDX_STATUS] == DownloadManager.STATUS_SUCCESSFUL) {
+                //actually - it's really all done...
+                cleanup();
+            }else {
+                UMProgressEvent evt = new UMProgressEvent(this, evtType,
+                        downloadStatus[0], downloadStatus[1], status);
+                for(int i = 0; i < progressListeners.size(); i++) {
+                    progressListeners.get(i).progressUpdated(evt);
+                }
             }
         }
 
@@ -758,47 +850,36 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
 
         private void fireDownloadComplete() {
+            Log.i(TAG, "Firing download complete");
             fireProgressEvent(UMProgressEvent.TYPE_COMPLETE, 200);
         }
 
-        private void cleanup() {
-            //when everything is done...
-            Log.d(TAG, "Download Complete");
+        public synchronized void cleanup() {
+            //when everything is done...  done only once
             if(timerProgressUpdate != null) {
                 timerProgressUpdate.cancel();
+                timerProgressUpdate = null;
+
+                final int[] byteTotals = this.getProgressAndTotal();
+                this.finished = true;
+                this.finishedBytesDownloaded = byteTotals[IDX_DOWNLOADED_SO_FAR];
+                this.finishedTotalSize = byteTotals[IDX_BYTES_TOTAL];
+                Log.d(TAG, "Download Size: " + finishedBytesDownloaded + " / " + finishedTotalSize);
+
+                try { notifyAll(); }
+                catch(Exception e) {}
+
+                fireDownloadComplete();
             }
-
-            final int[] byteTotals = this.getProgressAndTotal();
-            this.finished = true;
-            this.finishedBytesDownloaded = byteTotals[IDX_DOWNLOADED_SO_FAR];
-            this.finishedTotalSize = byteTotals[IDX_BYTES_TOTAL];
-            Log.d(TAG, "Download Size: " + finishedBytesDownloaded + " / " + finishedTotalSize);
-
-
-            /*
-             * On Android 2.3 devices it seems after the download is complete the receiver is no
-             * longer registered and this will throw an IllegalArgumentException
-             */
-            try {
-                this.ctx.unregisterReceiver(downloadCompleteReceiver);
-            }catch(IllegalArgumentException e) {
-                Log.d(TAG, "Ignore illegal argument exception for receiver already unregistered");
-            }
-
-
-
-            try { notifyAll(); }
-            catch(Exception e) {}
-
-            fireDownloadComplete();
         }
 
 
         private int[] getProgressAndTotal() {
-            int[] retVal = new int[2];
+            int[] retVal = new int[3];
             if(this.isFinished()) {
                 retVal[IDX_DOWNLOADED_SO_FAR] = this.finishedBytesDownloaded;
                 retVal[IDX_BYTES_TOTAL] = this.finishedTotalSize;
+                retVal[IDX_STATUS] = DownloadManager.STATUS_SUCCESSFUL;
             }else {
                 DownloadManager mgr = (DownloadManager)hostImpl.getCurrentContext().getSystemService(
                         Context.DOWNLOAD_SERVICE);
@@ -807,11 +888,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 Cursor cursor = mgr.query(query);
                 cursor.moveToFirst();
 
+
                 retVal[IDX_DOWNLOADED_SO_FAR] = cursor.getInt(cursor.getColumnIndex(
                         DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
                 retVal[IDX_BYTES_TOTAL] = cursor.getInt(cursor.getColumnIndex(
                         DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-                int statusCode = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS));
+                retVal[IDX_STATUS] = cursor.getInt(cursor.getColumnIndex(
+                        DownloadManager.COLUMN_STATUS));
             }
 
             return retVal;
@@ -823,6 +906,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
 
         private void startProgressTracking(final DownloadJob job) {
+            hostImpl.waitForHTTPReady(10, 5000);
+            hostImpl.httpService.watchDownloadJob(downloadID, this);
             this.timerProgressUpdate = new Timer();
             timerProgressUpdate.schedule(new TimerTask() {
                 @Override
@@ -879,7 +964,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         @Override
         public boolean isFinished() {
-            return finished;
+            return this.finished;
         }
 
         @Override

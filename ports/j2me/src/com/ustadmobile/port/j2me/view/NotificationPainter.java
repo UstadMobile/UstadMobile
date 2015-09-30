@@ -42,6 +42,9 @@ import com.sun.lwuit.geom.Rectangle;
 public class NotificationPainter implements Painter{
 
     private String text;
+    
+    private static final int BGCOLOR = 0x888888;
+    private static final int FGCOLOR = 0xffffff;
 
     public synchronized String getText() {
         return text;
@@ -61,6 +64,10 @@ public class NotificationPainter implements Painter{
         final int x = (rect.getSize().getWidth() - strWidth)/2;
         final int y = rect.getSize().getHeight() - strHeight - PADDING_BOTTOM;
         
+        g.setColor(BGCOLOR);
+        g.fillRect(x-2, y-2, strWidth+4, strHeight+4);
+        
+        g.setColor(FGCOLOR);
         g.drawString(textStr, x, y);
     }
     

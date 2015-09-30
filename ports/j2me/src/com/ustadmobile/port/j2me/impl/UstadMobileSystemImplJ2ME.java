@@ -31,6 +31,7 @@
 package com.ustadmobile.port.j2me.impl;
 
 import com.sun.lwuit.Form;
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
@@ -72,6 +73,7 @@ import javax.microedition.media.Manager;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
 import javax.microedition.media.control.VolumeControl;
+import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -316,14 +318,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         if(incSharedStorage) {
             storageDirs.addElement(new UMStorageDir(baseSystemDir, 
-                "Phone Memory", false, true, false));
+                getString(U.id.phone_memory), false, true, false));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(0).toString());
         }
         
         if(incUserStorage) {
             storageDirs.addElement(new UMStorageDir(UMFileUtil.joinPaths(
-                new String[]{baseSystemDir, username}), "Phone Memory", false,
-                true, true));
+                new String[]{baseSystemDir, username}), getString(U.id.phone_memory), 
+                false, true, true));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
         }
         
@@ -345,16 +347,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             String sdcardBaseDir = UMFileUtil.joinPaths(new String[]{sdcardURI, 
                 CONTENT_DIR_NAME});
             if(incSharedStorage) {
-                storageDirs.addElement(new UMStorageDir(sdcardBaseDir, "Memory Card", 
-                        true, sdCardAvailable, false));
+                storageDirs.addElement(new UMStorageDir(sdcardBaseDir, 
+                    getString(U.id.memory_card), true, sdCardAvailable, false));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
             
             if(incUserStorage) {
                 String userSDDir = UMFileUtil.joinPaths(
                     new String[] {sdcardBaseDir, username});
-                storageDirs.addElement(new UMStorageDir(userSDDir, "Memory Card",
-                    true, sdCardAvailable, true));
+                storageDirs.addElement(new UMStorageDir(userSDDir, 
+                    getString(U.id.memory_card), true, sdCardAvailable, true));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
         }
@@ -875,8 +877,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     /**
      * @inheritDoc
      */
-    public String openContainer(UstadJSOPDSEntry entry, String containerURI, 
-            String mimeType) {
+    public String openContainer(String containerURI, String mimeType) {
         l(UMLog.DEBUG, 557, containerURI + " : " + mimeType);
         if(openZip != null) {
             throw new IllegalStateException("J2ME: Open one thing at a time please");
@@ -999,6 +1000,15 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         UMIOUtils.throwIfNotNullIO(e);
         return in;
     }
+
+    /**
+     *{@inheritDoc}
+     */
+    public InputStream openResourceInputStream(String resURI) throws IOException {
+        return getClass().getResourceAsStream("/res/" + resURI);
+    }
+    
+    
     
     public String[] getPrefKeyList() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

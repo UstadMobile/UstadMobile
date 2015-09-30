@@ -56,7 +56,7 @@ public interface AppView {
      * 
      * @param title 
      */
-    public abstract void showProgressDialog(String title);
+    public void showProgressDialog(String title);
     
     /**
      * Dismiss the progress dialog (if showing).  If this method is called
@@ -64,7 +64,7 @@ public interface AppView {
      * 
      * @return true if dialog was showing and is now hidden, false otherwise
      */
-    public abstract boolean dismissProgressDialog();
+    public boolean dismissProgressDialog();
     
     
     /**
@@ -72,19 +72,41 @@ public interface AppView {
      * @param title Dialog window title
      * @param text Message text to show
      */
-    public abstract void showAlertDialog(String title, String text);
+    public void showAlertDialog(String title, String text);
     
     /**
      * Dismiss the alert dialog (this can be done by the user normally) if its
      * still showing
      */
-    public abstract void dismissAlertDialog();
+    public void dismissAlertDialog();
     
     /**
      * Show a short notification on top of the normal UI
      * @param text The text to show in the notification
      * @param length 
      */
-    public abstract void showNotification(String text, int length);
+    public void showNotification(String text, int length);
     
+    /**
+     * Show a list of choices to the user.  When the user has made a selection -
+     * notify the listener provided of the choice number and command id.
+     * 
+     * The choice dialog will not just go away when the user makes a choice - 
+     * the dismissChoiceDialog method must be called.  
+     * 
+     * When showChoiceDialog is called again without calling dismissChoiceDialog
+     * the dialog can be reused and the new choices will be presented.
+     * 
+     * @param title The title for the choice being presented to the user
+     * @param choices An array of choices for the user to choose from (e.g. Phone Memory, SD Card, etc)
+     * @param commandId The command ID that will be supplied to the listener
+     * @param listener the Listener to be registered when a choice is selected
+     */
+    public void showChoiceDialog(String title, String[] choices, int commandId, AppViewChoiceListener listener);
+    
+    /**
+     * Hide the choice dialog if showing
+     */
+    public void dismissChoiceDialog();
+
 }

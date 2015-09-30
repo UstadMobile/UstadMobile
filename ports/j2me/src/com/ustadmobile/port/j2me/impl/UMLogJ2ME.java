@@ -113,6 +113,7 @@ public class UMLogJ2ME extends UMLog{
             System.err.println("Exception sending log line");
             e.printStackTrace();
         }
+        exception.printStackTrace();
     }
     
     

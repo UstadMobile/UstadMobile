@@ -33,6 +33,7 @@ package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -94,8 +95,12 @@ public class TestCatalogControllerAcquire extends TestCase{
             CatalogController.SHARED_RESOURCE, null, null, 
             CatalogController.CACHE_ENABLED);
         
-        UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries, 
-            null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
+        UMStorageDir[] dirs = impl.getStorageDirs(CatalogController.SHARED_RESOURCE);
+        
+        CatalogController.AcquireRequest request = new CatalogController.AcquireRequest(
+            feed.entries, dirs[0].getDirURI(), null, null, CatalogController.SHARED_RESOURCE);
+        
+        UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(request);
         int totalSize = acquireJob.getTotalSize();
         assertTrue("Can count transfer size", totalSize > 0);
         

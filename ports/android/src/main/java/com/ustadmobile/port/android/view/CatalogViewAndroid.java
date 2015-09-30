@@ -171,10 +171,14 @@ public class CatalogViewAndroid implements CatalogView {
     }
 
     @Override
-    public void setDownloadEntryProgressVisible(String entryId, boolean visible) {
-        OPDSEntryCard card = this.fragment.getEntryCardByOPDSID(entryId);
+    public void setDownloadEntryProgressVisible(String entryId, final boolean visible) {
+        final OPDSEntryCard card = this.fragment.getEntryCardByOPDSID(entryId);
         if(card != null) {
-            card.setProgressBarVisible(visible);
+            activity.runOnUiThread(new Runnable() {
+                public void run() {
+                    card.setProgressBarVisible(visible);
+               }
+            });
         }
 
         if(visible) {
@@ -260,11 +264,6 @@ public class CatalogViewAndroid implements CatalogView {
 
     @Override
     public boolean isShowing() {
-        if(UstadMobileSystemImplAndroid.getInstanceAndroid().getCurrentActivity() instanceof CatalogActivity && activity != null) {
-            if(activity.getCurrentFragment() instanceof CatalogOPDSFragment) {
-                return ((CatalogOPDSFragment)activity.getCurrentFragment()).getCatalogView() == this;
-            }
-        }
 
         return false;
     }
