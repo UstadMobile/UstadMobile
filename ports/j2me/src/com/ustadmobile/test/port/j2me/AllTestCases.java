@@ -116,7 +116,6 @@ public class AllTestCases extends TestCase {
 //        allTestSuite.addTest(new TestHttpResult());
 //        allTestSuite.addTest(new TestEPUBRead());
 //        
-         */
         
         return allTestSuite;
 
