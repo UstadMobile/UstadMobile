@@ -36,16 +36,14 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
 import com.ustadmobile.port.j2me.app.FileUtils;
-import com.ustadmobile.core.impl.UMTransferJob;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.app.UserPref;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UMProgressEvent;
-import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.ZipFileHandle;
@@ -55,9 +53,14 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
+import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
+import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
+import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -119,6 +122,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      */
     private String baseSystemDir = null;
     
+    private DownloadServiceJ2ME downloadService = null;
+    
     public String getImplementationName() {
         return "J2ME";
     }
@@ -131,14 +136,17 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     /**
      * {@inheritDoc}
      */
-    public void init() {
-        getCacheDir(CatalogController.SHARED_RESOURCE);
+    public void init(Object context) {
+        getCacheDir(CatalogController.SHARED_RESOURCE, context);
         try {
             makeDirectory(baseSystemDir);
-            super.init();
+            super.init(context);
         }catch(Exception e) {
             l(UMLog.CRITICAL, 7, baseSystemDir, e);
         }
+        
+        downloadService = new DownloadServiceJ2ME();
+        downloadService.load();
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
@@ -194,15 +202,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return exists;
     }
 
-    /**
-     * {@inheritDoc} 
-     */
-    public UMTransferJob downloadURLToFile(String url, String fileURI, 
-            Hashtable headers) {
-        return new DownloadJob(url, fileURI, this);
-    }
-
-    public void setActiveUser(String username) {
+    
+    public void setActiveUser(String username, Object context) {
         AppPref.addSetting("CURRENTUSER", username);
         UserPref.setActiveUser(username);
         
@@ -216,16 +217,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }
         }
         
-        super.setActiveUser(username);
+        super.setActiveUser(username, context);
         l(UMLog.DEBUG, 531, username);
     }
 
-    public void setUserPref(String key, String value) {
+    public void setUserPref(String key, String value, Object context) {
         l(UMLog.DEBUG, 533, key + '=' + value);
         UserPref.addSetting(key, value);
     }
 
-    public void saveUserPrefs() {
+    public void saveUserPrefs(Object context) {
         
     }
     
@@ -266,7 +267,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     /**
      * {@inheritDoc}
      */
-    public String getCacheDir(int mode) {
+    public String getCacheDir(int mode, Object context) {
         findSystemBaseDir();
         
         if(mode == CatalogController.SHARED_RESOURCE) {
@@ -274,20 +275,20 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 UstadMobileConstants.CACHEDIR});
         }else {
             return UMFileUtil.joinPaths(new String[]{baseSystemDir, 
-                getActiveUser(), UstadMobileConstants.CACHEDIR});
+                getActiveUser(context), UstadMobileConstants.CACHEDIR});
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public UMStorageDir[] getStorageDirs(int mode) {
+    public UMStorageDir[] getStorageDirs(int mode, Object context) {
         //see if we can find the sdcard
         boolean incUserStorage = (mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE;
         boolean incSharedStorage = (mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE;
         
         Vector storageDirs = new Vector();
-        String username = getActiveUser();
+        String username = getActiveUser(context);
         
         if(incSharedStorage) {
             storageDirs.addElement(new UMStorageDir(baseSystemDir, 
@@ -436,35 +437,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public String getUserContentDirectory(String username){
         String sharedDir = getSharedContentDir();
         return UMFileUtil.joinPaths(new String[] {sharedDir, username});
-        /*
-        try{
-            
-            
-            getLogger().l(UMLog.DEBUG, 507, username);
-            DeviceRoots dt = FileUtils.getBestRoot();
-            String toSlashOrNot="";
-            if (dt.path.endsWith("//")){
-                toSlashOrNot="";
-            }else if(dt.path.endsWith("/")){
-                toSlashOrNot="";
-            }else{
-                toSlashOrNot = "/";
-            }
-            String sharedUserContentDir = dt.path + toSlashOrNot + 
-                    FileUtils.USTAD_CONTENT_DIR + FileUtils.FILE_SEP + username;
-            
-            getLogger().l(UMLog.DEBUG, 507, "dir: " + sharedUserContentDir);
-            
-            
-            //Check if it is created. If it isn't, create it.
-        }catch (Exception e){
-            getLogger().l(UMLog.DEBUG, 507, "exception in getUserContentDirectory", e);
-        }
-        return null;
-        */
     }
     
-    public String getSystemLocale(){
+    public String getSystemLocale(Object context){
         String locale = System.getProperty("microedition.locale");
         l(UMLog.DEBUG, 535, locale);
         return locale;
@@ -707,21 +682,29 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     
 
-    public String getActiveUser() {
-        //Code here:
+    public String getActiveUser(Object context) {
         return AppPref.getSetting("CURRENTUSER");
     }
 
-    public void setActiveUserAuth(String password) {
+    /**
+     * {@inheritDoc }
+     */
+    public void setActiveUserAuth(String password, Object context) {
         l(UMLog.DEBUG, 549, null);
         AppPref.addSetting("CURRENTUSERAUTH", password);
     }
 
-    public String getActiveUserAuth() {
+    /**
+     * {@inheritDoc }
+     */
+    public String getActiveUserAuth(Object context) {
         return AppPref.getSetting("CURRENTUSERAUTH");
     }
 
-    public String getAppPref(String key) {   
+    /**
+     * {@inheritDoc }
+     */
+    public String getAppPref(String key, Object ontext) {   
         String value;
         value = AppPref.getSetting(key);
         l(UMLog.DEBUG, 551, key + '=' + value);
@@ -798,15 +781,23 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             } 
             
             // Read Response from the Server
-            int response_code=httpConn.getResponseCode();
+            int responseCode = httpConn.getResponseCode();
             is = httpConn.openInputStream();
             
             UMIOUtils.readFully(is, bout, 1024);
             
             byte[] response = null;
             response = bout.toByteArray();
-            Hashtable responseHeaders = null;
-            httpResult = new HTTPResult(response, response_code, responseHeaders);
+            Hashtable responseHeaders = new Hashtable();
+            String headerKey;
+            String headerVal;
+            int i = 0;
+            while((headerKey = httpConn.getHeaderFieldKey(i++)) != null) {
+                headerVal = httpConn.getHeaderField(headerKey);
+                responseHeaders.put(headerKey, headerVal);
+            }
+            
+            httpResult = new HTTPResult(response, responseCode, responseHeaders);
         }catch(IOException ioe){
             l(UMLog.ERROR, 124, url, ioe);
             e = ioe;
@@ -823,7 +814,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return httpResult;
     }
 
-    public void setAppPref(String key, String value) {
+    public void setAppPref(String key, String value, Object context) {
         l(UMLog.DEBUG, 553, key + '=' + value);
         AppPref.addSetting(key, value);
     }
@@ -833,13 +824,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return parser;
     }
 
-    public String getUserPref(String key) {
+    public String getUserPref(String key, Object context) {
         String value = UserPref.getSetting(key);
         l(UMLog.DEBUG, 555, key + '=' + value);
         return value;
     }
 
-    public AppView getAppView() {
+    public AppView getAppView(Object context) {
         return appView;
     }
 
@@ -905,11 +896,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         openZip = null;
     }
 
-    public String[] getUserPrefKeyList() {
+    public String[] getUserPrefKeyList(Object context) {
         return UserPref.getAllKeys();
     }
 
-    public String[] getAppPrefKeyList() {
+    public String[] getAppPrefKeyList(Object context) {
         return AppPref.getAllKeys();
     }
 
@@ -978,7 +969,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     /**
      *{@inheritDoc}
      */
-    public InputStream openResourceInputStream(String resURI) throws IOException {
+    public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
         return getClass().getResourceAsStream("/res/" + resURI);
     }
     
@@ -996,6 +987,39 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return false;
     }
 
+    public void go(Class cls, Hashtable args, Object context) {
+        UstadViewFormJ2ME form = null;
+        if(cls.equals(LoginView.class)) {
+            form = new LoginViewJ2ME(args, context);
+        }else if(cls.equals(CatalogView.class)) {
+            form = new CatalogViewJ2ME(args, context);
+        }
+        
+        form.show();
+    }
+
+    public boolean loadActiveUserInfo(Object context) {
+        //nothing to do at the moment...
+        return true;
+    }
+
+    public long queueFileDownload(String url, String fileURI, Hashtable headers, Object context) {
+        return downloadService.enqueue(
+            new DownloadServiceJ2ME.DownloadRequest(url, fileURI, headers, "GET"));
+    }
+
+    public int[] getFileDownloadStatus(long downloadID, Object context) {
+        //TODO: implement this
+        return downloadService.getStatus(downloadID);
+    }
+
+    public void registerDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
+        downloadService.registerDownloadCompleteReceiver(receiver);
+    }
+
+    public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
+        downloadService.unregisterDownloadCompleteReceiver(receiver);
+    }
     
     public class PlayerListnerEventHandler implements PlayerListener {
         public PlayerListnerEventHandler() {
@@ -1159,264 +1183,5 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             dst.write(b); 
         }
     }
-    
-    /**
-     * J2ME implementation of the DownloadJob interface 
-     */
-    public class DownloadJob extends Thread implements UMTransferJob {
-
-        final private String srcURL;
-        
-        final private String destFileURI;
-        
-        private long bytesDownloaded;
-        
-        private int totalSize;
-        
-        private UstadMobileSystemImplJ2ME myImpl;
-        
-        private boolean finished;
-        
-        private final Vector progressListeners;
-        
-        private final UMProgressEvent evt;
-        
-        public static final int RETRY_LIMIT_DEFAULT = 10;
-        
-        /**
-         * The maximum number of retries allowed for this job until it fails
-         */
-        private int maxRetries;
-        
-        /**
-         * The current number of tries
-         */
-        private int tryCount;
-        
-        /**
-         * The delay (in ms) minimum between progress updates; this is used to
-         * ensure that we don't fire out too many updates
-         */
-        public static final int UPDATE_MIN_INTERVAL = 1000;
-        
-        /**
-         * The default time to wait in between download attemtps
-         */
-        public static final int RETRY_WAIT_DEFAULT = 1000;
-        
-        /**
-         * The time to wait in between download attempts
-         */
-        private int retryWait;
-        
-        /**
-         * Create a new download job
-         * 
-         * @param srcURL The HTTP source URL to download from
-         * @param destFileURI The file path to save to 
-         * @param myImpl our parent SystemImplementation
-         */
-        public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplJ2ME myImpl) {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 575, srcURL + "->" + destFileURI);
-            this.srcURL = srcURL;
-            this.destFileURI = destFileURI;
-            
-            bytesDownloaded = -1;
-            totalSize = -1;
-            this.myImpl =  myImpl;
-            finished = false;
-            progressListeners = new Vector();
-            evt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS, 0, 0, 0);
-            maxRetries = RETRY_LIMIT_DEFAULT;
-            retryWait = RETRY_WAIT_DEFAULT;
-        }
-        
-        public void setMaxRetries(int maxRetries) {
-            this.maxRetries = maxRetries;
-        }
-        
-        /**
-         * Send update event to all registered listeners
-         */
-        protected void fireProgressEvent() {
-            int i;
-            int numListeners = progressListeners.size();
-            for(i = 0; i < numListeners; i++) {
-                ((UMProgressListener)progressListeners.elementAt(i)).progressUpdated(evt);
-            }
-        }
-        
-        public void start() {
-            super.start();
-        }
-        
-        public void continueDownload() throws IOException{
-            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            OutputStream fOut = null;
-            HttpConnection con = null;
-            InputStream httpIn = null;
-            IOException ioe = null;
-            
-            try {
-                impl.l(UMLog.INFO, 332, srcURL + "->" + destFileURI);
-                bytesDownloaded = 0;
-                if(impl.fileExists(destFileURI)) {
-                    bytesDownloaded = impl.fileSize(destFileURI);
-                }
-
-
-                fOut = myImpl.openFileOutputStream(destFileURI, FILE_APPEND);
-                con = (HttpConnection)Connector.open(srcURL);
-                if(bytesDownloaded > 0) {
-                    myImpl.l(UMLog.VERBOSE, 410, srcURL + ':' + bytesDownloaded);
-                    con.setRequestProperty("Range", "bytes=" + bytesDownloaded + '-');
-                }
-                con.setRequestProperty("Connection", "close");
-
-                httpIn = con.openInputStream();
-                
-                myImpl.getLogger().l(UMLog.VERBOSE, 314, srcURL);
-
-                byte[] buf = new byte[1024];
-                int bytesRead = 0;
-                int totalRead = 0;
-                long lastUpdate = 0;
-
-                long timeNow;
-                while((bytesRead = httpIn.read(buf)) != -1) {
-                    fOut.write(buf, 0, bytesRead);
-                    totalRead += bytesRead;
-                    timeNow = System.currentTimeMillis();
-                    if(timeNow - lastUpdate > UPDATE_MIN_INTERVAL) {
-                        evt.setProgress((int)(totalRead + bytesDownloaded));
-                        System.out.println("Firing progress evt: " + totalRead);
-                        fireProgressEvent();
-                        lastUpdate = timeNow;
-                    }
-                }
-                
-                finished = true;
-                this.bytesDownloaded = totalSize;
-                evt.setEvtType(UMProgressEvent.TYPE_COMPLETE);
-                evt.setJobLength(totalSize);
-                evt.setProgress(totalSize);
-                evt.setStatusCode(200);
-                StringBuffer sbMsg = new StringBuffer();
-                sbMsg.append(srcURL).append("->").append(destFileURI).append(" (");
-                sbMsg.append(totalSize).append(" bytes)");
-                impl.getLogger().l(UMLog.INFO, 333, sbMsg.toString());
-                fireProgressEvent();
-            }catch(IOException e) {
-                ioe = e;
-                impl.l(UMLog.ERROR, 115, srcURL + "->" +  destFileURI, e);
-            }finally {
-                UMIOUtils.closeInputStream(httpIn);
-                J2MEIOUtils.closeConnection(con);
-                UMIOUtils.closeOutputStream(fOut);
-            }
-            
-            UMIOUtils.throwIfNotNullIO(ioe);
-        }
-        
-        
-        /**
-         * Run as a thread the actual download (in the background)
-         */
-        public void run() {
-            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            impl.l(UMLog.DEBUG, 577, srcURL + "->" + destFileURI);
-            
-            //see if we need to delete the destination beforehand
-            try {
-                if(impl.fileExists(destFileURI)) {
-                    impl.l(UMLog.DEBUG, 579, destFileURI);
-                    impl.removeFile(destFileURI);
-                }
-            }catch(IOException e) {
-                impl.l(UMLog.ERROR, 116 , destFileURI, e);
-            }
-            
-            while(!this.isFinished() && tryCount < maxRetries) {
-                try {
-                    if(totalSize == -1) {
-                        getTotalSize();
-                    }
-                    tryCount++;
-                    continueDownload();
-                }catch(IOException e) {
-                    StringBuffer sb = new StringBuffer();
-                    sb.append(srcURL).append("->").append(destFileURI);
-                    sb.append(" try : ").append(tryCount);
-                    impl.l(UMLog.ERROR, 117, sb.toString() , e);
-                }
-                try { Thread.sleep(retryWait); }
-                catch(InterruptedException e) {}
-            }
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public void addProgressListener(UMProgressListener listener) {
-            progressListeners.addElement(listener);
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public long getBytesDownloadedCount() {
-            return bytesDownloaded;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public int getTotalSize() {
-            if(totalSize > 0) {
-                return totalSize;
-            }
-            
-            HttpConnection con = null;
-            try {
-                con = (HttpConnection)Connector.open(srcURL);
-                con.setRequestMethod(HttpConnection.HEAD);
-                String contentLen = con.getHeaderField("Content-Length");
-                if(contentLen != null) {
-                    totalSize = Integer.parseInt(contentLen);
-                }
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 581, contentLen);
-            }catch(Exception e) {
-                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 102, null, e);
-            }finally {
-                J2MEIOUtils.closeConnection(con);
-                con = null;
-            }
-            
-            return totalSize;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public boolean isFinished() {
-            return finished;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public String getSource() {
-            return srcURL;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public String getDestination() {
-            return destFileURI;
-        }
-        
-    }
-    
 
 }

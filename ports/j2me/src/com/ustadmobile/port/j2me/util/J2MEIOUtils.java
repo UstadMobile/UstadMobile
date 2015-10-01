@@ -9,6 +9,8 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.io.IOException;
 import javax.microedition.io.Connection;
+import javax.microedition.rms.RecordStore;
+import javax.microedition.rms.RecordStoreException;
 
 /**
  *
@@ -23,6 +25,16 @@ public class J2MEIOUtils {
             }catch(IOException e) {
                 UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 101, 
                     null, e);
+            }
+        }
+    }
+    
+    public static final void closeRecordStore(RecordStore r) {
+        if(r != null) {
+            try { 
+                r.closeRecordStore();
+            }catch(RecordStoreException re) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 169, null, re);
             }
         }
     }

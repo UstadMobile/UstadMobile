@@ -28,30 +28,34 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+package com.ustadmobile.port.j2me.view;
+
+import com.sun.lwuit.Form;
+import java.util.Hashtable;
 
 /**
- * Assorted hard coded default values
+ *
  * @author mike
  */
-public class UstadMobileDefaults {
+public class UstadViewFormJ2ME extends Form {
     
     /**
-     * The default Experience API server
+     * The arguments used to create this view
      */
-    public static final String DEFAULT_XAPI_SERVER = 
-            "http://localhost/";
+    private Hashtable args;
     
-    public static final String DEFAULT_OPDS_SERVER = 
-            "http://localhost/testres/root.opds";
+    private Object context;
     
-    public static final String DEFAULT_REGISTER_SERVER = 
-            "http://umcloud1.ustadmobile.com/phoneinappreg/";
+    public UstadViewFormJ2ME(Hashtable args, Object context) {
+        this.args = args;
+        this.context = context;
+    }
     
-    /**
-     * Used by LoginController to auto discover the user's country
-     */
-    public static final String DEFAULT_GEOIP_SERVER = 
-            "https://freegeoip.net/json/";
+    protected Hashtable getArgs() {
+        return args;
+    }
     
+    public Object getContext() {
+        return context;
+    }
 }

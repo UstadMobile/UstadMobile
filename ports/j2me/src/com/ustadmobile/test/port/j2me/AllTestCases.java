@@ -65,6 +65,7 @@ public class AllTestCases extends TestCase {
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
         allTestSuite.addTest(new com.ustadmobile.test.core.TestLocalization());
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
         
         /*
         allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());

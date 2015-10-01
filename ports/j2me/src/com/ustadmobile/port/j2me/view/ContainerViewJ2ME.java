@@ -65,7 +65,7 @@ import java.util.TimerTask;
  *
  * @author mike
  */
-public class ContainerViewJ2ME implements ContainerView, ActionListener{
+public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerView, ActionListener{
     
     private Form currentForm;
     
@@ -108,7 +108,8 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     }
     
     
-    public ContainerViewJ2ME() {
+    public ContainerViewJ2ME(Hashtable args, Object context) {
+        super(args, context);
         UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
         containerZip = impl.getOpenZip();
         cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);
@@ -201,7 +202,10 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
             showPage(this.currentIndex + 1);
         }
     }
-    
+
+    public void setContainerTitle(String containerTitle) {
+        setTitle(containerTitle);
+    }
     
     public class ContainerDocumentRequestHandler implements DocumentRequestHandler {
 

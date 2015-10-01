@@ -12,8 +12,11 @@ import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.opds.*;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.view.AppView;
 import java.util.Hashtable;
 import com.ustadmobile.core.view.CatalogView;
@@ -24,7 +27,7 @@ import java.util.Enumeration;
  *
  * @author varuna
  */
-public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener, Runnable {
+public class CatalogViewJ2ME extends UstadViewFormJ2ME implements CatalogView, ActionListener, Runnable, ControllerReadyListener {
 
     public static int OPDSCMDID_OFFSET = 30;
     
@@ -66,7 +69,10 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
      */
     private static final int RUN_STATUSUPDATE = 1;
         
-    public CatalogViewJ2ME() {
+    
+    
+    public CatalogViewJ2ME(Hashtable args, Object context) {
+        super(args, context);
         Label spaceLabel = new Label(" ");
         addComponent(spaceLabel);
         
@@ -76,6 +82,35 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         entryIdToButtons = new Hashtable();
         statusesToUpdate = new Hashtable();        
         addCommandListener(this);
+        
+        String catalogURL = (String)args.get(CatalogController.KEY_URL);
+        int resMode = ((Integer)args.get(CatalogController.KEY_RESMOD)).intValue();
+        loadCatalog(catalogURL, resMode);
+    }
+    
+    public void loadCatalog(String url, int resourceMode) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final int fetchFlags = CatalogController.CACHE_ENABLED;
+
+        CatalogController.makeControllerForView(this, url, impl, resourceMode, 
+                fetchFlags, this);
+    }
+    
+
+    public void controllerReady(final UstadController controller, final int flags) {
+        if(controller != null) {
+            Display.getInstance().callSerially(new Runnable() {
+                public void run() {
+                    setController((CatalogController)controller);
+                }
+            });
+        }else {
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            String errMsg = LocaleUtil.formatMessage(impl.getString(U.id.course_catalog_load_error),
+                    "Catalog controller");
+            impl.getAppView(getContext()).showAlertDialog(impl.getString(U.id.error),
+                errMsg);
+        }
     }
     
     public void show() {
@@ -118,7 +153,8 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
             Button downloadAllButton = new Button(downloadAll);
             downloadAllButton.addActionListener(this);
             this.addComponent(downloadAllButton); 
-       }
+        }
+        repaint();
         
     }
 
@@ -141,7 +177,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
                 this.controller.handleClickDeleteEntries(
                     new UstadJSOPDSEntry[]{selectedButton.getEntry()});
             }else {
-                UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
                     UstadMobileSystemImpl.getInstance().getString(U.id.nothing_selected),
                     AppView.LENGTH_LONG);
             }

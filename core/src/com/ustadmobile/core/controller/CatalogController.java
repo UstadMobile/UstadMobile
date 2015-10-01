@@ -415,8 +415,8 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         
         args.put(LOAD_URL, url);
         args.put(LOAD_IMPL, impl);
-        args.put(LOAD_RESMODE, Integer.valueOf(resourceMode));
-        args.put(LOAD_FLAGS, Integer.valueOf(flags));
+        args.put(LOAD_RESMODE, new Integer(resourceMode));
+        args.put(LOAD_FLAGS, new Integer(flags));
         
         if(impl.getActiveUser(ctx) != null && impl.getActiveUserAuth(ctx) != null) {
             args.put(LOAD_HTTPUSER, impl.getActiveUser(ctx));
