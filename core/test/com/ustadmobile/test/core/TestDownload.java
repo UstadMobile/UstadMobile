@@ -126,8 +126,8 @@ public class TestDownload extends TestCase implements  UMDownloadCompleteReceive
         /*
          Test the same again... but when there is an interrption to the download
         */
-        //boolean limitsSet = TestUtils.getInstance().setLimits(4000, 20000);
-        //assertTrue("Successfully set download limits on server", limitsSet);
+        boolean limitsSet = TestUtils.getInstance().setLimits(4000, 20000);
+        assertTrue("Successfully set download limits on server", limitsSet);
         
         timeout = 4 * 60 * 1000;// 4 mins to allow for waiting in between disconnects
         impl.registerDownloadCompleteReceiver(this, context);

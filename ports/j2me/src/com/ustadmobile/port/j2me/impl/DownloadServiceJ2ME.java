@@ -296,11 +296,13 @@ public class DownloadServiceJ2ME implements Runnable {
             if(queue.length() > 0) {
                 long downloadID = queue.optLong(0, -1);
                 int jobStatus = continueDownload(downloadID);
-
+                statusTracker.put(downloadID + POSTFIX_STATUS, 
+                        new Integer(jobStatus));
+                
                 //remove this job from the queue
                 if(jobStatus == UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL) {
                     //todo: remove info about this download from the hashtable.
-                    //tell receivers about that news...
+                    //tell receivers about that news..
                     UMDownloadCompleteEvent evt = 
                         new UMDownloadCompleteEvent(downloadID, getStatus(downloadID));
                     for(int i = 0; i < downloadStatusReceivers.size(); i++) {
@@ -322,6 +324,7 @@ public class DownloadServiceJ2ME implements Runnable {
                         stop();
                     }
                 }
+                //TODO: Handle counting fails 
             }
             
             try { Thread.sleep(SLEEP_INTERVAL); }
@@ -353,6 +356,8 @@ public class DownloadServiceJ2ME implements Runnable {
         
         try {
             impl.l(UMLog.INFO, 332, srcURL + "->" + destFileURI);
+            
+            //the bytes already downloaded (e.g. from previous download in case of resuming
             int bytesDownloaded = 0;
             if(impl.fileExists(destFileURI)) {
                 bytesDownloaded = (int)impl.fileSize(destFileURI);
@@ -393,7 +398,8 @@ public class DownloadServiceJ2ME implements Runnable {
             while((bytesRead = httpIn.read(buf)) != -1 && isRunning()) {
                 fOut.write(buf, 0, bytesRead);
                 totalRead += bytesRead;
-                statusTracker.put(byteCountKey, new Integer(totalRead));
+                statusTracker.put(byteCountKey, 
+                        new Integer(totalRead + bytesDownloaded));
             }
 
             completed = true;
@@ -415,200 +421,6 @@ public class DownloadServiceJ2ME implements Runnable {
             return UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
         }else {
             return UstadMobileSystemImpl.DLSTATUS_PAUSED;
-        }
-        
-    }
-    
-    
-    /**
-     * J2ME implementation of the DownloadJob interface 
-     */
-    public class DownloadJob extends Thread  {
-
-        final private String srcURL;
-        
-        final private String destFileURI;
-        
-        private long bytesDownloaded;
-        
-        private int totalSize;
-        
-        private UstadMobileSystemImplJ2ME myImpl;
-        
-        private boolean finished;
-        
-        private final Vector progressListeners;
-        
-        //private final UMProgressEvent evt;
-        
-        public static final int RETRY_LIMIT_DEFAULT = 10;
-        
-        /**
-         * The maximum number of retries allowed for this job until it fails
-         */
-        private int maxRetries;
-        
-        /**
-         * The current number of tries
-         */
-        private int tryCount;
-        
-        /**
-         * The delay (in ms) minimum between progress updates; this is used to
-         * ensure that we don't fire out too many updates
-         */
-        public static final int UPDATE_MIN_INTERVAL = 1000;
-        
-        /**
-         * The default time to wait in between download attemtps
-         */
-        public static final int RETRY_WAIT_DEFAULT = 1000;
-        
-        /**
-         * The time to wait in between download attempts
-         */
-        private int retryWait;
-        
-        /**
-         * Create a new download job
-         * 
-         * @param srcURL The HTTP source URL to download from
-         * @param destFileURI The file path to save to 
-         * @param myImpl our parent SystemImplementation
-         */
-        public DownloadJob(String srcURL, String destFileURI, UstadMobileSystemImplJ2ME myImpl) {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 575, srcURL + "->" + destFileURI);
-            this.srcURL = srcURL;
-            this.destFileURI = destFileURI;
-            
-            bytesDownloaded = -1;
-            totalSize = -1;
-            this.myImpl =  myImpl;
-            finished = false;
-            progressListeners = new Vector();
-            //evt = new UMProgressEvent(this, UMProgressEvent.TYPE_PROGRESS, 0, 0, 0);
-            maxRetries = RETRY_LIMIT_DEFAULT;
-            retryWait = RETRY_WAIT_DEFAULT;
-        }
-        
-        public void setMaxRetries(int maxRetries) {
-            this.maxRetries = maxRetries;
-        }
-        
-        /**
-         * Send update event to all registered listeners
-         */
-        protected void fireProgressEvent() {
-            int i;
-            int numListeners = progressListeners.size();
-            for(i = 0; i < numListeners; i++) {
-                //((UMProgressListener)progressListeners.elementAt(i)).progressUpdated(evt);
-            }
-        }
-        
-        public void start() {
-            super.start();
-        }
-        
-        public void continueDownload() throws IOException{
-        }
-        
-        
-        /**
-         * Run as a thread the actual download (in the background)
-         */
-        public void run() {
-            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            impl.l(UMLog.DEBUG, 577, srcURL + "->" + destFileURI);
-            
-            //see if we need to delete the destination beforehand
-            try {
-                if(impl.fileExists(destFileURI)) {
-                    impl.l(UMLog.DEBUG, 579, destFileURI);
-                    impl.removeFile(destFileURI);
-                }
-            }catch(IOException e) {
-                impl.l(UMLog.ERROR, 116 , destFileURI, e);
-            }
-            
-            while(!this.isFinished() && tryCount < maxRetries) {
-                try {
-                    if(totalSize == -1) {
-                        getTotalSize();
-                    }
-                    tryCount++;
-                    continueDownload();
-                }catch(IOException e) {
-                    StringBuffer sb = new StringBuffer();
-                    sb.append(srcURL).append("->").append(destFileURI);
-                    sb.append(" try : ").append(tryCount);
-                    impl.l(UMLog.ERROR, 117, sb.toString() , e);
-                }
-                try { Thread.sleep(retryWait); }
-                catch(InterruptedException e) {}
-            }
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public void addProgressListener(Object listener) {
-            //progressListeners.addElement(listener);
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public long getBytesDownloadedCount() {
-            return bytesDownloaded;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public int getTotalSize() {
-            if(totalSize > 0) {
-                return totalSize;
-            }
-            
-            HttpConnection con = null;
-            try {
-                con = (HttpConnection)Connector.open(srcURL);
-                con.setRequestMethod(HttpConnection.HEAD);
-                String contentLen = con.getHeaderField("Content-Length");
-                if(contentLen != null) {
-                    totalSize = Integer.parseInt(contentLen);
-                }
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 581, contentLen);
-            }catch(Exception e) {
-                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 102, null, e);
-            }finally {
-                J2MEIOUtils.closeConnection(con);
-                con = null;
-            }
-            
-            return totalSize;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public boolean isFinished() {
-            return finished;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public String getSource() {
-            return srcURL;
-        }
-
-        /**
-         * @inheritDoc
-         */
-        public String getDestination() {
-            return destFileURI;
         }
         
     }
