@@ -36,7 +36,7 @@ public class CatalogActivityTest extends ActivityInstrumentationTestCase2<Catalo
 
         Intent intent = new Intent();
         intent.putExtra(CatalogController.KEY_URL, opdsURL);
-        intent.putExtra(CatalogController.KEY_RESMOD, CatalogController.USER_RESOURCE);
+        intent.putExtra(CatalogController.KEY_RESMOD, CatalogController.SHARED_RESOURCE);
         intent.putExtra(CatalogController.KEY_FLAGS, CatalogController.CACHE_ENABLED);
 
         setActivityIntent(intent);

@@ -56,6 +56,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -196,6 +197,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
         String catalogURL = getArguments().getString(CatalogController.KEY_URL);
         int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
         loadCatalog(catalogURL, resourceMode);
 
         return rootContainer;

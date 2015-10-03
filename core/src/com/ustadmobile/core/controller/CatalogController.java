@@ -1422,9 +1422,24 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         }
     }
     
+    /**
+     * Figure out what search mode to use: if a user is logged in set the
+     * USER_RESOURCE flag in the return value, otherwise set only the 
+     * SHARED_RESOURCE flag in the return value
+     * 
+     * @return SHARED_RESOURCE if no active user, SHARED_RESOURC | USER_RESOURCE if there's an active user
+     */
+    protected int determineSearchMode() {
+        int searchMode = SHARED_RESOURCE;
+        if(UstadMobileSystemImpl.getInstance().getActiveUser(context) != null) {
+            searchMode |= USER_RESOURCE;
+        }
+        
+        return searchMode;
+    }
+    
     public int getEntryAcquisitionStatus(String entryID) {
-        CatalogEntryInfo info = getEntryInfo(entryID, 
-                SHARED_RESOURCE | USER_RESOURCE, context);
+        CatalogEntryInfo info = getEntryInfo(entryID, determineSearchMode(), context);
         if(info != null) {
             return info.acquisitionStatus;
         }else {
@@ -1453,8 +1468,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         for(int i = 0; i< feed.entries.length; i++) {
-            info = getEntryInfo(feed.entries[i].id, 
-                    SHARED_RESOURCE | USER_RESOURCE, context);
+            info = getEntryInfo(feed.entries[i].id, determineSearchMode(), context);
             if(info != null){
                 if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
                     int[] fileDownloadStatus = impl.getFileDownloadStatus(info.downloadID, context);
