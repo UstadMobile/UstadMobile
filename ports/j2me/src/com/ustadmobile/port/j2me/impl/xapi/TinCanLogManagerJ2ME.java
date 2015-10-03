@@ -31,12 +31,14 @@
 package com.ustadmobile.port.j2me.impl.xapi;
 
 import com.sun.lwuit.io.util.BufferedOutputStream;
+import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
@@ -45,6 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
+import java.util.Hashtable;
 import java.util.TimerTask;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
@@ -70,7 +73,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
     static final String LOG_FOLDER = "xapi";
     
     public TinCanLogManagerJ2ME() {
-       impl = new UstadMobileSystemImplJ2ME();
+       impl = UstadMobileSystemImpl.getInstance();
     }
     
     
@@ -92,11 +95,9 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         f = cal.get(Calendar.HOUR_OF_DAY);
         append0IfLessThan10(sb, f);
         f = cal.get(Calendar.MINUTE);
-        /*
         append0IfLessThan10(sb, f);
         f = cal.get(Calendar.MILLISECOND);
         sb.append('.').append(f);
-        */        
         String a = sb.toString();
         
         return sb;
@@ -142,7 +143,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         }
         if (!FileUtils.checkFile(logPathPosition)){
             FileUtils.createFileOrDir(logPathPosition, Connector.READ_WRITE, false);
-            FileUtils.writeStringToFile("0", logPathPosition, false);
+            //FileUtils.writeStringToFile("0", logPathPosition, false);
         }
         
         
@@ -175,7 +176,12 @@ public class TinCanLogManagerJ2ME extends TimerTask{
     
     public boolean queueStatement(String userid, JSONObject stmt) {
         StringBuffer sb = new StringBuffer();
-        sb.append(userid).append(':').append(stmt.toString());
+        String status = "3";
+        if (userid != null && userid != ""){
+            status = "0";
+        }
+        sb.append('u').append(userid).append(':').append("statementstart:").append(
+                stmt.toString()).append(":statementend:").append(status);
         
         try {
             synchronized(this) {
@@ -193,6 +199,13 @@ public class TinCanLogManagerJ2ME extends TimerTask{
     }
     
     public void transmitQueue() throws IOException, Exception {
+      
+        String testJSON = "";
+        testJSON = "{\"actor\":{\"mbox\":\"mailto:student1@ustadmobile.com\",\"name\":\"Student One\",\"objectType\":\"Agent\"},\"object\":{\"definition\":{\"description\":{\"en-US\":\"Motivational\"},\"name\":{\"en-US\":\"Motivational\"},\"type\":\"http://adlnet.gov/expapi/activities/module\"},\"id\":\"http://www.ustadmobile.com/um-tincan/activities/ThisIsTheUniqueElpID/Motivational\",\"objectType\":\"Activity\"},\"result\":{\"duration\":\"PT0H0M2S\"},\"verb\":{\"display\":{\"en-US\":\"experienced\"},\"id\":\"http://adlnet.gov/expapi/verbs/experienced\"}}";
+        
+        JSONObject testJSONObj = new JSONObject(testJSON);
+        String JSON2String = testJSONObj.toString();
+        
         String newName = "";
         synchronized(this) {
             try {
@@ -216,12 +229,21 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         filesToReplicate = impl.listDirectory(tincanDir);
         //filesToReplicate = impl.listDirectory(currentFile)
         //filesToReplicate = listDir(appdir /tincan);
-        
+        String newLogMade = FileUtils.getBaseName(newName);
         //Go through all log files available..
         for(int i = 0; i < filesToReplicate.length; i++) {
             if(filesToReplicate[i].endsWith(".log")) {
                 
-                if (filesToReplicate[i].equals(newName)){
+                String potentialTempFile = filesToReplicate[i] + ".status";
+                String potentialTempFileURI = FileUtils.joinPath(tincanDir, 
+                        potentialTempFile);
+                if (FileUtils.checkDir(potentialTempFileURI)){
+                    //Both temp and log file exists. There are stuff left to scan through, etc
+                    
+                }
+                String currentFile = filesToReplicate[i];
+                
+                if (filesToReplicate[i].equals(newLogMade)){
                     //Dont do it. Skip.
                     continue;
                 }
@@ -275,8 +297,42 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     logIn = logCon.openInputStream();
                     
                     //Send log from log file IS and work on Status file OS
-                    sendLog(logIn, statusOut);
+                    int resultCode = sendLog(logIn, statusOut);
                     
+                    if (logIn != null){
+                        logIn.close();
+                    }
+                    if (logOut != null){
+                        logOut.close();
+                    }
+                    if (resultCode == 1){
+                        //delete .log, rename .tmp to .done
+                        FileUtils.deleteRecursively(
+                                FileUtils.joinPath(tincanDir, 
+                                        filesToReplicate[i]), false);
+                        String statusFileURIDone = statusFileURI + ".done";
+                        FileUtils.renameFileOrDir(statusFileURI,
+                                statusFileURIDone, Connector.READ_WRITE, false);
+                    }else if (resultCode == 2){
+                        String tempB4Delete = FileUtils.joinPath(tincanDir, 
+                                        filesToReplicate[i]) + ".origi";
+                        
+                        FileUtils.renameFileOrDir( 
+                                FileUtils.joinPath(tincanDir, 
+                                        filesToReplicate[i]),
+                                tempB4Delete,
+                                Connector.READ_WRITE, false);
+                        
+                        FileUtils.renameFileOrDir(statusFileURI, 
+                                FileUtils.joinPath(tincanDir, 
+                                        filesToReplicate[i]), 
+                                Connector.READ_WRITE, false);
+                        
+                        FileUtils.deleteRecursively(tempB4Delete, false);
+                        
+                    }else{
+                        //-\_(^-^)_/-
+                    }
                     
                 }                
             }
@@ -310,10 +366,21 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         int max_tries = 10;
         int trial=0;
         byte[] lineBytes;
+        boolean noErrors = true;
+        //X-Experience-API-Version
+        Hashtable tinCanHeaders = new Hashtable();
+        tinCanHeaders.put("X-Experience-API-Version", "1.0.1");
+        String statementUsername = "";
+        
+        //AppPref.addSetting("password-"+currentUsername, password);
+        
+        
+        
         while((b = logIn.read()) != -1) {
             System.out.println("output:");
+            String line = new String(bout.toByteArray());
             trial = 0;
-            while(trial < max_tries){
+            
                 if(b == nline || b ==cret) {
                     int return_code = 400;
                     lineBytes = bout.toByteArray(); 
@@ -324,76 +391,134 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     String logLine = new String(lineBytes);
                     String logLineWOCode="";
                     String doneTries = "";
-                    if(logLine.endsWith(":0") || logLine.endsWith(":2")){
-                        //Time to try this.
-                        
-                        System.out.println("New log / needs re trial");
-                        
-                        /*
-                        logLineWOCode = logLine.substring(0, logLine.length()-2);
-                        doneTries = logLineWOCode.substring(logLine.lastIndexOf(':'),
-                                logLineWOCode.length());
-                        if (doneTries != ""){
-                            int triesDone = Integer.parseInt(doneTries);
-                            if(triesDone > max_tries){
-                                statusOut.write(lineBytes);
-                                break; //I want to break free 
+                    while(trial < max_tries){
+                        if(logLine.endsWith(":0") || logLine.endsWith(":2")){
+                            //Time to try this.
+                            System.out.println("New log / needs re trial");
+                            /*
+                            logLineWOCode = logLine.substring(0, logLine.length()-2);
+                            doneTries = logLineWOCode.substring(logLine.lastIndexOf(':'),
+                                    logLineWOCode.length());
+                            if (doneTries != ""){
+                                int triesDone = Integer.parseInt(doneTries);
+                                if(triesDone > max_tries){
+                                    statusOut.write(lineBytes);
+                                    break; //I want to break free 
+                                }
                             }
+                            */     
+                        }else if (logLine.endsWith(":3")){
+                            //Not a valid line. Put it in the status file
+                            logLine = logLine.substring(0, logLine.length()-1);
+                            logLine = logLine + "3";
+                            lineBytes = logLine.getBytes();
+                            statusOut.write(lineBytes);
+                            statusOut.write(nline);
+                            trial = max_tries + 10;
+                            break; //I want to break free
+                        }else if (logLine.endsWith(":1")){
+                            //Already sent
+                            lineBytes = logLine.getBytes();
+                            statusOut.write(lineBytes);
+                            statusOut.write(nline);
+                            break;
+                        }else{
+                            //Unknown.
+                            logLine = logLine + ":03";
+                            lineBytes = logLine.getBytes();
+                            statusOut.write(lineBytes);
+                            statusOut.write(nline);
+                            break;
                         }
-                        */
                         
-                        //Time to send the log line
+                        statementUsername = logLine.substring(2, logLine.indexOf("statementstart:"));
+                        String password = impl.getAppPref("password-"+statementUsername);
                         
+                        if (statementUsername != null && statementUsername != ""){
+                            //Blank username bro
+                            logLine = logLine + ":03";
+                            lineBytes = logLine.getBytes();
+                            statusOut.write(lineBytes);
+                            statusOut.write(nline);
+                            
+                            break;
+                        }
                         
-                        
-                        
-                    }else{
-                        //Not a valid line. Put it in the status file
-                        logLine = logLine.substring(0, logLine.length()-1);
-                        logLine = logLine + "3";
-                        lineBytes = logLine.getBytes();
-                        statusOut.write(lineBytes);
-                        trial = max_tries + 10;
-                        break; //I want to break free
+                        String encodedUserAndPass="Basic "+ Base64.encode(statementUsername,
+                            password);
+                        tinCanHeaders.put("Authorization", encodedUserAndPass);
+
+                        String statementString = logLine.substring(
+                                logLine.indexOf("statementstart:"),
+                                logLine.indexOf(":statementend:"));
+                        statementString = statementString.substring("statementstart:".length(), statementString.length());
+                        byte[] statementBytes = statementString.getBytes();
+                        String tincanEndpointURL = 
+                                "http://umcloud1.ustadmobile.com/umlrs/statements/";
+
+                        HTTPResult result = HTTPUtils.makeHTTPRequest(tincanEndpointURL,
+                                null, tinCanHeaders, "POST", statementBytes);
+                        return_code = result.getStatus();
+
+                        if (return_code == 200){
+                            logLine = logLine.substring(0, logLine.length()-1);
+                            logLine = logLine + "1";
+                            lineBytes = logLine.getBytes();
+                            statusOut.write(lineBytes);
+                            statusOut.write(nline);
+
+                            break;
+                        }else if (return_code == 401 || 
+                            return_code == 400 || return_code == 403){
+
+                            if (trial + 2 > max_tries){
+                                noErrors = false;
+                                //Maxed out
+                                logLine = logLine.substring(0, logLine.length()-1);
+                                logLine = logLine + "2";
+                                lineBytes = logLine.getBytes();
+                                statusOut.write(lineBytes);
+                                statusOut.write(nline);
+                                trial = trial + 10;
+                            }
+                            trial = trial + 1;
+                            //Got to keep on trying 
+                        }else{
+                            //Not a valid line. Put it in the status file
+                            logLine = logLine.substring(0, logLine.length()-1);
+                            logLine = logLine + "3";
+                            lineBytes = logLine.getBytes();
+                            statusOut.write(lineBytes);
+                            statusOut.write(nline);
+                            trial = max_tries + 10;
+                            break; //I want to break free
+                        }
                     }
-                    
-                    String statementString = logLine.substring(
-                            logLine.indexOf("statementstart:"),
-                            logLine.indexOf(":statementend:"));
-                    byte[] statementBytes = statementString.getBytes();
-                    String tincanEndpointURL = 
-                            "http://umcloud1.ustadmobile.com/umlrs/statements/";
-
-                    HTTPResult result = HTTPUtils.makeHTTPRequest(tincanEndpointURL,
-                            null, null, "POST", statementBytes);
-                    return_code = result.getStatus();
-                    
-                    if (return_code == 200){
-
-                        trial = max_tries + 10;
-                    }else if (return_code == 401 || 
-                        return_code == 400 || return_code == 403){
-                        trial = trial + 1;
-                        //Got to keep on trying 
-                    }else{
-                        //Not a valid line. Put it in the status file
-                        logLine = logLine.substring(0, logLine.length()-1);
-                        logLine = logLine + "3";
-                        lineBytes = logLine.getBytes();
-                        statusOut.write(lineBytes);
-                        trial = max_tries + 10;
-                        break; //I want to break free
-                    }
-
 
 
                 }else {
                     bout.write(b);
+                    //continue;
                 }
-            }
+            
         }
         
-        return sent;
+        if (noErrors){
+            return 1;
+        }else{
+            return 2;
+        }
+        
+        //Next steps
+        //1. Convert the logOut (.temp file) to a .done file.
+        //   delete the .log file - We dont need it nomore
+        //2. If .done file needs to be re sent AND end of line reached:
+        //   rename the original .log file to .log.origi
+        //   rename the .done file to .log 
+        //   delete the original .log.origi
+        
+        
+        //return sent;
     }
 
     public void run() {

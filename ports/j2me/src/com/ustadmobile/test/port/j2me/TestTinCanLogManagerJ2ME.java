@@ -30,7 +30,11 @@
  */
 package com.ustadmobile.test.port.j2me;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.j2me.app.AppPref;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
+import com.ustadmobile.test.core.TestConstants;
 import j2meunit.framework.TestCase;
 
 /**
@@ -44,6 +48,10 @@ public class TestTinCanLogManagerJ2ME extends TestCase {
     
     public void runTest() throws Throwable{
         assertEquals("Simple Test OK", 2, 1+1);
+        
+        UstadMobileSystemImpl impl = new UstadMobileSystemImplJ2ME();
+        impl.setActiveUser(TestConstants.LOGIN_USER);
+        impl.setActiveUserAuth(TestConstants.LOGIN_PASS);
         
         TinCanLogManagerJ2ME tinManager = new TinCanLogManagerJ2ME();
         tinManager.transmitQueue();

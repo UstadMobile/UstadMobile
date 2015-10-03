@@ -144,6 +144,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      */
     public boolean queueTinCanStatement(JSONObject stmt) {
         //ToDo
+        
+        logManager.queueStatement(getActiveUser(), stmt);
+        
         return false;
     }
     
@@ -741,6 +744,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public void setActiveUserAuth(String password) {
         l(UMLog.DEBUG, 549, null);
         AppPref.addSetting("CURRENTUSERAUTH", password);
+        //Adding password mapping for tincan log manager to pick up.
+        String currentUsername = getActiveUser();
+        AppPref.addSetting("password-"+currentUsername, password);
     }
 
     public String getActiveUserAuth() {
