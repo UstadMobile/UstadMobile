@@ -40,10 +40,10 @@ public class UstadMobileDefaults {
      * The default Experience API server
      */
     public static final String DEFAULT_XAPI_SERVER = 
-            "http://localhost/";
+            "http://umcloud1.ustadmobile.com/umlrs/";
     
     public static final String DEFAULT_OPDS_SERVER = 
-            "http://localhost/testres/root.opds";
+            "http://umcloud1.ustadmobile.com/opds/";
     
     public static final String DEFAULT_REGISTER_SERVER = 
             "http://umcloud1.ustadmobile.com/phoneinappreg/";

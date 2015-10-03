@@ -295,6 +295,9 @@ public class DownloadServiceJ2ME implements Runnable {
             JSONArray queue = getQueue();
             if(queue.length() > 0) {
                 long downloadID = queue.optLong(0, -1);
+                String statusTrackerID = downloadID + POSTFIX_STATUS;
+                statusTracker.put(statusTrackerID, 
+                        new Integer(UstadMobileSystemImpl.DLSTATUS_RUNNING));
                 int jobStatus = continueDownload(downloadID);
                 statusTracker.put(downloadID + POSTFIX_STATUS, 
                         new Integer(jobStatus));
