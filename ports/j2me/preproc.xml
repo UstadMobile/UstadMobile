@@ -6,6 +6,7 @@
     <property name="ustadmobile.core.dir" value="../../core"/>
     <property name="ustadmobile.port.testsrc" value="./src"/>
     <property name="ustadmobile.port.mainsrc" value="./src"/>
+    <property name="ustadmobile.port.resdir" value="./src/res"/>
 
     <import file="../../core/core-preproc.xml"/>
 

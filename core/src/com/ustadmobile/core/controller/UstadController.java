@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.view.UstadView;
+
 /**
  *
  * @author mike
@@ -40,5 +42,11 @@ public interface UstadController {
      * Show the form for this controller
      */
     public void show();
+    
+    
+    public void setView(UstadView view);
+    
+    public UstadView getView();
+    
     
 }

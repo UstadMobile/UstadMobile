@@ -9,6 +9,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.opds.*;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMLog;
@@ -83,6 +84,7 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
     }
     
     public void setController(CatalogController controller) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(this.controller != null) {
             return;
         }
@@ -105,14 +107,14 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
         Label spaceLabel = new Label(" ");
         addComponent(spaceLabel);
         
-        Command refreshCmd = new Command("Refresh", CMD_REFRESH);
+        Command refreshCmd = new Command(impl.getString(U.id.refresh), CMD_REFRESH);
         Button refreshButton = new Button(refreshCmd);
         refreshButton.addActionListener(this);
         this.addComponent(refreshButton);
         
         
         if (acquisition){
-            Command downloadAll = new Command("Download All", CMD_DOWNLOAD_ALL);
+            Command downloadAll = new Command(impl.getString(U.id.download_all), CMD_DOWNLOAD_ALL);
             Button downloadAllButton = new Button(downloadAll);
             downloadAllButton.addActionListener(this);
             this.addComponent(downloadAllButton); 
@@ -140,7 +142,8 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
                     new UstadJSOPDSEntry[]{selectedButton.getEntry()});
             }else {
                 UstadMobileSystemImpl.getInstance().getAppView().showNotification(
-                        "No Entry Selected!", AppView.LENGTH_LONG);
+                    UstadMobileSystemImpl.getInstance().getString(U.id.nothing_selected),
+                    AppView.LENGTH_LONG);
             }
         }
     }
@@ -279,9 +282,11 @@ public class CatalogViewJ2ME extends Form implements CatalogView, ActionListener
      * @param String array of options to show in the menu
      */
     public void setMenuOptions(String[] menuOptions){
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         removeAllCommands();
         
-        Command deleteCommand = new Command("Delete", CMD_DELETE_ENTRY);
+        Command deleteCommand = new Command(impl.getString(U.id.delete), 
+                CMD_DELETE_ENTRY);
         addCommand(deleteCommand);
         
         for(int i = 0; i < menuOptions.length; i++) {

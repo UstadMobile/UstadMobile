@@ -31,9 +31,12 @@
 
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.LocaleUtil;
+import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
@@ -92,6 +95,21 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final String CONTENT_DIR_NAME = "ustadMobileContent";
     
+    private MessagesHashtable messages;
+    
+    /**
+     * The direction - either 0 for LTR or 1 for RTL 
+     */
+    private int direction;
+    
+    private boolean initRan;
+    
+    /**
+     * The App Preference Key for the XAPIServer e.g. to get the active xAPI
+     * server use getAppPref(UstadMobileSystemImpl.PREFKEY_XAPISERVER)
+     */
+    public static final String PREFKEY_XAPISERVER = "xapiserver";
+    
     /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
@@ -99,8 +117,21 @@ public abstract class UstadMobileSystemImpl {
      * @return A singleton instance
      */
     public static UstadMobileSystemImpl getInstance() {
+        return getInstance(false);
+    }
+    
+    /**
+     * Get an instance of the system implementation - relies on the platform
+     * specific factory method
+     * 
+     * @return A singleton instance
+     */
+    public static UstadMobileSystemImpl getInstance(boolean skipInit) {
         if(mainInstance == null) {
             mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
+            if(!skipInit) {
+                mainInstance.init();
+            }
         }
         
         return mainInstance;
@@ -140,17 +171,57 @@ public abstract class UstadMobileSystemImpl {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 519, null);
         boolean sharedDirOK = false;
         try {
-            String sharedContentDir = mainInstance.getSharedContentDir();
-            sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
-            String sharedCacheDir = mainInstance.getCacheDir(
-                    CatalogController.SHARED_RESOURCE);
-            boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
-            StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
-            initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
-            mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
+            checkCacheDir();
+            loadLocale();
         }catch(IOException e) {
             mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
         }
+    }
+    
+    public void checkCacheDir() throws IOException{
+        boolean sharedDirOK = false;
+        String sharedContentDir = mainInstance.getSharedContentDir();
+        sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
+        String sharedCacheDir = mainInstance.getCacheDir(
+                CatalogController.SHARED_RESOURCE);
+        boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
+        StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
+        initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
+        mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
+    }
+    
+    public boolean loadLocale() {
+        //choose the locale
+        boolean success = false;
+        String locale = LocaleUtil.chooseSystemLocale(getSystemLocale(), 
+                UstadMobileConstants.supportedLocales, 
+                UstadMobileConstants.fallbackLocale);
+        
+        InputStream localeIn = null;
+        try {
+            localeIn = openResourceInputStream("locale/" +locale + ".properties");
+            messages = MessagesHashtable.load(localeIn);
+            getLogger().l(UMLog.VERBOSE, 423, locale);
+            String localeDir = messages.get(U.id.dir);
+            direction = localeDir != null && localeDir.equals("rtl") ? 
+                UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
+            success = true;
+        }catch(IOException e) {
+            getLogger().l(UMLog.CRITICAL, 9, null, e);
+        }finally {
+            UMIOUtils.closeInputStream(localeIn);
+            localeIn = null;
+        }
+        
+        return success;
+    }
+    
+    /**
+     * Check on whether or not the locale string pack has been loaded or not
+     * @return 
+     */
+    public boolean isLocaleLoaded() {
+        return messages != null;
     }
     
     /**
@@ -160,14 +231,16 @@ public abstract class UstadMobileSystemImpl {
         final UstadMobileSystemImpl impl = this;
         
         String activeUser = getActiveUser();
+        String activeUserAuth = getActiveUserAuth();
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
-        if(activeUser == null) {
+                
+        if(activeUser == null || activeUserAuth == null) {
             new LoginController().show();
         }else {
             //Ensure directory presence in case user deleted it whilst we were away
             setActiveUser(activeUser);
             getLogger().l(UMLog.VERBOSE, 403, activeUser);
-            getAppView().showProgressDialog("Loading");
+            getAppView().showProgressDialog(getString(U.id.loading));
             
             Thread startThread = new Thread(new Runnable() {
                 public void run() {
@@ -187,6 +260,29 @@ public abstract class UstadMobileSystemImpl {
         }
     }
     
+    
+    /**
+     * Get a string for use in the UI
+     * 
+     * @param msgCode
+     * @see U
+     * @return String if found in current locale, otherwise null
+     */
+    public String getString(int msgCode) {
+        return messages.get(msgCode);
+    }
+    
+    /**
+     * Gets the direction of the UI
+     * 
+     * @see UstadMobileConstants#DIR_LTR
+     * @see UstadMobileConstants#DIR_RTL
+     * 
+     * @return Direction int flag - 0 for LTR or 1 for RTL
+     */
+    public int getDirection() {
+        return direction;
+    }
     
     /**
      * Get the name of the platform implementation being used
@@ -256,6 +352,11 @@ public abstract class UstadMobileSystemImpl {
      * @return System locale
      */
     public abstract String getSystemLocale();
+    
+    public String getSystemPreferredLocale() {
+        return null;
+    }
+    
     
     /**
      * Provide information about the platform as key value pairs in a hashtable
@@ -330,6 +431,15 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract InputStream openFileInputStream(String fileURI) throws IOException, SecurityException;
     
+    
+    /**
+     * Get an input stream for an item in the resources - this should be the path
+     * without a leading slash for files that get copied from the res directory
+     * of the source.
+     * 
+     * @param resURI the path to the resource; e.g. locale/en.properties
+     */
+    public abstract InputStream openResourceInputStream(String resURI) throws IOException;
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 
@@ -441,8 +551,9 @@ public abstract class UstadMobileSystemImpl {
         getLogger().l(UMLog.INFO, 306, username);
         if(username != null) {
             String userCachePath = getCacheDir(CatalogController.USER_RESOURCE);
+            String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
             try {
-                boolean dirOK = makeDirectory(userCachePath);
+                boolean dirOK = makeDirectory(userCacheParent) && makeDirectory(userCachePath);
                 getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath 
                     + ":" + dirOK);
             }catch(IOException e) {
@@ -673,12 +784,11 @@ public abstract class UstadMobileSystemImpl {
      * This method should be assumed to take a while and be run in a SEPERATE
      * thread.
      * 
-     * @param entry
-     * @param containerPath
-     * @param mimeType
-     * @return 
+     * @param containerURI The location of the container file
+     * @param mimeType The mime type of the container
+     * @return The path opened
      */
-    public abstract String openContainer(UstadJSOPDSEntry entry, String containerURI, String mimeType);
+    public abstract String openContainer(String containerURI, String mimeType);
     
     public abstract void closeContainer(String openURI);
     

@@ -54,6 +54,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMStorageDir;
 
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParserException;
@@ -110,8 +111,11 @@ public class TestContainerController extends TestCase {
         boolean entryPresent = entryInfo == null || entryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
         assertTrue("Entry not acquired at start of test", entryPresent);
         
-        UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(feed.entries, 
-            null, null, CatalogController.SHARED_RESOURCE, CatalogController.CACHE_ENABLED);
+        UMStorageDir[] dirs = impl.getStorageDirs(CatalogController.SHARED_RESOURCE);
+        CatalogController.AcquireRequest request = new CatalogController.AcquireRequest(
+            feed.entries, dirs[0].getDirURI(), null, null, CatalogController.SHARED_RESOURCE);
+        
+        UMTransferJob acquireJob = CatalogController.acquireCatalogEntries(request);
         int totalSize = acquireJob.getTotalSize();
         
         acquireJob.start();
@@ -130,7 +134,7 @@ public class TestContainerController extends TestCase {
         
         UstadJSOPDSEntry entry = feed.entries[0];
         
-        String openPath = impl.openContainer(entry, acquiredFileURI, 
+        String openPath = impl.openContainer(acquiredFileURI, 
             entryInfo.mimeType);
         assertNotNull("Got an open path from the system", openPath);
         

@@ -64,6 +64,23 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
 
     private static int viewId;
 
+    protected String title;
+
+    protected String buttonText;
+
+    protected String usernameHint;
+
+    protected String passwordHint;
+
+    protected String registerNameHint;
+
+    protected String registerPhoneNumHint;
+
+    protected String registerMaleLabel;
+
+    protected String registerFemaleLabel;
+
+    protected String registerButtonText;
 
     static {
         viewMap = new HashMap<Integer, LoginViewAndroid>();
@@ -138,5 +155,52 @@ public class LoginViewAndroid implements LoginView, View.OnClickListener {
     @Override
     public boolean isShowing() {
         return UstadMobileSystemImplAndroid.getInstanceAndroid().getCurrentActivity() instanceof LoginActivity;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        if(activity != null) {
+            activity.setTitle(title);
+        }
+    }
+
+    @Override
+    public void setUsernameHint(String usernameHint) {
+        this.usernameHint = usernameHint;
+    }
+
+    @Override
+    public void setPasswordHint(String passwordHint) {
+        this.passwordHint = passwordHint;
+    }
+
+    @Override
+    public void setButtonText(String buttonText) {
+        this.buttonText = buttonText;
+    }
+
+    @Override
+    public void setRegisterPhoneNumberHint(String phoneNumberHint) {
+        this.registerPhoneNumHint = phoneNumberHint;
+    }
+
+    @Override
+    public void setRegisterNameHint(String nameHint) {
+        this.registerNameHint = nameHint;
+    }
+
+    @Override
+    public void setRegisterGenderMaleLabel(String maleLabel) {
+        this.registerMaleLabel = maleLabel;
+    }
+
+    @Override
+    public void setRegisterGenderFemaleLabel(String femaleLabel) {
+        this.registerFemaleLabel = femaleLabel;
+    }
+
+    @Override
+    public void setRegisterButtonText(String registerButtonText) {
+        this.registerButtonText = registerButtonText;
     }
 }

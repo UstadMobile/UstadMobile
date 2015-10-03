@@ -377,7 +377,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         
         
         while((b = logIn.read()) != -1) {
-            System.out.println("output:");
+            //System.out.println("output:");
             String line = new String(bout.toByteArray());
             trial = 0;
             
@@ -431,10 +431,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             break;
                         }
                         
-                        statementUsername = logLine.substring(2, logLine.indexOf("statementstart:"));
+                        statementUsername = logLine.substring(2, logLine.indexOf(":statementstart:"));
                         String password = impl.getAppPref("password-"+statementUsername);
                         
-                        if (statementUsername != null && statementUsername != ""){
+                        if (statementUsername == null || statementUsername == ""){
                             //Blank username bro
                             logLine = logLine + ":03";
                             lineBytes = logLine.getBytes();

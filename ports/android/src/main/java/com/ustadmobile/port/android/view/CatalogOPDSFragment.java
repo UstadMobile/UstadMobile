@@ -111,7 +111,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             viewId = getArguments().getInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID);
             this.catalogView = CatalogViewAndroid.getViewById(viewId);
             if(catalogView != null) {
-                catalogView.setFragment(this);//This crashed once with a nullpointerexception - catalogView null?
+                catalogView.setFragment(this);
                 catalogView.setCatalogViewActivity((CatalogActivity) getActivity());
             }
         }

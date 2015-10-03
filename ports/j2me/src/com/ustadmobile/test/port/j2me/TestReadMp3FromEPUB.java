@@ -104,8 +104,7 @@ public class TestReadMp3FromEPUB extends TestCase {
         Thread.sleep(5000);
         String zipType = "zip:///";
         String mimetype = "application/epub+zip";
-        String openPath = impl.openContainer(null, mp3EPUBTestFile, 
-           mimetype);
+        String openPath = impl.openContainer(mp3EPUBTestFile, mimetype);
         ContainerController controller = ContainerController.makeFromEntry(opdsEntry, openPath, mp3EPUBTestFile, mimetype);
         HTTPUtils.httpDebug("showing..");
         UstadOCF ocf = controller.getOCF();

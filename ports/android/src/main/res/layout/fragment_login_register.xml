@@ -16,7 +16,6 @@
         android:id="@+id/login_registerphonenum"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/yourphonenumber"
         android:inputType="number" />
 
     <EditText
@@ -25,7 +24,6 @@
         android:id="@+id/login_registername"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/yourname"
         android:inputType="textNoSuggestions" />
 
     <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
@@ -36,13 +34,11 @@
         <RadioButton android:id="@+id/login_register_radio_male"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.50"
-            android:text="@string/male" />
+            android:layout_weight="0.50"/>
         <RadioButton android:id="@+id/login_register_radio_female"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.50"
-            android:text="@string/female"
             android:layout_gravity="center_horizontal" />
     </RadioGroup>
 
@@ -52,5 +48,5 @@
         android:id="@+id/login_registerbutton"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/register"/>
+        />
 </LinearLayout>

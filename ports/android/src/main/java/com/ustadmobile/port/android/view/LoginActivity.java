@@ -43,7 +43,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.ViewFactory;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.WeakHashMap;
 
@@ -51,14 +56,31 @@ public class LoginActivity extends AppCompatActivity {
 
     private int viewId;
 
+    protected LoginViewAndroid loginView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        int x = 0;
-        Integer viewIdObj = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, 0);
+        UstadMobileSystemImplAndroid.handleActivityCreate(this, savedInstanceState);
+
+        viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, -1);
+        loginView = LoginViewAndroid.getViewById(viewId);
+
+        if(loginView == null) {
+            //Android system itself restored the activity
+            LoginController ctrl = new LoginController();
+            loginView = (LoginViewAndroid)ViewFactory.makeLoginView();
+            ctrl.setView(loginView);
+            ctrl.setViewStrings(loginView);
+        }
+
+        loginView.setLoginViewActivity(this);
         setContentView(R.layout.umactivity_login);
-        LoginViewAndroid.getViewById(viewIdObj.intValue()).setLoginViewActivity(this);
-        this.viewId = viewIdObj.intValue();
+
+        UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),
+                UstadMobileSystemImpl.getInstance().getDirection());
+
+        setTitle(loginView.title);
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
         setSupportActionBar(toolbar);
@@ -116,7 +138,7 @@ public class LoginActivity extends AppCompatActivity {
 
         private WeakHashMap<Integer, LoginFragment> fragmentMap;
 
-        private String[] tabTitles = new String[] {"Login", "Register", "Join Class"};
+        private int[] tabTitles = new int[] {U.id.login, U.id.register};
 
         public LoginPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -143,7 +165,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             // Generate title based on item position
-            return tabTitles[position];
+            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position]);
         }
     }
 

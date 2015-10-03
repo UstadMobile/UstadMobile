@@ -64,7 +64,10 @@ public class AllTestCases extends TestCase {
        
         TestSuite allTestSuite = new TestSuite("AlltestSuites");
         
+
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestUMTinCanUtils());
         allTestSuite.addTest(new TestTinCanLogManagerJ2ME());
+        
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestCatalogController()); 
@@ -115,7 +118,6 @@ public class AllTestCases extends TestCase {
 //        allTestSuite.addTest(new TestHttpResult());
 //        allTestSuite.addTest(new TestEPUBRead());
 //        
-         
         
         return allTestSuite;
 

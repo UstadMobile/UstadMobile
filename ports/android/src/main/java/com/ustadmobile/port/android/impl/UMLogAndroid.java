@@ -20,9 +20,11 @@ public class UMLogAndroid  extends UMLog{
         }else if(level == UMLog.INFO) {
             Log.i(LOGTAG, logMessage);
         }else if(level == UMLog.CRITICAL) {
-            Log.e(LOGTAG, logMessage);
+            Log.wtf(LOGTAG, logMessage);
         }else if(level == UMLog.VERBOSE) {
             Log.v(LOGTAG, logMessage);
+        }else if(level == UMLog.ERROR) {
+            Log.e(LOGTAG, logMessage);
         }
     }
 
@@ -34,9 +36,11 @@ public class UMLogAndroid  extends UMLog{
         }else if(level == UMLog.INFO) {
             Log.i(LOGTAG, logMessage, exception);
         }else if(level == UMLog.CRITICAL) {
-            Log.e(LOGTAG, logMessage, exception);
+            Log.wtf(LOGTAG, logMessage, exception);
         }else if(level == UMLog.VERBOSE) {
             Log.v(LOGTAG, logMessage, exception);
+        }else if(level == UMLog.ERROR) {
+            Log.e(LOGTAG, logMessage, exception);
         }
     }
 }

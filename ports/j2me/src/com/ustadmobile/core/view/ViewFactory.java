@@ -4,7 +4,6 @@
  */
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
 import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
 import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
@@ -26,8 +25,8 @@ public class ViewFactory  {
        return new CatalogViewJ2ME();
     }
     
-    public static ContainerView makeContainerView(UstadJSOPDSEntry entry, String openPath, String mime) {
-        return new ContainerViewJ2ME(entry, openPath, mime);
+    public static ContainerView makeContainerView() {
+        return new ContainerViewJ2ME();
     }
     
     
