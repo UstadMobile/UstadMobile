@@ -16,6 +16,7 @@ import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.view.AppView;
 import java.util.Hashtable;
@@ -123,6 +124,7 @@ public class CatalogViewJ2ME extends UstadViewFormJ2ME implements CatalogView, A
         if(this.controller != null) {
             return;
         }
+        controller.setUIStrings(this);
         
         this.controller = controller;
         entries = this.controller.getModel().opdsFeed.entries;

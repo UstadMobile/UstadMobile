@@ -31,6 +31,7 @@
 package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -54,6 +55,8 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,10 +68,8 @@ import java.util.TimerTask;
  *
  * @author mike
  */
-public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerView, ActionListener{
-    
-    private Form currentForm;
-    
+public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerView, ActionListener, ControllerReadyListener{
+        
     private ContainerController controller;
     
     private String title;
@@ -81,7 +82,15 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     private DocumentRequestHandler requestHandler;
     
+    private String containerURI;
+    
+    private String mimeType;
+    
     private ZipFileHandle containerZip;
+    
+    private String openContainerBaseURI;
+    
+    private HTMLComponent htmlC;
     
     /**
      * The OPF base URL within the zip of the container epub that is being shown
@@ -111,11 +120,36 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     public ContainerViewJ2ME(Hashtable args, Object context) {
         super(args, context);
         UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
-        containerZip = impl.getOpenZip();
+        containerURI = (String)args.get(ContainerController.ARG_CONTAINERURI);
+        mimeType = (String)args.get(ContainerController.ARG_MIMETYPE);
+        
         cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);
         cmdForward = new Command(impl.getString(U.id.next), CMDFORWARD_ID);
+        
+        openContainerBaseURI = impl.openContainer(containerURI, mimeType);
+        containerZip = impl.getOpenZip();
+        setLayout(new BorderLayout());
+        
+        UstadMobileSystemImpl.l(UMLog.ERROR, 175, containerURI);
+        
+        //TODO: localize this string
+        impl.getAppView(context).showAlertDialog(impl.getString(U.id.error), 
+            "Could not open container");
+        ContainerController.makeControllerForView(this, openContainerBaseURI, 
+                mimeType, this);
+        
+        requestHandler = new ContainerDocumentRequestHandler(this);
+        htmlCallback = new ContainerHTMLCallback(this);
     }
 
+    public void controllerReady(UstadController controller, int flags) {
+        if(controller != null) {
+            setController((ContainerController)controller);
+            initByContentType();
+        }
+    }
+
+    
     public void setController(ContainerController controller) {
         this.controller = controller;
     }
@@ -129,11 +163,12 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     }
 
     public void show() {
-        initByContentType();
+        super.show();
+        UstadMobileSystemImplJ2ME.getInstanceJ2ME().handleFormShow(this);
     }
 
     public boolean isShowing() {
-        return currentForm != null && currentForm.isVisible();
+        return isVisible();
     }
     
     public void initByContentType() {
@@ -156,16 +191,30 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             HTTPUtils.httpDebug("getting spine");
             spineURLs = opf.getLinearSpineURLS();
             HTTPUtils.httpDebug("getting requesthandler");
-            requestHandler = new ContainerDocumentRequestHandler(this);
+            
             HTTPUtils.httpDebug("getting htmlcallback");
-            htmlCallback = new ContainerHTMLCallback(this);
+            
+            htmlC = new HTMLComponent(requestHandler);
+            htmlC.setHTMLCallback(htmlCallback);
+            htmlC.setImageConstrainPolicy(
+                HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
+            htmlC.setIgnoreCSS(true);
+            addCommand(cmdBack);
+            addCommand(cmdForward);
+            addCommandListener(this);
+            
             HTTPUtils.httpDebug("getting opfurl");
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
             HTTPUtils.httpDebug("opfURL:" + opfURL);
             HTTPUtils.httpDebug("title: " + title);
-            showPage(1);
+            Display.getInstance().callSerially(new Runnable() {
+                public void run() {
+                    addComponent(BorderLayout.CENTER, htmlC);
+                    showPage(1);
+                }
+            });
         }catch(Exception e) {
             UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 350, null, e);
         }
@@ -175,22 +224,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         if(pageIndex == currentIndex) {
             return;
         }
-        
-        Form oldForm = currentForm;
-        currentForm = new Form();
-        currentForm.setLayout(new BorderLayout());
-        HTMLComponent comp = new HTMLComponent(requestHandler);
-        comp.setHTMLCallback(htmlCallback);
-        comp.setImageConstrainPolicy(
-            HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
-        comp.setIgnoreCSS(true);
-        comp.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
-        currentForm.addComponent(BorderLayout.CENTER, comp);
-        currentForm.show();
-        
-        currentForm.addCommand(cmdBack);
-        currentForm.addCommand(cmdForward);
-        currentForm.addCommandListener(this);
+                
+        htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
         this.currentIndex = pageIndex;
     }
 

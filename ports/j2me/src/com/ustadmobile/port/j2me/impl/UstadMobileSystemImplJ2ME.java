@@ -54,11 +54,13 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
 import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
+import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
 import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
 import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.ByteArrayOutputStream;
@@ -841,8 +843,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     /**
      * @inheritDoc
      */
-    public String openContainer(UstadJSOPDSEntry entry, String containerURI, 
-            String mimeType) {
+    public String openContainer(String containerURI, String mimeType) {
         l(UMLog.DEBUG, 557, containerURI + " : " + mimeType);
         if(openZip != null) {
             throw new IllegalStateException("J2ME: Open one thing at a time please");
@@ -993,6 +994,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             form = new LoginViewJ2ME(args, context);
         }else if(cls.equals(CatalogView.class)) {
             form = new CatalogViewJ2ME(args, context);
+        }else if(cls.equals(ContainerView.class)) {
+            form = new ContainerViewJ2ME(args, context);
         }
         
         form.show();
