@@ -120,7 +120,7 @@ NetBeans.  See README for instructions on building from source.
             name="Ustad Mobile"
             vendor="Ustad Mobile Inc">
 
-            <midlet name="${Midlet_2_name}" class="${Midlet_2_class}"></midlet>
+            <midlet icon="umicon_micro.png" name="${Midlet_2_name}" class="${Midlet_2_class}"></midlet>
 
             <attribute name="MIDlet-Version" value="${ustadmobileversion}"/>
 
@@ -142,7 +142,8 @@ NetBeans.  See README for instructions on building from source.
 
 	
         <copy file="${src.dir}/nokia_non_touch_theme.res" todir="${classes.dir.ANTENNA}"/>
-        
+        <copy file="${src.dir}/umicon_micro.png" todir="${classes.dir.ANTENNA}"/>        
+
         <mkdir dir="${classes.dir.ANTENNA}/res"/>
         <copy todir="${classes.dir.ANTENNA}/res" verbose="true">
             <fileset dir="${src.dir}/res"/>

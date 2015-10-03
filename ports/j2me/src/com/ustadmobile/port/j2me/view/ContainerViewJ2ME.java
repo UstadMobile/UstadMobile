@@ -286,7 +286,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         
         
         
-        public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, HTMLElement mediaElement) {
+        public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement) {
             if(timer == null) {
                 timer = new Timer();
             }
@@ -295,29 +295,51 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 public void run() {
                     boolean isPlaying = false;
                     InputStream in= null;
-                    try {
-                        String pathInZip = src.substring(
-                            UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                        in = view.containerZip.openInputStream(pathInZip);
-                        Object mediaTypeObj = 
-                                mediaExtensions.get(UMFileUtil.getExtension(src));
-                        if(mediaTypeObj != null) {
-                            isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in, 
-                                (String)mediaTypeObj);
-                        }else {
-                            UstadMobileSystemImpl.getInstance().l(UMLog.INFO, 120, src);
-                        }
-
-                    }catch(IOException e) {
-                        UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 120, src, e);
-                    }finally {
-                        if(!isPlaying) {
-                            UMIOUtils.closeInputStream(in);
+                    String source = mediaElement.getAttributeById(HTMLElement.ATTR_SRC);
+                    if(source == null) {
+                        //means the source is not on the tag itself but on the source tags - find them
+                        HTMLElement srcTag = mediaElement.getFirstChildByTagId(
+                                HTMLElement.TAG_SOURCE);
+                        if(srcTag != null) {
+                            source = srcTag.getAttributeById(HTMLElement.ATTR_SRC);
                         }
                     }
+                    
+                    if(source != null) {
+                        try {
+                            String fullURI = UMFileUtil.resolveLink(
+                                htmlC.getPageURL(), source);
+                            String pathInZip = fullURI.substring(
+                                UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
+                            String mediaFileExtension = UMFileUtil.getExtension(src);
+                            Object mediaTypeObj = mediaExtensions.get(mediaFileExtension);
+
+                            UstadMobileSystemImpl.l(UMLog.VERBOSE, 427, pathInZip 
+                                + ':' + mediaFileExtension + ':' + mediaTypeObj);
+
+                            in = view.containerZip.openInputStream(pathInZip);
+
+                            if(mediaTypeObj != null) {
+                                isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in, 
+                                    (String)mediaTypeObj);
+                            }else {
+                                UstadMobileSystemImpl.l(UMLog.INFO, 120, src);
+                            }
+
+                        }catch(IOException e) {
+                            UstadMobileSystemImpl.l(UMLog.ERROR, 120, src, e);
+                        }finally {
+                            if(!isPlaying) {
+                                UMIOUtils.closeInputStream(in);
+                            }
+                        }
+                    }else {
+                        UstadMobileSystemImpl.l(UMLog.INFO, 373, mediaElement.toString());
+                    }
+                    
                 }
                 
-            }, 2500);
+            }, 1000);
         }
         
     }

@@ -106,7 +106,9 @@ public class TestReadMp3FromEPUB extends TestCase {
         String mimetype = "application/epub+zip";
         //ContainerController controller = ContainerController.makeFromEntry(
         //    opdsEntry, openPath, mp3EPUBTestFile, mimetype);
-        HTTPUtils.httpDebug("showing..");
+        //String openPath = impl.openContainer(mp3EPUBTestFile, mimetype);
+        //ContainerController controller = ContainerController.makeFromEntry(opdsEntry, openPath, mp3EPUBTestFile, mimetype);
+        //HTTPUtils.httpDebug("showing..");
         //UstadOCF ocf = controller.getOCF();
         //UstadJSOPF opf = controller.getOPF(0);
         

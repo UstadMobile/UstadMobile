@@ -220,7 +220,6 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     
     public static final String KEY_FLAGS = "flags";
     
-    
     public static final Integer LOAD_URL = new Integer(1);
     
     public static final Integer LOAD_IMPL = new Integer(2);
