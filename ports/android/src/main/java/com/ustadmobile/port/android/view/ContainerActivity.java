@@ -63,6 +63,13 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     private String mBaseURL = null;
 
+    private UstadJSOPF mOPF;
+
+    //Key when saving state for the current page
+    private static final String OUTSTATE_CURRENTITEM = "currentitem";
+
+    private int mSavedPosition = -1;
+
     @Override
     protected void onCreate(Bundle saved) {
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, saved);
@@ -86,6 +93,9 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
         mContainerURI = getIntent().getStringExtra(ContainerController.ARG_CONTAINERURI);
         mMimeType = getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
+        if(saved != null && saved.getInt(OUTSTATE_CURRENTITEM, -1) != -1) {
+            mSavedPosition = saved.getInt(OUTSTATE_CURRENTITEM);
+        }
 
         //now bind to the HTTPService - the onServiceConnected method will call initContent
         Intent intent = new Intent(this, HTTPService.class);
@@ -169,6 +179,9 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        if(mPager != null) {
+            outState.putInt(OUTSTATE_CURRENTITEM, mPager.getCurrentItem());
+        }
     }
 
     public void onDestroy() {
@@ -176,6 +189,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
         unbindService(mConnection);
         mContainerURI = null;
         mMimeType = null;
+        mSavedPosition = -1;
 
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
@@ -214,7 +228,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     @Override
     public void setContainerTitle(String title) {
-
+        setTitle(title);
     }
 
     @Override
@@ -292,9 +306,9 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
                         activity.mContainerController.getOpenPath(), ocf.rootFiles[0].fullPath});
 
                 //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
-                UstadJSOPF opf = activity.mContainerController.getOPF(0);
+                activity.mOPF = activity.mContainerController.getOPF(0);
 
-                String[] hrefArray = opf.getLinearSpineURLS();
+                String[] hrefArray = activity.mOPF.getLinearSpineURLS();
                 urlArray = new String[hrefArray.length];
                 for(int i = 0; i < hrefArray.length; i++) {
                     urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i]);
@@ -308,10 +322,15 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
                 final String[] finalURLArray = urlArray;
                 activity.runOnUiThread(new Runnable() {
                     public void run() {
+                        activity.setContainerTitle(activity.mOPF.title);
                         activity.mPager = (ViewPager) activity.findViewById(R.id.container_epubrunner_pager);
                         activity.mPagerAdapter = new ContainerViewPagerAdapter(
                                 activity.getSupportFragmentManager(), finalURLArray);
                         activity.mPager.setAdapter(activity.mPagerAdapter);
+                        if(activity.mSavedPosition != -1) {
+                            activity.mPager.setCurrentItem(activity.mSavedPosition);
+                        }
+
                         activity.mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                             @Override
                             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
