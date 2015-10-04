@@ -50,6 +50,7 @@ public class TestTinCanLogManagerJ2ME extends TestCase {
         assertEquals("Simple Test OK", 2, 1+1);
         
         UstadMobileSystemImpl impl = new UstadMobileSystemImplJ2ME();
+        impl.init();
         impl.setActiveUser(TestConstants.LOGIN_USER);
         impl.setActiveUserAuth(TestConstants.LOGIN_PASS);
         
