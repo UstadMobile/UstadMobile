@@ -428,7 +428,6 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      * Make a CatalogController for the user's default OPDS catalog
      * 
      * @param impl system implementation to be used
-     * @deprecated
      * 
      * @return CatalogController representing the default catalog for the active user
      */
@@ -459,11 +458,6 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         return args;
     }
     
-    public static CatalogController makeDeviceCatalog(Object context) throws IOException {
-        UstadJSOPDSFeed deviceFeed = makeDeviceFeed(null, null, 
-                USER_RESOURCE | SHARED_RESOURCE, context);
-        return new CatalogController(new CatalogModel(deviceFeed), context);
-    }
     
     /**
      * Make a catalog representing the files that are now in the shared and user
@@ -475,11 +469,10 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      * 
      * @return CatalogController representing files on the device
      */
-    public static UstadJSOPDSFeed makeDeviceFeed(String sharedDir, String userDir, int dirFlags, Object context) throws IOException{
+    public static UstadJSOPDSFeed makeDeviceFeed(UMStorageDir[] dirs, int dirFlags, Object context) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         boolean incShared = (dirFlags & SHARED_RESOURCE) == SHARED_RESOURCE;
         boolean incUser = (dirFlags & USER_RESOURCE) == USER_RESOURCE;
-        
         
         verifyKnownEntries(SHARED_RESOURCE, context);
         
@@ -488,19 +481,27 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         Vector containerFilesVector = new Vector();
         int containerUserStartIndex = 0;
         
-        sharedDir = (sharedDir == null) ? impl.getSharedContentDir() : sharedDir;
-        if(incUser && userDir == null) {
-            userDir = impl.getUserContentDirectory(impl.getActiveUser(context));
-        }
-        
+        int i;
         if(incShared) {
-            findOPDSFilesInDir(sharedDir, opdsFilesVector, containerFilesVector);
+            for(i = 0; i < dirs.length; i++) {
+                if(dirs[i].isAvailable() && !dirs[i].isUserSpecific()) {
+                    findOPDSFilesInDir(dirs[i].getDirURI(), opdsFilesVector, 
+                            containerFilesVector);
+                }
+            }
+            
             opdsUserStartIndex = opdsFilesVector.size();
             containerUserStartIndex = containerFilesVector.size();
         }
         
         if(incUser) {
-            findOPDSFilesInDir(userDir, opdsFilesVector, containerFilesVector);
+            dirs = impl.getStorageDirs(USER_RESOURCE, context);
+            for(i = 0; i < dirs.length; i++) {
+                if(dirs[i].isAvailable() && dirs[i].isUserSpecific()) {
+                    findOPDSFilesInDir(dirs[i].getDirURI(), opdsFilesVector, 
+                            containerFilesVector);
+                }
+            }
         }
         
         String[] opdsFiles = new String[opdsFilesVector.size()];
@@ -761,18 +762,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                 UstadMobileSystemImpl.getInstance().go(CatalogView.class,
                         args, context);
                 
-                /*
-                try {
-                    CatalogController deviceCatCtrl = 
-                            CatalogController.makeDeviceCatalog(context);
-                    deviceCatCtrl.show();
-                }catch(IOException e) {
-                    UstadMobileSystemImpl.getInstance().getAppView(context).showNotification(
-                        UstadMobileSystemImpl.getInstance().getString(U.id.error_loading_catalog), 
-                        AppView.LENGTH_LONG);
-                }*/
-                break;
-                            
+                break;                            
         }
     }
     
@@ -833,9 +823,9 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         
         if(url.startsWith("opds:///")) {
             if(url.equals(OPDS_PROTO_DEVICE)) {
-                opdsFeed = makeDeviceFeed(impl.getSharedContentDir(), 
-                        impl.getUserContentDirectory(impl.getActiveUser(context)), 
-                        resourceMode, context);
+                opdsFeed = makeDeviceFeed(
+                    impl.getStorageDirs(SHARED_RESOURCE | USER_RESOURCE, context), 
+                    resourceMode, context);
             }
         }else {
             XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
