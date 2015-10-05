@@ -93,7 +93,7 @@ public class CatalogViewJ2ME extends UstadViewFormJ2ME implements CatalogView, A
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         final int fetchFlags = CatalogController.CACHE_ENABLED;
 
-        CatalogController.makeControllerForView(this, url, impl, resourceMode, 
+        CatalogController.makeControllerForView(this, url, resourceMode, 
                 fetchFlags, this);
     }
     

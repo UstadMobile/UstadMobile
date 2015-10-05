@@ -85,7 +85,7 @@ public class TestCatalogController extends TestCase{
         String opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
         
         CatalogController controller = CatalogController.makeControllerByURL(
-            opdsURL, impl, CatalogController.USER_RESOURCE, 
+            opdsURL, CatalogController.USER_RESOURCE, 
             TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
             CatalogController.CACHE_ENABLED, context);
         assertNotNull("Create catalog controller", controller);

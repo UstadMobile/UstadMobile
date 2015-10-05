@@ -74,6 +74,7 @@ import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 import javax.microedition.lcdui.StringItem;
 import javax.microedition.media.Manager;
+import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
 import javax.microedition.media.control.VolumeControl;
@@ -86,7 +87,7 @@ import org.xmlpull.v1.XmlPullParserException;
  *
  * @author varuna
  */
-public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
+public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements PlayerListener {
 
     private UMLog umLogger;
     
@@ -102,6 +103,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     private Player player;
     public int volumeLevel=70;
+    
+    private InputStream mediaInputStream;
     
     /**
      * System property used to get the memory card location
@@ -1025,61 +1028,64 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
     
     public class PlayerListnerEventHandler implements PlayerListener {
+
         public PlayerListnerEventHandler() {
         }
 
         public void playerUpdate(Player player, String event, Object eventData) {
-          if (event == (PlayerListener.VOLUME_CHANGED)) {
-            VolumeControl vc = (VolumeControl) eventData;
-            updateDisplay("Volume Changed to: " + vc.getLevel());
-            if (vc.getLevel() > 60) {
-              updateDisplay("Volume higher than 60 is too loud");
-              vc.setLevel(60);
+            if (event == (PlayerListener.VOLUME_CHANGED)) {
+                VolumeControl vc = (VolumeControl) eventData;
+                updateDisplay("Volume Changed to: " + vc.getLevel());
+                if (vc.getLevel() > 60) {
+                    updateDisplay("Volume higher than 60 is too loud");
+                    vc.setLevel(60);
+                }
+            } else if (event == (PlayerListener.STOPPED)) {
+                updateDisplay("Player paused at: " + (Long) eventData);
+                stopMedia(); //do we wnat to close it if stopped reached ? Is this
+                // the same as it being paused? 5
+            } else if (event == (PlayerListener.STARTED)) {
+                updateDisplay("Player started at: " + (Long) eventData);
+            } else if (event == (PlayerListener.END_OF_MEDIA)) {
+                updateDisplay("Player reached end of loop.");
+                stopMedia();
+            } else if (event == (PlayerListener.CLOSED)) {
+                updateDisplay("Player closed.");
+                stopMedia();
+            } else if (event == (PlayerListener.ERROR)) {
+                updateDisplay("Error Message: " + (String) eventData);
+                stopMedia();
+
             }
-          } else if (event == (PlayerListener.STOPPED)) {
-            updateDisplay("Player paused at: " + (Long) eventData);
-            stopMedia(); //do we wnat to close it if stopped reached ? Is this
-                        // the same as it being paused? 5
-          } else if (event == (PlayerListener.STARTED)) {
-            updateDisplay("Player started at: " + (Long) eventData);
-          } else if (event == (PlayerListener.END_OF_MEDIA)) {
-            updateDisplay("Player reached end of loop.");
-            stopMedia();
-          } else if (event == (PlayerListener.CLOSED)) {
-            updateDisplay("Player closed.");
-            stopMedia();
-          } else if (event == (PlayerListener.ERROR)) {
-            updateDisplay("Error Message: " + (String) eventData);
-            stopMedia();
-            
-          }
-        }
-        
-        public void updateDisplay(String text){
-            l(UMLog.DEBUG, 590, text);
-            
         }
 
-}
+        public void updateDisplay(String text) {
+            l(UMLog.DEBUG, 590, text);
+
+        }
+
+    }
     
     /**
      * Plays the media's inputstream. Can be audio or video.
-     * @param mediaURLInputStream the InputStream to be played.
+     * @param mediaInputStream the InputStream to be played.
      * @param encoding The encoding by which the player will get generated. 
      * @return 
      */
-    public boolean playMedia(InputStream mediaURLInputStream, String encoding) {
+    public boolean playMedia(InputStream mediaInputStream, String encoding) {
         l(UMLog.DEBUG, 563, encoding);
         boolean status = false;
         stopMedia();
+        
+        this.mediaInputStream = mediaInputStream;
+        
         VolumeControl vc = null;
         PlayerListener pl = null;
-        PlayerListnerEventHandler eh = new PlayerListnerEventHandler();
         
         
         try{
-            player = Manager.createPlayer(mediaURLInputStream, encoding);
-            player.addPlayerListener(eh);
+            player = Manager.createPlayer(mediaInputStream, encoding);
+            player.addPlayerListener(this);
             player.realize();
             vc = (VolumeControl) player.getControl("VolumeControl");
             if (vc != null){
@@ -1091,21 +1097,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             status = true;            
         }catch(Exception e){
             l(UMLog.ERROR, 145, encoding, e);
-            status = false;
             stopMedia();
-        }finally{
-//            if (mediaURLInputStream != null){
-//                try{
-//                    mediaURLInputStream.close();
-//                }catch(Exception e){
-//                    HTTPUtils.httpDebug("eror nulling mediaURLInputStream.");
-//                }
-//            }
         }
         
         return status;
     }
 
+    
+    public void playerUpdate(Player uPlayer, String event, Object eventData) {
+        if (event.equals(PlayerListener.END_OF_MEDIA)) {
+            stopMedia();
+        } 
+    }
+    
     /**
      * Stops the media playing. 
      * @return 
@@ -1113,29 +1117,28 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public boolean stopMedia() {
         l(UMLog.DEBUG, 567, null);
         boolean status = false;
+        boolean needGC = player != null || mediaInputStream != null;
         if (player != null){
-            try{
-                l(UMLog.DEBUG, 567, "stopping");
-                player.stop();
-                l(UMLog.DEBUG, 567, "stopped");
-                player.deallocate();
-                l(UMLog.DEBUG, 567, "deallocated");
-                player.close();
-                l(UMLog.DEBUG, 567, "closed");
-                player = null;
-                l(UMLog.DEBUG, 567, "nulled");
-                l(UMLog.DEBUG, 571, null);
-                //Garbage collect too?
-                System.gc();
-                l(UMLog.DEBUG, 567, "gc-edx");
-                status = true;
-            }catch(Exception e){
-                l(UMLog.ERROR, 147, null, e);
-                status = false;
+            if(player.getState() != Player.CLOSED) {
+                try {
+                    player.stop();
+                    player.deallocate();
+                }catch(MediaException me) {
+                    l(UMLog.ERROR, 177, null, me);
+                }
             }
+            
+            player.close();
+            player = null;
+                        
+            
+            l(UMLog.DEBUG, 597, null);
         }else {
             l(UMLog.DEBUG, 569, null);
         }
+        
+        UMIOUtils.closeInputStream(mediaInputStream);
+        mediaInputStream = null;
         
         return status;
     }

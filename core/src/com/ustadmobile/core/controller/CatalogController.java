@@ -219,18 +219,9 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     public static final String KEY_HTTPPPASS = "httpp";
     
     public static final String KEY_FLAGS = "flags";
+            
+    public static final String OPDS_PROTO_DEVICE = "opds:///com.ustadmobile.app.devicefeed";
     
-    public static final Integer LOAD_URL = new Integer(1);
-    
-    public static final Integer LOAD_IMPL = new Integer(2);
-    
-    public static final Integer LOAD_RESMODE = new Integer(3);
-    
-    public static final Integer LOAD_HTTPUSER = new Integer(4);
-    
-    public static final Integer LOAD_HTTPPASS = new Integer(5);
-    
-    public static final Integer LOAD_FLAGS = new Integer(6);
     
     private Object context;
     
@@ -371,10 +362,9 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      * @param resourceMode: SHARED_RESOURCE to keep in shared cache: USER_RESOURCE to keep in user cache
      * @param httpUser: the HTTP username to use for authentication
      * @param httpPassword:or the HTTP password to use for authentication
-     * @param impl System implementation to use
      * @return 
      */
-    public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, int resourceMode, String httpUser, String httpPassword, int flags, Object context) throws IOException, XmlPullParserException{
+    public static CatalogController makeControllerByURL(String url, int resourceMode, String httpUser, String httpPassword, int flags, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, resourceMode, 
             httpUser, httpPassword, flags, context);
         CatalogController result = new CatalogController(
@@ -404,22 +394,19 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      * @throws IOException
      * @throws XmlPullParserException 
      */
-    public static void makeControllerForView(final CatalogView view, final String url, final UstadMobileSystemImpl impl, final int resourceMode, final int flags, final ControllerReadyListener listener) {
+    public static void makeControllerForView(final CatalogView view, final String url, final int resourceMode, final int flags, final ControllerReadyListener listener) {
         Hashtable args = new Hashtable();
-        if(impl == null) {
-            throw new IllegalArgumentException("impl cannot be null dimwit");
-        }
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         Object ctx = view.getContext();
         
-        args.put(LOAD_URL, url);
-        args.put(LOAD_IMPL, impl);
-        args.put(LOAD_RESMODE, new Integer(resourceMode));
-        args.put(LOAD_FLAGS, new Integer(flags));
+        args.put(KEY_URL, url);
+        args.put(KEY_RESMOD, new Integer(resourceMode));
+        args.put(KEY_FLAGS, new Integer(flags));
         
         if(impl.getActiveUser(ctx) != null && impl.getActiveUserAuth(ctx) != null) {
-            args.put(LOAD_HTTPUSER, impl.getActiveUser(ctx));
-            args.put(LOAD_HTTPPASS, impl.getActiveUserAuth(ctx));
+            args.put(KEY_HTTPUSER, impl.getActiveUser(ctx));
+            args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(ctx));
         }
         
         CatalogController controller = new CatalogController(ctx);
@@ -428,12 +415,11 @@ public class CatalogController implements UstadController, AppViewChoiceListener
 
     
     public UstadController loadController(Hashtable args, Object ctx) throws Exception {
-        CatalogController newController = makeControllerByURL((String)args.get(LOAD_URL), 
-            (UstadMobileSystemImpl)args.get(LOAD_IMPL), 
-            ((Integer)args.get(LOAD_RESMODE)).intValue(), 
-            args.get(LOAD_HTTPUSER) != null ? (String)args.get(LOAD_HTTPUSER) : null, 
-            args.get(LOAD_HTTPPASS) != null ? (String)args.get(LOAD_HTTPPASS) : null, 
-            ((Integer)args.get(LOAD_FLAGS)).intValue(), ctx);
+        CatalogController newController = makeControllerByURL((String)args.get(KEY_URL), 
+            ((Integer)args.get(KEY_RESMOD)).intValue(), 
+            args.get(KEY_HTTPUSER) != null ? (String)args.get(KEY_HTTPUSER) : null, 
+            args.get(KEY_HTTPPPASS) != null ? (String)args.get(KEY_HTTPPPASS) : null, 
+            ((Integer)args.get(KEY_FLAGS)).intValue(), ctx);
         newController.initEntryStatusCheck();
         return newController;
     }
@@ -452,7 +438,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         
         String activeUser = impl.getActiveUser(context);
         String activeUserAuth = impl.getActiveUserAuth(context);
-        return CatalogController.makeControllerByURL(opdsServerURL, impl, 
+        return CatalogController.makeControllerByURL(opdsServerURL, 
             USER_RESOURCE, activeUser, activeUserAuth, CACHE_ENABLED, context);
         
     }
@@ -767,6 +753,15 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                     null, context);
                 break;
             case MENUINDEX_MYDEVICE:
+                Hashtable args = new Hashtable();
+                args.put(KEY_URL, OPDS_PROTO_DEVICE);
+                args.put(KEY_RESMOD, new Integer(USER_RESOURCE | SHARED_RESOURCE));
+                args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
+                
+                UstadMobileSystemImpl.getInstance().go(CatalogView.class,
+                        args, context);
+                
+                /*
                 try {
                     CatalogController deviceCatCtrl = 
                             CatalogController.makeDeviceCatalog(context);
@@ -775,7 +770,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                     UstadMobileSystemImpl.getInstance().getAppView(context).showNotification(
                         UstadMobileSystemImpl.getInstance().getString(U.id.error_loading_catalog), 
                         AppView.LENGTH_LONG);
-                }
+                }*/
                 break;
                             
         }
@@ -835,23 +830,34 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         
         Hashtable headers = makeAuthHeaders(httpUsername, httpPassword);
         
-        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-        HTTPResult result = impl.readURLToString(url, headers);
-        if(result.getStatus() != 200) {
-            throw new IOException("HTTP Error " + result.getStatus());
+        
+        if(url.startsWith("opds:///")) {
+            if(url.equals(OPDS_PROTO_DEVICE)) {
+                opdsFeed = makeDeviceFeed(impl.getSharedContentDir(), 
+                        impl.getUserContentDirectory(impl.getActiveUser(context)), 
+                        resourceMode, context);
+            }
+        }else {
+            XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+            HTTPResult result = impl.readURLToString(url, headers);
+            if(result.getStatus() != 200) {
+                throw new IOException("HTTP Error " + result.getStatus());
+            }
+
+            byte[] opdsContents = result.getResponse();
+            parser.setInput(
+                new ByteArrayInputStream(opdsContents), 
+                "UTF-8");
+            opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+            CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
+                "UTF-8"), context);
         }
         
-        byte[] opdsContents = result.getResponse();
-        parser.setInput(
-            new ByteArrayInputStream(opdsContents), 
-            "UTF-8");
-
-        opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+        
         impl.getLogger().l(UMLog.DEBUG, 504, "Catalog Null:" + (opdsFeed == null));
         opdsFeed.href = url;
         stripEntryUMCloudIDPrefix(opdsFeed);
-        CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
-            "UTF-8"), context);
+        
         
         return opdsFeed;
     }
