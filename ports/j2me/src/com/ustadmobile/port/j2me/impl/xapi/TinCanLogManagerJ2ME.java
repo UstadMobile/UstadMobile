@@ -188,7 +188,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
             status = "0";
             impl.l(UMLog.DEBUG, 540, "user id ok" );
         }
-        sb.append('u').append(userid).append(':').append("statementstart:").append(
+        sb.append('u').append(':').append(userid).append(':').append("statementstart:").append(
                 stmt.toString()).append(":statementend:").append(status);
         impl.l(UMLog.DEBUG, 540, "appended statement to be queued ok");
         
