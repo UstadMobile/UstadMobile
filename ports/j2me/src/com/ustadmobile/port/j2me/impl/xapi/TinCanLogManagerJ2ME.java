@@ -172,7 +172,6 @@ public class TinCanLogManagerJ2ME extends TimerTask{
             }
         }
         
-        // logOut = ... open file output stream 
         if (success){
             return logPath;
         }else{
@@ -389,6 +388,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         if (logOut != null){
                             logOut.close();
                         }
+                        if (statusOut != null){
+                            statusOut.flush();
+                            statusOut.close();
+                        }
                         impl.l(UMLog.DEBUG, 548, 
                                 "after (log and temp) post send: okay and closed." );
                         if (resultCode == 1){
@@ -467,6 +470,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             logCon.close();
                         }
                         if (statusOut != null){
+                            statusOut.flush();
                             statusOut.close();
                         }
                         String doneLogName = filesToReplicate[i].toString()
@@ -493,6 +497,12 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     if (logOut != null){
                         logOut.close();
                     }
+                    if (statusOut != null){
+                        statusOut.flush();
+                        statusOut.close();
+                    }
+                    
+                    
                     impl.l(UMLog.DEBUG, 548, "after post send: okay and closed." );
                     if (resultCode == 1){
                         //delete .log, rename .tmp to .done
