@@ -681,7 +681,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
 
                             break;
                         }else if (return_code == 401 || 
-                            return_code == 400 || return_code == 403){
+                            return_code == 404 || return_code == 403){
                             impl.l(UMLog.DEBUG, 558, "Line needs a retry" );
                             if (trial + 2 > max_tries){
                                 impl.l(UMLog.DEBUG, 558, "Line got a timeout" );
@@ -699,6 +699,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             //Got to keep on trying 
                         }else{
                             impl.l(UMLog.DEBUG, 558, "Line is faulty" );
+                            
                             //Not a valid line. Put it in the status file
                             logLine = logLine.substring(0, logLine.length()-1);
                             logLine = logLine + "3";
