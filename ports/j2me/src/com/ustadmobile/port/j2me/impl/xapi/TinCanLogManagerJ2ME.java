@@ -396,8 +396,9 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                                     FileUtils.joinPath(tincanDir, 
                                             filesToReplicate[i]), false);
                             String statusFileURIDone = statusFileURI + ".done";
-                            FileUtils.renameFileOrDir(statusFileURI,
-                                    statusFileURIDone, Connector.READ_WRITE, false);
+                            impl.renameFile(statusFileURI, statusFileURIDone);
+                            //FileUtils.renameFileOrDir(statusFileURI,
+                            //        statusFileURIDone, Connector.READ_WRITE, false);
                         }else if (resultCode == 2){
                             String tempB4Delete = FileUtils.joinPath(tincanDir, 
                                             filesToReplicate[i]) + ".origi";
@@ -497,8 +498,9 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                                 FileUtils.joinPath(tincanDir, 
                                         filesToReplicate[i]), false);
                         String statusFileURIDone = statusFileURI + ".done";
-                        FileUtils.renameFileOrDir(statusFileURI,
-                                statusFileURIDone, Connector.READ_WRITE, false);
+                        impl.renameFile(statusFileURI, statusFileURI);
+                        //FileUtils.renameFileOrDir(statusFileURI,
+                        //        statusFileURIDone, Connector.READ_WRITE, false);
                     }else if (resultCode == 2){
                         String tempB4Delete = FileUtils.joinPath(tincanDir, 
                                         filesToReplicate[i]) + ".origi";
