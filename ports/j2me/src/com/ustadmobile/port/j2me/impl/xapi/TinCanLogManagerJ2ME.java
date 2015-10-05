@@ -693,6 +693,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                                 statusOut.write(lineBytes);
                                 statusOut.write(nline);
                                 trial = trial + 10;
+                                break;
                             }
                             trial = trial + 1;
                             //Got to keep on trying 
