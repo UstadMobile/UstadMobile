@@ -459,6 +459,23 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     }
     
     
+    private static void putStorageDirsInVectors(UMStorageDir[] dirs, boolean userSpecific, Vector opdsFilesVector, Vector containerFilesVector) {
+        for(int i = 0; i < dirs.length; i++) {
+            if(dirs[i].isAvailable() && dirs[i].isUserSpecific() == userSpecific) {
+                try {
+                    boolean dirExists = UstadMobileSystemImpl.getInstance().dirExists(
+                            dirs[i].getDirURI());
+                    if(dirExists) {
+                        findOPDSFilesInDir(dirs[i].getDirURI(), opdsFilesVector, 
+                            containerFilesVector);
+                    }
+                }catch(IOException ioe) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 177, dirs[i].getDirURI());
+                }
+            }
+        }
+    }
+    
     /**
      * Make a catalog representing the files that are now in the shared and user
      * directories
@@ -480,28 +497,16 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         int opdsUserStartIndex = 0;
         Vector containerFilesVector = new Vector();
         int containerUserStartIndex = 0;
+                
         
-        int i;
         if(incShared) {
-            for(i = 0; i < dirs.length; i++) {
-                if(dirs[i].isAvailable() && !dirs[i].isUserSpecific()) {
-                    findOPDSFilesInDir(dirs[i].getDirURI(), opdsFilesVector, 
-                            containerFilesVector);
-                }
-            }
-            
+            putStorageDirsInVectors(dirs, false, opdsFilesVector, containerFilesVector);
             opdsUserStartIndex = opdsFilesVector.size();
             containerUserStartIndex = containerFilesVector.size();
         }
         
         if(incUser) {
-            dirs = impl.getStorageDirs(USER_RESOURCE, context);
-            for(i = 0; i < dirs.length; i++) {
-                if(dirs[i].isAvailable() && dirs[i].isUserSpecific()) {
-                    findOPDSFilesInDir(dirs[i].getDirURI(), opdsFilesVector, 
-                            containerFilesVector);
-                }
-            }
+            putStorageDirsInVectors(dirs, true, opdsFilesVector, containerFilesVector);
         }
         
         String[] opdsFiles = new String[opdsFilesVector.size()];
@@ -515,8 +520,8 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         String generatedHREFBase = incUser ? impl.getUserContentDirectory(
                 impl.getActiveUser(context)) : impl.getSharedContentDir();
         
-        String looseFilePath = UMFileUtil.joinPaths(new String[] {generatedHREFBase, 
-            "cache-loose"});
+        String looseFilePath = UMFileUtil.joinPaths(new String[] {
+            impl.getCacheDir(USER_RESOURCE, context), "cache-loose"});
         
         boolean[] userOPDSFiles = new boolean[opdsFiles.length];
         UMUtil.fillBooleanArray(userOPDSFiles, true, opdsUserStartIndex, 
@@ -1106,6 +1111,8 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      */
     public static void findOPDSFilesInDir(String dir, Vector opdsFiles, Vector containerFiles) throws IOException{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 429, dir);
+        
         String[] dirContents = impl.listDirectory(dir);
         
         for(int i = 0; i < dirContents.length; i++) {
