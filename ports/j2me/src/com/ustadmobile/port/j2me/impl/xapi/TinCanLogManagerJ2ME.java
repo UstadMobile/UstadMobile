@@ -35,6 +35,7 @@ import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -664,8 +665,9 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                                 logLine.indexOf(":statementend:"));
                         statementString = statementString.substring("statementstart:".length(), statementString.length());
                         byte[] statementBytes = statementString.getBytes();
+
                         String tincanEndpointURL = 
-                                "http://umcloud1.ustadmobile.com/umlrs/statements/";
+                                UstadMobileDefaults.DEFAULT_XAPI_STATEMENT_SERVER;
                         impl.l(UMLog.DEBUG, 558, "POST-in log line" );
                         HTTPResult result = HTTPUtils.makeHTTPRequest(tincanEndpointURL,
                                 null, tinCanHeaders, "POST", statementBytes);

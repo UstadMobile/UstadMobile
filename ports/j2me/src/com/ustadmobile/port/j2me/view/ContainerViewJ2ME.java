@@ -56,6 +56,7 @@ import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.port.j2me.app.FileUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -194,8 +195,9 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
             if(htmlC != null && htmlC.getTitle() != null) {
                 title = htmlC.getTitle();
             }
-            
-            JSONObject stmt = UMTinCanUtil.makePageViewStmt(opf.id, currentPage,
+            String objectID = FileUtils.joinPath(
+                    UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id);
+            JSONObject stmt = UMTinCanUtil.makePageViewStmt(objectID, currentPage,
                 title, "en-US", duration, actor);
             UstadMobileSystemImpl.getInstance().queueTinCanStatement(stmt);
         }
