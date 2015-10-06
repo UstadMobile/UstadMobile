@@ -55,7 +55,7 @@ public class UstadMobileDefaults {
             "https://freegeoip.net/json/";
 
     public static final String DEFAULT_XAPI_STATEMENT_SERVER = 
-            "http://umcloud1.ustadmobile.com/umlrs/";
+            "http://umcloud1.ustadmobile.com/umlrs/statements/";
     
     public static final String DEFAULT_TINCAN_PREFIX =
             "http://www.ustadmobile.com/um-tincan/";
