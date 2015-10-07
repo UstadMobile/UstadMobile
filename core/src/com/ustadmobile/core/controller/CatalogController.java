@@ -816,10 +816,12 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      * @param flags boolean flags inc. for cache retrieval 
      *  - set USER_RESOURCE to retrieve catalogs from active user cache.
      *  - set SHARED_RESOURCE to retrieve catalogs from shared cache as well.
-     * @return 
+     * @return The OPDS Feed object representing this catalog or null if it cannot be accessed
      */
     public static UstadJSOPDSFeed getCatalogByURL(String url, int resourceMode, String httpUsername, String httpPassword, int flags, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
+        Exception e = null; 
+        
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.getLogger().l(UMLog.INFO, 307, url);
         
@@ -833,26 +835,53 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                     resourceMode, context);
             }
         }else {
-            XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-            HTTPResult result = impl.readURLToString(url, headers);
-            if(result.getStatus() != 200) {
-                throw new IOException("HTTP Error " + result.getStatus());
-            }
+            try {
+                XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+                HTTPResult result = impl.readURLToString(url, headers);
+                if(result.getStatus() != 200) {
+                    throw new IOException("HTTP Error " + result.getStatus());
+                }
 
-            byte[] opdsContents = result.getResponse();
-            parser.setInput(
-                new ByteArrayInputStream(opdsContents), 
-                "UTF-8");
-            opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
-            CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
-                "UTF-8"), context);
+                byte[] opdsContents = result.getResponse();
+                parser.setInput(
+                    new ByteArrayInputStream(opdsContents), 
+                    "UTF-8");
+                opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+                opdsFeed.href = url;
+                CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
+                    "UTF-8"), context);
+            }catch(Exception e1) {
+                UstadMobileSystemImpl.l(UMLog.WARN, 201, url, e1);
+                e = e1;
+            }
+            
+            if(opdsFeed == null & (flags & CACHE_ENABLED) == CACHE_ENABLED) {
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 431, url);
+                try {
+                    opdsFeed = getCachedCatalogByURL(url, resourceMode, context);
+                }catch(Exception e2) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 181, url, e2);
+                    e = e2;
+                }
+            }
         }
         
-        
-        impl.getLogger().l(UMLog.DEBUG, 504, "Catalog Null:" + (opdsFeed == null));
-        opdsFeed.href = url;
-        stripEntryUMCloudIDPrefix(opdsFeed);
-        
+        //If we have loaded it from remote server or cache it's not null here
+        if(opdsFeed != null) {
+            impl.getLogger().l(UMLog.DEBUG, 504, "Catalog Null:" + (opdsFeed == null));
+            opdsFeed.href = url;
+            stripEntryUMCloudIDPrefix(opdsFeed);
+        }else if(e != null){
+            if(e instanceof IOException) {
+                throw (IOException)e;
+            }else if(e instanceof XmlPullParserException) {
+                throw (XmlPullParserException)e;
+            }else {
+                throw new IOException(e.toString());
+            }
+        }else {
+            throw new IOException("OPDS Catalog not loaded: " + url);
+        }
         
         return opdsFeed;
     }
@@ -888,7 +917,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      * 
      * @return The OPDS ID of the entry from that location
      */
-    public String getCatalogIDByURL(String url, int resourceMode) {
+    public static String getCatalogIDByURL(String url, int resourceMode, Object context) {
         String catalogID = null;
         String prefKey = getPrefKeyNameForOPDSURLToIDMap(url);
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
@@ -968,11 +997,12 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         }
 	
         impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
-        String keyName = "opds-cache-" + catalog.id;
-	
-        impl.setPref(isUserMode, keyName, destPath, context);
-        impl.setPref(isUserMode, getPrefKeyNameForOPDSURLToIDMap(catalog.id), 
-            catalog.href, context);
+        String idKeyName = "opds-cache-" + catalog.id;
+	String urlKeyName = getPrefKeyNameForOPDSURLToIDMap(catalog.href);
+        
+        impl.setPref(isUserMode, idKeyName, destPath, context);
+        impl.setPref(isUserMode, urlKeyName, 
+            catalog.id, context);
     }
     
     /**
@@ -1088,16 +1118,21 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     }
     
     /**
+     * Get a cached copy of a given OPDS catalog by URL
      * 
-     * @param url
-     * @param username
-     * @return 
+     * @param url The OPDS url e.g. http://server.com/dir/place.opds
+     * @param resourceMode Where to look : flag can set SHARED_RESOURCE or USER_RESOURCE
+     * 
+     * @return the feed if it is available in the cache, null otherwise
      */
-    public static UstadJSOPDSFeed getCachedCatalogByURL(String url, int resourceMode) {
+    public static UstadJSOPDSFeed getCachedCatalogByURL(String url, int resourceMode, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed retVal = null;
-        
-        
-        return null;
+        String entryID = getCatalogIDByURL(url, resourceMode, context);
+        if(entryID != null) {
+            return getCachedCatalogByID(entryID, resourceMode, context);
+        }else {
+            return null;
+        }
     }
     
     

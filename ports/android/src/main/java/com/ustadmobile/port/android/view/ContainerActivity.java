@@ -233,7 +233,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     @Override
     public Object getContext() {
-        return null;
+        return this;
     }
 
 

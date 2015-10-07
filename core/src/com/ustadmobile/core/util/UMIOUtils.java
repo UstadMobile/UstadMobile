@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  *
@@ -114,6 +115,13 @@ public class UMIOUtils {
             throw e;
         }
     }
+    
+    public static final void throwIfNotNullXPE(XmlPullParserException xe) throws XmlPullParserException {
+        if(xe != null) {
+            throw xe;
+        }
+    }
+    
     
     /**
      * Logs and throws the given exception if it is not null

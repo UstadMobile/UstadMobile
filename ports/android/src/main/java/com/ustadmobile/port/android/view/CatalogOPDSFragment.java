@@ -119,7 +119,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         final int fetchFlags = CatalogController.CACHE_ENABLED;
 
-        CatalogController.makeControllerForView(this, url, impl, resourceMode, fetchFlags, this);
+        CatalogController.makeControllerForView(this, url, resourceMode, fetchFlags, this);
     }
 
     @Override
