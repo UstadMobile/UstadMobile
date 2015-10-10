@@ -430,8 +430,8 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         
                     }else{
                         impl.l(UMLog.DEBUG, 548, "temp line number " + 
-                            tempLineNumber+ " is not lower than log line number" +
-                                logLineNumber);
+                            "" + " is not lower than log line number" +
+                                "");
                         FileUtils.deleteRecursively(
                                     FileUtils.joinPath(tincanDir, 
                                         filesToReplicate[i]), false);
