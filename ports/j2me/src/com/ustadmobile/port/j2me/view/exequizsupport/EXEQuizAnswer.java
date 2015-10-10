@@ -46,6 +46,8 @@ public class EXEQuizAnswer {
     
     private HTMLElement answerElement;
     
+    private HTMLElement answerContentElement;
+    
     private HTMLElement inputElement;
         
     private HTMLElement feedbackElement;
@@ -72,10 +74,18 @@ public class EXEQuizAnswer {
     }
     
     private void setupFromElement(HTMLElement answerEl, HTMLElement formEl) {
-        this.inputElement = (HTMLElement)answerEl.getDescendantsByTagId(
+        inputElement = (HTMLElement)answerEl.getDescendantsByTagId(
                 HTMLElement.TAG_INPUT).elementAt(0);
         String feedbackElId = "sa" + this.answerIndex + "b" + question.getID();
         setFeedbackElement((HTMLElement)formEl.getElementById(feedbackElId));
+        
+        /* 
+         The input element has an id in the form of id='iXX_YY where XX_YY 
+         matches up with a div which will have an id of answer-XX_YY
+         */
+        String answerID = inputElement.getAttributeById(HTMLElement.ATTR_ID).substring(1);
+        answerContentElement = (HTMLElement)answerEl.getElementById("answer-" 
+            + answerID);
         hideFeedback();
     }
         
@@ -109,6 +119,10 @@ public class EXEQuizAnswer {
      */
     public HTMLElement getFeedbackElement() {
         return this.feedbackElement;
+    }
+    
+    public HTMLElement getAnswerContentElement() {
+        return this.answerContentElement;
     }
     
     /**

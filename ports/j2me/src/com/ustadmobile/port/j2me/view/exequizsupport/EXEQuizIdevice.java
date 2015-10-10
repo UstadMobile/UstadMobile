@@ -84,4 +84,14 @@ public class EXEQuizIdevice {
         return null;
     }
     
+    public boolean formatQuestionsAsTables() {
+        EXEQuizQuestion question;
+        boolean domChanged = false;
+        for(int i = 0; i < questions.size(); i++) {
+            domChanged = ((EXEQuizQuestion)questions.elementAt(i)).formatQuestionAsTable() || domChanged;
+        }
+        
+        return domChanged;
+    }
+    
 }

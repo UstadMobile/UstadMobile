@@ -43,6 +43,7 @@ import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizIdevice;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -159,6 +160,14 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
             modified = findEXEMCQs(htmlC) || modified;
             modified = hideExtras(htmlC) || modified;
+            
+            Enumeration quizzesOnPage = mcqQuizzes.elements();
+            EXEQuizIdevice currentQuiz;
+            while(quizzesOnPage.hasMoreElements()) {
+                currentQuiz = (EXEQuizIdevice)quizzesOnPage.nextElement();
+                modified = currentQuiz.formatQuestionsAsTables() || modified;
+            }
+            currentQuiz = null;
 
             if (modified) {
                 htmlC.refreshDOM();
