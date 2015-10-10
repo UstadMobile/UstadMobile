@@ -97,7 +97,6 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     private boolean findEXEMCQs(HTMLComponent htmlC) {
         Vector quizElements = htmlC.getDOM().getDescendantsByClass("MultichoiceIdevice", 
                 IDEVICE_TAG_IDS);   
-        int numQuizzes = quizElements.size();
         mcqQuizzes = new Hashtable();
         for(int i = 0; i < quizElements.size(); i++) {
             EXEQuizIdevice quizDevice = new EXEQuizIdevice(

@@ -32,7 +32,6 @@ package com.ustadmobile.port.j2me.view.exequizsupport;
 
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
-import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import java.util.Vector;
 
 /**
