@@ -44,6 +44,8 @@ public class EXEQuizAnswer {
     
     private EXEQuizQuestion question;
     
+    private HTMLElement answerElement;
+    
     private HTMLElement inputElement;
         
     private HTMLElement feedbackElement;
@@ -59,14 +61,24 @@ public class EXEQuizAnswer {
      * 
      * @param answerIndex Index of this answer e.g. 0 = first possible answer etc
      * @param question The question that this is a possible answer for
-     * @param inputElement The input element that is used to select this answer (e.g. radio button)
+     * @param answerEl the HTMLElement containing the answer itself (e.g. text and radio button)
+     * @param formEl The form element containing the entire question form (used to find the feedback element)
      */
-    public EXEQuizAnswer(int answerIndex, EXEQuizQuestion question, HTMLElement inputElement) {
+    public EXEQuizAnswer(int answerIndex, EXEQuizQuestion question, HTMLElement answerEl, HTMLElement formEl) {
         this.answerIndex = answerIndex;
         this.question = question;
-        this.inputElement = inputElement;
+        this.answerElement = answerEl;
+        setupFromElement(answerEl, formEl);
     }
     
+    private void setupFromElement(HTMLElement answerEl, HTMLElement formEl) {
+        this.inputElement = (HTMLElement)answerEl.getDescendantsByTagId(
+                HTMLElement.TAG_INPUT).elementAt(0);
+        String feedbackElId = "sa" + this.answerIndex + "b" + question.getID();
+        setFeedbackElement((HTMLElement)formEl.getElementById(feedbackElId));
+        hideFeedback();
+    }
+        
     public int getAnswerIndex() {
         return answerIndex;
     }

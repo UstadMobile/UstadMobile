@@ -40,8 +40,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizAnswer;
-import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizQuestion;
+import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizIdevice;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -64,8 +63,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     private Timer timer = null;
 
-    private Hashtable mcqQuestions;
-
+    private Hashtable mcqQuizzes;
+    
     boolean fixedPage = true;
 
     static Hashtable mediaExtensions;
@@ -75,6 +74,11 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         mediaExtensions.put("mp3", "audio/mpeg");
     }
 
+    public static final int[] IDEVICE_TAG_IDS = new int[] { HTMLElement.TAG_DIV, 
+        HTMLElement.TAG_SECTION, HTMLElement.TAG_ARTICLE};
+    
+    public static final int[] MCQ_FORM_TAGIDS = new int[] { HTMLElement.TAG_FORM };
+    
     public ContainerViewHTMLCallback() {
         super();
     }
@@ -91,50 +95,17 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
      * @return true if the DOM was modified - false otherwise
      */
     private boolean findEXEMCQs(HTMLComponent htmlC) {
-        Vector inputTags = htmlC.getDOM().getDescendantsByTagId(HTMLElement.TAG_INPUT);
-
-        HTMLElement currentEl = null;
-        int answerIndexCounter = 0;
-        String lastInputName = "";
-        for (int i = 0; i < inputTags.size(); i++) {
-            currentEl = (HTMLElement) inputTags.elementAt(i);
-            String inputType = currentEl.getAttributeById(HTMLElement.ATTR_TYPE);
-            String inputName = currentEl.getAttributeById(HTMLElement.ATTR_NAME);
-            if (inputType != null && inputType.equals("radio") && inputName != null && inputName.startsWith("option")) {
-                if (!inputName.equals(lastInputName)) {
-                    answerIndexCounter = 0;
-                    lastInputName = inputName;
-                } else {
-                    answerIndexCounter++;
-                }
-
-                    //In eXeLearning the questionID comes immediately after the option in name
-                //e.g. "option20_67" MCQ ID = 20_67
-                String questionID = inputName.substring(6);
-                Object questionObj = mcqQuestions.get(questionID);
-                EXEQuizQuestion question;
-                if (questionObj == null) {
-                    question = new EXEQuizQuestion(questionID, htmlC);
-                    mcqQuestions.put(questionID, question);
-                } else {
-                    question = (EXEQuizQuestion) mcqQuestions.get(questionID);
-                }
-
-                String feedbackID = "sa" + answerIndexCounter + "b" + questionID;
-                HTMLElement answerEl = (HTMLElement) htmlC.getDOM().getElementById(feedbackID);
-                EXEQuizAnswer answer = new EXEQuizAnswer(answerIndexCounter,
-                        question, currentEl);
-                answer.setFeedbackElement(answerEl);
-                question.addAnswer(answer);
-                answer.hideFeedback();
-            }
+        Vector quizElements = htmlC.getDOM().getDescendantsByClass("MultichoiceIdevice", 
+                IDEVICE_TAG_IDS);   
+        int numQuizzes = quizElements.size();
+        mcqQuizzes = new Hashtable();
+        for(int i = 0; i < quizElements.size(); i++) {
+            EXEQuizIdevice quizDevice = new EXEQuizIdevice(
+                    (HTMLElement)quizElements.elementAt(i), htmlC);
+            mcqQuizzes.put(quizDevice.getID(), quizDevice);
         }
-
-        if (!mcqQuestions.isEmpty()) {
-            return true;
-        } else {
-            return false;
-        }
+        
+        return mcqQuizzes.size() > 0;
     }
 
     /**
@@ -185,7 +156,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
         if (status == STATUS_DISPLAYED && fixedPage == false) {
             boolean modified = false;
-            mcqQuestions = new Hashtable();
+            mcqQuizzes = new Hashtable();
 
             modified = findEXEMCQs(htmlC) || modified;
             modified = hideExtras(htmlC) || modified;
@@ -205,6 +176,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     }
 
     public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {
+        boolean domChanged = false;
         if (element.getTagId() == HTMLElement.TAG_INPUT) {
             String inputType = element.getAttributeById(HTMLElement.ATTR_TYPE);
             if (inputType.equalsIgnoreCase("radio")) {
@@ -213,16 +185,20 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
                     return;//this is not an eXeLearning MCQ
                 }
 
-                    //In eXeLearning the questionID comes immediately after the option in name
+                //In eXeLearning the questionID comes immediately after the option in name
                 //e.g. "option20_67" MCQ ID = 20_67
-                String questionID = mcqName.substring(6);
-                if (mcqQuestions.containsKey(questionID)) {
-                    EXEQuizQuestion question = (EXEQuizQuestion) mcqQuestions.get(questionID);
-                    EXEQuizAnswer answer = question.getAnswerByInputElement(element);
-                    question.showMCQFeedback(answer);
+                String quizID = mcqName.substring(6, mcqName.indexOf('_', 6));
+                
+                if (mcqQuizzes.containsKey(quizID)) {
+                    EXEQuizIdevice quizDevice = (EXEQuizIdevice)mcqQuizzes.get(quizID);
+                    domChanged = quizDevice.handleSelectAnswer(element) || domChanged;
                 }
 
             }
+        }
+        
+        if(domChanged) {
+            htmlC.refreshDOM();
         }
 
         super.actionPerformed(evt, htmlC, element); //To change body of generated methods, choose Tools | Templates.
