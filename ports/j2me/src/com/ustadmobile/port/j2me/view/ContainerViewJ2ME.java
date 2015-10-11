@@ -210,6 +210,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         if(pageIndex == currentIndex) {
             return;
         }
+        UstadMobileSystemImplJ2ME.getInstanceJ2ME().stopMedia();
                 
         htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
         this.currentIndex = pageIndex;

@@ -31,6 +31,8 @@
 package com.ustadmobile.port.j2me.impl;
 
 import com.sun.lwuit.Form;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
@@ -129,6 +131,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     
     private DownloadServiceJ2ME downloadService = null;
     
+    private PlayerListener onEndOfMediaListener;
+    
     public String getImplementationName() {
         return "J2ME";
     }
@@ -136,6 +140,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     public UstadMobileSystemImplJ2ME() {
         umLogger = new UMLogJ2ME();
         appView = new AppViewJ2ME(this);
+        onEndOfMediaListener = null;
     }
     
     /**
@@ -1027,56 +1032,31 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         downloadService.unregisterDownloadCompleteReceiver(receiver);
     }
     
-    public class PlayerListnerEventHandler implements PlayerListener {
-
-        public PlayerListnerEventHandler() {
-        }
-
-        public void playerUpdate(Player player, String event, Object eventData) {
-            if (event == (PlayerListener.VOLUME_CHANGED)) {
-                VolumeControl vc = (VolumeControl) eventData;
-                updateDisplay("Volume Changed to: " + vc.getLevel());
-                if (vc.getLevel() > 60) {
-                    updateDisplay("Volume higher than 60 is too loud");
-                    vc.setLevel(60);
-                }
-            } else if (event == (PlayerListener.STOPPED)) {
-                updateDisplay("Player paused at: " + (Long) eventData);
-                stopMedia(); //do we wnat to close it if stopped reached ? Is this
-                // the same as it being paused? 5
-            } else if (event == (PlayerListener.STARTED)) {
-                updateDisplay("Player started at: " + (Long) eventData);
-            } else if (event == (PlayerListener.END_OF_MEDIA)) {
-                updateDisplay("Player reached end of loop.");
-                stopMedia();
-            } else if (event == (PlayerListener.CLOSED)) {
-                updateDisplay("Player closed.");
-                stopMedia();
-            } else if (event == (PlayerListener.ERROR)) {
-                updateDisplay("Error Message: " + (String) eventData);
-                stopMedia();
-
-            }
-        }
-
-        public void updateDisplay(String text) {
-            l(UMLog.DEBUG, 590, text);
-
-        }
-
+    /**
+     * Plays the media's inputstream. Can be audio or video.
+     * @param mediaInputStream the InputStream to be played.
+     * @param encoding The encoding by which the player will get generated. 
+     * 
+     * @return true if play was started successfully, false otherwise
+     */
+    public boolean playMedia(InputStream mediaInputStream, String encoding) {
+        return playMedia(mediaInputStream, encoding, null);
     }
     
     /**
      * Plays the media's inputstream. Can be audio or video.
      * @param mediaInputStream the InputStream to be played.
      * @param encoding The encoding by which the player will get generated. 
-     * @return 
+     * @param onEndOfMediaListener (Optional) a PlayerListener which will receive the END_OF_MEDIA event
+     * 
+     * @return true if play was started successfully, false otherwise
      */
-    public boolean playMedia(InputStream mediaInputStream, String encoding) {
+    public boolean playMedia(InputStream mediaInputStream, String encoding, PlayerListener onEndOfMediaListener) {
         l(UMLog.DEBUG, 563, encoding);
         boolean status = false;
         stopMedia();
         
+        this.onEndOfMediaListener = onEndOfMediaListener;
         this.mediaInputStream = mediaInputStream;
         
         VolumeControl vc = null;
@@ -1097,19 +1077,33 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
             status = true;            
         }catch(Exception e){
             l(UMLog.ERROR, 145, encoding, e);
+            if(onEndOfMediaListener != null) {
+                onEndOfMediaListener.playerUpdate(player, PlayerListener.END_OF_MEDIA, null);
+            }
             stopMedia();
         }
         
         return status;
     }
 
-    
+    /**
+     * Handle playerUpdate events: specifically watch for END_OF_MEDIA and 
+     * clean up when that is reached (inc. closing file input streams etc)
+     * 
+     * @param uPlayer
+     * @param event
+     * @param eventData 
+     */
     public void playerUpdate(Player uPlayer, String event, Object eventData) {
         if (event.equals(PlayerListener.END_OF_MEDIA)) {
+            PlayerListener endListener = onEndOfMediaListener;
             stopMedia();
-        } 
+            if(endListener != null) {
+                endListener.playerUpdate(uPlayer, event, eventData);
+            }
+        }
     }
-    
+        
     /**
      * Stops the media playing. 
      * @return 
@@ -1117,7 +1111,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     public boolean stopMedia() {
         l(UMLog.DEBUG, 567, null);
         boolean status = false;
-        boolean needGC = player != null || mediaInputStream != null;
         if (player != null){
             if(player.getState() != Player.CLOSED) {
                 try {
@@ -1138,7 +1131,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         }
         
         UMIOUtils.closeInputStream(mediaInputStream);
+        status = true;
         mediaInputStream = null;
+        onEndOfMediaListener = null;
         
         return status;
     }

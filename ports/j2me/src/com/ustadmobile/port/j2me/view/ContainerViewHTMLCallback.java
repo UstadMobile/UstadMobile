@@ -48,6 +48,7 @@ import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import javax.microedition.media.PlayerListener;
 
 /**
  *
@@ -213,6 +214,10 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     }
 
     public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement) {
+        mediaPlayRequested(type, op, htmlC, src, mediaElement, null);
+    }
+    
+    public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement, final PlayerListener endOfMediaListener) {
         if (timer == null) {
             timer = new Timer();
         }
@@ -255,7 +260,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
                             in = view.containerZip.openInputStream(pathInZip);
                             UstadMobileSystemImpl.l(UMLog.DEBUG, 584, fullURI);
                             isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in,
-                                    (String) mediaTypeObj);
+                                    (String) mediaTypeObj, endOfMediaListener);
                         } else {
                             UstadMobileSystemImpl.l(UMLog.INFO, 120, src);
                         }
@@ -275,5 +280,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
         }, 1000);
     }
+    
+    
 
 }

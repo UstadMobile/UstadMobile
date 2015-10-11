@@ -35,7 +35,11 @@ import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import java.util.Vector;
+import javax.microedition.media.Player;
+import javax.microedition.media.PlayerListener;
 
 
 /**
@@ -43,7 +47,7 @@ import java.util.Vector;
  * 
  * @author mike
  */
-public class EXEQuizAnswer {
+public class EXEQuizAnswer implements PlayerListener{
     
     private int answerIndex;
     
@@ -65,6 +69,8 @@ public class EXEQuizAnswer {
     
     private boolean feedbackShowing = true;
     
+    private String linkBranch;
+    
     /**
      * Creates a new quiz answer
      * 
@@ -85,7 +91,8 @@ public class EXEQuizAnswer {
         inputElement = (HTMLElement)answerEl.getDescendantsByTagId(
                 HTMLElement.TAG_INPUT).elementAt(0);
         String feedbackElId = "sa" + this.answerIndex + "b" + question.getID();
-        setFeedbackElement((HTMLElement)formEl.getElementById(feedbackElId));
+        HTMLElement feedbackEl = (HTMLElement)formEl.getElementById(feedbackElId);
+        setFeedbackElement(feedbackEl);
         
         /* 
          The input element has an id in the form of id='iXX_YY where XX_YY 
@@ -157,14 +164,52 @@ public class EXEQuizAnswer {
             
             //see if ther is a sound file here
             Vector audioTags = feedbackElement.getDescendantsByTagId(HTMLElement.TAG_AUDIO);
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 596, ""+audioTags.size());
+            String branchType = feedbackElement.getAttribute("data-branch-type");
+            
             if(audioTags != null && audioTags.size() > 0 && htmlC.getHTMLCallback() != null) {
-                HTMLCallback htmlCB = htmlC.getHTMLCallback();
+                ContainerViewHTMLCallback htmlCB = (ContainerViewHTMLCallback)htmlC.getHTMLCallback();
                 HTMLElement audioEl = (HTMLElement)audioTags.elementAt(0);
+                PlayerListener pl = null;
+                if(branchType != null && branchType.equals("aftermedia")) {
+                    pl = this;
+                }
+                
                 htmlCB.mediaPlayRequested(HTMLCallback.MEDIA_AUDIO, HTMLCallback.MEDIA_PLAY, 
-                    htmlC, null, audioEl);
+                    htmlC, null, audioEl, pl);
+            }else if(branchType != null && branchType.equals("immediate")) {
+                goRedirect();
             }
         }
     }
+    
+    /**
+     * Send the associated HTML component to the redirect if there is a redirect
+     * specified for this answer
+     */
+    protected void goRedirect() {
+        String branchStr = feedbackElement.getAttribute("data-branch-href");
+        if(branchStr != null){ 
+            String newURL = UMFileUtil.resolveLink(htmlC.getPageURL(), 
+                    branchStr);
+            htmlC.setPage(newURL);
+        }
+    }
+
+    /**
+     * Handle play update event - this is used to watch for the end of media
+     * after playing selected media - so we can run the redirect once the media
+     * is finished
+     * 
+     * @param player
+     * @param event
+     * @param eventData 
+     */
+    public void playerUpdate(Player player, String event, Object eventData) {
+        if(event.equals(PlayerListener.END_OF_MEDIA)) {
+            //redirect time
+            goRedirect();
+        }
+    }
+    
     
 }
