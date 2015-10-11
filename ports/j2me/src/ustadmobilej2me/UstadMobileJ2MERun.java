@@ -48,7 +48,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         }
        */
         
-        impl.init();
+        impl.init(this);
         
         
         try{
@@ -63,7 +63,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         Form loadingForm = new Form();
         loadingForm.show();
         impl.handleFormShow(loadingForm);
-        impl.startUI();
+        impl.startUI(this);
         
     }
     

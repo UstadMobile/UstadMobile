@@ -31,31 +31,29 @@
 package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.Command;
-import com.sun.lwuit.Form;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
-import com.sun.lwuit.html.DefaultHTMLCallback;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.DocumentRequestHandler;
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
-import com.sun.lwuit.html.HTMLElement;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.ocf.UstadOCF;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,10 +66,8 @@ import org.json.me.JSONObject;
  *
  * @author mike
  */
-public class ContainerViewJ2ME implements ContainerView, ActionListener{
-    
-    private Form currentForm;
-    
+public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerView, ActionListener, ControllerReadyListener{
+        
     private ContainerController controller;
     
     private String title;
@@ -84,7 +80,15 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     private DocumentRequestHandler requestHandler;
     
-    private ZipFileHandle containerZip;
+    private String containerURI;
+    
+    private String mimeType;
+    
+    ZipFileHandle containerZip;
+    
+    private String openContainerBaseURI;
+    
+    private HTMLComponent htmlC;
     
     /**
      * The OPF base URL within the zip of the container epub that is being shown
@@ -106,25 +110,46 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     static Hashtable mediaExtensions;
     
     long lastPageChangeTime = -1;
-    
-    /**
-     * The HTML component with the current page
-     */
-    private HTMLComponent htmlC;
-    
+        
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
     }
     
     
-    public ContainerViewJ2ME() {
+    public ContainerViewJ2ME(Hashtable args, Object context) {
+        super(args, context);
         UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
-        containerZip = impl.getOpenZip();
+        containerURI = (String)args.get(ContainerController.ARG_CONTAINERURI);
+        mimeType = (String)args.get(ContainerController.ARG_MIMETYPE);
+        
         cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);
         cmdForward = new Command(impl.getString(U.id.next), CMDFORWARD_ID);
+        
+        openContainerBaseURI = impl.openContainer(containerURI, mimeType);
+        containerZip = impl.getOpenZip();
+        setLayout(new BorderLayout());
+        
+        UstadMobileSystemImpl.l(UMLog.ERROR, 175, containerURI);
+        
+        //TODO: localize this string
+        impl.getAppView(context).showAlertDialog(impl.getString(U.id.error), 
+            "Could not open container");
+        ContainerController.makeControllerForView(this, openContainerBaseURI, 
+                mimeType, this);
+        
+        requestHandler = new ContainerDocumentRequestHandler(this);
+        htmlCallback = new ContainerViewHTMLCallback(this);
     }
 
+    public void controllerReady(UstadController controller, int flags) {
+        if(controller != null) {
+            setController((ContainerController)controller);
+            initByContentType();
+        }
+    }
+
+    
     public void setController(ContainerController controller) {
         this.controller = controller;
     }
@@ -138,11 +163,12 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     }
 
     public void show() {
-        initByContentType();
+        super.show();
+        UstadMobileSystemImplJ2ME.getInstanceJ2ME().handleFormShow(this);
     }
 
     public boolean isShowing() {
-        return currentForm != null && currentForm.isVisible();
+        return isVisible();
     }
     
     public void initByContentType() {
@@ -153,22 +179,43 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
     
     protected void initEPUB() {
         try {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 597 , null);
+            HTTPUtils.httpDebug("getting ocf");
             if (controller == null){
                 UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 524, "");
             }else{
                 UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 526, "");
             }
-            
-            ocf = controller.getOCF();
+            UstadOCF ocf = controller.getOCF();
+            HTTPUtils.httpDebug("getting opf");
             opf = controller.getOPF(0);
+            HTTPUtils.httpDebug("getting spine");
             spineURLs = opf.getLinearSpineURLS();
-            requestHandler = new ContainerDocumentRequestHandler(this);
-            htmlCallback = new ContainerHTMLCallback(this);
+            HTTPUtils.httpDebug("getting requesthandler");
+            
+            HTTPUtils.httpDebug("getting htmlcallback");
+            
+            htmlC = new HTMLComponent(requestHandler);
+            htmlC.setHTMLCallback(htmlCallback);
+            htmlC.setImageConstrainPolicy(
+                HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
+            htmlC.setIgnoreCSS(true);
+            htmlC.setEventsEnabled(true);
+            addCommand(cmdBack);
+            addCommand(cmdForward);
+            addCommandListener(this);
+            
+            HTTPUtils.httpDebug("getting opfurl");
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
-            showPage(1);
+            HTTPUtils.httpDebug("opfURL:" + opfURL);
+            HTTPUtils.httpDebug("title: " + title);
+            Display.getInstance().callSerially(new Runnable() {
+                public void run() {
+                    addComponent(BorderLayout.CENTER, htmlC);
+                    showPage(1);
+                }
+            });
         }catch(Exception e) {
             UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 350, null, e);
         }
@@ -180,10 +227,10 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
      */
     protected void makePageStatement() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(lastPageChangeTime != -1 && impl.getActiveUser() != null) {
+        if(lastPageChangeTime != -1 && impl.getActiveUser(getContext()) != null) {
             long duration =  System.currentTimeMillis() - lastPageChangeTime;
             JSONObject actor = UMTinCanUtil.makeActorFromUserAccount(
-                impl.getActiveUser(), 
+                impl.getActiveUser(getContext()), 
                 UstadMobileSystemImpl.getInstance().getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     UstadMobileDefaults.DEFAULT_XAPI_SERVER));
@@ -201,6 +248,7 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
         }
     }
     
+    
     /**
      * Show the page as per the index in the spineURLs
      * 
@@ -210,26 +258,10 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
         if(pageIndex == currentIndex) {
             return;
         }
-        
         makePageStatement();
-        
-        lastPageChangeTime = System.currentTimeMillis();
-        
-        Form oldForm = currentForm;
-        currentForm = new Form();
-        currentForm.setLayout(new BorderLayout());
-        htmlC = new HTMLComponent(requestHandler);
-        htmlC.setHTMLCallback(htmlCallback);
-        htmlC.setImageConstrainPolicy(
-            HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
-        htmlC.setIgnoreCSS(true);
+        UstadMobileSystemImplJ2ME.getInstanceJ2ME().stopMedia();
+                
         htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
-        currentForm.addComponent(BorderLayout.CENTER, htmlC);
-        currentForm.show();
-        
-        currentForm.addCommand(cmdBack);
-        currentForm.addCommand(cmdForward);
-        currentForm.addCommandListener(this);
         this.currentIndex = pageIndex;
     }
 
@@ -241,7 +273,29 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
             showPage(this.currentIndex + 1);
         }
     }
+
+    public void setContainerTitle(String containerTitle) {
+        setTitle(containerTitle);
+    }
     
+    /**
+     * Method to be called from the HTMLCallback when a new page is loaded -
+     * thus keeping the spine position tracker updated
+     * 
+     * @param newURL : the page that is in the process of being loaded (absolute url)
+     */
+    protected void handlePageChange(String newURL) {
+        String relativeTo = UMFileUtil.getParentFilename(this.opfURL);
+        if(relativeTo.charAt(relativeTo.length()-1) != '/') {
+            relativeTo += '/';
+        }
+        
+        String spineHREF = newURL.substring(relativeTo.length());
+        int spinePos = opf.getLinearSpinePositionByHREF(spineHREF);
+        if(spinePos != -1 && spinePos != currentIndex) {
+            this.currentIndex = spinePos;
+        }
+    }
     
     /**
      * Handles requests to load resources by pointing them to the openzip and
@@ -262,85 +316,16 @@ public class ContainerViewJ2ME implements ContainerView, ActionListener{
                 System.out.println("requestURL " + requestURL);
                 String baseURL = di.getBaseURL();
                 System.out.println("baseURL " + baseURL);
+                if(di.getExpectedContentType() != DocumentInfo.TYPE_IMAGE) {
+                    di.setEncoding(DocumentInfo.ENCODING_UTF8);
+                }
+                
                 String pathInZip = di.getUrl().substring(
                     UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
                 return view.containerZip.openInputStream(pathInZip);
             }catch(IOException e) {
                 return new ByteArrayInputStream("ERROR".getBytes());
             }
-        }
-        
-    }
-    
-    public class ContainerHTMLCallback extends DefaultHTMLCallback {
-
-        private ContainerViewJ2ME view;
-        
-        private Timer timer = null;
-        
-        public ContainerHTMLCallback(ContainerViewJ2ME view) {
-            this.view = view;
-            
-        }
-
-        public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
-            super.pageStatusChanged(htmlC, status, url); //To change body of generated methods, choose Tools | Templates.
-        }
-        
-        public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement) {
-            if(timer == null) {
-                timer = new Timer();
-            }
-            
-            timer.schedule(new TimerTask() {
-                public void run() {
-                    boolean isPlaying = false;
-                    InputStream in= null;
-                    String source = mediaElement.getAttributeById(HTMLElement.ATTR_SRC);
-                    if(source == null) {
-                        //means the source is not on the tag itself but on the source tags - find them
-                        HTMLElement srcTag = mediaElement.getFirstChildByTagId(
-                                HTMLElement.TAG_SOURCE);
-                        if(srcTag != null) {
-                            source = srcTag.getAttributeById(HTMLElement.ATTR_SRC);
-                        }
-                    }
-                    
-                    if(source != null) {
-                        try {
-                            String fullURI = UMFileUtil.resolveLink(
-                                htmlC.getPageURL(), source);
-                            String pathInZip = fullURI.substring(
-                                UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                            String mediaFileExtension = UMFileUtil.getExtension(src);
-                            Object mediaTypeObj = mediaExtensions.get(mediaFileExtension);
-
-                            UstadMobileSystemImpl.l(UMLog.VERBOSE, 427, pathInZip 
-                                + ':' + mediaFileExtension + ':' + mediaTypeObj);
-
-                            in = view.containerZip.openInputStream(pathInZip);
-
-                            if(mediaTypeObj != null) {
-                                isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in, 
-                                    (String)mediaTypeObj);
-                            }else {
-                                UstadMobileSystemImpl.l(UMLog.INFO, 120, src);
-                            }
-
-                        }catch(IOException e) {
-                            UstadMobileSystemImpl.l(UMLog.ERROR, 120, src, e);
-                        }finally {
-                            if(!isPlaying) {
-                                UMIOUtils.closeInputStream(in);
-                            }
-                        }
-                    }else {
-                        UstadMobileSystemImpl.l(UMLog.INFO, 373, mediaElement.toString());
-                    }
-                    
-                }
-                
-            }, 1000);
         }
         
     }

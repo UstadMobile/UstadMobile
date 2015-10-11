@@ -15,6 +15,7 @@ import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import com.ustadmobile.test.core.TestConstants;
+import com.ustadmobile.test.core.UMContextGetter;
 import j2meunit.framework.AssertionFailedError;
 import j2meunit.framework.Test;
 import j2meunit.framework.TestCase;
@@ -106,7 +107,9 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
             }
         }
         
-        UstadMobileSystemImpl.getInstance().init();
+        
+        UMContextGetter.setContext(this);
+        UstadMobileSystemImpl.getInstance().init(this);
         
         Display.init(this);
         

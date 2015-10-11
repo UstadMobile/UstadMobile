@@ -48,6 +48,8 @@ import junit.framework.TestCase;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
+        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
+
    $endif$ */
 
 /**
@@ -56,18 +58,19 @@ import junit.framework.TestCase;
  */
 
 /* $if umplatform == 1  $
-public class TestLocalization extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
+public class TestLocalization extends UMActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
 public class TestLocalization extends TestCase{
 /* $endif$ */
 
     public TestLocalization() {
         /* $if umplatform == 1 $ 
-        super("com.toughra.ustadmobile", UstadMobileActivity.class);
+        super(UstadMobileActivity.class);
         $endif */
     }
     
     public void testLocalization() throws IOException {
+        Object context = UMContextGetter.getContext(this);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         //test substitutions
@@ -79,7 +82,7 @@ public class TestLocalization extends TestCase{
                 LocaleUtil.formatMessage("the number to download is: %s", "10"));
         
         
-        InputStream in = impl.openResourceInputStream("locale/en.properties");
+        InputStream in = impl.openResourceInputStream("locale/en.properties", context);
         assertNotNull("Can load resource input stream", in);
         MessagesHashtable mht = MessagesHashtable.load(in);
         assertNotNull("Loaded hashtable", mht);

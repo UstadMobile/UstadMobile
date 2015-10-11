@@ -28,31 +28,28 @@
     GNU General Public License for more details.
 
  */
+package com.ustadmobile.test.core;
 
-package com.ustadmobile.core.view;
+/* $if umplatform == 2  $
+    import j2meunit.framework.TestCase;
+ $else$ */
+    import junit.framework.TestCase;
+/* $endif$ */
 
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.port.android.view.CatalogViewAndroid;
-import com.ustadmobile.port.android.view.ContainerViewAndroid;
-import com.ustadmobile.port.android.view.LoginViewAndroid;
 
 /**
- * Created by mike on 07/07/15.
+ * Most Android/Mobile OS Methods require some kind of context (e.g. Activity,
+ * Page, etc) to be used depending on the platform.  This method must be
+ * implemented for each platform port to generate the context given a testcase
+ * object
+ * 
+ * 
+ * @author mike
  */
-public class ViewFactory {
-
-    public static LoginView makeLoginView() {
-        return new LoginViewAndroid();
-    };
-
-    public static CatalogView makeCatalogView() {
-        return new CatalogViewAndroid();
+public class UMContextGetter {
+    
+    public static Object getContext(TestCase tc) {
+        throw new RuntimeException("Not Implemented");
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    public static ContainerView makeContainerView() {
-        return new ContainerViewAndroid();
-    }
+    
 }

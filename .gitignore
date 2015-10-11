@@ -48,6 +48,8 @@ ports/j2me/*~
 #Preprocessed unit test files
 preproctmp
 ports/android/src/androidTest/java/com/ustadmobile/test/core/*
+!ports/android/src/androidTest/java/com/ustadmobile/test/core/UMContextGetter.java
+
 core/test/com/ustadmobile/test/core/TestConstants.java
 
 #Files copied into the main Android project to force
@@ -64,8 +66,6 @@ ports/android/src/main/java/com/ustadmobile/core/impl/*
 !ports/android/src/main/java/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
 
 #Files preproc'd into j2me version
-ports/j2me/test/com/ustadmobile/test/core/*
-
 ports/j2me/src/com/ustadmobile/core/*
 !ports/j2me/src/com/ustadmobile/core/view
 !ports/j2me/src/com/ustadmobile/core/impl
@@ -93,6 +93,7 @@ ports/j2me/src/com/ustadmobile/app/tests/TestConstants.java
 
 #Ignore Core Tests copied to port
 ports/j2me/src/com/ustadmobile/test/core/*.java
+!ports/j2me/src/com/ustadmobile/test/core/UMContextGetter.java
 
 #Ignore mock unit test results sent by testing the test method
 testres/unittest-testresults.txt

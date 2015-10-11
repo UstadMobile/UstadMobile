@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -63,17 +64,17 @@ public class LoginFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         ViewGroup viewGroup = (ViewGroup)inflater.inflate(layoutIDs[positionID], container, false);
+
         LoginActivity loginActivity = (LoginActivity)getActivity();
 
-        LoginViewAndroid loginView = ((LoginActivity)getActivity()).loginView;
 
         switch(this.positionID) {
             case LoginView.SECTION_LOGIN:
                 Button loginButton = (Button)viewGroup.findViewById(R.id.login_button);
-                loginButton.setText(loginView.buttonText);
-                loginButton.setOnClickListener(loginView);
-                ((TextView)viewGroup.findViewById(R.id.login_username)).setHint(loginView.usernameHint);
-                ((TextView)viewGroup.findViewById(R.id.login_password)).setHint(loginView.passwordHint);
+                loginButton.setText(loginActivity.mButtonText);
+                loginButton.setOnClickListener(loginActivity);
+                ((TextView)viewGroup.findViewById(R.id.login_username)).setHint(loginActivity.mUsernameHint);
+                ((TextView)viewGroup.findViewById(R.id.login_password)).setHint(loginActivity.mPasswordHint);
 
                 break;
             case LoginView.SECTION_REGISTER:
@@ -83,16 +84,16 @@ public class LoginFragment extends Fragment {
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 countrySpinner.setAdapter(adapter);
                 Button registerButton = (Button)viewGroup.findViewById(R.id.login_registerbutton);
-                registerButton.setOnClickListener(loginView);
-                registerButton.setText(loginView.registerButtonText);
+                registerButton.setOnClickListener(loginActivity);
+                registerButton.setText(loginActivity.mRegisterButtonText);
                 ((TextView)viewGroup.findViewById(R.id.login_registername)).setHint(
-                        loginView.registerNameHint);
+                        loginActivity.mRegisterNameHint);
                 ((TextView)viewGroup.findViewById(R.id.login_registerphonenum)).setHint(
-                        loginView.registerPhoneNumHint);
+                        loginActivity.mRegisterPhoneNumberHint);
                 ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_male)).setText(
-                        loginView.registerMaleLabel);
+                        loginActivity.mRegisterGenderMaleLabel);
                 ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_female)).setText(
-                        loginView.registerFemaleLabel);
+                        loginActivity.mRegisterGenderFemaleLable);
 
                 lookupCountry(countrySpinner, getActivity());
                 break;
@@ -102,6 +103,7 @@ public class LoginFragment extends Fragment {
     }
 
     public void lookupCountry(final Spinner countrySpinner, final Activity activity) {
+        final Context ctx = getActivity();
         Thread countryLookupThread = new Thread() {
             public void run() {
                 try {
@@ -115,7 +117,7 @@ public class LoginFragment extends Fragment {
                     });
                 }catch(Exception e) {
                     e.printStackTrace();
-                    UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                    UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
                         "Sorry - Could not detect country", AppView.LENGTH_LONG);
                 }
             }

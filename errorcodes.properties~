@@ -45,9 +45,11 @@
 159=CatalogController.scanFiles error saving loose files index
 161=LoadControllerThread.run Error loading controller
 163=ContainerActivity: error in loadepubthread
+<<<<<<< HEAD
 195=JSONException: Should never happen: basic string JSON going on
 197=UMTinCanUtil.makeLangMapVal
 199=UMTinCanUtil.makePageViewStmt: exception
+=======
 165=UMIOUtils.getHTTPDownloadSize: Exception
 167=DownloadServiceJ2ME.save Exception
 169=J2MEIOUtils.closeRecordStore Exception
@@ -59,6 +61,7 @@
 181=CatalogController.getCatalogByURL exception accessing cache
 201=CatalogController.getCatalogByURL IOException
 203=CatalogController.getCatalogByURL XmlPullParserException
+>>>>>>> master
 305=J2ME HTTP makeRequest starting
 306=UstadMobileSystemImpl.setActiveUser Set active user
 307=Getting OPDS getCatalogByURL
@@ -179,9 +182,11 @@
 593=TestCacheAndStorageDir.testCacheDir completed cache dir assertions
 594=ContainerViewHTMLCallback.mediaPlayRequested: timer run
 595=LoadControllerThread.run
+<<<<<<< HEAD
 597=ContainerViewJ2ME.initEPUB
+=======
 596=EXEQuizAnswer.showFeedback: Num Audio Tags: 
 597=UstadMobileSystemImplJ2ME.stopMedia Complete
 598=ContainerViewHTMLCallback.mediaPlayRequested tag name=
 599=UstadMobileSystemImplJ2ME.openFileInputStream
-
+>>>>>>> master

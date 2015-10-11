@@ -149,6 +149,23 @@ public class UMUtil {
     }
     
     /**
+     * Add all the elements from one vector to another
+     * 
+     * @param vector The vector elements will be added to
+     * @param toAdd The vector elements will be added from
+     * @return the vector with all the elements (same as vector argument)
+     */
+    public static Vector addVectorToVector(Vector vector, Vector toAdd) {
+        int numElements = toAdd.size();
+        vector.ensureCapacity(vector.size() + toAdd.size());
+        for(int i = 0; i < numElements; i++) {
+            vector.addElement(toAdd.elementAt(i));
+        }
+        
+        return vector;
+    }
+    
+    /**
      * Request a new port on the DodgyHTTPD Test Server for logging /asset request
      * 
      * @param serverURL - Control Server URL eg http://server:8065/

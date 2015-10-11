@@ -37,12 +37,10 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.model.CatalogModel;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.LoginView;
-import com.ustadmobile.core.view.ViewFactory;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -72,9 +70,15 @@ public class LoginController implements UstadController{
     
     public static final String REGISTER_GENDER = "gender";
     
+    private Object context;
     
-    public LoginController() {
-        
+    public LoginController(Object context) {
+        this.context = context;
+    }
+    
+    
+    public static LoginController makeControllerForView(LoginView view) {
+        return new LoginController(view.getContext());
     }
     
     /**
@@ -92,6 +96,8 @@ public class LoginController implements UstadController{
         String encodedUserAndPass="Basic "+ Base64.encode(username,
                     password);
         headers.put("Authorization", encodedUserAndPass);
+        LoginController ctrl = null;
+        
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
                 url, headers, null);
         return authResult.getStatus();
@@ -176,6 +182,7 @@ public class LoginController implements UstadController{
      */
     public void handleClickRegister(final Hashtable userInfoParams) {
         final LoginController thisCtrl = this;
+        final Object ctx = context;
         Thread registerThread = new Thread() {
             public void run() {
                 String serverURL = UstadMobileSystemImpl.getInstance().getAppPref("regserver",
@@ -210,8 +217,8 @@ public class LoginController implements UstadController{
                     String newPassword = obj.getString("password");
                     thisCtrl.handleUserLoginAuthComplete(newUsername, newPassword);
                 }catch(Exception e) {
-                    UstadMobileSystemImpl.getInstance().getAppView().dismissProgressDialog();
-                    UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                    UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
+                    UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
                         UstadMobileSystemImpl.getInstance().getString(U.id.err_registering_new_user)
                         + e.toString(), AppView.LENGTH_LONG);
                     e.printStackTrace();
@@ -220,20 +227,19 @@ public class LoginController implements UstadController{
             }
         };
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.getAppView().showProgressDialog(impl.getString(U.id.registering));
+        impl.getAppView(ctx).showProgressDialog(impl.getString(U.id.registering));
         registerThread.start();
     }
     
     
     public void handleClickLogin(final String username, final String password) {
-        final LoginView myView = view;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Thread loginThread = new Thread() {
             public void run() {
                 impl.getLogger().l(UMLog.DEBUG, 303, null);
                 String serverBaseURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER);
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
                 String serverURL = UMFileUtil.joinPaths(new String[]{serverBaseURL, 
                     "statements?limit=1"});
 
@@ -247,32 +253,24 @@ public class LoginController implements UstadController{
                     ioe = e;
                 }
                 
-                impl.getAppView().dismissProgressDialog();
+                impl.getAppView(context).dismissProgressDialog();
 
                 if(result == 401 | result == 403) {
-                    impl.getAppView().showAlertDialog(impl.getString(U.id.error), 
+                    impl.getAppView(context).showAlertDialog(impl.getString(U.id.error), 
                         impl.getString(U.id.wrong_user_pass_combo));
                 }else if(result != 200) {
-                    UstadMobileSystemImpl.getInstance().getAppView().showAlertDialog(
+                    UstadMobileSystemImpl.getInstance().getAppView(context).showAlertDialog(
                         impl.getString(U.id.error), impl.getString(U.id.login_network_error));
                 }else {
-                    //make a new catalog controller and show it for the users base directory
-                    //Add username to UserPreferences.
-                    UstadMobileSystemImpl.getInstance().setActiveUser(username);
-                    UstadMobileSystemImpl.getInstance().setActiveUserAuth(password);
-                    
-                    try {
-                        CatalogController userCatalog = CatalogController.makeUserCatalog(
-                            UstadMobileSystemImpl.getInstance());
-                        userCatalog.show();
-                    }catch(Exception e) {
-                        e.printStackTrace();
-                    }
+                    UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
+                    UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
+                    UstadMobileSystemImpl.getInstance().go(CatalogView.class, 
+                        CatalogController.makeUserCatalogArgs(context), context);
                 }
             }
         };
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 302, null);
-        impl.getAppView().showProgressDialog(impl.getString(U.id.authenticating));
+        impl.getAppView(context).showProgressDialog(impl.getString(U.id.authenticating));
         loginThread.start();
     }
     
@@ -281,19 +279,10 @@ public class LoginController implements UstadController{
      * and what happens after they are newly registered etc.
      */
     private void handleUserLoginAuthComplete(final String username, final String password) {
-        UstadMobileSystemImpl.getInstance().setActiveUser(username);
-        UstadMobileSystemImpl.getInstance().setActiveUserAuth(password);
-
-        try {
-            CatalogController userCatalog = CatalogController.makeUserCatalog(
-                UstadMobileSystemImpl.getInstance());
-            userCatalog.show();
-        }catch(Exception e) {
-            e.printStackTrace();
-            UstadMobileSystemImpl.getInstance().getAppView().showNotification(
-                UstadMobileSystemImpl.getInstance().getString(U.id.course_catalog_load_error), 
-                AppView.LENGTH_LONG);
-        }
+        UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
+        UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
+        UstadMobileSystemImpl.getInstance().go(CatalogView.class, 
+            CatalogController.makeUserCatalogArgs(context), context);
     }
     
     public void setViewStrings(LoginView view) {
@@ -310,12 +299,6 @@ public class LoginController implements UstadController{
         view.setRegisterGenderFemaleLabel(impl.getString(U.id.female));
     }
     
-    public void show() {
-        this.view = ViewFactory.makeLoginView();
-        this.view.setController(this);
-        setViewStrings(this.view);
-        this.view.show();
-    }
     
     /**
      * Used when a view is somehow otherwise created e.g. by a smartphone OS

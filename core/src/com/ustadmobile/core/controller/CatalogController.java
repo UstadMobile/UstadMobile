@@ -33,13 +33,10 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
+import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UMProgressEvent;
-import com.ustadmobile.core.impl.UMProgressListener;
 import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UMTransferJob;
-import com.ustadmobile.core.impl.UMTransferJobList;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
@@ -57,13 +54,16 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.ViewFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -89,7 +89,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController implements UstadController, UMProgressListener, AppViewChoiceListener, AsyncLoadableController {
+public class CatalogController implements UstadController, AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -148,17 +148,9 @@ public class CatalogController implements UstadController, UMProgressListener, A
     /**
      * The locations available for a user to store downloaded content
      */
-    private UMStorageDir[] availableStorageDirs;
-    
-    private Vector activeTransferJobs;
-    
+    private UMStorageDir[] availableStorageDirs;    
     
     private int resourceMode;
-    
-    /**
-     * Hashtable indexed as entry id -> transferjob
-     */
-    private static Hashtable currentAcquisitionJobs = new Hashtable();
     
     //The View (J2ME or Android)
     private CatalogView view;
@@ -218,24 +210,35 @@ public class CatalogController implements UstadController, UMProgressListener, A
     private static final int CHOICE_DOWNLOAD_CANCEL = 2;
     
     
-    public static final Integer LOAD_URL = new Integer(1);
+    public static final String KEY_URL = "url";
     
-    public static final Integer LOAD_IMPL = new Integer(2);
+    public static final String KEY_RESMOD = "resmod";
     
-    public static final Integer LOAD_RESMODE = new Integer(3);
+    public static final String KEY_HTTPUSER = "httpu";
     
-    public static final Integer LOAD_HTTPUSER = new Integer(4);
+    public static final String KEY_HTTPPPASS = "httpp";
     
-    public static final Integer LOAD_HTTPPASS = new Integer(5);
+    public static final String KEY_FLAGS = "flags";
+            
+    public static final String OPDS_PROTO_DEVICE = "opds:///com.ustadmobile.app.devicefeed";
     
-    public static final Integer LOAD_FLAGS = new Integer(6);
     
+    private Object context;
     
+    private Timer downloadUpdateTimer;
     
-    public CatalogController() {
-        
+    public static final int DOWNLOAD_UPDATE_INTERVAL = 1000;
+    
+    //Hashtable indexed entry id -> download ID (Long object)
+    private Hashtable downloadingEntries;
+    
+    public CatalogController(Object context) {
+        this.context = context;
+        downloadingEntries = new Hashtable();
     }
-    public CatalogController(CatalogModel model){
+    
+    public CatalogController(CatalogModel model, Object context){
+        this(context);
         this.model=model;
     }
     
@@ -299,23 +302,17 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     //shows the view
+    /**
+     * @deprecated 
+     */
     public void show() {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        this.view = ViewFactory.makeCatalogView();
-        this.view.setController(this);
-        String[] catalogMenuOpts = new String[catalogMenuOptIDS.length];
-        for(int i =0; i < catalogMenuOpts.length; i++) {
-            catalogMenuOpts[i] = impl.getString(catalogMenuOptIDS[i]);
-        }
-        
-        this.view.setMenuOptions(catalogMenuOpts);
-        
+        /*
         UstadJSOPDSFeed feed = this.getModel().opdsFeed;
         if(feed.isAcquisitionFeed()) {
             //go through and set the acquisition status
             for(int i = 0; i < feed.entries.length; i++) {
                 CatalogEntryInfo info = getEntryInfo(feed.entries[i].id, 
-                    USER_RESOURCE | SHARED_RESOURCE);
+                    USER_RESOURCE | SHARED_RESOURCE, context);
                 if(info != null) {
                     this.view.setEntryStatus(feed.entries[i].id, 
                         info.acquisitionStatus);
@@ -323,13 +320,25 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 
             }
         }
+        */
         
-        this.view.show();
     }
     
     public UstadView getView() {
         return this.view;
     }
+    
+    public void setUIStrings(UstadView view) {
+        CatalogView cView = (CatalogView)view;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        cView.setMenuOptions(new String[]{
+            impl.getString(catalogMenuOptIDS[MENUINDEX_MYCOURSES]),
+            impl.getString(catalogMenuOptIDS[MENUINDEX_MYDEVICE]),
+            impl.getString(catalogMenuOptIDS[MENUINDEX_LOGOUT]),
+            impl.getString(catalogMenuOptIDS[MENUINDEX_ABOUT])});
+        
+    }
+    
     
     public void setView(UstadView view) {
         this.view = (CatalogView)view;
@@ -341,17 +350,10 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     public static boolean isInProgress(String entryID) {
-        return currentAcquisitionJobs.containsKey(entryID);
+        return false;
+        //TODO: Fix me
+        //return currentAcquisitionJobs.containsKey(entryID);
     }
-    
-    public static void registerDownloadInProgress(String entryID, UMTransferJob job) {
-        currentAcquisitionJobs.put(entryID, job);
-    }
-    
-    public static void unregisterDownloadInProgress(String entryID) {
-        currentAcquisitionJobs.remove(entryID);
-    }
-    
     
     /**
      * Construct a CatalogController for the OPDS feed at the given URL
@@ -360,14 +362,13 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param resourceMode: SHARED_RESOURCE to keep in shared cache: USER_RESOURCE to keep in user cache
      * @param httpUser: the HTTP username to use for authentication
      * @param httpPassword:or the HTTP password to use for authentication
-     * @param impl System implementation to use
      * @return 
      */
-    public static CatalogController makeControllerByURL(String url, UstadMobileSystemImpl impl, int resourceMode, String httpUser, String httpPassword, int flags) throws IOException, XmlPullParserException{
+    public static CatalogController makeControllerByURL(String url, int resourceMode, String httpUser, String httpPassword, int flags, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, resourceMode, 
-            httpUser, httpPassword, flags);
+            httpUser, httpPassword, flags, context);
         CatalogController result = new CatalogController(
-            new CatalogModel(opdsFeed));
+            new CatalogModel(opdsFeed), context);
         result.setResourceMode(resourceMode);
         
         return result;
@@ -393,34 +394,34 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @throws IOException
      * @throws XmlPullParserException 
      */
-    public static void makeControllerForView(final CatalogView view, final String url, final UstadMobileSystemImpl impl, final int resourceMode, final int flags, final ControllerReadyListener listener) {
+    public static void makeControllerForView(final CatalogView view, final String url, final int resourceMode, final int flags, final ControllerReadyListener listener) {
         Hashtable args = new Hashtable();
-        if(impl == null) {
-            throw new IllegalArgumentException("impl cannot be null dimwit");
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        Object ctx = view.getContext();
+        
+        args.put(KEY_URL, url);
+        args.put(KEY_RESMOD, new Integer(resourceMode));
+        args.put(KEY_FLAGS, new Integer(flags));
+        
+        if(impl.getActiveUser(ctx) != null && impl.getActiveUserAuth(ctx) != null) {
+            args.put(KEY_HTTPUSER, impl.getActiveUser(ctx));
+            args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(ctx));
         }
         
-        args.put(LOAD_URL, url);
-        args.put(LOAD_IMPL, impl);
-        args.put(LOAD_RESMODE, new Integer(resourceMode));
-        args.put(LOAD_FLAGS, new Integer(flags));
-        
-        if(impl.getActiveUser() != null && impl.getActiveUserAuth() != null) {
-            args.put(LOAD_HTTPUSER, impl.getActiveUser());
-            args.put(LOAD_HTTPPASS, impl.getActiveUserAuth());
-        }
-        
-        CatalogController controller = new CatalogController();
+        CatalogController controller = new CatalogController(ctx);
         new LoadControllerThread(args, controller, listener, view).start();
     }
 
     
-    public UstadController loadController(Hashtable args) throws Exception {
-        return makeControllerByURL((String)args.get(LOAD_URL), 
-            (UstadMobileSystemImpl)args.get(LOAD_IMPL), 
-            ((Integer)args.get(LOAD_RESMODE)).intValue(), 
-            args.get(LOAD_HTTPUSER) != null ? (String)args.get(LOAD_HTTPUSER) : null, 
-            args.get(LOAD_HTTPPASS) != null ? (String)args.get(LOAD_HTTPPASS) : null, 
-            ((Integer)args.get(LOAD_FLAGS)).intValue());
+    public UstadController loadController(Hashtable args, Object ctx) throws Exception {
+        CatalogController newController = makeControllerByURL((String)args.get(KEY_URL), 
+            ((Integer)args.get(KEY_RESMOD)).intValue(), 
+            args.get(KEY_HTTPUSER) != null ? (String)args.get(KEY_HTTPUSER) : null, 
+            args.get(KEY_HTTPPPASS) != null ? (String)args.get(KEY_HTTPPPASS) : null, 
+            ((Integer)args.get(KEY_FLAGS)).intValue(), ctx);
+        newController.initEntryStatusCheck();
+        return newController;
     }
     
     /**
@@ -430,21 +431,49 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * 
      * @return CatalogController representing the default catalog for the active user
      */
-    public static CatalogController makeUserCatalog(UstadMobileSystemImpl impl) throws IOException, XmlPullParserException{
+    public static CatalogController makeUserCatalog(UstadMobileSystemImpl impl, Object context) throws IOException, XmlPullParserException{
         String opdsServerURL = impl.getUserPref("opds_server_primary", 
-            UstadMobileDefaults.DEFAULT_OPDS_SERVER);
+            UstadMobileDefaults.DEFAULT_OPDS_SERVER, context);
         
-        String activeUser = impl.getActiveUser();
-        String activeUserAuth = impl.getActiveUserAuth();
-        return CatalogController.makeControllerByURL(opdsServerURL, impl, 
-            USER_RESOURCE, activeUser, activeUserAuth, CACHE_ENABLED);
+        String activeUser = impl.getActiveUser(context);
+        String activeUserAuth = impl.getActiveUserAuth(context);
+        return CatalogController.makeControllerByURL(opdsServerURL, 
+            USER_RESOURCE, activeUser, activeUserAuth, CACHE_ENABLED, context);
         
     }
     
-    public static CatalogController makeDeviceCatalog() throws IOException {
-        UstadJSOPDSFeed deviceFeed = makeDeviceFeed(null, null, 
-                USER_RESOURCE | SHARED_RESOURCE);
-        return new CatalogController(new CatalogModel(deviceFeed));
+    public static Hashtable makeUserCatalogArgs(Object context) {
+        Hashtable args = new Hashtable();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String catalogURL = impl.getUserPref("opds_server_primary", 
+            UstadMobileDefaults.DEFAULT_OPDS_SERVER, context);
+        args.put(CatalogController.KEY_URL, catalogURL);
+        args.put(CatalogController.KEY_HTTPUSER, impl.getActiveUser(context));
+        args.put(CatalogController.KEY_HTTPPPASS, impl.getActiveUserAuth(context));
+        args.put(CatalogController.KEY_FLAGS, 
+            new Integer(CatalogController.CACHE_ENABLED));
+        args.put(CatalogController.KEY_RESMOD, 
+            new Integer(CatalogController.USER_RESOURCE));
+        
+        return args;
+    }
+    
+    
+    private static void putStorageDirsInVectors(UMStorageDir[] dirs, boolean userSpecific, Vector opdsFilesVector, Vector containerFilesVector) {
+        for(int i = 0; i < dirs.length; i++) {
+            if(dirs[i].isAvailable() && dirs[i].isUserSpecific() == userSpecific) {
+                try {
+                    boolean dirExists = UstadMobileSystemImpl.getInstance().dirExists(
+                            dirs[i].getDirURI());
+                    if(dirExists) {
+                        findOPDSFilesInDir(dirs[i].getDirURI(), opdsFilesVector, 
+                            containerFilesVector);
+                    }
+                }catch(IOException ioe) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 177, dirs[i].getDirURI());
+                }
+            }
+        }
     }
     
     /**
@@ -457,32 +486,27 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * 
      * @return CatalogController representing files on the device
      */
-    public static UstadJSOPDSFeed makeDeviceFeed(String sharedDir, String userDir, int dirFlags) throws IOException{
+    public static UstadJSOPDSFeed makeDeviceFeed(UMStorageDir[] dirs, int dirFlags, Object context) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         boolean incShared = (dirFlags & SHARED_RESOURCE) == SHARED_RESOURCE;
         boolean incUser = (dirFlags & USER_RESOURCE) == USER_RESOURCE;
         
-        
-        verifyKnownEntries(SHARED_RESOURCE);
+        verifyKnownEntries(SHARED_RESOURCE, context);
         
         Vector opdsFilesVector = new Vector();
         int opdsUserStartIndex = 0;
         Vector containerFilesVector = new Vector();
         int containerUserStartIndex = 0;
-        
-        sharedDir = (sharedDir == null) ? impl.getSharedContentDir() : sharedDir;
-        if(incUser && userDir == null) {
-            userDir = impl.getUserContentDirectory(impl.getActiveUser());
-        }
+                
         
         if(incShared) {
-            findOPDSFilesInDir(sharedDir, opdsFilesVector, containerFilesVector);
+            putStorageDirsInVectors(dirs, false, opdsFilesVector, containerFilesVector);
             opdsUserStartIndex = opdsFilesVector.size();
             containerUserStartIndex = containerFilesVector.size();
         }
         
         if(incUser) {
-            findOPDSFilesInDir(userDir, opdsFilesVector, containerFilesVector);
+            putStorageDirsInVectors(dirs, true, opdsFilesVector, containerFilesVector);
         }
         
         String[] opdsFiles = new String[opdsFilesVector.size()];
@@ -494,9 +518,10 @@ public class CatalogController implements UstadController, UMProgressListener, A
         containerFilesVector = null;
         
         String generatedHREFBase = incUser ? impl.getUserContentDirectory(
-                impl.getActiveUser()) : impl.getSharedContentDir();
+                impl.getActiveUser(context)) : impl.getSharedContentDir();
         
-        String looseFilePath = UMFileUtil.joinPaths(new String[] {generatedHREFBase, 
+        String looseFilePath = UMFileUtil.joinPaths(new String[] {
+            impl.getCacheDir(incUser ? USER_RESOURCE : SHARED_RESOURCE, context), 
             "cache-loose"});
         
         boolean[] userOPDSFiles = new boolean[opdsFiles.length];
@@ -508,7 +533,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
         
         return scanFiles(opdsFiles, userOPDSFiles, containerFiles, userEPUBFiles, 
             looseFilePath, generatedHREFBase, "My Device", 
-            "scandir-" + sanitizeIDForFilename(generatedHREFBase));
+            "scandir-" + sanitizeIDForFilename(generatedHREFBase), context);
         
     }
     
@@ -553,10 +578,9 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     public void handleConfirmDeleteEntries() {
-        int numDeleted = 0;
         for(int i = 0; i < selectedEntries.length; i++) {
             CatalogController.removeEntry(selectedEntries[i].id, 
-                USER_RESOURCE | SHARED_RESOURCE);
+                USER_RESOURCE | SHARED_RESOURCE, context);
             this.view.setEntryStatus(selectedEntries[i].id, STATUS_NOT_ACQUIRED);
         }
         this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
@@ -576,59 +600,39 @@ public class CatalogController implements UstadController, UMProgressListener, A
             Vector entryLinks = entry.getLinks(null, UstadJSOPDSItem.TYPE_ATOMFEED, 
                 true, true);
             
+            final Object ctx = this.context;
+            
             if(entryLinks.size() > 0) {
                 String[] firstLink = (String[])entryLinks.elementAt(0);
                 final String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
                     firstLink[UstadJSOPDSItem.LINK_HREF]);
                 
-                Thread bgThread = new Thread() {
-                    public void run() {
-                        int resourceMode = USER_RESOURCE;
-                        int fetchFlags = CACHE_ENABLED;
-                        String httpUsername = impl.getActiveUser();
-                        String httpPassword = impl.getActiveUserAuth();
-                        try {
-                            CatalogController newController = CatalogController.makeControllerByURL(url, impl, resourceMode, 
-                                httpUsername, httpPassword, fetchFlags);
-                            newController.show();
-                            impl.getAppView().dismissProgressDialog();
-                        }catch(Exception e) {
-                            e.printStackTrace();
-                            impl.getAppView().dismissProgressDialog();
-                            impl.getAppView().showNotification(
-                                impl.getString(U.id.error_loading_catalog) + e.toString(),
-                                AppView.LENGTH_LONG);
-                        }
-                    }
-                };
-                impl.getAppView().showProgressDialog(impl.getString(U.id.loading));
-                bgThread.start();
+                Hashtable args = new Hashtable();
+                args.put(KEY_URL, url);
+                
+                if(impl.getActiveUser(context) != null) {
+                    args.put(KEY_HTTPUSER, impl.getActiveUser(context));
+                    args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(context));
+                }
+                
+                args.put(KEY_RESMOD, new Integer(getResourceMode()));
+                args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
+                
+                
+                UstadMobileSystemImpl.getInstance().go(CatalogView.class, args, 
+                        context);
             }
         }else {
             CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
-                    SHARED_RESOURCE | USER_RESOURCE);
+                    SHARED_RESOURCE | USER_RESOURCE, context);
             if(entryInfo != null && entryInfo.acquisitionStatus == STATUS_ACQUIRED) {
-                String openPath = null;
-                try {
-                    openPath = UstadMobileSystemImpl.getInstance().openContainer(
-                        entryInfo.fileURI, entryInfo.mimeType);
-                
-                    ContainerController containerCtrl = 
-                        ContainerController.makeFromEntry(entry, openPath, 
-                            entryInfo.fileURI, entryInfo.mimeType);
-                    containerCtrl.show();
-                
-                    impl.l(UMLog.VERBOSE, 425, openPath);
-                }catch(Exception e) {
-                    if(openPath != null) {
-                        UstadMobileSystemImpl.getInstance().closeContainer(openPath);
-                    }
-                    UstadMobileSystemImpl.getInstance().getAppView().showAlertDialog(
-                            impl.getString(U.id.error), 
-                            impl.getString(U.id.error_opening_file) + e.toString());
-                }
+                Hashtable openArgs = new Hashtable();
+                openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
+                openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
+                UstadMobileSystemImpl.getInstance().go(ContainerView.class, openArgs, 
+                        context);
             }else if(isInProgress(entry.id)){
-                UstadMobileSystemImpl.getInstance().getAppView().showNotification(
+                UstadMobileSystemImpl.getInstance().getAppView(context).showNotification(
                         impl.getString(U.id.download_in_progress), AppView.LENGTH_LONG);
             }else{
                 this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
@@ -644,12 +648,13 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public void handleSelectDownloadStorageMode(int storageMode) {
         selectedDownloadMode = storageMode;
-        availableStorageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(storageMode);
+        availableStorageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+            storageMode, context);
         String[] storageChoices = new String[availableStorageDirs.length];
         for(int i = 0; i < storageChoices.length; i++) {
             storageChoices[i] = availableStorageDirs[i].getName();
         }
-        UstadMobileSystemImpl.getInstance().getAppView().showChoiceDialog(
+        UstadMobileSystemImpl.getInstance().getAppView(context).showChoiceDialog(
             UstadMobileSystemImpl.getInstance().getString(U.id.save_to), 
             storageChoices, CMD_SELECT_STORAGE_DIR, this);
     }
@@ -661,7 +666,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param choice 
      */
     public void appViewChoiceSelected(int commandId, int choice) {
-        AppView appView = UstadMobileSystemImpl.getInstance().getAppView();
+        AppView appView = UstadMobileSystemImpl.getInstance().getAppView(context);
         switch(commandId) {
             case CMD_SELECT_SHARED_OR_USERONLY:
                 switch(choice) {
@@ -699,7 +704,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String[] choices = new String[]{impl.getString(U.id.all_users), 
             impl.getString(U.id.only_me), impl.getString(U.id.cancel)};
-        impl.getAppView().showChoiceDialog(impl.getString(U.id.download_for),
+        impl.getAppView(context).showChoiceDialog(impl.getString(U.id.download_for),
             choices, CMD_SELECT_SHARED_OR_USERONLY, this);
     }
     
@@ -732,19 +737,18 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public void handleConfirmDownloadEntries(UstadJSOPDSEntry[] entries, String destDirURI) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        UMTransferJobList transferJob;
-        AcquireRequest request = new AcquireRequest(entries, destDirURI, 
-            impl.getActiveUser(), impl.getActiveUserAuth(), selectedDownloadMode);
-        transferJob = CatalogController.acquireCatalogEntries(request);
-        //TODO: Add event listeners to update progress etc.
-        if(activeTransferJobs == null) {
-            activeTransferJobs = new Vector();
-        }
-        transferJob.addProgressListener(this);
-        setViewEntryProgressVisible(entries, true);
-        transferJob.start();
-        activeTransferJobs.addElement(transferJob);
+        final AcquireRequest request = new AcquireRequest(entries, destDirURI, 
+            impl.getActiveUser(context), impl.getActiveUserAuth(context), 
+            selectedDownloadMode, context, this);
         this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
+        
+        Thread startDownloadThread = new Thread(new Runnable() {
+            public void run() {
+                CatalogController.acquireCatalogEntries(request);
+            }
+        });
+        startDownloadThread.start();
+        
     }
     
     /**
@@ -756,21 +760,19 @@ public class CatalogController implements UstadController, UMProgressListener, A
     public void handleClickMenuItem(int index) {
         switch(index) {
             case MENUINDEX_LOGOUT:
-                LoginController loginController = new LoginController();
-                loginController.handleLogout();
-                loginController.show();
+                UstadMobileSystemImpl.getInstance().go(LoginView.class, 
+                    null, context);
                 break;
             case MENUINDEX_MYDEVICE:
-                try {
-                    CatalogController deviceCatCtrl = CatalogController.makeDeviceCatalog();
-                    deviceCatCtrl.show();
-                }catch(IOException e) {
-                    UstadMobileSystemImpl.getInstance().getAppView().showNotification(
-                        UstadMobileSystemImpl.getInstance().getString(U.id.error_loading_catalog), 
-                        AppView.LENGTH_LONG);
-                }
-                break;
-                            
+                Hashtable args = new Hashtable();
+                args.put(KEY_URL, OPDS_PROTO_DEVICE);
+                args.put(KEY_RESMOD, new Integer(USER_RESOURCE | SHARED_RESOURCE));
+                args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
+                
+                UstadMobileSystemImpl.getInstance().go(CatalogView.class,
+                        args, context);
+                
+                break;                            
         }
     }
     
@@ -819,32 +821,72 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param flags boolean flags inc. for cache retrieval 
      *  - set USER_RESOURCE to retrieve catalogs from active user cache.
      *  - set SHARED_RESOURCE to retrieve catalogs from shared cache as well.
-     * @return 
+     * @return The OPDS Feed object representing this catalog or null if it cannot be accessed
      */
-    public static UstadJSOPDSFeed getCatalogByURL(String url, int resourceMode, String httpUsername, String httpPassword, int flags) throws IOException, XmlPullParserException{
+    public static UstadJSOPDSFeed getCatalogByURL(String url, int resourceMode, String httpUsername, String httpPassword, int flags, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = null;
+        Exception e = null; 
+        
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.getLogger().l(UMLog.INFO, 307, url);
         
         Hashtable headers = makeAuthHeaders(httpUsername, httpPassword);
         
-        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-        HTTPResult result = impl.readURLToString(url, headers);
-        if(result.getStatus() != 200) {
-            throw new IOException("HTTP Error " + result.getStatus());
+        
+        if(url.startsWith("opds:///")) {
+            if(url.equals(OPDS_PROTO_DEVICE)) {
+                opdsFeed = makeDeviceFeed(
+                    impl.getStorageDirs(resourceMode, context), 
+                    resourceMode, context);
+            }
+        }else {
+            try {
+                XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+                HTTPResult result = impl.readURLToString(url, headers);
+                if(result.getStatus() != 200) {
+                    throw new IOException("HTTP Error " + result.getStatus());
+                }
+
+                byte[] opdsContents = result.getResponse();
+                parser.setInput(
+                    new ByteArrayInputStream(opdsContents), 
+                    "UTF-8");
+                opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+                opdsFeed.href = url;
+                CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
+                    "UTF-8"), context);
+            }catch(Exception e1) {
+                UstadMobileSystemImpl.l(UMLog.WARN, 201, url, e1);
+                e = e1;
+            }
+            
+            if(opdsFeed == null & (flags & CACHE_ENABLED) == CACHE_ENABLED) {
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 431, url);
+                try {
+                    opdsFeed = getCachedCatalogByURL(url, resourceMode, context);
+                }catch(Exception e2) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 181, url, e2);
+                    e = e2;
+                }
+            }
         }
         
-        byte[] opdsContents = result.getResponse();
-        parser.setInput(
-            new ByteArrayInputStream(opdsContents), 
-            "UTF-8");
-
-        opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
-        impl.getLogger().l(UMLog.DEBUG, 504, "Catalog Null:" + (opdsFeed == null));
-        opdsFeed.href = url;
-        stripEntryUMCloudIDPrefix(opdsFeed);
-        CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
-            "UTF-8"));
+        //If we have loaded it from remote server or cache it's not null here
+        if(opdsFeed != null) {
+            impl.getLogger().l(UMLog.DEBUG, 504, "Catalog Null:" + (opdsFeed == null));
+            opdsFeed.href = url;
+            stripEntryUMCloudIDPrefix(opdsFeed);
+        }else if(e != null){
+            if(e instanceof IOException) {
+                throw (IOException)e;
+            }else if(e instanceof XmlPullParserException) {
+                throw (XmlPullParserException)e;
+            }else {
+                throw new IOException(e.toString());
+            }
+        }else {
+            throw new IOException("OPDS Catalog not loaded: " + url);
+        }
         
         return opdsFeed;
     }
@@ -880,15 +922,17 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * 
      * @return The OPDS ID of the entry from that location
      */
-    public String getCatalogIDByURL(String url, int resourceMode) {
+    public static String getCatalogIDByURL(String url, int resourceMode, Object context) {
         String catalogID = null;
         String prefKey = getPrefKeyNameForOPDSURLToIDMap(url);
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
-            catalogID = UstadMobileSystemImpl.getInstance().getUserPref(prefKey);
+            catalogID = UstadMobileSystemImpl.getInstance().getUserPref(prefKey,
+                context);
         }
         
         if(catalogID == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
-            catalogID = UstadMobileSystemImpl.getInstance().getAppPref(prefKey);
+            catalogID = UstadMobileSystemImpl.getInstance().getAppPref(prefKey,
+                context);
         }
         
         return catalogID;
@@ -939,14 +983,14 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param ownerUser the user that owns the download, or null if this is for the shared directory
      * @param serializedCatalog String contents of the catalog (in XML) : optional : if they are 'handy', otherwise null
      */
-    public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog) throws IOException{
+    public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog, Object context) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.getLogger().l(UMLog.VERBOSE, 405, "id: " + catalog.id + " href: " + catalog.href);
         
 	String destPath;
         boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
         
-        destPath = impl.getCacheDir(resourceMode);
+        destPath = impl.getCacheDir(resourceMode, context);
         
 	destPath = UMFileUtil.joinPaths(new String[]{destPath, 
             getFileNameForOPDSFeedId(catalog.id)});
@@ -958,11 +1002,12 @@ public class CatalogController implements UstadController, UMProgressListener, A
         }
 	
         impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
-        String keyName = "opds-cache-" + catalog.id;
-	
-        impl.setPref(isUserMode, keyName, destPath);
-        impl.setPref(isUserMode, getPrefKeyNameForOPDSURLToIDMap(catalog.id), 
-            catalog.href);
+        String idKeyName = "opds-cache-" + catalog.id;
+	String urlKeyName = getPrefKeyNameForOPDSURLToIDMap(catalog.href);
+        
+        impl.setPref(isUserMode, idKeyName, destPath, context);
+        impl.setPref(isUserMode, urlKeyName, 
+            catalog.id, context);
     }
     
     /**
@@ -981,10 +1026,10 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * already acquired; with the links pointing to the local file container
      * 
      */
-    public static UstadJSOPDSFeed generateLocalCatalog(UstadJSOPDSFeed catalog, int resourceMode, int acquisitionStatusMode) throws IOException{
+    public static UstadJSOPDSFeed generateLocalCatalog(UstadJSOPDSFeed catalog, int resourceMode, int acquisitionStatusMode, Object context) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String baseDir = resourceMode == SHARED_RESOURCE ? impl.getSharedContentDir() :
-            impl.getUserContentDirectory(impl.getActiveUser());
+            impl.getUserContentDirectory(impl.getActiveUser(context));
         String localCatalogID = catalog.id + LOCALOPDS_ID_SUFFIX;
         String filename = sanitizeIDForFilename(localCatalogID) + ".local.opds";
         
@@ -1006,7 +1051,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
         Vector linksToRemove = new Vector();
         
         for(i = 0; i < catalog.entries.length; i++){
-            CatalogEntryInfo info = getEntryInfo(catalog.entries[i].id, acquisitionStatusMode);
+            CatalogEntryInfo info = getEntryInfo(catalog.entries[i].id, 
+                acquisitionStatusMode, context);
             if(info != null && info.acquisitionStatus == STATUS_ACQUIRED) {
                 //add an entry with a pointer to the local file
                 UstadJSOPDSEntry entryCopy = new UstadJSOPDSEntry(newFeed, 
@@ -1047,7 +1093,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
       * 
       * 
       */
-    public static UstadJSOPDSFeed getCachedCatalogByID(String catalogID, int resourceMode) throws IOException, XmlPullParserException{
+    public static UstadJSOPDSFeed getCachedCatalogByID(String catalogID, int resourceMode, Object context) throws IOException, XmlPullParserException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         impl.getLogger().l(UMLog.VERBOSE, 406, catalogID);
@@ -1057,12 +1103,12 @@ public class CatalogController implements UstadController, UMProgressListener, A
         String key = "opds-cache-" + catalogID;
         
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
-            filename = impl.getUserPref(key);
+            filename = impl.getUserPref(key, context);
             impl.getLogger().l(UMLog.DEBUG, 509, filename);
         }
         
         if(filename == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
-            filename = impl.getAppPref(key);
+            filename = impl.getAppPref(key, context);
             impl.getLogger().l(UMLog.DEBUG, 510, filename);
         }
 
@@ -1077,16 +1123,21 @@ public class CatalogController implements UstadController, UMProgressListener, A
     }
     
     /**
+     * Get a cached copy of a given OPDS catalog by URL
      * 
-     * @param url
-     * @param username
-     * @return 
+     * @param url The OPDS url e.g. http://server.com/dir/place.opds
+     * @param resourceMode Where to look : flag can set SHARED_RESOURCE or USER_RESOURCE
+     * 
+     * @return the feed if it is available in the cache, null otherwise
      */
-    public static UstadJSOPDSFeed getCachedCatalogByURL(String url, int resourceMode) {
+    public static UstadJSOPDSFeed getCachedCatalogByURL(String url, int resourceMode, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed retVal = null;
-        
-        
-        return null;
+        String entryID = getCatalogIDByURL(url, resourceMode, context);
+        if(entryID != null) {
+            return getCachedCatalogByID(entryID, resourceMode, context);
+        }else {
+            return null;
+        }
     }
     
     
@@ -1100,6 +1151,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
      */
     public static void findOPDSFilesInDir(String dir, Vector opdsFiles, Vector containerFiles) throws IOException{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 429, dir);
+        
         String[] dirContents = impl.listDirectory(dir);
         
         for(int i = 0; i < dirContents.length; i++) {
@@ -1125,18 +1178,18 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * 
      * @param resourceMode SHARED_RESOURCE or USER_RESOURCE
      */
-    public static void verifyKnownEntries(int resourceMode) {
+    public static void verifyKnownEntries(int resourceMode, Object context) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.l(UMLog.INFO, 313, "mode: " + resourceMode);
         boolean isShared = resourceMode == SHARED_RESOURCE;
         String[] entryInfoKeys = UMUtil.filterArrByPrefix(
-            isShared ? impl.getAppPrefKeyList() : impl.getUserPrefKeyList(),
+            isShared ? impl.getAppPrefKeyList(context) : impl.getUserPrefKeyList(context),
             PREFIX_ENTRYINFO);
         
         CatalogEntryInfo info;
         for(int i = 0; i < entryInfoKeys.length; i++) {
             info = CatalogEntryInfo.fromString(
-                isShared ? impl.getAppPref(entryInfoKeys[i]) : impl.getUserPref(entryInfoKeys[i]));
+                isShared ? impl.getAppPref(entryInfoKeys[i], context) : impl.getUserPref(entryInfoKeys[i], context));
             if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
                 boolean canAccessFile = false;
                 try {
@@ -1151,9 +1204,9 @@ public class CatalogController implements UstadController, UMProgressListener, A
                     //remove the entry from our listing
                     impl.l(UMLog.VERBOSE, 407, info.fileURI);
                     if(isShared) {
-                        impl.setAppPref(entryInfoKeys[i], null);
+                        impl.setAppPref(entryInfoKeys[i], null, context);
                     }else {
-                        impl.setUserPref(entryInfoKeys[i], null);
+                        impl.setUserPref(entryInfoKeys[i], null, context);
                     }
                 }
             }
@@ -1179,7 +1232,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param feedID ID for the generated feed
      * @return A feed object with entries for each opdsFile and if required a loose/unsorted feed
      */
-    public static UstadJSOPDSFeed scanFiles(String[] opdsFiles, boolean[] opdsFileModes, String[] containerFiles, boolean[] containerFileModes, String looseContainerFile, String baseHREF, String title, String feedID) {
+    public static UstadJSOPDSFeed scanFiles(String[] opdsFiles, boolean[] opdsFileModes, String[] containerFiles, boolean[] containerFileModes, String looseContainerFile, String baseHREF, String title, String feedID, Object context) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UstadJSOPDSFeed retVal = new UstadJSOPDSFeed(
                 UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHREF), 
@@ -1253,7 +1306,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
                             : SHARED_RESOURCE;
                     
                     CatalogEntryInfo thisEntryInfo = getEntryInfo(opf.id,
-                        resourceMode);
+                        resourceMode, context);
                     if(thisEntryInfo == null) {
                         impl.l(UMLog.VERBOSE, 409, containerFiles[i]);
                         thisEntryInfo = new CatalogEntryInfo();
@@ -1261,7 +1314,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
                         thisEntryInfo.fileURI = containerFiles[i];
                         thisEntryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
                         thisEntryInfo.srcURLs = new String[] { containerFiles[i] };
-                        setEntryInfo(opf.id, thisEntryInfo, resourceMode);
+                        setEntryInfo(opf.id, thisEntryInfo, resourceMode, context);
                     }
                 }
             }catch(Exception e) {
@@ -1277,8 +1330,8 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 impl.writeStringToFile(looseContainerFeed.toString(), looseContainerFile, 
                     "UTF-8");
             }catch(IOException e) {
-                impl.getAppView().showNotification(impl.getString(U.id.error)
-                    + " : 159", AppView.LENGTH_LONG);
+                //impl.getAppView().showNotification(impl.getString(U.id.error)
+                //    + " : 159", AppView.LENGTH_LONG);
                 impl.l(UMLog.ERROR, 159, looseContainerFile, e);
             }
             
@@ -1313,9 +1366,9 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param resourceMode  USER_RESOURCE or SHARED_RESOURCE to be set as a user or shared preference
      * Use USER_RESOURCE when the file is in the users own directory, SHARED_RESOURCE otherwise
      */
-    public static void setEntryInfo(String entryID, CatalogEntryInfo info, int resourceMode) {
+    public static void setEntryInfo(String entryID, CatalogEntryInfo info, int resourceMode, Object context) {
         UstadMobileSystemImpl.getInstance().setPref(resourceMode == USER_RESOURCE, 
-            getEntryInfoKey(entryID), info != null? info.toString(): null);
+            getEntryInfoKey(entryID), info != null? info.toString(): null, context);
     }
     
     /**
@@ -1327,17 +1380,17 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * eg. to get both - use USER_RESOURCE | SHARED_RESOURCE
      * @return CatalogEntryInfo for the given ID, or null if not found
      */
-    public static CatalogEntryInfo getEntryInfo(String entryID, int resourceMode) {
+    public static CatalogEntryInfo getEntryInfo(String entryID, int resourceMode, Object context) {
         String prefKey = getEntryInfoKey(entryID);
         String entryInfoStr = null;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
-            entryInfoStr = impl.getUserPref(prefKey);
+            entryInfoStr = impl.getUserPref(prefKey, context);
         }
         
         if(entryInfoStr == null && (resourceMode & SHARED_RESOURCE) ==SHARED_RESOURCE) {
-            entryInfoStr = impl.getAppPref(prefKey);
+            entryInfoStr = impl.getAppPref(prefKey, context);
         }
         
         if(entryInfoStr != null) {
@@ -1350,7 +1403,7 @@ public class CatalogController implements UstadController, UMProgressListener, A
     
     
     /**
-     * Fetch and download the given container, save required information about it to
+     * Fetch and download the given containers, save required information about it to
      * disk
      * 
      * 1. Download the given srcURL to disk (see options.destdir and destname) to 
@@ -1363,16 +1416,15 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * 
      * @param request The AcquireReuqest 
      * 
-     * @return a Transfer job, that when it's start method is called will acquire the given entries
      */
-    public static UMTransferJobList acquireCatalogEntries(CatalogController.AcquireRequest request) {
+    public static void acquireCatalogEntries(CatalogController.AcquireRequest request) {
         UstadJSOPDSEntry[] entries = request.getEntries();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        UMTransferJob[] transferJobs = new UMTransferJob[entries.length];
         String[] mimeTypes = new String[entries.length];
         
         Hashtable authHeaders = makeAuthHeaders(request.getHttpUsername(), 
                 request.getHttpPassword());
+        int resourceMode = request.getResourceMode();
         
         for(int i = 0; i < entries.length; i++) {
             Vector itemLinks = entries[i].getAcquisitionLinks();
@@ -1392,54 +1444,205 @@ public class CatalogController implements UstadController, UMProgressListener, A
                 request.getDestDirPath(), UMFileUtil.getFilename(itemHref)
             });
             
-            transferJobs[i] = impl.downloadURLToFile(itemURL, destFilename, 
-                authHeaders);
-            registerDownloadInProgress(entries[i].id, transferJobs[i]);
-        }
-        
-        UMTransferJobList transferJob = new UMTransferJobList(transferJobs, 
-            entries);
-        transferJob.setRunAfterFinishJob(new AcquirePostDownloadRunnable(entries, 
-            transferJobs, mimeTypes, request.getResourceMode()));
-        return transferJob;
-    }
-
-    public void progressUpdated(UMProgressEvent evt) {
-        if(this.view != null) {
-            UMTransferJobList jobList = (UMTransferJobList)evt.getSrc();
-            int currentJobItem = jobList.getCurrentItem();
-            UstadJSOPDSEntry entry = (UstadJSOPDSEntry)jobList.getJobValue(
-                currentJobItem);
-            boolean isComplete = 
-                jobList.getCurrentJobProgress() == jobList.getCurrentJobTotalSize();
-            this.view.updateDownloadEntryProgress(entry.id, jobList.getCurrentJobProgress(), 
-                jobList.getCurrentJobTotalSize());
-            if(isComplete) {
-                this.view.setEntryStatus(entry.id, STATUS_ACQUIRED);
-                this.view.setDownloadEntryProgressVisible(entry.id, false);
+            CatalogEntryInfo info = new CatalogEntryInfo();
+            info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
+            info.srcURLs = new String[]{itemURL};
+            info.fileURI = destFilename;
+            info.mimeType = mimeTypes[i];
+            info.downloadTotalSize = UMIOUtils.getHTTPDownloadSize(itemURL, 
+                    authHeaders);
+            
+            long downloadID = impl.queueFileDownload(itemURL, destFilename, authHeaders, 
+                    request.getContext());
+            info.downloadID = downloadID;
+            setEntryInfo(entries[i].id, info, resourceMode, request.getContext());
+            
+            if(request.getController() != null) {
+                request.getController().registerDownloadingEntry(entries[i].id, 
+                        new Long(downloadID));
             }
         }
     }
     
     /**
-     * Runs before an acquisition run goes: marks items as in progress
+     * Figure out what search mode to use: if a user is logged in set the
+     * USER_RESOURCE flag in the return value, otherwise set only the 
+     * SHARED_RESOURCE flag in the return value
+     * 
+     * @return SHARED_RESOURCE if no active user, SHARED_RESOURC | USER_RESOURCE if there's an active user
      */
-    private static class AcquirePreDownloadRunnable implements Runnable{
-        
-        private UstadJSOPDSEntry[] entries;
-        
-        private UMTransferJob[] srcJobs;
-        
-        private String[] mimeTypes;
-        
-        public AcquirePreDownloadRunnable(UstadJSOPDSEntry[] entries, UMTransferJob[] srcJobs, String[] mimeTypes) {
-            this.entries = entries;
-            this.mimeTypes = mimeTypes;
+    protected int determineSearchMode() {
+        int searchMode = SHARED_RESOURCE;
+        if(UstadMobileSystemImpl.getInstance().getActiveUser(context) != null) {
+            searchMode |= USER_RESOURCE;
         }
         
+        return searchMode;
+    }
+    
+    public int getEntryAcquisitionStatus(String entryID) {
+        CatalogEntryInfo info = getEntryInfo(entryID, determineSearchMode(), context);
+        if(info != null) {
+            return info.acquisitionStatus;
+        }else {
+            return CatalogEntryInfo.ACQUISITION_STATUS_NOTACQUIRED;
+        }
+        
+    }
+    
+    public void registerDownloadingEntry(String entryID, Long downloadID) {
+        downloadingEntries.put(entryID, downloadID);
+        if(view != null) {
+            view.setDownloadEntryProgressVisible(entryID, true);
+        }
+        
+        startDownloadTimer();
+    }
+    
+    /**
+     * Used when the view is attached to see what the status of entries are right
+     * now.
+     * 
+     */
+    private synchronized void initEntryStatusCheck() {
+        CatalogEntryInfo info;
+        UstadJSOPDSFeed feed = getModel().opdsFeed;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        for(int i = 0; i< feed.entries.length; i++) {
+            info = getEntryInfo(feed.entries[i].id, determineSearchMode(), context);
+            if(info != null){
+                if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
+                    int[] fileDownloadStatus = impl.getFileDownloadStatus(info.downloadID, context);
+                    if(fileDownloadStatus != null) {
+                        int downloadStatus = fileDownloadStatus[UstadMobileSystemImpl.IDX_STATUS];
+                        switch(downloadStatus) {
+                            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
+                                registerItemAcquisitionCompleted(feed.entries[i].id);
+                                break;
+                            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                            case UstadMobileSystemImpl.DLSTATUS_PENDING:
+                            case UstadMobileSystemImpl.DLSTATUS_PAUSED:
+                                registerDownloadingEntry(feed.entries[i].id, 
+                                    new Long(info.downloadID));
+                        }
+                    }else {
+                        //perhaps the system is not tracking the download anymore and it's actually complete
+                        int downloadedSize = 
+                            (int)UstadMobileSystemImpl.getInstance().fileSize(info.fileURI);
+                        if(downloadedSize != -1 && downloadedSize == info.downloadTotalSize) 
+                            //this download has in fact completed
+                            registerItemAcquisitionCompleted(feed.entries[i].id);
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Starts a Timer to watch the status of downloads.  Calling this twice
+     * will have no effect - a new timer will only start if there is none currently
+     * running for this controller
+     */
+    private synchronized void startDownloadTimer() {
+        if(downloadUpdateTimer == null) {
+            downloadUpdateTimer = new Timer();
+            downloadUpdateTimer.schedule(new UpdateProgressTimerTask(), 
+                DOWNLOAD_UPDATE_INTERVAL, DOWNLOAD_UPDATE_INTERVAL);
+            UstadMobileSystemImpl.getInstance().registerDownloadCompleteReceiver(
+                    this, context);
+        }
+    }
+    
+    /**
+     * If the timer to run downloads is running - stop it
+     */
+    private synchronized void stopDownloadTimer() {
+        if(downloadUpdateTimer != null) {
+            downloadUpdateTimer.cancel();
+            downloadUpdateTimer = null;
+            UstadMobileSystemImpl.getInstance().unregisterDownloadCompleteReceiver(
+                    this, context);
+        }
+    }
+    
+    
+    public void unregisterDownloadingEntry(String entryID) {
+        downloadingEntries.remove(entryID);
+        if(view != null) {
+            view.setDownloadEntryProgressVisible(entryID, false);
+        }
+        
+        if(downloadingEntries.size() < 1) {
+            stopDownloadTimer();
+        }
+    }
+
+    public void downloadStatusUpdated(UMDownloadCompleteEvent evt) {
+        Enumeration downloadEntryKeys = downloadingEntries.keys();
+        String entryID;
+        Long downloadID;
+        while(downloadEntryKeys.hasMoreElements()) {
+            entryID = (String)downloadEntryKeys.nextElement();
+            downloadID = (Long)downloadingEntries.get(entryID);
+            if(downloadID.longValue() == evt.getDownloadID()) {
+                //this means our download has completed - update status and such
+                unregisterDownloadingEntry(entryID);
+                registerItemAcquisitionCompleted(entryID);
+                return;
+            }
+        }
+    }
+    
+    protected void registerItemAcquisitionCompleted(String entryID) {
+        //first lookup as a user storage only download: if it's not - see if it is a shared space download
+        int entryAcquireResMode = USER_RESOURCE;
+        CatalogEntryInfo info = getEntryInfo(entryID, USER_RESOURCE, context);
+        if(info == null) {
+            info = getEntryInfo(entryID, SHARED_RESOURCE, context);
+            entryAcquireResMode = SHARED_RESOURCE;
+        }
+        
+        info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        CatalogController.setEntryInfo(entryID, info, entryAcquireResMode, context);
+        if(this.view != null) {
+            this.view.setEntryStatus(entryID, info.acquisitionStatus);
+            this.view.setDownloadEntryProgressVisible(entryID, false);
+        }
+    }
+    
+    private class UpdateProgressTimerTask extends TimerTask {
+
         public void run() {
-            
+            //here we actually go and set the progress bars...
+            Enumeration entries = CatalogController.this.downloadingEntries.keys();
+            String entryID;
+            Long downloadID;
+            while(entries.hasMoreElements()) {
+                entryID = (String)entries.nextElement();
+                downloadID = (Long)CatalogController.this.downloadingEntries.get(entryID);
+                int[] downloadStatus = UstadMobileSystemImpl.getInstance().getFileDownloadStatus(
+                    downloadID.longValue(), CatalogController.this.context);
+                if(CatalogController.this.view != null) {
+                    CatalogController.this.view.updateDownloadEntryProgress(entryID, 
+                        downloadStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], 
+                        downloadStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL]);
+                }
+            }
         }
+        
+    }
+    
+    public void handleViewPause() {
+        stopDownloadTimer();
+    }
+    
+    public void handleViewResume() {
+        startDownloadTimer();
+    }
+    
+    public void handleViewDestroy() {
+        stopDownloadTimer();
     }
     
     /**
@@ -1459,6 +1662,10 @@ public class CatalogController implements UstadController, UMProgressListener, A
         
         private int flags;
         
+        private Object context;
+        
+        private CatalogController controller;
+        
         /**
          * @param entries The OPDS Entries that should be acquired.  Must be OPDS 
          * Entry items with acquire links.  For now the first acquisition link will
@@ -1468,14 +1675,17 @@ public class CatalogController implements UstadController, UMProgressListener, A
          * @param httpUsername optional HTTP authentication username - can be null
          * @param httpPassword optional HTTP authentication password - can be null
          * @param resourceMode SHARED_RESOURCE or USER_RESOURCE - controls where 
+         * @param controller : the controller that will want to know about updates etc.  Can be null
          * we update info about this acquisition - in user prefs or in app wide prefs
          */
-        public AcquireRequest(UstadJSOPDSEntry[] entries, String destDirPath, String httpUsername, String httpPassword, int resourceMode) {
+        public AcquireRequest(UstadJSOPDSEntry[] entries, String destDirPath, String httpUsername, String httpPassword, int resourceMode, Object context, CatalogController controller) {
             this.entries = entries;
             this.destDirPath = destDirPath;
             this.httpUsername = httpUsername;
             this.httpPassword = httpPassword;
             this.resourceMode = resourceMode;
+            this.context = context;
+            this.controller = controller;
         }
         
         /**
@@ -1507,51 +1717,16 @@ public class CatalogController implements UstadController, UMProgressListener, A
             return resourceMode;
         }
         
-    }
-    
-    
-    private static class AcquirePostDownloadRunnable implements Runnable {
-        private UstadJSOPDSEntry[] entries;
-        
-        private UMTransferJob[] srcJobs;
-        
-        private String[] mimeTypes;
-        
-        private int resourceMode;
-        
-        public AcquirePostDownloadRunnable(UstadJSOPDSEntry[] entries, UMTransferJob[] srcJobs, String[] mimeTypes, int resourceMode) {
-            this.entries = entries;
-            this.srcJobs = srcJobs;
-            this.mimeTypes = mimeTypes;
-            this.resourceMode = resourceMode;
+        public Object getContext() {
+            return context;
         }
         
-        public void run() {
-            Hashtable parentFeeds = new Hashtable();
-            for(int i = 0; i < entries.length; i++) {
-                CatalogEntryInfo info = new CatalogEntryInfo();
-                info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
-                info.srcURLs = new String[]{srcJobs[i].getSource()};
-                info.fileURI = srcJobs[i].getDestination();
-                info.mimeType = mimeTypes[i];
-                unregisterDownloadInProgress(entries[i].id);
-                CatalogController.setEntryInfo(entries[i].id, info, resourceMode);
-                parentFeeds.put(entries[i].parentFeed, entries[i].parentFeed);
-            }
-            
-            Enumeration parentFeedKeys = parentFeeds.keys();
-            while(parentFeedKeys.hasMoreElements()) {
-                UstadJSOPDSFeed parentFeed = (UstadJSOPDSFeed)parentFeedKeys.nextElement();
-                try {
-                    CatalogController.generateLocalCatalog(parentFeed, resourceMode, 
-                    CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE);
-                }catch(IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        public CatalogController getController() {
+            return controller;
         }
-    }
-    
+        
+        
+    }    
     
     /**
      * Delete the given entry
@@ -1559,23 +1734,23 @@ public class CatalogController implements UstadController, UMProgressListener, A
      * @param entryID
      * @param resourceMode
      */
-    public static void removeEntry(String entryID, int resourceMode) {
+    public static void removeEntry(String entryID, int resourceMode, Object context) {
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
-            actionRemoveEntry(entryID, USER_RESOURCE);
+            actionRemoveEntry(entryID, USER_RESOURCE, context);
         }
         
         if((resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
-            actionRemoveEntry(entryID, SHARED_RESOURCE);
+            actionRemoveEntry(entryID, SHARED_RESOURCE, context);
         }
     }
     
-    private static void actionRemoveEntry(String entryID, int resourceMode) {
-        CatalogEntryInfo entry = getEntryInfo(entryID, resourceMode);
+    private static void actionRemoveEntry(String entryID, int resourceMode, Object context) {
+        CatalogEntryInfo entry = getEntryInfo(entryID, resourceMode, context);
         if(entry != null && entry.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
   	    impl.getLogger().l(UMLog.INFO, 520, entry.fileURI);
             impl.removeFile(entry.fileURI);
-            setEntryInfo(entryID, null, resourceMode);
+            setEntryInfo(entryID, null, resourceMode, context);
         }
     }
     

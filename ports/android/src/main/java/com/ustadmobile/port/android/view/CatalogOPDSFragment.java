@@ -34,9 +34,11 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
 
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,14 +51,23 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -69,34 +80,33 @@ import java.util.WeakHashMap;
  * Use the {@link CatalogOPDSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CatalogOPDSFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener {
+public class CatalogOPDSFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener {
 
     private OnFragmentInteractionListener mListener;
 
     private View rootContainer;
 
-    private CatalogViewAndroid catalogView;
-
     private ListView catalogListView;
 
     private Map<String, OPDSEntryCard> idToCardMap;
 
-    /** The viewId of the view we are supposed to be attached with */
-    private int viewId;
+    protected CatalogController mCatalogController;
+
+    private UstadJSOPDSEntry[] mSelectedEntries;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param viewId Parameter 1.
      * @return A new instance of fragment CatalogOPDSFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CatalogOPDSFragment newInstance(int viewId) {
+    public static CatalogOPDSFragment newInstance(Bundle args) {
         CatalogOPDSFragment fragment = new CatalogOPDSFragment();
-        Bundle args = new Bundle();
-        args.putInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID, viewId);
-        fragment.setArguments(args);
+        Bundle bundle = new Bundle();
+        bundle.putAll(args);
+        fragment.setArguments(bundle);
+
         return fragment;
     }
 
@@ -104,31 +114,47 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         // Required empty public constructor
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            viewId = getArguments().getInt(UstadMobileSystemImplAndroid.EXTRA_VIEWID);
-            this.catalogView = CatalogViewAndroid.getViewById(viewId);
-            if(catalogView != null) {
-                catalogView.setFragment(this);
-                catalogView.setCatalogViewActivity((CatalogActivity) getActivity());
-            }
-        }
+
+    public void loadCatalog(final String url, int resourceMode) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final int fetchFlags = CatalogController.CACHE_ENABLED;
+
+        CatalogController.makeControllerForView(this, url, resourceMode, fetchFlags, this);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
-        UstadJSOPDSFeed feed = catalogView.getController().getModel().opdsFeed;
+    public void controllerReady(final UstadController controller, int flags) {
+        if(controller == null) {
+            //there was an error loading the controller
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            String errMsg = LocaleUtil.formatMessage(impl.getString(U.id.course_catalog_load_error),
+                    "Catalog controller");
+            impl.getAppView(getActivity()).showAlertDialog(impl.getString(U.id.error), errMsg);
+        }else {
+            //TODO: check that the activity has not been destroyed etc.
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    setupFromCatalogController((CatalogController) controller);
+                }
+            });
+        }
+    }
+
+    public void setupFromCatalogController(CatalogController controller) {
+        mCatalogController = controller;
+        CatalogModel model = controller.getModel();
+        UstadJSOPDSFeed feed = model.opdsFeed;
+        getActivity().setTitle(feed.title);
+        controller.setUIStrings(this);
+
+        LayoutInflater inflater = getLayoutInflater(null);
         LinearLayout linearLayout = (LinearLayout)this.rootContainer.findViewById(
                 R.id.fragment_catalog_container);
-        idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
 
         int entryStatus = -1;
         for(int i = 0; i < feed.entries.length; i++) {
+
             OPDSEntryCard cardView  = (OPDSEntryCard) inflater.inflate(
                     R.layout.fragment_opds_item, null);
             cardView.setOPDSEntry(feed.entries[i]);
@@ -139,29 +165,49 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             linearLayout.addView(cardView);
 
             //check the acquisition status
-            entryStatus =catalogView.getEntryStatus(feed.entries[i].id);
+            entryStatus = controller.getEntryAcquisitionStatus(feed.entries[i].id);
             if(entryStatus != -1) {
                 cardView.setOPDSEntryOverlay(entryStatus);
+            }
+
+            if(entryStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
+                cardView.setProgressBarVisible(true);
             }
 
             idToCardMap.put(feed.entries[i].id, cardView);
         }
 
+        getActivity().supportInvalidateOptionsMenu();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
+        mSelectedEntries = new UstadJSOPDSEntry[0];
         setHasOptionsMenu(true);
+
+        idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
+
+        String catalogURL = getArguments().getString(CatalogController.KEY_URL);
+        int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
+        loadCatalog(catalogURL, resourceMode);
 
         return rootContainer;
     }
 
     public void onStart() {
         super.onStart();
-        getActivity().setTitle(catalogView.getController().getModel().opdsFeed.title);
     }
 
 
-
-    public CatalogView getCatalogView() {
-        return catalogView;
-    }
 
     /**
      * Get the OPDSEntryCard for the given OPDS Entry ID
@@ -173,13 +219,26 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         return idToCardMap.get(id);
     }
 
+
+    @Override
+    public void setController(CatalogController controller) {
+        this.mCatalogController = controller;
+    }
+
+    @Override
+    public CatalogController getController() {
+        return mCatalogController;
+    }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        boolean isAcquisitionFeed = this.catalogView.getController().getModel().opdsFeed.isAcquisitionFeed();
-        if(isAcquisitionFeed) {
-            inflater.inflate(R.menu.menu_opds_acquireopts, menu);
-        }else {
-            inflater.inflate(R.menu.menu_opds_navopts, menu);
+        if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
+            boolean isAcquisitionFeed = mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
+            if(isAcquisitionFeed) {
+                inflater.inflate(R.menu.menu_opds_acquireopts, menu);
+            }else {
+                inflater.inflate(R.menu.menu_opds_navopts, menu);
+            }
         }
     }
 
@@ -187,34 +246,23 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_opds_acquire:
-                if(catalogView.getSelectedEntries().length > 0) {
-                    catalogView.getController().handleClickDownloadEntries(
-                        catalogView.getSelectedEntries());
+                if(getSelectedEntries().length > 0) {
+                    mCatalogController.handleClickDownloadEntries(getSelectedEntries());
                 }else {
-                    catalogView.getController().handleClickDownloadAll();
+                    mCatalogController.handleClickDownloadAll();
                 }
 
                 return true;
 
             case R.id.action_opds_deleteitem:
-                if(catalogView.getSelectedEntries().length > 0) {
-                    catalogView.getController().handleClickDeleteEntries(
-                        catalogView.getSelectedEntries());
+                if(getSelectedEntries().length > 0) {
+                    mCatalogController.handleClickDeleteEntries(getSelectedEntries());
                 }
+
+                return true;
         }
 
-
-        if(item.getItemId() == R.id.action_opds_acquire) {
-            if(catalogView.getSelectedEntries().length > 0) {
-                catalogView.getController().handleClickDownloadEntries(
-                    catalogView.getSelectedEntries());
-            }else {
-                catalogView.getController().handleClickDownloadAll();
-            }
-            return true;
-        }else {
-            return super.onOptionsItemSelected(item);
-        }
+        return super.onOptionsItemSelected(item);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -241,10 +289,28 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         mListener = null;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mCatalogController != null) {
+            mCatalogController.handleViewPause();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(mCatalogController != null) {
+            mCatalogController.handleViewDestroy();
+        }
+    }
+
     public void toggleEntrySelected(OPDSEntryCard card) {
         boolean nowSelected = !card.isSelected();
         card.setSelected(nowSelected);
-        UstadJSOPDSEntry[] currentSelection = this.catalogView.getSelectedEntries();
+
+        //TODO: Fix this
+        UstadJSOPDSEntry[] currentSelection = getSelectedEntries();
         int newArraySize = nowSelected ? currentSelection.length + 1 : currentSelection.length -1;
         UstadJSOPDSEntry[] newSelection = new UstadJSOPDSEntry[newArraySize];
 
@@ -261,7 +327,7 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
             }
         }
 
-        this.catalogView.setSelectedEntries(newSelection);
+        setSelectedEntries(newSelection);
     }
 
 
@@ -270,10 +336,10 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     public void onClick(View view) {
         if(view instanceof OPDSEntryCard) {
             OPDSEntryCard card = ((OPDSEntryCard)view);
-            if(this.catalogView.getSelectedEntries().length > 0) {
+            if(getSelectedEntries().length > 0) {
                 toggleEntrySelected(card);
             }else {
-                catalogView.getController().handleClickEntry(card.getEntry());
+                mCatalogController.handleClickEntry(card.getEntry());
             }
         }
     }
@@ -289,6 +355,84 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
         return false;
     }
 
+    @Override
+    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(message);
+        builder.setTitle(title);
+        builder.setPositiveButton(positiveChoice, new DialogInterface.OnClickListener(){
+            public void onClick(DialogInterface dialog, int id) {
+                mCatalogController.handleConfirmDialogClick(true, commandId);
+            }
+        });
+        builder.setNegativeButton(negativeChoice, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                mCatalogController.handleConfirmDialogClick(false, commandId);
+            }
+        });
+        builder.create().show();
+    }
+
+    @Override
+    public void setMenuOptions(String[] menuOptions) {
+        ((CatalogActivity)getActivity()).setMenuOptions(menuOptions);
+    }
+
+    @Override
+    public void setEntryStatus(final String entryId, final int status) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                idToCardMap.get(entryId).setOPDSEntryOverlay(status);
+            }
+        });
+    }
+
+    @Override
+    public void updateDownloadAllProgress(int loaded, int total) {
+
+    }
+
+    @Override
+    public void setDownloadEntryProgressVisible(final String entryId, final boolean visible) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                idToCardMap.get(entryId).setProgressBarVisible(visible);
+            }
+        });
+    }
+
+    @Override
+    public void updateDownloadEntryProgress(final String entryId, final int loaded, final int total) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                int progressPercent = Math.round(((float)loaded/(float)total) * OPDSEntryCard.PROGRESS_ENTRY_MAX);
+                idToCardMap.get(entryId).setDownloadProgressBarProgress(progressPercent);
+            }
+        });
+    }
+
+    @Override
+    public UstadJSOPDSEntry[] getSelectedEntries() {
+        return mSelectedEntries;
+    }
+
+    @Override
+    public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
+        this.mSelectedEntries = entries;
+        UstadJSOPDSFeed thisFeed = mCatalogController.getModel().opdsFeed;
+        for(int i = 0; i < thisFeed.entries.length; i++) {
+            boolean isSelected = false;
+            for(int j = 0; j < entries.length; j++) {
+                if(thisFeed.entries[i].id.equals(entries[j].id)) {
+                    isSelected = true;
+                    break;
+                }
+            }
+
+            idToCardMap.get(thisFeed.entries[i].id).setSelected(isSelected);
+        }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -302,6 +446,12 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
+    }
+
+    public void handleClickMenuItem(int index) {
+        if(mCatalogController != null) {
+            mCatalogController.handleClickMenuItem(index);
+        }
     }
 
 }

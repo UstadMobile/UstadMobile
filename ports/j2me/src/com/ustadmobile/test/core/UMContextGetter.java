@@ -28,36 +28,25 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.view;
+package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import j2meunit.framework.TestCase;
+import javax.microedition.midlet.MIDlet;
 
 /**
- * This class needs to be overriden by the implementation to return an 
- * implementation of the view for that platform.  Use the exact same names
- * and methods
- * 
- * 
+ *
  * @author mike
  */
-public class ViewFactory {
+public class UMContextGetter {
     
-    public static LoginView makeLoginView() {
-        throw new RuntimeException("Not Implemented");
-    };
+    private static Object context; 
     
-    public static CatalogView makeCatalogView() {
-        throw new RuntimeException("Not Implemented");
+    public static void setContext(Object context) {
+        UMContextGetter.context = context;
     }
     
-    /**
-     * This method should return a ContainerView for the given entry.  The entry
-     * must be opened using UstadMobileSystemImpl.openContainer first.  
-     * 
-     * @return ContainerView to be used to show this container.
-     */
-    public static ContainerView makeContainerView() {
-        throw new RuntimeException("Not Implemented");
+    public static Object getContext(TestCase tc) {
+        return context;
     }
     
 }

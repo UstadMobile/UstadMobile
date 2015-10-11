@@ -28,14 +28,34 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.impl;
+package com.ustadmobile.port.j2me.view;
+
+import com.sun.lwuit.Form;
+import java.util.Hashtable;
 
 /**
  *
  * @author mike
  */
-public interface UMProgressListener {
+public class UstadViewFormJ2ME extends Form {
     
-    public void progressUpdated(UMProgressEvent listener);
+    /**
+     * The arguments used to create this view
+     */
+    private Hashtable args;
     
+    private Object context;
+    
+    public UstadViewFormJ2ME(Hashtable args, Object context) {
+        this.args = args;
+        this.context = context;
+    }
+    
+    protected Hashtable getArgs() {
+        return args;
+    }
+    
+    public Object getContext() {
+        return context;
+    }
 }

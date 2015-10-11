@@ -41,46 +41,56 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.ViewFactory;
+import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements LoginView, View.OnClickListener {
 
     private int viewId;
 
-    protected LoginViewAndroid loginView;
+    private LoginController mLoginController;
+
+    protected String mTitle;
+
+    protected String mUsernameHint;
+
+    protected String mPasswordHint;
+
+    protected String mButtonText;
+
+    protected String mRegisterPhoneNumberHint;
+
+    protected String mRegisterNameHint;
+
+    protected String mRegisterGenderMaleLabel;
+
+    protected String mRegisterGenderFemaleLable;
+
+    protected String mRegisterButtonText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UstadMobileSystemImplAndroid.handleActivityCreate(this, savedInstanceState);
-
-        viewId = getIntent().getIntExtra(UstadMobileSystemImplAndroid.EXTRA_VIEWID, -1);
-        loginView = LoginViewAndroid.getViewById(viewId);
-
-        if(loginView == null) {
-            //Android system itself restored the activity
-            LoginController ctrl = new LoginController();
-            loginView = (LoginViewAndroid)ViewFactory.makeLoginView();
-            ctrl.setView(loginView);
-            ctrl.setViewStrings(loginView);
-        }
-
-        loginView.setLoginViewActivity(this);
         setContentView(R.layout.umactivity_login);
 
-        UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),
-                UstadMobileSystemImpl.getInstance().getDirection());
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
 
-        setTitle(loginView.title);
+
+        mLoginController = LoginController.makeControllerForView(this);
+        setTitle("Login");
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
         setSupportActionBar(toolbar);
@@ -90,10 +100,7 @@ public class LoginActivity extends AppCompatActivity {
         viewPager.setAdapter(new LoginPagerAdapter(getSupportFragmentManager()));
         TabLayout tabLayout = (TabLayout)findViewById(R.id.login_sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
-    }
-
-    public int getViewID() {
-        return this.viewId;
+        mLoginController.setViewStrings(this);
     }
 
     public void onStart() {
@@ -132,6 +139,86 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void setController(LoginController controller) {
+
+    }
+
+    @Override
+    public void setTitle(String title) {
+        mTitle = title;
+        super.setTitle(title);
+    }
+
+    @Override
+    public void setUsernameHint(String loginHint) {
+        mUsernameHint = loginHint;
+    }
+
+    @Override
+    public void setPasswordHint(String passwordHint) {
+        mPasswordHint = passwordHint;
+    }
+
+    @Override
+    public void setButtonText(String buttonText) {
+        mButtonText = buttonText;
+    }
+
+    @Override
+    public void setRegisterPhoneNumberHint(String phoneNumberHint) {
+        mRegisterPhoneNumberHint = phoneNumberHint;
+    }
+
+    @Override
+    public void setRegisterNameHint(String nameHint) {
+        mRegisterNameHint = nameHint;
+    }
+
+    @Override
+    public void setRegisterGenderMaleLabel(String maleLabel) {
+        mRegisterGenderMaleLabel = maleLabel;
+    }
+
+    @Override
+    public void setRegisterGenderFemaleLabel(String femaleLabel) {
+        mRegisterGenderFemaleLable = femaleLabel;
+    }
+
+    @Override
+    public void setRegisterButtonText(String registerButtonText) {
+        mRegisterButtonText = registerButtonText;
+    }
+
+    @Override
+    public Object getContext() {
+        return this;
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if(id == R.id.login_button) {
+            String username = ((EditText)findViewById(R.id.login_username)).getText().toString();
+            String password = ((EditText)findViewById(R.id.login_password)).getText().toString();
+            mLoginController.handleClickLogin(username, password);
+        }else if(id == R.id.login_registerbutton) {
+            Hashtable userVals = new Hashtable();
+            int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();
+
+            userVals.put(LoginController.REGISTER_COUNTRY,
+                    new Integer(UstadMobileConstants.COUNTRYDIALINGCODES[selectedCountryNum]));
+            userVals.put(LoginController.REGISTER_PHONENUM,
+                    ((EditText) findViewById(R.id.login_registerphonenum)).getText().toString());
+            userVals.put(LoginController.REGISTER_NAME,
+                    ((EditText)findViewById(R.id.login_registername)).getText().toString());
+            int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
+            userVals.put(LoginController.REGISTER_GENDER,
+                    genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
+            mLoginController.handleClickRegister(userVals);
+        }
     }
 
     public class LoginPagerAdapter extends FragmentStatePagerAdapter {

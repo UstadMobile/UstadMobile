@@ -48,7 +48,7 @@ public class SplashScreenActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UstadMobileSystemImplAndroid.handleActivityCreate(this, savedInstanceState);
+        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
     }
 
@@ -59,7 +59,7 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         impl.handleActivityStart(this);
-        impl.startUI();
+        impl.startUI(this);
 
     }
 

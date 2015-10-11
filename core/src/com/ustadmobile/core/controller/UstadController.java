@@ -36,13 +36,7 @@ import com.ustadmobile.core.view.UstadView;
  *
  * @author mike
  */
-public interface UstadController {
-    
-    /**
-     * Show the form for this controller
-     */
-    public void show();
-    
+public interface UstadController {    
     
     public void setView(UstadView view);
     

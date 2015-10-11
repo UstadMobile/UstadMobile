@@ -125,5 +125,5 @@ public interface CatalogView extends UstadView{
      * @param entries Array of entries to be marked as selected
      */
     public void setSelectedEntries(UstadJSOPDSEntry[] entries);
-        
+    
 }

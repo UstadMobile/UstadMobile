@@ -1,5 +1,6 @@
 package com.toughra.ustadmobile;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.test.ActivityInstrumentationTestCase2;
@@ -29,14 +30,14 @@ public class CatalogActivityTest extends ActivityInstrumentationTestCase2<Catalo
         super.setUp();
 
         //load impl with skipping the locale load (cant be done before an activity is created)
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance(true);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
         String opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
 
         Intent intent = new Intent();
-        intent.putExtra(CatalogActivity.EXTRA_CATALOGURL, opdsURL);
-        intent.putExtra(CatalogActivity.EXTRA_RESMODE, CatalogController.USER_RESOURCE);
-        intent.putExtra(UstadMobileSystemImplAndroid.KEY_CURRENTUSER, TestConstants.LOGIN_USER);
-        intent.putExtra(UstadMobileSystemImplAndroid.KEY_CURRENTAUTH, TestConstants.LOGIN_PASS);
+        intent.putExtra(CatalogController.KEY_URL, opdsURL);
+        intent.putExtra(CatalogController.KEY_RESMOD, CatalogController.SHARED_RESOURCE);
+        intent.putExtra(CatalogController.KEY_FLAGS, CatalogController.CACHE_ENABLED);
 
         setActivityIntent(intent);
     }

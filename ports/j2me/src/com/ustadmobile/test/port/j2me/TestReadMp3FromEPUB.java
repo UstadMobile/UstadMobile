@@ -33,7 +33,6 @@ package com.ustadmobile.test.port.j2me;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ContainerController;
-import com.ustadmobile.core.impl.UMTransferJob;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.ocf.UstadOCF;
@@ -44,6 +43,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
+import com.ustadmobile.test.core.UMContextGetter;
 import j2meunit.framework.TestCase;
 import java.io.InputStream;
 import javax.microedition.media.Manager;
@@ -96,7 +96,7 @@ public class TestReadMp3FromEPUB extends TestCase {
         
         UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL, 
             CatalogController.SHARED_RESOURCE, null, null, 
-            CatalogController.CACHE_ENABLED);
+            CatalogController.CACHE_ENABLED, UMContextGetter.getContext(this));
         
         Thread.sleep(5000);
         
@@ -104,12 +104,13 @@ public class TestReadMp3FromEPUB extends TestCase {
         Thread.sleep(5000);
         String zipType = "zip:///";
         String mimetype = "application/epub+zip";
-        String openPath = impl.openContainer(mp3EPUBTestFile, mimetype);
-        ContainerController controller = ContainerController.makeFromEntry(opdsEntry, openPath, mp3EPUBTestFile, mimetype);
-        HTTPUtils.httpDebug("showing..");
-        UstadOCF ocf = controller.getOCF();
-        UstadJSOPF opf = controller.getOPF(0);
-        controller.show();
+        //ContainerController controller = ContainerController.makeFromEntry(
+        //    opdsEntry, openPath, mp3EPUBTestFile, mimetype);
+        //String openPath = impl.openContainer(mp3EPUBTestFile, mimetype);
+        //ContainerController controller = ContainerController.makeFromEntry(opdsEntry, openPath, mp3EPUBTestFile, mimetype);
+        //HTTPUtils.httpDebug("showing..");
+        //UstadOCF ocf = controller.getOCF();
+        //UstadJSOPF opf = controller.getOPF(0);
         
 //        //make sure if the entry is around... we remove it...
 //        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[0].id, 

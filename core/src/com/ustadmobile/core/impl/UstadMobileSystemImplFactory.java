@@ -36,6 +36,9 @@ package com.ustadmobile.core.impl;
  */
 public class UstadMobileSystemImplFactory {
     
+    /**
+     * @return 
+     */
     public static UstadMobileSystemImpl createUstadSystemImpl() {
         throw new RuntimeException("Error 42");
     }
