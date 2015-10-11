@@ -153,6 +153,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
         if (status == STATUS_REQUESTED) {
             fixedPage = false;
+        }else if(status == STATUS_CONNECTED) {
+            view.handlePageChange(url);
         }
 
         if (status == STATUS_DISPLAYED && fixedPage == false) {

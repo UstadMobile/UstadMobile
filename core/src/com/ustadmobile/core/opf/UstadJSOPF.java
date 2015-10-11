@@ -289,5 +289,20 @@ public class UstadJSOPF {
         return linearSpine;
     }
     
-    
+     /**
+     * Find the position of a particular spine item
+     * 
+     * @param href the href to find the position of in the spine (as it appears in the OPF (relative)
+     * @return position of that item in the linear spine or -1 if not found
+     */
+    public int getLinearSpinePositionByHREF(String href) {
+        String[] linearSpine = getLinearSpineURLS();
+        for(int i = 0; i < linearSpine.length; i++) {
+            if(linearSpine[i].equals(href)) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
 }

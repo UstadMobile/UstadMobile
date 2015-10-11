@@ -172,7 +172,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             }
             UstadOCF ocf = controller.getOCF();
             HTTPUtils.httpDebug("getting opf");
-            UstadJSOPF opf = controller.getOPF(0);
+            opf = controller.getOPF(0);
             HTTPUtils.httpDebug("getting spine");
             spineURLs = opf.getLinearSpineURLS();
             HTTPUtils.httpDebug("getting requesthandler");
@@ -227,6 +227,25 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
 
     public void setContainerTitle(String containerTitle) {
         setTitle(containerTitle);
+    }
+    
+    /**
+     * Method to be called from the HTMLCallback when a new page is loaded -
+     * thus keeping the spine position tracker updated
+     * 
+     * @param newURL : the page that is in the process of being loaded (absolute url)
+     */
+    protected void handlePageChange(String newURL) {
+        String relativeTo = UMFileUtil.getParentFilename(this.opfURL);
+        if(relativeTo.charAt(relativeTo.length()-1) != '/') {
+            relativeTo += '/';
+        }
+        
+        String spineHREF = newURL.substring(relativeTo.length());
+        int spinePos = opf.getLinearSpinePositionByHREF(spineHREF);
+        if(spinePos != -1 && spinePos != currentIndex) {
+            this.currentIndex = spinePos;
+        }
     }
     
     public class ContainerDocumentRequestHandler implements DocumentRequestHandler {
