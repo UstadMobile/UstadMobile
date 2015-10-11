@@ -349,7 +349,7 @@ public abstract class UstadMobileSystemImpl {
      * @param stmt statement to Queue
      * @return true if successfully queued, false otherwise
      */
-    public abstract boolean queueTinCanStatement(JSONObject stmt);
+    public abstract boolean queueTinCanStatement(JSONObject stmt, Object context);
     
     /**
      * Gets the cache directory for the platform for either user specific

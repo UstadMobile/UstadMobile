@@ -245,7 +245,7 @@ public class HTTPUtils {
                         hKey = headerKeys.nextElement().toString();
                         hValue = optionalHeaders.get(hKey).toString();
                         if(!hKey.equals("") && !hValue.equals("")){
-                            httpDebug("setting key" + hKey);
+                            httpDebug("setting key " + hKey);
                             httpConn.setRequestProperty(hKey, hValue);
                         }
                 }
@@ -264,6 +264,9 @@ public class HTTPUtils {
                     os = httpConn.openOutputStream();
                     httpDebug("writing params-getBytes()");
                     os.write(postBody);
+                    httpDebug("flushing..");
+                    os.flush();
+                    httpDebug("flushed.");
                 }else{
                     //Content-Length to be set
                     httpDebug("setting content length " + String.valueOf(params.getBytes().length));
@@ -280,22 +283,27 @@ public class HTTPUtils {
             
             } 
             
-            // Read Response from the Server
-            int response_code=httpConn.getResponseCode();
-            httpDebug("response code is : " + String.valueOf(response_code));
-            is = httpConn.openInputStream();
-            
-            byte[] buf = new byte[1024];
-            int bytesRead = -1;
-            while ((bytesRead = is.read(buf)) != -1) {
-                bout.write(buf, 0, bytesRead);
+            try{
+                // Read Response from the Server
+                int response_code=httpConn.getResponseCode();
+                httpDebug("response code is : " + String.valueOf(response_code));
+                is = httpConn.openInputStream();
+
+                byte[] buf = new byte[1024];
+                int bytesRead = -1;
+                while ((bytesRead = is.read(buf)) != -1) {
+                    bout.write(buf, 0, bytesRead);
+                }
+
+                byte[] response = null;
+                response = bout.toByteArray();
+                String res = new String(response);
+                Hashtable responseHeaders = null;
+                httpResult = new HTTPResult(response, response_code, responseHeaders);
+            }catch(Exception ex){
+                ex.printStackTrace();
+                return new HTTPResult(null, 400, null);
             }
-            
-            byte[] response = null;
-            response = bout.toByteArray();
-            String res = new String(response);
-            Hashtable responseHeaders = null;
-            httpResult = new HTTPResult(response, response_code, responseHeaders);
         }catch(IOException e){  
             e.printStackTrace();
         }catch(SecurityException e) {
