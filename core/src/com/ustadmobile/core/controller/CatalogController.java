@@ -521,7 +521,8 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                 impl.getActiveUser(context)) : impl.getSharedContentDir();
         
         String looseFilePath = UMFileUtil.joinPaths(new String[] {
-            impl.getCacheDir(USER_RESOURCE, context), "cache-loose"});
+            impl.getCacheDir(incUser ? USER_RESOURCE : SHARED_RESOURCE, context), 
+            "cache-loose"});
         
         boolean[] userOPDSFiles = new boolean[opdsFiles.length];
         UMUtil.fillBooleanArray(userOPDSFiles, true, opdsUserStartIndex, 
@@ -608,8 +609,12 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                 
                 Hashtable args = new Hashtable();
                 args.put(KEY_URL, url);
-                args.put(KEY_HTTPUSER, impl.getActiveUser(context));
-                args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(context));
+                
+                if(impl.getActiveUser(context) != null) {
+                    args.put(KEY_HTTPUSER, impl.getActiveUser(context));
+                    args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(context));
+                }
+                
                 args.put(KEY_RESMOD, new Integer(getResourceMode()));
                 args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
                 
@@ -831,7 +836,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         if(url.startsWith("opds:///")) {
             if(url.equals(OPDS_PROTO_DEVICE)) {
                 opdsFeed = makeDeviceFeed(
-                    impl.getStorageDirs(SHARED_RESOURCE | USER_RESOURCE, context), 
+                    impl.getStorageDirs(resourceMode, context), 
                     resourceMode, context);
             }
         }else {
