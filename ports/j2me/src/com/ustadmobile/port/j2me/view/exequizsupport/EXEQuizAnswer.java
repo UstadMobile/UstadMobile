@@ -30,7 +30,12 @@
  */
 package com.ustadmobile.port.j2me.view.exequizsupport;
 
+import com.sun.lwuit.html.HTMLCallback;
+import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import java.util.Vector;
 
 
 /**
@@ -54,6 +59,8 @@ public class EXEQuizAnswer {
     
     private HTMLElement feedbackElementParent;
     
+    private HTMLComponent htmlC;
+    
     private int feedbackElPosition;
     
     private boolean feedbackShowing = true;
@@ -66,10 +73,11 @@ public class EXEQuizAnswer {
      * @param answerEl the HTMLElement containing the answer itself (e.g. text and radio button)
      * @param formEl The form element containing the entire question form (used to find the feedback element)
      */
-    public EXEQuizAnswer(int answerIndex, EXEQuizQuestion question, HTMLElement answerEl, HTMLElement formEl) {
+    public EXEQuizAnswer(int answerIndex, EXEQuizQuestion question, HTMLElement answerEl, HTMLElement formEl, HTMLComponent htmlC) {
         this.answerIndex = answerIndex;
         this.question = question;
         this.answerElement = answerEl;
+        this.htmlC = htmlC;
         setupFromElement(answerEl, formEl);
     }
     
@@ -146,6 +154,16 @@ public class EXEQuizAnswer {
         if(!feedbackShowing && feedbackElement != null) {
             feedbackElementParent.addChild(feedbackElement);
             feedbackShowing = true;
+            
+            //see if ther is a sound file here
+            Vector audioTags = feedbackElement.getDescendantsByTagId(HTMLElement.TAG_AUDIO);
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 596, ""+audioTags.size());
+            if(audioTags != null && audioTags.size() > 0 && htmlC.getHTMLCallback() != null) {
+                HTMLCallback htmlCB = htmlC.getHTMLCallback();
+                HTMLElement audioEl = (HTMLElement)audioTags.elementAt(0);
+                htmlCB.mediaPlayRequested(HTMLCallback.MEDIA_AUDIO, HTMLCallback.MEDIA_PLAY, 
+                    htmlC, null, audioEl);
+            }
         }
     }
     

@@ -83,7 +83,8 @@ public class EXEQuizQuestion {
         
         for(int i = 0; i < answerEls.size(); i++) {
             HTMLElement answerEl = (HTMLElement)answerEls.elementAt(i);
-            EXEQuizAnswer answer = new EXEQuizAnswer(i, this, answerEl, qFormEl);
+            EXEQuizAnswer answer = new EXEQuizAnswer(i, this, answerEl, qFormEl,
+                htmlC);
             answers.addElement(answer);
         }
         

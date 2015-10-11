@@ -279,7 +279,7 @@ public abstract class UstadMobileSystemImpl {
         String activeUser = getActiveUser(context);
         String activeUserAuth = getActiveUserAuth(context);
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
-                
+        
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {

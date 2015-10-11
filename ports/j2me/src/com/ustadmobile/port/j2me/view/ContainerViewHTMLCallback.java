@@ -217,8 +217,11 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
             timer = new Timer();
         }
 
+        
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 598, mediaElement.getTagName());
         timer.schedule(new TimerTask() {
             public void run() {
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 594, mediaElement.getTagName());
                 boolean isPlaying = false;
                 InputStream in = null;
                 String source = mediaElement.getAttributeById(HTMLElement.ATTR_SRC);
@@ -230,22 +233,27 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
                         source = srcTag.getAttributeById(HTMLElement.ATTR_SRC);
                     }
                 }
-
+                
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 592, source);
+                
                 if (source != null) {
                     try {
                         String fullURI = UMFileUtil.resolveLink(
                                 htmlC.getPageURL(), source);
+                        UstadMobileSystemImpl.l(UMLog.DEBUG, 590, fullURI);
                         String pathInZip = fullURI.substring(
                                 UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                        String mediaFileExtension = UMFileUtil.getExtension(src);
+                        UstadMobileSystemImpl.l(UMLog.DEBUG, 588, pathInZip);
+                        String mediaFileExtension = UMFileUtil.getExtension(source);
+                        UstadMobileSystemImpl.l(UMLog.DEBUG, 586, mediaFileExtension);
                         Object mediaTypeObj = mediaExtensions.get(mediaFileExtension);
 
                         UstadMobileSystemImpl.l(UMLog.VERBOSE, 427, pathInZip
                                 + ':' + mediaFileExtension + ':' + mediaTypeObj);
 
-                        in = view.containerZip.openInputStream(pathInZip);
-
                         if (mediaTypeObj != null) {
+                            in = view.containerZip.openInputStream(pathInZip);
+                            UstadMobileSystemImpl.l(UMLog.DEBUG, 584, fullURI);
                             isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in,
                                     (String) mediaTypeObj);
                         } else {

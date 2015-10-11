@@ -914,7 +914,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     }
 
     public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException{
-        l(UMLog.DEBUG, 561, fileURI);
+        l(UMLog.DEBUG, 599, fileURI);
         boolean append = (flags & FILE_APPEND) == FILE_APPEND;
         
         FileConnection con = null;
@@ -958,7 +958,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
      * {@inheritDoc}
      */
     public InputStream openFileInputStream(String fileURI) throws IOException {
-        l(UMLog.DEBUG, 563, fileURI);
+        l(UMLog.DEBUG, 599, fileURI);
         InputStream in = null;
         IOException e = null;
         try {
