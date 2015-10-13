@@ -5,8 +5,7 @@
 package com.ustadmobile.test.port.j2me;
 
 import com.sun.lwuit.Form;
-import com.ustadmobile.port.j2me.app.forms.TestForm3;
-import com.ustadmobile.port.j2me.app.forms.TestForm4;
+import com.ustadmobile.port.j2me.app.forms.CustomLWUITDynamicForm;
 import j2meunit.framework.TestCase;
 
 
@@ -21,7 +20,7 @@ public class TestCustomLWUIT extends TestCase {
     
     public void runTest() throws Throwable{
         assertEquals("Simple Test OK", 2, 1+1);
-        TestForm4 form = new TestForm4();
+        CustomLWUITDynamicForm form = new CustomLWUITDynamicForm();
         form.show();
         form.setTitle("Custom LWUIT Test..");
         int count = 0;

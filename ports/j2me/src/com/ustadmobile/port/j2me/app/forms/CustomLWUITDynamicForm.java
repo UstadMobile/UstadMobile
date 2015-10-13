@@ -20,14 +20,14 @@ import java.util.Hashtable;
  *
  * @author varuna
  */
-public class TestForm4 extends Form implements ActionListener{
+public class CustomLWUITDynamicForm extends Form implements ActionListener{
     
     private int CMD_RANDOM1 = 1;
     private int CMD_RANDOM2 = 2;
    
     private Hashtable entryIdToButtons;
     
-    public TestForm4() {
+    public CustomLWUITDynamicForm() {
         
         //Set Layout of the form.
         BoxLayout boxLayout = new BoxLayout(BoxLayout.Y_AXIS);

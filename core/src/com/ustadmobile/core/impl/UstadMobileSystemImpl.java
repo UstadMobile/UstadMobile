@@ -726,14 +726,21 @@ public abstract class UstadMobileSystemImpl {
      * @throws IOException if something goes wrong with the request
      * @return HTTPResult object containing the server response
      */
-    public abstract HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters, String method) throws IOException;
+    public abstract HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters, String method, byte[] postBody) throws IOException;
     
     
     /**
      * Do an HTTP request using the default method (GET)
      */
     public HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters) throws IOException{
-        return makeRequest(url, headers, postParameters, HTTPResult.GET);
+        return makeRequest(url, headers, postParameters, HTTPResult.GET, null);
+    }
+
+    /**
+    * Do an HTTP request with no PostBody given
+    */
+    public HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters, String method) throws IOException{
+        return makeRequest(url, headers, postParameters, method, null);
     }
     
     /**

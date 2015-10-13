@@ -28,23 +28,38 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.port.j2me;
+package com.ustadmobile.test.core;
 
-import com.ustadmobile.port.j2me.app.HTTPUtils;
-import com.ustadmobile.core.impl.HTTPResult;
-import j2meunit.framework.TestCase;
+/* $if umplatform == 2  $ */
+    import org.j2meunit.framework.TestCase;
+ /* $else$
+    import junit.framework.TestCase;
+$endif$ */
+
+import com.ustadmobile.core.controller.LoginController;
+import java.io.IOException;
+import java.util.Hashtable;
 
 /**
  *
- * @author varuna
+ * @author mike
  */
-public class TestSimpleHTTP extends TestCase {
-    public TestSimpleHTTP(){
-        setName("TestSimpleHTTP Test");
-    }
+public class TestLoginRegisterUser extends TestCase {
     
-    public void runTest() throws Throwable{
-        assertEquals("HTTP Simple Test OK", 2, 1+1);
+    public TestLoginRegisterUser() {
         
     }
+    
+    public void testLoginRegister() throws IOException{
+        Hashtable registerParams = new Hashtable();
+        registerParams.put("phonenumber", "+9641234567");
+        registerParams.put("gender", "f");
+        registerParams.put("name", "Unit Testing");
+        
+        String serverSays = LoginController.registerNewUser(registerParams, 
+            TestConstants.REGISTER_URL);
+        assertNotNull("Can register user: server says " + serverSays, 
+            serverSays);
+    }
+    
 }

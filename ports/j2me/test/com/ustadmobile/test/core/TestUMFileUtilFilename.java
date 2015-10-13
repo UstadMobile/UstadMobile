@@ -28,43 +28,40 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.port.j2me;
+package com.ustadmobile.test.core;
 
-/* $if umplatform == 2  $*/
-    import j2meunit.framework.TestCase;
- /* $else$ 
+
+/* $if umplatform == 2  $ */
+    import org.j2meunit.framework.TestCase;
+ /* $else$
     import junit.framework.TestCase;
- $endif$ */
+$endif$ */
 
-import com.ustadmobile.core.controller.LoginController;
-import java.io.IOException;
-import com.ustadmobile.test.core.TestConstants;
+import com.ustadmobile.core.util.UMFileUtil;
 
 
-/** 
-*
+/**
+ *
  * @author mike
  */
-public class CoreLoginTest extends TestCase{
+public class TestUMFileUtilFilename extends TestCase{
     
-    public CoreLoginTest() {
+    public void testFileUtilFilename() {
+        assertEquals("Will return the same for a name only entry", 
+            UMFileUtil.getFilename("testfile.txt"), "testfile.txt");
+        assertEquals("Will return the same for a name only entry with trailing /", 
+            UMFileUtil.getFilename("somedir/"), "somedir/");
+        assertEquals("Will cut the path off and return filnemae", 
+            UMFileUtil.getFilename("/somedir/file.txt"), "file.txt");
+        assertEquals("Will cut off query string", 
+            UMFileUtil.getFilename("http://someplace.com/somedir/file.txt"), 
+            "file.txt");
+        
+        assertEquals("Will correctly find extension: mp3",
+            "mp3", UMFileUtil.getExtension("http://server.com/dir/file.mp3"));
+        assertEquals("Will return null in case of no extension",
+            null, UMFileUtil.getExtension("http://server.com/some/dir"));
     }
     
-    public void setUp() {
-    }
-    
-    public void tearDown() {
-    }
-
-    public void testLogin() throws IOException{
-        int loginOKResult = LoginController.authenticate(
-                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
-    }
-    
-    public void runTest() throws IOException{
-        testLogin();
-    }
     
 }

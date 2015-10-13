@@ -114,14 +114,7 @@ public class FileUtils {
         }
         if(bestRoot.path != null || bestRoot.path != ""){
             if(bestRoot.path.startsWith(FILE_PREFIX + FILE_SEP)){
-                try {
-                    HTTPUtils.makeHTTPRequest(
-                    "http://umcloud1.ustadmobile.com/NullSDCard/"+
-                            "",
-                            null, null);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                
             }
             
             return bestRoot;

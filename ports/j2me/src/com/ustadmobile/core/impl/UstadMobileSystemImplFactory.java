@@ -4,10 +4,7 @@
  */
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.port.j2me.app.FileUtils;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import java.io.IOException;
 
 /*
 You would use the system implementation like so:

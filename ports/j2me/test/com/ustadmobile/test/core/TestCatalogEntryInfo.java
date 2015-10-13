@@ -28,43 +28,38 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.port.j2me;
+package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import j2meunit.framework.TestCase;
-import com.ustadmobile.port.j2me.app.FileUtils;
-import javax.microedition.io.Connector;
-import javax.microedition.io.file.FileConnection;
+/* $if umplatform == 2  $ */
+    import org.j2meunit.framework.TestCase;
+ /* $else$
+    import junit.framework.TestCase;
+$endif$ */
+
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 
 /**
  *
- * @author varuna
+ * @author mike
  */
-public class TestRename extends TestCase {
-    private UstadMobileSystemImpl ustadMobileSystemImpl;
-    public TestRename(){
-        setName("TestRename Test");
+public class TestCatalogEntryInfo extends TestCase {
+    
+    public void testCatalogEntryInfo() {
+        CatalogEntryInfo testInfo = new CatalogEntryInfo();
+        testInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        testInfo.srcURLs = new String[]{"http://www.server1.com/file.epub",
+            "http://www.server2.com/file.epub"};
+        testInfo.fileURI = "/some/file/path/file.epub";
+        testInfo.mimeType = "application/epub+zip";
+        
+        String infoStr = testInfo.toString();
+        CatalogEntryInfo restoreEntry = CatalogEntryInfo.fromString(infoStr);
+        
+        assertEquals(testInfo.acquisitionStatus, restoreEntry.acquisitionStatus);
+        assertEquals(testInfo.srcURLs[0], restoreEntry.srcURLs[0]);
+        assertEquals(testInfo.srcURLs[1], restoreEntry.srcURLs[1]);
+        assertEquals(testInfo.fileURI, restoreEntry.fileURI);
+        assertEquals(testInfo.mimeType, restoreEntry.mimeType);
     }
     
-    public void runTest() throws Throwable{
-        //ustadMobileSystemImpl = UstadMobileSystemImplFactory.createUstadSystemImpl();
-        String getSharedContentDir = ustadMobileSystemImpl.getSharedContentDir();
-        String fileURIFrom = FileUtils.joinPath(getSharedContentDir, "from.txt");
-        FileConnection fc = null;
-        fc = (FileConnection) Connector.open(fileURIFrom,
-                Connector.READ_WRITE);
-        if (!fc.exists()){
-            fc.create();
-        }
-        if (fc!=null){
-            fc.close();
-        }
-        String fileURITo = FileUtils.joinPath(getSharedContentDir, "to.txt");
-        ustadMobileSystemImpl.renameFile(fileURIFrom, fileURITo);
-        if (FileUtils.checkFile(fileURITo)){
-            assertTrue(true);
-        }else{
-            assertTrue(false);
-        }
-    }
 }

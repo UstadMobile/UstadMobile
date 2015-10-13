@@ -28,43 +28,41 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.forms;
+package com.ustadmobile.test.core;
 
-import com.sun.lwuit.Form;
-import com.sun.lwuit.Label;
-import com.sun.lwuit.TextField;
-import com.sun.lwuit.layouts.BoxLayout;
+/* $if umplatform == 2  $ */
+    import org.j2meunit.framework.TestCase;
+ /* $else$
+    import junit.framework.TestCase;
+$endif$ */
 
-/**
- *
- * @author varuna
+import com.ustadmobile.core.controller.LoginController;
+import java.io.IOException;
+
+/** 
+*
+ * @author mike
  */
-public class TestForm {
+public class TestLogin extends TestCase{
     
-    private static Form f;
+    public TestLogin() {
+    }
     
-    public TestForm(Form d){
-        f = d;
+    public void setUp() {
     }
-    public TestForm(){
-        
+    
+    public void tearDown() {
     }
-    public static Form loadTestForm(){
-        
-        f = new Form("Hello, LWUIT!");
-        f.setTitle("Test Fom");
-        
-        /** Initialising the form as a box layout**/
-        BoxLayout bLayout = new BoxLayout(BoxLayout.Y_AXIS);
-        f.setLayout(bLayout);
-        
-        /** Display and render the form elements.**/
-        Label courseIDLabel = new Label("Label");
-        f.addComponent(courseIDLabel);
-        
-        TextField idTextField = new TextField();
-        f.addComponent(idTextField);
-        return f;
+
+    public void testLogin() throws IOException{
+        int loginOKResult = LoginController.authenticate(
+                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                TestConstants.LOGIN_URL);
+        assertEquals("Login OK returns 200", 200, loginOKResult);
+    }
+    
+    public void runTest() throws IOException{
+        testLogin();
     }
     
 }
