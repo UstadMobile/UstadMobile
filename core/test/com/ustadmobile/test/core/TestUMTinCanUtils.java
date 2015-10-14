@@ -56,7 +56,7 @@ public class TestUMTinCanUtils extends TestCase{
         String testAcctStr = testAcct.toString();
         assertEquals("Correctly set name on account", testAcct.getString("name"), 
                 TestConstants.LOGIN_USER);
-        assertEquals("Correctly set homepage", testAcct.getString("homepage"),
+        assertEquals("Correctly set homepage", testAcct.getString("homePage"),
             TestConstants.XAPI_SERVER);
         
         long twoMinThirtySecInMs = (60+60+30) * 1000;

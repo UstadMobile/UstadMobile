@@ -63,6 +63,7 @@ import com.ustadmobile.port.android.view.LoginActivity;
 import android.os.Build;
 import android.util.Log;
 
+import org.json.JSONObject;
 import org.xmlpull.v1.*;
 
 
@@ -140,6 +141,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public String getImplementationName() {
         return null;
+    }
+
+    @Override
+    public boolean isJavascriptSupported() {
+        return true;
+    }
+
+    @Override
+    public boolean queueTinCanStatement(JSONObject stmt, Object context) {
+        return false;
     }
 
     /**
@@ -541,7 +552,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      * @inheritDoc
      */
     @Override
-    public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method) throws IOException {
+    public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method, byte[] postBody) throws IOException {
         URL url = new URL(httpURL);
         HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 
