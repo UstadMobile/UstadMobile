@@ -54,13 +54,10 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
-import com.ustadmobile.port.j2me.app.FileUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
-import java.util.Timer;
-import java.util.TimerTask;
 import org.json.me.JSONObject;
 
 /**
@@ -201,6 +198,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
             htmlC.setIgnoreCSS(true);
             htmlC.setEventsEnabled(true);
+            htmlC.setAutoAddSubmitButton(false);
             addCommand(cmdBack);
             addCommand(cmdForward);
             addCommandListener(this);
@@ -223,6 +221,22 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     }
     
     /**
+     * Return the TinCan ID of the current page
+     * 
+     * @return 
+     */
+    public String getCurrentTinCanPageID() {
+        return UMFileUtil.joinPaths(new String[]{
+            UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id, 
+            spineURLs[currentIndex]});
+    }
+    
+    public String getContainerTinCanID() {
+        return UMFileUtil.joinPaths(new String[]{
+            UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id});
+    }
+    
+    /**
      * Make a tincan statement about the user viewing the current page and
      * send it to the system implementation to be queued.
      */
@@ -230,11 +244,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(lastPageChangeTime != -1 && impl.getActiveUser(getContext()) != null) {
             long duration =  System.currentTimeMillis() - lastPageChangeTime;
-            JSONObject actor = UMTinCanUtil.makeActorFromUserAccount(
-                impl.getActiveUser(getContext()), 
-                UstadMobileSystemImpl.getInstance().getAppPref(
-                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER));
+            JSONObject actor = UMTinCanUtil.makeActorFromActiveUser(getContext());
             String currentPage = spineURLs[currentIndex];
             
             //TODO: get language of the page itself or from OPF
@@ -242,9 +252,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             if(htmlC != null && htmlC.getTitle() != null) {
                 title = htmlC.getTitle();
             }
-            String objectID = FileUtils.joinPath(
-                    UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id);
-            JSONObject stmt = UMTinCanUtil.makePageViewStmt(objectID, currentPage,
+            
+            String tinCanId = UMFileUtil.joinPaths(new String[] {
+                UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id, currentPage});
+            JSONObject stmt = UMTinCanUtil.makePageViewStmt(tinCanId,
                 title, "en-US", duration, actor);
             UstadMobileSystemImpl.getInstance().queueTinCanStatement(stmt, getContext());
         }
@@ -265,6 +276,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 
         htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
         this.currentIndex = pageIndex;
+        lastPageChangeTime = System.currentTimeMillis();
     }
 
     public void actionPerformed(ActionEvent ae) {

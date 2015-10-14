@@ -66,7 +66,7 @@ public class TestUMTinCanUtils extends TestCase{
         String pageID = "somepage";
         String pageTitle = "Page Title";
         
-        JSONObject pageStmt = UMTinCanUtil.makePageViewStmt(tcParent, pageID, 
+        JSONObject pageStmt = UMTinCanUtil.makePageViewStmt(tcParent+ "/" + pageID, 
             pageTitle, "en-US", twoMinThirtySecInMs, testActor);
         String pageStmtSTr = pageStmt.toString();
         

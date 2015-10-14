@@ -70,6 +70,10 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     boolean fixedPage = true;
 
     static Hashtable mediaExtensions;
+    
+    String containerTinCanID;
+    
+    Object context;
 
     static {
         mediaExtensions = new Hashtable();
@@ -81,12 +85,15 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     
     public static final int[] MCQ_FORM_TAGIDS = new int[] { HTMLElement.TAG_FORM };
     
-    public ContainerViewHTMLCallback() {
+    public ContainerViewHTMLCallback(String containerTinCanID, Object context) {
         super();
+        this.containerTinCanID = containerTinCanID;
+        this.context = context;
     }
 
     public ContainerViewHTMLCallback(ContainerViewJ2ME view) {
         this.view = view;
+        this.context = view.getContext();
     }
 
     /**
@@ -99,14 +106,30 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     private boolean findEXEMCQs(HTMLComponent htmlC) {
         Vector quizElements = htmlC.getDOM().getDescendantsByClass("MultichoiceIdevice", 
                 IDEVICE_TAG_IDS);   
+        
+        if(quizElements.size() == 0) {
+            return false;
+        }
+        
+        if(containerTinCanID == null && view != null) {
+            containerTinCanID = view.getContainerTinCanID();
+        }
+        
         mcqQuizzes = new Hashtable();
+        String pageTinCanID = containerTinCanID + '/' + 
+                UMFileUtil.getFilename(htmlC.getPageURL());
         for(int i = 0; i < quizElements.size(); i++) {
             EXEQuizIdevice quizDevice = new EXEQuizIdevice(
-                    (HTMLElement)quizElements.elementAt(i), htmlC);
+                    (HTMLElement)quizElements.elementAt(i), htmlC, context, 
+                    pageTinCanID, i);
             mcqQuizzes.put(quizDevice.getID(), quizDevice);
         }
         
-        return mcqQuizzes.size() > 0;
+        return true;
+    }
+    
+    public Hashtable getMCQQuizzes() {
+        return mcqQuizzes;
     }
 
     /**
@@ -151,10 +174,14 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     }
 
     public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
+        System.out.println("Status: " + status + " url " + url);
         if (status == STATUS_REQUESTED) {
             fixedPage = false;
         }else if (status == STATUS_DISPLAYED && fixedPage == false) {
-            view.handlePageChange(url);
+            if(view != null) {
+                view.handlePageChange(url);
+            }
+            
             boolean modified = false;
             mcqQuizzes = new Hashtable();
 

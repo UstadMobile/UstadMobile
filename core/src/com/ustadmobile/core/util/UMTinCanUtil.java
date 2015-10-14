@@ -31,6 +31,7 @@
 package com.ustadmobile.core.util;
 
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 /* $if umplatform == 2  $
@@ -62,9 +63,8 @@ public class UMTinCanUtil {
      * 
      * @return JSONObject representing the TinCan stmt, null if error
      */
-    public static JSONObject makePageViewStmt(String tcParent, String pageName, String pageTitle, String pageLang, long duration, JSONObject actor) {
+    public static JSONObject makePageViewStmt(String tinCanID, String pageTitle, String pageLang, long duration, JSONObject actor) {
         JSONObject stmtObject = new JSONObject();
-        String tinCanID = tcParent + "/" + pageName;
         try {
             stmtObject.put("actor", actor);
             
@@ -95,8 +95,7 @@ public class UMTinCanUtil {
             //Uncomment if required for debugging
             //String totalStmtStr = stmtObject.toString();
         }catch(JSONException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 199, tcParent + '/' + pageName, 
-                e);
+            UstadMobileSystemImpl.l(UMLog.ERROR, 199, tinCanID, e);
         }
         
         return stmtObject;
@@ -179,4 +178,48 @@ public class UMTinCanUtil {
         
         return actorObj;
     }
+    
+    /**
+     * Make an actor JSON as per makeActorFromuserAccount for the currently
+     * logged in user against the server that they logged in using
+     * 
+     * @see UMTinCanUtil#makeActorFromUserAccount(java.lang.String, java.lang.String) 
+     * @param context Current context object
+     * @return JSON Object representing the currently logged in user.
+     */
+    public static JSONObject makeActorFromActiveUser(Object context) {
+        return UMTinCanUtil.makeActorFromUserAccount(
+                UstadMobileSystemImpl.getInstance().getActiveUser(context), 
+                UstadMobileSystemImpl.getInstance().getAppPref(
+                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER));
+    }
+    
+    /**
+     * Make a JSON object representing the verb in the form of:
+     * {
+     *  id : (id)
+     *  display: {
+     *    "(lang)" : "(display)"
+     *  }
+     * }
+     * 
+     * @param id ID of the verb e.g. http://adlnet.gov/expapi/verbs/answered
+     * @param lang lang for display value: e.g. en-US
+     * @param display text to represent verb in that language : e.g. answered
+     * @return 
+     */
+    public static JSONObject makeVerbObject(String id, String lang, String display) {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("id", id);
+            obj.put("display", makeLangMapVal(lang, display));
+        }catch(JSONException je) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 195, "UMTinCanUtil.makeVerbObject", je);
+        }
+        
+        return obj;
+    }
+    
+    
 }

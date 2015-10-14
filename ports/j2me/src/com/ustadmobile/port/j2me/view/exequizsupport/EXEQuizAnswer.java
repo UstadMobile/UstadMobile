@@ -36,10 +36,15 @@ import com.sun.lwuit.html.HTMLElement;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import java.util.Vector;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
+import org.json.me.JSONArray;
+import org.json.me.JSONException;
+import org.json.me.JSONObject;
 
 
 /**
@@ -53,9 +58,9 @@ public class EXEQuizAnswer implements PlayerListener{
     
     private EXEQuizQuestion question;
     
-    private HTMLElement answerElement;
+    protected HTMLElement answerElement;
     
-    private HTMLElement answerContentElement;
+    protected HTMLElement answerContentElement;
     
     private HTMLElement inputElement;
         
@@ -102,6 +107,10 @@ public class EXEQuizAnswer implements PlayerListener{
         answerContentElement = (HTMLElement)answerEl.getElementById("answer-" 
             + answerID);
         hideFeedback();
+    }
+    
+    public String getID() {
+        return inputElement.getAttributeById(HTMLElement.ATTR_ID);
     }
         
     public int getAnswerIndex() {
@@ -159,6 +168,8 @@ public class EXEQuizAnswer implements PlayerListener{
      */
     public void showFeedback() {
         if(!feedbackShowing && feedbackElement != null) {
+            UstadMobileSystemImpl.getInstance().queueTinCanStatement(makeTinCanStmt(),
+                question.iDevice.context);
             feedbackElementParent.addChild(feedbackElement);
             feedbackShowing = true;
             
@@ -180,6 +191,43 @@ public class EXEQuizAnswer implements PlayerListener{
                 goRedirect();
             }
         }
+    }
+    
+    /**
+     * Make a statement for the selection of the given answer
+     * 
+     * TODO: Move section generating the tincan definition to the question
+     * @return 
+     */
+    public JSONObject makeTinCanStmt() {
+        JSONObject stmt = new JSONObject();
+        String stmtStr =  null;
+        try {
+            stmt.put("object", question.getTinCanObject());
+            stmt.put("actor", UMTinCanUtil.makeActorFromActiveUser(
+                    question.iDevice.context));
+            stmt.put("verb", UMTinCanUtil.makeVerbObject(
+                "http://adlnet.gov/expapi/verbs/answered", "en-US", "answered"));
+            JSONObject resultObj = new JSONObject();
+            resultObj.put("response", getID());
+            stmt.put("result", resultObj);
+            
+            JSONObject context = new JSONObject();
+            JSONObject contextActivities = new JSONObject();
+            JSONArray parentArr = new JSONArray();
+            JSONObject parentObj = new JSONObject();
+            
+            parentObj.put("id", question.iDevice.pageTinCanID);
+            parentArr.put(parentObj);
+            contextActivities.put("parent", parentArr);
+            context.put("contextActivities", contextActivities);
+            stmt.put("context", context);
+            stmtStr = stmt.toString();
+        }catch(JSONException je) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 195, "exequizanswer.maketincanstmt");
+        }
+        
+        return stmt;
     }
     
     /**

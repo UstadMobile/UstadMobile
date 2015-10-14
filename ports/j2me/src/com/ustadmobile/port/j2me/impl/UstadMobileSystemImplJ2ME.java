@@ -161,7 +161,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
      */
     public boolean queueTinCanStatement(JSONObject stmt, Object context) {
         l(UMLog.DEBUG, 538, "");
-        return logManager.queueStatement(getActiveUser(context), stmt);
+        return true;
+        //return logManager.queueStatement(getActiveUser(context), stmt);
     }
     
     
