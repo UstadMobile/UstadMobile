@@ -45,8 +45,8 @@ public class UstadMobileJ2MERun extends MIDlet {
         }catch(IOException e) {
             System.err.println("Error connecting to testlog socket");
             e.printStackTrace();
-        }
-       */
+        }        
+        */
         
         impl.init(this);
         

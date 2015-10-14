@@ -648,8 +648,17 @@ public class CatalogController implements UstadController, AppViewChoiceListener
      */
     public void handleSelectDownloadStorageMode(int storageMode) {
         selectedDownloadMode = storageMode;
-        availableStorageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+        UMStorageDir[] allDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
             storageMode, context);
+        Vector availableVector = new Vector();
+        for(int i = 0; i < allDirs.length; i++) {
+            if(allDirs[i].isAvailable()) {
+                availableVector.addElement(allDirs[i]);
+            }
+        }
+        availableStorageDirs = new UMStorageDir[availableVector.size()];
+        availableVector.copyInto(availableStorageDirs);
+        
         String[] storageChoices = new String[availableStorageDirs.length];
         for(int i = 0; i < storageChoices.length; i++) {
             storageChoices[i] = availableStorageDirs[i].getName();
@@ -686,6 +695,8 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                 //here we need to call confirmDownload - and add a parameter for the storage dir selected
                 appView.dismissChoiceDialog();
                 String destDirURI = availableStorageDirs[choice].getDirURI();
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 526, "#" + choice + ": " 
+                    + destDirURI);
                 handleConfirmDownloadEntries(selectedEntries, destDirURI);
                 break;
         }
@@ -1425,6 +1436,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
         Hashtable authHeaders = makeAuthHeaders(request.getHttpUsername(), 
                 request.getHttpPassword());
         int resourceMode = request.getResourceMode();
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 433, request.getDestDirPath());
         
         for(int i = 0; i < entries.length; i++) {
             Vector itemLinks = entries[i].getAcquisitionLinks();
@@ -1452,6 +1464,8 @@ public class CatalogController implements UstadController, AppViewChoiceListener
             info.downloadTotalSize = UMIOUtils.getHTTPDownloadSize(itemURL, 
                     authHeaders);
             
+            UstadMobileSystemImpl.l(UMLog.VERBOSE, 435, itemURL + "->" + 
+                destFilename);
             long downloadID = impl.queueFileDownload(itemURL, destFilename, authHeaders, 
                     request.getContext());
             info.downloadID = downloadID;
