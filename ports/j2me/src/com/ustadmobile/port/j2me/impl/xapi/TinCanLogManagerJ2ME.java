@@ -30,18 +30,13 @@
  */
 package com.ustadmobile.port.j2me.impl.xapi;
 
-import com.sun.lwuit.io.util.BufferedOutputStream;
 import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.app.FileUtils;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -671,8 +666,12 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         String tincanEndpointURL = 
                                 UstadMobileDefaults.DEFAULT_XAPI_STATEMENT_SERVER;
                         impl.l(UMLog.DEBUG, 558, "POST-in log line" );
-                        HTTPResult result = HTTPUtils.makeHTTPRequest(tincanEndpointURL,
-                                null, tinCanHeaders, "POST", statementBytes);
+                        
+                        HTTPResult result = impl.makeRequest(tincanEndpointURL, 
+                                tinCanHeaders, null, "POST", statementBytes);
+                        
+                        //HTTPResult result = HTTPUtils.makeHTTPRequest(tincanEndpointURL,
+                        //        null, tinCanHeaders, "POST", statementBytes);
                         return_code = result.getStatus();
 
                         if (return_code == 200){

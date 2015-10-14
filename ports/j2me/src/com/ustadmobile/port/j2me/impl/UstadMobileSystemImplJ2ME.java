@@ -751,11 +751,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         l(UMLog.DEBUG, 551, key + '=' + value);
         return value;
     }
-
+ 
     /**
      * @inheritDoc
      */
-    public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String type) throws IOException{
+    public HTTPResult makeRequest(final String url, final Hashtable headers, final Hashtable postParameters, final String type, byte[] postBody) throws IOException{
         getLogger().l(UMLog.VERBOSE, 305, "HTTP (" + type + ")" + url);
         HTTPResult httpResult = null;
         HttpConnection httpConn = null;
@@ -797,6 +797,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
                     }
                 }
             }
+
+            l(UMLog.DEBUG, 800, "params are - " + params);
                         
             //Add Headers
             if (headers != null){
@@ -806,19 +808,41 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
                     hKey = headerKeys.nextElement().toString();
                     hValue = headers.get(hKey).toString();
                     if(!hKey.equals("") && !hValue.equals("")){
+                        l(UMLog.DEBUG, 800, "setting key " + hKey);
                         httpConn.setRequestProperty(hKey, hValue);
                     }
                 }
             }
             
             if(type.equals("POST")){
-                //Content-Length to be set
-                httpConn.setRequestProperty("Content-length", 
-                        String.valueOf(params.getBytes().length));
-                httpConn.setRequestProperty(url, type);
-                os = httpConn.openOutputStream();
-                os.write(params.getBytes());
-                //os.flush?
+                if(params == null && postBody != null){
+                    //Content-Length to be set
+                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(postBody.length));
+                    httpConn.setRequestProperty("Content-length", 
+                            String.valueOf(postBody.length));
+                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
+                    //httpConn.setRequestProperty(url, type);
+                    l(UMLog.DEBUG, 800, "openingOutputStream");
+                    os = httpConn.openOutputStream();
+                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
+                    os.write(postBody);
+                    l(UMLog.DEBUG, 800, "flushing..");
+                    os.flush();
+                    l(UMLog.DEBUG, 800, "flushed.");
+                }else{
+                    //Content-Length to be set
+                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(params.getBytes().length));
+                    httpConn.setRequestProperty("Content-length", 
+                            String.valueOf(params.getBytes().length));
+                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
+                    //httpConn.setRequestProperty(url, type);
+                    l(UMLog.DEBUG, 800, "openingOutputStream");
+                    os = httpConn.openOutputStream();
+                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
+                    os.write(params.getBytes());
+                    //os.flush();
+                }
+                
             } 
             
             // Read Response from the Server

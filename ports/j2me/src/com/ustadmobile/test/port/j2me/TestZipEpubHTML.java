@@ -40,7 +40,6 @@ import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.port.j2me.app.EpubUtils;
 import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
-import com.ustadmobile.port.j2me.app.forms.HTMLForm;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.opf.UstadJSOPFItem;
@@ -88,27 +87,5 @@ public class TestZipEpubHTML extends TestCase {
         NetworkManager.getInstance().start();
         Display.init(this);
 
-        /*
-        String urlToLoad = epubTestFile + "!" + "free_text_text.xhtml";
-        //Get ready to open the file:
-        mainForm = new Form("Test Zip Epub HTML");
-        htmlComp = new HTMLComponent((ZipEPUBRequestHandler) new ZipEPUBRequestHandler());
-        mainForm.setLayout(new BorderLayout());
-        mainForm.addComponent(BorderLayout.CENTER, htmlComp);
-        htmlComp.setPage(urlToLoad);
-        mainForm.show();
-                
-        
-        
-        com.sun.lwuit.Display.getInstance().callSeriallyAndWait(new Runnable() {
-            public void run() {
-                Form f = new Form();
-                f = HTMLForm.loadTestForm();
-                f.show();
-            }
-        });
-        try { Thread.sleep(2000); }
-        catch(InterruptedException e) {}
-        */
     }
 }

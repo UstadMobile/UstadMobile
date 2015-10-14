@@ -68,7 +68,7 @@ public class AllTestCases extends TestCase {
         ///allTestSuite.addTest(new com.ustadmobile.test.core.TestUMTinCanUtils());
         allTestSuite.addTest(new TestJ2MEEXEMCQ());
         
-        //allTestSuite.addTest(new TestTinCanLogManagerJ2ME());
+        allTestSuite.addTest(new TestTinCanLogManagerJ2ME());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestLocalization());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
         
