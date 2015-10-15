@@ -80,7 +80,7 @@ import java.util.WeakHashMap;
  * Use the {@link CatalogOPDSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CatalogOPDSFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener {
+public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener {
 
     private OnFragmentInteractionListener mListener;
 
@@ -141,10 +141,12 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     public void setupFromCatalogController(CatalogController controller) {
         mCatalogController = controller;
+        setBaseController(controller);
+
         CatalogModel model = controller.getModel();
         UstadJSOPDSFeed feed = model.opdsFeed;
         getActivity().setTitle(feed.title);
-        controller.setUIStrings(this);
+        controller.setUIStrings();
 
         LayoutInflater inflater = getLayoutInflater(null);
         LinearLayout linearLayout = (LinearLayout)this.rootContainer.findViewById(
