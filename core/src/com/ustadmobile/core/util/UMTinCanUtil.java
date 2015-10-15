@@ -192,7 +192,7 @@ public class UMTinCanUtil {
                 UstadMobileSystemImpl.getInstance().getActiveUser(context), 
                 UstadMobileSystemImpl.getInstance().getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER));
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context));
     }
     
     /**
