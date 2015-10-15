@@ -86,8 +86,6 @@ public class CatalogOPDSFragment extends Fragment implements View.OnClickListene
 
     private View rootContainer;
 
-    private ListView catalogListView;
-
     private Map<String, OPDSEntryCard> idToCardMap;
 
     protected CatalogController mCatalogController;

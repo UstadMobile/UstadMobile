@@ -56,6 +56,7 @@ import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -159,7 +160,7 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     private CatalogModel model;
     
     public static int[] catalogMenuOptIDS = new int[]{U.id.mycourses, 
-        U.id.onthisdevice, U.id.logout, U.id.about};
+        U.id.onthisdevice, U.id.logout, U.id.about, U.id.settings};
     
     public static final int MENUINDEX_MYCOURSES = 0;
     
@@ -168,6 +169,8 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     public static final int MENUINDEX_LOGOUT = 2;
     
     public static final int MENUINDEX_ABOUT = 3;
+    
+    public static final int MENUINDEX_SETTINGS = 4;
     
     public static final String LOCALOPDS_ID_SUFFIX = "-local";
     
@@ -240,6 +243,13 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     public CatalogController(CatalogModel model, Object context){
         this(context);
         this.model=model;
+    }
+
+    /**
+     * {@inheritDoc }
+     */
+    public Object getContext() {
+        return context;
     }
     
     /**
@@ -331,11 +341,12 @@ public class CatalogController implements UstadController, AppViewChoiceListener
     public void setUIStrings(UstadView view) {
         CatalogView cView = (CatalogView)view;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        cView.setMenuOptions(new String[]{
-            impl.getString(catalogMenuOptIDS[MENUINDEX_MYCOURSES]),
-            impl.getString(catalogMenuOptIDS[MENUINDEX_MYDEVICE]),
-            impl.getString(catalogMenuOptIDS[MENUINDEX_LOGOUT]),
-            impl.getString(catalogMenuOptIDS[MENUINDEX_ABOUT])});
+        String[] menuOpts = new String[catalogMenuOptIDS.length];
+        for(int i = 0; i < menuOpts.length; i++) {
+            menuOpts[i] = impl.getString(catalogMenuOptIDS[i]);
+        }
+        
+        cView.setMenuOptions(menuOpts);
         
     }
     
@@ -783,7 +794,11 @@ public class CatalogController implements UstadController, AppViewChoiceListener
                 UstadMobileSystemImpl.getInstance().go(CatalogView.class,
                         args, context);
                 
-                break;                            
+                break;
+            case MENUINDEX_SETTINGS:
+                UstadMobileSystemImpl.getInstance().go(UserSettingsView.class, 
+                        new Hashtable(), context);
+                break;
         }
     }
     

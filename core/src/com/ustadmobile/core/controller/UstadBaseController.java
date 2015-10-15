@@ -33,16 +33,55 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.view.UstadView;
 
 /**
- *
+ * Base Controller that provides key functionality 
+ * 
  * @author mike
  */
-public interface UstadController {    
+public abstract class UstadBaseController implements UstadController {
+
+    private UstadView view;
     
-    public void setView(UstadView view);
+    private Object context;
     
-    public UstadView getView();
+    /**
+     * Create a new controller with the given context
+     * 
+     * @param context System dependent context object
+     */
+    public UstadBaseController(Object context) {
+        this.context = context;
+    }
     
-    public Object getContext();
+    /**
+     * Set the view that this controller is associated with
+     * 
+     * @param view 
+     */
+    public void setView(UstadView view) {
+        this.view = view;
+    }
+
+    /**
+     * Get the view this controller is associated with
+     * @return View this controller is associated with
+     */
+    public UstadView getView() {
+        return this.view;
+    }
     
+    /**
+     * Get the system dependent context for this controller
+     * 
+     * @return System dependent context object for this controller
+     */
+    public Object getContext() {
+        return this.context;
+    }
+    
+    /**
+     * Must call all view methods that set UI strings - e.g.  when the
+     * locale is changed
+     */
+    public abstract void setUIStrings();
     
 }

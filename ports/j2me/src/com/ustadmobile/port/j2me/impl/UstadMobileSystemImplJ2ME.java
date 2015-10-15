@@ -59,12 +59,14 @@ import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
 import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
 import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
 import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
+import com.ustadmobile.port.j2me.view.UserSettingsViewJ2ME;
 import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -1052,6 +1054,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
             form = new CatalogViewJ2ME(args, context);
         }else if(cls.equals(ContainerView.class)) {
             form = new ContainerViewJ2ME(args, context);
+        }else if(cls.equals(UserSettingsView.class)) {
+            form = new UserSettingsViewJ2ME(args, context);
         }
         
         form.show();

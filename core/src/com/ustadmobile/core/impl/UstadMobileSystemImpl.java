@@ -34,6 +34,7 @@ package com.ustadmobile.core.impl;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
@@ -106,6 +107,10 @@ public abstract class UstadMobileSystemImpl {
     
     private boolean initRan;
     
+    /**
+     * The currently active locale
+     */
+    private String locale;
     
     /**
      * The App Preference Key for the XAPIServer e.g. to get the active xAPI
@@ -220,8 +225,8 @@ public abstract class UstadMobileSystemImpl {
         
         try {
             checkCacheDir(context);
-            loadLocale(context);
             loadActiveUserInfo(context);
+            loadLocale(context);
             initRan = true;
         }catch(IOException e) {
             mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
@@ -251,8 +256,10 @@ public abstract class UstadMobileSystemImpl {
     public boolean loadLocale(Object context) {
         //choose the locale
         boolean success = false;
-        String locale = LocaleUtil.chooseSystemLocale(getSystemLocale(context), 
-                UstadMobileConstants.supportedLocales, 
+        String usersLocale = getUserPref(UserSettingsController.PREFKEY_LANG, "", 
+                context);
+        locale = LocaleUtil.chooseSystemLocale(usersLocale,
+                getSystemLocale(context), UstadMobileConstants.supportedLocales, 
                 UstadMobileConstants.fallbackLocale);
         
         InputStream localeIn = null;
@@ -273,6 +280,15 @@ public abstract class UstadMobileSystemImpl {
         }
         
         return success;
+    }
+    
+    /**
+     * Provides the currently active locale
+     * 
+     * @return The currently active locale
+     */
+    public String getLocale() {
+        return locale;
     }
     
     public abstract boolean loadActiveUserInfo(Object context);

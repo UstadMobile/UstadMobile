@@ -23,4 +23,5 @@
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="register">Register</string>
+    <string name="title_activity_user_settings">UserSettingsActivity</string>
 </resources>

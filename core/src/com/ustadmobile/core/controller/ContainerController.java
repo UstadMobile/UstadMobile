@@ -65,6 +65,8 @@ public class ContainerController implements UstadController, AsyncLoadableContro
     
     private String[] opfTitles;
     
+    private Object context;
+    
     /**
      * Use with loadController as the key for the containerURI in args hashtable
      * @see ContainerController#loadController(java.util.Hashtable) 
@@ -80,8 +82,12 @@ public class ContainerController implements UstadController, AsyncLoadableContro
     /**
      * Empty constructor - this creates a blank unusable object - required for async loading
      */
-    public ContainerController() {
-        
+    public ContainerController(Object context) {
+        this.context = context;
+    }
+    
+    public Object getContext() {
+        return this.context;
     }
     
     /**
@@ -114,7 +120,7 @@ public class ContainerController implements UstadController, AsyncLoadableContro
         Hashtable args = new Hashtable();
         args.put(ARG_CONTAINERURI, containerURI);
         args.put(ARG_MIMETYPE, mimeType);
-        ContainerController ctrl = new ContainerController();
+        ContainerController ctrl = new ContainerController(view.getContext());
         new LoadControllerThread(args, ctrl, listener, view).start();
     }
     

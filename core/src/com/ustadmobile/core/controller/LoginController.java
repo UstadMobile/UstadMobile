@@ -76,6 +76,10 @@ public class LoginController implements UstadController{
         this.context = context;
     }
     
+    public Object getContext() {
+        return this.context;
+    }
+    
     
     public static LoginController makeControllerForView(LoginView view) {
         return new LoginController(view.getContext());
@@ -96,7 +100,6 @@ public class LoginController implements UstadController{
         String encodedUserAndPass="Basic "+ Base64.encode(username,
                     password);
         headers.put("Authorization", encodedUserAndPass);
-        LoginController ctrl = null;
         
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
                 url, headers, null);

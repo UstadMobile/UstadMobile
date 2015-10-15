@@ -28,21 +28,41 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.controller;
+package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.core.model.UserSettingItem;
 
 /**
  *
  * @author mike
  */
-public interface UstadController {    
+public interface UserSettingsView extends UstadView {
     
-    public void setView(UstadView view);
+    /** 
+     * The name of each setting - e.g. Language
+     * 
+     */
+    public static final int SETTING_NAME = 0;
     
-    public UstadView getView();
+    /**
+     * The current value of that setting to show in the list item
+     */
+    public static final int SETTING_CURRENTVAL = 1;
     
-    public Object getContext();
+    public void setSettingsTitle(String title);
     
+    public void setSettingsList(UserSettingItem[] items);
+    
+    public void setLanguageList(String[] languages);
+    
+    /**
+     * Switch what's active to the list of settings
+     */
+    public void showSettingsList();
+    
+    /**
+     * 
+     */
+    public void showLanguageList();
     
 }

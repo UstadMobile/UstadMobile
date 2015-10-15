@@ -28,21 +28,53 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.controller;
+package com.ustadmobile.port.j2me.view;
 
-import com.ustadmobile.core.view.UstadView;
+import com.sun.lwuit.ComboBox;
+import com.sun.lwuit.List;
+import com.sun.lwuit.layouts.BorderLayout;
+import com.sun.lwuit.list.DefaultListModel;
+import com.sun.lwuit.list.ListModel;
+import com.ustadmobile.core.controller.UserSettingsController;
+import com.ustadmobile.core.model.UserSettingItem;
+import com.ustadmobile.core.view.UserSettingsView;
+import java.util.Hashtable;
 
 /**
  *
  * @author mike
  */
-public interface UstadController {    
+public class UserSettingsViewJ2ME extends UstadViewFormJ2ME implements UserSettingsView {
     
-    public void setView(UstadView view);
+    private List settingsList; 
     
-    public UstadView getView();
+    private DefaultListModel listModel;
     
-    public Object getContext();
-    
+    private UserSettingsController controller;
+
+    public UserSettingsViewJ2ME(Hashtable args, Object context) {
+        super(args, context);
+        
+        listModel = new DefaultListModel();
+        settingsList = new List(listModel);
+        settingsList.setRenderer(new SettingsListRenderer());
+        setLayout(new BorderLayout());
+        addComponent(BorderLayout.CENTER, settingsList);
+        
+        controller = UserSettingsController.makeControllerForView(this);
+    }
+
+    public void setSettingsTitle(String title) {
+        setTitle(title);
+    }
+
+    public void setSettingsList(UserSettingItem[] items) {
+        listModel.removeAll();
+        for(int i = 0; i < items.length; i++) {
+            listModel.addItem(items[i]);
+        }
+        
+    }
+
     
 }
