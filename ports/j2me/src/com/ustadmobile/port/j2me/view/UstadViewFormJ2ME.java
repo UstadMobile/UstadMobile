@@ -44,6 +44,9 @@ import java.util.Vector;
 
 /**
  *
+ * Is the basis for all Views on J2ME and handles most of the base functionality
+ * including maintaining the back button, context, and UI direction
+ * 
  * @author mike
  */
 public class UstadViewFormJ2ME extends Form {
@@ -116,7 +119,7 @@ public class UstadViewFormJ2ME extends Form {
     public void setDirection(int direction) {
         if(umViewDirection != direction) {
             boolean isRTL = direction == UstadMobileConstants.DIR_RTL;
-            //applyRTL(isRTL);
+            //don't use applyRTL etc. here - it will confuse the soft buttons
             UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
             umViewDirection = direction;
         }
