@@ -61,7 +61,7 @@ public class UserSettingsViewJ2ME extends UstadViewFormJ2ME implements UserSetti
     private DefaultListModel languageListModel;
     
     private Component currentComp;
-
+    
     public UserSettingsViewJ2ME(Hashtable args, Object context) {
         super(args, context);
         
@@ -105,6 +105,7 @@ public class UserSettingsViewJ2ME extends UstadViewFormJ2ME implements UserSetti
             removeComponent(currentComp);
             addComponent(BorderLayout.CENTER, newComp);
             currentComp = newComp;
+            revalidate();
         }
     }
     
@@ -123,6 +124,23 @@ public class UserSettingsViewJ2ME extends UstadViewFormJ2ME implements UserSetti
             controller.handleClickLanguage(languageList.getSelectedIndex());
         }
     }
+
+    public void goBack() {
+        setCurrentComp(settingsList);
+    }
+
+    public boolean canGoBack() {
+        if(currentComp != settingsList) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
+    public void setDirection(int direction) {
+        //Do nothing because it will confuse the soft commands
+    }
+    
 
     
 }

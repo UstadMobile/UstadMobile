@@ -100,7 +100,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     
     private AppViewJ2ME appView;
     
-    private Form currentForm;
+    private UstadViewFormJ2ME currentForm;
     
     private ZipFileHandle openZip;
     
@@ -142,6 +142,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     
     private PlayerListener onEndOfMediaListener;
     
+    private Vector viewHistory;
+    
+    public static final int VIEW_HISTORY_LIMIT = 10;
+    
     public String getImplementationName() {
         return "J2ME";
     }
@@ -150,6 +154,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         umLogger = new UMLogJ2ME();
         appView = new AppViewJ2ME(this);
         onEndOfMediaListener = null;
+        viewHistory = new Vector();
     }
 
     /**
@@ -200,7 +205,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
      * This needs to be called so the system knows the current form
      * @param frm 
      */
-    public void handleFormShow(Form frm) {
+    public void handleFormShow(UstadViewFormJ2ME frm) {
         l(UMLog.DEBUG, 525, frm.getTitle());
         if(this.currentForm != frm) {
             appView.dismissAll();
@@ -1048,8 +1053,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-
-    public void go(Class cls, Hashtable args, Object context) {
+    
+    private UstadViewFormJ2ME getFormByArgs(Class cls, Hashtable args, Object context) {
         UstadViewFormJ2ME form = null;
         if(cls.equals(LoginView.class)) {
             form = new LoginViewJ2ME(args, context);
@@ -1061,7 +1066,47 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
             form = new UserSettingsViewJ2ME(args, context);
         }
         
+        return form;
+    }
+
+    private void destroyCurrentForm() {
+        if(currentForm != null) {
+            currentForm.onDestroy();
+        }
+    }
+    
+    public void go(Class cls, Hashtable args, Object context) {
+        UstadViewFormJ2ME form = getFormByArgs(cls, args, context);
+        
+        viewHistory.insertElementAt(new ViewHistoryEntry(cls, args), 0);
+        viewHistory.setSize(VIEW_HISTORY_LIMIT);
+        
+        destroyCurrentForm();
+        currentForm = form;
         form.show();
+    }
+    
+    public void goBack(Object context) {
+        if(currentForm.canGoBack()) {
+            currentForm.goBack();
+        }else if(viewHistory.size() > 2) {
+            viewHistory.removeElementAt(0);
+            ViewHistoryEntry entry = (ViewHistoryEntry)viewHistory.elementAt(0);
+            UstadViewFormJ2ME frm = getFormByArgs(entry.viewClass, entry.viewArgs, context);
+            
+            destroyCurrentForm();
+            currentForm = frm;
+            frm.showBack();
+        }
+    }
+    
+    /**
+     * Returns the current number of history entries in the history list
+     * 
+     * @return 
+     */
+    public int getViewHistorySize() {
+        return viewHistory.size();
     }
 
     public boolean loadActiveUserInfo(Object context) {
@@ -1238,6 +1283,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         public void write(byte[] b) throws IOException {
             dst.write(b); 
         }
+    }
+    
+    public static class ViewHistoryEntry {
+        
+        Class viewClass;
+        
+        Hashtable viewArgs;
+        
+        public ViewHistoryEntry(Class viewClass, Hashtable viewArgs) {
+            this.viewClass = viewClass;
+            this.viewArgs = viewArgs;
+        }
+        
     }
 
 }

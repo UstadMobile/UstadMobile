@@ -99,9 +99,13 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     private Command cmdForward;
     
+    private Command cmdBackToCatalog;
+    
     public static final int CMDBACK_ID = 1;
     
     public static final int CMDFORWARD_ID = 2;
+    
+    public static final int CMDBACK_TO_CATALOG_ID = 3;
     
     private HTMLCallback htmlCallback;
     
@@ -116,23 +120,20 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     
     public ContainerViewJ2ME(Hashtable args, Object context) {
-        super(args, context);
+        super(args, context, false);
         UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
         containerURI = (String)args.get(ContainerController.ARG_CONTAINERURI);
         mimeType = (String)args.get(ContainerController.ARG_MIMETYPE);
         
         cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);
         cmdForward = new Command(impl.getString(U.id.next), CMDFORWARD_ID);
+        cmdBackToCatalog = new Command("Exit course", CMDBACK_TO_CATALOG_ID);
         
         openContainerBaseURI = impl.openContainer(containerURI, mimeType);
         containerZip = impl.getOpenZip();
         setLayout(new BorderLayout());
         
-        UstadMobileSystemImpl.l(UMLog.ERROR, 175, containerURI);
         
-        //TODO: localize this string
-        impl.getAppView(context).showAlertDialog(impl.getString(U.id.error), 
-            "Could not open container");
         ContainerController.makeControllerForView(this, openContainerBaseURI, 
                 mimeType, this);
         
@@ -144,6 +145,12 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         if(controller != null) {
             setController((ContainerController)controller);
             initByContentType();
+        }else {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 175, containerURI);
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            //TODO: localize this string
+            impl.getAppView(getContext()).showAlertDialog(impl.getString(U.id.error), 
+                "Could not open container");
         }
     }
 
@@ -199,8 +206,9 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             htmlC.setIgnoreCSS(true);
             htmlC.setEventsEnabled(true);
             htmlC.setAutoAddSubmitButton(false);
-            addCommand(cmdBack);
             addCommand(cmdForward);
+            addCommand(cmdBack);
+            addCommand(cmdBackToCatalog);
             addCommandListener(this);
             
             HTTPUtils.httpDebug("getting opfurl");
@@ -285,6 +293,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             showPage(this.currentIndex -1);
         }else if(cmd.equals(cmdForward)) {
             showPage(this.currentIndex + 1);
+        }else if(cmd.equals(cmdBackToCatalog)) {
+            UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
         }
     }
 
@@ -310,6 +320,15 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             this.currentIndex = spinePos;
         }
     }
+
+    public void onDestroy() {
+        if(openContainerBaseURI != null) {
+            UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
+            impl.closeContainer(openContainerBaseURI);    
+            openContainerBaseURI = null;
+        }
+    }
+    
     
     /**
      * Handles requests to load resources by pointing them to the openzip and

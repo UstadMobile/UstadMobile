@@ -30,6 +30,8 @@ import java.util.Enumeration;
  */
 public class CatalogViewJ2ME extends UstadViewFormJ2ME implements CatalogView, ActionListener, Runnable, ControllerReadyListener {
 
+    public static final int OPDSCMDID_MAX = 999;
+    
     public static int OPDSCMDID_OFFSET = 30;
     
     public static int MENUCMD_OFFSET = 10;
@@ -163,7 +165,7 @@ public class CatalogViewJ2ME extends UstadViewFormJ2ME implements CatalogView, A
 
     public void actionPerformed(ActionEvent evt) {
         int cmdId = evt.getCommand().getId();
-        if(cmdId >= OPDSCMDID_OFFSET) {
+        if(cmdId >= OPDSCMDID_OFFSET && cmdId < OPDSCMDID_MAX) {
             UstadJSOPDSEntry clickedEntry = controller.getModel().opdsFeed.entries[cmdId - OPDSCMDID_OFFSET];
             this.controller.handleClickEntry(clickedEntry);
         }else if(cmdId >= MENUCMD_OFFSET) {
@@ -326,13 +328,19 @@ public class CatalogViewJ2ME extends UstadViewFormJ2ME implements CatalogView, A
         
         Command deleteCommand = new Command(impl.getString(U.id.delete), 
                 CMD_DELETE_ENTRY);
+        addCommand(backCommand);
         addCommand(deleteCommand);
         
         for(int i = 0; i < menuOptions.length; i++) {
             addCommand(new Command(menuOptions[i], i + MENUCMD_OFFSET));
         }
-            
+    }
+    
+    public void onDestroy() {
+        super.onDestroy();
         
-        
+        if(controller != null) {
+            controller.handleViewDestroy();
+        }
     }
 }
