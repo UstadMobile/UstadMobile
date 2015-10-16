@@ -1079,7 +1079,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         UstadViewFormJ2ME form = getFormByArgs(cls, args, context);
         
         viewHistory.insertElementAt(new ViewHistoryEntry(cls, args), 0);
-        viewHistory.setSize(VIEW_HISTORY_LIMIT);
+        if(viewHistory.size() > VIEW_HISTORY_LIMIT) {
+            viewHistory.setSize(VIEW_HISTORY_LIMIT);
+        }
+        
         
         destroyCurrentForm();
         currentForm = form;
@@ -1089,7 +1092,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     public void goBack(Object context) {
         if(currentForm.canGoBack()) {
             currentForm.goBack();
-        }else if(viewHistory.size() > 2) {
+        }else if(viewHistory.size() >= 2) {
             viewHistory.removeElementAt(0);
             ViewHistoryEntry entry = (ViewHistoryEntry)viewHistory.elementAt(0);
             UstadViewFormJ2ME frm = getFormByArgs(entry.viewClass, entry.viewArgs, context);

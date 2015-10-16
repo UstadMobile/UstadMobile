@@ -35,7 +35,9 @@ import com.sun.lwuit.Form;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.plaf.UIManager;
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -66,7 +68,9 @@ public class UstadViewFormJ2ME extends Form {
         this.context = context;
         umViewDirection = UIManager.getInstance().getLookAndFeel().isRTL() ? UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
         this.backCommandEnabled = backCommandEnabled;
-        backCommand = new Command("Back", CMD_BACK_ID);
+        backCommand = new Command(
+                UstadMobileSystemImpl.getInstance().getString(U.id.back), 
+                CMD_BACK_ID);
         addCommandListener(new UstadFormCommandListener(context));
         if(this.backCommandEnabled) {
             addBackCommand(1);
@@ -92,7 +96,7 @@ public class UstadViewFormJ2ME extends Form {
      * and there should be at least 2 entries for the user to be able to go back to the previous form
      */
     protected void addBackCommand(int minHistoryEntries) {
-        if(canGoBack() || UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() > minHistoryEntries) {
+        if(canGoBack() || UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() >= minHistoryEntries) {
             addCommand(backCommand);
         }
     }
@@ -112,7 +116,7 @@ public class UstadViewFormJ2ME extends Form {
     public void setDirection(int direction) {
         if(umViewDirection != direction) {
             boolean isRTL = direction == UstadMobileConstants.DIR_RTL;
-            applyRTL(isRTL);
+            //applyRTL(isRTL);
             UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
             umViewDirection = direction;
         }
