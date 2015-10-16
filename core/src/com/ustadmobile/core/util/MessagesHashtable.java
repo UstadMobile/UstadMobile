@@ -63,7 +63,7 @@ public class MessagesHashtable extends Hashtable {
                 if(inComment) {
                     inComment = false;
                 }else {
-                    line = new String(lineOut.toByteArray());
+                    line = new String(lineOut.toByteArray(), "UTF-8");
                     int eqPos = line.indexOf('=');
                     if(eqPos != -1) {
                         ht.put(

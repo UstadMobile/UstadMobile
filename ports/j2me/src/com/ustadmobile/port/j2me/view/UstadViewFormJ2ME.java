@@ -66,6 +66,7 @@ public class UstadViewFormJ2ME extends Form {
         this.context = context;
         umViewDirection = UIManager.getInstance().getLookAndFeel().isRTL() ? UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
         this.backCommandEnabled = backCommandEnabled;
+        backCommand = new Command("Back", CMD_BACK_ID);
         addCommandListener(new UstadFormCommandListener(context));
         if(this.backCommandEnabled) {
             addBackCommand(1);
@@ -92,7 +93,6 @@ public class UstadViewFormJ2ME extends Form {
      */
     protected void addBackCommand(int minHistoryEntries) {
         if(canGoBack() || UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() > minHistoryEntries) {
-            backCommand = new Command("Back", CMD_BACK_ID);
             addCommand(backCommand);
         }
     }
