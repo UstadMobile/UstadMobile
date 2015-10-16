@@ -33,6 +33,7 @@ package com.ustadmobile.port.j2me.impl;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.plaf.UIManager;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
@@ -187,6 +188,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
+        UIManager.getInstance().getLookAndFeel().setRTL(
+                getDirection() == UstadMobileConstants.DIR_RTL);
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {

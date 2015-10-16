@@ -55,6 +55,7 @@ public class UstadMobileJ2MERun extends MIDlet {
             Resources r = Resources.open("/nokia_non_touch_theme.res");
             Hashtable theme = r.getTheme("NokiaTheme");
             UIManager.getInstance().setThemeProps(theme);
+            Display.getInstance().setBidiAlgorithm(true);
         }catch(Exception e) {
             impl.getLogger().l(UMLog.CRITICAL, 2, null, e);
         }

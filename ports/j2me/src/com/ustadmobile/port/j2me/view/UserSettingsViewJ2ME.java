@@ -31,7 +31,11 @@
 package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.ComboBox;
+import com.sun.lwuit.Component;
+import com.sun.lwuit.Container;
 import com.sun.lwuit.List;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.list.DefaultListModel;
 import com.sun.lwuit.list.ListModel;
@@ -44,22 +48,35 @@ import java.util.Hashtable;
  *
  * @author mike
  */
-public class UserSettingsViewJ2ME extends UstadViewFormJ2ME implements UserSettingsView {
+public class UserSettingsViewJ2ME extends UstadViewFormJ2ME implements UserSettingsView, ActionListener {
     
     private List settingsList; 
     
-    private DefaultListModel listModel;
-    
+    private DefaultListModel settingsListModel;
+        
     private UserSettingsController controller;
+       
+    private List languageList;
+    
+    private DefaultListModel languageListModel;
+    
+    private Component currentComp;
 
     public UserSettingsViewJ2ME(Hashtable args, Object context) {
         super(args, context);
         
-        listModel = new DefaultListModel();
-        settingsList = new List(listModel);
+        settingsListModel = new DefaultListModel();
+        settingsList = new List(settingsListModel);
         settingsList.setRenderer(new SettingsListRenderer());
+        settingsList.addActionListener(this);
+        
         setLayout(new BorderLayout());
         addComponent(BorderLayout.CENTER, settingsList);
+        currentComp = settingsList;
+        
+        languageListModel = new DefaultListModel();
+        languageList = new List(languageListModel);
+        languageList.addActionListener(this);
         
         controller = UserSettingsController.makeControllerForView(this);
     }
@@ -69,11 +86,42 @@ public class UserSettingsViewJ2ME extends UstadViewFormJ2ME implements UserSetti
     }
 
     public void setSettingsList(UserSettingItem[] items) {
-        listModel.removeAll();
+        settingsListModel.removeAll();
         for(int i = 0; i < items.length; i++) {
-            listModel.addItem(items[i]);
+            settingsListModel.addItem(items[i]);
         }
         
+    }
+
+    public void setLanguageList(String[] languages) {
+        languageListModel.removeAll();
+        for(int i = 0; i < languages.length; i++) {
+            languageListModel.addItem(languages[i]);
+        }
+    }
+
+    private void setCurrentComp(Component newComp) {
+        if(currentComp != newComp) {
+            removeComponent(currentComp);
+            addComponent(BorderLayout.CENTER, newComp);
+            currentComp = newComp;
+        }
+    }
+    
+    public void showSettingsList() {
+        setCurrentComp(settingsList);
+    }
+
+    public void showLanguageList() {
+        setCurrentComp(languageList);
+    }
+
+    public void actionPerformed(ActionEvent evt) {
+        if(evt.getComponent() == settingsList) {
+            controller.handleClickSetting(settingsList.getSelectedIndex());
+        }else if(evt.getComponent() == languageList) {
+            controller.handleClickLanguage(languageList.getSelectedIndex());
+        }
     }
 
     

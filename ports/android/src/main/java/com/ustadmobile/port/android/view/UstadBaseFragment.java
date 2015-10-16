@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.support.v4.app.Fragment;
 
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 /**
@@ -28,6 +29,22 @@ public class UstadBaseFragment  extends Fragment{
         }
 
         mUILocale = new String(sysLocale);
+    }
+
+
+    public int getDirection() {
+        if(getActivity() instanceof UstadBaseActivity) {
+            return ((UstadBaseActivity)getActivity()).getDirection();
+        }else {
+            return UstadMobileConstants.DIR_LTR;
+        }
+    }
+
+
+    public void setDirection(int dir) {
+        if(getActivity() instanceof UstadBaseActivity) {
+            ((UstadBaseActivity)getActivity()).setDirection(dir);
+        }
     }
 
 

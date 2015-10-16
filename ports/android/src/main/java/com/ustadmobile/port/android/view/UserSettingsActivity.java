@@ -27,7 +27,7 @@ public class UserSettingsActivity extends UstadBaseActivity implements UserSetti
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_settings);
-        setToolbarUM();
+        setUMToolbar();
 
 
         settingsController = UserSettingsController.makeControllerForView(this);
@@ -79,12 +79,5 @@ public class UserSettingsActivity extends UstadBaseActivity implements UserSetti
         getSupportFragmentManager().beginTransaction().replace(R.id.user_settings_fragment_container,
                 frag, FRAGMENT_TAG_LANGLIST).commit();
     }
-
-    @Override
-    public Object getContext() {
-        return this;
-    }
-
-
 
 }

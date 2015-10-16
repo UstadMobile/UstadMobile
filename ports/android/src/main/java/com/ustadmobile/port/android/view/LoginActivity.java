@@ -57,7 +57,7 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class LoginActivity extends AppCompatActivity implements LoginView, View.OnClickListener {
+public class LoginActivity extends UstadBaseActivity implements LoginView, View.OnClickListener {
 
     private int viewId;
 
@@ -90,6 +90,8 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
 
 
         mLoginController = LoginController.makeControllerForView(this);
+        setBaseController(mLoginController);
+
         setTitle("Login");
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
@@ -100,24 +102,8 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
         viewPager.setAdapter(new LoginPagerAdapter(getSupportFragmentManager()));
         TabLayout tabLayout = (TabLayout)findViewById(R.id.login_sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
-        mLoginController.setViewStrings(this);
+        mLoginController.setUIStrings();
     }
-
-    public void onStart() {
-        super.onStart();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
-    }
-
-    public void onStop() {
-        super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -143,7 +129,7 @@ public class LoginActivity extends AppCompatActivity implements LoginView, View.
 
     @Override
     public void setController(LoginController controller) {
-
+        setBaseController(controller);
     }
 
     @Override

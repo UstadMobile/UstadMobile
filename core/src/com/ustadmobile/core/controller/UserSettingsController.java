@@ -107,6 +107,8 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         }
         
         settingsView.setLanguageList(languageNames);
+        settingsView.setDirection(
+                UstadMobileSystemImpl.getInstance().getDirection());
     }
     
     
@@ -135,7 +137,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
     public void handleClickLanguage(int index) {
         String chosenLocaleCode = languageCodes[index];
         UstadMobileSystemImpl.getInstance().setUserPref(PREFKEY_LANG, 
-            chosenLocaleCode, index);
+            chosenLocaleCode, context);
         UstadMobileSystemImpl.getInstance().loadLocale(getContext());
         setUIStrings();
         settingsView.showSettingsList();

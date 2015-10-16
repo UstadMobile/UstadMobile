@@ -41,7 +41,7 @@ public abstract class UstadBaseController implements UstadController {
 
     private UstadView view;
     
-    private Object context;
+    protected Object context;
     
     /**
      * Create a new controller with the given context

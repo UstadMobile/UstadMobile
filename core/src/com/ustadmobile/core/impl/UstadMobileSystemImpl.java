@@ -256,8 +256,12 @@ public abstract class UstadMobileSystemImpl {
     public boolean loadLocale(Object context) {
         //choose the locale
         boolean success = false;
-        String usersLocale = getUserPref(UserSettingsController.PREFKEY_LANG, "", 
+        String usersLocale = null;
+        if(getActiveUser(context) != null) {
+            usersLocale = getUserPref(UserSettingsController.PREFKEY_LANG, "", 
                 context);
+        }
+        
         locale = LocaleUtil.chooseSystemLocale(usersLocale,
                 getSystemLocale(context), UstadMobileConstants.supportedLocales, 
                 UstadMobileConstants.fallbackLocale);

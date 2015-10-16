@@ -124,7 +124,8 @@ public class CatalogViewJ2ME extends UstadViewFormJ2ME implements CatalogView, A
         if(this.controller != null) {
             return;
         }
-        controller.setUIStrings(this);
+        
+        controller.setUIStrings();
         
         this.controller = controller;
         entries = this.controller.getModel().opdsFeed.entries;

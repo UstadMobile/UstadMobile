@@ -154,7 +154,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         int entryStatus = -1;
         for(int i = 0; i < feed.entries.length; i++) {
-
             OPDSEntryCard cardView  = (OPDSEntryCard) inflater.inflate(
                     R.layout.fragment_opds_item, null);
             cardView.setOPDSEntry(feed.entries[i]);
@@ -432,6 +431,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             idToCardMap.get(thisFeed.entries[i].id).setSelected(isSelected);
         }
     }
+
+
 
     /**
      * This interface must be implemented by activities that contain this

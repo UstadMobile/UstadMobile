@@ -24,7 +24,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFragment.OnFragmentInteractionListener, ListView.OnItemClickListener {
+public class CatalogActivity extends UstadBaseActivity implements CatalogOPDSFragment.OnFragmentInteractionListener, ListView.OnItemClickListener {
 
     private DrawerLayout mDrawerLayout;
 
@@ -42,11 +42,8 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_catalog);
-
-        //Toolbar toolbar =
-        Toolbar toolbar = (Toolbar)findViewById(R.id.catalog_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        setUMToolbar(R.id.catalog_toolbar);
+        setHandleUIStringsOnResume(false);
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.catalog_drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.catalog_left_drawer_list);
@@ -56,7 +53,7 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         mDrawerToggle = new ActionBarDrawerToggle(this,//host activity
                 mDrawerLayout, //DrawerLayout object
-                toolbar, //
+                getUMToolbar(), //
                 R.string.drawer_open,
                 R.string.drawer_close
         ) {
@@ -74,8 +71,7 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        UMAndroidUtil.setDirectionIfSupported(findViewById(R.id.catalog_relativelayout),
-                UstadMobileSystemImpl.getInstance().getDirection());
+        setDirectionFromSystem();
 
         CatalogOPDSFragment currentFrag = CatalogOPDSFragment.newInstance(getIntent().getExtras());
         if(savedInstanceState == null) {
@@ -94,23 +90,6 @@ public class CatalogActivity extends AppCompatActivity implements CatalogOPDSFra
     public void setMenuOptions(String[] menuOptions) {
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawermenuitem,
                 menuOptions));
-    }
-
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
-    }
-
-    public void onStop() {
-        super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
 
     @Override

@@ -31,6 +31,8 @@
 package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.Form;
+import com.sun.lwuit.plaf.UIManager;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import java.util.Hashtable;
 
 /**
@@ -46,9 +48,12 @@ public class UstadViewFormJ2ME extends Form {
     
     private Object context;
     
+    private int umViewDirection;
+    
     public UstadViewFormJ2ME(Hashtable args, Object context) {
         this.args = args;
         this.context = context;
+        umViewDirection = UIManager.getInstance().getLookAndFeel().isRTL() ? UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
     }
     
     protected Hashtable getArgs() {
@@ -58,4 +63,18 @@ public class UstadViewFormJ2ME extends Form {
     public Object getContext() {
         return context;
     }
+    
+    public void setDirection(int direction) {
+        if(umViewDirection != direction) {
+            boolean isRTL = direction == UstadMobileConstants.DIR_RTL;
+            applyRTL(isRTL);
+            UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
+            umViewDirection = direction;
+        }
+    }
+    
+    public int getDirection() {
+        return umViewDirection;
+    }
+    
 }
