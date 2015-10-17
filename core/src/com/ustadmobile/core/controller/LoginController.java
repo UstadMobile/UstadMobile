@@ -57,7 +57,7 @@ import java.util.Hashtable;
  * 
  * @author varuna
  */
-public class LoginController implements UstadController{
+public class LoginController extends UstadBaseController{
     
     //private LoginView view;
     public LoginView view;
@@ -70,15 +70,16 @@ public class LoginController implements UstadController{
     
     public static final String REGISTER_GENDER = "gender";
     
-    private Object context;
     
     public LoginController(Object context) {
-        this.context = context;
+        super(context);
     }
     
     
     public static LoginController makeControllerForView(LoginView view) {
-        return new LoginController(view.getContext());
+        LoginController ctrl = new LoginController(view.getContext());
+        ctrl.setView(view);
+        return ctrl;
     }
     
     /**
@@ -96,7 +97,6 @@ public class LoginController implements UstadController{
         String encodedUserAndPass="Basic "+ Base64.encode(username,
                     password);
         headers.put("Authorization", encodedUserAndPass);
-        LoginController ctrl = null;
         
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
                 url, headers, null);
@@ -283,22 +283,7 @@ public class LoginController implements UstadController{
         UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
         UstadMobileSystemImpl.getInstance().go(CatalogView.class, 
             CatalogController.makeUserCatalogArgs(context), context);
-    }
-    
-    public void setViewStrings(LoginView view) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        view.setTitle(impl.getString(U.id.login));
-        view.setButtonText(impl.getString(U.id.login));
-        view.setUsernameHint(impl.getString(U.id.username));
-        view.setPasswordHint(impl.getString(U.id.password));
-        view.setRegisterButtonText(impl.getString(U.id.register));
-        view.setRegisterNameHint(impl.getString(U.id.name));
-        view.setRegisterPhoneNumberHint(impl.getString(U.id.phone_number));
-        view.setRegisterGenderMaleLabel(impl.getString(U.id.male));
-        view.setRegisterGenderFemaleLabel(impl.getString(U.id.female));
-    }
-    
+    }    
     
     /**
      * Used when a view is somehow otherwise created e.g. by a smartphone OS
@@ -316,5 +301,19 @@ public class LoginController implements UstadController{
     
     public void hide() {
         
+    }
+
+    public void setUIStrings() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        view.setTitle(impl.getString(U.id.login));
+        view.setButtonText(impl.getString(U.id.login));
+        view.setUsernameHint(impl.getString(U.id.username));
+        view.setPasswordHint(impl.getString(U.id.password));
+        view.setRegisterButtonText(impl.getString(U.id.register));
+        view.setRegisterNameHint(impl.getString(U.id.name));
+        view.setRegisterPhoneNumberHint(impl.getString(U.id.phone_number));
+        view.setRegisterGenderMaleLabel(impl.getString(U.id.male));
+        view.setRegisterGenderFemaleLabel(impl.getString(U.id.female));
+        view.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
     }
 }

@@ -51,7 +51,7 @@ import java.util.Hashtable;
  * 
  * @author mike
  */
-public class ContainerController implements UstadController, AsyncLoadableController{
+public class ContainerController extends UstadBaseController implements AsyncLoadableController{
     
     private ContainerView containerView;
     
@@ -64,7 +64,7 @@ public class ContainerController implements UstadController, AsyncLoadableContro
     private UstadOCF ocf;
     
     private String[] opfTitles;
-    
+        
     /**
      * Use with loadController as the key for the containerURI in args hashtable
      * @see ContainerController#loadController(java.util.Hashtable) 
@@ -80,41 +80,15 @@ public class ContainerController implements UstadController, AsyncLoadableContro
     /**
      * Empty constructor - this creates a blank unusable object - required for async loading
      */
-    public ContainerController() {
-        
-    }
-    
-    /**
-     * Creates a new container controller
-     * @param entry
-     * @param openPath
-     * @param fileURI
-     * @param mimeType 
-     */
-    public ContainerController(UstadJSOPDSEntry entry, String openPath, String mimeType) {
-        this.entry = entry;
-        this.openPath = openPath;
-        this.mimeType = mimeType;
-    }
-    
-    
-    /**
-     * 
-     * @param entry
-     * @param openPath
-     * @param fileURI
-     * @param mimeType
-     * @return 
-     */
-    public static ContainerController makeFromEntry(UstadJSOPDSEntry entry, String openPath, String mimeType) {
-        return new ContainerController(entry, openPath, mimeType);
+    public ContainerController(Object context) {
+         super(context);
     }
     
     public static void makeControllerForView(ContainerView view, String containerURI, String mimeType, ControllerReadyListener listener) {
         Hashtable args = new Hashtable();
         args.put(ARG_CONTAINERURI, containerURI);
         args.put(ARG_MIMETYPE, mimeType);
-        ContainerController ctrl = new ContainerController();
+        ContainerController ctrl = new ContainerController(view.getContext());
         new LoadControllerThread(args, ctrl, listener, view).start();
     }
     
@@ -214,6 +188,10 @@ public class ContainerController implements UstadController, AsyncLoadableContro
         mimeType = (String)args.get(ARG_MIMETYPE);
         getOCF();
         return this;
+    }
+
+    public void setUIStrings() {
+        //do nothing - there are no ui strings to be set.
     }
     
 }

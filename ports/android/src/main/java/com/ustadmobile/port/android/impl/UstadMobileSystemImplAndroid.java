@@ -53,12 +53,14 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.CatalogActivity;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
+import com.ustadmobile.port.android.view.UserSettingsActivity;
 
 import android.os.Build;
 import android.util.Log;
@@ -184,6 +186,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             androidClass = ContainerActivity.class;
         }else if(cls.equals(CatalogView.class)) {
             androidClass = CatalogActivity.class;
+        }else if(cls.equals(UserSettingsView.class)) {
+            androidClass = UserSettingsActivity.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);

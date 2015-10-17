@@ -28,21 +28,20 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.controller;
-
-import com.ustadmobile.core.view.UstadView;
+package com.ustadmobile.core.model;
 
 /**
  *
  * @author mike
  */
-public interface UstadController {    
+public class UserSettingItem {
+    public String settingName;
     
-    public void setView(UstadView view);
+    public String settingValue;
     
-    public UstadView getView();
-    
-    public Object getContext();
-    
+    public UserSettingItem(String settingName, String settingValue) {
+        this.settingName = settingName;
+        this.settingValue = settingValue;
+    }
     
 }

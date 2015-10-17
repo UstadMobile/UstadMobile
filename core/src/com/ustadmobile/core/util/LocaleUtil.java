@@ -18,15 +18,27 @@ public class LocaleUtil {
      * the basis of the first two letters (e.g. language).  We don't have variations
      * right now
      * 
+     * @param userPrefLocale The locale specified by this user. Blank string "" means use the system locale, null for no current user
      * @param systemLocale The locale according to the operating system
      * @param supportedLocales The locales available that we support
      * @param fallbackLang The language to use if the user's preferred system locale is not available (e.g. en)
      * 
      * @return locale to used based on arguments
      */
-    public static String chooseSystemLocale(String systemLocale, String[] supportedLocales, String fallbackLang) {
-        String systemLocaleShort = systemLocale.substring(0, 2);
+    public static String chooseSystemLocale(String userPrefLocale, String systemLocale, String[] supportedLocales, String fallbackLang) {
+        //first check the user's chosen locale is valid and overrides the systemLocale
         int i;
+        if(userPrefLocale != null && !userPrefLocale.equals("")) {
+            for(i = 0; i < supportedLocales.length; i++) {
+                if(supportedLocales[i].equals(userPrefLocale)) {
+                    return userPrefLocale;
+                }
+            }
+        }
+        
+        
+        String systemLocaleShort = systemLocale.substring(0, 2);
+        
         for(i = 0; i < supportedLocales.length; i++) {
             if(supportedLocales[i].startsWith(systemLocaleShort)) {
                 return supportedLocales[i];

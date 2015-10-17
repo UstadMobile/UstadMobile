@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends AppCompatActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView {
+public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView {
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -142,6 +142,7 @@ public class ContainerActivity extends AppCompatActivity implements ContainerPag
 
     protected void setupFromController(ContainerController controller) {
         //TODO: Deal with other content types here - but for right now we only have EPUB
+        setBaseController(controller);
         if(mMimeType.startsWith("application/epub+zip")) {
             Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
             setSupportActionBar(toolbar);

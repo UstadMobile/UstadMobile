@@ -125,5 +125,13 @@ public class U {
         public static final int female = 42;
         
         public static final int could_not_open_file = 43;
+        
+        public static final int settings = 44;
+        
+        public static final int lang_sys = 45;
+        
+        public static final int lang_en = 46;
+        
+        public static final int lang_ar = 47;
     }
 }

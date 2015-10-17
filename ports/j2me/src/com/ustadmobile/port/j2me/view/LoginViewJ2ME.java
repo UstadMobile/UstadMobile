@@ -87,8 +87,8 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         loginButton.addActionListener(this);
         this.addComponent(loginButton);
         
-        controller = new LoginController(getContext());
-        controller.setViewStrings(this);
+        controller = LoginController.makeControllerForView(this);
+        controller.setUIStrings();
     }
     
     public void show() {
@@ -99,7 +99,7 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
     
     public void setController(LoginController controller) {
         this.controller = controller;
-        controller.setViewStrings(this);
+        controller.setUIStrings();
     }
     
     public void actionPerformed(ActionEvent evt) {

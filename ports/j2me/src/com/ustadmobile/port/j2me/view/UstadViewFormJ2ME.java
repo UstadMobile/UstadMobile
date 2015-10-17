@@ -30,11 +30,23 @@
  */
 package com.ustadmobile.port.j2me.view;
 
+import com.sun.lwuit.Command;
 import com.sun.lwuit.Form;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.plaf.UIManager;
+import com.ustadmobile.core.U;
+import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  *
+ * Is the basis for all Views on J2ME and handles most of the base functionality
+ * including maintaining the back button, context, and UI direction
+ * 
  * @author mike
  */
 public class UstadViewFormJ2ME extends Form {
@@ -46,9 +58,54 @@ public class UstadViewFormJ2ME extends Form {
     
     private Object context;
     
-    public UstadViewFormJ2ME(Hashtable args, Object context) {
+    private int umViewDirection;
+    
+    protected Command backCommand;
+    
+    public static final int CMD_BACK_ID = 1000;
+    
+    private boolean backCommandEnabled = true;
+
+    public UstadViewFormJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
         this.args = args;
         this.context = context;
+        umViewDirection = UIManager.getInstance().getLookAndFeel().isRTL() ? UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
+        this.backCommandEnabled = backCommandEnabled;
+        backCommand = new Command(
+                UstadMobileSystemImpl.getInstance().getString(U.id.back), 
+                CMD_BACK_ID);
+        addCommandListener(new UstadFormCommandListener(context));
+        if(this.backCommandEnabled) {
+            addBackCommand(1);
+        }
+    }
+    
+    public UstadViewFormJ2ME(Hashtable args, Object context) {
+        this(args, context, true);
+    }
+
+    public boolean isIsBackCommandEnabled() {
+        return backCommandEnabled;
+    }
+
+    public void setIsBackCommandEnabled(boolean backCommandEnabled) {
+        this.backCommandEnabled = backCommandEnabled;
+    }
+    
+    /**
+     * Adds the back command to the form 
+     * @param minHistoryEntries Minimum number of history entries available.  If this is during form construction - there
+     * only needs to be one entry available.  After the constructor the current form is an element in the history stack
+     * and there should be at least 2 entries for the user to be able to go back to the previous form
+     */
+    protected void addBackCommand(int minHistoryEntries) {
+        if(canGoBack() || UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() >= minHistoryEntries) {
+            addCommand(backCommand);
+        }
+    }
+    
+    protected void addBackCommand() {
+        addBackCommand(2);
     }
     
     protected Hashtable getArgs() {
@@ -58,4 +115,58 @@ public class UstadViewFormJ2ME extends Form {
     public Object getContext() {
         return context;
     }
+    
+    public void setDirection(int direction) {
+        if(umViewDirection != direction) {
+            boolean isRTL = direction == UstadMobileConstants.DIR_RTL;
+            //don't use applyRTL etc. here - it will confuse the soft buttons
+            UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
+            umViewDirection = direction;
+        }
+    }
+    
+    public int getDirection() {
+        return umViewDirection;
+    }
+    
+    public static class UstadFormCommandListener implements ActionListener{
+
+        final private Object context;
+        
+        public UstadFormCommandListener(Object context) {
+            this.context = context;
+        }
+        
+        public void actionPerformed(ActionEvent evt) {
+            if(evt.getCommand() != null && evt.getCommand().getId() == UstadViewFormJ2ME.CMD_BACK_ID) {
+                UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
+                impl.goBack(context);
+            }
+        }
+        
+    }
+    
+    /**
+     * Tells the system implementation if this form can go back internally... 
+     * 
+     * @return true if this form can go back, false otherwise
+     */
+    public boolean canGoBack() {
+        return false;
+    }
+    
+    /**
+     * Tells the form to go back internally - by default does nothing
+     */
+    public void goBack() {
+        
+    }
+    
+    /**
+     * Handle shut down as required - the user is about to leave...
+     */
+    public void onDestroy() {
+        
+    }
+    
 }
