@@ -34,7 +34,6 @@ import com.ustadmobile.port.j2me.app.DeviceRoots;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import com.ustadmobile.port.j2me.app.FileUtils;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.app.RMSUtils;
 import java.io.IOException;
 import java.io.InputStream;

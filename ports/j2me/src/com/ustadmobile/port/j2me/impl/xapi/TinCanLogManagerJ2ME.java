@@ -175,7 +175,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         }
     }
     
-    public boolean queueStatement(String userid, JSONObject stmt) {
+    public boolean queueStatement(String userid, JSONObject stmt) throws IOException {
         impl.l(UMLog.DEBUG, 540, " userid: " + userid );
         StringBuffer sb = new StringBuffer();
         String status = "3";
@@ -187,7 +187,9 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         sb.append('u').append(':').append(userid).append(':').append("statementstart:").append(
                 stmt.toString()).append(":statementend:").append(status);
         impl.l(UMLog.DEBUG, 540, "appended statement to be queued ok");
-        
+        if (logOut == null){
+            openNewLog();
+        }
         try {
             synchronized(this) {
                 logOut.write(sb.toString().getBytes(UstadMobileConstants.UTF8));
@@ -664,8 +666,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         byte[] statementBytes = statementString.getBytes();
 
                         String tincanEndpointURL = 
-                                UstadMobileDefaults.DEFAULT_XAPI_STATEMENT_SERVER;
-                        impl.l(UMLog.DEBUG, 558, "POST-in log line" );
+                                FileUtils.joinPath(UstadMobileDefaults.DEFAULT_XAPI_SERVER, 
+                                        "statements");
+                        //        UstadMobileDefaults.DEFAULT_XAPI_STATEMENT_SERVER;
+                        //impl.l(UMLog.DEBUG, 558, "POST-in log line" );
                         
                         HTTPResult result = impl.makeRequest(tincanEndpointURL, 
                                 tinCanHeaders, null, "POST", statementBytes);
