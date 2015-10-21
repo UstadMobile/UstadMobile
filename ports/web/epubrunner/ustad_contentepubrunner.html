@@ -1,0 +1,140 @@
+<!-- This file is part of Ustad Mobile.  
+    
+    Ustad Mobile Copyright (C) 2011-2014 UstadMobile Ltd.
+
+    Ustad Mobile is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version with the following additional terms:
+    
+    All names, links, and logos of Ustad Mobile and Toughra Technologies FZ 
+    LLC must be kept as they are in the original distribution.  If any new
+    screens are added you must include the Ustad Mobile logo as it has been
+    used in the original distribution.  You may not create any new 
+    functionality whose purpose is to diminish or remove the Ustad Mobile 
+    Logo.  You must leave the Ustad Mobile logo as the logo for the 
+    application to be used with any launcher (e.g. the mobile app launcher).  
+    
+    If you want a commercial license to remove the above restriction you must
+    contact us.  
+    
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    Ustad Mobile is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+
+
+
+This program is free software.  It is licensed under the GNU GENERAL PUBLIC LICENSE ( http://www.gnu.org/copyleft/gpl.html ) with the following 
+
+GPL License Additional Terms
+
+All names, links, and logos of Ustad Mobile and Toughra Technologies FZ LLC must be kept as they are in the original distribution.  If any new screens are added you must include the Ustad Mobile logo as it has been used in the original distribution.  You may not create any new functionality whose purpose is to diminish or remove the Ustad Mobile Logo.  You must leave the Ustad Mobile logo as the logo for the application to be used with any launcher (e.g. the mobile app launcher).  
+
+If you need a commercial license to remove these restrictions please contact us by emailing info@ustadmobile.com 
+
+-->
+
+<!-- 
+    This is the page that shows all the books/packages available in different locations on different platforms with the help of its javascript and its functions and callbacks.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta charset='utf-8'/>
+        <script src="exe_jquery.js" type='text/javascript'></script>
+        <script src="tincan.js" type="text/javascript"></script>
+        <script src="tincan_queue.js" type="text/javascript"></script>
+        
+        <script src="exe_tincan.js" type='text/javascript'></script>
+        <script src="ustadmobile.js" type='text/javascript'></script>
+        <script src="jquery.mobile.min.js" type='text/javascript'></script>
+
+
+        <meta name="viewport" content="width=device-width, initial-scale=1"/> 
+        <link rel='stylesheet' href='jquerymobiletheme.min.css' />
+        <link rel="stylesheet" href="jquery.mobile.icons.min.css" />
+        <link rel="stylesheet" href="jquery.mobile.structure.css" />
+	<link rel="stylesheet" href="font-awesome.min.css" type="text/css"/>
+	<link rel="stylesheet" href="../css/fontawesome/css/font-awesome.min.css" type="text/css"/>
+
+        
+        <script src="ustadjs.js" type="text/javascript"></script>
+        <script type="text/javascript">
+
+	function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+            results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+	var package_opf =  getParameterByName('src');
+
+        $(function() {
+            $("#ustad_epub_frame").opubframe();
+            var height = UstadMobile.getInstance().getJQMViewportHeight() - 8;
+            
+            $("#ustad_epub_frame").opubframe("option", "height", height + "px");
+            $("#ustad_epub_frame").css("margin", "0px");
+            $("#ustad_epub_frame").opubframe("loadfromopf", package_opf);
+        });
+        </script>
+        
+    </head>
+    <body data-zone="app">  
+        <div data-role="page" id="ustadmobile_epubrunner_page" data-theme="a">
+            <div data-role="header" data-position="fixed" data-theme="b">
+		<!-- #STARTUSTADJQMHEADER -->
+            <div class="ustadjqmheader" id="ustadjqmheader" data-role="header" data-position="fixed" data-theme="b" data-tap-toggle="false">
+                <a data-theme="b" href="javascript:history.back()" data-role='button' data-inline='true' class="ustad_panel_href ui-btn-left"><i class='lIcon fa fa-arrow-circle-left'></i></a>
+
+                <h1><span id="logintext" class="exeTranslated" data-exe-translation="OPDS Feed">OPDS Feed</span></h1>
+                <a data-theme="b" data-role="button" data-icon="user" id="ustad_user_button" class="ui-btn-right">&nbsp;</a>
+                <script>
+                    if (localStorage.getItem("username") === null) {
+                        
+                        document.getElementById('ustad_user_button').innerHTML="<a href='index.html'>Guest</a>";
+                    }else{
+                        var username = localStorage.getItem('username');
+                        document.getElementById('ustad_user_button').innerHTML=username;
+
+                    }
+                </script>
+
+            </div>
+            <!-- #ENDUSTADJQMHEADER -->
+
+                <h3>&nbsp;</h3>
+            </div>
+            
+            <div data-role="content" data-theme="a">            
+                <div id="ustad_epub_frame" style="width:100%; height: 200px;">
+                    
+                </div>
+                
+            </div>
+            
+
+            <div data-role="footer" data-position="fixed" style="text-align: center;" data-tap-toggle="false" data-theme="a"> 
+                <a id="umBack"  
+                class="ui-btn ui-corner-all ui-btn-inline ui-mini ui-btn-icon-left ui-icon-carat-l footer-button-left" 
+                onclick="$('#ustad_epub_frame').opubframe('go', -1)" 
+                > </a>
+                     
+            <a id="umForward" 
+                class="ui-btn ui-corner-all ui-btn-inline ui-mini ui-btn-icon-right ui-icon-carat-r footer-button-right" 
+                data-direction="reverse"                 
+                onclick="$('#ustad_epub_frame').opubframe('go', 1)" 
+                > </a>
+            </div>
+        </div>
+        
+    </body>
+</html>
+

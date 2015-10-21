@@ -1,0 +1,128 @@
+/*
+eXe
+Copyright 2004-2006, University of Auckland
+Copyright 2004-2007 eXe Project, New Zealand Tertiary Education Commission
+base style sheet for all themes
+*/
+
+body{margin:0;padding:0 10px 10px 10px;font-family:arial,verdana,helvetica,sans-serif;font-size:.8em}
+#header{text-align:left;height:50px;padding-left:20px;font-size:2.2em;font-weight:bold}
+a{text-decoration:none}
+a:hover,a:focus{text-decoration:underline}
+img.submit,img.help,img.info,img.gallery{border:0}
+li{list-style-position:inside}
+#nodeDecoration{padding:0.1em;border-bottom:0em;text-align:right}
+.block,.feedback{display:block;padding-top:0.25em;padding-bottom:0.25em}
+.feedback{font-family:times,serif;font-size:120%}
+.feedback-button p{margin:0}
+/* iDevice */
+.emphasis0{padding-left:0;margin:0}
+.iDeviceTitle{font-weight:bold;position:relative;top:-18px;/* aligns title up with middle of icon */}
+input.feedbackbutton{margin-top:10px;margin-bottom:10px}
+/* 'tips for completion' and 'pedagogical help' */
+.popupDiv{background-color:#EDEFF0;border:2px solid #607489;padding:0 4px 4px 4px;margin-left:15px;text-align:left;z-index:99;border-radius:3px}
+.popupDivLabel{text-align:center;font:message-box;font-weight:bold;color:#fff;cursor:move;margin:0 -4px;background-image:url(popup_bg.gif)}
+@media print{
+    .feedback{display:block!important}
+    .feedbackbutton,.feedback-button{display:none!important}
+    #main{margin-left:10px}
+    div.node{page-break-after:always}
+}
+/* The New eXeLearning */
+/* Include these styles in the old themes */
+.pre-code{background:#112C4A;color:#E7ECF1;font-family:Monaco,Courier,monospace;border-radius:9px;font-size:12px;margin:2em 1em;overflow:auto;padding:20px}
+* html .pre-code{width:90%} /* IE6 */
+.iDevice_content{position:relative;max-width:100%}
+.exe-epub3 .iDevice_content{position:static}
+.iDevice_header{background-position:0 50%;background-repeat:no-repeat}
+.exe-dl dt{font-size:1.1em;font-weight:bold}
+.exe-dl dd{margin:1em 1.5em}
+/* TinyMCE: Images and media */
+.exe-figure{margin:1.5em 0;max-width:100%}
+.position-center{margin:1.5em auto}
+.position-right{margin:1.5em 0 1.5em auto}
+.float-left{float:left;margin:.5em 1.5em 1em 0}
+.float-right{float:right;margin:.5em 0 1em 1.5em}
+.figcaption{padding-top:.2em}
+.figcaption.header{padding-top:0;padding-bottom:.2em}
+/* TinyMCE templates */
+.exe-layout-2-cols,.exe-layout-3-cols{width:100%}
+.exe-layout-2-cols .exe-col{float:left;width:49%}
+.exe-layout-2-cols .exe-col-1{padding-right:1%}
+.exe-layout-2-cols .exe-col-2{padding-left:1%}
+.exe-layout-2-30-70 .exe-col{width:69%}
+.exe-layout-2-30-70 .exe-col-1{width:29%}
+.exe-layout-2-70-30 .exe-col{width:29%}
+.exe-layout-2-70-30 .exe-col-1{width:69%}
+.exe-layout-3-cols .exe-col{float:left;width:32%}
+.exe-layout-3-cols .exe-col-1,.exe-layout-3-cols .exe-col-2{padding-right:2%}
+/* Autoclear */
+.exe-clear{overflow:auto}
+/* JavaScript on/offf */
+.toggle-idevice,.exe-hidden,.js-required,.js .js-hidden{display:none}
+.js .js-required{display:block}
+/* Hints */
+.js #main .iDevice_hint_title{font-size:1em;margin-top:0;font-weight:normal;*margin-top:1em}/* IE6, IE7 */
+.iDevice_hint{margin-bottom:1.5em}
+.iDevice_hint_title a{background-repeat:no-repeat;background-position:0 50%;padding-left:23px;text-decoration:none}
+.iDevice_hint_content{padding:0 23px}
+/* Questions/Answers */
+.iDevice_answers{margin-top:.5em}
+.iDevice_answer{overflow:hidden;*margin:1.5em 0}/* IE6, IE7 */
+.iDevice_answer p{margin-top:0}
+.iDevice_answer-field{width:2.5em;float:left}
+.js .iDevice_answer-content,.js .iDevice_answer-feedback{padding-left:2.5em}
+/* To review */
+.hidden-idevice .image_text{display:none} /* iDevice Toggler : Required for Magnifier */
+/* Accessibility */
+#skipNav{margin:0;position:absolute;width:100%}
+
+.sr-av,.js .js-sr-av,#skipNav a,.exe-hidden-accessible{position:absolute;overflow:hidden;clip:rect(0 0 0 0);clip:rect(0,0,0,0);height:0} /* sr-av: Avaible for Screen Readers. (0 0 0 0) is for IE6 & 7 */
+#skipNav a{background:#333;color:#fff;padding:.4em .85em}
+#skipNav a:active,#skipNav a:focus{position:static;overflow:visible;clip:auto;height:auto}
+
+/*Tin Can strings inside identified divs*/
+.tcdiv {display: none}
+
+/*Sortable Item*/
+.sortablesub {
+    cursor: move;
+}
+
+.sortableitemulcontainer {
+    list-style-type: none;
+    list-style-image: none;
+}
+
+/*Hangman styles*/
+.hangmanimage_series {
+    display: none;
+}
+
+/* Avoid URL etc. on the printout */ 
+@page 
+{
+    size: auto;   /* auto is the current printer page size */
+    margin: 0mm;  /* this affects the margin in the printer settings */
+}
+
+/* Tooltips */
+body .qtip {font-size:.85em;line-height:1.5em}
+.js .exe-tooltip-text{display:none}
+/* Structured lists */
+ol.auto-numbered{counter-reset:item}
+.auto-numbered ol{counter-reset:item}
+.auto-numbered li{display:block}
+.auto-numbered li:before {content:counters(item,".") ".- ";counter-increment:item}
+/* Blockquote + Cite */
+.exe-quote-cite cite{display:block;text-align:right;margin-top:-.5em}
+/* File information */
+.exe-link-data{font-size:.8em;margin:0 .2em}
+.exe-link-data abbr{cursor:help}
+/* Quote With Authorship */
+.styled-qc{font-family:Georgia,serif;font-style:italic;width:80%;margin:1.5em auto;padding:0.25em 40px;position:relative}
+.styled-qc:before{display:block;content:"\201C";font-size:5em;position:absolute;left:0;top:-20px}
+/* Responsive design */
+@media all and (max-width: 780px) {
+    .exe-layout-2-cols .exe-col,.exe-layout-3-cols .exe-col{float:none;width:100%;padding:0}
+}

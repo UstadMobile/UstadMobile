@@ -1,0 +1,30 @@
+<html>
+
+<head>
+
+
+</head>
+
+
+<body>
+<script src="en-gb.js" type="text/javascript">
+</script>
+
+<textarea rows='100' cols='100' id='outputArea'>
+</textarea>
+
+<script type="text/javascript">
+
+document.getElementById("outputArea").value = "messages = {\n";
+for(var key in messages) {
+    document.getElementById("outputArea").value += "\"" + messages[key] + "\" : \"\",\n";
+}
+
+document.getElementById("outputArea").value += "\n};";
+
+</script>
+
+
+</body>
+
+</html>

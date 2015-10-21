@@ -1,0 +1,28 @@
+/*
+ * Structural adjustments specific to UstadMobile
+ */
+
+.ClozeIdevice .ui-input-text {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* 
+ * Footer button issue: see http://demos.jquerymobile.com/1.4.4/toolbar/
+ * - buttons in footer
+ */
+
+.footer-button-left,
+.footer-button-right {
+    position: absolute; 
+    margin: 0;
+    top: 0.24em;          
+    bottom: 0.24em;
+}
+.footer-button-left {
+    left: 0.4em;
+}
+.footer-button-right {
+    right: 0.4em;
+}
+
