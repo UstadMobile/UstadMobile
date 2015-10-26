@@ -62,7 +62,6 @@ NetBeans.  See README for instructions on building from source.
                 <include name="kxml2-min-2.3.0.jar" />
                 <include name="LWUIT-MIDP-IO.jar" />
                 <include name="LWUIT-MIDP.jar" />            
-		
             </fileset>
         </path>
         

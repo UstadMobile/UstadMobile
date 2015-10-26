@@ -8,3 +8,20 @@ else
     echo "Did you run core getlibs yet?  See the README file"
 fi
 
+mkdir -p lib/checkout
+cd lib/checkout
+
+#checkout the QR Code lib from Git.  
+if [ -e qrcode ]; then
+    cd qrcode
+    git pull
+    cd ..
+else
+    git clone https://github.com/UstadMobile/Open-Source-QR-Code-Library-OMR-Fork.git qrcode
+fi
+#go back to base directory
+cd ../..
+pwd
+cp -rv lib/checkout/qrcode/src/jp src/
+
+

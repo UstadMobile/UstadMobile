@@ -55,5 +55,18 @@ public class TestConstants {
     
     public static final String REGISTER_URL = 
             "http://umcloud1.ustadmobile.com/phoneinappreg/";
+
+    /**
+     * When doing a network job tests need to run async otherwise android
+     * will throw an annoying exception 
+     * 
+     * The default time to wait for a job to complete
+     */
+    public static final int DEFAULT_NETWORK_INTERVAL = 1000;
+    
+    /**
+     * The default length of time to wait for a network job to complete
+     */
+    public static final int DEFAULT_NETWORK_TIMEOUT = 20000;
     
 }

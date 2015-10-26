@@ -31,6 +31,7 @@
 package com.ustadmobile.port.j2me.impl;
 
 import com.sun.lwuit.Form;
+import com.sun.lwuit.Image;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.plaf.UIManager;
@@ -61,6 +62,7 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
+import com.ustadmobile.port.j2me.impl.qr.J2MEQRCodeImage;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
@@ -84,6 +86,7 @@ import javax.microedition.media.MediaException;
 import javax.microedition.media.Player;
 import javax.microedition.media.PlayerListener;
 import javax.microedition.media.control.VolumeControl;
+import jp.sourceforge.qrcode.data.QRCodeImage;
 import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -1245,6 +1248,17 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         onEndOfMediaListener = null;
         
         return status;
+    }
+
+    //This is just a placeholder so it compiles - we dont support OMR on J2ME just yet
+    public QRCodeImage getQRCodeImage(InputStream in) {
+        try {
+            return new J2MEQRCodeImage(Image.createImage(in));
+        }catch(IOException e) {
+            
+        }
+        
+        return null;
     }
     
     /**

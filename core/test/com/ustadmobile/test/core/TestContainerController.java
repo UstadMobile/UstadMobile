@@ -87,7 +87,6 @@ public class TestContainerController extends TestCase {
         $endif */
     }
 
-    @Override
     protected void setUp() throws Exception {
         super.setUp(); 
         httpRoot = TestUtils.getInstance().getHTTPRoot();

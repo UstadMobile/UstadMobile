@@ -76,7 +76,8 @@ ports/j2me/src/com/ustadmobile/core/view/*
 ports/j2me/src/com/ustadmobile/core/impl/*
 !ports/j2me/src/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
 
-
+#QRCode that gets checked out into the source directory
+ports/j2me/src/jp
 
 #Testing node server files
 testres/node-qunit-server/node_modules
@@ -98,3 +99,5 @@ ports/j2me/src/com/ustadmobile/test/core/*.java
 #Ignore mock unit test results sent by testing the test method
 testres/unittest-testresults.txt
 testres/unittest-result
+
+
