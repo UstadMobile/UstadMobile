@@ -75,6 +75,17 @@
 
     <script>
 
+	function getOpdsUrl(){
+	    //var url = "http://umcloud1.ustadmobile.com/opds/";
+ 	    if (localStorage.getItem("username") === null) {
+		var url = "http://umcloud1.ustadmobile.com/opds/public/providers/";
+		return url;
+	    }else{
+	        var url = localStorage.getItem("opdsendpoint");
+	        return url;
+	    }
+	}
+
       	function changePage(page){
 	    document.location.href = page;
       	}
@@ -87,12 +98,23 @@
       	}
 
       	function getCatalogByURLAuto(){
-	    var url = "http://umcloud1.ustadmobile.com/opds/";
+	    //var url = "http://umcloud1.ustadmobile.com/opds/";
 	    var opdsurl =  getParameterByName('url');
-            var options = new Object();
-            options.httpusername=localStorage.getItem("username");
-            options.httppassword=localStorage.getItem("password");
-	    getCatalogByURL(opdsurl, options,failFn);
+	    console.log("opdsurl" + opdsurl);
+	    if (opdsurl === ""){
+		console.log("empty.");
+		opdsurl = getOpdsUrl();
+		var options = new Object();
+                options.httpusername=localStorage.getItem("username");
+                options.httppassword=localStorage.getItem("password");
+                getCatalogByURL(opdsurl, options,failFn);
+
+	    }else{
+                var options = new Object();
+                options.httpusername=localStorage.getItem("username");
+                options.httppassword=localStorage.getItem("password");
+	        getCatalogByURL(opdsurl, options,failFn);
+	    }
 	}
 
 	function get_baseurl(){
@@ -118,14 +140,14 @@
     	    return( the_arr.join('/') );
 	}
 
-	function find_package(viewlink, title, callback){
+	function find_package(viewlink, title, links, titles, callback){
 	    console.log("Finding package..");
 	    var container_xml_url = RemoveLastDirectoryPartOf(viewlink.replace(/\/$/, "")) + "/" + "/META-INF/container.xml";
 	    var ajaxOpts = {
                 dataType : "text"
             };
-	    var links = [];
-	    var titles = [];
+	    //var links = [];
+	    //var titles = [];
 
 	    $.ajax(container_xml_url, ajaxOpts).done(function(containerXMLString){
 	  	console.log("AJAX done in find package");
@@ -170,9 +192,16 @@
                 var opdsFeedObj = null;
                 try {
                     opdsFeedObj = UstadJSOPDSFeed.loadFromXML(opdsStr, url);
-                    getLinkToPopulate(opdsFeedObj, function(linkToPopulate, title){
-                        $( ".opdsentry" ).append("<p><a onclick='changePage(\"" + 
-                        linkToPopulate +  "\");' >" + ""+ title + "</a><p>");
+		    updateTitle(opdsFeedObj.title);
+                    getLinkToPopulate(opdsFeedObj, function(linkToPopulate, title, desc, extra){
+                        //$( ".opdslist" ).append("<p><a onclick='changePage(\"" + 
+                        //linkToPopulate +  "\");' >" + ""+ title + "</a><p>");
+			if (typeof extra === 'undefined'){
+			    extra ="";
+			}
+			$(".opdslist").append(
+			    "<li><a href=\"#\" onclick='changePage(\"" + linkToPopulate + "\");'><h3>"+ title +"</h3><p>" + desc + "</p></a>" + extra + "</li>"
+			).listview('refresh');
                     });
                 
                     
@@ -188,24 +217,39 @@
         var index;
         var baseurl = get_baseurl();
         for (index = 0; index < opdsFeedObj.entries.length; ++index) {
+	  (function(index) {
 	    var opdsFeedObjEntry = opdsFeedObj.entries[index];
+	    var summary = opdsFeedObj.entries[index].getSummary(null);
             var opdslinks = opdsFeedObj.entries[index].getLinks(null,"application/atom+xml", { mimeTypeByPrefix: true } );
+	
 
+	    /*(function(index) {
+        	asycronouseProcess(function() {
+               	    alert(cntr);
+        	});
+    	    })(index);*/
 
             if(typeof opdslinks !== 'undefined' && opdslinks.length > 0 ){
                 var entryLink = opdslinks[0].href;
-                callback("opds.html?url=" + baseurl + "/" + entryLink, opdsFeedObj.entries[index].title);
+                callback("opds.html?url=" + baseurl + "/" + entryLink, opdsFeedObj.entries[index].title, summary);
 
             }else{
 		var title = opdsFeedObj.entries[index].title;
                 getAcquisitionLinks(opdsFeedObjEntry, title, function(linksToPopulate, titles){
                     var index;
-                    for (index = 0; index <= linksToPopulate.entries.length; ++index) {
-                        callback(linksToPopulate[index], titles[index]);
-                    }
+		    if (linksToPopulate.length === 2){
+		        callback(linksToPopulate[1], titles[0], summary,  
+			    "<a onclick='changePage(\" " + linksToPopulate[0] + "\");' data-rel=\"popup\" data-position-to=\"window\" data-transition=\"pop\">Download File</a>");
+		    }else{
+                        for (index = 0; index < linksToPopulate.length; ++index) {
+			    console.log("HOLA! " + index);
+                            callback(linksToPopulate[index], titles[index], summary);
+                        }
+		    }
                 });
 
             }
+	  })(index);
         }
     }
 
@@ -218,15 +262,15 @@
         links.push(baseurl +"/" + epubLink[0].href)
  	console.log(links)
         var titles = []
-        titles.push(title + "[Download]");
+        titles.push(title);
 
-	callback(links, titles);
+	//callback(links, titles);
 
         var viewlinks = opdsFeedObjEntry.getLinks(null, 
                 "text/html", {mimeTypeByPrefix: true});
         if (typeof viewlinks !== "undefined" && viewlinks.length > 0){
             var viewLink = viewlinks[0].href
-            find_package(baseurl + "/" + viewLink, title, function(links, titles){
+            find_package(baseurl + "/" + viewLink, title, links, titles, function(links, titles){
 		callback(links, titles);
 	    });
 		
@@ -240,8 +284,24 @@
         }else{
             callback(links, titles);
         }
+	//callback(links, titles);
 
     }
+
+    function updateDefaultTitle(){	
+	if(localStorage.getItem("feedtitle") === null){
+            console.log("null. settings as Feed");
+            document.getElementById('opdsfeed').innerHTML="Feed";
+        }else{
+            var feedtitle = localStorage.getItem('feedtitle');
+            document.getElementById('opdsfeed').innerHTML=feedtitle;
+        }
+
+    }
+    function updateTitle(title){     
+	document.getElementById('opdsfeed').innerHTML=title;
+    }
+
 
    </script>
 
@@ -257,17 +317,18 @@
             <div class="ustadjqmheader" id="ustadjqmheader" data-role="header" data-position="fixed" data-theme="b" data-tap-toggle="false">
                 <a data-theme="b" href="javascript:history.back()" data-role='button' data-inline='true' class="ustad_panel_href ui-btn-left"><i class='lIcon fa fa-arrow-circle-left'></i></a>
 		
-                <h1><span id="logintext" class="exeTranslated" data-exe-translation="OPDS Feed">OPDS Feed</span></h1>
+                <h1 id="opdsfeed" class="opdsfeed" >&nbsp;</h1>
 		<a data-theme="b" data-role="button" data-icon="user" id="ustad_user_button" class="ui-btn-right">&nbsp;</a>
 		<script>
 		    if (localStorage.getItem("username") === null) {
 			
-     			document.getElementById('ustad_user_button').innerHTML="<a href='index.html'>Guest</a>";
+     			document.getElementById('ustad_user_button').innerHTML="<a href='index.html'>Login</a>";
 		    }else{
 			var username = localStorage.getItem('username');
-                        document.getElementById('ustad_user_button').innerHTML=username;
+                        document.getElementById('ustad_user_button').innerHTML="<a onclick='changePage(\"index.html\");' >" + username + "</a>";
 
 		    }
+		    //updateDefaultTitle();
 		</script>
 	
             </div>
@@ -277,11 +338,17 @@
             <div role="content" class="ui-content" data-theme="b">
                 <div id="opdsentry" class="opdsentry">
                         <div style='text-align: center'>
-                            <img style="max-width: 95%" src="res/umres/aboutlogo.png" alt="Ustad Mobile: Mobilizing Education for All"/>
+                            <a onclick='changePage("opds.html");' href=""><img style="max-width: 20%" src="res/umres/aboutlogo.png" alt="Ustad Mobile: Mobilizing Education for All"/></a>
                         </div>
-			<div class="opdslist" id="opdslist">
 
-			</div>
+
+			<ul id="opdslist" class="opdslist" data-role="listview" data-inset="true" data-split-icon="carat-d">
+			    <!--<li><a href="#">
+				<img src="../user.png" />
+				<h2>Broken Bells</h2>
+				<p>Broken Bells</p></a>
+			    </li>-->
+		    	</ul>
 
                     
                     <div data-role="popup" id="ustad_login_popup_dialog"  data-theme="b" data-dismissible="false" style="max-width:400px;">

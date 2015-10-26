@@ -132,6 +132,7 @@ UstadMobileLogin.prototype = {
                     //UstadCatalogController.setupUserCatalog({show: true});
 		    console.log("Yay, success. Username and Password autneticated. Now time to make the OPDS");
 	  	    var opdsEndpoint = "http://umcloud1.ustadmobile.com/opds/";
+		    localStorage.setItem("opdsendpoint", opdsEndpoint);
 		    var opdsPage = "opds.html?url=" + opdsEndpoint;
 		    document.location.href = opdsPage;
 		    //Load opdsFeed by URL or something..
