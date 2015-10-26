@@ -81,6 +81,8 @@ public class TestOMR extends TestCase {
         
         QRCodeImage img = UstadMobileSystemImpl.getInstance().getQRCodeImage(
             new ByteArrayInputStream(imgBytes));
+        imgBytes = null;
+        
         assertNotNull("Can get QR Code image from stream", img);
         boolean[][] bitmap = OMRRecognizer.convertImgToBitmap(img);
         img = null;
