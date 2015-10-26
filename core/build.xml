@@ -61,7 +61,7 @@
             <url url="http://www.ustadmobile.com/build-dep/proguard4.10.zip"/>
 
             <!-- QRCode -->
-            <url url="https://devserver2.ustadmobile.com:8081/job/QRCode/lastSuccessfulBuild/artifact/lib/qrcode.jar"/>
+            <url url="http://devserver2.ustadmobile.com:8080/job/QRCode/lastSuccessfulBuild/artifact/lib/qrcode.jar"/>
         </get>
 
         <unzip dest="${lib.dir}">
