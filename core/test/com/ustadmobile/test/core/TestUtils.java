@@ -69,6 +69,11 @@ public class TestUtils {
         return setValues;
     }
     
+    /**
+     * Get the current HTTP Root directory - includes a trailing /
+     * 
+     * @return HTTP Asset root directory with a trailing /
+     */
     public String getHTTPRoot() {
         Exception ex = null;
                 
@@ -138,4 +143,23 @@ public class TestUtils {
         }
         
     }
+    
+    /**
+     * This can be used to avoid putting network code in the main thread
+     * 
+     * Simply start a thread that puts the value in the hashtable and
+     * then call this method with the key that we should wait for.  Hashtable
+     * is thread safe...
+     * 
+     * @param valKey
+     * @param table 
+     */
+    public static void waitForValueInTable(String valKey, Hashtable table) {
+        int t = 0;
+        for(t = TestConstants.DEFAULT_NETWORK_TIMEOUT; t > 0 && table.get(valKey) == null; t -= TestConstants.DEFAULT_NETWORK_INTERVAL) {
+            try { Thread.sleep(TestConstants.DEFAULT_NETWORK_INTERVAL); }
+            catch(InterruptedException e) {}
+        }
+    }
+    
 }

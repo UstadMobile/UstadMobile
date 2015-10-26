@@ -38,6 +38,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import java.io.ByteArrayInputStream;
+import java.util.Hashtable;
 import org.xmlpull.v1.XmlPullParser;
 
 
@@ -63,6 +64,8 @@ public class TestCatalogController extends ActivityInstrumentationTestCase2<Usta
 public class TestCatalogController extends TestCase{
 /* $endif */
     
+    private String opdsURL;
+    
     public TestCatalogController() {
         /* $if umplatform == 1 $ 
         super("com.toughra.ustadmobile", UstadMobileActivity.class);
@@ -74,20 +77,35 @@ public class TestCatalogController extends TestCase{
         /* $if umplatform == 1  $
         android.app.Activity activity = getActivity();
          $endif */
+        opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
     }
     
     public void testCatalogController() throws IOException, XmlPullParserException {
-        Object context = UMContextGetter.getContext(this);
+        final Object context = UMContextGetter.getContext(this);
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 311, null);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.setActiveUser(TestConstants.LOGIN_USER, context);
         
-        String opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
         
-        CatalogController controller = CatalogController.makeControllerByURL(
-            opdsURL, CatalogController.USER_RESOURCE, 
-            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-            CatalogController.CACHE_ENABLED, context);
+        final Hashtable loadedVals = new Hashtable();
+        
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    CatalogController loadCtrl = CatalogController.makeControllerByURL(
+                    opdsURL, CatalogController.USER_RESOURCE, 
+                    TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                    CatalogController.CACHE_ENABLED, context);
+                    loadedVals.put("controller1", loadCtrl);
+                }catch(Exception e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 183, opdsURL, e);
+                }
+            }
+        }).start();
+        
+        TestUtils.waitForValueInTable("controller1", loadedVals);
+        CatalogController controller = (CatalogController)loadedVals.get("controller1");
+        
         assertNotNull("Create catalog controller", controller);
         
         

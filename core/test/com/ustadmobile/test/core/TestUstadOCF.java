@@ -63,22 +63,38 @@ public class TestUstadOCF extends ActivityInstrumentationTestCase2<UstadMobileAc
 public class TestUstadOCF extends TestCase {
 /* $endif */    
     
+    private byte[] ocfData;
+    
     public TestUstadOCF() {
         /* $if umplatform == 1 $ 
         super("com.toughra.ustadmobile", UstadMobileActivity.class);
         $endif */
     }
+
+    protected void setUp() throws Exception {
+        super.setUp();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String containerXMLURL = UMFileUtil.joinPaths(new String[] { 
+            TestUtils.getInstance().getHTTPRoot(), "container.xml"});
+        HTTPResult httpData = impl.makeRequest(containerXMLURL, new Hashtable(), new Hashtable(), 
+            "GET");
+         ocfData = httpData.getResponse();
+    }
+
+    
+    protected void tearDown() throws Exception {
+        super.tearDown(); //To change body of generated methods, choose Tools | Templates.
+        ocfData = null;
+    }
+    
+    
     
     public void testUstadOCF() throws IOException, XmlPullParserException{
         //loads testassets/container.xml
         
-        String containerXMLURL = UMFileUtil.joinPaths(new String[] { 
-            TestUtils.getInstance().getHTTPRoot(), "container.xml"});
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        HTTPResult httpData = impl.makeRequest(containerXMLURL, new Hashtable(), new Hashtable(), 
-            "GET");
         XmlPullParser xpp = impl.newPullParser();
-        xpp.setInput(new ByteArrayInputStream(httpData.getResponse()), "UTF-8");
+        xpp.setInput(new ByteArrayInputStream(ocfData), "UTF-8");
         UstadOCF ocf = UstadOCF.loadFromXML(xpp);
         assertEquals("Loaded container has one root", 1, ocf.rootFiles.length);
         

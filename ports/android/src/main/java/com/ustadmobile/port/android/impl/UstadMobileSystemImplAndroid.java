@@ -35,6 +35,8 @@ import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.*;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -55,6 +57,7 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
+import com.ustadmobile.port.android.impl.qr.AndroidQRCodeImage;
 import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.CatalogActivity;
@@ -67,6 +70,8 @@ import android.util.Log;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
+
+import jp.sourceforge.qrcode.data.QRCodeImage;
 
 
 /**
@@ -641,6 +646,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
         return parser;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public QRCodeImage getQRCodeImage(InputStream in) {
+        return new AndroidQRCodeImage(in);
     }
 
     @Override

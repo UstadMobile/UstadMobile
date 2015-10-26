@@ -80,15 +80,25 @@ public class TestContainerController extends TestCase {
      */
     public static final int TIMEOUT = 60000;
     
+    private String httpRoot;
+    
     public TestContainerController() {
         /* $if umplatform == 1 $ 
         super(UstadMobileActivity.class);
         $endif */
     }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp(); 
+        httpRoot = TestUtils.getInstance().getHTTPRoot();
+    }
+    
+    
     
     public void testContainerController() throws IOException, XmlPullParserException{
-        String httpRoot = TestUtils.getInstance().getHTTPRoot();
         
+        //TODO: Update me for the new ViewFirst model
 //        
 //        
 //        String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {

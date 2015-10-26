@@ -88,6 +88,7 @@ public class TestCatalogControllerAcquire extends TestCase{
     
     public void testCatalogControllerAcquire() throws Exception{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        //TODO: Update this for the new download manager implementation
 //        String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
 //             TestUtils.getInstance().getHTTPRoot(), "acquire.opds"});
 //        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();

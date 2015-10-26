@@ -70,16 +70,28 @@ public class TestCatalogView extends TestCase {
     public TestCatalogView() {
         /* $if umplatform == 1 $ 
         super(CatalogActivity.class);
+        
+        $endif */
+    }
+
+    protected void setUp() throws Exception {
+        super.setUp(); 
+        
         String opdsURL =  TestUtils.getInstance().getHTTPRoot()
                 + TestConstants.CATALOG_OPDS_ROOT;
+        
+        /* $if umplatform == 1 $ 
         Intent intent = new Intent();
         intent.putExtra(CatalogController.KEY_URL, opdsURL);
         intent.putExtra(CatalogController.KEY_RESMOD, CatalogController.USER_RESOURCE);
         intent.putExtra(CatalogController.KEY_FLAGS, CatalogController.CACHE_ENABLED);
         setActivityIntent(intent);
-        
         $endif */
+        
     }
+    
+    
+    
     
     public void testCatalogView() throws Exception{
 //        Object context = UMContextGetter.getContext(this);

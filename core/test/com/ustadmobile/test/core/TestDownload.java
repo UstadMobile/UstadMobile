@@ -58,7 +58,7 @@ $endif$ */
  * @author mike
  */
 /* $if umplatform == 1  $
-public class TestDownload extends UMActivityInstrumentationTestCase2<UstadMobileActivity> implements UMDownloadCompleteReceiver{
+public class TestDownload extends ActivityInstrumentationTestCase2<UstadMobileActivity> implements UMDownloadCompleteReceiver{
  $else$ */
 public class TestDownload extends TestCase implements  UMDownloadCompleteReceiver{
 /* $endif$ */
@@ -69,10 +69,18 @@ public class TestDownload extends TestCase implements  UMDownloadCompleteReceive
     
     private long downloadID;
     
+    private String httpRoot = null;
+    
     public TestDownload() {
         /* $if umplatform == 1 $ 
         super(UstadMobileActivity.class);
         $endif */
+    }
+
+    
+    protected void setUp() throws Exception {
+        super.setUp(); 
+        httpRoot = TestUtils.getInstance().getHTTPRoot();
     }
         
     public void testDownloadImpl() throws IOException{
@@ -88,7 +96,7 @@ public class TestDownload extends TestCase implements  UMDownloadCompleteReceive
             impl.removeFile(destFileURI);
         }
         
-        String fileDownloadURL = TestUtils.getInstance().getHTTPRoot() + "phonepic-smaller.png";
+        String fileDownloadURL = httpRoot + "phonepic-smaller.png";
         
         int downloadSize = UMIOUtils.getHTTPDownloadSize(fileDownloadURL, null);
         assertTrue("Can get size before starting", downloadSize > 0);
@@ -125,7 +133,7 @@ public class TestDownload extends TestCase implements  UMDownloadCompleteReceive
         
         /*
          Test the same again... but when there is an interrption to the download
-        */
+        */        
         boolean limitsSet = TestUtils.getInstance().setLimits(4000, 20000);
         assertTrue("Successfully set download limits on server", limitsSet);
         
@@ -145,6 +153,8 @@ public class TestDownload extends TestCase implements  UMDownloadCompleteReceive
         downloadedSize = downloadFinishedStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR];
         assertEquals("Downloaded file size equals job download size (with interruptions)",
                 downloadedSize, impl.fileSize(destFileURI));
+        
+        
         impl.unregisterDownloadCompleteReceiver(this, context);
     }
 

@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
+import jp.sourceforge.qrcode.data.QRCodeImage;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -820,6 +821,16 @@ public abstract class UstadMobileSystemImpl {
     public XmlPullParser newPullParser(InputStream in) throws XmlPullParserException {
         return newPullParser(in, UstadMobileConstants.UTF8);
     }
+    
+    /**
+     * Generates a QRCodeImage compatible object for the platform that we're on
+     * with the given input stream
+     * 
+     * @param in
+     * 
+     * @return 
+     */
+    public abstract QRCodeImage getQRCodeImage(InputStream in);
     
     /**
      * Get access to the App View to do common UI activities (e.g. show

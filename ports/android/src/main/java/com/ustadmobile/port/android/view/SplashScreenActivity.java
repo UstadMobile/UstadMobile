@@ -39,8 +39,16 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 
+import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.omr.OMRRecognizer;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
+import jp.sourceforge.qrcode.QRCodeDecoder;
+import jp.sourceforge.qrcode.data.QRCodeImage;
 
 
 public class SplashScreenActivity extends ActionBarActivity {
@@ -50,6 +58,10 @@ public class SplashScreenActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+
+        UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
+        impl.handleActivityStart(this);
+        impl.startUI(this);
     }
 
     @Override
@@ -57,9 +69,6 @@ public class SplashScreenActivity extends ActionBarActivity {
         super.onStart();
         UstadMobileSystemImpl.getInstance();
 
-        UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        impl.handleActivityStart(this);
-        impl.startUI(this);
 
     }
 
@@ -95,4 +104,5 @@ public class SplashScreenActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
