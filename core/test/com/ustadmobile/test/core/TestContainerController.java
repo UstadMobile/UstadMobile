@@ -34,7 +34,6 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
-        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
 $endif$ */
 
 /* $if umplatform == 2  $
@@ -65,7 +64,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author mike
  */
 /* $if umplatform == 1  $
-public class TestContainerController extends UMActivityInstrumentationTestCase2<UstadMobileActivity>{
+public class TestContainerController extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
 public class TestContainerController extends TestCase {
 /* $endif */

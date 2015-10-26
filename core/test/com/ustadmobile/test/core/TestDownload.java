@@ -49,7 +49,6 @@ import java.util.Hashtable;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
-        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
 $endif$ */
 
 

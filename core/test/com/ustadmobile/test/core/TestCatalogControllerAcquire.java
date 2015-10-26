@@ -42,7 +42,6 @@ import com.ustadmobile.core.util.UMFileUtil;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
-        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
    $endif$ */
 
 /* $if umplatform == 2  $
@@ -58,7 +57,7 @@ import com.ustadmobile.core.util.UMFileUtil;
  */
 
 /* $if umplatform == 1  $
-public class TestCatalogControllerAcquire extends UMActivityInstrumentationTestCase2<UstadMobileActivity>{
+public class TestCatalogControllerAcquire extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
 public class TestCatalogControllerAcquire extends TestCase{
 /* $endif */

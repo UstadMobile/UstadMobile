@@ -47,7 +47,6 @@ import java.io.IOException;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
-        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
 $endif$ */
 
 
@@ -56,7 +55,7 @@ $endif$ */
  * @author mike
  */
 /* $if umplatform == 1  $
-public class TestCacheAndStorageDir extends UMActivityInstrumentationTestCase2<UstadMobileActivity> {
+public class TestCacheAndStorageDir extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
 public class TestCacheAndStorageDir extends TestCase{
 /* $endif$ */

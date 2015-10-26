@@ -34,7 +34,6 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
-        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
    $endif$ */
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;

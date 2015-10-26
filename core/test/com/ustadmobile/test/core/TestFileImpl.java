@@ -48,7 +48,6 @@ import java.io.OutputStream;
         import android.content.Intent;
         import android.app.Activity;
         import android.app.Instrumentation;
-        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
    $endif$ */
 
 
@@ -57,7 +56,7 @@ import java.io.OutputStream;
  * @author mike
  */
 /* $if umplatform == 1  $
-public class TestFileImpl extends UMActivityInstrumentationTestCase2<UstadMobileActivity>{
+public class TestFileImpl extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
 public class TestFileImpl extends TestCase {
 /* $endif */

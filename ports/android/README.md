@@ -32,4 +32,4 @@ Build Release Version:
 Watching logcat/Debugging:
 
 The logtag is UMLogAndroid
-$ adb logcat -s 'ActivityManager:I UMLogAndroid:*'
+$ adb logcat -s 'ActivityManager:I UMLogAndroid:* TestRunner:*'

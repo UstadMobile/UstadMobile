@@ -48,7 +48,6 @@ import junit.framework.TestCase;
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
         import com.toughra.ustadmobile.UstadMobileActivity;
-        import com.toughra.ustadmobile.UMActivityInstrumentationTestCase2;
 
    $endif$ */
 
@@ -58,7 +57,7 @@ import junit.framework.TestCase;
  */
 
 /* $if umplatform == 1  $
-public class TestLocalization extends UMActivityInstrumentationTestCase2<UstadMobileActivity> {
+public class TestLocalization extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
 public class TestLocalization extends TestCase{
 /* $endif$ */
