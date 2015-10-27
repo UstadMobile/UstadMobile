@@ -826,11 +826,11 @@ public abstract class UstadMobileSystemImpl {
      * Generates a QRCodeImage compatible object for the platform that we're on
      * with the given input stream
      * 
-     * @param in
+     * @param sysImage System dependent image object: on Android: Bitmap, on J2ME: lwuit Image
      * 
-     * @return 
+     * @return QRCodeImage to use
      */
-    public abstract QRCodeImage getQRCodeImage(InputStream in);
+    public abstract QRCodeImage getQRCodeImage(Object sysImage);
     
     /**
      * Get access to the App View to do common UI activities (e.g. show

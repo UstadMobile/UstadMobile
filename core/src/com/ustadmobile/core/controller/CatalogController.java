@@ -53,6 +53,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
@@ -160,7 +161,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     private CatalogModel model;
     
     public static int[] catalogMenuOptIDS = new int[]{U.id.mycourses, 
-        U.id.onthisdevice, U.id.logout, U.id.about, U.id.settings};
+        U.id.onthisdevice, U.id.logout, U.id.about, U.id.settings, U.id.attendance};
     
     public static final int MENUINDEX_MYCOURSES = 0;
     
@@ -171,6 +172,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static final int MENUINDEX_ABOUT = 3;
     
     public static final int MENUINDEX_SETTINGS = 4;
+    
+    public static final int MENUINDEX_ATTENDANCE = 5;
     
     public static final String LOCALOPDS_ID_SUFFIX = "-local";
     
@@ -772,6 +775,10 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             case MENUINDEX_SETTINGS:
                 UstadMobileSystemImpl.getInstance().go(UserSettingsView.class, 
                         new Hashtable(), getContext());
+                break;
+            case MENUINDEX_ATTENDANCE:
+                UstadMobileSystemImpl.getInstance().go(AttendanceView.class, 
+                    new Hashtable(), getContext());
                 break;
         }
     }

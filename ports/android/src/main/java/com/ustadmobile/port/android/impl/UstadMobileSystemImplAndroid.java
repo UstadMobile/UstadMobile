@@ -52,6 +52,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
@@ -60,6 +61,7 @@ import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.impl.qr.AndroidQRCodeImage;
 import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
+import com.ustadmobile.port.android.view.AttendanceActivity;
 import com.ustadmobile.port.android.view.CatalogActivity;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
@@ -193,6 +195,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             androidClass = CatalogActivity.class;
         }else if(cls.equals(UserSettingsView.class)) {
             androidClass = UserSettingsActivity.class;
+        }else if(cls.equals(AttendanceView.class)) {
+            androidClass = AttendanceActivity.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);
@@ -653,8 +657,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
      * {@inheritDoc}
      */
     @Override
-    public QRCodeImage getQRCodeImage(InputStream in) {
-        return new AndroidQRCodeImage(in);
+    public QRCodeImage getQRCodeImage(Object sysImage) {
+        Bitmap bitmap = (Bitmap)sysImage;
+        return new AndroidQRCodeImage(bitmap);
     }
 
     @Override
