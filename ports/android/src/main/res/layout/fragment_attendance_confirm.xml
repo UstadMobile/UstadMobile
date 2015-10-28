@@ -20,6 +20,7 @@
         android:id="@+id/attendance_confirm_list"/>
 
     <Button
+        android:text="Confirm"
         android:layout_alignParentBottom="true"
         android:id="@+id/attendance_confirm_button"
         android:layout_width="match_parent"

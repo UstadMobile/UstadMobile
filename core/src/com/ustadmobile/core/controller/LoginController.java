@@ -111,7 +111,7 @@ public class LoginController extends UstadBaseController{
      * @param password
      * @return 
      */
-    private static Hashtable makeAuthHeaders(String username, String password) { 
+    public static Hashtable makeAuthHeaders(String username, String password) { 
         Hashtable ht = new Hashtable();
         String encodedUserAndPass="Basic "+ Base64.encode(username,
                     password);

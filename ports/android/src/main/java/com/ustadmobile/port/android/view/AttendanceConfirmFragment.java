@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -20,7 +21,7 @@ import com.ustadmobile.core.model.UserSettingItem;
 /**
  *
  */
-public class AttendanceConfirmFragment extends Fragment {
+public class AttendanceConfirmFragment extends Fragment implements View.OnClickListener{
 
     private ListView mList;
 
@@ -63,7 +64,14 @@ public class AttendanceConfirmFragment extends Fragment {
         mListAdapter = new AttendanceArrayAdapter<>(getContext(), 0,
                 ((AttendanceActivity)getActivity()).getAttendanceResults());
         mList.setAdapter(mListAdapter);
+        ((Button)rootView.findViewById(R.id.attendance_confirm_button)).setOnClickListener(this);
+
         return rootView;
+    }
+
+    @Override
+    public void onClick(View view) {
+        ((AttendanceActivity)getActivity()).mController.handleClickSubmitResults();
     }
 
     class AttendanceArrayAdapter<T> extends ArrayAdapter {
@@ -92,6 +100,7 @@ public class AttendanceConfirmFragment extends Fragment {
             }else {
                 imgView.setImageResource(android.R.color.transparent);
             }
+
             return convertView;
         }
 

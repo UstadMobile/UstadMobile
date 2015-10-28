@@ -62,6 +62,9 @@ public class UstadMobileConstants {
     
     public static final String ROLE_TEACHER = "Teacher";
     
+    public static final String PREFIX_ATTENDANCE_URL = 
+        "http://www.ustadmobile.com/activities/attended-class/";
+    
     /**
      * Sorted by country name: list of international dialing codes
      * see testres/countrycodes.ods

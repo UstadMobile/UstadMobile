@@ -857,6 +857,12 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract ZipFileHandle openZip(String name) throws IOException;
     
+    /**
+     * Generate a new Random UUID e.g. with Java 1.5+ using java.util.UUID.randomUUID()
+     * 
+     * @return a random UUID
+     */
+    public abstract String generateUUID();
     
 }
 

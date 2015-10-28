@@ -32,13 +32,19 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.model.AttendanceClassStudent;
 import com.ustadmobile.core.model.AttendanceRowModel;
 import com.ustadmobile.core.omr.OMRRecognizer;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
+import java.io.IOException;
+import java.util.Hashtable;
 import jp.sourceforge.qrcode.QRCodeDecoder;
 import jp.sourceforge.qrcode.data.QRCodeImage;
 import org.json.JSONArray;
@@ -75,6 +81,21 @@ public class AttendanceController extends UstadBaseController{
     private int selectedClass;
     
     private AttendanceClassStudent[] classStudents;
+    
+    /**
+     * Mapping of standard tincan verbs to IDS as per 
+     * AttendanceRowModel.STATUS_
+     */
+    public static final String[] VERB_IDS = new String[] {
+        "http://adlnet.gov/expapi/verbs/attended",
+        "http://www.ustadmobile.com/xapi/verb/late",
+        "http://www.ustadmobile.com/xapi/verb/absent-excused",
+        "http://id.tincanapi.com/verb/skipped"
+    };
+    
+    public static final String[] VERB_DISPLAYS = new String[] {
+        "Attended", "Late", "Absent - Excused", "Skipped"
+    };
     
     public AttendanceController(Object context) {
         super(context);
@@ -205,7 +226,7 @@ public class AttendanceController extends UstadBaseController{
     }
     
     
-        public void handleResultsDecoded(boolean[][] opticalMarks) {
+    public void handleResultsDecoded(boolean[][] opticalMarks) {
         classStudents = loadClassStudentListFromPrefs(
                 teacherClasses[selectedClass].id, context);
 
@@ -229,6 +250,102 @@ public class AttendanceController extends UstadBaseController{
         }
         
         view.showResult(attendanceResult);
+    }
+    
+    public void handleClickSubmitResults() {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String xAPIServer = UstadMobileSystemImpl.getInstance().getAppPref(
+                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+        JSONArray stmtArr = new JSONArray();
+        String registrationUUID = impl.generateUUID();
+        
+        JSONObject teacherStmt = makeAttendendedStmt(
+            teacherClasses[selectedClass].id, teacherClasses[selectedClass].name,
+            impl.getActiveUser(getContext()), xAPIServer, 
+            "http://activitystrea.ms/schema/1.0/host", "hosted", registrationUUID, 
+            null);
+        stmtArr.put(teacherStmt);
+        
+        JSONObject studentStmt;
+        JSONObject instructorActor = UMTinCanUtil.makeActorFromActiveUser(getContext());
+        
+        for(int i = 0; i < attendanceResult.length; i++) {
+            int attendanceStatus = attendanceResult[i].attendanceStatus;
+            if(attendanceStatus >= 0) {
+                studentStmt = makeAttendendedStmt(teacherClasses[selectedClass].id, 
+                    teacherClasses[selectedClass].name, attendanceResult[i].userId, 
+                    xAPIServer, VERB_IDS[attendanceStatus], VERB_DISPLAYS[attendanceStatus], 
+                    registrationUUID, instructorActor);
+                stmtArr.put(studentStmt);
+            }
+            
+        }
+        sendToXAPIServer(stmtArr, xAPIServer, impl.getActiveUser(getContext()), 
+            impl.getActiveUserAuth(getContext()));
+    }
+    
+    public void handleResultsSubmitted() {
+        
+    }
+    
+    public void sendToXAPIServer(final JSONArray stmtArr, final String xapiServer, final String username, final String pasword) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final String stmtURL = UMFileUtil.joinPaths(new String[] {
+            xapiServer, "statements"});
+        final String stmtStr = stmtArr.toString();
+        final Hashtable headers = LoginController.makeAuthHeaders(username, 
+            pasword);
+        headers.put("X-Experience-API-Version", "1.0.1");
+        
+        Thread sendThread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    impl.makeRequest(stmtURL, headers, null, "POST", 
+                        stmtArr.toString().getBytes("UTF-8"));
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }
+                
+            }
+        });
+        sendThread.start();
+    }
+    
+    
+    public JSONObject makeAttendendedStmt(String classID, String className, String username, String xapiServer, String verbID, String verbDisplay, String registrationUUID, JSONObject instructor) {
+        JSONObject stmt = new JSONObject();
+        try {
+            stmt.put("actor", UMTinCanUtil.makeActorFromUserAccount(username, 
+                xapiServer));
+            JSONObject verbObj = new JSONObject();
+            
+            verbObj.put("id",verbID);
+            verbObj.put("display", 
+                UMTinCanUtil.makeLangMapVal("en-US", verbDisplay));
+            stmt.put("verb", verbObj);
+            
+            JSONObject object = new JSONObject();
+            object.put("id", UstadMobileConstants.PREFIX_ATTENDANCE_URL + classID);
+            object.put("objectType", "Activity");
+            JSONObject definition = new JSONObject();
+            definition.put("name", 
+                UMTinCanUtil.makeLangMapVal("en-US", className));
+            object.put("definition", definition);
+            
+            stmt.put("object", object);
+            
+            JSONObject stmtContext = new JSONObject();
+            stmtContext.put("registration", registrationUUID);
+            if(instructor != null) {
+                stmtContext.put("instructor", instructor);
+            }
+            stmt.put("context", stmtContext);
+        }catch(JSONException j) {
+            
+        }
+        
+        return stmt;
     }
 
     

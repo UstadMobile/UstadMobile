@@ -581,26 +581,32 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         conn.setRequestMethod(method);
 
-        if("POST".equals(method) && postParams != null && postParams.size() > 0) {
-            //we need to write the post params to the request
-            StringBuilder sb = new StringBuilder();
-            Enumeration e = postParams.keys();
-            boolean firstParam = true;
-            while(e.hasMoreElements()) {
-                String key = e.nextElement().toString();
-                String value = postParams.get(key).toString();
-                if(firstParam) {
-                    firstParam = false;
-                }else {
-                    sb.append('&');
+        if("POST".equals(method)) {
+            if(postBody == null && postParams != null && postParams.size() > 0) {
+                //we need to write the post params to the request
+                StringBuilder sb = new StringBuilder();
+                Enumeration e = postParams.keys();
+                boolean firstParam = true;
+                while(e.hasMoreElements()) {
+                    String key = e.nextElement().toString();
+                    String value = postParams.get(key).toString();
+                    if(firstParam) {
+                        firstParam = false;
+                    }else {
+                        sb.append('&');
+                    }
+                    sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
+                    sb.append(URLEncoder.encode(value, "UTF-8"));
                 }
-                sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
-                sb.append(URLEncoder.encode(value, "UTF-8"));
+
+                postBody = sb.toString().getBytes();
+            }else if(postBody == null) {
+                throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
             }
 
             conn.setDoOutput(true);
             OutputStream out = conn.getOutputStream();
-            out.write(sb.toString().getBytes());
+            out.write(postBody);
             out.flush();
             out.close();
         }
@@ -686,6 +692,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public ZipFileHandle openZip(String name) throws IOException{
         return new ZipFileHandleAndroid(name);
+    }
+
+    @Override
+    public String generateUUID() {
+        return UUID.randomUUID().toString();
     }
 
 }
