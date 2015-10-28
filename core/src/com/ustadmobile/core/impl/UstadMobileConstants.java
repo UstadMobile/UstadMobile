@@ -60,6 +60,8 @@ public class UstadMobileConstants {
      */
     public static final int DIR_RTL = 1;
     
+    public static final String ROLE_TEACHER = "Teacher";
+    
     /**
      * Sorted by country name: list of international dialing codes
      * see testres/countrycodes.ods

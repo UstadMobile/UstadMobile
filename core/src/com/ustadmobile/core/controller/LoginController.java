@@ -44,6 +44,8 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 
 /* $if umplatform == 2  $
@@ -92,16 +94,108 @@ public class LoginController extends UstadBaseController{
      * @throws IOException if something goes wrong talking to server
      */
     public static int authenticate(String username, String password, String url) throws IOException{
-        Hashtable headers = new Hashtable();
+        Hashtable headers = LoginController.makeAuthHeaders(username, 
+            password);
         headers.put("X-Experience-API-Version", "1.0.1");
-        String encodedUserAndPass="Basic "+ Base64.encode(username,
-                    password);
-        headers.put("Authorization", encodedUserAndPass);
         
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
                 url, headers, null);
         return authResult.getStatus();
 
+    }
+    
+    /**
+     * Makes a hashtable with the HTTP auth username and password set
+     * 
+     * @param username
+     * @param password
+     * @return 
+     */
+    private static Hashtable makeAuthHeaders(String username, String password) { 
+        Hashtable ht = new Hashtable();
+        String encodedUserAndPass="Basic "+ Base64.encode(username,
+                    password);
+        ht.put("Authorization", encodedUserAndPass);
+        return ht;
+    }
+    
+    /**
+     * Get the role from the UMCloud server
+     * 
+     * @param username auth username to use with request
+     * @param password auth password to use with request
+     * @param url the API endpoint url
+     * @return
+     * @throws IOException 
+     */
+    public static final String getRole(String username, String password, String url) throws IOException {
+        String role = null;
+        
+        Hashtable headers = LoginController.makeAuthHeaders(username, password);
+        
+        HTTPResult roleResult = UstadMobileSystemImpl.getInstance().makeRequest(
+            url, headers, null);
+        if(roleResult.getStatus() == 200) {
+            try {
+                JSONObject obj = new JSONObject(new String(roleResult.getResponse(), 
+                    "UTF-8"));
+                role = obj.optString("role");
+            }catch(JSONException j) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 185, url, j);
+                throw new IOException(j.toString());
+            }
+        }
+        
+        return role;
+    }
+    
+    /**
+     * 
+     * @param username
+     * @param password
+     * @param url
+     * @return
+     * @throws IOException 
+     */
+    public static String getTeacherClassList(String username, String password, String url) throws IOException {
+        JSONObject result = null;
+        String classListStr = null;
+        
+        HTTPResult classListResult = UstadMobileSystemImpl.getInstance().makeRequest(url, 
+            makeAuthHeaders(username, password), null);
+        if(classListResult.getStatus() == 200) {
+            classListStr = new String(classListResult.getResponse(), "UTF-8");
+            try {
+                JSONArray classArray = new JSONArray(classListStr);
+            }catch(JSONException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 187, 
+                    url+ '/' +  classListStr, e);
+                classListStr = null;
+            }
+            
+        }
+        
+        return classListStr;
+    }
+    
+    public static String getJSONArrayResult(String username, String password, String url) throws IOException {
+        JSONArray arr;
+        String classListStr = null;
+        
+        HTTPResult classListResult  = UstadMobileSystemImpl.getInstance().makeRequest(url, 
+            makeAuthHeaders(username, password), null);
+        if(classListResult.getStatus() == 200) {
+            classListStr = new String(classListResult.getResponse(), "UTF-8");
+            try {
+                arr = new JSONArray(classListStr);
+            }catch(JSONException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 189, 
+                    url+ '/' +  classListStr, e);
+                classListStr = null;
+            }
+        }
+        
+        return classListStr;
     }
     
     /**
@@ -244,6 +338,8 @@ public class LoginController extends UstadBaseController{
                     "statements?limit=1"});
 
                 int result = 0;
+                String role = null;
+                String teacherClassList = null;
                 IOException ioe = null;
 
                 try {
@@ -251,6 +347,48 @@ public class LoginController extends UstadBaseController{
                         serverURL);
                 }catch(IOException e) {
                     ioe = e;
+                }
+                
+                if(result == 200) {
+                    // try and find the role
+                    try {
+                        role = LoginController.getRole(username, password, 
+                            UstadMobileDefaults.DEFAULT_ROLE_ENDPOINT);
+                        
+                        if(role != null && role.equals(UstadMobileConstants.ROLE_TEACHER)) {
+                            teacherClassList = LoginController.getJSONArrayResult(
+                                username, password, 
+                                UstadMobileDefaults.DEFAULT_CLASSLIST_ENDPOINT);
+                            if(teacherClassList != null) {
+                                impl.setUserPref("teacherclasslist", 
+                                    teacherClassList, context);
+                            }
+                        }
+                        
+                        if(teacherClassList != null) {
+                            try {
+                                JSONArray classArr = new JSONArray(teacherClassList);
+                                for(int i = 0; i < classArr.length(); i++) {
+                                    JSONObject classObj = classArr.getJSONObject(i);
+                                    String classID = classObj.getString("id");
+                                    String classURL = UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT
+                                        + classID;
+                                    String studentListJSON = 
+                                        LoginController.getJSONArrayResult(
+                                            username, password, classURL);
+                                    if(studentListJSON != null) {
+                                        impl.setUserPref("studentlist."+classID, 
+                                            studentListJSON, context);
+                                    }
+                                }
+                            }catch(JSONException e) {
+                                //this should never happen - if it did... getTeacherClassList would have return null
+                            }
+                        }
+                        
+                    }catch(IOException e) {
+                        ioe = e;
+                    }
                 }
                 
                 impl.getAppView(context).dismissProgressDialog();
@@ -264,6 +402,11 @@ public class LoginController extends UstadBaseController{
                 }else {
                     UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
                     UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
+                    if(role != null) {
+                        UstadMobileSystemImpl.getInstance().setUserPref("role", 
+                            role, context);
+                    }
+                    
                     UstadMobileSystemImpl.getInstance().go(CatalogView.class, 
                         CatalogController.makeUserCatalogArgs(context), context);
                 }

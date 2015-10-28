@@ -28,22 +28,35 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.view;
-
-import com.ustadmobile.core.model.AttendanceRowModel;
+package com.ustadmobile.core.model;
 
 /**
- *
+ * 
  * @author mike
  */
-public interface AttendanceView extends UstadView {
+public class AttendanceRowModel {
     
-    public void showStartPrompt();
+    public static final int STATUS_ATTENDED = 0;
     
-    public void showTakePicture();
+    public static final int STATUS_LATE = 1;
     
-    public void showClassList(String[] classList);
+    public static final int STATUS_EXCUSED = 2;
     
-    public void showResult(AttendanceRowModel[] results);
+    public static final int STATUS_ABSENT = 3;
+    
+    public int rollNum;
+    
+    public String name;
+    
+    public String userId;
+    
+    public int attendanceStatus;
+    
+    public AttendanceRowModel(int rollNum, String name, String userId, int attendanceStatus) {
+        this.rollNum = rollNum;
+        this.name = name;
+        this.userId = userId;
+        this.attendanceStatus = attendanceStatus;
+    }
     
 }

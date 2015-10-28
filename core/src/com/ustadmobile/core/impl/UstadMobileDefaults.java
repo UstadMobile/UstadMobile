@@ -60,4 +60,18 @@ public class UstadMobileDefaults {
     
     public static final String DEFAULT_TINCAN_PREFIX =
             "http://www.ustadmobile.com/um-tincan/";
+    
+    
+    public static final String DEFAULT_BASE_UMCLOUD_SERVER = 
+            "http://umcloud1.ustadmobile.com/";
+    
+    public static final String DEFAULT_ROLE_ENDPOINT = 
+        DEFAULT_BASE_UMCLOUD_SERVER + "isteacher/";
+    
+    public static final String DEFAULT_CLASSLIST_ENDPOINT = 
+        DEFAULT_BASE_UMCLOUD_SERVER + "teacherclasses/";
+    
+    public static final String DEFAULT_STUDENTLIST_ENDPOINT = 
+        DEFAULT_BASE_UMCLOUD_SERVER + "allclassstudents/";
+    
 }

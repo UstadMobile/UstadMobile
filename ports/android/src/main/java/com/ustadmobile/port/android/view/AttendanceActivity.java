@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.AttendanceController;
+import com.ustadmobile.core.model.AttendanceRowModel;
 import com.ustadmobile.core.view.AttendanceView;
 
 import java.io.File;
@@ -24,9 +25,15 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
 
     public static final String TAG_STARTFRAG = "startfrag";
 
+    public static final String TAG_RESULTSFRAG = "resultsfrag";
+
+    public static final String TAG_CLASSLISTFRAG = "classlistfrag";
+
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
     private String mCurrentImgPath;
+
+    protected AttendanceRowModel[] mAttendanceResults;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,9 +45,7 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         setUMToolbar();
         setTitle("Attendance");
         if(savedInstanceState == null) {
-            Fragment startFrag = AttendanceStartFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().add(R.id.attendance_fragment_container,
-                startFrag, TAG_STARTFRAG).commit();
+            mController.handleStartFlow();
         }
     }
 
@@ -48,6 +53,14 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
     public void showStartPrompt() {
 
     }
+
+    @Override
+    public void showClassList(String[] classList) {
+        Fragment classListFrag = AttendanceSelectClassListFragment.newInstance(classList);
+        getSupportFragmentManager().beginTransaction().replace(R.id.attendance_fragment_container,
+                classListFrag, TAG_CLASSLISTFRAG).commit();
+    }
+
 
     @Override
     public void showTakePicture() {
@@ -84,6 +97,9 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
             int targetW = 800;
             int targetH = 1400;
 
+            //for offline usage of a fixed image via the emulator
+            //mCurrentImgPath = "/sdcard/IMG_20151025_241421713.jpg";
+
             BitmapFactory.Options bmOptions = new BitmapFactory.Options();
             bmOptions.inJustDecodeBounds = true;
             BitmapFactory.decodeFile(mCurrentImgPath, bmOptions);
@@ -104,7 +120,6 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
             bmOptions.inPurgeable = true;
 
             Bitmap bitmap = BitmapFactory.decodeFile(mCurrentImgPath, bmOptions);
-            System.out.println("im here");
             mController.handlePictureAcquired(bitmap);
         }
     }
@@ -113,7 +128,18 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
 
 
     @Override
-    public void showResult() {
+    public void showResult(AttendanceRowModel[] results) {
+        this.mAttendanceResults = results;
+        Fragment resultsFrag = AttendanceConfirmFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().replace(R.id.attendance_fragment_container,
+                resultsFrag, TAG_RESULTSFRAG).commit();
+    }
 
+    protected AttendanceRowModel[] getAttendanceResults() {
+        if(this.mAttendanceResults != null) {
+            return mAttendanceResults;
+        }else {
+            return new AttendanceRowModel[0];
+        }
     }
 }
