@@ -124,8 +124,10 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         }
     }
 
-
-
+    @Override
+    public void finish() {
+        super.finish();
+    }
 
     @Override
     public void showResult(AttendanceRowModel[] results) {

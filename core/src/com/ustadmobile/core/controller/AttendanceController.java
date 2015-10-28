@@ -297,18 +297,24 @@ public class AttendanceController extends UstadBaseController{
         final Hashtable headers = LoginController.makeAuthHeaders(username, 
             pasword);
         headers.put("X-Experience-API-Version", "1.0.1");
+        final Object ctx = getContext();
         
         Thread sendThread = new Thread(new Runnable() {
             public void run() {
                 try {
                     impl.makeRequest(stmtURL, headers, null, "POST", 
                         stmtArr.toString().getBytes("UTF-8"));
+                    impl.getAppView(ctx).dismissProgressDialog();
+                    view.finish();
                 }catch(IOException e) {
+                    impl.getAppView(ctx).dismissProgressDialog();
+                    impl.getAppView(ctx).showAlertDialog("Error", "Error sending result - please try again");
                     e.printStackTrace();
                 }
                 
             }
         });
+        impl.getAppView(getContext()).showProgressDialog("Sending...");
         sendThread.start();
     }
     

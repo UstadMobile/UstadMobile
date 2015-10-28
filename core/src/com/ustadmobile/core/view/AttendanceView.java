@@ -46,4 +46,6 @@ public interface AttendanceView extends UstadView {
     
     public void showResult(AttendanceRowModel[] results);
     
+    public void finish();
+    
 }
