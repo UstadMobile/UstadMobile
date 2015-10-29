@@ -32,22 +32,26 @@ package com.ustadmobile.core.impl;
 
 /**
  * Assorted hard coded default values
+ * 
  * @author mike
  */
 public class UstadMobileDefaults {
+    
+    public static final String DEFAULT_BASE_SERVER = 
+        "http://umcloud1.ustadmobile.com/";
     
     /**
      * The default Experience API server
      */
     public static final String DEFAULT_XAPI_SERVER = 
-            "http://umcloud1.ustadmobile.com/umlrs/";
+            DEFAULT_BASE_SERVER + "umlrs/";
             
     
     public static final String DEFAULT_OPDS_SERVER = 
-            "http://umcloud1.ustadmobile.com/opds/";
+            DEFAULT_BASE_SERVER + "opds/";
     
     public static final String DEFAULT_REGISTER_SERVER = 
-            "http://umcloud1.ustadmobile.com/phoneinappreg/";
+            DEFAULT_BASE_SERVER + "phoneinappreg/";
     
     /**
      * Used by LoginController to auto discover the user's country
@@ -56,22 +60,19 @@ public class UstadMobileDefaults {
             "https://freegeoip.net/json/";
 
     public static final String DEFAULT_XAPI_STATEMENT_SERVER = 
-            "http://umcloud1.ustadmobile.com/umlrs/statements/";
+            DEFAULT_BASE_SERVER + "umlrs/statements/";
     
     public static final String DEFAULT_TINCAN_PREFIX =
             "http://www.ustadmobile.com/um-tincan/";
     
     
-    public static final String DEFAULT_BASE_UMCLOUD_SERVER = 
-            "http://umcloud1.ustadmobile.com/";
-    
     public static final String DEFAULT_ROLE_ENDPOINT = 
-        DEFAULT_BASE_UMCLOUD_SERVER + "isteacher/";
+        DEFAULT_BASE_SERVER + "isteacher/";
     
     public static final String DEFAULT_CLASSLIST_ENDPOINT = 
-        DEFAULT_BASE_UMCLOUD_SERVER + "teacherclasses/";
+        DEFAULT_BASE_SERVER + "teacherclasses/";
     
     public static final String DEFAULT_STUDENTLIST_ENDPOINT = 
-        DEFAULT_BASE_UMCLOUD_SERVER + "allclassstudents/";
+        DEFAULT_BASE_SERVER + "allclassstudents/";
     
 }
