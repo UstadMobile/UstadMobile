@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import gnu.classpath.java.util.zip.ZipEntry;
 import gnu.classpath.java.util.zip.ZipInputStream;
 import java.io.IOException;
@@ -57,10 +58,10 @@ public class ZipFileHandleJ2ME implements ZipFileHandle{
     
     public InputStream openInputStream(String name) throws IOException {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 585, zipFileURI);
-        InputStream fin;
+        InputStream fin = null;
         ZipInputStream zin = null;
         try {
-            fin = UstadMobileSystemImpl.getInstance().openFileInputStream(zipFileURI);
+            fin = UstadMobileSystemImplJ2ME.getInstanceJ2ME().openFileInputStream(zipFileURI, name);
             zin = new ZipInputStream(fin);
             ZipEntry entry;
             while((entry = zin.getNextEntry()) != null) {
@@ -71,6 +72,7 @@ public class ZipFileHandleJ2ME implements ZipFileHandle{
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 305, name, e);
             UMIOUtils.closeInputStream(zin);
+            UMIOUtils.closeInputStream(fin);
         }
         
         UstadMobileSystemImpl.l(UMLog.ERROR, 413, name);

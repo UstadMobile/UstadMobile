@@ -32,7 +32,9 @@ package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.html.AsyncDocumentRequestHandler;
 import com.sun.lwuit.html.DefaultHTMLCallback;
+import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
 import com.ustadmobile.core.impl.UMLog;
@@ -59,7 +61,7 @@ import javax.microedition.media.PlayerListener;
  * 
  * @author mike
  */
-public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
+public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements AsyncDocumentRequestHandler.IOCallback{
 
     private ContainerViewJ2ME view;
 
@@ -305,6 +307,10 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
             }
 
         }, 1000);
+    }
+
+    public void streamReady(InputStream in, DocumentInfo di) {
+        
     }
     
     

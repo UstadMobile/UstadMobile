@@ -34,6 +34,8 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.html.AsyncDocumentRequestHandler;
+import com.sun.lwuit.html.AsyncDocumentRequestHandler.IOCallback;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.DocumentRequestHandler;
 import com.sun.lwuit.html.HTMLCallback;
@@ -54,10 +56,13 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.json.me.JSONObject;
 
 /**
@@ -76,7 +81,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     private UstadJSOPF opf;
     
-    private DocumentRequestHandler requestHandler;
+    protected ContainerDocumentRequestHandler requestHandler;
     
     private String containerURI;
     
@@ -327,25 +332,48 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             impl.closeContainer(openContainerBaseURI);    
             openContainerBaseURI = null;
         }
+        
+        if(requestHandler != null && requestHandler.timer != null) {
+            requestHandler.stopTimer();
+        }
     }
     
     
     /**
      * Handles requests to load resources by pointing them to the openzip and
      * requests to play media
+     * 
      */
-    public class ContainerDocumentRequestHandler implements DocumentRequestHandler {
+    public static class ContainerDocumentRequestHandler implements AsyncDocumentRequestHandler {
 
         private ContainerViewJ2ME view;
         
+        protected Timer timer;
         
         public ContainerDocumentRequestHandler(ContainerViewJ2ME view) {
             this.view = view;
+            startTimer();
+        }
+        
+        protected void startTimer() {
+            if(timer == null) {
+                timer = new Timer();
+            }
+        }
+        
+        protected void stopTimer() {
+            if(timer != null) {
+                timer.cancel();
+                timer = null;
+            }
         }
         
         public InputStream resourceRequested(DocumentInfo di) {
+            return resourceRequested(di.getUrl(), di.getExpectedContentType(), true, di);
+        }
+        
+        public InputStream resourceRequested(String requestURL, int expectedType, boolean bufferEnabled, DocumentInfo di) {
             try {
-                String requestURL = di.getUrl();
                 System.out.println("requestURL " + requestURL);
                 String baseURL = di.getBaseURL();
                 System.out.println("baseURL " + baseURL);
@@ -355,11 +383,72 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 
                 String pathInZip = di.getUrl().substring(
                     UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                return view.containerZip.openInputStream(pathInZip);
+                InputStream src = view.containerZip.openInputStream(pathInZip);
+                if(bufferEnabled) {
+                    return J2MEIOUtils.readToByteArrayStream(src);
+                }else {
+                    return src;
+                }
+                
             }catch(IOException e) {
                 return new ByteArrayInputStream("ERROR".getBytes());
             }
         }
+
+        
+        public void resourceRequestedAsync(DocumentInfo di, IOCallback ioc, boolean bufferEnabled) {
+            timer.schedule(new ContainerDocumentRequestTask(di, ioc, this, 
+                bufferEnabled), 50);
+        }
+        
+        public void resourceRequestedAsync(DocumentInfo di, IOCallback ioc) {
+            resourceRequestedAsync(di, ioc, true);
+        }
+        
+    }
+    
+    /**
+     * TimerTask to open resources 
+     * 
+     */
+    public static class ContainerDocumentRequestTask extends TimerTask {
+
+        private DocumentInfo di;
+        
+        private IOCallback ioc;
+        
+        private ContainerDocumentRequestHandler handler;
+        
+        private boolean bufferEnabled;
+        
+        private String url;
+        
+        private int expectedType;
+        
+        public ContainerDocumentRequestTask(DocumentInfo di, IOCallback ioc, ContainerDocumentRequestHandler handler, boolean bufferEnabled) {
+            this.di = di;
+            this.ioc = ioc;
+            this.handler = handler;
+            this.bufferEnabled = bufferEnabled;
+            
+            url = di.getUrl();
+            expectedType = di.getExpectedContentType();
+        }
+        
+        public ContainerDocumentRequestTask(String url, IOCallback ioc, ContainerDocumentRequestHandler handler, boolean bufferEnabled, int expectedType) {
+            this.url = url;
+            this.ioc = ioc;
+            this.bufferEnabled = bufferEnabled;
+            this.expectedType = expectedType;
+            this.di = null;
+        }
+        
+        public void run() {
+            InputStream in = handler.resourceRequested(url, expectedType, bufferEnabled, di);
+            ioc.streamReady(in, di);
+        }
+        
+        
         
     }
     

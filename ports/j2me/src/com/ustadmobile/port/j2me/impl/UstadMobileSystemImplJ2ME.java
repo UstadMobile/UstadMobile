@@ -65,6 +65,7 @@ import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.j2me.impl.qr.J2MEQRCodeImage;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
+import com.ustadmobile.port.j2me.util.WatchedInputStream;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
 import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
 import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
@@ -172,13 +173,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
      */
     public boolean queueTinCanStatement(JSONObject stmt, Object context) {
         l(UMLog.DEBUG, 538, "");
-        boolean result = false;
+        boolean result = true;
+        
+        /*
         try {
-            //return true;
+            
             return logManager.queueStatement(getActiveUser(context), stmt);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        */
         return result;
     }
     
@@ -1036,18 +1040,23 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     /**
      * {@inheritDoc}
      */
-    public InputStream openFileInputStream(String fileURI) throws IOException {
+    public InputStream openFileInputStream(String fileURI, String tag) throws IOException {
         l(UMLog.DEBUG, 599, fileURI);
         InputStream in = null;
         IOException e = null;
         try {
-            in = Connector.openInputStream(fileURI);
+            in = new WatchedInputStream(Connector.openInputStream(fileURI), fileURI+ "!" + tag);
         }catch(SecurityException se) {
             e = new IOException(PREFIX_SECURITY_EXCEPTION + se.toString());
         }
         UMIOUtils.throwIfNotNullIO(e);
         return in;
     }
+    
+    public InputStream openFileInputStream(String fileURI) throws IOException{
+        return openFileInputStream(fileURI, "");
+    }
+    
 
     /**
      *{@inheritDoc}

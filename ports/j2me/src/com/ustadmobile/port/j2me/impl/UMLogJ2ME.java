@@ -6,9 +6,14 @@
 
 package com.ustadmobile.port.j2me.impl;
 
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.j2me.app.SerializedHashtable;
+import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,6 +34,8 @@ public class UMLogJ2ME extends UMLog{
     private SocketConnection socketConn;
     
     private OutputStream socketOut;
+    
+    private OutputStream fileOut;
     
     private boolean remoteSocketConnected;
     
@@ -66,8 +73,41 @@ public class UMLogJ2ME extends UMLog{
             e.printStackTrace();
             closeSocketConn();
             throw e;
+        }   
+    }
+    
+    public synchronized void connectLogToFile(String fileDest) throws IOException {
+        closeLogFileConnection();
+        fileOut = UstadMobileSystemImpl.getInstance().openFileOutputStream(fileDest, 0);
+        logOut = new PrintStream(fileOut);
+    }
+    
+    public void closeLogFileConnection() {
+        if(fileOut != null) {
+            UMIOUtils.closeOutputStream(fileOut);
+            logOut = System.out;
+            fileOut = null;
+        }
+    }
+    
+    public boolean connectLogToSharedDir(Object context) throws IOException{
+        UMStorageDir[] sharedDirs = UstadMobileSystemImplJ2ME.getInstance().getStorageDirs(
+            CatalogController.SHARED_RESOURCE, context);
+        
+        UMStorageDir sdCardDir = null;
+        for(int i = 0; i < sharedDirs.length; i++) {
+            if(sharedDirs[i].isRemovableMedia() && sharedDirs[i].isAvailable()) {
+                sdCardDir = sharedDirs[i];
+                break;
+            }
         }
         
+        UMStorageDir dirToUse = sdCardDir != null ? sdCardDir : sharedDirs[0];
+        String fileName = TinCanLogManagerJ2ME.getDateLogStr().append("-umlog.txt").toString();
+        connectLogToFile(UMFileUtil.joinPaths(new String[] { dirToUse.getDirURI(), 
+            fileName}));
+        
+        return false;
     }
     
     public synchronized void closeSocketConn() {
