@@ -61,6 +61,22 @@ public class UstadMobileConstants {
     public static final int DIR_RTL = 1;
     
     /**
+     * Mime type parameter name in OPDS feeds indicating the maximum width of the images 
+     * in the EPUB added by the UMCLOUD server e.g. for images contained within 320x320
+     * 
+     * application/epub+zip;width=320;height=320
+     */
+    public static final String MIMEPARAM_WIDTH = "width";
+    
+    /**
+     * Mime type parameter name in OPDS feeds indicating the maximum height of the images 
+     * in the EPUB added by the UMCLOUD server e.g. for images contained within 320x320
+     * 
+     * application/epub+zip;width=320;height=320
+     */
+    public static final String MIMEPARAM_HEIGHT = "height";
+    
+    /**
      * Sorted by country name: list of international dialing codes
      * see testres/countrycodes.ods
      */

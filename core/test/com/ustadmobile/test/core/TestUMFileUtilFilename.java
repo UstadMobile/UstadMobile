@@ -38,6 +38,7 @@ package com.ustadmobile.test.core;
 /* $endif$ */
 
 import com.ustadmobile.core.util.UMFileUtil;
+import java.util.Hashtable;
 
 
 /**
@@ -80,6 +81,19 @@ public class TestUMFileUtilFilename extends TestCase{
             UMFileUtil.getParentFilename("file.mp3") == null);
         assertTrue("Parent filename return nulls when path is one char long",
             UMFileUtil.getParentFilename(".") == null);
+        
+        Hashtable noParamsHT = UMFileUtil.getMimeTypeParameters("application/atom+xml");
+        assertTrue("No params in mime type : getMimeTypeParameters returns null", 
+            noParamsHT == null);
+        
+        Hashtable withParamsHT = UMFileUtil.getMimeTypeParameters(
+            "application/atom+xml;profile=opds-catalog;kind=navigation");
+        assertTrue("Params in mime type : getMimeTypeParameters != null", 
+            withParamsHT != null);
+        assertEquals("find first param in mime type", "opds-catalog",
+            withParamsHT.get("profile"));
+        assertEquals("find second param in mime type", "navigation",
+            withParamsHT.get("kind")); 
     }
 
     public void runTest(){

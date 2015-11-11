@@ -109,9 +109,12 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         
         
         UMContextGetter.setContext(this);
-        UstadMobileSystemImpl.getInstance().init(this);
         
         Display.init(this);
+        
+        UstadMobileSystemImpl.getInstance().init(this);
+        
+        
         
         AllTestCases atc = new AllTestCases() ;
         int ctc = atc.suite().countTestCases();

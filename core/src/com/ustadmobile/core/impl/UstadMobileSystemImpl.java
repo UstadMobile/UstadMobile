@@ -857,6 +857,17 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract ZipFileHandle openZip(String name) throws IOException;
     
+    /**
+     * Figure out the screen size on this platform - can be used to determine
+     * which file to download
+     * 
+     * @param context system dependent context object
+     * 
+     * @return int array with width, height in pixels
+     * 
+     * @throws IOException 
+     */
+    public abstract int[] getScreenSize(Object context);
     
 }
 

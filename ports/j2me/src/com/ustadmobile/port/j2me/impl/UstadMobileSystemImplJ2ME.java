@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.port.j2me.impl;
 
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.events.ActionEvent;
@@ -206,8 +207,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
-        UIManager.getInstance().getLookAndFeel().setRTL(
-                getDirection() == UstadMobileConstants.DIR_RTL);
+        boolean isRTL = getDirection() == UstadMobileConstants.DIR_RTL;
+        UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
+        int x = 42;
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
@@ -1268,6 +1270,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         }
         
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int[] getScreenSize(Object context) {
+        return new int[] {Display.getInstance().getDisplayWidth(),
+            Display.getInstance().getDisplayHeight()};
     }
     
     /**

@@ -66,7 +66,9 @@ import com.ustadmobile.port.android.view.LoginActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
@@ -648,7 +650,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return parser;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -682,5 +683,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public ZipFileHandle openZip(String name) throws IOException{
         return new ZipFileHandleAndroid(name);
     }
+
+    @Override
+    public int[] getScreenSize(Object context) {
+        Context ctx = (Context)context;
+        WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics dm = new DisplayMetrics();
+        wm.getDefaultDisplay().getMetrics(dm);
+
+        return new int[] { dm.widthPixels, dm.heightPixels};
+    }
+
 
 }

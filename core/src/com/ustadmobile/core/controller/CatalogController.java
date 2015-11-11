@@ -37,6 +37,7 @@ import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
@@ -1400,7 +1401,67 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
     }
     
-    
+    /**
+     * Find the best acquisition link according to the given request parameters
+     * 
+     * Right now: this is looking at matching the width and height. If the request
+     * has no specified width and height: prefer the link with no specified
+     * width and height.  If there is a preferred (e.g. screen) width and height
+     * prefer the source that is the smallest available that matches the
+     * is at least as big as the preferred width and height
+     * 
+     * TODO: Handle that width and height (e.g. orientation) are interchangable.
+     * 
+     * @param request
+     * @param entry
+     * @return 
+     */
+    public static String[] getBestAcquisitionLinkByParams(CatalogController.AcquireRequest request, UstadJSOPDSEntry entry) {
+        Vector acquisitionLinks = entry.getAcquisitionLinks();
+        if(acquisitionLinks == null || acquisitionLinks.size() == 0) {
+            return null;
+        }
+        
+        String[] preferredLink = null;
+        int[] preferredSize = request.getPreferredResolution();
+        int[] bestSizeMatch = null;
+        String[] linkInfo;
+        
+        Hashtable mimeParams;
+        
+        for(int i = 0; i < acquisitionLinks.size(); i++) {
+            linkInfo = (String[])acquisitionLinks.elementAt(i);
+            mimeParams = UMFileUtil.getMimeTypeParameters(
+                linkInfo[UstadJSOPDSItem.LINK_MIMETYPE]);
+            if(preferredSize == null && mimeParams == null) {
+                //we want the screen size neutral version and this is it
+                preferredLink = linkInfo;
+                break;
+            }else if(preferredLink == null) {
+                //we have no other link right now - take this one
+                preferredLink = linkInfo;
+                bestSizeMatch = getScreenSizeFromMimeParams(mimeParams);
+            }else if(preferredSize != null) {
+                int[] thisLinkSize = getScreenSizeFromMimeParams(mimeParams);
+                if(thisLinkSize == null) {
+                    continue;
+                }
+                
+                boolean fitsScreen = thisLinkSize[0] >= preferredSize[0] && thisLinkSize[1] >= preferredSize[1];
+                boolean smallerThanLast = true;
+                if(bestSizeMatch != null) {
+                    smallerThanLast= (thisLinkSize[0] * thisLinkSize[1]) < (bestSizeMatch[0] * bestSizeMatch[1]);
+                }
+                
+                if(fitsScreen && smallerThanLast) {
+                    preferredLink = linkInfo;
+                    bestSizeMatch = thisLinkSize;
+                }
+            }
+        }
+        
+        return preferredLink;
+    }
     
     /**
      * Fetch and download the given containers, save required information about it to
@@ -1427,21 +1488,25 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         int resourceMode = request.getResourceMode();
         UstadMobileSystemImpl.l(UMLog.VERBOSE, 433, request.getDestDirPath());
         
+        String[] preferredLink;        
+        String itemHref;
+        String itemURL;
+        String destFilename;
+        
         for(int i = 0; i < entries.length; i++) {
-            Vector itemLinks = entries[i].getAcquisitionLinks();
-            if(itemLinks.size() <= 0) {
+            preferredLink = getBestAcquisitionLinkByParams(request, entries[i]);
+            
+            if(preferredLink == null) {
                 continue;
             }
             
-            String[] firstLink = ((String[])itemLinks.elementAt(0));
-            String itemHref = firstLink[UstadJSOPDSItem.LINK_HREF];
-            mimeTypes[i] = firstLink[UstadJSOPDSItem.LINK_MIMETYPE];
+            itemHref = preferredLink[UstadJSOPDSItem.LINK_HREF];
+            mimeTypes[i] = preferredLink[UstadJSOPDSItem.LINK_MIMETYPE];
             
-            String itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
+            itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
                     itemHref);
-            itemLinks = null;
             
-            String destFilename = UMFileUtil.joinPaths(new String[] {
+            destFilename = UMFileUtil.joinPaths(new String[] {
                 request.getDestDirPath(), UMFileUtil.getFilename(itemHref)
             });
             
@@ -1464,6 +1529,25 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 request.getController().registerDownloadingEntry(entries[i].id, 
                         new Long(downloadID));
             }
+        }
+    }
+    
+    /**
+     * Figure out the width and height (if any) present in the mime parameters
+     * in the given hashtable (which may be null if there are none)
+     * 
+     * @param mimeParams Mime parameters as a hashtable
+     * 
+     * @return int[]{width,height} of screen size params given; null if there are none
+     */
+    private static int[] getScreenSizeFromMimeParams(Hashtable mimeParams) {
+        if(mimeParams != null && mimeParams.containsKey(UstadMobileConstants.MIMEPARAM_WIDTH) && mimeParams.containsKey(UstadMobileConstants.MIMEPARAM_HEIGHT)) {
+            return new int[] { 
+                Integer.parseInt(mimeParams.get(UstadMobileConstants.MIMEPARAM_WIDTH).toString()),
+                Integer.parseInt(mimeParams.get(UstadMobileConstants.MIMEPARAM_HEIGHT).toString())
+            };
+        }else {
+            return null;
         }
     }
     
@@ -1669,6 +1753,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         private CatalogController controller;
         
+        private int[] preferredResolution;
+        
         /**
          * @param entries The OPDS Entries that should be acquired.  Must be OPDS 
          * Entry items with acquire links.  For now the first acquisition link will
@@ -1689,6 +1775,29 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             this.resourceMode = resourceMode;
             this.context = context;
             this.controller = controller;
+            this.preferredResolution = null;
+        }
+        
+        /**
+         * The preferred resolution for download of resources: if they have 
+         * width and height attributes look for the smallest one that fits
+         * both width and height.
+         * 
+         * @return Preferred dimension as int[] width, height or null for no preferred dimension (e.g. use original unscaled version)
+         */
+        public int[] getPreferredResolution() {
+            return preferredResolution;
+        }
+        
+        /**
+         * he preferred resolution for download of resources: if they have 
+         * width and height attributes look for the smallest one that fits
+         * both width and height.
+         * 
+         * @param preferredResolution Preferred dimension as int[] width, height or null for no preferred dimension (e.g. use original unscaled version)
+         */
+        public void setPreferredResolution(int[] preferredResolution) {
+            this.preferredResolution= preferredResolution;
         }
         
         /**

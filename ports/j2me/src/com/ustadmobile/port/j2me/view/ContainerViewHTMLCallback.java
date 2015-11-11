@@ -76,7 +76,11 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements As
     String containerTinCanID;
     
     Object context;
+    
+    private String mediaType;
 
+    private PlayerListener endOfMediaListener;
+    
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
@@ -175,6 +179,17 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements As
         return removed > 0;
     }
 
+    public boolean parsingError(int errorId, String tag, String attribute, String value, String description) {
+        UstadMobileSystemImpl.l(UMLog.ERROR, 300, "parsingError: id:" + errorId +
+            "tag " + tag + " /attribute: " + attribute + " /value: " + value +
+            "/description: " + description);
+        
+        
+        return super.parsingError(errorId, tag, attribute, value, description); 
+    }
+    
+    
+
     public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
         System.out.println("Status: " + status + " url " + url);
         if (status == STATUS_REQUESTED) {
@@ -249,6 +264,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements As
         if (timer == null) {
             timer = new Timer();
         }
+        
+        final ContainerViewHTMLCallback cb = this;
 
         
         UstadMobileSystemImpl.l(UMLog.DEBUG, 598, mediaElement.getTagName());
@@ -270,7 +287,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements As
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 592, source);
                 
                 if (source != null) {
-                    try {
+                    //try {
                         String fullURI = UMFileUtil.resolveLink(
                                 htmlC.getPageURL(), source);
                         UstadMobileSystemImpl.l(UMLog.DEBUG, 590, fullURI);
@@ -280,26 +297,35 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements As
                         String mediaFileExtension = UMFileUtil.getExtension(source);
                         UstadMobileSystemImpl.l(UMLog.DEBUG, 586, mediaFileExtension);
                         Object mediaTypeObj = mediaExtensions.get(mediaFileExtension);
-
+                        
                         UstadMobileSystemImpl.l(UMLog.VERBOSE, 427, pathInZip
                                 + ':' + mediaFileExtension + ':' + mediaTypeObj);
 
                         if (mediaTypeObj != null) {
-                            in = view.containerZip.openInputStream(pathInZip);
+                            mediaType = (String)mediaTypeObj;
+                            cb.endOfMediaListener = endOfMediaListener;
+                            view.requestHandler.resourceRequestedAsync(fullURI, 
+                                cb, false, -1); 
+                            //in = view.containerZip.openInputStream(pathInZip);
+                            /*
                             UstadMobileSystemImpl.l(UMLog.DEBUG, 584, fullURI);
                                 isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in,
                                     (String) mediaTypeObj, endOfMediaListener);
+                            */
                         } else {
                             UstadMobileSystemImpl.l(UMLog.INFO, 120, src);
                         }
 
-                    } catch (IOException e) {
+                    //} 
+                    /*
+                    catch (IOException e) {
                         UstadMobileSystemImpl.l(UMLog.ERROR, 120, src, e);
                     } finally {
                         if (!isPlaying) {
                             UMIOUtils.closeInputStream(in);
                         }
                     }
+                    */
                 } else {
                     UstadMobileSystemImpl.l(UMLog.INFO, 373, mediaElement.toString());
                 }
@@ -310,7 +336,11 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements As
     }
 
     public void streamReady(InputStream in, DocumentInfo di) {
-        
+        if(in != null) {
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 584, di != null ? di.toString() : null);
+            boolean isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in,
+                mediaType, endOfMediaListener);
+        }
     }
     
     

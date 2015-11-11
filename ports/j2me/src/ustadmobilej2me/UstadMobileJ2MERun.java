@@ -53,6 +53,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         impl.init(this);
 
         //Uncomment this to send log output to file
+        
         /*
         try {
             UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
@@ -61,7 +62,6 @@ public class UstadMobileJ2MERun extends MIDlet {
             e.printStackTrace();
         }
         */
-        
         
         
         

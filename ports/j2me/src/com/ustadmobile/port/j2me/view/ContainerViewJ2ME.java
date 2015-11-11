@@ -286,7 +286,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }
         makePageStatement();
         UstadMobileSystemImplJ2ME.getInstanceJ2ME().stopMedia();
-                
+        System.gc();
+        
         htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
         this.currentIndex = pageIndex;
         lastPageChangeTime = System.currentTimeMillis();
@@ -375,13 +376,11 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         public InputStream resourceRequested(String requestURL, int expectedType, boolean bufferEnabled, DocumentInfo di) {
             try {
                 System.out.println("requestURL " + requestURL);
-                String baseURL = di.getBaseURL();
-                System.out.println("baseURL " + baseURL);
-                if(di.getExpectedContentType() != DocumentInfo.TYPE_IMAGE) {
+                if(expectedType != DocumentInfo.TYPE_IMAGE && di != null) {
                     di.setEncoding(DocumentInfo.ENCODING_UTF8);
                 }
                 
-                String pathInZip = di.getUrl().substring(
+                String pathInZip = requestURL.substring(
                     UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
                 InputStream src = view.containerZip.openInputStream(pathInZip);
                 if(bufferEnabled) {
@@ -395,6 +394,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             }
         }
 
+        public void resourceRequestedAsync(String url, IOCallback ioc, boolean bufferEnabled, int expectedType) {
+            timer.schedule(new ContainerDocumentRequestTask(url, ioc, this, 
+                bufferEnabled, expectedType), 50);
+        }
         
         public void resourceRequestedAsync(DocumentInfo di, IOCallback ioc, boolean bufferEnabled) {
             timer.schedule(new ContainerDocumentRequestTask(di, ioc, this, 
@@ -441,6 +444,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             this.bufferEnabled = bufferEnabled;
             this.expectedType = expectedType;
             this.di = null;
+            this.handler = handler;
         }
         
         public void run() {

@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.util;
 
+import java.util.Hashtable;
 import java.util.Vector;
 
 /**
@@ -325,5 +326,45 @@ public class UMFileUtil {
         }else {
             return path.substring(prefix.length());
         }
+    }
+    
+    /**
+     * 
+     * Get a list of mime type parameters e.g. where you have
+     * application/atom+xml;profile=opds-catalog;kind=acquisition
+     * 
+     * return hashtable with profile=opds-catalog and kind=acquisition set
+     * 
+     * @param mimeType The mime type string to examine
+     * 
+     * @return Hashtable with mime parameters or null if there are no parameters
+     */
+    public static Hashtable getMimeTypeParameters(String mimeType) {
+        int semiPos = mimeType.indexOf(';');
+        
+        if(semiPos == -1) {
+            return null;
+        }
+        
+        Hashtable results = new Hashtable();
+        char c;
+        int eqPos = -1;
+        
+        String key;
+        String value;
+        for(int i = semiPos + 1; i < mimeType.length(); i++) {
+            c= mimeType.charAt(i);
+            
+            if(c == '=') {
+                eqPos = i;
+            }else if(c == ';' || i == mimeType.length()-1) {
+                key = mimeType.substring(semiPos+1, eqPos);
+                value = mimeType.substring(eqPos+1, c == ';' ? i : i + 1);
+                results.put(key, value);
+                semiPos = i;
+            }
+        }
+        
+        return results;
     }
 }
