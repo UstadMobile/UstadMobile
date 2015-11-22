@@ -61,7 +61,7 @@ import javax.microedition.media.PlayerListener;
  * 
  * @author mike
  */
-public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements AsyncDocumentRequestHandler.IOCallback{
+public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     private ContainerViewJ2ME view;
 
@@ -255,94 +255,5 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback implements As
 
         super.actionPerformed(evt, htmlC, element); //To change body of generated methods, choose Tools | Templates.
     }
-
-    public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement) {
-        mediaPlayRequested(type, op, htmlC, src, mediaElement, null);
-    }
-    
-    public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement, final PlayerListener endOfMediaListener) {
-        if (timer == null) {
-            timer = new Timer();
-        }
-        
-        final ContainerViewHTMLCallback cb = this;
-
-        
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 598, mediaElement.getTagName());
-        timer.schedule(new TimerTask() {
-            public void run() {
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 594, mediaElement.getTagName());
-                boolean isPlaying = false;
-                InputStream in = null;
-                String source = mediaElement.getAttributeById(HTMLElement.ATTR_SRC);
-                if (source == null) {
-                    //means the source is not on the tag itself but on the source tags - find them
-                    HTMLElement srcTag = mediaElement.getFirstChildByTagId(
-                            HTMLElement.TAG_SOURCE);
-                    if (srcTag != null) {
-                        source = srcTag.getAttributeById(HTMLElement.ATTR_SRC);
-                    }
-                }
-                
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 592, source);
-                
-                if (source != null) {
-                    //try {
-                        String fullURI = UMFileUtil.resolveLink(
-                                htmlC.getPageURL(), source);
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 590, fullURI);
-                        String pathInZip = fullURI.substring(
-                                UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 588, pathInZip);
-                        String mediaFileExtension = UMFileUtil.getExtension(source);
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 586, mediaFileExtension);
-                        Object mediaTypeObj = mediaExtensions.get(mediaFileExtension);
-                        
-                        UstadMobileSystemImpl.l(UMLog.VERBOSE, 427, pathInZip
-                                + ':' + mediaFileExtension + ':' + mediaTypeObj);
-
-                        if (mediaTypeObj != null) {
-                            mediaType = (String)mediaTypeObj;
-                            cb.endOfMediaListener = endOfMediaListener;
-                            view.requestHandler.resourceRequestedAsync(fullURI, 
-                                cb, false, -1); 
-                            //in = view.containerZip.openInputStream(pathInZip);
-                            /*
-                            UstadMobileSystemImpl.l(UMLog.DEBUG, 584, fullURI);
-                                isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in,
-                                    (String) mediaTypeObj, endOfMediaListener);
-                            */
-                        } else {
-                            UstadMobileSystemImpl.l(UMLog.INFO, 120, src);
-                        }
-
-                    //} 
-                    /*
-                    catch (IOException e) {
-                        UstadMobileSystemImpl.l(UMLog.ERROR, 120, src, e);
-                    } finally {
-                        if (!isPlaying) {
-                            UMIOUtils.closeInputStream(in);
-                        }
-                    }
-                    */
-                } else {
-                    UstadMobileSystemImpl.l(UMLog.INFO, 373, mediaElement.toString());
-                }
-
-            }
-
-        }, 1000);
-    }
-
-    public void streamReady(InputStream in, DocumentInfo di) {
-        if(in != null) {
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 584, di != null ? di.toString() : null);
-            boolean isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in,
-                mediaType, endOfMediaListener);
-        }
-    }
-    
-    
 
 }

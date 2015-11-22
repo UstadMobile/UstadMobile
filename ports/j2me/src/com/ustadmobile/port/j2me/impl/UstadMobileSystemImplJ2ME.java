@@ -83,11 +83,6 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
-import javax.microedition.media.Manager;
-import javax.microedition.media.MediaException;
-import javax.microedition.media.Player;
-import javax.microedition.media.PlayerListener;
-import javax.microedition.media.control.VolumeControl;
 import jp.sourceforge.qrcode.data.QRCodeImage;
 import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
@@ -99,7 +94,7 @@ import org.json.me.*;
  *
  * @author varuna
  */
-public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements PlayerListener {
+public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     private UMLog umLogger;
     
@@ -112,12 +107,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     private String openZipURI;
     
     public static final String OPENZIP_PROTO = "zip:///";
-    
-    private Player player;
-    public int volumeLevel=70;
-    
-    private InputStream mediaInputStream;
-    
+        
     /**
      * System property used to get the memory card location
      */
@@ -144,9 +134,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     private TinCanLogManagerJ2ME logManager;
     
     private DownloadServiceJ2ME downloadService = null;
-    
-    private PlayerListener onEndOfMediaListener;
-    
+        
     private Vector viewHistory;
     
     public static final int VIEW_HISTORY_LIMIT = 10;
@@ -158,7 +146,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     public UstadMobileSystemImplJ2ME() {
         umLogger = new UMLogJ2ME();
         appView = new AppViewJ2ME(this);
-        onEndOfMediaListener = null;
         viewHistory = new Vector();
     }
 
@@ -557,7 +544,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
             e = new IOException(PREFIX_SECURITY_EXCEPTION  + se.toString());
         }
         
-        UMIOUtils.logAndThrowIfNotNullIO(e, UMLog.ERROR, volumeLevel, fileURI);
+        UMIOUtils.logAndThrowIfNotNullIO(e, UMLog.ERROR, 600, fileURI);
         
         return fileExists;
     }
@@ -1153,112 +1140,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
 
     public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
         downloadService.unregisterDownloadCompleteReceiver(receiver);
-    }
-    
-    /**
-     * Plays the media's inputstream. Can be audio or video.
-     * @param mediaInputStream the InputStream to be played.
-     * @param encoding The encoding by which the player will get generated. 
-     * 
-     * @return true if play was started successfully, false otherwise
-     */
-    public boolean playMedia(InputStream mediaInputStream, String encoding) {
-        return playMedia(mediaInputStream, encoding, null);
-    }
-    
-    /**
-     * Plays the media's inputstream. Can be audio or video.
-     * @param mediaInputStream the InputStream to be played.
-     * @param encoding The encoding by which the player will get generated. 
-     * @param onEndOfMediaListener (Optional) a PlayerListener which will receive the END_OF_MEDIA event
-     * 
-     * @return true if play was started successfully, false otherwise
-     */
-    public boolean playMedia(InputStream mediaInputStream, String encoding, PlayerListener onEndOfMediaListener) {
-        l(UMLog.DEBUG, 563, encoding);
-        boolean status = false;
-        stopMedia();
-        
-        this.onEndOfMediaListener = onEndOfMediaListener;
-        this.mediaInputStream = mediaInputStream;
-        
-        VolumeControl vc = null;
-        PlayerListener pl = null;
-        
-        
-        try{
-            player = Manager.createPlayer(mediaInputStream, encoding);
-            player.addPlayerListener(this);
-            player.realize();
-            vc = (VolumeControl) player.getControl("VolumeControl");
-            if (vc != null){
-                vc.setLevel(volumeLevel);
-            }
-            player.start();
-            long playerTime = player.getDuration();
-            l(UMLog.DEBUG, 565, ""+playerTime);
-            status = true;            
-        }catch(Exception e){
-            l(UMLog.ERROR, 145, encoding, e);
-            if(onEndOfMediaListener != null) {
-                onEndOfMediaListener.playerUpdate(player, PlayerListener.END_OF_MEDIA, null);
-            }
-            stopMedia();
-        }
-        
-        return status;
-    }
-
-    /**
-     * Handle playerUpdate events: specifically watch for END_OF_MEDIA and 
-     * clean up when that is reached (inc. closing file input streams etc)
-     * 
-     * @param uPlayer
-     * @param event
-     * @param eventData 
-     */
-    public void playerUpdate(Player uPlayer, String event, Object eventData) {
-        if (event.equals(PlayerListener.END_OF_MEDIA)) {
-            PlayerListener endListener = onEndOfMediaListener;
-            stopMedia();
-            if(endListener != null) {
-                endListener.playerUpdate(uPlayer, event, eventData);
-            }
-        }
-    }
-        
-    /**
-     * Stops the media playing. 
-     * @return 
-     */
-    public boolean stopMedia() {
-        l(UMLog.DEBUG, 567, null);
-        boolean status = false;
-        if (player != null){
-            if(player.getState() != Player.CLOSED) {
-                try {
-                    player.stop();
-                    player.deallocate();
-                }catch(MediaException me) {
-                    l(UMLog.ERROR, 177, null, me);
-                }
-            }
-            
-            player.close();
-            player = null;
-                        
-            
-            l(UMLog.DEBUG, 597, null);
-        }else {
-            l(UMLog.DEBUG, 569, null);
-        }
-        
-        UMIOUtils.closeInputStream(mediaInputStream);
-        status = true;
-        mediaInputStream = null;
-        onEndOfMediaListener = null;
-        
-        return status;
     }
 
     //This is just a placeholder so it compiles - we dont support OMR on J2ME just yet

@@ -41,6 +41,7 @@ import com.sun.lwuit.html.DocumentRequestHandler;
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.layouts.BorderLayout;
+import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -75,7 +76,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     private String title;
     
-    private int currentIndex;
+    private int currentIndex = -1;
     
     private UstadOCF ocf;
     
@@ -211,6 +212,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             htmlC.setIgnoreCSS(true);
             htmlC.setEventsEnabled(true);
             htmlC.setAutoAddSubmitButton(false);
+            htmlC.setMediaPlayerEnabled(true);
             addCommand(cmdForward);
             addCommand(cmdBack);
             addCommand(cmdBackToCatalog);
@@ -225,7 +227,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             Display.getInstance().callSerially(new Runnable() {
                 public void run() {
                     addComponent(BorderLayout.CENTER, htmlC);
-                    showPage(1);
+                    showPage(0);
                 }
             });
         }catch(Exception e) {
@@ -285,7 +287,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             return;
         }
         makePageStatement();
-        UstadMobileSystemImplJ2ME.getInstanceJ2ME().stopMedia();
+        DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers();
+        
         System.gc();
         
         htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
