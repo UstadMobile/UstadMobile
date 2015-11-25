@@ -47,10 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
-import javax.microedition.media.PlayerListener;
 
 /**
  *
@@ -65,8 +62,6 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     private ContainerViewJ2ME view;
 
-    private Timer timer = null;
-
     private Hashtable mcqQuizzes;
     
     boolean fixedPage = true;
@@ -76,11 +71,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     String containerTinCanID;
     
     Object context;
-    
-    private String mediaType;
-
-    private PlayerListener endOfMediaListener;
-    
+        
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
@@ -179,6 +170,14 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         return removed > 0;
     }
 
+    public boolean linkClicked(HTMLComponent htmlC, String url) {
+        parsingError(600, "a", "src", url, "link click");
+        UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog("Click2", "u\n clicked");
+        return false;
+    }
+
+    
+    
     public boolean parsingError(int errorId, String tag, String attribute, String value, String description) {
         UstadMobileSystemImpl.l(UMLog.ERROR, 300, "parsingError: id:" + errorId +
             "tag " + tag + " /attribute: " + attribute + " /value: " + value +
@@ -229,7 +228,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {
         boolean domChanged = false;
-        if (element.getTagId() == HTMLElement.TAG_INPUT) {
+        if (element != null && element.getTagId() == HTMLElement.TAG_INPUT) {
             String inputType = element.getAttributeById(HTMLElement.ATTR_TYPE);
             if (inputType.equalsIgnoreCase("radio")) {
                 String mcqName = element.getAttributeById(HTMLElement.ATTR_NAME);
