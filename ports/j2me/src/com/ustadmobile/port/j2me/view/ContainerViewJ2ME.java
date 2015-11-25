@@ -42,6 +42,7 @@ import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
+import com.sun.lwuit.mediaplayer.MIDPMediaPlayer;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -58,6 +59,7 @@ import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
+import gnu.classpath.java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -145,6 +147,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         
         requestHandler = new ContainerDocumentRequestHandler(this);
         htmlCallback = new ContainerViewHTMLCallback(this);
+        
+        //make the mediaplayer do vocal logging
+        MIDPMediaPlayer player = (MIDPMediaPlayer)DefaultLWUITMediaPlayerManager.getInstance().getPlayer();
+        player.setCallback(htmlCallback);
     }
 
     public void controllerReady(UstadController controller, int flags) {
@@ -303,6 +309,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }else if(cmd.equals(cmdForward)) {
             showPage(this.currentIndex + 1);
         }else if(cmd.equals(cmdBackToCatalog)) {
+            DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers();
             UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
         }
     }
@@ -372,8 +379,17 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             }
         }
         
+        boolean shouldBeBufferEnabled(DocumentInfo di) {
+            int type = di.getExpectedContentType();
+            return (type != DocumentInfo.TYPE_AUDIO) && 
+                (type != DocumentInfo.TYPE_VIDEO);
+            //return true;
+        }
+        
         public InputStream resourceRequested(DocumentInfo di) {
-            return resourceRequested(di.getUrl(), di.getExpectedContentType(), true, di);
+            
+            return resourceRequested(di.getUrl(), di.getExpectedContentType(), 
+                shouldBeBufferEnabled(di), di);
         }
         
         public InputStream resourceRequested(String requestURL, int expectedType, boolean bufferEnabled, DocumentInfo di) {
@@ -389,7 +405,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 if(bufferEnabled) {
                     return J2MEIOUtils.readToByteArrayStream(src);
                 }else {
-                    return src;
+                    return new BufferedInputStream(src, 20*1024);
+                    //return src;
                 }
                 
             }catch(IOException e) {
@@ -408,7 +425,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }
         
         public void resourceRequestedAsync(DocumentInfo di, IOCallback ioc) {
-            resourceRequestedAsync(di, ioc, true);
+            resourceRequestedAsync(di, ioc, shouldBeBufferEnabled(di));
         }
         
     }

@@ -49,7 +49,7 @@ public class WatchedInputStream extends InputStream{
         UstadMobileSystemImpl.l(UMLog.INFO, 399, "#Active Streams: " 
             + openStreams.size() + " : +"  +this.name);
         System.out.println("ADD: " + name);
-        printActiveStreams();
+        //printActiveStreams();
     }
     
     private void removeFromActiveStreams() {
@@ -60,7 +60,7 @@ public class WatchedInputStream extends InputStream{
         UstadMobileSystemImpl.l(UMLog.INFO, 398, "#Active Streams: " 
             + openStreams.size() + " : -"  +this.name);
         System.out.println("REMOVE: " + name);
-        printActiveStreams();
+        //printActiveStreams();
     }
     
     public boolean markSupported() {
