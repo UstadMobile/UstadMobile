@@ -54,14 +54,14 @@ public class UstadMobileJ2MERun extends MIDlet {
 
         //Uncomment this to send log output to file
         
-        
+        /*
         try {
             UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
             umLog.connectLogToSharedDir(this);
         }catch(IOException e) {
             e.printStackTrace();
         }
-        
+        */
         
         
         

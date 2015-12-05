@@ -328,7 +328,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             return;
         }
         makePageStatement();
-        DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers();
+        DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
         
         System.gc();
         
@@ -344,7 +344,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }else if(cmd.equals(cmdForward)) {
             showPage(this.currentIndex + 1);
         }else if(cmd.equals(cmdBackToCatalog)) {
-            DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers();
+            DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
             UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
         }
     }
