@@ -592,6 +592,17 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract long fileSize(String fileURI);
     
+    /**
+     * Get the amount of free space available on a given file URI: This is of
+     * course determined by the underlying filesystem
+     * 
+     * @param fileURI URI to the filesystem
+     * 
+     * @return The number of bytes available on the given filesystem : -1 for unknown
+     */
+    public abstract long fileAvailableSize(String fileURI) throws IOException;
+    
+    
     public abstract boolean makeDirectory(String dirURI) throws IOException;
     
     public abstract boolean removeRecursively(String dirURI);

@@ -31,6 +31,7 @@
 package com.ustadmobile.port.j2me.impl.zip;
 
 import com.ustadmobile.core.impl.ZipEntryHandle;
+import gnu.classpath.java.util.zip.ZipEntry;
 
 /**
  *
@@ -49,6 +50,13 @@ public class ZipEntryHandleJ2ME implements ZipEntryHandle{
         this.size = size;
         this.isDirectory = isDirectory;
     }
+    
+    public ZipEntryHandleJ2ME(ZipEntry entry) {
+        this.name = entry.getName();
+        this.size = entry.getSize();
+        this.isDirectory = entry.isDirectory();
+    }
+    
     
     public long getSize() {
         return size;

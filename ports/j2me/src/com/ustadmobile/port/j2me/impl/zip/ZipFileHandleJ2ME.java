@@ -42,6 +42,7 @@ import gnu.classpath.java.util.zip.ZipInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  *
@@ -50,23 +51,26 @@ import java.util.Enumeration;
 public class ZipFileHandleJ2ME implements ZipFileHandle{
 
     private String zipFileURI;
-    
+        
     public ZipFileHandleJ2ME(String zipFileURI) {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 583, zipFileURI);
         this.zipFileURI = zipFileURI;
     }
+    
+    
     
     public InputStream openInputStream(String name) throws IOException {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 585, zipFileURI);
         InputStream fin = null;
         ZipInputStream zin = null;
         try {
-            fin = UstadMobileSystemImplJ2ME.getInstanceJ2ME().openFileInputStream(zipFileURI, name);
+            fin = UstadMobileSystemImplJ2ME.getInstanceJ2ME().openFileInputStream(
+                zipFileURI, name);
             zin = new ZipInputStream(fin);
             ZipEntry entry;
             while((entry = zin.getNextEntry()) != null) {
                 if(entry.getName().equals(name)) {
-                    return zin;
+                    return new UMZipEntryInputStream(zin, new ZipEntryHandleJ2ME(entry));
                 }
             }
         }catch(IOException e) {

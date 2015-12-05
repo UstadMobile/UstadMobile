@@ -659,6 +659,35 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         l(UMLog.VERBOSE, 545, fileURI + " (" + size + "bytes");
         return size;
     } 
+
+    /**
+     * {@inheritDoc}
+     */
+    public long fileAvailableSize(String fileURI) throws IOException {
+        long result = -1;
+        FileConnection fc = null;
+        IOException ioe = null;
+        try {
+            fc = (FileConnection)Connector.open(fileURI);
+            result = fc.availableSize();
+            l(UMLog.DEBUG, 564, fileURI+ ":" + result);
+        }catch(Exception e) {
+            l(UMLog.ERROR, 137, fileURI, e);
+            if(e instanceof IOException) {
+                ioe = (IOException)e;
+            }else {
+                ioe = new IOException(e.toString() + ":" + e.getMessage());
+            }
+        }finally {
+            J2MEIOUtils.closeConnection(fc);
+        }
+        
+        UMIOUtils.throwIfNotNullIO(ioe);
+        
+        return result;
+    }
+    
+    
     
     public boolean makeDirectory(String dirURI) throws IOException{
         getLogger().l(UMLog.VERBOSE, 401, dirURI);

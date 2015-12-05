@@ -54,10 +54,13 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.port.j2me.impl.zip.UMZipEntryInputStream;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import gnu.classpath.java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -120,7 +123,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     static Hashtable mediaExtensions;
     
     long lastPageChangeTime = -1;
-        
+            
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
@@ -219,6 +222,38 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             htmlC.setEventsEnabled(true);
             htmlC.setAutoAddSubmitButton(false);
             htmlC.setMediaPlayerEnabled(true);
+            
+            //see what we can do about caching
+            UMStorageDir[] dirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                CatalogController.SHARED_RESOURCE, getContext());
+            
+            long mostSpaceAvailable = 0;
+            int bestCacheDir = -1;
+            
+            long currentSpace;
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            for(int i = 0; i < dirs.length; i++) {
+                currentSpace = -1;
+
+                try { 
+                    currentSpace = impl.fileAvailableSize(dirs[i].getDirURI());
+                    if(currentSpace > mostSpaceAvailable) {
+                        mostSpaceAvailable = currentSpace;
+                        bestCacheDir = i;
+                    }
+                }catch(Exception e) {
+                    UstadMobileSystemImpl.l(UMLog.WARN, 205, 
+                        dirs[i].getDirURI(), e);
+                }
+
+            }
+            
+            if(bestCacheDir != -1) {
+                MIDPMediaPlayer.setCacheDir(dirs[bestCacheDir].getDirURI());
+                UstadMobileSystemImpl.l(UMLog.INFO, 375, 
+                    dirs[bestCacheDir].getDirURI() + " (" + mostSpaceAvailable+" bytes free)");
+            }
+            
             addCommand(cmdForward);
             addCommand(cmdBack);
             addCommand(cmdBackToCatalog);
@@ -402,6 +437,13 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 String pathInZip = requestURL.substring(
                     UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
                 InputStream src = view.containerZip.openInputStream(pathInZip);
+                
+                //see if we know what the size is...
+                if(di != null && src instanceof UMZipEntryInputStream) {
+                    di.setContentLength(
+                        (int)((UMZipEntryInputStream)src).getZipEntry().getSize());
+                }
+                
                 if(bufferEnabled) {
                     return J2MEIOUtils.readToByteArrayStream(src);
                 }else {
