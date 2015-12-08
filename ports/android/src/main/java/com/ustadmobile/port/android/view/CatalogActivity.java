@@ -24,7 +24,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class CatalogActivity extends UstadBaseActivity implements CatalogOPDSFragment.OnFragmentInteractionListener, ListView.OnItemClickListener {
+public class CatalogActivity extends UstadBaseActivity implements  ListView.OnItemClickListener {
 
     private DrawerLayout mDrawerLayout;
 
@@ -112,10 +112,6 @@ public class CatalogActivity extends UstadBaseActivity implements CatalogOPDSFra
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void onFragmentInteraction(Uri uri) {
-
     }
 
     @Override

@@ -133,5 +133,10 @@ public class U {
         public static final int lang_en = 46;
         
         public static final int lang_ar = 47;
-    }
+        
+        public static final int downloaded_items = 48;
+        
+        public static final int browse_feeds = 49;
+         
+   }
 }

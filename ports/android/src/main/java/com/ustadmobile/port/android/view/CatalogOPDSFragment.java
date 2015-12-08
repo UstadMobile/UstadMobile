@@ -75,14 +75,11 @@ import java.util.WeakHashMap;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link CatalogOPDSFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link CatalogOPDSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener {
-
-    private OnFragmentInteractionListener mListener;
 
     private View rootContainer;
 
@@ -92,13 +89,19 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private UstadJSOPDSEntry[] mSelectedEntries;
 
+    private int mMenuID = -1;
+
+    public static final String ARG_MENUID = "frag-menuid";
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
+     * One can also put in the bundle frag-menuid to set the menuid to be used : otherwise menus
+     * will be set according to if the feed is acquisition or navigation type
+     *
      * @return A new instance of fragment CatalogOPDSFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static CatalogOPDSFragment newInstance(Bundle args) {
         CatalogOPDSFragment fragment = new CatalogOPDSFragment();
         Bundle bundle = new Bundle();
@@ -194,6 +197,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
 
+        mMenuID = getArguments().getInt(ARG_MENUID, -1);
         String catalogURL = getArguments().getString(CatalogController.KEY_URL);
         int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
@@ -231,7 +235,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
+        if(mMenuID != -1) {
+            inflater.inflate(mMenuID, menu);
+        }else if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
             boolean isAcquisitionFeed = mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
             if(isAcquisitionFeed) {
                 inflater.inflate(R.menu.menu_opds_acquireopts, menu);
@@ -262,30 +268,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     @Override
@@ -374,7 +356,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setMenuOptions(String[] menuOptions) {
-        ((CatalogActivity)getActivity()).setMenuOptions(menuOptions);
+        if(getActivity() instanceof  CatalogActivity) {
+            ((CatalogActivity) getActivity()).setMenuOptions(menuOptions);
+        }
     }
 
     @Override
@@ -434,20 +418,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
 
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
 
     public void handleClickMenuItem(int index) {
         if(mCatalogController != null) {

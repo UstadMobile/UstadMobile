@@ -32,7 +32,9 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
+import static com.ustadmobile.core.controller.CatalogController.OPDS_PROTO_DEVICE;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -41,6 +43,7 @@ import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.LoginView;
 import java.io.ByteArrayOutputStream;
@@ -316,12 +319,38 @@ public abstract class UstadMobileSystemImpl {
         String activeUserAuth = getActiveUserAuth(context);
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
         
+        /*
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {
-            Hashtable args = CatalogController.makeUserCatalogArgs(context);
-            go(CatalogView.class, args, context);
+            //Hashtable args = CatalogController.makeUserCatalogArgs(context);
+            //go(CatalogView.class, args, context);
+            
         }
+        */
+        
+        Hashtable args = new Hashtable();
+        String[] basePointURLs = new String[] {
+            CatalogController.OPDS_PROTO_DEVICE, 
+            impl.getUserPref("opds_server_primary", 
+                UstadMobileDefaults.DEFAULT_OPDS_SERVER, context)
+        };
+        
+        String iPrefix;
+        for(int i = 0; i < BasePointController.NUM_TABS; i++) {
+            iPrefix = i+BasePointController.OPDS_ARGS_PREFIX;
+            args.put(iPrefix + CatalogController.KEY_URL, basePointURLs[i]);
+            args.put(iPrefix + CatalogController.KEY_HTTPUSER, 
+                impl.getActiveUser(context));
+            args.put(iPrefix + CatalogController.KEY_HTTPPPASS, 
+                impl.getActiveUserAuth(context));
+            args.put(iPrefix + CatalogController.KEY_FLAGS, 
+                new Integer(CatalogController.CACHE_ENABLED));
+            args.put(iPrefix + CatalogController.KEY_RESMOD, 
+                new Integer(CatalogController.USER_RESOURCE));
+        }
+        
+        go(BasePointView.class, args, context);
     }
     
     
