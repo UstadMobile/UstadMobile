@@ -239,9 +239,14 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static final String OPDS_PROTO_DEVICE = "opds:///com.ustadmobile.app.devicefeed";
     
     /**
+     * The prefix that we use for the user's own feedlist
+     */
+    public static final String USER_FEEDLIST_ID_PREFIX = "com.ustadmobile.app.userfeedlist";
+    
+    /**
      * A url that provides a feed giving this users list of root feeds
      */
-    public static final String OPDS_PROTO_USER_FEEDLIST = "opds:///com.ustadmobile.app.userfeedlist";
+    public static final String OPDS_PROTO_USER_FEEDLIST = "opds:///" + USER_FEEDLIST_ID_PREFIX;
     
     /**
      * The preference key that will be used to save the user's feedlist as a
@@ -487,6 +492,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
     }
     
+    public static String getUserFeedListIdPrefix(Object context) {
+        return OPDS_PROTO_USER_FEEDLIST + 
+            UstadMobileSystemImpl.getInstance().getActiveUser(context);
+    }
+    
     /**
      * 
      * @param context
@@ -496,13 +506,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String rootFeedsStr = impl.getUserPref(PREFKEY_USERFEEDLIST, 
             UstadMobileDefaults.DEFAULT_FEEDLIST, context);
-        JSONArray arr = null;
-        String feedID =  "com.ustadmobile.app.userfeedlist" + 
-                impl.getActiveUser(context);
+        String feedID =  getUserFeedListIdPrefix(context);
         UstadJSOPDSFeed usersFeeds = new UstadJSOPDSFeed(OPDS_PROTO_USER_FEEDLIST,
                 "My Feeds",feedID);
+        JSONArray arr = BasePointController.getUserFeedListArray(context);
         try {
-            arr = new JSONArray(rootFeedsStr);
             JSONObject currentFeed;
             UstadJSOPDSEntry newEntry;
             for(int i = 0; i < arr.length(); i++) {

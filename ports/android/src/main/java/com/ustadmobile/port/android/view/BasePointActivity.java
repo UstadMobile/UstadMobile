@@ -4,6 +4,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -81,6 +82,13 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
             case R.id.action_basepoint_addfeed:
                 mBasePointController.handleClickAddFeed();
                 return true;
+            case R.id.action_basepoint_removefeed:
+                CatalogOPDSFragment opdsFragment = (CatalogOPDSFragment)mPagerAdapter.getItem(
+                        BasePointController.INDEX_BROWSEFEEDS);
+                mBasePointController.handleRemoveItemsFromUserFeed(
+                        opdsFragment.getSelectedEntries());
+                opdsFragment.setSelectedEntries(new UstadJSOPDSEntry[0]);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -124,7 +132,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         if(id == DialogInterface.BUTTON_POSITIVE) {
             mBasePointController.handleAddFeed(getAddFeedDialogURL(), getAddFeedDialogTitle());
         }else if(id == DialogInterface.BUTTON_NEGATIVE) {
-            //cancenl it
+            //cancel it
 
         }
         dialogInterface.dismiss();

@@ -5,13 +5,16 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.UstadView;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -159,11 +162,7 @@ public class BasePointController extends UstadBaseController{
     
     public static void addFeedToUserFeedList(String url, String title, String authUser, String authPass, Object context) {
         try {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            String currentJSON = impl.getUserPref(
-                CatalogController.PREFKEY_USERFEEDLIST, 
-                UstadMobileDefaults.DEFAULT_FEEDLIST, context);
-            JSONArray arr = new JSONArray(currentJSON);
+            JSONArray arr = BasePointController.getUserFeedListArray(context);
             JSONObject newFeed = new JSONObject();
             newFeed.put("url", url);
             newFeed.put("title", title);
@@ -171,10 +170,34 @@ public class BasePointController extends UstadBaseController{
             newFeed.put("httpp", authPass);
             arr.put(newFeed);
             String newJSON = arr.toString();
-            impl.setUserPref(CatalogController.PREFKEY_USERFEEDLIST, 
-                newJSON, context);
+            BasePointController.setUserFeedListArray(arr, context);
         }catch(JSONException e) {
             
+        }
+    }
+    
+    public static JSONArray getUserFeedListArray(Object context) {
+        JSONArray retVal = null;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        try {
+            String currentJSON = impl.getUserPref(
+                CatalogController.PREFKEY_USERFEEDLIST, 
+                UstadMobileDefaults.DEFAULT_FEEDLIST, context);
+            retVal = new JSONArray(currentJSON);
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 148, null, e);
+        }
+        
+        return retVal;
+    }
+    
+    public static void setUserFeedListArray(JSONArray arr, Object context) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        try {
+            impl.setUserPref(CatalogController.PREFKEY_USERFEEDLIST, 
+                arr.toString(), context);
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 146, null, e);
         }
     }
     
@@ -183,5 +206,40 @@ public class BasePointController extends UstadBaseController{
         basePointView.refreshCatalog(INDEX_BROWSEFEEDS);
     }
     
-    
+    public void handleRemoveItemsFromUserFeed(UstadJSOPDSEntry[] entriesToRemove) {
+        if(entriesToRemove.length == 0) {
+            return;//nothing to do here
+        }
+        
+        String userPrefix = CatalogController.getUserFeedListIdPrefix(context);
+        JSONArray userFeedList = BasePointController.getUserFeedListArray(context);
+        JSONArray newUserFeedList = new JSONArray();
+        try {
+            boolean removeItem;
+            String currentID;
+            int j;
+            
+            for(int i = 0; i < userFeedList.length(); i++) {
+                removeItem = false;
+                currentID = userPrefix + i;
+                
+                for(j = 0; j < entriesToRemove.length && !removeItem; j++) {
+                    if(entriesToRemove[j].id.equals(currentID)) {
+                        removeItem = true;
+                        break;
+                    }
+                }
+                
+                if(!removeItem) {
+                    newUserFeedList.put(userFeedList.get(i));
+                }
+            }
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 144, null, e);
+        }
+        
+        BasePointController.setUserFeedListArray(newUserFeedList, context);
+        
+        basePointView.refreshCatalog(INDEX_BROWSEFEEDS);
+    }
 }
