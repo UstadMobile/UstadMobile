@@ -41,6 +41,24 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
  */
 public interface BasePointView extends UstadView{
     
+    /**
+     * Show the dialog for adding a new feed
+     */
+    public void showAddFeedDialog();
     
+    public void setAddFeedDialogURL(String url);
+    
+    public String getAddFeedDialogURL();
+    
+    public String getAddFeedDialogTitle();
+    
+    public void setAddFeedDialogTitle(String title);
+    
+    /**
+     * Refresh the given column 
+     * 
+     * @param column INDEX_DOWNLOADEDENTRIES or INDEX_BROWSEFEEDS
+     */
+    public void refreshCatalog(int column);
     
 }

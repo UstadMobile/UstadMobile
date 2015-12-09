@@ -319,38 +319,15 @@ public abstract class UstadMobileSystemImpl {
         String activeUserAuth = getActiveUserAuth(context);
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
         
-        /*
+        
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {
-            //Hashtable args = CatalogController.makeUserCatalogArgs(context);
-            //go(CatalogView.class, args, context);
+            Hashtable args = BasePointController.makeDefaultBasePointArgs(context);
+            go(BasePointView.class, args, context);
             
         }
-        */
         
-        Hashtable args = new Hashtable();
-        String[] basePointURLs = new String[] {
-            CatalogController.OPDS_PROTO_DEVICE, 
-            impl.getUserPref("opds_server_primary", 
-                UstadMobileDefaults.DEFAULT_OPDS_SERVER, context)
-        };
-        
-        String iPrefix;
-        for(int i = 0; i < BasePointController.NUM_TABS; i++) {
-            iPrefix = i+BasePointController.OPDS_ARGS_PREFIX;
-            args.put(iPrefix + CatalogController.KEY_URL, basePointURLs[i]);
-            args.put(iPrefix + CatalogController.KEY_HTTPUSER, 
-                impl.getActiveUser(context));
-            args.put(iPrefix + CatalogController.KEY_HTTPPPASS, 
-                impl.getActiveUserAuth(context));
-            args.put(iPrefix + CatalogController.KEY_FLAGS, 
-                new Integer(CatalogController.CACHE_ENABLED));
-            args.put(iPrefix + CatalogController.KEY_RESMOD, 
-                new Integer(CatalogController.USER_RESOURCE));
-        }
-        
-        go(BasePointView.class, args, context);
     }
     
     

@@ -123,6 +123,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         CatalogController.makeControllerForView(this, url, resourceMode, fetchFlags, this);
     }
 
+
     @Override
     public void controllerReady(final UstadController controller, int flags) {
         if(controller == null) {
@@ -154,6 +155,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         LayoutInflater inflater = getLayoutInflater(null);
         LinearLayout linearLayout = (LinearLayout)this.rootContainer.findViewById(
                 R.id.fragment_catalog_container);
+        linearLayout.removeAllViews();
 
         int entryStatus = -1;
         for(int i = 0; i < feed.entries.length; i++) {
@@ -198,12 +200,20 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
 
         mMenuID = getArguments().getInt(ARG_MENUID, -1);
+        loadCatalog();
+
+        return rootContainer;
+    }
+
+
+    /**
+     * Load the catalog from the arguments given
+     */
+    public void loadCatalog() {
         String catalogURL = getArguments().getString(CatalogController.KEY_URL);
         int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
         loadCatalog(catalogURL, resourceMode);
-
-        return rootContainer;
     }
 
     public void onStart() {

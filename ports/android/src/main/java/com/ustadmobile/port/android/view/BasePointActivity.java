@@ -7,29 +7,45 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TableLayout;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class BasePointActivity extends UstadBaseActivity implements BasePointView{
+public class BasePointActivity extends UstadBaseActivity implements BasePointView, DialogInterface.OnClickListener, Spinner.OnItemSelectedListener {
 
     protected BasePointController mBasePointController;
 
     protected BasePointPagerAdapter mPagerAdapter;
+
+    private int[] tabIconsIds = new int[]{R.drawable.ic_sd_card_black_24dp,
+            R.drawable.ic_public_black_24dp};
+
+    protected Dialog addFeedDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +63,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         viewPager.setAdapter(mPagerAdapter);
         TabLayout tabLayout = (TabLayout)findViewById(R.id.basepoint_tabs);
         tabLayout.setupWithViewPager(viewPager);
-        tabLayout.getTabAt(0).setIcon(R.drawable.ic_sd_card_black_24dp);
-        tabLayout.getTabAt(1).setIcon(R.drawable.ic_public_black_24dp);
+        for(int i = 0; i < BasePointController.NUM_TABS; i++) {
+            tabLayout.getTabAt(i).setIcon(tabIconsIds[i]);
+        }
     }
 
     @Override
@@ -62,13 +79,104 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_basepoint_addfeed:
-                int x = 100;
-                int y = x +1;
+                mBasePointController.handleClickAddFeed();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void showAddFeedDialog() {
+        AddFeedDialogFragment dialogFragment = new AddFeedDialogFragment();
+        dialogFragment.show(getSupportFragmentManager(), "AddFeedDialog");
+    }
+
+    @Override
+    public void setAddFeedDialogURL(String url) {
+        ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_url)).setText(url);
+    }
+
+    @Override
+    public String getAddFeedDialogURL() {
+        return ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_url)).getText().toString();
+    }
+
+    @Override
+    public String getAddFeedDialogTitle() {
+        return ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).getText().toString();
+    }
+
+    @Override
+    public void setAddFeedDialogTitle(String title) {
+        ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).setText(title);
+    }
+
+    /**
+     * Handle when the user has clicked a button on the dialog: to either add the feed or
+     * to cancel
+     *
+     * @param dialogInterface
+     * @param id
+     */
+    @Override
+    public void onClick(DialogInterface dialogInterface, int id) {
+        if(id == DialogInterface.BUTTON_POSITIVE) {
+            mBasePointController.handleAddFeed(getAddFeedDialogURL(), getAddFeedDialogTitle());
+        }else if(id == DialogInterface.BUTTON_NEGATIVE) {
+            //cancenl it
+
+        }
+        dialogInterface.dismiss();
+        addFeedDialog = null;
+    }
+
+    @Override
+    public void refreshCatalog(int column) {
+        ((CatalogOPDSFragment) mPagerAdapter.getItem(column)).loadCatalog();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+        mBasePointController.handleFeedPresetSelected(index);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+
+    public static class AddFeedDialogFragment extends DialogFragment {
+
+        private Dialog dialog;
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            builder.setTitle("Add Feed");
+            View dialogView =inflater.inflate(R.layout.dialog_basepoint_addfeed, null);
+            builder.setView(dialogView);
+            BasePointActivity activity = (BasePointActivity) getActivity();
+            builder.setNegativeButton("Cancel", activity);
+            builder.setPositiveButton("Add", activity);
+            String[] presetTitles = activity.mBasePointController.getFeedList(
+                BasePointController.OPDS_FEEDS_INDEX_TITLE);
+            ArrayAdapter<String> adapter= new ArrayAdapter<>(activity,
+                    R.layout.item_basepoint_dialog_spinneritem, presetTitles);
+            Spinner presetsSpinner = ((Spinner)dialogView.findViewById(
+                    R.id.basepoint_addfeed_src_spinner));
+            presetsSpinner.setAdapter(adapter);
+            presetsSpinner.setOnItemSelectedListener(activity);
+            dialog = builder.create();
+            activity.addFeedDialog = dialog;
+            return dialog;
+        }
+
+
+    }
+
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -76,8 +184,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         private WeakHashMap<Integer, CatalogOPDSFragment> fragmentMap;
 
-        private int[] tabIconsIds = new int[]{R.drawable.ic_sd_storage_white_24dp,
-                R.drawable.ic_public_white_24dp};
+
 
 
         public BasePointPagerAdapter(FragmentManager fm) {
@@ -97,6 +204,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                     bundle.putInt(CatalogOPDSFragment.ARG_MENUID, R.menu.menu_basepoint_remotefeeds);
                 }
                 fragment = CatalogOPDSFragment.newInstance(bundle);
+                fragmentMap.put(position, fragment);
             }
 
             return fragment;
@@ -109,20 +217,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         @Override
         public CharSequence getPageTitle(int position) {
-            // Generate title based on item position
-            Drawable image = ContextCompat.getDrawable(BasePointActivity.this,
-                    tabIconsIds[position]);
-            int w = image.getIntrinsicWidth();
-            int h = image.getIntrinsicHeight();
-            image.setBounds(0, 0, w,h);
-            //SpannableString sb = new SpannableString(
-            //        UstadMobileSystemImpl.getInstance().getString(tabTitles[position]));
-            SpannableString sb = new SpannableString(" ");
-            ImageSpan imageSpan = new ImageSpan(image, ImageSpan.ALIGN_BOTTOM);
-            sb.setSpan(imageSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-
-            //return sb;
             return UstadMobileSystemImpl.getInstance().getString(tabTitles[position]);
         }
 

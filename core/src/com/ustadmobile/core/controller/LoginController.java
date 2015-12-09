@@ -40,6 +40,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
@@ -264,8 +265,8 @@ public class LoginController extends UstadBaseController{
                 }else {
                     UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
                     UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
-                    UstadMobileSystemImpl.getInstance().go(CatalogView.class, 
-                        CatalogController.makeUserCatalogArgs(context), context);
+                    UstadMobileSystemImpl.getInstance().go(BasePointView.class, 
+                        BasePointController.makeDefaultBasePointArgs(context), context);
                 }
             }
         };

@@ -70,6 +70,14 @@ import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+
+/* $if umplatform == 2  $
+    import org.json.me.*;
+ $else$ */
+    import org.json.*;
+/* $endif$ */
+
+
 /**
  * CatalogController manages OPDS Feeds and controls the view component
  * showing catalogs to the user
@@ -224,7 +232,22 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     
     public static final String KEY_FLAGS = "flags";
             
+    /**
+     * A url that provides a list of the of the contents that have been downloaded
+     * to the device
+     */
     public static final String OPDS_PROTO_DEVICE = "opds:///com.ustadmobile.app.devicefeed";
+    
+    /**
+     * A url that provides a feed giving this users list of root feeds
+     */
+    public static final String OPDS_PROTO_USER_FEEDLIST = "opds:///com.ustadmobile.app.userfeedlist";
+    
+    /**
+     * The preference key that will be used to save the user's feedlist as a
+     * json string
+     */
+    public static final String PREFKEY_USERFEEDLIST = "userfeedlist";
     
     private Timer downloadUpdateTimer;
     
@@ -462,6 +485,39 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 }
             }
         }
+    }
+    
+    /**
+     * 
+     * @param context
+     * @return 
+     */
+    public static UstadJSOPDSFeed makeUserFeedListFeeed(Object context) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String rootFeedsStr = impl.getUserPref(PREFKEY_USERFEEDLIST, 
+            UstadMobileDefaults.DEFAULT_FEEDLIST, context);
+        JSONArray arr = null;
+        String feedID =  "com.ustadmobile.app.userfeedlist" + 
+                impl.getActiveUser(context);
+        UstadJSOPDSFeed usersFeeds = new UstadJSOPDSFeed(OPDS_PROTO_USER_FEEDLIST,
+                "My Feeds",feedID);
+        try {
+            arr = new JSONArray(rootFeedsStr);
+            JSONObject currentFeed;
+            UstadJSOPDSEntry newEntry;
+            for(int i = 0; i < arr.length(); i++) {
+                currentFeed = arr.getJSONObject(i);
+                 newEntry = new UstadJSOPDSEntry(usersFeeds, 
+                    currentFeed.getString("title"), feedID + i, "subsection", 
+                    UstadJSOPDSEntry.TYPE_NAVIGATIONFEED, 
+                    currentFeed.getString("url"));
+                 usersFeeds.addEntry(newEntry);
+            }
+        }catch(JSONException e) {
+            
+        }
+        
+        return usersFeeds;
     }
     
     /**
@@ -839,6 +895,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 opdsFeed = makeDeviceFeed(
                     impl.getStorageDirs(resourceMode, context), 
                     resourceMode, context);
+            }else if(url.equals(OPDS_PROTO_USER_FEEDLIST)) {
+                opdsFeed = makeUserFeedListFeeed(context);
             }
         }else {
             try {

@@ -60,4 +60,16 @@ public class UstadMobileDefaults {
     
     public static final String DEFAULT_TINCAN_PREFIX =
             "http://www.ustadmobile.com/um-tincan/";
+    
+    /**
+     * The default one root server feed list
+     */
+    public static final String DEFAULT_FEEDLIST = "[{\n" +
+        "    title: \"Ustad Mobile\",\n" +
+        "    url: \"http://umcloud1.ustadmobile.com/opds/\",\n" +
+        "    auth: \":appuser:\"\n" +
+        "}]";
+    
+    
+    
 }
