@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.core.util.UMFileUtil;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -51,12 +52,21 @@ public class HTTPResult {
      * 
      * @param response The byte response data from the server
      * @param status the response code returned by the server
-     * @param responseHeaders the headers returned by the server in a hashtable
+     * @param responseHeaders the headers returned by the server in a hashtable (all keys lower case)
      */
     public HTTPResult(byte[] response, int status, Hashtable responseHeaders) {
         this.response = response;
         this.status = status;
-        this.responseHeaders = responseHeaders;
+        
+        //put all headers into lower case to make them case insensitive
+        this.responseHeaders = new Hashtable();
+        String headerName;
+        Enumeration keys = responseHeaders.keys();
+        while(keys.hasMoreElements()) {
+            headerName = (String)keys.nextElement();
+            this.responseHeaders.put(headerName.toLowerCase(), 
+                responseHeaders.get(headerName));
+        }
     }
     
     public String[] getHTTPHeaderKeys() {
@@ -71,6 +81,21 @@ public class HTTPResult {
         
         return headerKeys;
     }
+    
+    public String getSuggestedFilename(String url) {
+        String suggestedFilename = null;
+        if(responseHeaders.containsKey("content-disposition")) {
+            
+        }else {
+            return UMFileUtil.getFilename(url);
+        }
+        
+        
+        
+        
+        return suggestedFilename;   
+    }
+    
     
     /**
      * 

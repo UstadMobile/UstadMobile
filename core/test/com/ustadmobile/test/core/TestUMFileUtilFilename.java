@@ -82,18 +82,33 @@ public class TestUMFileUtilFilename extends TestCase{
         assertTrue("Parent filename return nulls when path is one char long",
             UMFileUtil.getParentFilename(".") == null);
         
-        Hashtable noParamsHT = UMFileUtil.getMimeTypeParameters("application/atom+xml");
-        assertTrue("No params in mime type : getMimeTypeParameters returns null", 
-            noParamsHT == null);
         
-        Hashtable withParamsHT = UMFileUtil.getMimeTypeParameters(
+        //test mime type parsing (will replace getMimeTypeParameters
+        UMFileUtil.TypeWithParamHeader header = UMFileUtil.parseTypeWithParamHeader(
             "application/atom+xml;profile=opds-catalog;kind=navigation");
-        assertTrue("Params in mime type : getMimeTypeParameters != null", 
-            withParamsHT != null);
-        assertEquals("find first param in mime type", "opds-catalog",
-            withParamsHT.get("profile"));
-        assertEquals("find second param in mime type", "navigation",
-            withParamsHT.get("kind")); 
+        assertEquals("Correct type from header1", "application/atom+xml", 
+            header.typeName);
+        assertEquals("Correct profile parameter in header1", "opds-catalog", 
+            header.params.get("profile"));
+        assertEquals("Correct kind parameter in header1", "navigation",
+            header.params.get("kind"));
+        
+        header = UMFileUtil.parseTypeWithParamHeader(
+            "attachment; filename=\"some book.epub\"");
+        assertEquals("parse content-disposition type", "attachment",
+            header.typeName);
+        assertEquals("parse content disposition filename", "some book.epub",
+            header.params.get("filename"));
+        
+        header = UMFileUtil.parseTypeWithParamHeader("application/atom+xml");
+        assertEquals("Can parse header with no params", "application/atom+xml",
+            header.typeName);
+        assertEquals("Header with no params results in null param ht", null,
+            header.params);
+        
+        //test filtering nasty characters
+        assertEquals("removes security hazard characters from filename", 
+            "nastyname.so", UMFileUtil.filterFilename("/nastyname.*so"));
     }
 
     public void runTest(){

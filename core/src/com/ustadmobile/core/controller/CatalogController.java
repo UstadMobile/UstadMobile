@@ -1497,8 +1497,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         for(int i = 0; i < acquisitionLinks.size(); i++) {
             linkInfo = (String[])acquisitionLinks.elementAt(i);
-            mimeParams = UMFileUtil.getMimeTypeParameters(
-                linkInfo[UstadJSOPDSItem.LINK_MIMETYPE]);
+            mimeParams = UMFileUtil.parseTypeWithParamHeader(
+                linkInfo[UstadJSOPDSItem.LINK_MIMETYPE]).params;
             if(preferredSize == null && mimeParams == null) {
                 //we want the screen size neutral version and this is it
                 preferredLink = linkInfo;

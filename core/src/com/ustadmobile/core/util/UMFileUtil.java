@@ -264,6 +264,126 @@ public class UMFileUtil {
     }
     
     /**
+     * Parse type with params header fields (Content-Disposition; Content-Type etc)
+     * 
+     * TODO: Support params with *paramname and encoding e.g. http://tools.ietf.org/html/rfc6266 section 5 example 2
+     * 
+     * @return 
+     */
+    public static TypeWithParamHeader parseTypeWithParamHeader(String header) {
+        TypeWithParamHeader result = null;
+        
+        int headerLen = header.length();
+        StringBuffer sb = new StringBuffer();
+        char c;
+        
+        String disposition = null;//disposition itself e.g. attachment or inline
+        String paramName = null;
+        Hashtable params = null;
+        boolean inQuotes = false;
+        
+        char lastChar = 0;
+        for(int i = 0; i < headerLen; i++) {
+            c = header.charAt(i);
+            if(c == '"') {
+                if(!inQuotes) {
+                    inQuotes = true;
+                }else if(inQuotes && lastChar != '\\') {
+                    inQuotes = false;
+                }
+                
+            }
+
+            if((isWhiteSpace(c) && !inQuotes) || (c == '"' && i < headerLen-1)) {
+                //do nothing more
+            }else if(disposition == null && (c == ';' || i == headerLen-1)) {
+                if(i == headerLen-1) {
+                    sb.append(c);
+                }
+                
+                disposition = sb.toString();
+                sb = new StringBuffer();
+            }else if((c == ';' || i == headerLen-1) && disposition != null){
+                //check if we are here because it's the end... then we add this to bufer
+                if(i == headerLen-1 && c != '"') {
+                    sb.append(c);
+                }
+                
+                if(params == null) {
+                    params = new Hashtable();
+                }
+                
+                params.put(paramName, sb.toString());
+                sb = new StringBuffer();
+                paramName = null;
+            }else if(c == '='){
+                paramName = sb.toString();
+                sb = new StringBuffer();
+            }else {
+                sb.append(c);
+            }
+            
+            lastChar = c;
+        }
+        
+        result = new TypeWithParamHeader(disposition, params);
+        return result;
+    }
+    
+    /**
+     * Filter filenames for characters that could be nasty attacks (e.g. /sdcard/absolutepath etc)
+     * 
+     * @param filename Filename from an untrusted source (e.g. http header)
+     * 
+     * @return Filename with sensitive characters (: / \ * > < ? ) removed
+     */
+    public static String filterFilename(String filename) {
+        StringBuffer newStr = new StringBuffer(filename.length());
+        char c;
+        
+        for(int i = 0; i < filename.length(); i++) {
+            c = filename.charAt(i);
+            if(!(c == ':' || c == '/' || c == '\\' || c == '*' || c == '>' || c == '<' || c == '?')) {
+                newStr.append(c);
+            }
+        }
+        
+        return newStr.toString();
+    }
+    
+    /**
+     * Simple wrapper class that represents a haeder field with a type
+     * and parameters.
+     */
+    public static class TypeWithParamHeader {
+        
+       /**
+        * The first parameter: e.g. the mime type; content disposition etc.
+        */
+       public String typeName;
+
+       /**
+        * Hashtable of parameters found (case sensitive)
+        */
+       public Hashtable params;
+
+       public TypeWithParamHeader(String typeName, Hashtable params) {
+           this.typeName = typeName;
+           this.params = params;
+       }   
+    }
+    
+    private static boolean isWhiteSpace(char c) {
+        if(c == ' ' || c == '\n' || c == '\t' || c == '\r') {
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
+    
+    
+    /**
      * Returns the parent filename of a given string uri 
      * 
      * @param uri e.g. /some/file/path or http://server.com/some/file.txt
@@ -328,43 +448,4 @@ public class UMFileUtil {
         }
     }
     
-    /**
-     * 
-     * Get a list of mime type parameters e.g. where you have
-     * application/atom+xml;profile=opds-catalog;kind=acquisition
-     * 
-     * return hashtable with profile=opds-catalog and kind=acquisition set
-     * 
-     * @param mimeType The mime type string to examine
-     * 
-     * @return Hashtable with mime parameters or null if there are no parameters
-     */
-    public static Hashtable getMimeTypeParameters(String mimeType) {
-        int semiPos = mimeType.indexOf(';');
-        
-        if(semiPos == -1) {
-            return null;
-        }
-        
-        Hashtable results = new Hashtable();
-        char c;
-        int eqPos = -1;
-        
-        String key;
-        String value;
-        for(int i = semiPos + 1; i < mimeType.length(); i++) {
-            c= mimeType.charAt(i);
-            
-            if(c == '=') {
-                eqPos = i;
-            }else if(c == ';' || i == mimeType.length()-1) {
-                key = mimeType.substring(semiPos+1, eqPos);
-                value = mimeType.substring(eqPos+1, c == ';' ? i : i + 1);
-                results.put(key, value);
-                semiPos = i;
-            }
-        }
-        
-        return results;
-    }
 }
