@@ -31,6 +31,7 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.util.UMFileUtil;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -47,6 +48,11 @@ public class HTTPResult {
     private Hashtable responseHeaders;
     
     public static final String GET = "GET";
+    
+    
+    public static final int HTTP_SIZE_NOT_GIVEN = -1;
+    
+    public static final int HTTP_SIZE_IO_EXCEPTION = -2;
     
     /**
      * 
@@ -69,6 +75,12 @@ public class HTTPResult {
         }
     }
     
+    /**
+     * Get a list of all the HTTP headers that have been provided for this
+     * request
+     * 
+     * @return String array of available http headers
+     */
     public String[] getHTTPHeaderKeys() {
         Enumeration e   = responseHeaders.keys();
         String[] headerKeys = new String[responseHeaders.size()];
@@ -82,18 +94,52 @@ public class HTTPResult {
         return headerKeys;
     }
     
+    /**
+     * Get the suggested filename for this HTTP Request: if the HTTP request
+     * has a content-disposition header we will use it to provide the filename;
+     * otherwise we will use the filename portion of the URL 
+     * 
+     * @param url The entire URL 
+     * 
+     * @return Filename suggested by content-disposition if any; otherwise the filename portion of the URL
+     */
     public String getSuggestedFilename(String url) {
         String suggestedFilename = null;
+        Object dispositionHeaderStr = responseHeaders.get("content-disposition");
         if(responseHeaders.containsKey("content-disposition")) {
-            
-        }else {
-            return UMFileUtil.getFilename(url);
+            UMFileUtil.TypeWithParamHeader dispositionHeader = 
+                UMFileUtil.parseTypeWithParamHeader((String)dispositionHeaderStr);
+            if(dispositionHeader.params != null && dispositionHeader.params.containsKey("filename")) {
+                suggestedFilename = UMFileUtil.filterFilename(
+                    (String)dispositionHeader.params.get("filename"));
+            }
         }
         
         
-        
+        if(suggestedFilename == null){
+            suggestedFilename = UMFileUtil.getFilename(url);
+        }
         
         return suggestedFilename;   
+    }
+    
+    /**
+     * Return the size of this http request as per content-length.  This can
+     * be used in combination with the HEAD request method to request the content
+     * length without actually downloading the content itself
+     * 
+     * @see HTTPResult#HTTP_SIZE_IO_EXCEPTION
+     * @see HTTPResult#HTTP_SIZE_NOT_GIVEN
+     * 
+     * @return The content length in bytes if successful, an error flag < 0 otherwise
+     */
+    public int getContentLength() {
+        int retVal = HTTP_SIZE_NOT_GIVEN;
+        String contentLengthStr = getHeaderValue("content-length");
+        if(contentLengthStr != null) {
+            retVal = Integer.parseInt(contentLengthStr);
+        }
+        return retVal;
     }
     
     

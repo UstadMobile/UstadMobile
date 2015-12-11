@@ -1557,7 +1557,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         String[] preferredLink;        
         String itemHref;
         String itemURL;
-        String destFilename;
+        String suggestedFilename;
         
         for(int i = 0; i < entries.length; i++) {
             preferredLink = getBestAcquisitionLinkByParams(request, entries[i]);
@@ -1572,22 +1572,35 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
                     itemHref);
             
-            destFilename = UMFileUtil.joinPaths(new String[] {
-                request.getDestDirPath(), UMFileUtil.getFilename(itemHref)
-            });
+            
             
             CatalogEntryInfo info = new CatalogEntryInfo();
             info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
             info.srcURLs = new String[]{itemURL};
-            info.fileURI = destFilename;
+            
+            
+            HTTPResult result = null;
+            try {
+                result = impl.makeRequest(itemURL, null, null,"HEAD");
+                suggestedFilename = result.getSuggestedFilename(itemURL);
+                info.downloadTotalSize  = result.getContentLength();
+            }catch(Exception e) {
+                //the info we want isn't available right now ... can still try to queue it...
+                suggestedFilename = UMFileUtil.getFilename(itemURL);
+                info.downloadTotalSize = HTTPResult.HTTP_SIZE_IO_EXCEPTION;
+            }
+                        
+            info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
+            info.srcURLs = new String[]{itemURL};
+            info.fileURI = UMFileUtil.joinPaths(new String[] {
+                request.getDestDirPath(), suggestedFilename
+            });;
             info.mimeType = mimeTypes[i];
-            info.downloadTotalSize = UMIOUtils.getHTTPDownloadSize(itemURL, 
-                    authHeaders);
             
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 435, itemURL + "->" + 
-                destFilename);
-            long downloadID = impl.queueFileDownload(itemURL, destFilename, authHeaders, 
-                    request.getContext());
+                info.fileURI);
+            long downloadID = impl.queueFileDownload(itemURL, info.fileURI, 
+                authHeaders, request.getContext());
             info.downloadID = downloadID;
             setEntryInfo(entries[i].id, info, resourceMode, request.getContext());
             
