@@ -65,13 +65,15 @@ public class HTTPResult {
         this.status = status;
         
         //put all headers into lower case to make them case insensitive
-        this.responseHeaders = new Hashtable();
-        String headerName;
-        Enumeration keys = responseHeaders.keys();
-        while(keys.hasMoreElements()) {
-            headerName = (String)keys.nextElement();
-            this.responseHeaders.put(headerName.toLowerCase(), 
-                responseHeaders.get(headerName));
+        if(responseHeaders != null) {
+            this.responseHeaders = new Hashtable();
+            String headerName;
+            Enumeration keys = responseHeaders.keys();
+            while(keys.hasMoreElements()) {
+                headerName = (String)keys.nextElement();
+                this.responseHeaders.put(headerName.toLowerCase(), 
+                    responseHeaders.get(headerName));
+            }
         }
     }
     
@@ -105,8 +107,9 @@ public class HTTPResult {
      */
     public String getSuggestedFilename(String url) {
         String suggestedFilename = null;
-        Object dispositionHeaderStr = responseHeaders.get("content-disposition");
-        if(responseHeaders.containsKey("content-disposition")) {
+        
+        if(responseHeaders != null && responseHeaders.containsKey("content-disposition")) {
+            Object dispositionHeaderStr = responseHeaders.get("content-disposition");
             UMFileUtil.TypeWithParamHeader dispositionHeader = 
                 UMFileUtil.parseTypeWithParamHeader((String)dispositionHeaderStr);
             if(dispositionHeader.params != null && dispositionHeader.params.containsKey("filename")) {
