@@ -107,6 +107,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     
     public static final int STATUS_NOT_ACQUIRED = 2;
     
+    //Begin flags
     
     /**
      * Enable retrieving resource from cache
@@ -124,6 +125,30 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static final int SHARED_RESOURCE = 4;
     
+    /**
+     * Flag Indicates that contents should be sorted in a descending order
+     */
+    public static final int SORT_DESC = 8;
+    
+    /**
+     * Flag Indicates that the contents should be sorted in an ascending manner
+     */
+    public static final int SORT_ASC = 16;
+    
+    /**
+     * Indicates that the contents should not be sorted
+     */
+    public static final int SORT_NONE = 32;
+    
+    /**
+     * Flag indicates that the contents should be sorted according to when they were last used
+     */
+    public static final int SORT_BY_LASTACCESSED = 64;
+    
+    /**
+     * Flag Indicates that the contents should be sorted by the title
+     */
+    public static final int SORT_BY_TITLE = 128;
     
     
     public static final int ENTRY_ACQUISITION_STATUS = 0;
@@ -383,6 +408,14 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static CatalogController makeControllerByURL(String url, int resourceMode, String httpUser, String httpPassword, int flags, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, resourceMode, 
             httpUser, httpPassword, flags, context);
+        
+        if((flags & SORT_ASC) == SORT_ASC || (flags & SORT_DESC) == SORT_DESC) {
+            if((flags & SORT_BY_LASTACCESSED) == SORT_BY_LASTACCESSED) {
+                opdsFeed.sortEntries(new 
+                    CatalogLastAccessTimeComparer(flags, context));
+            }
+        }
+        
         CatalogController result = new CatalogController(
             new CatalogModel(opdsFeed), context);
         result.setResourceMode(resourceMode);
@@ -400,13 +433,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * 
      * @param view The view we are attaching with
      * @param url as per makeControllerByURL
-     * @param impl as per makeControllerByURL
      * @param resourceMode as per makeControllerByURL 
      * @param flags as per makeControllerByURL
      * 
      * @see CatalogController#makeControllerByURL(java.lang.String, com.ustadmobile.core.impl.UstadMobileSystemImpl, int, java.lang.String, java.lang.String, int) 
      * 
-     * @return CatalogController attached with the given view
      * @throws IOException
      * @throws XmlPullParserException 
      */
@@ -1305,33 +1336,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHREF), 
                 title, feedID);
         
-        //hashtable in the form of ID to path
-        Hashtable knownContainerIDs = new Hashtable();
-        int i;
-        int j;
-        UstadJSOPDSFeed feed;
-        UstadJSOPDSEntry feedEntry;
         
-        for(i = 0; i < opdsFiles.length; i++) {
-            try {
-                //let's try reading it and loading it in
-                feed = UstadJSOPDSFeed.loadFromXML(impl.readFileAsText(opdsFiles[i]));
-                feedEntry = UstadJSOPDSEntry.makeEntryForItem(
-                    feed, retVal, "subsection", UstadJSOPDSEntry.TYPE_NAVIGATIONFEED, 
-                    UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, 
-                        opdsFiles[i]));
-                retVal.addEntry(feedEntry);
-                for(j = 0; j < feed.entries.length; j++) {
-                    knownContainerIDs.put(feed.entries[j].id, 
-                            UMFileUtil.resolveLink(opdsFiles[i], 
-                            UMFileUtil.getFilename(opdsFiles[i])));
-                }
-            }catch(Exception e) {
-                impl.l(UMLog.ERROR, 114, opdsFiles[i]);
-            }
-        }
-        feed = null;
-        feedEntry = null;
         
         ZipFileHandle zipHandle;
         ZipEntryHandle zipEntryHandle;
@@ -1340,7 +1345,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         UstadJSOPF opf;
         UstadJSOPDSFeed looseContainerFeed = new UstadJSOPDSFeed(baseHREF, 
             "Loose files", feedID+"-loose");
+        Hashtable foundContainerIDS = new Hashtable();
         
+        int i;
+        int j;
+        UstadJSOPDSEntry epubEntry;
         for(i = 0; i < containerFiles.length; i++) {
             impl.l(UMLog.VERBOSE, 408, containerFiles[i]);
             zipHandle = null;
@@ -1362,11 +1371,21 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                     UMIOUtils.closeInputStream(zIs);
                     zIs = null;
                     
+                    epubEntry =new UstadJSOPDSEntry(retVal,opf, 
+                        UstadJSOPDSItem.TYPE_EPUBCONTAINER, containerFiles[i]);
+                    
+                    if(!foundContainerIDS.containsKey(epubEntry.id)) {
+                        retVal.addEntry(epubEntry);
+                        foundContainerIDS.put(epubEntry.id, epubEntry.id);
+                    }
+                    
+                    /*
                     if(!knownContainerIDs.containsKey(opf.id) && looseContainerFeed.getEntryById(opf.id) == null) {
                         UstadJSOPDSEntry looseEntry= new UstadJSOPDSEntry(looseContainerFeed,
                             opf, null, containerFiles[i]);
                         looseContainerFeed.addEntry(looseEntry);
                     }
+                    */
                     
                     //Make sure that this entry is marked as acquired
                     int resourceMode = containerFileModes[i] ? USER_RESOURCE 
@@ -1391,6 +1410,34 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 UMIOUtils.closeZipFileHandle(zipHandle);
             }
         }
+        
+        //hashtable in the form of ID to path
+        Hashtable knownContainerIDs = new Hashtable();
+        
+        UstadJSOPDSFeed feed;
+        UstadJSOPDSEntry feedEntry;
+        for(i = 0; i < opdsFiles.length; i++) {
+            try {
+                //let's try reading it and loading it in
+                feed = UstadJSOPDSFeed.loadFromXML(impl.readFileAsText(opdsFiles[i]));
+                feedEntry = UstadJSOPDSEntry.makeEntryForItem(
+                    feed, retVal, "subsection", UstadJSOPDSEntry.TYPE_NAVIGATIONFEED, 
+                    UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, 
+                        opdsFiles[i]));
+                retVal.addEntry(feedEntry);
+                for(j = 0; j < feed.entries.length; j++) {
+                    knownContainerIDs.put(feed.entries[j].id, 
+                            UMFileUtil.resolveLink(opdsFiles[i], 
+                            UMFileUtil.getFilename(opdsFiles[i])));
+                }
+            }catch(Exception e) {
+                impl.l(UMLog.ERROR, 114, opdsFiles[i]);
+            }
+        }
+        feed = null;
+        feedEntry = null;
+        
+        
         
         if(looseContainerFeed.entries.length > 0) {
             try {

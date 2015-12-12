@@ -64,6 +64,8 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     private UstadOCF ocf;
     
     private String[] opfTitles;
+    
+    public static final String PREFKEY_PREFIX_LASTOPENED = "laxs-";
         
     /**
      * Use with loadController as the key for the containerURI in args hashtable
@@ -163,6 +165,31 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         opf = UstadJSOPF.loadFromOPF(xpp);
                 
         return opf;
+    }
+    
+    /**
+     * Log that the given container has been opened.  This should be called
+     * by the view.  it can then be used as the basis by which to sort items
+     * 
+     * @param opf 
+     */
+    public void logContainerOpened(UstadJSOPF opf) {
+        UstadMobileSystemImpl.getInstance().setUserPref(
+            PREFKEY_PREFIX_LASTOPENED + opf.id, ""+System.currentTimeMillis(), 
+            context);
+    }
+    
+    /**
+     * Get the time (in miliseconds since 1/1/1970 as per system.currenTimeMillis)
+     * 
+     * @param id Container ID to find the last time opened
+     * @param context Context object for retrieving preferences
+     * 
+     * @return 
+     */
+    public static Long getContainerLastOpenedTime(String id, Object context) {
+        return Long.parseLong(UstadMobileSystemImpl.getInstance().getUserPref(
+            PREFKEY_PREFIX_LASTOPENED + id, "0", context));
     }
     
     

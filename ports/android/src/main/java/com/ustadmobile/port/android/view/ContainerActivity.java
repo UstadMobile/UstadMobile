@@ -308,6 +308,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
                 //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
                 activity.mOPF = activity.mContainerController.getOPF(0);
+                activity.mContainerController.logContainerOpened(activity.mOPF);
 
                 String[] hrefArray = activity.mOPF.getLinearSpineURLS();
                 urlArray = new String[hrefArray.length];

@@ -44,6 +44,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.omr.OMRRecognizer;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.core.util.UMUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -57,6 +58,17 @@ public class SplashScreenActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Integer five = new Integer(5);
+        Integer three = new Integer(3);
+        Integer seven = new Integer(7);
+
+        Integer arr[] = new Integer[]{five, three, seven};
+        UMUtil.Comparer comparer = new UMUtil.Comparer() {
+            public int compare(Object o1, Object o2) {
+                return ((Integer)o1).intValue() - ((Integer)o2).intValue();
+            }
+        };
+        UMUtil.bubbleSort(arr, comparer);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 

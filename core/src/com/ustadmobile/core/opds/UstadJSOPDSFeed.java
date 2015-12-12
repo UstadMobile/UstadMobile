@@ -31,6 +31,7 @@
 package com.ustadmobile.core.opds;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Vector;
@@ -185,6 +186,16 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         newEntries[entries.length] = entry;
         this.entries = newEntries;
     }
+    
+    /**
+     * Sort entries use a given comparer
+     * 
+     * @param comparer 
+     */
+    public void sortEntries(UMUtil.Comparer comparer) {
+        UMUtil.bubbleSort(entries, comparer);
+    }
+    
     
     public UstadJSOPDSEntry getEntryById (String id) {
         UstadJSOPDSEntry entry;

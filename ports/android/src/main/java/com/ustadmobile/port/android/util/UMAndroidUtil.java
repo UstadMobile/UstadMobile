@@ -46,6 +46,8 @@ public class UMAndroidUtil {
             val = bundle.get(key);
             if(val instanceof String) {
                 retVal.put(key, val);
+            }else if(val instanceof Integer) {
+                retVal.put(key, val);
             }
         }
 

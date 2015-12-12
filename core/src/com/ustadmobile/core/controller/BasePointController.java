@@ -90,8 +90,14 @@ public class BasePointController extends UstadBaseController{
             args.put(iPrefix + CatalogController.KEY_FLAGS, 
                 new Integer(CatalogController.CACHE_ENABLED));
             args.put(iPrefix + CatalogController.KEY_RESMOD, 
-                new Integer(CatalogController.USER_RESOURCE));
+                new Integer(CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE));
         }
+        
+        Integer downloadedEntriesFlags = new Integer(
+            CatalogController.CACHE_ENABLED | CatalogController.SORT_DESC | 
+            CatalogController.SORT_BY_LASTACCESSED);
+        args.put(INDEX_DOWNLOADEDENTRIES+BasePointController.OPDS_ARGS_PREFIX +
+            CatalogController.KEY_FLAGS, downloadedEntriesFlags);
         
         return args;
     }

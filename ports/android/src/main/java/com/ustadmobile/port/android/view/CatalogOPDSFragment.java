@@ -91,7 +91,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private int mMenuID = -1;
 
+    private int mFetchFlags;
+
     public static final String ARG_MENUID = "frag-menuid";
+
+    private boolean hasDisplayed = false;
 
     /**
      * Use this factory method to create a new instance of
@@ -118,9 +122,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     public void loadCatalog(final String url, int resourceMode) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        final int fetchFlags = CatalogController.CACHE_ENABLED;
-
-        CatalogController.makeControllerForView(this, url, resourceMode, fetchFlags, this);
+        CatalogController.makeControllerForView(this, url, resourceMode, mFetchFlags, this);
     }
 
 
@@ -192,6 +194,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
         mSelectedEntries = new UstadJSOPDSEntry[0];
@@ -200,6 +203,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
 
         mMenuID = getArguments().getInt(ARG_MENUID, -1);
+        mFetchFlags = getArguments().getInt(CatalogController.KEY_FLAGS,
+                CatalogController.CACHE_ENABLED);
+
         loadCatalog();
 
         return rootContainer;
@@ -216,10 +222,21 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         loadCatalog(catalogURL, resourceMode);
     }
 
+    @Override
     public void onStart() {
         super.onStart();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(!hasDisplayed) {
+            hasDisplayed = true;
+        }else {
+            loadCatalog();
+        }
+
+    }
 
 
     /**
