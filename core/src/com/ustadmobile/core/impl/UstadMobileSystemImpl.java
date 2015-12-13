@@ -319,7 +319,6 @@ public abstract class UstadMobileSystemImpl {
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
         
         
-        /*
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {
@@ -327,14 +326,14 @@ public abstract class UstadMobileSystemImpl {
             go(BasePointView.class, args, context);
             
         }
-        */
         
+        /*
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {
             Hashtable args = CatalogController.makeUserCatalogArgs(context);
             go(CatalogView.class, args, context);
-        }
+        }*/
 
     }
     

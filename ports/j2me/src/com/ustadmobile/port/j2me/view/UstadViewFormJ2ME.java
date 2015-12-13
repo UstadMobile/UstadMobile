@@ -107,7 +107,7 @@ public class UstadViewFormJ2ME extends Form {
     }
     
     protected boolean isBackCommandAvailable(int minHistoryEntries) {
-        return canGoBack() && UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() >= minHistoryEntries;
+        return backCommandEnabled && UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() >= minHistoryEntries;
     }
     
     protected void addBackCommand() {
@@ -202,8 +202,8 @@ public class UstadViewFormJ2ME extends Form {
     
     public void setActiveUstadViewContainer(UstadViewContainerJ2ME container) {        
         if(container != this.activeContainer) {
-            if(container != null) {
-                removeCommandListener(container);
+            if(this.activeContainer != null) {
+                removeCommandListener(this.activeContainer);
             }
             
             this.activeContainer = container;

@@ -52,12 +52,12 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.ZipFileHandle;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
@@ -68,6 +68,7 @@ import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.util.WatchedInputStream;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
+import com.ustadmobile.port.j2me.view.BasePointViewJ2ME;
 import com.ustadmobile.port.j2me.view.CatalogWrapperForm;
 import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
 import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
@@ -1100,6 +1101,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             form = new ContainerViewJ2ME(args, context);
         }else if(cls.equals(UserSettingsView.class)) {
             form = new UserSettingsViewJ2ME(args, context);
+        }else if(cls.equals(BasePointView.class)) {
+            form = new BasePointViewJ2ME(args, context, true);
         }
         
         return form;
