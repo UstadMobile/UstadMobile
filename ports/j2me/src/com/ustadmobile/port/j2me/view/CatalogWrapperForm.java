@@ -28,42 +28,35 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core;
+package com.ustadmobile.port.j2me.view;
 
-import com.ustadmobile.core.util.UMUtil;
-/* $if umplatform == 2  $
-    import j2meunit.framework.TestCase;
- $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
-
+import com.sun.lwuit.layouts.BorderLayout;
+import java.util.Hashtable;
 
 /**
  *
  * @author mike
  */
-public class TestUMUtil extends TestCase{
+public class CatalogWrapperForm extends UstadViewFormJ2ME{
+
+    private CatalogOPDSContainer opdsContainer;
     
-    public void testUMUtilSort() {
-        Integer five = new Integer(5);
-        Integer three = new Integer(3);
-        Integer seven = new Integer(7);
+    public CatalogWrapperForm(Hashtable args, Object context, boolean backCommandEnabled) {
+        super(args, context, backCommandEnabled);
+        setLayout(new BorderLayout());
         
-        Integer arr[] = new Integer[]{five, three, seven};
-        UMUtil.Comparer comparer = new UMUtil.Comparer() {
-            public int compare(Object o1, Object o2) {
-                return ((Integer)o1).intValue() - ((Integer)o2).intValue();
-            }
-        };
-        UMUtil.bubbleSort(arr, comparer);
-        
-        assertEquals("Sorted item0", three, arr[0]);
-        assertEquals("sorted item1", five, arr[1]);
-        assertEquals("Sorted item2", seven, arr[2]);
+    }
+
+    protected void initComponent() {
+        super.initComponent(); 
+        if(opdsContainer == null) {
+            opdsContainer = new CatalogOPDSContainer(getArgs(), getContext(), 
+                this);
+            addComponent(BorderLayout.CENTER, opdsContainer);
+            setActiveUstadViewContainer(opdsContainer);
+        }
     }
     
-    public void runTest(){
-        testUMUtilSort();
-    }
+    
     
 }

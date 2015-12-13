@@ -187,7 +187,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * 
      * @return 
      */
-    public static Long getContainerLastOpenedTime(String id, Object context) {
+    public static long getContainerLastOpenedTime(String id, Object context) {
         return Long.parseLong(UstadMobileSystemImpl.getInstance().getUserPref(
             PREFKEY_PREFIX_LASTOPENED + id, "0", context));
     }

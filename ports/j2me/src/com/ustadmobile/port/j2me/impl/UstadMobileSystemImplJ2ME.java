@@ -68,7 +68,7 @@ import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.util.WatchedInputStream;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
-import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
+import com.ustadmobile.port.j2me.view.CatalogWrapperForm;
 import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
 import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
 import com.ustadmobile.port.j2me.view.UserSettingsViewJ2ME;
@@ -1095,7 +1095,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         if(cls.equals(LoginView.class)) {
             form = new LoginViewJ2ME(args, context);
         }else if(cls.equals(CatalogView.class)) {
-            form = new CatalogViewJ2ME(args, context);
+            form = new CatalogWrapperForm(args, context, true);
         }else if(cls.equals(ContainerView.class)) {
             form = new ContainerViewJ2ME(args, context);
         }else if(cls.equals(UserSettingsView.class)) {

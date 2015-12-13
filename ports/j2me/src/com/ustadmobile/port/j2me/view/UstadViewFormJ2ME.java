@@ -65,6 +65,8 @@ public class UstadViewFormJ2ME extends Form {
     public static final int CMD_BACK_ID = 1000;
     
     private boolean backCommandEnabled = true;
+    
+    private UstadViewContainerJ2ME activeContainer;
 
     public UstadViewFormJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
         this.args = args;
@@ -99,9 +101,13 @@ public class UstadViewFormJ2ME extends Form {
      * and there should be at least 2 entries for the user to be able to go back to the previous form
      */
     protected void addBackCommand(int minHistoryEntries) {
-        if(canGoBack() || UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() >= minHistoryEntries) {
+        if(isBackCommandAvailable(minHistoryEntries)) {
             addCommand(backCommand);
         }
+    }
+    
+    protected boolean isBackCommandAvailable(int minHistoryEntries) {
+        return canGoBack() && UstadMobileSystemImplJ2ME.getInstanceJ2ME().getViewHistorySize() >= minHistoryEntries;
     }
     
     protected void addBackCommand() {
@@ -166,7 +172,59 @@ public class UstadViewFormJ2ME extends Form {
      * Handle shut down as required - the user is about to leave...
      */
     public void onDestroy() {
+        if(activeContainer != null) {
+            activeContainer.onDestroy();
+        }
         
     }
+    
+    public void onCreateMenuCommands(Vector cmdVector) {
+        
+    }
+    
+    public void invalidateMenuCommands() {
+        removeAllCommands();
+        Vector cmdVector = new Vector();
+        
+        if(isBackCommandAvailable(2)) {
+            cmdVector.addElement(backCommand);
+        }
+        
+        onCreateMenuCommands(cmdVector);
+        if(this.activeContainer != null) {
+            this.activeContainer.onCreateMenuCommands(cmdVector);
+        }
+        
+        for(int i = 0;i < cmdVector.size(); i++) {
+            addCommand((Command)cmdVector.elementAt(i));
+        }
+    }
+    
+    public void setActiveUstadViewContainer(UstadViewContainerJ2ME container) {        
+        if(container != this.activeContainer) {
+            if(container != null) {
+                removeCommandListener(container);
+            }
+            
+            this.activeContainer = container;
+            invalidateMenuCommands();
+            addCommandListener(container);
+            invalidateTitle();
+        }
+    }
+    
+    /**
+     * Used by containers to tell us to look again at the title
+     */
+    public void invalidateTitle() {
+        if(this.activeContainer != null) {
+            String containerTitle = activeContainer.getTitle();
+            if(containerTitle != null) {
+                setTitle(containerTitle);
+            }
+        }
+    }
+    
+    
     
 }

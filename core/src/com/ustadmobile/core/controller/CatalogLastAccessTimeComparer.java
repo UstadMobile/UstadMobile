@@ -30,13 +30,12 @@ public class CatalogLastAccessTimeComparer implements UMUtil.Comparer{
     }
 
     private final long getLastAccessTime(String id) {
-        Long lastAccessTime;
         if(lastAccessTimes.contains(id)) {
             return ((Long)lastAccessTimes.get(id)).longValue();
         }else {
-            lastAccessTime = ContainerController.getContainerLastOpenedTime(id, 
+            long lastAccessTime = ContainerController.getContainerLastOpenedTime(id, 
                 context);
-            lastAccessTimes.put(id, lastAccessTime);
+            lastAccessTimes.put(id, new Long(lastAccessTime));
             return lastAccessTime;
         }
     }

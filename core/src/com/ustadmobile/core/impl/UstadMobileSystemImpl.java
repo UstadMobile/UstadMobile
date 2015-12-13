@@ -34,7 +34,6 @@ package com.ustadmobile.core.impl;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
-import static com.ustadmobile.core.controller.CatalogController.OPDS_PROTO_DEVICE;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -320,6 +319,7 @@ public abstract class UstadMobileSystemImpl {
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
         
         
+        /*
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {
@@ -327,7 +327,15 @@ public abstract class UstadMobileSystemImpl {
             go(BasePointView.class, args, context);
             
         }
+        */
         
+        if(activeUser == null || activeUserAuth == null) {
+            go(LoginView.class, null, context);
+        }else {
+            Hashtable args = CatalogController.makeUserCatalogArgs(context);
+            go(CatalogView.class, args, context);
+        }
+
     }
     
     
