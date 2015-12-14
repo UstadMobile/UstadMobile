@@ -46,6 +46,8 @@ $endif$ */
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -56,6 +58,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 
 import java.io.IOException;
+import java.util.Hashtable;
 import org.xmlpull.v1.XmlPullParserException;
 
 
@@ -66,7 +69,7 @@ import org.xmlpull.v1.XmlPullParserException;
 /* $if umplatform == 1  $
 public class TestContainerController extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestContainerController extends TestCase {
+public class TestContainerController extends TestCase  {
 /* $endif */
 
      /**
@@ -81,10 +84,13 @@ public class TestContainerController extends TestCase {
     
     private String httpRoot;
     
+    private final Hashtable loadedVals;
+    
     public TestContainerController() {
         /* $if umplatform == 1 $ 
         super(UstadMobileActivity.class);
         $endif */
+        loadedVals = new Hashtable();
     }
 
     protected void setUp() throws Exception {
@@ -97,11 +103,28 @@ public class TestContainerController extends TestCase {
     public void testContainerController() throws IOException, XmlPullParserException{
         
         //TODO: Update me for the new ViewFirst model
-//        
-//        
-//        String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
+//        final Hashtable loadedVals = new Hashtable();
+//        final Object context = UMContextGetter.getContext(this);
+//        final String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
 //            httpRoot, "acquire.opds"});
+//        
+//        new Thread(new Runnable() {
+//            public void run() {
+//                try {
+//                    CatalogController loadCtrl = CatalogController.makeControllerByURL(
+//                        acquireOPDSURL, CatalogController.USER_RESOURCE, 
+//                        TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+//                        CatalogController.CACHE_ENABLED, context);
+//                    loadedVals.put("catalogctrl", loadCtrl);
+//                }catch(Exception e) {
+//                    UstadMobileSystemImpl.l(UMLog.ERROR, 183, acquireOPDSURL, e);
+//                }
+//            }
+//        }).start();
+//        
+//        TestUtils.waitForValueInTable("catalogctrl", loadedVals);
 //        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//        
 //        
 //        UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(acquireOPDSURL, 
 //            CatalogController.SHARED_RESOURCE, null, null, 
@@ -159,13 +182,14 @@ public class TestContainerController extends TestCase {
 //        //delete it now we are done
 //        impl.closeContainer(openPath);
 //        CatalogController.removeEntry(entry.id, CatalogController.SHARED_RESOURCE);
-
-	assertTrue(true);
+//
+//	assertTrue(true);
         
     }
-    
     
     public void runTests() throws IOException, XmlPullParserException{
 	this.testContainerController();
     }
+
+    
 }

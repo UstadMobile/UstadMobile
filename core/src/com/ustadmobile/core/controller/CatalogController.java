@@ -1336,13 +1336,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHREF), 
                 title, feedID);
         
-        
-        
-        ZipFileHandle zipHandle;
-        ZipEntryHandle zipEntryHandle;
-        InputStream zIs = null;
-        UstadOCF ocf;
-        UstadJSOPF opf;
         UstadJSOPDSFeed looseContainerFeed = new UstadJSOPDSFeed(baseHREF, 
             "Loose files", feedID+"-loose");
         Hashtable foundContainerIDS = new Hashtable();
@@ -1350,49 +1343,30 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         int i;
         int j;
         UstadJSOPDSEntry epubEntry;
+        
+        UstadJSOPDSFeed containerFeed;
         for(i = 0; i < containerFiles.length; i++) {
             impl.l(UMLog.VERBOSE, 408, containerFiles[i]);
-            zipHandle = null;
-            ocf = null;
-            zIs = null;
-            zipEntryHandle = null;
             
             try {
-                zipHandle = impl.openZip(containerFiles[i]);
-                zIs = zipHandle.openInputStream(OCF_CONTAINER_PATH);
-                ocf = UstadOCF.loadFromXML(impl.newPullParser(zIs));
-                UMIOUtils.closeInputStream(zIs);
-                zIs = null;
+                containerFeed = ContainerController.generateContainerFeed(
+                    containerFiles[i], containerFiles[i] + ".umcache");
                 
-                for(j = 0; j < ocf.rootFiles.length; j++) {
-                    zIs = zipHandle.openInputStream(ocf.rootFiles[j].fullPath);
-                    opf = UstadJSOPF.loadFromOPF(impl.newPullParser(zIs), 
-                            UstadJSOPF.PARSE_METADATA);
-                    UMIOUtils.closeInputStream(zIs);
-                    zIs = null;
-                    
-                    epubEntry =new UstadJSOPDSEntry(retVal,opf, 
-                        UstadJSOPDSItem.TYPE_EPUBCONTAINER, containerFiles[i]);
+                for(j = 0; j < containerFeed.entries.length; j++) {
+                    epubEntry =new UstadJSOPDSEntry(retVal,
+                        containerFeed.entries[j]);
                     
                     if(!foundContainerIDS.containsKey(epubEntry.id)) {
                         retVal.addEntry(epubEntry);
                         foundContainerIDS.put(epubEntry.id, epubEntry.id);
                     }
-                    
-                    /*
-                    if(!knownContainerIDs.containsKey(opf.id) && looseContainerFeed.getEntryById(opf.id) == null) {
-                        UstadJSOPDSEntry looseEntry= new UstadJSOPDSEntry(looseContainerFeed,
-                            opf, null, containerFiles[i]);
-                        looseContainerFeed.addEntry(looseEntry);
-                    }
-                    */
-                    
+                                        
                     //Make sure that this entry is marked as acquired
                     int resourceMode = containerFileModes[i] ? USER_RESOURCE 
                             : SHARED_RESOURCE;
                     
-                    CatalogEntryInfo thisEntryInfo = getEntryInfo(opf.id,
-                        resourceMode, context);
+                    CatalogEntryInfo thisEntryInfo = getEntryInfo(
+                        containerFeed.entries[j].id, resourceMode, context);
                     if(thisEntryInfo == null) {
                         impl.l(UMLog.VERBOSE, 409, containerFiles[i]);
                         thisEntryInfo = new CatalogEntryInfo();
@@ -1400,14 +1374,12 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         thisEntryInfo.fileURI = containerFiles[i];
                         thisEntryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
                         thisEntryInfo.srcURLs = new String[] { containerFiles[i] };
-                        setEntryInfo(opf.id, thisEntryInfo, resourceMode, context);
+                        setEntryInfo(containerFeed.entries[j].id, thisEntryInfo, 
+                            resourceMode, context);
                     }
                 }
             }catch(Exception e) {
                impl.l(UMLog.ERROR, 113, containerFiles[i], e);
-            }finally {
-                UMIOUtils.closeInputStream(zIs);
-                UMIOUtils.closeZipFileHandle(zipHandle);
             }
         }
         
@@ -1436,8 +1408,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
         feed = null;
         feedEntry = null;
-        
-        
         
         if(looseContainerFeed.entries.length > 0) {
             try {

@@ -42,7 +42,13 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.ZipEntryHandle;
+import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.UstadView;
+import java.io.InputStream;
 import java.util.Hashtable;
 
 /**
@@ -80,6 +86,12 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public static final String ARG_MIMETYPE = "MIME";
     
     /**
+     * Hardcoded fixed path to the container.xml file as per the open container
+     * format spec : META-INF/container.xml
+     */
+    public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
+    
+    /**
      * Empty constructor - this creates a blank unusable object - required for async loading
      */
     public ContainerController(Object context) {
@@ -92,6 +104,61 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         args.put(ARG_MIMETYPE, mimeType);
         ContainerController ctrl = new ContainerController(view.getContext());
         new LoadControllerThread(args, ctrl, listener, view).start();
+    }
+    
+    /**
+     * Generates an OPDS feed for the entries in a given container.  In the case
+     * of an epub this is all the 
+     * 
+     * @param fileURI File URI to the path of an EPUB file
+     * @param cachePath The path in which the cached container feed is to be written
+     * 
+     * @return UstadJSOPDSFeed when 
+     * 
+     * @throws IOException 
+     */
+    public static UstadJSOPDSFeed generateContainerFeed(String fileURI, String cachePath) throws IOException{
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.l(UMLog.VERBOSE, 437, fileURI);
+        
+        String containerFilename = UMFileUtil.getFilename(fileURI);
+        String cacheFeedID = CatalogController.sanitizeIDForFilename(fileURI);
+        UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileURI, containerFilename, 
+            cacheFeedID);
+        
+        ZipFileHandle zipHandle = null;
+        InputStream zIs = null;
+        UstadOCF ocf;
+        UstadJSOPF opf;
+        UstadJSOPDSEntry epubEntry;
+        int j;
+        
+        try {
+            zipHandle = impl.openZip(fileURI);
+            zIs = zipHandle.openInputStream(OCF_CONTAINER_PATH);
+            ocf = UstadOCF.loadFromXML(impl.newPullParser(zIs));
+            UMIOUtils.closeInputStream(zIs);
+            
+            for(j = 0; j < ocf.rootFiles.length; j++) {
+                zIs = zipHandle.openInputStream(ocf.rootFiles[j].fullPath);
+                opf = UstadJSOPF.loadFromOPF(impl.newPullParser(zIs), 
+                        UstadJSOPF.PARSE_METADATA);
+                UMIOUtils.closeInputStream(zIs);
+                zIs = null;
+                    
+                epubEntry =new UstadJSOPDSEntry(result,opf, 
+                    UstadJSOPDSItem.TYPE_EPUBCONTAINER, fileURI);
+                result.addEntry(epubEntry);
+            }
+        }catch(Exception e) {
+            impl.l(UMLog.ERROR, 142, fileURI, e);
+        }finally {
+            UMIOUtils.closeInputStream(zIs);
+            UMIOUtils.closeZipFileHandle(zipHandle);
+        }
+        
+        
+        return result;
     }
     
     public String getOpenPath() {
