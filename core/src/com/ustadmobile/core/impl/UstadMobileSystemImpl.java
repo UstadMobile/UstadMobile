@@ -476,13 +476,14 @@ public abstract class UstadMobileSystemImpl {
     }
     
     /**
-     * Return the difference in file modification times between two files
+     * Return the last file modification time of the given file
      * 
-     * @param fileURI1 
-     * @param fileURI2
-     * @return 
+     * @param fileURI
+     * 
+     * @return The time the given file was last modified; or -1 in the event of an error
      */
-    public abstract long modTimeDifference(String fileURI1, String fileURI2);
+    public abstract long fileLastModified(String fileURI);
+    
     
     /**
      * Get an output stream to the given file.  If the FILE_APPEND flag is set

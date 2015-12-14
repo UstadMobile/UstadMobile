@@ -516,16 +516,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return systemInfo;
     }
     
-    public long modTimeDifference(String fileURI1, String fileURI2){
-        try{
-            long file1LastModified = FileUtils.getLastModified(fileURI1);
-            long file2LastModified = FileUtils.getLastModified(fileURI2);
-            if (file1LastModified != -1 || file2LastModified != -1 ){
-                long difference = file1LastModified - file2LastModified;
-                return difference;
-            }
-        }catch(Exception e){}
-        return -1;
+    public long fileLastModified(String fileURI) {
+        long result = -1;
+        FileConnection con = null;
+        try {
+            con = (FileConnection)Connector.open(fileURI);
+            result = con.lastModified();
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 136, fileURI, e);
+        }finally {
+            J2MEIOUtils.closeConnection(con);
+        }
+        
+        return result;
     }
         
     /**

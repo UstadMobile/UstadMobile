@@ -213,6 +213,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static final String OPDS_EXTENSION = ".opds";
     
+    public static final String CONTAINER_INFOCACHE_EXT = ".umcache";
+    
     /**
      * Hardcoded EPUB extension ".epub"
      */
@@ -1343,14 +1345,37 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         int i;
         int j;
         UstadJSOPDSEntry epubEntry;
-        
         UstadJSOPDSFeed containerFeed;
+        String entryCacheFile;
+        
         for(i = 0; i < containerFiles.length; i++) {
+            containerFeed = null;
             impl.l(UMLog.VERBOSE, 408, containerFiles[i]);
             
             try {
-                containerFeed = ContainerController.generateContainerFeed(
-                    containerFiles[i], containerFiles[i] + ".umcache");
+                entryCacheFile = containerFiles[i] + CONTAINER_INFOCACHE_EXT;
+                //see oif
+                if(impl.fileExists(entryCacheFile) && impl.fileLastModified(entryCacheFile) > impl.fileLastModified(containerFiles[i])) {
+                    try { 
+                        containerFeed = UstadJSOPDSFeed.loadFromXML(
+                            impl.readFileAsText(entryCacheFile, "UTF-8"));
+                    }catch(IOException e) {
+                        impl.l(UMLog.ERROR, 140, entryCacheFile, e);
+                    }
+                }
+                
+                if(containerFeed == null) {
+                    containerFeed = ContainerController.generateContainerFeed(
+                        containerFiles[i], containerFiles[i] + CONTAINER_INFOCACHE_EXT);
+                    try {
+                        impl.writeStringToFile(containerFeed.toString(), 
+                            entryCacheFile, "UTF-8");
+                    }catch(IOException e) {
+                        impl.l(UMLog.ERROR, 138, entryCacheFile, e);
+                    }
+                }
+                
+                
                 
                 for(j = 0; j < containerFeed.entries.length; j++) {
                     epubEntry =new UstadJSOPDSEntry(retVal,

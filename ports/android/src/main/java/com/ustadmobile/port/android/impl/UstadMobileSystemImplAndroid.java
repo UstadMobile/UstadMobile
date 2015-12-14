@@ -291,8 +291,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public long modTimeDifference(String fileURI1, String fileURI2) {
-        return (new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
+    public long fileLastModified(String fileURI) {
+        return new File(fileURI).lastModified();
     }
 
     @Override
