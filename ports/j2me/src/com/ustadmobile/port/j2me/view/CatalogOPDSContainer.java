@@ -86,6 +86,10 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     final private int CMD_DELETE_ENTRY = 4;
     
+    public static final int CMDID_ADDFEED = 5;
+    
+    public static final int CMDID_REMOVEFEED = 6;
+    
     private int confirmDialogCmdId = 0;
 
     private Dialog confirmDialog;
@@ -113,6 +117,8 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     boolean acquisition = false;
     
     private Command[] menuCommands;
+    
+    private Command[] extraCommands;
     
     public CatalogOPDSContainer(Hashtable args, Object context, UstadViewFormJ2ME ustadForm) {
         super(args, context, ustadForm);
@@ -161,15 +167,18 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     public void setController(CatalogController controller) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        /*
         if(this.controller != null) {
             return;
         }
+        */
         
         controller.setUIStrings();
         
         this.controller = controller;
         entries = this.controller.getModel().opdsFeed.entries;
         entryIdToButtons.clear();
+        removeAll();
         
         //TODO: Make the title change as you change tabs
         //setTitle(this.controller.getModel().opdsFeed.title);
@@ -337,6 +346,16 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         confirmDialog.showPacked(BorderLayout.CENTER, false);
     }
 
+    /**
+     * Set the additional commands for this particular container (e.g. add
+     * feed to list etc)
+     * 
+     * @param extraCommands 
+     */
+    public void setExtraCommands(Command[] extraCommands) {
+        this.extraCommands = extraCommands;
+    }
+    
 
     /**
      * Sets the options available in the menu (this could be a drawer, J2ME menu, etc)
@@ -365,7 +384,14 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
             return;//not ready yet
         }
         
-        for(int i = 0; i < menuCommands.length; i++) {
+        int i;
+        if(extraCommands != null) {
+            for(i = 0; i < extraCommands.length; i++) {
+                cmdVector.addElement(extraCommands[i]);
+            }
+        }
+        
+        for(i = 0; i < menuCommands.length; i++) {
             cmdVector.addElement(menuCommands[i]);
         }
     }
@@ -392,7 +418,18 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
      * @return Array of entries selected by the user
      */
     public UstadJSOPDSEntry[] getSelectedEntries(){
-        return null;
+        Enumeration e = entryIdToButtons.keys();
+        String id;
+        OPDSItemButton button;
+        while(e.hasMoreElements()) {
+            id = (String)e.nextElement();
+            button = (OPDSItemButton)entryIdToButtons.get(id);
+            if(button.hasFocus()) {
+                return new UstadJSOPDSEntry[] {button.getEntry()};
+            }
+        }
+        
+        return new UstadJSOPDSEntry[0];
     }
     
     
@@ -402,7 +439,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
      * @param entries Array of entries to be marked as selected
      */
     public void setSelectedEntries(UstadJSOPDSEntry[] entries){
-        //ToDo
+        //Things aren't really selected on J2ME - do nothing
     }
 
     

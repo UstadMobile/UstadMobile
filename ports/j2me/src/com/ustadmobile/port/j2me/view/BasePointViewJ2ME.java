@@ -30,10 +30,14 @@
  */
 package com.ustadmobile.port.j2me.view;
 
+import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
+import com.sun.lwuit.Form;
 import com.sun.lwuit.RadioButton;
-import com.sun.lwuit.TabbedPane;
 import com.sun.lwuit.Tabs;
+import com.sun.lwuit.TextField;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.U;
@@ -46,7 +50,7 @@ import java.util.Hashtable;
  *
  * @author mike
  */
-public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointView, FocusListener{
+public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointView, FocusListener, ActionListener{
 
     //private Tabs tabs;
     private Tabs tabs;
@@ -58,11 +62,21 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     private int[] tabTitles =  new int[]{U.id.downloaded_items, U.id.browse_feeds};
     private String[] tabNames;
     
+    /**
+     * Form used for adding new feeds to the user's list
+     */
+    private BasePointFeedForm feedForm;
+    
+    private Command addFeedCmd;
+    
+    private Command removeFeedCmd;
+    
     public BasePointViewJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
         super(args, context, backCommandEnabled);
         setLayout(new BorderLayout());
         basePointController = BasePointController.makeControllerForView(this, args);
     }
+    
     
     public void initComponent() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -79,10 +93,26 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
                     getContext(), this);
                 tabs.addTab(impl.getString(tabTitles[i]), opdsContainers[i]);
             }
+            addFeedCmd = new Command("+ Feed", 
+                CatalogOPDSContainer.CMDID_ADDFEED);
+            removeFeedCmd = new Command("- Feed", 
+                CatalogOPDSContainer.CMDID_REMOVEFEED);
+            opdsContainers[BasePointController.INDEX_BROWSEFEEDS].setExtraCommands(
+                new Command[]{addFeedCmd, removeFeedCmd});
             
             setActiveUstadViewContainer(opdsContainers[0]);
             setLayout(new BorderLayout());
             addComponent(BorderLayout.CENTER, tabs);
+            addCommandListener(this);
+        }
+    }
+    
+    public void actionPerformed(ActionEvent evt) {
+        if(evt.getCommand().getId() == CatalogOPDSContainer.CMDID_ADDFEED) {
+            basePointController.handleClickAddFeed();
+        }else if(evt.getCommand().getId() == CatalogOPDSContainer.CMDID_REMOVEFEED) {
+            basePointController.handleRemoveItemsFromUserFeed(
+                opdsContainers[BasePointController.INDEX_BROWSEFEEDS].getSelectedEntries());
         }
     }
     
@@ -98,27 +128,43 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     
 
     public void showAddFeedDialog() {
-        
+        feedForm = new BasePointFeedForm("Add Feed", this);
+        feedForm.show();
+    }
+    
+    BasePointController getBasePointController() {
+        return basePointController;
     }
 
     public void setAddFeedDialogURL(String url) {
-        
+        feedForm.urlTextField.setText(url);
     }
 
     public String getAddFeedDialogURL() {
-        return "";
+        return feedForm.urlTextField.getText();
     }
 
     public String getAddFeedDialogTitle() {
-        return "";
+        return feedForm.titleTextField.getText();
     }
 
     public void setAddFeedDialogTitle(String title) {
-        
+        feedForm.titleTextField.setText(title);
     }
 
     public void refreshCatalog(int column) {
+        opdsContainers[column].loadCatalog();
+    }
+    
+    void dismissFeedDialog(int cmdId) {
+        if(cmdId == BasePointFeedForm.CMDID_OK) {
+            String feedURL = getAddFeedDialogURL();
+            String title = getAddFeedDialogTitle();
+            basePointController.handleAddFeed(feedURL, title);
+        }
         
+        this.show();
+        feedForm = null;
     }
 
     public void focusGained(Component cmpnt) {
