@@ -92,6 +92,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
     
     /**
+     * Harded postfix added to container files when downloading the thumbnail
+     * for them.  E.g. For a book called bookname.epub where the PNG thumbnail
+     * was given in the OPDS feed we will have a file called bookname.epub.thumb.png
+     */
+    public static final String THUMBNAIL_POSTFIX = ".thumb.";
+    
+    /**
      * Empty constructor - this creates a blank unusable object - required for async loading
      */
     public ContainerController(Object context) {
@@ -126,6 +133,26 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileURI, containerFilename, 
             cacheFeedID);
         
+        String absFileURI = UMFileUtil.ensurePathHasPrefix("file://", fileURI);
+        
+        //check and see if there is a given default thumbnail for this container
+        String[] imgExtensions = new String[]{"jpg", "png", "gif"};
+        String thumbURI = null;
+        String thumbMimeType = null;
+        
+        for(int i = 0; i < imgExtensions.length; i++) {
+            try {
+                thumbURI = absFileURI + THUMBNAIL_POSTFIX + imgExtensions[i];
+                if(impl.fileExists(thumbURI)) {
+                    thumbMimeType = impl.getMimeTypeFromExtension(imgExtensions[i]);
+                    break;
+                }
+            }catch(Exception e) {
+                impl.l(UMLog.ERROR, 150, thumbURI, e);
+            }
+        }
+        
+        
         ZipFileHandle zipHandle = null;
         InputStream zIs = null;
         UstadOCF ocf;
@@ -147,7 +174,12 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
                 zIs = null;
                     
                 epubEntry =new UstadJSOPDSEntry(result,opf, 
-                    UstadJSOPDSItem.TYPE_EPUBCONTAINER, fileURI);
+                    UstadJSOPDSItem.TYPE_EPUBCONTAINER, absFileURI);
+                if(thumbMimeType != null) {//Thumb Mime type only set when we have a file
+                    epubEntry.addLink(UstadJSOPDSEntry.LINK_THUMBNAIL, 
+                        thumbMimeType, thumbURI);
+                }
+                
                 result.addEntry(epubEntry);
             }
         }catch(Exception e) {

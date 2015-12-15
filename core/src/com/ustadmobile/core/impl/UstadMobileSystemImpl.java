@@ -37,6 +37,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -174,6 +175,8 @@ public abstract class UstadMobileSystemImpl {
      * Same value as android.app.DownloadManager.STATUS_PENDING
      */
     public static final int DLSTATUS_PAUSED = 4;
+    
+    public HTTPCacheDir httpCacheDir;
     
     /**
      * Get an instance of the system implementation - relies on the platform
@@ -893,6 +896,34 @@ public abstract class UstadMobileSystemImpl {
      * @throws IOException 
      */
     public abstract int[] getScreenSize(Object context);
+    
+    public HTTPCacheDir getCachedir(Object context) {
+        if(httpCacheDir != null) {
+            return httpCacheDir;
+        }
+        
+        httpCacheDir = new HTTPCacheDir(getCacheDir(
+            CatalogController.USER_RESOURCE, context));
+        return httpCacheDir;
+    }
+    
+    /**
+     * Return the mime type for the given extension
+     * 
+     * @param extension the extension without the leading .
+     * 
+     * @return The mime type if none; or null if it's not known
+     */
+    public abstract String getMimeTypeFromExtension(String extension);
+    
+    /**
+     * Return the extension of the given mime type
+     * 
+     * @param mimeType The mime type
+     * 
+     * @return File extension for the mime type without the leading .
+     */
+    public abstract String getExtensionFromMimeType(String mimeType);
     
 }
 

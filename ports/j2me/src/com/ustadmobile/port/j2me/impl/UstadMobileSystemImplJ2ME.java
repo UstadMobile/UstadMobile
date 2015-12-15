@@ -140,6 +140,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public static final int VIEW_HISTORY_LIMIT = 10;
     
+    private Hashtable mimeTypeToExtTable;
+    
+    private Hashtable extToMimeTypeTable;
+    
     public String getImplementationName() {
         return "J2ME";
     }
@@ -148,6 +152,18 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         umLogger = new UMLogJ2ME();
         appView = new AppViewJ2ME(this);
         viewHistory = new Vector();
+        
+        //init the mime type list - built in hard coded
+        mimeTypeToExtTable = new Hashtable();
+        mimeTypeToExtTable.put("image/jpeg", "jpg");
+        mimeTypeToExtTable.put("image/png", "png");
+        mimeTypeToExtTable.put("image/gif", "gif");
+        
+        extToMimeTypeTable = new Hashtable();
+        extToMimeTypeTable.put("jpg", "image/jpeg");
+        extToMimeTypeTable.put("jpeg", "image/jpeg");
+        extToMimeTypeTable.put("png", "image/png");
+        extToMimeTypeTable.put("gif", "image/gif");
     }
 
     /**
@@ -1195,6 +1211,25 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return new int[] {Display.getInstance().getDisplayWidth(),
             Display.getInstance().getDisplayHeight()};
     }
+
+    public String getMimeTypeFromExtension(String extension) {
+        String lcExt = extension.toLowerCase();
+        if(extToMimeTypeTable.containsKey(lcExt)) {
+            return (String)extToMimeTypeTable.get(extension);
+        }else {
+            return null;
+        }
+    }
+
+    public String getExtensionFromMimeType(String mimeType) {
+        if(mimeTypeToExtTable.containsKey(mimeType)) {
+            return (String)mimeTypeToExtTable.get(mimeType);
+        }else {
+            return null;
+        }
+    }
+    
+    
     
     /**
      * Use when an output stream is bound to a connector, and we want to make sure

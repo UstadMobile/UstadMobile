@@ -35,6 +35,8 @@ package com.ustadmobile.port.android.view;
 import android.app.Activity;
 
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -62,6 +64,7 @@ import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
@@ -184,6 +187,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
 
         getActivity().supportInvalidateOptionsMenu();
+        mCatalogController.loadThumbnails();
     }
 
     @Override
@@ -393,6 +397,23 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 idToCardMap.get(entryId).setOPDSEntryOverlay(status);
+            }
+        });
+    }
+
+    @Override
+    public void setEntrythumbnail(final String entryId, String iconFileURI) {
+        iconFileURI = UMFileUtil.stripPrefixIfPresent("file://", iconFileURI);
+
+        final Bitmap bitmap = BitmapFactory.decodeFile(iconFileURI);
+        final String errURI = iconFileURI;
+
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                //TODO: idToCardMap should not be null when this is called... this should only be called after cards are made...
+                if(idToCardMap != null && idToCardMap.get(entryId) != null) {
+                    idToCardMap.get(entryId).setThumbnail(bitmap);
+                }
             }
         });
     }

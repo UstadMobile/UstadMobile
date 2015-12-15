@@ -107,6 +107,18 @@ public class OPDSItemButton extends Button {
             }
         }
     }
+    
+    /**
+     * Set the alignment for all the styles of this button
+     * 
+     * @param align 
+     */
+    public void setAllStylesAlignment(int align) {
+        getStyle().setAlignment(align);
+        getSelectedStyle().setAlignment(align);
+        getPressedStyle().setAlignment(align);
+        getDisabledStyle().setAlignment(align);
+    }
 
     public UstadJSOPDSEntry getEntry() {
         return entry;
@@ -143,7 +155,7 @@ public class OPDSItemButton extends Button {
             repaint();
         }
     }
-
+    
     /**
      * Whether or not the progress bar is visible for this entry
      * 

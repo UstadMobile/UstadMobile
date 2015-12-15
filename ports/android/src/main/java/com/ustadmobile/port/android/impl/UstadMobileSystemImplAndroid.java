@@ -71,6 +71,7 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
@@ -119,6 +120,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
 
     /**
+     * Some mime types that the Android OS does not know about but we do...
+     * Mapped: Mime type -> extension
+     */
+    private HashMap<String, String> knownMimeToExtensionMap;
+
+    /**
      @deprecated
      */
     public UstadMobileSystemImplAndroid() {
@@ -126,6 +133,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         activityToHttpServiceMap = new HashMap<>();
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
+        knownMimeToExtensionMap = new HashMap<>();
+        knownMimeToExtensionMap.put("application/epub+zip", "epub");
     }
 
     /**
@@ -703,5 +712,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return new int[] { dm.widthPixels, dm.heightPixels};
     }
 
+    @Override
+    public String getMimeTypeFromExtension(String extension) {
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+    }
 
+    @Override
+    public String getExtensionFromMimeType(String mimeType) {
+        String extension =MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        if(extension == null) {
+            extension = knownMimeToExtensionMap.get(mimeType);
+        }
+
+        return extension;
+    }
 }

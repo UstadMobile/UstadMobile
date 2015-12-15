@@ -33,8 +33,11 @@ package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.Button;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
+import com.sun.lwuit.Graphics;
+import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
 import com.sun.lwuit.events.ActionEvent;
@@ -50,8 +53,10 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.LocaleUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogView;
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -179,11 +184,13 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         
         int i;
         int entryStatus = -1;
+        int alignment = isRTL() ? Component.RIGHT : Component.LEFT;
         
         for(i=0; i<entries.length; i++){
             String title = entries[i].title;
             Command entryCmd = new Command(title, i+OPDSCMDID_OFFSET);
             OPDSItemButton entryButton = new OPDSItemButton(entryCmd, entries[i]);
+            entryButton.setAllStylesAlignment(alignment);
             
             entryStatus = controller.getEntryAcquisitionStatus(entries[i].id);
             if(entryStatus != -1) {
@@ -214,6 +221,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         repaint();
         
         getUstadForm().invalidateTitle();
+        controller.loadThumbnails();
     }
     
     public String getTitle() {
@@ -290,6 +298,48 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
             Display.getInstance().callSerially(this);
         }
     }
+
+    public void setEntrythumbnail(String entryId, String iconFileURI) {
+        final OPDSItemButton opdsItem = (OPDSItemButton)entryIdToButtons.get(entryId);
+        
+        Image iconImg;
+        InputStream in = null;
+        try {
+            in = UstadMobileSystemImpl.getInstance().openFileInputStream(iconFileURI);
+            iconImg = Image.createImage(in);
+            in.close();
+            
+            int h = iconImg.getHeight();
+            
+            
+            int heightAvail = (opdsItem.getHeight() - opdsItem.getStyle().getPadding(TOP) - 
+                opdsItem.getStyle().getPadding(BOTTOM))*2;
+            
+            if(h > heightAvail) {
+                iconImg = iconImg.scaledHeight(heightAvail);
+            }
+            
+            if(Display.getInstance().isEdt()) {
+                opdsItem.setIcon(iconImg);
+                revalidate();
+            }else {
+                final Image img = iconImg;
+                Display.getInstance().callSerially(new Runnable() {
+                    public void run() {
+                        opdsItem.setIcon(img);
+                        revalidate();
+                    }
+                });
+            }
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 123, entryId +" : " + iconFileURI, e);
+        }finally {
+            UMIOUtils.closeInputStream(in);
+        }
+        
+    }
+    
+    
     
     public void run() {
         int flags = getRunFlags();

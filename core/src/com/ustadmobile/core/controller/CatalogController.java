@@ -48,6 +48,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -62,6 +63,7 @@ import com.ustadmobile.core.view.UstadView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Timer;
@@ -99,7 +101,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController extends UstadBaseController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver {
+public class CatalogController extends UstadBaseController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -288,6 +290,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     //Hashtable indexed entry id -> download ID (Long object)
     private Hashtable downloadingEntries;
     
+    private Thread thumbnailLoadThread;
+    
+    
     public CatalogController(Object context) {
         super(context);
         downloadingEntries = new Hashtable();
@@ -472,6 +477,55 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         newController.initEntryStatusCheck();
         return newController;
     }
+    
+    /**
+     * Asynchronously load thumbnails for this controller and set them on the
+     * view accordingly.  This will fork a new thread using itself as the
+     * the runnable target.
+     * 
+     */
+    public void loadThumbnails() {
+        if(thumbnailLoadThread == null) {
+            thumbnailLoadThread = new Thread(this);
+            thumbnailLoadThread.start();
+        }
+    }
+    
+    
+    /**
+     * This is the runnable target method that actually loads thumbnails
+     */
+    public void run() {
+        UstadJSOPDSFeed feed = model.opdsFeed;
+        String[] thumbnailLinks;
+        HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getCachedir(
+            context);
+        String thumbnailFile;
+        
+        for(int i = 0; i < feed.entries.length; i++) {
+            thumbnailLinks = feed.entries[i].getThumbnailLink(false);
+            thumbnailFile = null;
+            if(thumbnailLinks != null) {
+                String thumbnailURI = UMFileUtil.resolveLink(
+                        feed.href, thumbnailLinks[UstadJSOPDSEntry.LINK_HREF]);
+                if(thumbnailURI.startsWith("file://")) {
+                    thumbnailFile = thumbnailURI;//this is already on disk...
+                }else {
+                    try {
+                        thumbnailFile = cache.getFileURI(thumbnailURI);
+                    }catch(Exception e) {
+                        UstadMobileSystemImpl.l(UMLog.ERROR, 132, 
+                            feed.entries[i].title + ": " + feed.entries[i].id, e);
+                    }
+                }
+                
+                if(thumbnailFile != null) {
+                    view.setEntrythumbnail(feed.entries[i].id, thumbnailFile);
+                }
+            }
+        }
+    }
+    
     
     /**
      * Make a CatalogController for the user's default OPDS catalog
@@ -1600,6 +1654,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         String itemHref;
         String itemURL;
         String suggestedFilename;
+        String mimeWithoutParams;
+        String requiredExtension;
         
         for(int i = 0; i < entries.length; i++) {
             preferredLink = getBestAcquisitionLinkByParams(request, entries[i]);
@@ -1613,8 +1669,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             
             itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
                     itemHref);
-            
-            
             
             CatalogEntryInfo info = new CatalogEntryInfo();
             info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
@@ -1631,7 +1685,15 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 suggestedFilename = UMFileUtil.getFilename(itemURL);
                 info.downloadTotalSize = HTTPResult.HTTP_SIZE_IO_EXCEPTION;
             }
-                        
+            
+            mimeWithoutParams = UMFileUtil.stripMimeParams(mimeTypes[i]);
+            requiredExtension = impl.getExtensionFromMimeType(mimeWithoutParams);
+            if(requiredExtension != null) {
+                suggestedFilename = UMFileUtil.ensurePathHasSuffix(
+                    '.' + requiredExtension, suggestedFilename);
+            }
+            
+            saveThumbnail(entries[i], request, suggestedFilename);
             info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
             info.srcURLs = new String[]{itemURL};
             info.fileURI = UMFileUtil.joinPaths(new String[] {
@@ -1651,6 +1713,55 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         new Long(downloadID));
             }
         }
+    }
+    
+    /**
+     * Grabs the Thumbnail for an entry that is being downloaded from the HTTP
+     * cache and puts it into the same directory as containername.thumb.filetype
+     * e.g. bookname.epub.thumb.png
+     * 
+     * @param entry The entry that we want to get a thumbnail for
+     * @param request The Acquisition request being acted upon
+     * @param containerFilename the filename of the container being downloaded e.g. bookname.epub
+     * @return The base name of the thumbnail if it was found and copied, null otherwise
+     */
+    public static String saveThumbnail(UstadJSOPDSEntry entry, AcquireRequest request, String containerFilename) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] thumbnailLink = entry.getThumbnailLink(false);
+        String result = null;
+        
+        if(thumbnailLink != null) {
+            String thumbnailURL = UMFileUtil.resolveLink(
+                entry.parentFeed.href, 
+                thumbnailLink[UstadJSOPDSEntry.LINK_HREF]);
+                    
+            String thumbnailFile = impl.getCachedir(
+                request.getContext()).getCacheFileURIByURL(thumbnailURL);
+            
+            if(thumbnailFile != null) {
+                //we have the thumbnail file in the cahce... let's copy it
+                InputStream in = null;
+                OutputStream out = null;
+                String extension = impl.getExtensionFromMimeType(
+                    thumbnailLink[UstadJSOPDSEntry.LINK_MIMETYPE]);
+                String thumbnailFilename = containerFilename + ".thumb." + 
+                    extension;
+                try {
+                    in = impl.openFileInputStream(thumbnailFile);
+                    out = impl.openFileOutputStream(UMFileUtil.joinPaths(
+                        new String[]{request.getDestDirPath(), thumbnailFilename}), 0);
+                    UMIOUtils.readFully(in, out, 1024);
+                    result = thumbnailFilename;
+                }catch(Exception e) {
+                    impl.l(UMLog.ERROR, 119, containerFilename, e);
+                }finally {
+                    UMIOUtils.closeInputStream(in);
+                    UMIOUtils.closeOutputStream(out);
+                }
+            }
+        }
+        
+        return result;
     }
     
     /**

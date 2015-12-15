@@ -190,6 +190,29 @@ public abstract class UstadJSOPDSItem {
         return result;
     }
     
+    /**
+     * Return the link String array for the thumbnail for this item
+     * 
+     * @param imgFallback If true use the IMAGE link for items that do not have a thumbnail (could be a bigger image)
+     * 
+     * @return String][ array of link items as per getLinks or null if not found on this item
+     */
+    public String[] getThumbnailLink(boolean imgFallback) {
+        Vector results = getLinks(LINK_THUMBNAIL, null);
+        if(results.size() > 0) {
+            return ((String[])results.elementAt(0));
+        }
+        
+        if(imgFallback) {
+            results = getLinks(LINK_IMAGE, null);
+            if(results.size() > 0) {
+                return ((String[])results.elementAt(0));
+            }
+        }
+        
+        return null;
+    }
+    
     public Vector getNavigationLinks(){
         return this.getLinks(null, TYPE_ATOMFEED, false, true);
     }

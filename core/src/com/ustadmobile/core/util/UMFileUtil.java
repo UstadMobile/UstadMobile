@@ -448,4 +448,33 @@ public class UMFileUtil {
         }
     }
     
+    /**
+     * Make sure that the given path has the given suffix; if it doesn't
+     * add the suffix.
+     * 
+     * @param suffix the suffix that the path must end with
+     * @param path The path to add the suffix to if missing
+     * 
+     * @return The path with the suffix added if it was originally missing
+     */
+    public static String ensurePathHasSuffix(String suffix, String path) {
+        if(!path.endsWith(suffix)) {
+            return path + suffix;
+        }else {
+            return path;
+        }
+    }
+    
+    /**
+     * Strip out mime type parameters if they are present 
+     * 
+     * @param mimeType Mime type e.g. application/atom+xml;profile=opds
+     * @return Mime type without any params e.g. application/atom+xml
+     */
+    public static String stripMimeParams(String mimeType) {
+        int i = mimeType.indexOf(';');
+        return i != -1 ? mimeType.substring(0, i).trim() : mimeType;
+    }
+    
+    
 }

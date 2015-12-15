@@ -54,6 +54,11 @@ public class WatchedInputStream extends InputStream{
     
     private void removeFromActiveStreams() {
         int index = openStreams.indexOf(this);
+        if(index == -1) {
+            //already closed - do nothing
+            return;
+        }
+        
         openStreams.removeElementAt(index);
         streamNames.removeElementAt(index);
         
