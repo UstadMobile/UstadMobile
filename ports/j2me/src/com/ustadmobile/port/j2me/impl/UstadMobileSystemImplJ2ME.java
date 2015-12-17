@@ -77,7 +77,10 @@ import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.Vector;
 import javax.microedition.io.Connection;
@@ -1229,6 +1232,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         }
     }
     
+    public void blah() {
+        Calendar c = Calendar.getInstance();
+        
+    }
     
     
     /**

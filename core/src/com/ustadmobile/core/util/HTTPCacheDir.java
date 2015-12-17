@@ -11,7 +11,10 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.TimeZone;
+import java.util.Vector;
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
@@ -30,6 +33,8 @@ public class HTTPCacheDir {
     
     private String dirName;
     
+    private String indexFileURI;
+    
     private JSONObject cacheIndex;
     
     private static final String INDEX_FILENAME = "cacheindex.json";
@@ -46,20 +51,23 @@ public class HTTPCacheDir {
     
     public static final int DEFAULT_EXPIRES = (1000 * 60 * 60);//1hour
     
+    public static final String[] HTTP_MONTH_NAMES = new String[]{"Jan", "Feb",
+        "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    
     public HTTPCacheDir(String dirName) {
         this.dirName = dirName;
         
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String indexFile = UMFileUtil.joinPaths(new String[]{ dirName,
+        indexFileURI = UMFileUtil.joinPaths(new String[]{ dirName,
             INDEX_FILENAME});
         
         try {
-            if(impl.fileExists(indexFile)) {
-                cacheIndex = new JSONObject(impl.readFileAsText(indexFile, 
+            if(impl.fileExists(indexFileURI)) {
+                cacheIndex = new JSONObject(impl.readFileAsText(indexFileURI, 
                     "UTF-8"));
             }
         }catch(Exception e) {
-            impl.l(UMLog.ERROR, 134, indexFile, e);
+            impl.l(UMLog.ERROR, 134, indexFileURI, e);
         }
         
         if(cacheIndex == null) {
@@ -67,6 +75,114 @@ public class HTTPCacheDir {
         }
     }
     
+    /**
+     * 
+     * @param start
+     * @param deliminators
+     * @param str
+     * @return 
+     */
+    private static Vector tokenize(String str, char[] deliminators, int start, int end) {
+        boolean inToken = false;
+        boolean isDelim;
+        
+        char c;
+        int i;
+        int j;
+        Vector tokens = new Vector();
+        int tStart = 0;
+        
+        
+        for(i = start; i < end; i++) {
+            c = str.charAt(i);
+            isDelim = false;
+            
+            for(j = 0; j < deliminators.length; j++) {
+                if(c == deliminators[j]) {
+                    isDelim = true;
+                    break;
+                }
+            }
+            
+            if(!isDelim && !inToken) {
+                tStart = i;
+                inToken = true;
+            }else if(inToken && (isDelim || i == end-1)) {
+                tokens.addElement(str.substring(tStart, isDelim ? i : i+1));
+                inToken = false;
+            }
+            
+        }
+        
+        return tokens;
+    }
+    
+    /**
+     * Parse the given http date according to : 
+     *  http://tools.ietf.org/html/rfc2616#section-3.3
+     * 
+     * @param httpDate
+     * @return 
+     */
+    public static long parseHTTPDate(String httpDate) {
+        char[] delimChars = new char[]{' ', ':', '-'};
+        
+        Vector tokens = tokenize(httpDate, delimChars, 0, httpDate.length());
+        Calendar cal = null;
+        
+        if(tokens.size() == 8) {//this includes the timezone
+            cal = Calendar.getInstance(TimeZone.getTimeZone(
+                (String)tokens.elementAt(7)));
+            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(
+                (String)tokens.elementAt(1)));
+            cal.set(Calendar.MONTH, UMUtil.getIndexInArrayIgnoreCase(
+                (String)tokens.elementAt(2), HTTP_MONTH_NAMES));
+            int calYear = Integer.parseInt((String)tokens.elementAt(3));
+            
+            //Adjust two digit years
+            if(calYear < 30) {
+                calYear += 2000;
+            }else if(calYear < 100) {
+                calYear += 1900;
+            }
+            cal.set(Calendar.YEAR, calYear);
+            
+            cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(
+                (String)tokens.elementAt(4)));
+            cal.set(Calendar.MINUTE, Integer.parseInt(
+                (String)tokens.elementAt(5)));
+            cal.set(Calendar.SECOND, Integer.parseInt(
+                (String)tokens.elementAt(6)));
+        }
+        
+        String toStr = cal.toString();
+        return cal != null ? cal.getTime().getTime() : -1;
+    }
+    
+    public boolean saveIndex() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.l(UMLog.DEBUG, 515, indexFileURI);
+        boolean savedOK = false;
+        
+        try {
+            impl.writeStringToFile(cacheIndex.toString(), indexFileURI, "UTF-8");
+            savedOK = true;
+        }catch(Exception e) {
+            impl.l(UMLog.ERROR, 152, indexFileURI, e);
+        }
+        
+        return savedOK;
+    }
+    
+    
+    /**
+     * Get the file URI of a file in the cache if present.  This does not attempt
+     * to fetch the url from the Internet in case it's not available.
+     * 
+     * @param url
+     * 
+     * @return 
+     */
     public String getFileURI(String url) {
         String fileURI = null;
         JSONArray entry = cacheIndex.optJSONArray(url);

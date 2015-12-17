@@ -76,6 +76,24 @@ public class UMUtil {
         return -1;
     }
     
+    /**
+     * Find the index of a string in an array of strings using
+     * equalsIgnoreCase to find the match
+     * 
+     * @param str String to locate array
+     * @param arr Array in which to search
+     * @return the index of the given string in the array if found; -1 otherwise
+     */
+    public static final int getIndexInArrayIgnoreCase(String str, String[] arr) {
+        for(int i = 0; i < arr.length; i++) {
+            if(arr[i] != null && arr[i].equalsIgnoreCase(str)) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+    
     public static final String[] filterArrByPrefix(String[] arr, String prefix) {
         boolean[] matches = new boolean[arr.length];
         
