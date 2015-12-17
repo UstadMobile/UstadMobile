@@ -75,47 +75,7 @@ public class HTTPCacheDir {
         }
     }
     
-    /**
-     * 
-     * @param start
-     * @param deliminators
-     * @param str
-     * @return 
-     */
-    private static Vector tokenize(String str, char[] deliminators, int start, int end) {
-        boolean inToken = false;
-        boolean isDelim;
-        
-        char c;
-        int i;
-        int j;
-        Vector tokens = new Vector();
-        int tStart = 0;
-        
-        
-        for(i = start; i < end; i++) {
-            c = str.charAt(i);
-            isDelim = false;
-            
-            for(j = 0; j < deliminators.length; j++) {
-                if(c == deliminators[j]) {
-                    isDelim = true;
-                    break;
-                }
-            }
-            
-            if(!isDelim && !inToken) {
-                tStart = i;
-                inToken = true;
-            }else if(inToken && (isDelim || i == end-1)) {
-                tokens.addElement(str.substring(tStart, isDelim ? i : i+1));
-                inToken = false;
-            }
-            
-        }
-        
-        return tokens;
-    }
+    
     
     /**
      * Parse the given http date according to : 
@@ -127,7 +87,7 @@ public class HTTPCacheDir {
     public static long parseHTTPDate(String httpDate) {
         char[] delimChars = new char[]{' ', ':', '-'};
         
-        Vector tokens = tokenize(httpDate, delimChars, 0, httpDate.length());
+        Vector tokens = UMUtil.tokenize(httpDate, delimChars, 0, httpDate.length());
         Calendar cal = null;
         
         if(tokens.size() == 8) {//this includes the timezone
