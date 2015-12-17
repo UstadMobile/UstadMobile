@@ -76,6 +76,15 @@ public class HTTPCacheDir {
     }
     
     
+    private static int checkYear(int year) {
+        if(year < 30) {
+            return 2000 + year;
+        }else if(year < 100) {
+            return 1900 + year;
+        }else {
+            return year;
+        }
+    }
     
     /**
      * Parse the given http date according to : 
@@ -97,15 +106,8 @@ public class HTTPCacheDir {
                 (String)tokens.elementAt(1)));
             cal.set(Calendar.MONTH, UMUtil.getIndexInArrayIgnoreCase(
                 (String)tokens.elementAt(2), HTTP_MONTH_NAMES));
-            int calYear = Integer.parseInt((String)tokens.elementAt(3));
-            
-            //Adjust two digit years
-            if(calYear < 30) {
-                calYear += 2000;
-            }else if(calYear < 100) {
-                calYear += 1900;
-            }
-            cal.set(Calendar.YEAR, calYear);
+            cal.set(Calendar.YEAR, checkYear(Integer.parseInt(
+                (String)tokens.elementAt(3))));
             
             cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(
                 (String)tokens.elementAt(4)));
@@ -113,6 +115,23 @@ public class HTTPCacheDir {
                 (String)tokens.elementAt(5)));
             cal.set(Calendar.SECOND, Integer.parseInt(
                 (String)tokens.elementAt(6)));
+        }else if(tokens.size() == 7) {
+            cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+            cal.set(Calendar.MONTH, UMUtil.getIndexInArrayIgnoreCase(
+                (String)tokens.elementAt(1), HTTP_MONTH_NAMES));
+            cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(
+                (String)tokens.elementAt(2)));
+            cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(
+                (String)tokens.elementAt(3)));
+            cal.set(Calendar.MINUTE, Integer.parseInt(
+                (String)tokens.elementAt(4)));
+            cal.set(Calendar.SECOND, Integer.parseInt(
+                (String)tokens.elementAt(5)));
+            
+            cal.set(Calendar.YEAR, checkYear(Integer.parseInt(
+                (String)tokens.elementAt(6))));
+        }else {
+            throw new RuntimeException("Invalid date: " + httpDate);
         }
         
         String toStr = cal.toString();

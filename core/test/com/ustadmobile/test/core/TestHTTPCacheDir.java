@@ -77,11 +77,14 @@ public class TestHTTPCacheDir extends TestCase {
             fileURI);
         
         long date1 = HTTPCacheDir.parseHTTPDate("Sun, 06 Nov 1994 08:49:37 GMT");
+        long date2 = HTTPCacheDir.parseHTTPDate("Sunday, 06-Nov-94 08:49:37 GMT");
+        long date3 = HTTPCacheDir.parseHTTPDate("Sun Nov  6 08:49:37 1994 ");
         
         //The time in milliseconds between teh date given and the date calculated
         // accurate to within one second
         assertTrue("Can parse date 1", Math.abs(784111777137L -date1) <= 1000);
-        
+        assertTrue("Can parse date 2", Math.abs(784111777137L -date2) <= 1000);
+        assertTrue("Can parse date 3", Math.abs(784111777137L -date3) <= 1000);
     }
     
     protected void runTest() throws Throwable {
