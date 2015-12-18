@@ -490,7 +490,7 @@ public class UstadMobileConstants {
         "UG",
         "UA",
         "AE",
-        "UK",
+        "GB",
         "US",
         "UY",
         "UZ",

@@ -187,7 +187,7 @@ public class LoginController extends UstadBaseController{
         Thread registerThread = new Thread() {
             public void run() {
                 String serverURL = UstadMobileSystemImpl.getInstance().getAppPref("regserver",
-                        UstadMobileDefaults.DEFAULT_REGISTER_SERVER);
+                        UstadMobileDefaults.DEFAULT_REGISTER_SERVER, context);
                 
                 StringBuffer phoneNumSB = new StringBuffer().append('+').append(
                     userInfoParams.get(LoginController.REGISTER_COUNTRY));
@@ -282,8 +282,8 @@ public class LoginController extends UstadBaseController{
     private void handleUserLoginAuthComplete(final String username, final String password) {
         UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
         UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
-        UstadMobileSystemImpl.getInstance().go(CatalogView.class, 
-            CatalogController.makeUserCatalogArgs(context), context);
+        UstadMobileSystemImpl.getInstance().go(BasePointView.class, 
+            BasePointController.makeDefaultBasePointArgs(context), context);
     }    
     
     /**
