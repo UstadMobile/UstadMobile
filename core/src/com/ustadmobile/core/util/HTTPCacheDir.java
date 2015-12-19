@@ -134,7 +134,6 @@ public class HTTPCacheDir {
             throw new RuntimeException("Invalid date: " + httpDate);
         }
         
-        String toStr = cal.toString();
         return cal != null ? cal.getTime().getTime() : -1;
     }
     

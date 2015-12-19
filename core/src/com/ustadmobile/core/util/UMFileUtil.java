@@ -264,27 +264,28 @@ public class UMFileUtil {
     }
     
     /**
-     * Parse type with params header fields (Content-Disposition; Content-Type etc)
+     * Parse a deliminated string with keys and values like Content-Type parameters
+     * and cache-control headers.  Keys can be present on their own e.g.
+     * no-cache in which case the no-cache key will be in the hashtable with a
+     * blank string value.  It can also have an = sign with quoted or unquoted
+     * text e.g. maxage=600 or maxage="600"
      * 
-     * TODO: Support params with *paramname and encoding e.g. http://tools.ietf.org/html/rfc6266 section 5 example 2
-     * 
-     * @return 
+     * @param str String to parse
+     * @param deliminator deliminator character 
+     * @return Hashtable of parameters and values found
      */
-    public static TypeWithParamHeader parseTypeWithParamHeader(String header) {
-        TypeWithParamHeader result = null;
+    public static Hashtable parseParams(String str, char deliminator) {
+        String paramName = null;
+        Hashtable params = new Hashtable();
+        boolean inQuotes = false;
         
-        int headerLen = header.length();
+        int strLen = str.length();
         StringBuffer sb = new StringBuffer();
         char c;
         
-        String disposition = null;//disposition itself e.g. attachment or inline
-        String paramName = null;
-        Hashtable params = null;
-        boolean inQuotes = false;
-        
         char lastChar = 0;
-        for(int i = 0; i < headerLen; i++) {
-            c = header.charAt(i);
+        for(int i = 0; i < strLen; i++) {
+            c = str.charAt(i);
             if(c == '"') {
                 if(!inQuotes) {
                     inQuotes = true;
@@ -294,26 +295,22 @@ public class UMFileUtil {
                 
             }
 
-            if((isWhiteSpace(c) && !inQuotes) || (c == '"' && i < headerLen-1)) {
+            if((isWhiteSpace(c) && !inQuotes) || (c == '"' && i < strLen-1)) {
                 //do nothing more
-            }else if(disposition == null && (c == ';' || i == headerLen-1)) {
-                if(i == headerLen-1) {
-                    sb.append(c);
-                }
-                
-                disposition = sb.toString();
-                sb = new StringBuffer();
-            }else if((c == ';' || i == headerLen-1) && disposition != null){
+            }else if((c == deliminator || i == strLen-1)){
                 //check if we are here because it's the end... then we add this to bufer
-                if(i == headerLen-1 && c != '"') {
+                if(i == strLen-1 && c != '"') {
                     sb.append(c);
                 }
                 
-                if(params == null) {
-                    params = new Hashtable();
+                if(paramName != null) {
+                    //this is a parameter with a value
+                    params.put(paramName, sb.toString());
+                }else {
+                    //this is a parameter on its own
+                    params.put(sb.toString(), "");
                 }
                 
-                params.put(paramName, sb.toString());
                 sb = new StringBuffer();
                 paramName = null;
             }else if(c == '='){
@@ -326,8 +323,34 @@ public class UMFileUtil {
             lastChar = c;
         }
         
-        result = new TypeWithParamHeader(disposition, params);
-        return result;
+        return params;
+   }
+    
+    /**
+     * Parse type with params header fields (Content-Disposition; Content-Type etc)
+     * 
+     * TODO: Support params with *paramname and encoding e.g. http://tools.ietf.org/html/rfc6266 section 5 example 2
+     * 
+     * @return 
+     */
+    public static TypeWithParamHeader parseTypeWithParamHeader(String header) {
+        TypeWithParamHeader result = null;
+        
+        int semiPos = header.indexOf(';');
+        String typeStr = null;
+        Hashtable params = null;
+        
+        if(semiPos == -1) {
+            typeStr = header.trim();
+        }else {
+            typeStr = header.substring(0, semiPos).trim();
+        }
+        
+        if(semiPos != -1 && semiPos < header.length()-1) {
+            params = parseParams(header.substring(semiPos), ';');
+        }
+        
+        return new TypeWithParamHeader(typeStr, params);
     }
     
     /**

@@ -106,6 +106,16 @@ public class TestUMFileUtilFilename extends TestCase{
         assertEquals("Header with no params results in null param ht", null,
             header.params);
         
+        String cacheHeader = "private, community=UCI, maxage=600";
+        Hashtable cacheTable = UMFileUtil.parseParams(cacheHeader, ',');
+        
+        assertEquals("Cache control parsed private", "", 
+            cacheTable.get("private"));
+        assertEquals("Cache control get community", "UCI", 
+            cacheTable.get("community"));
+        assertEquals("Cache control get maxage", "600", 
+            cacheTable.get("maxage"));
+            
         //test filtering nasty characters
         assertEquals("removes security hazard characters from filename", 
             "nastyname.so", UMFileUtil.filterFilename("/nastyname.*so"));
