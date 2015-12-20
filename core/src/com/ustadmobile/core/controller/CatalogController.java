@@ -512,7 +512,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                     thumbnailFile = thumbnailURI;//this is already on disk...
                 }else {
                     try {
-                        thumbnailFile = cache.getFileURI(thumbnailURI);
+                        thumbnailFile = cache.get(thumbnailURI);
                     }catch(Exception e) {
                         UstadMobileSystemImpl.l(UMLog.ERROR, 132, 
                             feed.entries[i].title + ": " + feed.entries[i].id, e);

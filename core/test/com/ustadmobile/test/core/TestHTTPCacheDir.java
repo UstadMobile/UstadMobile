@@ -66,7 +66,7 @@ public class TestHTTPCacheDir extends TestCase {
             "phonepic-smaller.png"});
         
         //make sure that we can fetch a file
-        String cachedFile = cacheDir.fetch(httpURL);
+        String cachedFile = cacheDir.get(httpURL);
         assertTrue("Cached file downloaded", impl.fileExists(cachedFile));
         boolean savedOK = cacheDir.saveIndex();
         assertTrue("Cache dir can save OK", savedOK);
@@ -85,6 +85,9 @@ public class TestHTTPCacheDir extends TestCase {
         assertTrue("Can parse date 1", Math.abs(784111777137L -date1) <= 1000);
         assertTrue("Can parse date 2", Math.abs(784111777137L -date2) <= 1000);
         assertTrue("Can parse date 3", Math.abs(784111777137L -date3) <= 1000);
+        
+        assertEquals("Can format HTTP Date", "Sun, 06 Nov 1994 08:49:37 GMT",
+            HTTPCacheDir.makeHTTPDate(784111777137L));
     }
     
     protected void runTest() throws Throwable {

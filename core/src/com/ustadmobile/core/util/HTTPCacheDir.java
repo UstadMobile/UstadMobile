@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.TimeZone;
+import java.util.Date;
 import java.util.Vector;
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -54,6 +55,14 @@ public class HTTPCacheDir {
     public static final String[] HTTP_MONTH_NAMES = new String[]{"Jan", "Feb",
         "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
     
+    public static final int[] HTTP_DAYS = new int[]{ Calendar.MONDAY, Calendar.TUESDAY,
+        Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY,
+        Calendar.SUNDAY
+    };
+    
+    public static final String[] HTTP_DAY_LABELS = new String[]{"Mon", "Tue",
+        "Wed", "Thu", "Fri", "Sat", "Sun"};
+    
     public HTTPCacheDir(String dirName) {
         this.dirName = dirName;
         
@@ -76,6 +85,8 @@ public class HTTPCacheDir {
     }
     
     
+    
+    
     private static int checkYear(int year) {
         if(year < 30) {
             return 2000 + year;
@@ -84,6 +95,55 @@ public class HTTPCacheDir {
         }else {
             return year;
         }
+    }
+    
+    /**
+     * Appends two digits for the integer i; if i < 10; prepend a leading 0
+     * 
+     * @param i Numbe to append
+     * @param sb StringBuffer to append it two
+     * @return The stringbuffer
+     */
+    private static StringBuffer appendTwoDigits(int i, StringBuffer sb) {
+        if(i < 10) {
+            sb.append('0');
+        }
+        sb.append(i);
+        
+        return sb;
+    }
+    
+    /**
+     * Make a String for the date given by time as an HTTP Date as per 
+     * http://tools.ietf.org/html/rfc2616#section-3.3 
+     * 
+     * e.g.
+     * Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+     * 
+     * @param time The time to generate the date for
+     * @return A string with a properly formatted HTTP Date
+     */
+    public static String makeHTTPDate(long time) {
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        cal.setTime(new Date(time));
+        StringBuffer sb = new StringBuffer();
+        
+        int val = cal.get(Calendar.DAY_OF_WEEK);
+        for(int i = 0; i < HTTP_MONTH_NAMES.length; i++) {
+            if(val == HTTP_DAYS[i]) {
+                sb.append(HTTP_DAY_LABELS[i]).append(", ");
+                break;
+            }
+        }
+        appendTwoDigits(cal.get(Calendar.DAY_OF_MONTH), sb).append(' ');
+        
+        sb.append(HTTP_MONTH_NAMES[cal.get(Calendar.MONTH)]).append(' ');
+        sb.append(checkYear(cal.get(Calendar.YEAR))).append(' ');
+        appendTwoDigits(cal.get(Calendar.HOUR_OF_DAY), sb).append(':');
+        appendTwoDigits(cal.get(Calendar.MINUTE), sb).append(':');
+        appendTwoDigits(cal.get(Calendar.SECOND), sb).append(" GMT");
+        
+        return sb.toString();
     }
     
     /**
@@ -153,6 +213,65 @@ public class HTTPCacheDir {
     }
     
     
+    public String get(String url) throws IOException{
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        boolean isValid = false;
+        
+        //check and see if we have the entry
+        JSONArray entry = cacheIndex.optJSONArray(url);
+        HTTPResult result = null;
+        
+        if (entry != null) {
+            try {
+                long timeNow = System.currentTimeMillis();
+                long entryExpires = entry.getLong(IDX_EXPIRES);
+
+                if (timeNow < entryExpires) {
+                    //we can serve it direct from the cache - no validation needed
+                    isValid = true;
+                } else {
+                    //needs to be validated
+                    result = impl.makeRequest(url, null, null, "HEAD");
+                    isValid = validateCacheEntry(entry, result);
+                }
+                
+                if(isValid) {
+                    return UMFileUtil.joinPaths(new String[]{ dirName, 
+                        entry.optString(IDX_FILENAME)});
+                }
+            } catch (Exception e) {
+                impl.l(UMLog.ERROR, 130, url, e);
+            }
+
+        }
+        
+        
+        result = impl.makeRequest(url, null, null);
+        return cacheResult(url, result);
+    }
+    
+    public boolean validateCacheEntry(JSONArray entry, HTTPResult result) {
+        boolean isValid = false;
+        try {
+            String validateHeader = result.getHeaderValue("etag");
+            String cachedEtag = entry.getString(IDX_ETAG);
+            if (validateHeader.equals(cachedEtag)) {
+                isValid = true;
+            }else if((validateHeader = result.getHeaderValue("Last-Modified")) != null){
+                long cachedLastModified = entry.getLong(IDX_LASTMODIFIED);
+                if(cachedLastModified != -1 && parseHTTPDate(validateHeader) >= entry.getLong(IDX_LASTMODIFIED)) {
+                    isValid = true;
+                }
+            }
+        }catch(Exception e) {
+            //JSON exception should really never happen here
+            UstadMobileSystemImpl.l(UMLog.ERROR, 154, null, e);
+        }
+        
+        return isValid;
+    }
+    
+    
     /**
      * Get the file URI of a file in the cache if present.  This does not attempt
      * to fetch the url from the Internet in case it's not available.
@@ -161,6 +280,7 @@ public class HTTPCacheDir {
      * 
      * @return 
      */
+    /*
     public String getFileURI(String url) {
         String fileURI = null;
         JSONArray entry = cacheIndex.optJSONArray(url);
@@ -211,7 +331,7 @@ public class HTTPCacheDir {
         
         return fileURI;
     }
-    
+    */
     
     public String getCacheFileURIByURL(String url) {
         String fileURI = null;
@@ -230,11 +350,16 @@ public class HTTPCacheDir {
         return fileURI;
     }
     
-    
-    
-    public String fetch(String url) throws IOException{
+    /**
+     * Cache the given HTTPResult as the content of the given URL
+     * 
+     * @param url
+     * @param result
+     * @return 
+     */
+    public String cacheResult(String url, HTTPResult result) throws IOException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        HTTPResult result = impl.makeRequest(url, null, null);
+        
         String filename = CatalogController.sanitizeIDForFilename(url);
         String extension = '.' + impl.getExtensionFromMimeType(
             result.getHeaderValue("content-type"));
@@ -276,7 +401,8 @@ public class HTTPCacheDir {
         
         
         return cacheFileURI;
-        
     }
+    
+    
     
 }
