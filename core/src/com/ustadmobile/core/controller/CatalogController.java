@@ -498,8 +498,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void run() {
         UstadJSOPDSFeed feed = model.opdsFeed;
         String[] thumbnailLinks;
-        HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getCachedir(
-            context);
+        HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
+            resourceMode, context);
+            
         String thumbnailFile;
         
         for(int i = 0; i < feed.entries.length; i++) {
@@ -1735,7 +1736,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 entry.parentFeed.href, 
                 thumbnailLink[UstadJSOPDSEntry.LINK_HREF]);
                     
-            String thumbnailFile = impl.getCachedir(
+            String thumbnailFile = impl.getHTTPCacheDir(request.getResourceMode(),
                 request.getContext()).getCacheFileURIByURL(thumbnailURL);
             
             if(thumbnailFile != null) {

@@ -231,7 +231,14 @@ public class HTTPCacheDir {
     }
     
     
-    public String get(String url) throws IOException{
+    /**
+     * 
+     * @param url
+     * @param filename
+     * @return
+     * @throws IOException 
+     */
+    public String get(String url, String filename) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         boolean isValid = false;
         
@@ -266,7 +273,17 @@ public class HTTPCacheDir {
         
         
         result = impl.makeRequest(url, null, null);
-        return cacheResult(url, result);
+        return cacheResult(url, result, filename);
+    }
+    
+    /**
+     * 
+     * @param url
+     * @return
+     * @throws IOException 
+     */
+    public String get(String url) throws IOException{
+        return get(url, null);
     }
     
     /**
@@ -456,16 +473,20 @@ public class HTTPCacheDir {
      * 
      * @param url
      * @param result
+     * @param filename Optional: if specified use the given filename - can help when storing catalogs by id etc.
      * @return 
      */
-    public String cacheResult(String url, HTTPResult result) throws IOException {
+    public String cacheResult(String url, HTTPResult result, String filename) throws IOException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         if(getNumEntries() >= maxEntries) {
             removeOldestEntry();
         }
         
-        String filename = CatalogController.sanitizeIDForFilename(url);
+        if(filename == null) {
+            filename = CatalogController.sanitizeIDForFilename(url);
+        }
+        
         String extension = '.' + impl.getExtensionFromMimeType(
             result.getHeaderValue("content-type"));
         if(extension != null && !filename.endsWith(extension)) {
@@ -511,6 +532,10 @@ public class HTTPCacheDir {
         
         
         return cacheFileURI;
+    }
+    
+    public String cacheResult(String url, HTTPResult result) throws IOException{
+        return cacheResult(url, result, null);
     }
     
     

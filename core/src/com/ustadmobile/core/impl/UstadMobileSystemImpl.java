@@ -176,7 +176,15 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final int DLSTATUS_PAUSED = 4;
     
-    public HTTPCacheDir httpCacheDir;
+    /**
+     * The shared HTTPCacheDir
+     */
+    protected HTTPCacheDir sharedHttpCacheDir;
+    
+    /**
+     * The user specific http cache dir
+     */
+    protected HTTPCacheDir userHttpCacheDir;
     
     /**
      * Get an instance of the system implementation - relies on the platform
@@ -897,14 +905,31 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract int[] getScreenSize(Object context);
     
-    public HTTPCacheDir getCachedir(Object context) {
-        if(httpCacheDir != null) {
-            return httpCacheDir;
+    /**
+     * 
+     * @param context
+     * @param mode
+     * @return 
+     */
+    public HTTPCacheDir getHTTPCacheDir(int mode, Object context) {
+        if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
+            if(userHttpCacheDir == null) {
+                userHttpCacheDir = new HTTPCacheDir(getCacheDir(
+                    CatalogController.USER_RESOURCE, context));
+            }
+            
+            return userHttpCacheDir;
+        }else if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
+            if(sharedHttpCacheDir == null) {
+                sharedHttpCacheDir = new HTTPCacheDir(getCacheDir(
+                    CatalogController.SHARED_RESOURCE, context));
+            }
+            
+            return sharedHttpCacheDir;
         }
         
-        httpCacheDir = new HTTPCacheDir(getCacheDir(
-            CatalogController.USER_RESOURCE, context));
-        return httpCacheDir;
+        
+        return null;
     }
     
     /**
