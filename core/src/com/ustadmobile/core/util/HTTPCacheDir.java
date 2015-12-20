@@ -271,68 +271,6 @@ public class HTTPCacheDir {
         return isValid;
     }
     
-    
-    /**
-     * Get the file URI of a file in the cache if present.  This does not attempt
-     * to fetch the url from the Internet in case it's not available.
-     * 
-     * @param url
-     * 
-     * @return 
-     */
-    /*
-    public String getFileURI(String url) {
-        String fileURI = null;
-        JSONArray entry = cacheIndex.optJSONArray(url);
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        boolean isValid = false;
-        
-        if (entry != null) {
-            try {
-                long timeNow = System.currentTimeMillis();
-                long entryExpires = entry.getLong(IDX_EXPIRES);
-
-                if (timeNow < entryExpires) {
-                    //we can serve it direct from the cache - no validation needed
-                    isValid = true;
-                } else {
-                    //needs to be validated
-                    HTTPResult result = impl.makeRequest(url, null, null, "HEAD");
-                    String etag = result.getHeaderValue("etag");
-                    String cachedEtag = entry.getString(IDX_ETAG);
-                    if (etag.equals(cachedEtag)) {
-                        isValid = true;
-                    }
-                }
-            } catch (Exception e) {
-                impl.l(UMLog.ERROR, 130, url, e);
-            }
-
-        }
-        
-        if(isValid) {
-            //Cache hit
-            return UMFileUtil.joinPaths(new String[]{ dirName, 
-                entry.optString(IDX_FILENAME)});
-        }
-        
-        
-        try {
-            fileURI = fetch(url);
-        }catch(Exception e) {
-            impl.l(UMLog.ERROR, 138, url, e);
-        }
-        
-        //fallback in case of being offline - might be stale but better than nothing
-        if(fileURI == null && entry != null) {
-            fileURI = UMFileUtil.joinPaths(new String[]{ dirName, 
-                entry.optString(IDX_FILENAME)});
-        }
-        
-        return fileURI;
-    }
-    */
-    
     public String getCacheFileURIByURL(String url) {
         String fileURI = null;
         
