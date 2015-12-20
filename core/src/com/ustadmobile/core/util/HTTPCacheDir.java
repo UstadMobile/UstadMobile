@@ -15,11 +15,13 @@ import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.TimeZone;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Vector;
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
     import org.json.*;
+    import java.util.Iterator;
 /* $endif$ */
 
 
@@ -50,6 +52,8 @@ public class HTTPCacheDir {
     
     public static final int IDX_FILENAME = 4;
     
+    public static final int IDX_MUSTREVALIDATE = 5;
+    
     public static final int DEFAULT_EXPIRES = (1000 * 60 * 60);//1hour
     
     public static final String[] HTTP_MONTH_NAMES = new String[]{"Jan", "Feb",
@@ -63,7 +67,17 @@ public class HTTPCacheDir {
     public static final String[] HTTP_DAY_LABELS = new String[]{"Mon", "Tue",
         "Wed", "Thu", "Fri", "Sat", "Sun"};
     
-    public HTTPCacheDir(String dirName) {
+    public static final int DEFAULT_MAX_ENTRIES = 200;
+    
+    private int maxEntries;
+    
+    /**
+     * Starts a new HTTP cache directory in the directory given
+     * 
+     * @param dirName Directory to use for caching purposes
+     * @param maxEntries the maximum number of entries to be allowed in the cache
+     */
+    public HTTPCacheDir(String dirName, int maxEntries) {
         this.dirName = dirName;
         
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -82,6 +96,10 @@ public class HTTPCacheDir {
         if(cacheIndex == null) {
             cacheIndex = new JSONObject();
         }
+    }
+    
+    public HTTPCacheDir(String dirName) {
+        this(dirName, DEFAULT_MAX_ENTRIES);
     }
     
     
@@ -194,7 +212,7 @@ public class HTTPCacheDir {
             throw new RuntimeException("Invalid date: " + httpDate);
         }
         
-        return cal != null ? cal.getTime().getTime() : -1;
+        return cal.getTime().getTime();
     }
     
     public boolean saveIndex() {
@@ -236,6 +254,7 @@ public class HTTPCacheDir {
                 }
                 
                 if(isValid) {
+                    entry.put(IDX_LASTACCESSED, timeNow);
                     return UMFileUtil.joinPaths(new String[]{ dirName, 
                         entry.optString(IDX_FILENAME)});
                 }
@@ -248,6 +267,31 @@ public class HTTPCacheDir {
         
         result = impl.makeRequest(url, null, null);
         return cacheResult(url, result);
+    }
+    
+    /**
+     * Gets the number of entries in the cache
+     * 
+     * @return Number of entries in the cache
+     */
+    public int getNumEntries() {
+        return cacheIndex.length();
+    }
+    
+    /**
+     * Get the JSON array that represents the cached object
+     * 
+     * @param url The URL to lookup
+     * 
+     * @return JSONArray with values as per IDX_* constants
+     */
+    public JSONArray getEntry(String url) {
+        try {
+            return cacheIndex.optJSONArray(url);
+        }catch(Exception e) {
+            //this really would never happen - using the opt method on a prebuilt jsonobject
+        }
+        return null;
     }
     
     public boolean validateCacheEntry(JSONArray entry, HTTPResult result) {
@@ -277,6 +321,7 @@ public class HTTPCacheDir {
         try {
             JSONArray urlEntry = cacheIndex.optJSONArray(url);
             if(urlEntry != null) {
+                urlEntry.put(IDX_LASTACCESSED, System.currentTimeMillis());
                 fileURI = UMFileUtil.joinPaths(new String[] {dirName,
                     urlEntry.optString(IDX_FILENAME)});
             }
@@ -288,6 +333,124 @@ public class HTTPCacheDir {
         return fileURI;
     }
     
+    
+    /**
+     * Calculates when an entry will expire based on it's HTTP headers: specifically
+     * the expires header and cache-control header
+     * 
+     * As per :  http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html section
+     * 14.9.3 the max-age if present will take precedence over the expires header
+     * 
+     * 
+     * @param headers Hashtable with ALL headers in lower case
+     * @return 
+     */
+    public static long calculateExpiryTime(Hashtable headers) {        
+        if(headers.containsKey("cache-control")) {
+            Hashtable ccParams = UMFileUtil.parseParams(
+                (String)headers.get("cache-control"), ',');
+            if(ccParams.containsKey("max-age")) {
+                long maxage = Integer.parseInt((String)ccParams.get("max-age"));
+                return System.currentTimeMillis() + (maxage * 1000);
+            }
+        }
+        
+        if(headers.containsKey("expires")) {
+            return parseHTTPDate((String)headers.get("expires"));
+        }
+        
+        return -1;
+    }
+    
+    /**
+     * Remove the given entry from the cache
+     * 
+     * @param url The URL of the item to remove from the cache
+     * @return 
+     */
+    public boolean deleteEntry(String url) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        boolean result = false;
+        try {
+            JSONArray item  = cacheIndex.optJSONArray(url);
+            if(item != null) {
+                String fileURI = UMFileUtil.joinPaths(new String[] {dirName,
+                    item.getString(IDX_FILENAME)});
+                result = impl.removeFile(fileURI);
+                if(result) {
+                    cacheIndex.remove(url);
+                }
+            }
+        }catch(Exception e) {
+            impl.l(UMLog.ERROR, 156, url, e);
+        }
+        
+        return result;
+    }
+    
+    /**
+     * Make an enumeration of all the urls that are in the cache
+     * 
+     * @return 
+     */
+    public Enumeration getCachedURLs() {
+        Enumeration urls;
+        /* $if umplatform == 2  $
+            urls = cacheIndex.keys();
+         $else$ */
+            final Iterator urlIterator = cacheIndex.keys();
+            urls = new Enumeration() {
+                public boolean hasMoreElements() {
+                    return urlIterator.hasNext();
+                }
+
+                public Object nextElement() {
+                    return urlIterator.next();
+                }
+                
+            };
+        /* $endif$ */
+        
+        return urls;
+    }
+    
+    /**
+     * Finds the entry with the greatest length of time since it was last accessed
+     * and deletes it.
+     * 
+     * @return true if we find and successfully delete the last entry; false otherwise
+     */
+    public boolean removeOldestEntry() {
+        long oldestTime = Long.MAX_VALUE;
+        String urlToRemove = null;
+        
+        Enumeration urls = getCachedURLs();
+        
+        JSONArray entry;
+        String url = null;
+        long entryLastAccessed;
+        try {
+            while(urls.hasMoreElements()) {
+                url = (String)urls.nextElement();
+                entry = cacheIndex.getJSONArray(url);
+                entryLastAccessed = entry.getLong(IDX_LASTACCESSED);
+                if(entryLastAccessed < oldestTime) {
+                    oldestTime = entryLastAccessed;
+                    urlToRemove = url;
+                }
+            }
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 158, url, e);
+        }
+        
+        if(urlToRemove != null) {
+            return deleteEntry(urlToRemove);
+        }else {
+            return false;
+        }
+    }
+    
+    
     /**
      * Cache the given HTTPResult as the content of the given URL
      * 
@@ -298,10 +461,14 @@ public class HTTPCacheDir {
     public String cacheResult(String url, HTTPResult result) throws IOException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
+        if(getNumEntries() >= maxEntries) {
+            removeOldestEntry();
+        }
+        
         String filename = CatalogController.sanitizeIDForFilename(url);
         String extension = '.' + impl.getExtensionFromMimeType(
             result.getHeaderValue("content-type"));
-        if(!filename.endsWith(extension)) {
+        if(extension != null && !filename.endsWith(extension)) {
             filename += extension;
         }
         
@@ -324,7 +491,12 @@ public class HTTPCacheDir {
         JSONArray arr  = new JSONArray();
 
         long currentTime = System.currentTimeMillis();
-        long expiresTime = currentTime + DEFAULT_EXPIRES;
+        long expiresTime = calculateExpiryTime(result.getResponseHeaders());
+        
+        if(expiresTime == -1) {
+            expiresTime = currentTime + DEFAULT_EXPIRES;
+        }
+        
         try {
             arr.put(IDX_EXPIRES, expiresTime);
             arr.put(IDX_ETAG, result.getHeaderValue("etag"));
@@ -340,6 +512,7 @@ public class HTTPCacheDir {
         
         return cacheFileURI;
     }
+    
     
     
     

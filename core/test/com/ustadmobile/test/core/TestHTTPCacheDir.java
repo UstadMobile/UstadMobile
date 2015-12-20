@@ -40,6 +40,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMFileUtil;
+import java.util.Hashtable;
 
 
 /**
@@ -88,6 +89,49 @@ public class TestHTTPCacheDir extends TestCase {
         
         assertEquals("Can format HTTP Date", "Sun, 06 Nov 1994 08:49:37 GMT",
             HTTPCacheDir.makeHTTPDate(784111777137L));
+        
+        
+        
+        //Expiry time in one hour
+        long currentTime = System.currentTimeMillis();
+        long expireHeaderTime = currentTime + (1000*60*60);
+        Hashtable expireHeaders = new Hashtable();
+        
+        expireHeaders.put("expires", HTTPCacheDir.makeHTTPDate(expireHeaderTime));
+        expireHeaders.put("cache-control", "max-age=7200");
+        long calculatedExpiryTime = HTTPCacheDir.calculateExpiryTime(expireHeaders);
+        long expectedExpiry = Math.abs(currentTime + (7200L*1000));
+        //the cache-control should take precedence
+        assertTrue("Can calculate expires time with both cache control and expires header",
+            Math.abs(expectedExpiry - calculatedExpiryTime) < 1000);
+        
+        expireHeaders.remove("cache-control");
+        calculatedExpiryTime = HTTPCacheDir.calculateExpiryTime(expireHeaders);
+        assertTrue("Can calculate expires time with just expires header",
+            Math.abs(expireHeaderTime - calculatedExpiryTime) < 1000);
+        
+        int numEntriesPreDelete = cacheDir.getNumEntries();
+        boolean deletedEntry = cacheDir.deleteEntry(httpURL);
+        assertTrue("Cache dir reports success deleting entry", deletedEntry);
+        assertEquals("Cache dir now one entry smaller", numEntriesPreDelete-1, 
+            cacheDir.getNumEntries());
+        
+        try { Thread.sleep(1000); }
+        catch(InterruptedException e) {}
+        
+        //access the entry
+        cacheDir.get(httpURL);
+        long timeSinceAccess = System.currentTimeMillis() - 
+            cacheDir.getEntry(httpURL).getLong(HTTPCacheDir.IDX_LASTACCESSED);
+        assertTrue("Last accessed time is updated", timeSinceAccess < 300);
+        
+        String httpURL2 = UMFileUtil.joinPaths(new String[] {httpRoot, 
+            "smallcheck.jpg"});
+        cacheDir.get(httpURL2);
+        boolean oldestRemoved = cacheDir.removeOldestEntry();
+        assertTrue("Can remove oldest entry", oldestRemoved);
+        assertNotNull("most recently accessed item still in cache", 
+            cacheDir.getCacheFileURIByURL(httpURL2));
     }
     
     protected void runTest() throws Throwable {

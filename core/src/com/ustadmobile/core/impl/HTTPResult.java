@@ -97,6 +97,15 @@ public class HTTPResult {
     }
     
     /**
+     * Provides all responses headers (with the header itself in **lower case** 
+     * in a hashtable
+     * @return 
+     */
+    public Hashtable getResponseHeaders() {
+        return responseHeaders;
+    }
+    
+    /**
      * Get the suggested filename for this HTTP Request: if the HTTP request
      * has a content-disposition header we will use it to provide the filename;
      * otherwise we will use the filename portion of the URL 
