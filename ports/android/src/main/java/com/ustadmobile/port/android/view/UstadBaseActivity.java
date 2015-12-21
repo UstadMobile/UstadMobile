@@ -80,6 +80,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        UstadMobileSystemImpl.getInstance().handleSave();
     }
 
     @Override

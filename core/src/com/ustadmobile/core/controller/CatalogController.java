@@ -984,7 +984,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         impl.getLogger().l(UMLog.INFO, 307, url);
         
         Hashtable headers = makeAuthHeaders(httpUsername, httpPassword);
-        
+        InputStream catalogIn = null;
         
         if(url.startsWith("opds:///")) {
             if(url.equals(OPDS_PROTO_DEVICE)) {
@@ -997,32 +997,59 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }else {
             try {
                 XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-                HTTPResult result = impl.readURLToString(url, headers);
-                if(result.getStatus() != 200) {
-                    throw new IOException("HTTP Error " + result.getStatus());
-                }
+                String catalogID = getCatalogIDByURL(url, resourceMode, context);
+                HTTPResult[] resultBuf = new HTTPResult[1];
+                String opdsFileURI = null;
+                
+                if(url.startsWith("http://") || url.startsWith("https://")) {
+                    HTTPCacheDir primaryCacheDir = null;
+                    HTTPCacheDir fallbackCache = null;
 
-                byte[] opdsContents = result.getResponse();
-                parser.setInput(
-                    new ByteArrayInputStream(opdsContents), 
-                    "UTF-8");
+
+                    String filename = null;
+                    if(catalogID != null) {
+                        filename = getFileNameForOPDSFeedId(catalogID);
+                    }
+
+                    if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
+                        primaryCacheDir = impl.getHTTPCacheDir(USER_RESOURCE, context);
+                    }
+
+                    if((resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
+                        if(primaryCacheDir == null) {
+                            primaryCacheDir = impl.getHTTPCacheDir(SHARED_RESOURCE, 
+                                context);
+                        }else {
+                            fallbackCache = impl.getHTTPCacheDir(SHARED_RESOURCE, 
+                                context);
+                        }
+                    }
+
+                    opdsFileURI = primaryCacheDir.get(url, filename, headers, 
+                        resultBuf, fallbackCache);
+                }else if(url.startsWith("file://")) {
+                    opdsFileURI = url;
+                }
+                
+                
+                if(opdsFileURI == null) {
+                    throw new IOException("HTTP Error : could not cache file: " 
+                        + url);
+                }
+                
+                if(resultBuf[0] != null) {
+                    catalogIn = new ByteArrayInputStream(resultBuf[0].getResponse());
+                }else {
+                    catalogIn = impl.openFileInputStream(opdsFileURI);
+                }
+                
+                parser.setInput(catalogIn, "UTF-8");
                 opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
                 opdsFeed.href = url;
-                CatalogController.cacheCatalog(opdsFeed, resourceMode, new String(opdsContents, 
-                    "UTF-8"), context);
+                CatalogController.cacheCatalog(opdsFeed, resourceMode, context);
             }catch(Exception e1) {
                 UstadMobileSystemImpl.l(UMLog.WARN, 201, url, e1);
                 e = e1;
-            }
-            
-            if(opdsFeed == null & (flags & CACHE_ENABLED) == CACHE_ENABLED) {
-                UstadMobileSystemImpl.l(UMLog.VERBOSE, 431, url);
-                try {
-                    opdsFeed = getCachedCatalogByURL(url, resourceMode, context);
-                }catch(Exception e2) {
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 181, url, e2);
-                    e = e2;
-                }
             }
         }
         
@@ -1135,34 +1162,25 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * Cache the given catalog so it can be retrieved when offline
      * 
      * @param catalog 
-     * @param ownerUser the user that owns the download, or null if this is for the shared directory
-     * @param serializedCatalog String contents of the catalog (in XML) : optional : if they are 'handy', otherwise null
+     * @param resourceMode 
+     * @param context
+     * @throws IOException
      */
-    public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, String serializedCatalog, Object context) throws IOException{
+    public static void cacheCatalog(UstadJSOPDSFeed catalog, int resourceMode, Object context) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.getLogger().l(UMLog.VERBOSE, 405, "id: " + catalog.id + " href: " + catalog.href);
         
-	String destPath;
+        
         boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
-        
-        destPath = impl.getCacheDir(resourceMode, context);
-        
-	destPath = UMFileUtil.joinPaths(new String[]{destPath, 
-            getFileNameForOPDSFeedId(catalog.id)});
-        
-        impl.getLogger().l(UMLog.DEBUG, 505, destPath);
-        
-        if(serializedCatalog == null) {
-            serializedCatalog = catalog.toString();
-        }
+                            
+        impl.getLogger().l(UMLog.DEBUG, 505, catalog.id + "/mode:" + resourceMode);
 	
-        impl.writeStringToFile(serializedCatalog, destPath, "UTF-8");
+        String filename = getFileNameForOPDSFeedId(catalog.id);        
         String idKeyName = "opds-cache-" + catalog.id;
 	String urlKeyName = getPrefKeyNameForOPDSURLToIDMap(catalog.href);
         
-        impl.setPref(isUserMode, idKeyName, destPath, context);
-        impl.setPref(isUserMode, urlKeyName, 
-            catalog.id, context);
+        impl.setPref(isUserMode, idKeyName, filename, context);
+        impl.setPref(isUserMode, urlKeyName, catalog.id, context);
     }
     
     /**
@@ -1250,7 +1268,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
       */
     public static UstadJSOPDSFeed getCachedCatalogByID(String catalogID, int resourceMode, Object context) throws IOException, XmlPullParserException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        
+        HTTPCacheDir cacheDir = null;
         impl.getLogger().l(UMLog.VERBOSE, 406, catalogID);
         
         String filename = null;
@@ -1259,17 +1277,20 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
             filename = impl.getUserPref(key, context);
+            cacheDir = impl.getHTTPCacheDir(USER_RESOURCE, context);
             impl.getLogger().l(UMLog.DEBUG, 509, filename);
         }
         
         if(filename == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
             filename = impl.getAppPref(key, context);
+            cacheDir = impl.getHTTPCacheDir(SHARED_RESOURCE, context);
             impl.getLogger().l(UMLog.DEBUG, 510, filename);
         }
 
 
         if(filename != null) {
-            String contentsXML = impl.readFileAsText(filename, "UTF-8");
+            String contentsXML = impl.readFileAsText(
+                cacheDir.getCacheFileURIByFilename(filename), "UTF-8");
             UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(contentsXML);
             return feed;
         }

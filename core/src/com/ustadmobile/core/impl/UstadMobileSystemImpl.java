@@ -337,16 +337,21 @@ public abstract class UstadMobileSystemImpl {
             go(BasePointView.class, args, context);
             
         }
-        
-        /*
-        if(activeUser == null || activeUserAuth == null) {
-            go(LoginView.class, null, context);
-        }else {
-            Hashtable args = CatalogController.makeUserCatalogArgs(context);
-            go(CatalogView.class, args, context);
-        }*/
-
     }
+    
+    /**
+     * Save anything that should be written to disk
+     */
+    public synchronized void handleSave() {
+        if(userHttpCacheDir != null) {
+            userHttpCacheDir.saveIndex();
+        }
+        
+        if(sharedHttpCacheDir != null) {
+            sharedHttpCacheDir.saveIndex();
+        }
+    }
+    
     
     
     /**

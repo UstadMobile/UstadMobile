@@ -49,7 +49,7 @@ import org.xmlpull.v1.XmlPullParser;
    $endif$ */
 
 /* $if umplatform == 2  $
-    import j2meunit.framework.TestCase;
+    import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -122,7 +122,7 @@ public class TestCatalogController extends TestCase{
         UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
         assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
         CatalogController.cacheCatalog(feedItem, CatalogController.USER_RESOURCE, 
-                null, context);
+                context);
         UstadJSOPDSFeed cachedFeed = 
             CatalogController.getCachedCatalogByID(feedItem.id, 
             CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,

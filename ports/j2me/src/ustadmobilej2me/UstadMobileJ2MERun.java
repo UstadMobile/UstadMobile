@@ -85,5 +85,6 @@ public class UstadMobileJ2MERun extends MIDlet {
     }
     
     public void destroyApp(boolean unconditional) {
+        UstadMobileSystemImpl.getInstance().handleSave();
     }
 }

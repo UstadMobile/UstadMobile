@@ -79,6 +79,7 @@ public class HTTPCacheDir {
      */
     public HTTPCacheDir(String dirName, int maxEntries) {
         this.dirName = dirName;
+        this.maxEntries = maxEntries;
         
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         indexFileURI = UMFileUtil.joinPaths(new String[]{ dirName,
@@ -231,20 +232,69 @@ public class HTTPCacheDir {
     }
     
     
+    private JSONArray getEntryByFilename(String filename) {
+        boolean fileExists = false;
+        try {
+            fileExists = UstadMobileSystemImpl.getInstance().fileExists(
+                UMFileUtil.joinPaths(new String[]{dirName, filename}));
+        }catch(IOException e) {
+            
+        }
+        
+        if(!fileExists) {
+            return null;
+        }
+        
+        Enumeration e = getCachedURLs();
+        String currentFilename;
+        JSONArray currentEntry;
+        String url;
+        while(e.hasMoreElements()) {
+            try {
+                url = (String)e.nextElement();
+                currentEntry = cacheIndex.getJSONArray(url);
+                if(filename.equals(currentEntry.getString(IDX_FILENAME))) {
+                    return currentEntry;
+                }
+            }catch(Exception ex) {
+                //this should never happen - going through a JSON Object with known values
+                ex.printStackTrace();
+            }
+        }
+        
+        return null;
+    }
+    
     /**
+     * Run a get request through the cache.  This method will fetch the entry,
+     * save it to the cache and return a file URI path to the entry itself.
      * 
-     * @param url
-     * @param filename
-     * @return
+     * @param url The HTTP or HTTPS url to fetch
+     * @param filename Optional - can be null: A specific filename to use to 
+     * save the entry in the cache.  When the same item might come from different
+     * URLs this can be useful - e.g. OPDS catalogs by catalog id.
+     * @param resultBuf Optional: An Array of 1 HTTPResult that in case we do wind
+     * up directly fetching the result from the network this will be referenced
+     * to the HTTPResult object.
+     * @param fallback Optional: A fallback cache to send the get request to
+     * in case we don't  find the entry in this cache.
+     * 
+     * @return The file URI path to the cached file
+     * 
      * @throws IOException 
      */
-    public String get(String url, String filename) throws IOException{
+    public String get(String url, String filename, Hashtable headers, HTTPResult[] resultBuf, HTTPCacheDir fallback) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         boolean isValid = false;
         
         //check and see if we have the entry
         JSONArray entry = cacheIndex.optJSONArray(url);
         HTTPResult result = null;
+        
+        //if the filename is being used for an ID - lets see if that exists...
+        if(entry == null && filename != null) {
+            entry = getEntryByFilename(filename);
+        }
         
         if (entry != null) {
             try {
@@ -254,10 +304,14 @@ public class HTTPCacheDir {
                 if (timeNow < entryExpires) {
                     //we can serve it direct from the cache - no validation needed
                     isValid = true;
+                    System.out.println("Cache HIT" + url);
                 } else {
                     //needs to be validated
-                    result = impl.makeRequest(url, null, null, "HEAD");
+                    result = impl.makeRequest(url, headers, null, "HEAD");
                     isValid = validateCacheEntry(entry, result);
+                    if(isValid) {
+                        System.out.println("Cache validated HIT" + url);
+                    }
                 }
                 
                 if(isValid) {
@@ -269,11 +323,34 @@ public class HTTPCacheDir {
                 impl.l(UMLog.ERROR, 130, url, e);
             }
 
+        }else if(fallback != null) {
+            if(fallback.hasCachedURL(url) || (filename != null && fallback.hasCachedFilename(filename))) {
+                return fallback.get(url, filename, headers, resultBuf, fallback);
+            }
         }
         
+        try {
+            result = impl.makeRequest(url, headers, null);
+            if(resultBuf != null) {
+                resultBuf[0] = result;
+            }
+            
+            return cacheResult(url, result, filename);
+        }catch(IOException e) {
+            impl.l(UMLog.ERROR, 162, url, e);
+        }
         
-        result = impl.makeRequest(url, null, null);
-        return cacheResult(url, result, filename);
+        //Looks like we are offline... use anything we have 
+        if(entry != null) {
+            return UMFileUtil.joinPaths(new String[]{ dirName, entry.optString(
+                IDX_FILENAME)});
+        }else {
+            return null;
+        }
+    }
+    
+    public String get(String url, String filename) throws IOException {
+        return get(url, filename, null, null, null);
     }
     
     /**
@@ -283,7 +360,7 @@ public class HTTPCacheDir {
      * @throws IOException 
      */
     public String get(String url) throws IOException{
-        return get(url, null);
+        return get(url, null, null, null, null);
     }
     
     /**
@@ -332,6 +409,28 @@ public class HTTPCacheDir {
         return isValid;
     }
     
+    /**
+     * Used when the fileid that was used to save it is known (e.g. catalog
+     * cache files which are saved by the catalog id)
+     * 
+     * @param filename
+     * @return 
+     */
+    public String getCacheFileURIByFilename(String filename) {
+        String fileURI = null;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        boolean fileExists = false;
+        try {
+            fileURI = UMFileUtil.joinPaths(new String[]{dirName, filename});
+            fileExists = impl.fileExists(fileURI);
+        }catch(IOException e) {
+            
+        }
+        
+        return fileExists ? fileURI : null;
+    }
+    
     public String getCacheFileURIByURL(String url) {
         String fileURI = null;
         
@@ -348,6 +447,22 @@ public class HTTPCacheDir {
         }
         
         return fileURI;
+    }
+    
+    public boolean hasCachedURL(String url) {
+        return cacheIndex.has(url);
+    }
+    
+    public boolean hasCachedFilename(String filename) {
+        boolean exists = false;
+        try {
+            exists = UstadMobileSystemImpl.getInstance().fileExists(
+                UMFileUtil.joinPaths(new String[]{dirName, filename}));
+        }catch(IOException e) {
+            
+        }
+        
+        return exists;
     }
     
     
@@ -489,7 +604,7 @@ public class HTTPCacheDir {
         
         String extension = '.' + impl.getExtensionFromMimeType(
             result.getHeaderValue("content-type"));
-        if(extension != null && !filename.endsWith(extension)) {
+        if(filename  == null && (extension != null && !filename.endsWith(extension))) {
             filename += extension;
         }
         
