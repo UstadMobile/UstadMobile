@@ -129,8 +129,6 @@ public abstract class UstadJSOPDSItem {
     }
     
     public void addLink(String rel, String mimeType, String href) {
-        //String[] s = new String[]{rel, mimeType, href};
-        //linkVector.addElement(s);        
         linkVector.addElement(new String[]{rel, mimeType, href, null, null, null});
     }
     

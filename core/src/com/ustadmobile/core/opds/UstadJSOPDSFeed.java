@@ -117,9 +117,6 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                         linkAttrs[i] = xpp.getAttributeValue(null, 
                             LINK_ATTR_NAMES[i]);
                     }
-                    //rel = xpp.getAttributeValue(null, "rel");
-                    //mimeType = xpp.getAttributeValue(null, "type");
-                    //href = xpp.getAttributeValue(null, "href");
                     currentItem.addLink(linkAttrs);
                 }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
                     currentItem.updated = xpp.getText();

@@ -175,28 +175,6 @@ public class TestCatalogController extends TestCase{
         assertEquals("After filtering micro type micro epub link remains",
             "application/epub+zip;x-umprofile=micro",
             filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
-        
-        /*
-        request.setPreferredResolution(new int[]{320, 320});
-        String[] entry = CatalogController.getBestAcquisitionLinkByParams(request, 
-            feed.entries[0]);
-        assertEquals("Link returned when screen size set is correct", 
-            "small-microed.epub", entry[UstadJSOPDSItem.LINK_HREF]);
-        
-        request.setPreferredResolution(null);
-        entry = CatalogController.getBestAcquisitionLinkByParams(request, 
-            feed.entries[0]);
-        assertEquals("Link returned when screen size not set correct", 
-            "small.epub", entry[UstadJSOPDSItem.LINK_HREF]);
-        
-        //try when the only one available is too small for screen
-        request.setPreferredResolution(new int[]{1280, 960});
-        entry = CatalogController.getBestAcquisitionLinkByParams(request, 
-            feed.entries[0]);
-        
-        assertEquals("Link returned when screen size larger than resized versions available is correct", 
-            "small.epub", entry[UstadJSOPDSItem.LINK_HREF]);
-        */
     }
     
     public void runTest() throws IOException, XmlPullParserException{
