@@ -982,7 +982,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 
                 acquireRequest.setCurrentFormatOptions(mimeChoices);
                 acquireRequest.setCurrentFormatChoiceEntry(i);
-                impl.getAppView(context).showChoiceDialog("Choose Format", 
+                impl.getAppView(context).showChoiceDialog("Choose Format" +
+                    acquireRequest.getEntries()[i].title, 
                     choiceLabels, CMD_SELECT_FORMAT, this);
                 break;
             }
@@ -1815,6 +1816,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 info.downloadTotalSize = HTTPResult.HTTP_SIZE_IO_EXCEPTION;
             }
             
+            //save information from the catalog about it
             mimeWithoutParams = UMFileUtil.stripMimeParams(mimeTypes[i]);
             requiredExtension = impl.getExtensionFromMimeType(mimeWithoutParams);
             if(requiredExtension != null) {
@@ -1829,7 +1831,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 request.getDestDirPath(), suggestedFilename
             });;
             info.mimeType = mimeTypes[i];
-            
+            saveEntryInfo(entries[i], info, suggestedFilename);
+                        
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 435, itemURL + "->" + 
                 info.fileURI);
             long downloadID = impl.queueFileDownload(itemURL, info.fileURI, 
@@ -1842,6 +1845,37 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         new Long(downloadID));
             }
         }
+    }
+    
+    /**
+     * Save the portion of the OPDS feed we are looking at that is entry information
+     * about what we are downloading to be the initial cache of that info.
+     * 
+     * @param entry The OPDSEntry that is about to be acquired
+     * @param info CatalogEntryInfo for the item being acquired: including mime type, file destination etc.
+     * @param suggestedFilename the base filename that the entry is going to be saved to
+     * @return 
+     */
+    public static boolean saveEntryInfo(UstadJSOPDSEntry entry, CatalogEntryInfo info, String suggestedFilename) {
+        boolean savedOK = false;
+        UstadJSOPDSFeed entryFeed = new UstadJSOPDSFeed(info.fileURI, suggestedFilename, 
+            CatalogController.sanitizeIDForFilename(info.fileURI));
+        UstadJSOPDSEntry newEntry = new UstadJSOPDSEntry(entryFeed, 
+            entry.title, entry.id, UstadJSOPDSItem.LINK_ACQUIRE,
+            info.mimeType, info.fileURI);
+        
+        entryFeed.addEntry(newEntry);
+            
+        try {
+            UstadMobileSystemImpl.getInstance().writeStringToFile(entryFeed.toString(), 
+                info.fileURI + CONTAINER_INFOCACHE_EXT, "UTF-8");
+            savedOK = true;
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 160,info.fileURI + 
+                CONTAINER_INFOCACHE_EXT, e);
+        }
+        
+        return savedOK;
     }
     
     /**
