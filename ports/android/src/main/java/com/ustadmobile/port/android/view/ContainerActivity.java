@@ -31,10 +31,12 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Hashtable;
 import java.util.WeakHashMap;
 
 public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView {
@@ -70,6 +72,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private int mSavedPosition = -1;
 
+    private Hashtable mArgs;
+
     @Override
     protected void onCreate(Bundle saved) {
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, saved);
@@ -93,9 +97,14 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
         mContainerURI = getIntent().getStringExtra(ContainerController.ARG_CONTAINERURI);
         mMimeType = getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
+        mArgs = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
+
         if(saved != null && saved.getInt(OUTSTATE_CURRENTITEM, -1) != -1) {
             mSavedPosition = saved.getInt(OUTSTATE_CURRENTITEM);
         }
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
+        setSupportActionBar(toolbar);
 
         //now bind to the HTTPService - the onServiceConnected method will call initContent
         Intent intent = new Intent(this, HTTPService.class);
@@ -108,7 +117,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         public void onServiceConnected(ComponentName className, IBinder service) {
             HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
             mHttpService = binder.getService();
-            mBaseURL = mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
             ContainerActivity.this.initContent();
         }
 
@@ -119,8 +127,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     };
 
     public void initContent() {
-        UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + " type " + mMimeType);
-        ContainerController.makeControllerForView(this, mBaseURL, mMimeType, this);
+        mBaseURL = mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
+        mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
+        UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + "on " + mBaseURL + " type "
+                + mMimeType);
+        ContainerController.makeControllerForView(this, mArgs, this);
     }
 
     @Override
@@ -128,10 +139,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         final Context ctx = this;
         runOnUiThread(new Runnable() {
             public void run() {
-                if(controller != null) {
-                    mContainerController = (ContainerController)controller;
-                    setupFromController((ContainerController)controller);
-                }else {
+                if (controller != null) {
+                    mContainerController = (ContainerController) controller;
+                    setupFromController((ContainerController) controller);
+                } else {
                     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                     impl.getAppView(ctx).showAlertDialog(impl.getString(U.id.error),
                             impl.getString(U.id.could_not_open_file));
@@ -144,9 +155,67 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         //TODO: Deal with other content types here - but for right now we only have EPUB
         setBaseController(controller);
         if(mMimeType.startsWith("application/epub+zip")) {
-            Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
-            setSupportActionBar(toolbar);
-            new EPUBLoaderThread(this).start();
+            //new EPUBLoaderThread(this).start();
+            showEPUB();
+        }else if(mMimeType.startsWith("application/pdf")) {
+
+        }
+    }
+
+    protected void showEPUB() {
+        UstadOCF ocf = null;
+        String[] urlArray = null;
+        Exception exc = null;
+        try {
+            ocf = mContainerController.getOCF();
+            String opfPath = UMFileUtil.joinPaths(new String[]{mBaseURL, ocf.rootFiles[0].fullPath});
+
+            //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
+            mOPF = mContainerController.getActiveOPF();
+            mContainerController.logContainerOpened(mOPF);
+
+            String[] hrefArray = mOPF.getLinearSpineURLS();
+            urlArray = new String[hrefArray.length];
+            for(int i = 0; i < hrefArray.length; i++) {
+                urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i]);
+            }
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 163, null, e);
+            exc = e;
+        }
+
+        if(urlArray != null) {
+            setContainerTitle(mOPF.title);
+            mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
+            mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(), urlArray);
+            mPager.setAdapter(mPagerAdapter);
+            if(mSavedPosition != -1) {
+                mPager.setCurrentItem(mSavedPosition);
+            }
+
+            mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+                }
+
+                @Override
+                public void onPageSelected(int position) {
+                    ContainerPageFragment frag = (ContainerPageFragment) mPagerAdapter.getItem(
+                        position);
+                    frag.evaluateJavascript(onpageSelectedJS);
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {
+
+                }
+            });
+        }else {
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            String message = "what a terrible failure: " + exc.toString();
+            exc.printStackTrace();
+            impl.getAppView(this).showAlertDialog(impl.getString(U.id.error), message);
         }
     }
 
@@ -288,81 +357,5 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             return pageList.length;
         }
     }
-
-    private static class EPUBLoaderThread extends Thread {
-
-        private ContainerActivity activity;
-
-        public EPUBLoaderThread(ContainerActivity activity) {
-            this.activity = activity;
-        }
-
-        public void run() {
-            UstadOCF ocf = null;
-            String[] urlArray = null;
-            Exception exc = null;
-            try {
-                ocf = activity.mContainerController.getOCF();
-                String opfPath = UMFileUtil.joinPaths(new String[]{
-                        activity.mContainerController.getOpenPath(), ocf.rootFiles[0].fullPath});
-
-                //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
-                activity.mOPF = activity.mContainerController.getOPF(0);
-                activity.mContainerController.logContainerOpened(activity.mOPF);
-
-                String[] hrefArray = activity.mOPF.getLinearSpineURLS();
-                urlArray = new String[hrefArray.length];
-                for(int i = 0; i < hrefArray.length; i++) {
-                    urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i]);
-                }
-            }catch(Exception e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 163, null, e);
-                exc = e;
-            }
-
-            if(urlArray != null) {
-                final String[] finalURLArray = urlArray;
-                activity.runOnUiThread(new Runnable() {
-                    public void run() {
-                        activity.setContainerTitle(activity.mOPF.title);
-                        activity.mPager = (ViewPager) activity.findViewById(R.id.container_epubrunner_pager);
-                        activity.mPagerAdapter = new ContainerViewPagerAdapter(
-                                activity.getSupportFragmentManager(), finalURLArray);
-                        activity.mPager.setAdapter(activity.mPagerAdapter);
-                        if(activity.mSavedPosition != -1) {
-                            activity.mPager.setCurrentItem(activity.mSavedPosition);
-                        }
-
-                        activity.mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                            @Override
-                            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                            }
-
-                            @Override
-                            public void onPageSelected(int position) {
-                                ContainerPageFragment frag =
-                                        (ContainerPageFragment) activity.mPagerAdapter.getItem(position);
-                                frag.evaluateJavascript(activity.onpageSelectedJS);
-                            }
-
-                            @Override
-                            public void onPageScrollStateChanged(int state) {
-
-                            }
-                        });
-                    }
-                });
-            }else {
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                String message = "what a terrible failure: " + exc.toString();
-                exc.printStackTrace();
-                impl.getAppView(activity).showAlertDialog(impl.getString(U.id.error), message);
-            }
-
-        }
-
-    }
-
 
 }

@@ -69,6 +69,8 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     
     private UstadOCF ocf;
     
+    private UstadJSOPF activeOPF;
+    
     private String[] opfTitles;
     
     public static final String PREFKEY_PREFIX_LASTOPENED = "laxs-";
@@ -80,10 +82,22 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public static final String ARG_CONTAINERURI = "URI";
     
     /**
+     * Use with loadController as the key for where the contents of a zip
+     * file can actually be accessed e.g. over an HTTP mount etc.
+     */
+    public static final String ARG_OPENPATH = "OPATH";
+    
+    /**
      * Use with loadController as the key for the mime type in args hashtable
      * @see ContainerController#loadController(java.util.Hashtable) 
      */
     public static final String ARG_MIMETYPE = "MIME";
+    
+    /**
+     * Use with loadController as the key for the OPF index to load from the
+     * container if this container is an EPUB file
+     */
+    public static final String ARG_OPFINDEX = "OPFI";
     
     /**
      * Hardcoded fixed path to the container.xml file as per the open container
@@ -105,13 +119,31 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
          super(context);
     }
     
-    public static void makeControllerForView(ContainerView view, String containerURI, String mimeType, ControllerReadyListener listener) {
-        Hashtable args = new Hashtable();
-        args.put(ARG_CONTAINERURI, containerURI);
-        args.put(ARG_MIMETYPE, mimeType);
+    public static void makeControllerForView(ContainerView view, Hashtable args, ControllerReadyListener listener) {
         ContainerController ctrl = new ContainerController(view.getContext());
         new LoadControllerThread(args, ctrl, listener, view).start();
     }
+    
+    /**
+     * Gets the currently active OPF for this controller (used if this represents
+     * an epub file)
+     * 
+     * @return Currently active OPF object
+     */
+    public UstadJSOPF getActiveOPF() {
+        return activeOPF;
+    }
+
+    /**
+     * Sets the currently active OPF for this container (used if this represents
+     * an epub file)
+     * 
+     * @param activeOPF The currently active OPF
+     */
+    public void setActiveOPF(UstadJSOPF activeOPF) {
+        this.activeOPF = activeOPF;
+    }
+    
     
     /**
      * Generates an OPDS feed for the entries in a given container.  In the case
@@ -217,31 +249,19 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * @return 
      */
     public UstadOCF getOCF() throws IOException, XmlPullParserException{
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        
         if(ocf != null) {
-            impl.getLogger().l(UMLog.DEBUG, 528, "");
             return ocf;
         }
-        impl.getLogger().l(UMLog.DEBUG, 530, "");
+        
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String containerXMLURI = UMFileUtil.joinPaths(
                 new String[]{openPath, "META-INF/container.xml"});
         
-        impl.getLogger().l(UMLog.DEBUG, 522, containerXMLURI);
-        HTTPResult res = UstadMobileSystemImpl.getInstance().readURLToString(containerXMLURI, 
-            null);
-        impl.getLogger().l(UMLog.DEBUG, 534, "result got");
-        byte[] contentBytes2 = res.getResponse();
-        String b = new String(contentBytes2);
-        impl.getLogger().l(UMLog.DEBUG, 534, "b is :" + b);
-        byte[] contentBytes = impl.readURLToString(containerXMLURI, 
-            null).getResponse();
-        String a = new String(contentBytes);
-        impl.getLogger().l(UMLog.DEBUG, 534, a);
+        HTTPResult res = UstadMobileSystemImpl.getInstance().readURLToString(
+            containerXMLURI, null);
         
-        impl.getLogger().l(UMLog.DEBUG, 534, "Starting to get ocf");
         XmlPullParser xpp = impl.newPullParser();
-        xpp.setInput(new ByteArrayInputStream(contentBytes), "UTF-8");
+        xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
         ocf = UstadOCF.loadFromXML(xpp);
         impl.getLogger().l(UMLog.DEBUG, 534, "Got ocf");
         
@@ -291,15 +311,6 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
             PREFKEY_PREFIX_LASTOPENED + id, "0", context));
     }
     
-    
-    /**
-     * Utility method to return an array of the pages that are in this, if it's an epub
-     * @return 
-     */
-    public UstadJSOPF getEpubPageList() {
-        return null;
-    }
-    
     /**
      * Load this controller - used by the async thread basesd loader
      * 
@@ -310,9 +321,16 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * @see ContainerController#ARG_MIMETYPE
      */
     public UstadController loadController(Hashtable args, Object context) throws Exception {
-        openPath = (String)args.get(ARG_CONTAINERURI);
+        openPath = (String)args.get(ARG_OPENPATH);
         mimeType = (String)args.get(ARG_MIMETYPE);
-        getOCF();
+        if(mimeType.startsWith(UstadJSOPDSItem.TYPE_EPUBCONTAINER)) {
+            getOCF();
+            if(args.containsKey(ARG_OPFINDEX)) {
+                setActiveOPF(getOPF(
+                    ((Integer)args.get(ARG_OPFINDEX)).intValue()));
+            }
+        }
+        
         return this;
     }
 

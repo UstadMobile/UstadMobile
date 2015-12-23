@@ -776,6 +776,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 Hashtable openArgs = new Hashtable();
                 openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
                 openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
+                openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
                 UstadMobileSystemImpl.getInstance().go(ContainerView.class, openArgs, 
                         getContext());
             }else if(isInProgress(entry.id)){

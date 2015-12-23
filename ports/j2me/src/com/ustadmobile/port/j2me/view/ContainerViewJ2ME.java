@@ -144,9 +144,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         containerZip = impl.getOpenZip();
         setLayout(new BorderLayout());
         
-        
-        ContainerController.makeControllerForView(this, openContainerBaseURI, 
-                mimeType, this);
+        args.put(ContainerController.ARG_OPENPATH, openContainerBaseURI);
+        ContainerController.makeControllerForView(this, args, this);
         
         requestHandler = new ContainerDocumentRequestHandler(this);
         htmlCallback = new ContainerViewHTMLCallback(this);
@@ -199,21 +198,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     protected void initEPUB() {
         try {
-            HTTPUtils.httpDebug("getting ocf");
-            if (controller == null){
-                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 524, "");
-            }else{
-                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 526, "");
-            }
-            UstadOCF ocf = controller.getOCF();
-            HTTPUtils.httpDebug("getting opf");
-            opf = controller.getOPF(0);
-            HTTPUtils.httpDebug("getting spine");
+            ocf = controller.getOCF();
+            opf = controller.getActiveOPF();
             spineURLs = opf.getLinearSpineURLS();
-            HTTPUtils.httpDebug("getting requesthandler");
-            
-            HTTPUtils.httpDebug("getting htmlcallback");
-            
+                        
             htmlC = new HTMLComponent(requestHandler);
             htmlC.setHTMLCallback(htmlCallback);
             htmlC.setImageConstrainPolicy(
@@ -259,12 +247,9 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             addCommand(cmdBackToCatalog);
             addCommandListener(this);
             
-            HTTPUtils.httpDebug("getting opfurl");
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
-            HTTPUtils.httpDebug("opfURL:" + opfURL);
-            HTTPUtils.httpDebug("title: " + title);
             Display.getInstance().callSerially(new Runnable() {
                 public void run() {
                     addComponent(BorderLayout.CENTER, htmlC);
