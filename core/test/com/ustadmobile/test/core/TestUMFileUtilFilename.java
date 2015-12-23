@@ -119,6 +119,16 @@ public class TestUMFileUtilFilename extends TestCase{
         //test filtering nasty characters
         assertEquals("removes security hazard characters from filename", 
             "nastyname.so", UMFileUtil.filterFilename("/nastyname.*so"));
+        
+        int fileSize = 500;
+        assertEquals("Format filename in bytes", "500 bytes", 
+            UMFileUtil.formatFileSize(500));
+        fileSize *= 1024;
+        assertEquals("Format filename in kB", "500 kB", 
+            UMFileUtil.formatFileSize(fileSize));
+        fileSize *= 1024;
+        assertEquals("Format filename in kB", "500 MB", 
+            UMFileUtil.formatFileSize(fileSize));
     }
 
     public void runTest(){

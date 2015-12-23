@@ -46,6 +46,8 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public UstadJSOPDSEntry[] entries;
     
+    
+    
     /**
      * The absolute URL of this catalog (HTTP or Filesystem based)
      */
@@ -88,12 +90,16 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         
         UstadJSOPDSItem currentItem = resultFeed;
         Vector entryVector = new Vector();
+        
+        String[] linkAttrs;
         String rel;
         String mimeType;
         String href;
         //cache the content string of an entry in case we dont find summary
         String content = null;
-                String name;
+        String name;
+        
+        int i;
         do {
             name = null;
             if(evtType == XmlPullParser.START_TAG) {
@@ -106,10 +112,15 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                 }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
                     currentItem.id = xpp.getText();
                 }else if(name.equals("link")){
-                    rel = xpp.getAttributeValue(null, "rel");
-                    mimeType = xpp.getAttributeValue(null, "type");
-                    href = xpp.getAttributeValue(null, "href");
-                    currentItem.addLink(rel, mimeType, href);
+                    linkAttrs = new String[LINK_ATTR_NAMES.length];
+                    for(i = 0; i < LINK_ATTR_NAMES.length; i++) {
+                        linkAttrs[i] = xpp.getAttributeValue(null, 
+                            LINK_ATTR_NAMES[i]);
+                    }
+                    //rel = xpp.getAttributeValue(null, "rel");
+                    //mimeType = xpp.getAttributeValue(null, "type");
+                    //href = xpp.getAttributeValue(null, "href");
+                    currentItem.addLink(linkAttrs);
                 }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
                     currentItem.updated = xpp.getText();
                 }else if(name.equals("summary") && xpp.next() == XmlPullParser.TEXT) {

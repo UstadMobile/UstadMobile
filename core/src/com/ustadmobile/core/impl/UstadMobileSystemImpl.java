@@ -910,6 +910,19 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract int[] getScreenSize(Object context);
     
+    
+    /**
+     * When selecting a link to download we can use the mime type parameter
+     * x-umprofile to determine the type of device the link is intended for
+     * e.g. x-umprofile=micro for files with reduced size images and 3gp
+     * video
+     * 
+     * Currently supports only null (no specific profile) or micro
+     * 
+     * @return profile name for this system e.g. null or "micro"
+     */
+    public abstract String getUMProfileName();
+    
     /**
      * 
      * @param context
@@ -935,6 +948,30 @@ public abstract class UstadMobileSystemImpl {
         
         
         return null;
+    }
+    
+    /**
+     * Get the applicable primary and fallback cache directories
+     * 
+     * @param mode
+     * @param context
+     * @return 
+     */
+    public HTTPCacheDir[] getCacheDirsByMode(int mode, Object context) {
+        if(mode == CatalogController.SHARED_RESOURCE) {
+            return new HTTPCacheDir[] { 
+                getHTTPCacheDir(CatalogController.SHARED_RESOURCE, context), null};
+        }else if(mode == CatalogController.USER_RESOURCE) {
+            return new HTTPCacheDir[] { 
+                getHTTPCacheDir(CatalogController.USER_RESOURCE, context), null};
+        }else if(mode == (CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE)) {
+            return new HTTPCacheDir[] { 
+                getHTTPCacheDir(CatalogController.USER_RESOURCE, context),
+                getHTTPCacheDir(CatalogController.SHARED_RESOURCE, context)
+            };
+        }else {
+            return null;//invali
+        }
     }
     
     /**

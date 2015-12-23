@@ -178,9 +178,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     private UstadJSOPDSEntry[] selectedEntries;
     
     /**
-     * The currently selected download mode (set after choice dialog to user)
+     * The acquire request that the user is in the process of building up
      */
-    private int selectedDownloadMode = SHARED_RESOURCE;
+    private AcquireRequest acquireRequest;
     
     /**
      * The locations available for a user to store downloaded content
@@ -244,6 +244,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static final int CMD_SELECT_STORAGE_DIR = 20;
     
+    /**
+     * Flag to indicate that the user is being asked to choose a download format
+     */
+    public static final int CMD_SELECT_FORMAT = 30;
+    
     private static final int CHOICE_DOWNLOAD_SHARED = 0;
     
     private static final int CHOICE_DOWNLOAD_USER = 1;
@@ -286,6 +291,10 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     private Timer downloadUpdateTimer;
     
     public static final int DOWNLOAD_UPDATE_INTERVAL = 1000;
+    
+    public static final int CACHEDIR_PRIMARY = 0;
+    
+    public static final int CACHEDIR_FALLBACK = 1;
     
     //Hashtable indexed entry id -> download ID (Long object)
     private Hashtable downloadingEntries;
@@ -785,7 +794,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @param storageMode 
      */
     public void handleSelectDownloadStorageMode(int storageMode) {
-        selectedDownloadMode = storageMode;
+        acquireRequest.setResourceMode(storageMode);
         UMStorageDir[] allDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
             storageMode, getContext());
         Vector availableVector = new Vector();
@@ -808,6 +817,19 @@ public class CatalogController extends UstadBaseController implements AppViewCho
 
     /**
      * Handle when the choice dialog has resulted in a decision 
+     * 
+     * The methods the user goes through to acquire entries are:
+     *  1. handleClickDownloadEntries : Prompt user to choose to download to 
+     *     their own dir or shared dir
+     * 
+     *  2. handleSelectStorageMode : Get a list of available directories 
+     *     (e.g. device, sd card): allow the user to select where they want to
+     *     save files.
+     * 
+     * 3.  handleSelectDestinationDir: User has chosen a directory: If required
+     *     prompt the user to choose their preferred format for download
+     * 
+     * 4.  handleConfirmDownload: Everything ready to go: start acquisition
      * 
      * @param commandId
      * @param choice 
@@ -835,8 +857,13 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 String destDirURI = availableStorageDirs[choice].getDirURI();
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 526, "#" + choice + ": " 
                     + destDirURI);
-                handleConfirmDownloadEntries(selectedEntries, destDirURI);
+                handleSelectDestDir(selectedEntries, destDirURI);
                 break;
+            case CMD_SELECT_FORMAT:
+                handleEntryFormatSelected(choice, false);
+                appView.dismissChoiceDialog();
+                
+                    
         }
     }
     
@@ -849,8 +876,12 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @param entries The entries selected by the user to download
      */
     public void handleClickDownloadEntries(final UstadJSOPDSEntry[] entries) {
-        selectedEntries = entries;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        selectedEntries = entries;
+        acquireRequest = new AcquireRequest(entries, null, 
+            impl.getActiveUser(getContext()), impl.getActiveUserAuth(getContext()), 
+            -1, getContext(), this);
+        
         String[] choices = new String[]{impl.getString(U.id.all_users), 
             impl.getString(U.id.only_me), impl.getString(U.id.cancel)};
         impl.getAppView(getContext()).showChoiceDialog(impl.getString(U.id.download_for),
@@ -884,11 +915,90 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @param entries - the entries that the user wants to download
      * @param destDirURI - the directory in which the entries should be saved
      */
-    public void handleConfirmDownloadEntries(UstadJSOPDSEntry[] entries, String destDirURI) {
+    public void handleSelectDestDir(UstadJSOPDSEntry[] entries, String destDirURI) {
+        acquireRequest.setDestDirPath(destDirURI);
+        
+        //check and see if we need to choose formats...
+        promptSelectEntryFormat();
+    }
+    
+    public void handleEntryFormatSelected(int choice, boolean setAll) {
+        acquireRequest.setSelectedFormat(acquireRequest.currentFormatChoiceEntry,
+            acquireRequest.getCurrentFormatOptions()[choice]);
+        //for any remaining entries...
+        promptSelectEntryFormat();
+    }
+    
+    /**
+     * 
+     */
+    public void promptSelectEntryFormat() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        final AcquireRequest request = new AcquireRequest(entries, destDirURI, 
-            impl.getActiveUser(getContext()), impl.getActiveUserAuth(getContext()), 
-            selectedDownloadMode, getContext(), this);
+        
+        Vector acquireLinks;
+        int i;
+        int j;
+        String[] currentLink;        
+        
+        for(i = 0; i < acquireRequest.getEntries().length; i++) {
+            if(acquireRequest.getSelectedFormat(i) != null) {
+                continue;//skip over whatever we already have a format for
+            }
+            acquireLinks = filterAcquisitionLinksByProfile(
+                acquireRequest.getEntries()[i].getAcquisitionLinks(),
+                impl.getUMProfileName());
+            
+            //check and see how many types we have...
+            if(acquireLinks.size() == 1) {
+                //set this one and continue
+                currentLink = (String[])acquireLinks.elementAt(0);
+                acquireRequest.setSelectedFormat(i, 
+                    currentLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+            }else {
+                String mimeChoices[] = new String[acquireLinks.size()];
+                String choiceLabels[] = new String[acquireLinks.size()];
+                
+                for(j = 0; j < mimeChoices.length; j++) {
+                    currentLink = (String[])acquireLinks.elementAt(j);
+                    mimeChoices[j] = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
+                    if(currentLink[UstadJSOPDSItem.LINK_TITLE] != null) {
+                        choiceLabels[j] = currentLink[UstadJSOPDSItem.LINK_TITLE];
+                    }else {
+                        choiceLabels[j] = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
+                    }
+                    
+                    if(currentLink[UstadJSOPDSItem.LINK_LENGTH] != null) {
+                        try {
+                            choiceLabels[j] += "(" + UMFileUtil.formatFileSize(
+                                Integer.parseInt(currentLink[UstadJSOPDSItem.LINK_LENGTH])) +
+                                ")";
+                        }catch(Exception e) {
+                            //number format exception of some kind probably...
+                            impl.l(UMLog.WARN, 207, 
+                                currentLink[UstadJSOPDSItem.LINK_LENGTH], e);
+                        }
+                    }
+                }
+                
+                acquireRequest.setCurrentFormatOptions(mimeChoices);
+                acquireRequest.setCurrentFormatChoiceEntry(i);
+                impl.getAppView(context).showChoiceDialog("Choose Format", 
+                    choiceLabels, CMD_SELECT_FORMAT, this);
+                break;
+            }
+       }
+        
+        if(i == acquireRequest.getEntries().length) {
+            //now we are good to go...
+            startAcquireRequest();
+        }
+        
+    }
+    
+    protected void startAcquireRequest() {
+        final AcquireRequest request = acquireRequest;
+        this.acquireRequest = null;
+        
         this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
         
         Thread startDownloadThread = new Thread(new Runnable() {
@@ -897,8 +1007,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             }
         });
         startDownloadThread.start();
-        
     }
+    
     
     /**
      * Called when the user selects an item from the menu (e.g. Drawer, J2ME options
@@ -964,6 +1074,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         return headers;
     }
     
+    
+    
     /**
      * Get an OPDS catalog by URL
      * 
@@ -1002,31 +1114,15 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 String opdsFileURI = null;
                 
                 if(url.startsWith("http://") || url.startsWith("https://")) {
-                    HTTPCacheDir primaryCacheDir = null;
-                    HTTPCacheDir fallbackCache = null;
-
-
+                    HTTPCacheDir[] cacheDirs = impl.getCacheDirsByMode(resourceMode, 
+                        context);
                     String filename = null;
                     if(catalogID != null) {
                         filename = getFileNameForOPDSFeedId(catalogID);
                     }
 
-                    if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
-                        primaryCacheDir = impl.getHTTPCacheDir(USER_RESOURCE, context);
-                    }
-
-                    if((resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
-                        if(primaryCacheDir == null) {
-                            primaryCacheDir = impl.getHTTPCacheDir(SHARED_RESOURCE, 
-                                context);
-                        }else {
-                            fallbackCache = impl.getHTTPCacheDir(SHARED_RESOURCE, 
-                                context);
-                        }
-                    }
-
-                    opdsFileURI = primaryCacheDir.get(url, filename, headers, 
-                        resultBuf, fallbackCache);
+                    opdsFileURI = cacheDirs[0].get(url, filename, headers, 
+                        resultBuf, cacheDirs[1]);
                 }else if(url.startsWith("file://")) {
                     opdsFileURI = url;
                 }
@@ -1586,65 +1682,72 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     }
     
     /**
-     * Find the best acquisition link according to the given request parameters
+     * Filter the given vector of acquisition links by the x-umprofile parameter
+     * of the mime type in the acquisition links.  The server may be able to 
+     * provide an epub version formatted for smaller devices (e.g. small images
+     * 3gp video format etc).  Where there is one version matching the profile
+     * and another version not matching the profile we will want to show only
+     * the version that matches the profile.
      * 
-     * Right now: this is looking at matching the width and height. If the request
-     * has no specified width and height: prefer the link with no specified
-     * width and height.  If there is a preferred (e.g. screen) width and height
-     * prefer the source that is the smallest available that matches the
-     * is at least as big as the preferred width and height
+     * @see UstadJSOPDSItem#getLinks(java.lang.String, java.lang.String, boolean, boolean) 
      * 
-     * TODO: Handle that width and height (e.g. orientation) are interchangable.
+     * @param links Vector of String arrays indexed as per UstadJSOPDSItem.getLinks
+     * @param profileName the profile parameter of the platform that we want links to match
+     *  : currently only null for the generic original version and micro for micro optimized
+     *    version
      * 
-     * @param request
-     * @param entry
-     * @return 
+     * @return a new Vector filtered as described
      */
-    public static String[] getBestAcquisitionLinkByParams(CatalogController.AcquireRequest request, UstadJSOPDSEntry entry) {
-        Vector acquisitionLinks = entry.getAcquisitionLinks();
-        if(acquisitionLinks == null || acquisitionLinks.size() == 0) {
-            return null;
-        }
-        
-        String[] preferredLink = null;
-        int[] preferredSize = request.getPreferredResolution();
-        int[] bestSizeMatch = null;
-        String[] linkInfo;
-        
-        Hashtable mimeParams;
-        
-        for(int i = 0; i < acquisitionLinks.size(); i++) {
-            linkInfo = (String[])acquisitionLinks.elementAt(i);
-            mimeParams = UMFileUtil.parseTypeWithParamHeader(
-                linkInfo[UstadJSOPDSItem.LINK_MIMETYPE]).params;
-            if(preferredSize == null && mimeParams == null) {
-                //we want the screen size neutral version and this is it
-                preferredLink = linkInfo;
-                break;
-            }else if(preferredLink == null) {
-                //we have no other link right now - take this one
-                preferredLink = linkInfo;
-                bestSizeMatch = getScreenSizeFromMimeParams(mimeParams);
-            }else if(preferredSize != null) {
-                int[] thisLinkSize = getScreenSizeFromMimeParams(mimeParams);
-                if(thisLinkSize == null) {
-                    continue;
+    public static Vector filterAcquisitionLinksByProfile(Vector links, String profileName) {
+        Vector filteredLinks = new Vector();
+        Hashtable linksByType = new Hashtable();
+        String[] currentLink;
+        String currentMime;
+        int semiPos;
+        for(int i = 0; i < links.size(); i++) {
+            currentLink = (String[])links.elementAt(i);
+            currentMime = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
+            semiPos = currentMime.indexOf(';');
+            if(semiPos != -1) {
+                currentMime = currentMime.substring(0, semiPos).trim();
+            }
+            
+            if(linksByType.containsKey(currentMime)) {
+                //this means we have found two versions here
+                Integer otherIndex = (Integer)linksByType.get(currentMime);
+                String[] otherLink = (String[])links.elementAt(otherIndex.intValue());
+                String otherProfile = UMFileUtil.parseTypeWithParamHeader(
+                    otherLink[UstadJSOPDSItem.LINK_MIMETYPE]).getParam("x-umprofile");
+                String currentProfile = UMFileUtil.parseTypeWithParamHeader(
+                    currentLink[UstadJSOPDSItem.LINK_MIMETYPE]).getParam("x-umprofile");
+                
+                boolean otherMatches = false;
+                boolean currentMatches = false;
+                if(profileName == null) {
+                    otherMatches = otherProfile == null;
+                    currentMatches = currentProfile == null;
+                }else {
+                    otherMatches = otherProfile != null && 
+                        otherProfile.equals(profileName);
+                    currentMatches = currentProfile != null && 
+                        currentProfile.equals(profileName);
                 }
                 
-                boolean fitsScreen = thisLinkSize[0] >= preferredSize[0] && thisLinkSize[1] >= preferredSize[1];
-                boolean smallerThanLast = true;
-                if(bestSizeMatch != null) {
-                    smallerThanLast= (thisLinkSize[0] * thisLinkSize[1]) < (bestSizeMatch[0] * bestSizeMatch[1]);
+                if(otherMatches && !currentMatches) {
+                    //do nothing - do not add this one to the filtered links
+                }else if(!otherMatches && currentMatches) {
+                    //replace the other one
+                    filteredLinks.setElementAt(currentLink, otherIndex.intValue());
+                }else {
+                    filteredLinks.addElement(currentLink);
                 }
-                
-                if(fitsScreen && smallerThanLast) {
-                    preferredLink = linkInfo;
-                    bestSizeMatch = thisLinkSize;
-                }
+            }else {
+                linksByType.put(currentMime, new Integer(filteredLinks.size()));
+                filteredLinks.addElement(currentLink);
             }
         }
         
-        return preferredLink;
+        return filteredLinks;
     }
     
     /**
@@ -1678,13 +1781,17 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         String suggestedFilename;
         String mimeWithoutParams;
         String requiredExtension;
+        Vector acquisitionLinks;
         
         for(int i = 0; i < entries.length; i++) {
-            preferredLink = getBestAcquisitionLinkByParams(request, entries[i]);
-            
-            if(preferredLink == null) {
+            acquisitionLinks = entries[i].getAcquisitionLinks(
+                request.getSelectedFormat(i));
+            if(acquisitionLinks.size() == 0) {
+                //nothing available for this link that we want... skip it
                 continue;
             }
+            
+            preferredLink = (String[])acquisitionLinks.elementAt(0);
             
             itemHref = preferredLink[UstadJSOPDSItem.LINK_HREF];
             mimeTypes[i] = preferredLink[UstadJSOPDSItem.LINK_MIMETYPE];
@@ -1757,8 +1864,14 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 entry.parentFeed.href, 
                 thumbnailLink[UstadJSOPDSEntry.LINK_HREF]);
                     
-            String thumbnailFile = impl.getHTTPCacheDir(request.getResourceMode(),
-                request.getContext()).getCacheFileURIByURL(thumbnailURL);
+            HTTPCacheDir[] dirs = impl.getCacheDirsByMode(
+                CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, 
+                request.getContext());
+            
+            String thumbnailFile = dirs[0].getCacheFileURIByURL(thumbnailURL);
+            if(thumbnailFile == null && dirs[1] != null) {
+                thumbnailFile = dirs[1].getCacheFileURIByFilename(thumbnailURL);
+            }
             
             if(thumbnailFile != null) {
                 //we have the thumbnail file in the cahce... let's copy it
@@ -1784,25 +1897,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
         
         return result;
-    }
-    
-    /**
-     * Figure out the width and height (if any) present in the mime parameters
-     * in the given hashtable (which may be null if there are none)
-     * 
-     * @param mimeParams Mime parameters as a hashtable
-     * 
-     * @return int[]{width,height} of screen size params given; null if there are none
-     */
-    private static int[] getScreenSizeFromMimeParams(Hashtable mimeParams) {
-        if(mimeParams != null && mimeParams.containsKey(UstadMobileConstants.MIMEPARAM_WIDTH) && mimeParams.containsKey(UstadMobileConstants.MIMEPARAM_HEIGHT)) {
-            return new int[] { 
-                Integer.parseInt(mimeParams.get(UstadMobileConstants.MIMEPARAM_WIDTH).toString()),
-                Integer.parseInt(mimeParams.get(UstadMobileConstants.MIMEPARAM_HEIGHT).toString())
-            };
-        }else {
-            return null;
-        }
     }
     
     /**
@@ -2007,7 +2101,30 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         private CatalogController controller;
         
+        /**
+         * EPUBs by device type profile: currently only null and "micro" represented
+         * by the mime type params after the epub x-umprofile=micro etc.
+         */
+        private String preferredProfile;
+        
         private int[] preferredResolution;
+        
+        /**
+         * The mime type of the format to be downloaded for each link
+         */
+        private String[] selectedFormat;
+        
+        /**
+         * When options are being selected - track which options have been
+         * presented to the user and the order of them
+         */
+        private String[] currentFormatOptions;
+        
+        /**
+         * The index of the entry that is currently up for the user to choose
+         * the desired format
+         */
+        private int currentFormatChoiceEntry;
         
         /**
          * @param entries The OPDS Entries that should be acquired.  Must be OPDS 
@@ -2030,28 +2147,15 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             this.context = context;
             this.controller = controller;
             this.preferredResolution = null;
+            this.selectedFormat = new String[entries.length];
         }
         
-        /**
-         * The preferred resolution for download of resources: if they have 
-         * width and height attributes look for the smallest one that fits
-         * both width and height.
-         * 
-         * @return Preferred dimension as int[] width, height or null for no preferred dimension (e.g. use original unscaled version)
-         */
-        public int[] getPreferredResolution() {
-            return preferredResolution;
+        public void setPreferredProfile(String preferredProfile) {
+            this.preferredProfile = preferredProfile;
         }
         
-        /**
-         * he preferred resolution for download of resources: if they have 
-         * width and height attributes look for the smallest one that fits
-         * both width and height.
-         * 
-         * @param preferredResolution Preferred dimension as int[] width, height or null for no preferred dimension (e.g. use original unscaled version)
-         */
-        public void setPreferredResolution(int[] preferredResolution) {
-            this.preferredResolution= preferredResolution;
+        public String getPreferredProfile() {
+            return preferredProfile;
         }
         
         /**
@@ -2062,6 +2166,29 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             return entries;
         }
         
+        public void setSelectedFormat(int index, String format) {
+            selectedFormat[index] = format;
+        }
+        
+        public String getSelectedFormat(int index) {
+            return selectedFormat[index];
+        }
+        
+        public void setCurrentFormatOptions(String[] currentFormatOptions) {
+            this.currentFormatOptions = currentFormatOptions;
+        }
+        
+        public String[] getCurrentFormatOptions() {
+            return this.currentFormatOptions;
+        }
+        
+        public int getCurrentFormatChoiceEntry() {
+            return currentFormatChoiceEntry;
+        }
+        
+        public void setCurrentFormatChoiceEntry(int currentFormatChoiceEntry) {
+            this.currentFormatChoiceEntry = currentFormatChoiceEntry;
+        }
         
         public String getDestDirPath() {
             return destDirPath;
@@ -2081,6 +2208,10 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         public int getResourceMode() {
             return resourceMode;
+        }
+        
+        public void setResourceMode(int resourceMode) {
+            this.resourceMode = resourceMode;
         }
         
         public Object getContext() {

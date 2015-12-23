@@ -44,9 +44,18 @@ public abstract class UstadJSOPDSItem {
     
     protected Vector linkVector;
     
-    public static int LINK_REL = 0;
-    public static int LINK_MIMETYPE = 1;
-    public static int LINK_HREF = 2;
+    public static final int LINK_REL = 0;
+    public static final int LINK_MIMETYPE = 1;
+    public static final int LINK_HREF = 2;
+    public static final int LINK_LENGTH = 3;
+    public static final int LINK_TITLE = 4;
+    public static final int LINK_HREFLANG = 5;
+    
+    /**
+     * Mapping of attribute names to constants above
+     */
+    protected static final String[] LINK_ATTR_NAMES = new String[]{ "rel", "type",
+        "href", "length", "title", "hreflang"};
     
     public String updated;
     
@@ -120,8 +129,18 @@ public abstract class UstadJSOPDSItem {
     }
     
     public void addLink(String rel, String mimeType, String href) {
-        String[] s = new String[]{rel, mimeType, href};
-        linkVector.addElement(s);        
+        //String[] s = new String[]{rel, mimeType, href};
+        //linkVector.addElement(s);        
+        linkVector.addElement(new String[]{rel, mimeType, href, null, null, null});
+    }
+    
+    /**
+     * Add a link to this item
+     * 
+     * @param linkVals Link values as per the LINK_* constants
+     */
+    public void addLink(String[] linkVals) {
+        linkVector.addElement(linkVals);
     }
     
     public String[] getLink(int index) {

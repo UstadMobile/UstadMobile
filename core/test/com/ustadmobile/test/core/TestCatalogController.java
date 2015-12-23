@@ -40,6 +40,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import java.io.ByteArrayInputStream;
 import java.util.Hashtable;
+import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 
 
@@ -81,7 +82,7 @@ public class TestCatalogController extends TestCase{
         android.app.Activity activity = getActivity();
          $endif */
         opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
-        acquireOPDSURL = TestUtils.getInstance().getHTTPRoot() + "acquire.opds";
+        acquireOPDSURL = TestUtils.getInstance().getHTTPRoot() + "acquire-multi.opds";
     }
     
     public void testCatalogController() throws IOException, XmlPullParserException {
@@ -154,6 +155,28 @@ public class TestCatalogController extends TestCase{
             feed.entries, "/some/dir/notused", 
             TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
             CatalogController.SHARED_RESOURCE, context, controller);
+        
+        // test filtering of acquisition links
+        Vector filteredLinks = CatalogController.filterAcquisitionLinksByProfile(
+            controller.getModel().opdsFeed.entries[0].getAcquisitionLinks(),null);
+        String[] filteredLink = (String[])filteredLinks.elementAt(1);
+        assertEquals("After filtering two links are remaining", 2, 
+            filteredLinks.size());
+        assertEquals("After filtering null type only plain link remains",
+            "application/epub+zip",filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+        
+        // tst filtering acquisition links for the micro profile
+        filteredLinks = CatalogController.filterAcquisitionLinksByProfile(
+            controller.getModel().opdsFeed.entries[0].getAcquisitionLinks(),
+            "micro");
+        filteredLink = (String[])filteredLinks.elementAt(1);
+        assertEquals("After filtering two links are remaining", 2, 
+            filteredLinks.size());
+        assertEquals("After filtering micro type micro epub link remains",
+            "application/epub+zip;x-umprofile=micro",
+            filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+        
+        /*
         request.setPreferredResolution(new int[]{320, 320});
         String[] entry = CatalogController.getBestAcquisitionLinkByParams(request, 
             feed.entries[0]);
@@ -170,8 +193,10 @@ public class TestCatalogController extends TestCase{
         request.setPreferredResolution(new int[]{1280, 960});
         entry = CatalogController.getBestAcquisitionLinkByParams(request, 
             feed.entries[0]);
+        
         assertEquals("Link returned when screen size larger than resized versions available is correct", 
             "small.epub", entry[UstadJSOPDSItem.LINK_HREF]);
+        */
     }
     
     public void runTest() throws IOException, XmlPullParserException{

@@ -712,6 +712,17 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return new int[] { dm.widthPixels, dm.heightPixels};
     }
 
+    /**
+     * Running on Android we will take the "full fat" version of any files... eg. files without
+     * a x-umprofile tag
+     *
+     * @return
+     */
+    @Override
+    public String getUMProfileName() {
+        return null;
+    }
+
     @Override
     public String getMimeTypeFromExtension(String extension) {
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);

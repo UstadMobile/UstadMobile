@@ -111,6 +111,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     private String openZipURI;
     
     public static final String OPENZIP_PROTO = "zip:///";
+    
+    public static final String MICRO_PROFILE_NAME = "micro";
         
     /**
      * System property used to get the memory card location
@@ -1215,6 +1217,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             Display.getInstance().getDisplayHeight()};
     }
 
+    public String getUMProfileName() {
+        return MICRO_PROFILE_NAME;
+    }
+    
     public String getMimeTypeFromExtension(String extension) {
         String lcExt = extension.toLowerCase();
         if(extToMimeTypeTable.containsKey(lcExt)) {

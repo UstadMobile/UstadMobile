@@ -61,20 +61,12 @@ public class UstadMobileConstants {
     public static final int DIR_RTL = 1;
     
     /**
-     * Mime type parameter name in OPDS feeds indicating the maximum width of the images 
-     * in the EPUB added by the UMCLOUD server e.g. for images contained within 320x320
+     * The mime parameter value for the micro edition: an epub version that will
+     * contain reduced sized images to avoid issues and 3gp video/mp3 audio
+     * only.
      * 
-     * application/epub+zip;width=320;height=320
      */
-    public static final String MIMEPARAM_WIDTH = "width";
-    
-    /**
-     * Mime type parameter name in OPDS feeds indicating the maximum height of the images 
-     * in the EPUB added by the UMCLOUD server e.g. for images contained within 320x320
-     * 
-     * application/epub+zip;width=320;height=320
-     */
-    public static final String MIMEPARAM_HEIGHT = "height";
+    public static String UMPROFILE_MICRO = "micro";
     
     public static final String[][] OPDS_FEEDS_PRESETS = new String[][]{
         {"", "Select a feed"},

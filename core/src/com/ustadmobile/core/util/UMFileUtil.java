@@ -393,7 +393,15 @@ public class UMFileUtil {
        public TypeWithParamHeader(String typeName, Hashtable params) {
            this.typeName = typeName;
            this.params = params;
-       }   
+       }
+       
+       public String getParam(String paramName) {
+           if(params != null && params.containsKey(paramName)) {
+               return (String)params.get(paramName);
+           }else {
+               return null;
+           }
+       }
     }
     
     private static boolean isWhiteSpace(char c) {
@@ -404,7 +412,26 @@ public class UMFileUtil {
         }
     }
     
-    
+    /**
+     * Return a String formatted to show the file size in a user friendly format
+     * 
+     * If < 1024 (kb) : size 'bytes'
+     * if 1024 < size < 1024^2 : size/1024 kB
+     * if 1024^ < size < 1023^3 : size/1024^2 MB
+     * 
+     * @param size Size of the file in bytes
+     * 
+     * @return Formatted string as above
+     */
+    public static String formatFileSize(int size) {
+        if(size < 1024) {
+            return size + " bytes";
+        }else if(size < 1048576) {
+            return (size/1024) + " kB";
+        }else {
+            return (size/1048576) + " MB";
+        }
+    }
     
     /**
      * Returns the parent filename of a given string uri 
