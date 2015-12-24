@@ -286,6 +286,12 @@ public class HTTPCacheDir {
     public String get(String url, String filename, Hashtable headers, HTTPResult[] resultBuf, HTTPCacheDir fallback) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         boolean isValid = false;
+        String dataURL = null;
+        
+        if(url.startsWith("data:")) {
+            dataURL = url;
+            url = convertIfDataURL(url);
+        }
         
         //check and see if we have the entry
         JSONArray entry = cacheIndex.optJSONArray(url);
@@ -305,8 +311,9 @@ public class HTTPCacheDir {
                     //we can serve it direct from the cache - no validation needed
                     isValid = true;
                     System.out.println("Cache HIT" + url);
-                } else {
+                } else if(dataURL == null){
                     //needs to be validated
+                    
                     result = impl.makeRequest(url, headers, null, "HEAD");
                     isValid = validateCacheEntry(entry, result);
                     if(isValid) {
@@ -330,7 +337,12 @@ public class HTTPCacheDir {
         }
         
         try {
-            result = impl.makeRequest(url, headers, null);
+            if(dataURL == null) {
+                result = impl.makeRequest(url, headers, null);
+            }else {
+                result = new HTTPResult(dataURL);
+            }
+            
             if(resultBuf != null) {
                 resultBuf[0] = result;
             }
@@ -347,6 +359,14 @@ public class HTTPCacheDir {
         }else {
             return null;
         }
+    }
+    
+    private String convertIfDataURL(String url) {
+        if(url.startsWith("data:")) {
+            url = "datahc:///" + url.hashCode();
+        }
+        
+        return url;
     }
     
     public String get(String url, String filename) throws IOException {
@@ -381,7 +401,7 @@ public class HTTPCacheDir {
      */
     public JSONArray getEntry(String url) {
         try {
-            return cacheIndex.optJSONArray(url);
+            return cacheIndex.optJSONArray(convertIfDataURL(url));
         }catch(Exception e) {
             //this really would never happen - using the opt method on a prebuilt jsonobject
         }
@@ -392,11 +412,11 @@ public class HTTPCacheDir {
         boolean isValid = false;
         try {
             String validateHeader = result.getHeaderValue("etag");
-            String cachedEtag = entry.getString(IDX_ETAG);
-            if (validateHeader.equals(cachedEtag)) {
+            String cachedEtag = entry.optString(IDX_ETAG);
+            if (validateHeader != null && validateHeader.equals(cachedEtag)) {
                 isValid = true;
             }else if((validateHeader = result.getHeaderValue("Last-Modified")) != null){
-                long cachedLastModified = entry.getLong(IDX_LASTMODIFIED);
+                long cachedLastModified = entry.optLong(IDX_LASTMODIFIED, -1);
                 if(cachedLastModified != -1 && parseHTTPDate(validateHeader) >= entry.getLong(IDX_LASTMODIFIED)) {
                     isValid = true;
                 }
@@ -435,7 +455,7 @@ public class HTTPCacheDir {
         String fileURI = null;
         
         try {
-            JSONArray urlEntry = cacheIndex.optJSONArray(url);
+            JSONArray urlEntry = cacheIndex.optJSONArray(convertIfDataURL(url));
             if(urlEntry != null) {
                 urlEntry.put(IDX_LASTACCESSED, System.currentTimeMillis());
                 fileURI = UMFileUtil.joinPaths(new String[] {dirName,
@@ -450,7 +470,7 @@ public class HTTPCacheDir {
     }
     
     public boolean hasCachedURL(String url) {
-        return cacheIndex.has(url);
+        return cacheIndex.has(convertIfDataURL(url));
     }
     
     public boolean hasCachedFilename(String filename) {

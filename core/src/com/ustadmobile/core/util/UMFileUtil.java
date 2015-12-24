@@ -107,6 +107,11 @@ public class UMFileUtil {
             }
         }
         
+        //Check if this is actually a data: link which should not be resolved
+        if(link.startsWith("data:")) {
+            return link;
+        }
+        
         if(link.length() > 2 && link.charAt(0) == '/' && link.charAt(1) == '/'){
             //we want the protocol only from the base
             String resolvedURL = base.substring(0, base.indexOf(':')+1) + link;

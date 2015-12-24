@@ -31,12 +31,12 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.U;
-import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
@@ -95,8 +95,8 @@ public class LoginController extends UstadBaseController{
     public static int authenticate(String username, String password, String url) throws IOException{
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");
-        String encodedUserAndPass="Basic "+ Base64.encode(username,
-                    password);
+        String encodedUserAndPass = "Basic " + Base64Coder.encodeString(
+            username + ':' + password);
         headers.put("Authorization", encodedUserAndPass);
         
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(

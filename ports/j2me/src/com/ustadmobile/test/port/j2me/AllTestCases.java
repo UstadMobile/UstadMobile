@@ -62,7 +62,8 @@ public class AllTestCases extends TestCase {
         }
         
        
-        TestSuite allTestSuite = new TestSuite("AlltestSuites");
+        TestSuite allTestSuite = new TestSuite("AllTestSuite");
+        allTestSuite.addTest(new TestHTTPResult());
         allTestSuite.addTest(new TestHTTPCacheDir());
 
         ///allTestSuite.addTest(new com.ustadmobile.test.core.TestUMTinCanUtils());

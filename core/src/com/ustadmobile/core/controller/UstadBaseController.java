@@ -43,6 +43,8 @@ public abstract class UstadBaseController implements UstadController {
     
     protected Object context;
     
+    protected boolean isDestroyed = false;
+    
     /**
      * Create a new controller with the given context
      * 
@@ -83,5 +85,50 @@ public abstract class UstadBaseController implements UstadController {
      * locale is changed
      */
     public abstract void setUIStrings();
+    
+    /**
+     * This should be called by the view when it is paused: e.g. when the user
+     * leaves the view
+     */
+    public void handleViewPause() {
+        
+    }
+    
+    /**
+     * This should be called by the view when the user has come back to
+     * the view
+     */
+    public void handleViewResume() {
+        
+    }
+    
+    /**
+     * This should be called by the view when it is being destroyed: this is
+     * irreversible and it is time to stop background activities 
+     */
+    public void handleViewDestroy() {
+        setDestroyed(true);
+    }
+    
+    /**
+     * Returns true if the view we are working for has been destroyed, false
+     * otherwise
+     * 
+     * @return true if view has been destroyed, false otherwise
+     */
+    protected synchronized boolean isDestroyed() {
+        return isDestroyed;
+    }
+    
+    /**
+     * Set if the view has been destroyed - this is in reality irreversible
+     * and lives in a synchronized method for purposes of thread safety
+     * 
+     * @param isDestroyed 
+     */
+    protected synchronized void setDestroyed(boolean isDestroyed) {
+        this.isDestroyed = isDestroyed;
+    }
+    
     
 }

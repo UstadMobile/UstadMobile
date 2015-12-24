@@ -16,7 +16,10 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
+import com.joanzapata.pdfview.PDFView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.ContainerController;
@@ -34,6 +37,7 @@ import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -155,11 +159,27 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         //TODO: Deal with other content types here - but for right now we only have EPUB
         setBaseController(controller);
         if(mMimeType.startsWith("application/epub+zip")) {
-            //new EPUBLoaderThread(this).start();
             showEPUB();
         }else if(mMimeType.startsWith("application/pdf")) {
-
+            showPDF();
         }
+    }
+
+    /**
+     * Show a PDF container using
+     */
+    protected void showPDF() {
+        com.joanzapata.pdfview.PDFView pdfView;
+        RelativeLayout container = (RelativeLayout)findViewById(R.id.container_relative_layout);
+        container.removeView(findViewById(R.id.container_epubrunner_pager));
+        pdfView = (PDFView)getLayoutInflater().inflate(R.layout.item_container_pdfview, null);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
+        params.addRule(RelativeLayout.BELOW, R.id.container_toolbar);
+        container.addView(pdfView, params);
+        setContainerTitle(UMFileUtil.getFilename(mContainerURI));
+        pdfView.fromFile(new File(UMFileUtil.stripPrefixIfPresent("file:///", mContainerURI)))
+            .enableSwipe(true).load();
     }
 
     protected void showEPUB() {

@@ -31,7 +31,6 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.U;
-import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -48,6 +47,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -222,6 +222,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static final String EPUB_EXTENSION = ".epub";
     
+    public static final String PDF_EXTENSION = ".pdf";
+    
     /**
      * Hardcoded fixed path to the container.xml file as per the open container
      * format spec : META-INF/container.xml
@@ -299,8 +301,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     //Hashtable indexed entry id -> download ID (Long object)
     private Hashtable downloadingEntries;
     
-    private Thread thumbnailLoadThread;
-    
+    private Thread thumbnailLoadThread;    
     
     public CatalogController(Object context) {
         super(context);
@@ -512,7 +513,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             
         String thumbnailFile;
         
-        for(int i = 0; i < feed.entries.length; i++) {
+        for(int i = 0; i < feed.entries.length && !isDestroyed(); i++) {
             thumbnailLinks = feed.entries[i].getThumbnailLink(false);
             thumbnailFile = null;
             if(thumbnailLinks != null) {
@@ -527,6 +528,10 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         UstadMobileSystemImpl.l(UMLog.ERROR, 132, 
                             feed.entries[i].title + ": " + feed.entries[i].id, e);
                     }
+                }
+                
+                if(isDestroyed()) {
+                    return;
                 }
                 
                 if(thumbnailFile != null) {
@@ -1071,7 +1076,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static Hashtable makeAuthHeaders(String username, String password) {
         Hashtable headers = new Hashtable();
         if(username != null && password != null) {
-            headers.put("Authorization", "Basic "+ Base64.encode(username,password));
+            headers.put("Authorization", "Basic "+ Base64Coder.encodeString(
+                username + ':' + password));
         }
         return headers;
     }
@@ -1428,18 +1434,22 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         UstadMobileSystemImpl.l(UMLog.VERBOSE, 429, dir);
         
         String[] dirContents = impl.listDirectory(dir);
+        String currentPath;
         
         for(int i = 0; i < dirContents.length; i++) {
             if(dirContents[i].startsWith("cache")) {
                 continue;
             }
             
+            currentPath = UMFileUtil.joinPaths(new String[]{dir, dirContents[i]});
             if(dirContents[i].endsWith(OPDS_EXTENSION)) {
-                opdsFiles.addElement(UMFileUtil.joinPaths(new String[]{dir, 
-                    dirContents[i]}));
+                opdsFiles.addElement(currentPath);
             }else if(dirContents[i].endsWith(EPUB_EXTENSION)) {
-                containerFiles.addElement(UMFileUtil.joinPaths(new String[]{dir, 
-                    dirContents[i]}));
+                containerFiles.addElement(currentPath);
+            }else if(dirContents[i].endsWith(PDF_EXTENSION)){
+                if(impl.fileExists(currentPath + CONTAINER_INFOCACHE_EXT)) {
+                    containerFiles.addElement(currentPath);
+                }
             }
         }
     }
@@ -1521,6 +1531,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         UstadJSOPDSEntry epubEntry;
         UstadJSOPDSFeed containerFeed;
         String entryCacheFile;
+        boolean isEPUB = false;
         
         for(i = 0; i < containerFiles.length; i++) {
             containerFeed = null;
@@ -1528,8 +1539,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             
             try {
                 entryCacheFile = containerFiles[i] + CONTAINER_INFOCACHE_EXT;
+                isEPUB = containerFiles[i].endsWith(EPUB_EXTENSION);
                 //see oif
-                if(impl.fileExists(entryCacheFile) && impl.fileLastModified(entryCacheFile) > impl.fileLastModified(containerFiles[i])) {
+                if(impl.fileExists(entryCacheFile) && (impl.fileLastModified(entryCacheFile) > impl.fileLastModified(containerFiles[i])) || !isEPUB) {
                     try { 
                         containerFeed = UstadJSOPDSFeed.loadFromXML(
                             impl.readFileAsText(entryCacheFile, "UTF-8"));
@@ -2104,14 +2116,17 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     }
     
     public void handleViewPause() {
+        super.handleViewPause();
         stopDownloadTimer();
     }
     
     public void handleViewResume() {
+        super.handleViewResume();
         startDownloadTimer();
     }
     
     public void handleViewDestroy() {
+        super.handleViewDestroy();
         stopDownloadTimer();
     }
     

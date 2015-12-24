@@ -48,4 +48,5 @@ dependencies {
     compile 'com.android.support:design:23.0.1'
     compile 'com.android.support:support-v4:23.0.1'
     compile 'com.nanohttpd:nanohttpd:2.1.1'
+    compile 'com.joanzapata.pdfview:android-pdfview:1.0.4@aar'
 }

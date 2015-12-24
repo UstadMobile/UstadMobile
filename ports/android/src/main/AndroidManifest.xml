@@ -23,6 +23,7 @@
             android:label="@string/title_activity_login"></activity>
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
+            android:noHistory="true"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/title_activity_splash_screen">
             <intent-filter>

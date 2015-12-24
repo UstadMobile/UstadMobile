@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -54,6 +55,8 @@ public class HTTPResult {
     
     public static final int HTTP_SIZE_IO_EXCEPTION = -2;
     
+    public static final String DATA_URI_PREFIX = "data:";
+    
     /**
      * 
      * @param response The byte response data from the server
@@ -75,6 +78,67 @@ public class HTTPResult {
                     responseHeaders.get(headerName));
             }
         }
+    }
+    
+    /**
+     * Make a result object based on a data URL with the bytes in the response
+     * byte array
+     * 
+     * As per: https://en.wikipedia.org/wiki/Data_URI_scheme
+     * 
+     * @param dataURL 
+     */
+    public HTTPResult(String dataURL) {
+        int dataStarts = dataURL.indexOf(',');
+        
+        responseHeaders = null;
+        boolean isBase64 = false;
+        
+        if(dataStarts > DATA_URI_PREFIX.length()) {
+            String infoSection = dataURL.substring(DATA_URI_PREFIX.length(), 
+                dataStarts);
+            Hashtable params = UMFileUtil.parseParams(infoSection, ';');
+            Enumeration keys = params.keys();
+            String paramName;
+            
+            String charset = null;
+            String mediaType = null;
+            while(keys.hasMoreElements()) {
+                paramName = (String)keys.nextElement();
+                if(paramName.equals("charset")) {
+                    charset = (String)params.get(paramName);
+                }else if(paramName.equals("base64")) {
+                    isBase64 = true;
+                }else {
+                    //it must be the media type
+                    mediaType = paramName;
+                }
+            }
+            
+            if(mediaType != null){
+                responseHeaders = new Hashtable();
+                if(charset != null) {
+                    mediaType += ";charset=" + charset;
+                }
+                responseHeaders.put("content-type", mediaType);
+            }
+        }
+        
+        if(isBase64) {
+            int offset = dataStarts+1;
+            char[] charArr = new char[dataURL.length()-offset];
+            char c;
+            int p = 0;
+            for(int i = offset; i < dataURL.length(); i++) {
+                c = dataURL.charAt(i);
+                if (c != ' ' && c != '\r' && c != '\n' && c != '\t') {
+                    charArr[p++] = c;
+                }
+            }
+            
+            response = Base64Coder.decode(charArr, 0, p);
+        }
+        
     }
     
     /**
@@ -161,7 +225,7 @@ public class HTTPResult {
      * @return 
      */
     public String getHeaderValue(String key) {
-        Object valObj = responseHeaders.get(key);
+        Object valObj = responseHeaders.get(key.toLowerCase());
         if(valObj != null) {
             return valObj.toString();
         }else {

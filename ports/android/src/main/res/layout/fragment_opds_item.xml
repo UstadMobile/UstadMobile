@@ -24,12 +24,23 @@
         android:layout_marginBottom="4dp"
         >
 
-        <ImageView
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/opds_item_thumbnail"
+            android:id="@+id/opds_item_thumbnail_container"
             android:minWidth="80dp"
-            android:minHeight="80dp" />
+            android:minHeight="80dp">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:id="@+id/opds_item_thumbnail"
+                android:minWidth="32dp"
+                android:minHeight="32dp"
+                android:maxWidth="80dp"
+                android:maxHeight="80dp" />
+        </RelativeLayout>
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -38,8 +49,8 @@
             android:text="Large Text"
             android:id="@+id/opdsitem_title_text"
             android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/opds_item_thumbnail"
-            android:layout_toEndOf="@+id/opds_item_thumbnail"/>
+            android:layout_toRightOf="@+id/opds_item_thumbnail_container"
+            android:layout_toEndOf="@+id/opds_item_thumbnail_container"/>
 
         <TextView
             android:layout_width="wrap_content"
