@@ -58,4 +58,6 @@ public interface UstadView {
      */
     public void setDirection(int dir);
     
+    public void setAppMenuCommands(String[] labels, int[] ids);
+    
 }

@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UstadBaseController;
@@ -27,6 +29,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     private boolean handleUIStringsOnResume = true;
 
     private Toolbar umToolbar;
+
+    private int[] appMenuCommands;
+
+    private String[] appMenuLabels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +68,32 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
+    }
+
+
+    public void setAppMenuCommands(String[] labels, int[] ids) {
+        this.appMenuLabels = labels;
+        this.appMenuCommands = ids;
+        supportInvalidateOptionsMenu();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if(appMenuCommands != null && appMenuLabels != null) {
+            for(int i = 0; i < appMenuLabels.length; i++) {
+                menu.add(Menu.NONE, appMenuCommands[i], i, appMenuLabels[i]);
+            }
+            return true;
+        }else {
+            return super.onCreateOptionsMenu(menu);
+        }
+    }
+
+    public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {
+        if(controller.handleClickAppMenuItem(item.getItemId())) {
+            return true;
+        }else {
+            return false;
+        }
     }
 
     protected Toolbar getUMToolbar() {

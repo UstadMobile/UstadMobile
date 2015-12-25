@@ -240,6 +240,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     
     public void setView(UstadView view) {
         this.containerView = (ContainerView)view;
+        super.setView(view);
     }
     
     /**
@@ -335,7 +336,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
 
     public void setUIStrings() {
-        //do nothing - there are no ui strings to be set.
+        setStandardAppMenuOptions();
     }
     
 }

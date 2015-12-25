@@ -110,6 +110,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
         setSupportActionBar(toolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         //now bind to the HTTPService - the onServiceConnected method will call initContent
         Intent intent = new Intent(this, HTTPService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
@@ -129,6 +131,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
 
     };
+
+
 
     public void initContent() {
         mBaseURL = mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
@@ -158,6 +162,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     protected void setupFromController(ContainerController controller) {
         //TODO: Deal with other content types here - but for right now we only have EPUB
         setBaseController(controller);
+        mContainerController.setUIStrings();
         if(mMimeType.startsWith("application/epub+zip")) {
             showEPUB();
         }else if(mMimeType.startsWith("application/pdf")) {
@@ -285,22 +290,15 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_container, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if(handleClickAppMenuItem(item, mContainerController)) {
             return true;
+        }
+
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

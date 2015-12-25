@@ -394,6 +394,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         cView.setMenuOptions(menuOpts);
         cView.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
         
+        setStandardAppMenuOptions();
     }
     
     

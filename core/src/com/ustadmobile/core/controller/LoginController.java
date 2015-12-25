@@ -108,8 +108,10 @@ public class LoginController extends UstadBaseController{
     /**
      * Removes the credentials of the current user from the system
      */
-    public void handleLogout() {
-        
+    public static void handleLogout(Object context) {
+        //delete the active user
+        UstadMobileSystemImpl.getInstance().go(LoginView.class, new Hashtable(), 
+            context);
     }
     
     

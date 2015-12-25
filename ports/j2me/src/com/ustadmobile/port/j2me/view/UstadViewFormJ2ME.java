@@ -85,6 +85,10 @@ public class UstadViewFormJ2ME extends Form {
     public UstadViewFormJ2ME(Hashtable args, Object context) {
         this(args, context, true);
     }
+    
+    public void setAppMenuCommands(String[] labels, int[] ids) {
+        //do nothing
+    }
 
     public boolean isIsBackCommandEnabled() {
         return backCommandEnabled;

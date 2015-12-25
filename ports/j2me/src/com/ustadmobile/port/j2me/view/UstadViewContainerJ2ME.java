@@ -66,6 +66,10 @@ public class UstadViewContainerJ2ME extends Container implements UstadView, Acti
         this.ustadForm = ustadForm;
     }
     
+    public void setAppMenuCommands(String[] labels, int[] ids) {
+        //do nothing for the moment
+    }
+    
     public Object getContext() {
         return context;
     }
