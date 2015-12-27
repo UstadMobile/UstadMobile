@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.UstadView;
 import java.util.Enumeration;
@@ -175,7 +176,6 @@ public class BasePointController extends UstadBaseController{
             newFeed.put("httpu", authUser);
             newFeed.put("httpp", authPass);
             arr.put(newFeed);
-            String newJSON = arr.toString();
             BasePointController.setUserFeedListArray(arr, context);
         }catch(JSONException e) {
             
@@ -187,11 +187,41 @@ public class BasePointController extends UstadBaseController{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         try {
             String currentJSON = impl.getUserPref(
-                CatalogController.PREFKEY_USERFEEDLIST, 
-                UstadMobileDefaults.DEFAULT_FEEDLIST, context);
-            retVal = new JSONArray(currentJSON);
+                CatalogController.PREFKEY_USERFEEDLIST, null, context);
+            if(currentJSON != null) {
+                retVal = new JSONArray(currentJSON);
+            }else {
+                retVal = getDefaultUserFeedList(context);
+            }
         }catch(JSONException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 148, null, e);
+        }
+        
+        return retVal;
+    }
+    
+    /**
+     * Generates the default user feed list by resolving the DEFAULT_OPDS_SERVER
+     * relative to the current xAPI server
+     * 
+     * @param context
+     * @return 
+     */
+    public static JSONArray getDefaultUserFeedList(Object context) {
+        JSONArray retVal = null;
+        String xAPIServer = UstadMobileSystemImpl.getInstance().getAppPref(
+            UstadMobileSystemImpl.PREFKEY_XAPISERVER, 
+            UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+        try {
+            retVal = new JSONArray();
+            JSONObject serverFeed = new JSONObject();
+            serverFeed.put("title", "Ustad Mobile");
+            serverFeed.put("url", UMFileUtil.resolveLink(xAPIServer, 
+                UstadMobileDefaults.DEFAULT_OPDS_SERVER));
+            serverFeed.put("auth", ":appuser:");
+            retVal.put(serverFeed);
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 164, xAPIServer, e);
         }
         
         return retVal;

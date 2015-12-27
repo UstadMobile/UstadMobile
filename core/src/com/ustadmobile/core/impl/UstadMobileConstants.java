@@ -46,7 +46,25 @@ public class UstadMobileConstants {
      */
     public static final String CACHEDIR = "cache";
     
-    public static final String[] supportedLocales = new String[] {"en", "ar"};
+    /**
+     * Locales and their name (in their own language).  Two dimensional string
+     * array with the locale code and it's name
+     */
+    public static final String[][] SUPPORTED_LOCALES = new String[][] {
+        {"en", "English"}, {"ar", "العَرَبِية‎"}, {"fa", "دری"}, {"ps", "پښتو"}};
+    
+    /**
+     * Index of the locale code in the string array - e.g.
+     * SUPPORTED_LOCALES[i][LOCALE_CODE] = "en"
+     */
+    public static final int LOCALE_CODE = 0;
+    
+    /**
+     * Index of the locale name in the string array - e.g.
+     * SUPPORTED_LOCALES[i][LOCALE_CODE] = "English".  Name should be in it's
+     * own language e.g. Francais not "French"
+     */
+    public static final int LOCALE_NAME = 1;
     
     public static final String fallbackLocale = "en";
     

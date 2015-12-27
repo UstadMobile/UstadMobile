@@ -71,6 +71,13 @@ public class LoginController extends UstadBaseController{
     
     public static final String REGISTER_GENDER = "gender";
     
+    public static final String REGISTER_USERNAME = "username";
+    
+    public static final String REGISTER_PASSWORD = "password";
+    
+    public static final String REGISTER_EMAIL = "email";
+    
+    public static final String REGISTER_REGCODE = "regcode";
     
     public LoginController(Object context) {
         super(context);
@@ -173,6 +180,10 @@ public class LoginController extends UstadBaseController{
     }
     
     
+    public void handleAdvanceCheckboxToggled(boolean checked) {
+        view.setAdvancedSettingsVisible(checked);
+    }
+    
     /**
      * Handle when the user clicks the registration button - register a new 
      * account, then bring them into the app
@@ -182,14 +193,21 @@ public class LoginController extends UstadBaseController{
      *  LoginController.REGISTER_PHONENUM - String with phone number not including country code
      *  LoginController.REGISTER_NAME - String containing name
      *  LoginController.REGISTER_GENDER - String with 'm' or 'f'
+     *  UstadMobileSystemImpl.PREFKEY_XAPISERVER - The URL of the xAPI server: 
+     *  regserver can be relative to this.
      */
     public void handleClickRegister(final Hashtable userInfoParams) {
+        final String xAPIServer = (String)userInfoParams.get(
+            UstadMobileSystemImpl.PREFKEY_XAPISERVER);
+        updateXAPIServer(xAPIServer);
+        
         final LoginController thisCtrl = this;
         final Object ctx = context;
         Thread registerThread = new Thread() {
             public void run() {
                 String serverURL = UstadMobileSystemImpl.getInstance().getAppPref("regserver",
                         UstadMobileDefaults.DEFAULT_REGISTER_SERVER, context);
+                serverURL = UMFileUtil.resolveLink(xAPIServer, serverURL);
                 
                 StringBuffer phoneNumSB = new StringBuffer().append('+').append(
                     userInfoParams.get(LoginController.REGISTER_COUNTRY));
@@ -234,16 +252,29 @@ public class LoginController extends UstadBaseController{
         registerThread.start();
     }
     
-    
-    public void handleClickLogin(final String username, final String password) {
+    protected void updateXAPIServer(String newServer) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String currentServer = impl.getAppPref(
+                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+        
+        //See if the user has changed hte xAPI Server
+        if(!currentServer.equals(newServer)) {
+            impl.setAppPref(UstadMobileSystemImpl.PREFKEY_XAPISERVER, newServer, 
+                context);
+        }
+    }
+    
+    
+    public void handleClickLogin(final String username, final String password, final String xAPIServer) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        updateXAPIServer(xAPIServer);
+        
         Thread loginThread = new Thread() {
             public void run() {
                 impl.getLogger().l(UMLog.DEBUG, 303, null);
-                String serverBaseURL = impl.getAppPref(
-                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
-                String serverURL = UMFileUtil.joinPaths(new String[]{serverBaseURL, 
+                String serverURL = UMFileUtil.joinPaths(new String[]{xAPIServer, 
                     "statements?limit=1"});
 
                 int result = 0;
@@ -318,5 +349,11 @@ public class LoginController extends UstadBaseController{
         view.setRegisterGenderMaleLabel(impl.getString(U.id.male));
         view.setRegisterGenderFemaleLabel(impl.getString(U.id.female));
         view.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
+        view.setAdvancedLabel(impl.getString(U.id.advanced));
+        view.setServerLabel(impl.getString(U.id.server));
+        String xAPIURL = impl.getAppPref(
+                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+        view.setXAPIServerURL(xAPIURL);
     }
 }

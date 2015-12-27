@@ -607,8 +607,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static UstadJSOPDSFeed makeUserFeedListFeeed(Object context) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String rootFeedsStr = impl.getUserPref(PREFKEY_USERFEEDLIST, 
-            UstadMobileDefaults.DEFAULT_FEEDLIST, context);
         String feedID =  getUserFeedListIdPrefix(context);
         UstadJSOPDSFeed usersFeeds = new UstadJSOPDSFeed(OPDS_PROTO_USER_FEEDLIST,
                 "My Feeds",feedID);

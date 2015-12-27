@@ -110,4 +110,22 @@ public interface LoginView extends UstadView {
      */
     public void setRegisterButtonText(String registerButtonText);
     
+    /**
+     * The text that will appear for users to select the server.
+     */
+    public void setServerLabel(String serverLabel);
+    
+    /**
+     * The actual xAPI server to use
+     */
+    public void setXAPIServerURL(String xAPIServerURL);
+    
+    /**
+     * The text that will appear for users to see advanced settings
+     * @param advancedLabel 
+     */
+    public void setAdvancedLabel(String advancedLabel);
+    
+    public void setAdvancedSettingsVisible(boolean visible);
+    
 }

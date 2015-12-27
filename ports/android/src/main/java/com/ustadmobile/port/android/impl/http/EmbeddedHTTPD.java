@@ -142,15 +142,15 @@ public class EmbeddedHTTPD extends NanoHTTPD {
             }
 
             String pathInZip = uri.substring(nextSlash + 1);
-
             try {
                 MountedZip mountedZip = mountedEPUBs.get(zipMountPath);
                 ZipFile zipFile = new ZipFile(mountedZip.zipPath);
                 ZipEntry entry = zipFile.getEntry(pathInZip);
-                int totalLength = (int)entry.getSize();
-                String etag = Integer.toHexString((zipMountPath + pathInZip + entry.getTime() + "" +
-                        totalLength).hashCode());
+
                 if(entry != null) {
+                    int totalLength = (int)entry.getSize();
+                    String etag = Integer.toHexString((zipMountPath + pathInZip + entry.getTime() + "" +
+                            totalLength).hashCode());
                     String extension = UMFileUtil.getExtension(pathInZip);
                     InputStream zipEntryStream = zipFile.getInputStream(entry);
                     retInputStream = zipEntryStream;

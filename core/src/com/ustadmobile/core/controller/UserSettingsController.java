@@ -52,14 +52,6 @@ public class UserSettingsController extends UstadBaseController implements Ustad
     
     private UserSettingsView settingsView;
     
-    private static Hashtable langNamesTable = new Hashtable();
-    
-    static {
-        langNamesTable.put("", new Integer(U.id.lang_sys));
-        langNamesTable.put("en", new Integer(U.id.lang_en));
-        langNamesTable.put("ar", new Integer(U.id.lang_ar));
-    }
-    
     String[] languageNames;
     
     String[] languageCodes;
@@ -68,12 +60,20 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         super(context);
     }
     
-    public static int getStringIDByLang(String langCode) {
-        if(langNamesTable.containsKey(langCode)) {
-            return ((Integer)langNamesTable.get(langCode)).intValue();
-        }else {
-            return -1;
+    public static String getLocaleNameByCode(String langCode) {
+        String retVal = null;
+        if(langCode.equals("")) {
+            //this is the system default language
+            return UstadMobileSystemImpl.getInstance().getString(U.id.lang_sys);
         }
+        
+        for(int i = 0; i < UstadMobileConstants.SUPPORTED_LOCALES.length; i++) {
+            if(UstadMobileConstants.SUPPORTED_LOCALES[i][UstadMobileConstants.LOCALE_CODE].equals(langCode)) {
+                return UstadMobileConstants.SUPPORTED_LOCALES[i][UstadMobileConstants.LOCALE_NAME];
+            }
+        }
+        
+        return null;
     }
     
     public static UserSettingsController makeControllerForView(UserSettingsView view) {
@@ -91,7 +91,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         settingsView.setSettingsTitle(impl.getString(U.id.settings));
         setViewSettingsList();
         
-        int numLangs = UstadMobileConstants.supportedLocales.length + 1;
+        int numLangs = UstadMobileConstants.SUPPORTED_LOCALES.length + 1;
         languageNames = new String[numLangs];
         languageCodes = new String[numLangs];
         
@@ -99,11 +99,9 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         languageCodes[0] = "";
         languageNames[0] = impl.getString(U.id.lang_sys);
         
-        String locale;
         for(int i = 1; i < numLangs; i++) {
-            locale = UstadMobileConstants.supportedLocales[i-1];
-            languageCodes[i] = locale;
-            languageNames[i] = impl.getString(getStringIDByLang(locale));
+            languageCodes[i] = UstadMobileConstants.SUPPORTED_LOCALES[i-1][UstadMobileConstants.LOCALE_CODE];
+            languageNames[i] = UstadMobileConstants.SUPPORTED_LOCALES[i-1][UstadMobileConstants.LOCALE_NAME];
         }
         
         settingsView.setLanguageList(languageNames);
@@ -119,8 +117,9 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         
         String userLangSetting = impl.getUserPref(PREFKEY_LANG, "", 
                 settingsView.getContext());
-        String selectedLang = impl.getString(getStringIDByLang(userLangSetting));
-        items[SETTING_LANG] = new UserSettingItem("Language", selectedLang);
+        String selectedLang = getLocaleNameByCode(userLangSetting);
+        items[SETTING_LANG] = new UserSettingItem(impl.getString(U.id.language), 
+            selectedLang);
         
         settingsView.setSettingsList(items);
     }

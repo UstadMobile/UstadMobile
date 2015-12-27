@@ -42,6 +42,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -57,7 +59,7 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class LoginActivity extends UstadBaseActivity implements LoginView, View.OnClickListener {
+public class LoginActivity extends UstadBaseActivity implements LoginView, View.OnClickListener, CheckBox.OnCheckedChangeListener {
 
     private int viewId;
 
@@ -81,6 +83,12 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
     protected String mRegisterButtonText;
 
+    protected String mAdvancedLabel;
+
+    protected String mServerLabel;
+
+    protected String mXAPIServer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,13 +111,6 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         TabLayout tabLayout = (TabLayout)findViewById(R.id.login_sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
         mLoginController.setUIStrings();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_login, menu);
-        return true;
     }
 
     @Override
@@ -179,6 +180,32 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
     }
 
     @Override
+    public void setServerLabel(String serverLabel) {
+        this.mServerLabel = serverLabel;
+    }
+
+    @Override
+    public void setXAPIServerURL(String xAPIServerURL) {
+        this.mXAPIServer = xAPIServerURL;
+        View xAPITextView = findViewById(R.id.login_xapi_server);
+        if(xAPITextView != null) {
+            ((EditText)xAPITextView).setText(xAPIServerURL);
+        }
+    }
+
+    @Override
+    public void setAdvancedLabel(String advancedLabel) {
+        this.mAdvancedLabel = advancedLabel;
+    }
+
+    @Override
+    public void setAdvancedSettingsVisible(boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.INVISIBLE;
+        findViewById(R.id.login_server_label).setVisibility(visibility);
+        findViewById(R.id.login_xapi_server).setVisibility(visibility);
+    }
+
+    @Override
     public Object getContext() {
         return this;
     }
@@ -186,10 +213,11 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
     @Override
     public void onClick(View view) {
         int id = view.getId();
+        String xAPIServer = ((EditText)findViewById(R.id.login_xapi_server)).getText().toString();
         if(id == R.id.login_button) {
             String username = ((EditText)findViewById(R.id.login_username)).getText().toString();
             String password = ((EditText)findViewById(R.id.login_password)).getText().toString();
-            mLoginController.handleClickLogin(username, password);
+            mLoginController.handleClickLogin(username, password, xAPIServer);
         }else if(id == R.id.login_registerbutton) {
             Hashtable userVals = new Hashtable();
             int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();
@@ -203,8 +231,14 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
             int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
             userVals.put(LoginController.REGISTER_GENDER,
                     genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
+            userVals.put(UstadMobileSystemImpl.PREFKEY_XAPISERVER, xAPIServer);
             mLoginController.handleClickRegister(userVals);
         }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean value) {
+        mLoginController.handleAdvanceCheckboxToggled(value);
     }
 
     public class LoginPagerAdapter extends FragmentStatePagerAdapter {

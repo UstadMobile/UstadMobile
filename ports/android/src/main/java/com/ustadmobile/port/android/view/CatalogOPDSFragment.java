@@ -139,12 +139,14 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             impl.getAppView(getActivity()).showAlertDialog(impl.getString(U.id.error), errMsg);
         }else {
             //TODO: check that the activity has not been destroyed etc.
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    setupFromCatalogController((CatalogController) controller);
-                }
-            });
+            if(getActivity() != null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setupFromCatalogController((CatalogController) controller);
+                    }
+                });
+            }
         }
     }
 

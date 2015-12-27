@@ -137,6 +137,14 @@ public class U {
         public static final int downloaded_items = 48;
         
         public static final int browse_feeds = 49;
+        
+        public static final int choose_format = 50;
+        
+        public static final int language = 51;
+        
+        public static final int advanced = 52;
+        
+        public static final int server = 53;
          
    }
 }

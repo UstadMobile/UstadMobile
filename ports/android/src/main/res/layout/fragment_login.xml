@@ -6,10 +6,11 @@
     >
 
     <ImageView
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_margin="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:scaleType="fitStart"
+        android:adjustViewBounds="true"
         android:src="@drawable/umlogoheader" />
 
     <EditText
@@ -42,5 +43,32 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="@string/login_footer"
         android:id="@+id/textView" />
+
+    <CheckBox
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:id="@+id/login_advanced_checkbox" />
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Server:"
+        android:id="@+id/login_server_label"
+        android:visibility="invisible"
+        />
+    <EditText
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:id="@+id/login_xapi_server"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textNoSuggestions"
+        android:visibility="invisible"
+        />
+
+
+
 
 </LinearLayout>

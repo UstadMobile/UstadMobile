@@ -277,7 +277,7 @@ public abstract class UstadMobileSystemImpl {
         }
         
         locale = LocaleUtil.chooseSystemLocale(usersLocale,
-                getSystemLocale(context), UstadMobileConstants.supportedLocales, 
+                getSystemLocale(context), UstadMobileConstants.SUPPORTED_LOCALES, 
                 UstadMobileConstants.fallbackLocale);
         
         InputStream localeIn = null;

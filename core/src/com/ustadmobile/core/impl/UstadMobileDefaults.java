@@ -43,11 +43,19 @@ public class UstadMobileDefaults {
             "http://umcloud1.ustadmobile.com/umlrs/";
             
     
+    /**
+     * The default OPDS server: this can be absolute or relative to the
+     * XAPI_SERVER
+     */
     public static final String DEFAULT_OPDS_SERVER = 
-            "http://umcloud1.ustadmobile.com/opds/";
+            "/opds/";
     
+    /**
+     * The default registration server: this can be absolute or relative to the 
+     * XAPI_SERVER
+     */
     public static final String DEFAULT_REGISTER_SERVER = 
-            "http://umcloud1.ustadmobile.com/phoneinappreg/";
+            "/phoneinappreg/";
     
     /**
      * Used by LoginController to auto discover the user's country
@@ -55,21 +63,8 @@ public class UstadMobileDefaults {
     public static final String DEFAULT_GEOIP_SERVER = 
             "https://freegeoip.net/json/";
 
-    public static final String DEFAULT_XAPI_STATEMENT_SERVER = 
-            "http://umcloud1.ustadmobile.com/umlrs/statements/";
-    
     public static final String DEFAULT_TINCAN_PREFIX =
             "http://www.ustadmobile.com/um-tincan/";
-    
-    /**
-     * The default one root server feed list
-     */
-    public static final String DEFAULT_FEEDLIST = "[{\n" +
-        "    title: \"Ustad Mobile\",\n" +
-        "    url: \"http://umcloud1.ustadmobile.com/opds/\",\n" +
-        "    auth: \":appuser:\"\n" +
-        "}]";
-    
     
     
 }
