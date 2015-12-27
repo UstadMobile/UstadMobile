@@ -60,6 +60,9 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    private void setTextViewHint(ViewGroup viewGroup, int id, String hint) {
+        ((TextView)viewGroup.findViewById(id)).setHint(hint);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,14 +95,19 @@ public class LoginFragment extends Fragment {
                 Button registerButton = (Button)viewGroup.findViewById(R.id.login_registerbutton);
                 registerButton.setOnClickListener(loginActivity);
                 registerButton.setText(loginActivity.mRegisterButtonText);
-                ((TextView)viewGroup.findViewById(R.id.login_registername)).setHint(
-                        loginActivity.mRegisterNameHint);
+                setTextViewHint(viewGroup, R.id.login_registername, loginActivity.mRegisterNameHint);
                 ((TextView)viewGroup.findViewById(R.id.login_registerphonenum)).setHint(
                         loginActivity.mRegisterPhoneNumberHint);
                 ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_male)).setText(
                         loginActivity.mRegisterGenderMaleLabel);
                 ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_female)).setText(
                         loginActivity.mRegisterGenderFemaleLable);
+                setTextViewHint(viewGroup, R.id.login_registerusername,
+                        loginActivity.mRegisterUsernameHint);
+                setTextViewHint(viewGroup, R.id.login_registerpassword,
+                        loginActivity.mRegisterPasswordHint);
+                setTextViewHint(viewGroup, R.id.login_registeremail, loginActivity.mRegisterEmailHint);
+                setTextViewHint(viewGroup, R.id.login_registerregcode, loginActivity.mRegisterRegcodeHint);
 
                 lookupCountry(countrySpinner, getActivity());
                 break;

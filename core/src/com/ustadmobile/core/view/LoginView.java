@@ -92,6 +92,34 @@ public interface LoginView extends UstadView {
     public void setRegisterNameHint(String nameHint);
     
     /**
+     * The hint for the request username field
+     * 
+     * @param usernameHint 
+     */
+    public void setRegisterUsernameHint(String usernameHint);
+    
+    /**
+     * The hint for the user to request a password
+     * 
+     * @param passwordHint
+     */
+    public void setRegisterPasswordHint(String passwordHint);
+    
+    /**
+     * The hint for the user to include their email with registration
+     * 
+     * @param registerEmailHint 
+     */
+    public void setRegisterEmailHint(String registerEmailHint);
+    
+    /**
+     * The hint for the user to enter their registration code
+     * 
+     * @param registerRegcodHint 
+     */
+    public void setRegisterRegcodeHint(String registerRegcodHint);
+    
+    /**
      * The label for the registration form - male gender label
      * @param maleLabel 
      */

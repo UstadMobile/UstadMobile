@@ -89,6 +89,14 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
     protected String mXAPIServer;
 
+    protected String mRegisterUsernameHint;
+
+    protected String mRegisterPasswordHint;
+
+    protected String mRegisterEmailHint;
+
+    protected String mRegisterRegcodeHint;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,6 +173,26 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
     }
 
     @Override
+    public void setRegisterUsernameHint(String usernameHint) {
+        mRegisterUsernameHint = usernameHint;
+    }
+
+    @Override
+    public void setRegisterPasswordHint(String passwordHint) {
+        mRegisterPasswordHint = passwordHint;
+    }
+
+    @Override
+    public void setRegisterEmailHint(String registerEmailHint) {
+        mRegisterEmailHint = registerEmailHint;
+    }
+
+    @Override
+    public void setRegisterRegcodeHint(String registerRegcodeHint) {
+        mRegisterRegcodeHint = registerRegcodeHint;
+    }
+
+    @Override
     public void setRegisterGenderMaleLabel(String maleLabel) {
         mRegisterGenderMaleLabel = maleLabel;
     }
@@ -210,6 +238,10 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         return this;
     }
 
+    private String getEditTextVal(int viewId) {
+        return ((EditText)findViewById(viewId)).getText().toString();
+    }
+
     @Override
     public void onClick(View view) {
         int id = view.getId();
@@ -231,6 +263,10 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
             int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
             userVals.put(LoginController.REGISTER_GENDER,
                     genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
+            userVals.put(LoginController.REGISTER_USERNAME, getEditTextVal(R.id.login_registerusername));
+            userVals.put(LoginController.REGISTER_PASSWORD, getEditTextVal(R.id.login_registerpassword));
+            userVals.put(LoginController.REGISTER_EMAIL, getEditTextVal(R.id.login_registeremail));
+            userVals.put(LoginController.REGISTER_REGCODE, getEditTextVal(R.id.login_registerregcode));
             userVals.put(UstadMobileSystemImpl.PREFKEY_XAPISERVER, xAPIServer);
             mLoginController.handleClickRegister(userVals);
         }

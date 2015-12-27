@@ -145,6 +145,14 @@ public class U {
         public static final int advanced = 52;
         
         public static final int server = 53;
+        
+        public static final int optional = 54;
+        
+        public static final int email = 55;
+        
+        public static final int regcode = 56;
+        
+        
          
    }
 }

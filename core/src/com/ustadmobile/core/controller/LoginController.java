@@ -117,6 +117,8 @@ public class LoginController extends UstadBaseController{
      */
     public static void handleLogout(Object context) {
         //delete the active user
+        UstadMobileSystemImpl.getInstance().setActiveUser(null, context);
+        UstadMobileSystemImpl.getInstance().setActiveUserAuth(null, context);
         UstadMobileSystemImpl.getInstance().go(LoginView.class, new Hashtable(), 
             context);
     }
@@ -348,9 +350,16 @@ public class LoginController extends UstadBaseController{
         view.setRegisterPhoneNumberHint(impl.getString(U.id.phone_number));
         view.setRegisterGenderMaleLabel(impl.getString(U.id.male));
         view.setRegisterGenderFemaleLabel(impl.getString(U.id.female));
+        String optSffx = " (" + impl.getString(U.id.optional) + ")";
+        view.setRegisterUsernameHint(impl.getString(U.id.username) +optSffx);
+        view.setRegisterPasswordHint(impl.getString(U.id.password) + optSffx);
+        view.setRegisterEmailHint(impl.getString(U.id.email) + optSffx);
+        view.setRegisterRegcodeHint(impl.getString(U.id.regcode) + optSffx);
+        
         view.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
         view.setAdvancedLabel(impl.getString(U.id.advanced));
         view.setServerLabel(impl.getString(U.id.server));
+        
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
