@@ -625,7 +625,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         int contentLen = conn.getContentLength();
         int statusCode = conn.getResponseCode();
-        InputStream in = conn.getInputStream();
+        InputStream in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
         byte[] buf = new byte[1024];
         int bytesRead = 0;
         int bytesReadTotal = 0;
