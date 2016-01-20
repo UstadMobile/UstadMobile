@@ -349,48 +349,6 @@ public class LoginController extends UstadBaseController{
                     ioe = e;
                 }
                 
-                if(result == 200) {
-                    // try and find the role
-                    try {
-                        role = LoginController.getRole(username, password, 
-                            UstadMobileDefaults.DEFAULT_ROLE_ENDPOINT);
-                        
-                        if(role != null && role.equals(UstadMobileConstants.ROLE_TEACHER)) {
-                            teacherClassList = LoginController.getJSONArrayResult(
-                                username, password, 
-                                UstadMobileDefaults.DEFAULT_CLASSLIST_ENDPOINT);
-                            if(teacherClassList != null) {
-                                impl.setUserPref("teacherclasslist", 
-                                    teacherClassList, context);
-                            }
-                        }
-                        
-                        if(teacherClassList != null) {
-                            try {
-                                JSONArray classArr = new JSONArray(teacherClassList);
-                                for(int i = 0; i < classArr.length(); i++) {
-                                    JSONObject classObj = classArr.getJSONObject(i);
-                                    String classID = classObj.getString("id");
-                                    String classURL = UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT
-                                        + classID;
-                                    String studentListJSON = 
-                                        LoginController.getJSONArrayResult(
-                                            username, password, classURL);
-                                    if(studentListJSON != null) {
-                                        impl.setUserPref("studentlist."+classID, 
-                                            studentListJSON, context);
-                                    }
-                                }
-                            }catch(JSONException e) {
-                                //this should never happen - if it did... getTeacherClassList would have return null
-                            }
-                        }
-                        
-                    }catch(IOException e) {
-                        ioe = e;
-                    }
-                }
-                
                 impl.getAppView(context).dismissProgressDialog();
 
                 if(result == 401 | result == 403) {
@@ -402,6 +360,48 @@ public class LoginController extends UstadBaseController{
                 }else {
                     UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
                     UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
+
+                    // try and find the role
+                    try {
+                        role = LoginController.getRole(username, password,
+                                UstadMobileDefaults.DEFAULT_ROLE_ENDPOINT);
+
+                        if(role != null && role.equals(UstadMobileConstants.ROLE_TEACHER)) {
+                            teacherClassList = LoginController.getJSONArrayResult(
+                                    username, password,
+                                    UstadMobileDefaults.DEFAULT_CLASSLIST_ENDPOINT);
+                            if(teacherClassList != null) {
+                                impl.setUserPref("teacherclasslist",
+                                        teacherClassList, context);
+                            }
+                        }
+
+                        if(teacherClassList != null) {
+                            try {
+                                JSONArray classArr = new JSONArray(teacherClassList);
+                                for(int i = 0; i < classArr.length(); i++) {
+                                    JSONObject classObj = classArr.getJSONObject(i);
+                                    String classID = classObj.getString("id");
+                                    String classURL = UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT
+                                            + classID;
+                                    String studentListJSON =
+                                            LoginController.getJSONArrayResult(
+                                                    username, password, classURL);
+                                    if(studentListJSON != null) {
+                                        impl.setUserPref("studentlist."+classID,
+                                                studentListJSON, context);
+                                    }
+                                }
+                            }catch(JSONException e) {
+                                //this should never happen - if it did... getTeacherClassList would have return null
+                            }
+                        }
+
+                    }catch(IOException e) {
+                        ioe = e;
+                    }
+
+
                     if(role != null) {
                         UstadMobileSystemImpl.getInstance().setUserPref("role", 
                             role, context);
