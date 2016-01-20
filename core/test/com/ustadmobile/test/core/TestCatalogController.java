@@ -37,8 +37,10 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import java.io.ByteArrayInputStream;
 import java.util.Hashtable;
+import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 
 
@@ -48,7 +50,7 @@ import org.xmlpull.v1.XmlPullParser;
    $endif$ */
 
 /* $if umplatform == 2  $
-    import j2meunit.framework.TestCase;
+    import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
@@ -66,6 +68,8 @@ public class TestCatalogController extends TestCase{
     
     private String opdsURL;
     
+    private String acquireOPDSURL;
+    
     public TestCatalogController() {
         /* $if umplatform == 1 $ 
         super("com.toughra.ustadmobile", UstadMobileActivity.class);
@@ -78,6 +82,7 @@ public class TestCatalogController extends TestCase{
         android.app.Activity activity = getActivity();
          $endif */
         opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
+        acquireOPDSURL = TestUtils.getInstance().getHTTPRoot() + "acquire-multi.opds";
     }
     
     public void testCatalogController() throws IOException, XmlPullParserException {
@@ -93,9 +98,9 @@ public class TestCatalogController extends TestCase{
             public void run() {
                 try {
                     CatalogController loadCtrl = CatalogController.makeControllerByURL(
-                    opdsURL, CatalogController.USER_RESOURCE, 
-                    TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
-                    CatalogController.CACHE_ENABLED, context);
+                        opdsURL, CatalogController.USER_RESOURCE, 
+                        TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                        CatalogController.CACHE_ENABLED, context);
                     loadedVals.put("controller1", loadCtrl);
                 }catch(Exception e) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 183, opdsURL, e);
@@ -118,13 +123,58 @@ public class TestCatalogController extends TestCase{
         UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
         assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
         CatalogController.cacheCatalog(feedItem, CatalogController.USER_RESOURCE, 
-                null, context);
+                context);
         UstadJSOPDSFeed cachedFeed = 
             CatalogController.getCachedCatalogByID(feedItem.id, 
             CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
             context);
         
         assertEquals("Same feed id on cached catalog", feedItem.id, cachedFeed.id);
+        
+        //test out selection between different links
+        
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    CatalogController loadCtrl = CatalogController.makeControllerByURL(
+                        acquireOPDSURL, CatalogController.USER_RESOURCE, 
+                        TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                        CatalogController.CACHE_ENABLED, context);
+                    loadedVals.put("controller2", loadCtrl);
+                }catch(Exception e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 183, opdsURL, e);
+                }
+            }
+        }).start();
+        
+        TestUtils.waitForValueInTable("controller2", loadedVals);
+        controller = (CatalogController)loadedVals.get("controller2");
+        
+        UstadJSOPDSFeed feed = controller.getModel().opdsFeed;
+        CatalogController.AcquireRequest request = new CatalogController.AcquireRequest(
+            feed.entries, "/some/dir/notused", 
+            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+            CatalogController.SHARED_RESOURCE, context, controller);
+        
+        // test filtering of acquisition links
+        Vector filteredLinks = CatalogController.filterAcquisitionLinksByProfile(
+            controller.getModel().opdsFeed.entries[0].getAcquisitionLinks(),null);
+        String[] filteredLink = (String[])filteredLinks.elementAt(1);
+        assertEquals("After filtering two links are remaining", 2, 
+            filteredLinks.size());
+        assertEquals("After filtering null type only plain link remains",
+            "application/epub+zip",filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+        
+        // tst filtering acquisition links for the micro profile
+        filteredLinks = CatalogController.filterAcquisitionLinksByProfile(
+            controller.getModel().opdsFeed.entries[0].getAcquisitionLinks(),
+            "micro");
+        filteredLink = (String[])filteredLinks.elementAt(1);
+        assertEquals("After filtering two links are remaining", 2, 
+            filteredLinks.size());
+        assertEquals("After filtering micro type micro epub link remains",
+            "application/epub+zip;x-umprofile=micro",
+            filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
     }
     
     public void runTest() throws IOException, XmlPullParserException{

@@ -46,7 +46,25 @@ public class UstadMobileConstants {
      */
     public static final String CACHEDIR = "cache";
     
-    public static final String[] supportedLocales = new String[] {"en", "ar"};
+    /**
+     * Locales and their name (in their own language).  Two dimensional string
+     * array with the locale code and it's name
+     */
+    public static final String[][] SUPPORTED_LOCALES = new String[][] {
+        {"en", "English"}, {"ar", "العَرَبِية‎"}, {"fa", "دری"}, {"ps", "پښتو"}};
+    
+    /**
+     * Index of the locale code in the string array - e.g.
+     * SUPPORTED_LOCALES[i][LOCALE_CODE] = "en"
+     */
+    public static final int LOCALE_CODE = 0;
+    
+    /**
+     * Index of the locale name in the string array - e.g.
+     * SUPPORTED_LOCALES[i][LOCALE_CODE] = "English".  Name should be in it's
+     * own language e.g. Francais not "French"
+     */
+    public static final int LOCALE_NAME = 1;
     
     public static final String fallbackLocale = "en";
     
@@ -64,6 +82,22 @@ public class UstadMobileConstants {
     
     public static final String PREFIX_ATTENDANCE_URL = 
         "http://www.ustadmobile.com/activities/attended-class/";
+    
+    /**
+     * The mime parameter value for the micro edition: an epub version that will
+     * contain reduced sized images to avoid issues and 3gp video/mp3 audio
+     * only.
+     * 
+     */
+    public static String UMPROFILE_MICRO = "micro";
+    
+    public static final String[][] OPDS_FEEDS_PRESETS = new String[][]{
+        {"", "Select a feed"},
+        {"", "Custom Feed"},
+        {"http://ustadmobile.com/opds/", "UstadMobile"},
+        {"http://m.gutenberg.org/ebooks/?format=opds", "Project Gutenberg"},
+        {"http://atoll-digital-library.org/opds/", "Atoll Digital Library"}
+    };
     
     /**
      * Sorted by country name: list of international dialing codes
@@ -471,7 +505,7 @@ public class UstadMobileConstants {
         "UG",
         "UA",
         "AE",
-        "UK",
+        "GB",
         "US",
         "UY",
         "UZ",

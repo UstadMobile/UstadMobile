@@ -32,15 +32,18 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.LoginView;
 import java.io.ByteArrayOutputStream;
@@ -174,6 +177,16 @@ public abstract class UstadMobileSystemImpl {
     public static final int DLSTATUS_PAUSED = 4;
     
     /**
+     * The shared HTTPCacheDir
+     */
+    protected HTTPCacheDir sharedHttpCacheDir;
+    
+    /**
+     * The user specific http cache dir
+     */
+    protected HTTPCacheDir userHttpCacheDir;
+    
+    /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
      * 
@@ -264,7 +277,7 @@ public abstract class UstadMobileSystemImpl {
         }
         
         locale = LocaleUtil.chooseSystemLocale(usersLocale,
-                getSystemLocale(context), UstadMobileConstants.supportedLocales, 
+                getSystemLocale(context), UstadMobileConstants.SUPPORTED_LOCALES, 
                 UstadMobileConstants.fallbackLocale);
         
         InputStream localeIn = null;
@@ -316,13 +329,29 @@ public abstract class UstadMobileSystemImpl {
         String activeUserAuth = getActiveUserAuth(context);
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
         
+        
         if(activeUser == null || activeUserAuth == null) {
             go(LoginView.class, null, context);
         }else {
-            Hashtable args = CatalogController.makeUserCatalogArgs(context);
-            go(CatalogView.class, args, context);
+            Hashtable args = BasePointController.makeDefaultBasePointArgs(context);
+            go(BasePointView.class, args, context);
+            
         }
     }
+    
+    /**
+     * Save anything that should be written to disk
+     */
+    public synchronized void handleSave() {
+        if(userHttpCacheDir != null) {
+            userHttpCacheDir.saveIndex();
+        }
+        
+        if(sharedHttpCacheDir != null) {
+            sharedHttpCacheDir.saveIndex();
+        }
+    }
+    
     
     
     /**
@@ -463,13 +492,14 @@ public abstract class UstadMobileSystemImpl {
     }
     
     /**
-     * Return the difference in file modification times between two files
+     * Return the last file modification time of the given file
      * 
-     * @param fileURI1 
-     * @param fileURI2
-     * @return 
+     * @param fileURI
+     * 
+     * @return The time the given file was last modified; or -1 in the event of an error
      */
-    public abstract long modTimeDifference(String fileURI1, String fileURI2);
+    public abstract long fileLastModified(String fileURI);
+    
     
     /**
      * Get an output stream to the given file.  If the FILE_APPEND flag is set
@@ -591,6 +621,17 @@ public abstract class UstadMobileSystemImpl {
      * @return length in bytes
      */
     public abstract long fileSize(String fileURI);
+    
+    /**
+     * Get the amount of free space available on a given file URI: This is of
+     * course determined by the underlying filesystem
+     * 
+     * @param fileURI URI to the filesystem
+     * 
+     * @return The number of bytes available on the given filesystem : -1 for unknown
+     */
+    public abstract long fileAvailableSize(String fileURI) throws IOException;
+    
     
     public abstract boolean makeDirectory(String dirURI) throws IOException;
     
@@ -863,6 +904,89 @@ public abstract class UstadMobileSystemImpl {
      * @return a random UUID
      */
     public abstract String generateUUID();
+
+    
+    
+    /**
+     * When selecting a link to download we can use the mime type parameter
+     * x-umprofile to determine the type of device the link is intended for
+     * e.g. x-umprofile=micro for files with reduced size images and 3gp
+     * video
+     * 
+     * Currently supports only null (no specific profile) or micro
+     * 
+     * @return profile name for this system e.g. null or "micro"
+     */
+    public abstract String getUMProfileName();
+    
+    /**
+     * 
+     * @param context
+     * @param mode
+     * @return 
+     */
+    public HTTPCacheDir getHTTPCacheDir(int mode, Object context) {
+        if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
+            if(userHttpCacheDir == null) {
+                userHttpCacheDir = new HTTPCacheDir(getCacheDir(
+                    CatalogController.USER_RESOURCE, context));
+            }
+            
+            return userHttpCacheDir;
+        }else if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
+            if(sharedHttpCacheDir == null) {
+                sharedHttpCacheDir = new HTTPCacheDir(getCacheDir(
+                    CatalogController.SHARED_RESOURCE, context));
+            }
+            
+            return sharedHttpCacheDir;
+        }
+        
+        
+        return null;
+    }
+    
+    /**
+     * Get the applicable primary and fallback cache directories
+     * 
+     * @param mode
+     * @param context
+     * @return 
+     */
+    public HTTPCacheDir[] getCacheDirsByMode(int mode, Object context) {
+        if(mode == CatalogController.SHARED_RESOURCE) {
+            return new HTTPCacheDir[] { 
+                getHTTPCacheDir(CatalogController.SHARED_RESOURCE, context), null};
+        }else if(mode == CatalogController.USER_RESOURCE) {
+            return new HTTPCacheDir[] { 
+                getHTTPCacheDir(CatalogController.USER_RESOURCE, context), null};
+        }else if(mode == (CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE)) {
+            return new HTTPCacheDir[] { 
+                getHTTPCacheDir(CatalogController.USER_RESOURCE, context),
+                getHTTPCacheDir(CatalogController.SHARED_RESOURCE, context)
+            };
+        }else {
+            return null;//invali
+        }
+    }
+    
+    /**
+     * Return the mime type for the given extension
+     * 
+     * @param extension the extension without the leading .
+     * 
+     * @return The mime type if none; or null if it's not known
+     */
+    public abstract String getMimeTypeFromExtension(String extension);
+    
+    /**
+     * Return the extension of the given mime type
+     * 
+     * @param mimeType The mime type
+     * 
+     * @return File extension for the mime type without the leading .
+     */
+    public abstract String getExtensionFromMimeType(String mimeType);
     
 }
 

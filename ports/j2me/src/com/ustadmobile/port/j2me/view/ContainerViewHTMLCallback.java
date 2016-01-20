@@ -32,7 +32,9 @@ package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.html.AsyncDocumentRequestHandler;
 import com.sun.lwuit.html.DefaultHTMLCallback;
+import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
 import com.ustadmobile.core.impl.UMLog;
@@ -45,10 +47,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
-import javax.microedition.media.PlayerListener;
 
 /**
  *
@@ -63,8 +62,6 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     private ContainerViewJ2ME view;
 
-    private Timer timer = null;
-
     private Hashtable mcqQuizzes;
     
     boolean fixedPage = true;
@@ -74,7 +71,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     String containerTinCanID;
     
     Object context;
-
+        
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
@@ -173,6 +170,25 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         return removed > 0;
     }
 
+    public boolean linkClicked(HTMLComponent htmlC, String url) {
+        parsingError(600, "a", "src", url, "link click");
+        UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog("Click2", "u\n clicked");
+        return false;
+    }
+
+    
+    
+    public boolean parsingError(int errorId, String tag, String attribute, String value, String description) {
+        UstadMobileSystemImpl.l(UMLog.ERROR, 300, "parsingError: id:" + errorId +
+            "tag " + tag + " /attribute: " + attribute + " /value: " + value +
+            "/description: " + description);
+        
+        
+        return super.parsingError(errorId, tag, attribute, value, description); 
+    }
+    
+    
+
     public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
         System.out.println("Status: " + status + " url " + url);
         if (status == STATUS_REQUESTED) {
@@ -212,7 +228,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {
         boolean domChanged = false;
-        if (element.getTagId() == HTMLElement.TAG_INPUT) {
+        if (element != null && element.getTagId() == HTMLElement.TAG_INPUT) {
             String inputType = element.getAttributeById(HTMLElement.ATTR_TYPE);
             if (inputType.equalsIgnoreCase("radio")) {
                 String mcqName = element.getAttributeById(HTMLElement.ATTR_NAME);
@@ -238,75 +254,5 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
         super.actionPerformed(evt, htmlC, element); //To change body of generated methods, choose Tools | Templates.
     }
-
-    public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement) {
-        mediaPlayRequested(type, op, htmlC, src, mediaElement, null);
-    }
-    
-    public void mediaPlayRequested(final int type, final int op, final HTMLComponent htmlC, final String src, final HTMLElement mediaElement, final PlayerListener endOfMediaListener) {
-        if (timer == null) {
-            timer = new Timer();
-        }
-
-        
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 598, mediaElement.getTagName());
-        timer.schedule(new TimerTask() {
-            public void run() {
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 594, mediaElement.getTagName());
-                boolean isPlaying = false;
-                InputStream in = null;
-                String source = mediaElement.getAttributeById(HTMLElement.ATTR_SRC);
-                if (source == null) {
-                    //means the source is not on the tag itself but on the source tags - find them
-                    HTMLElement srcTag = mediaElement.getFirstChildByTagId(
-                            HTMLElement.TAG_SOURCE);
-                    if (srcTag != null) {
-                        source = srcTag.getAttributeById(HTMLElement.ATTR_SRC);
-                    }
-                }
-                
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 592, source);
-                
-                if (source != null) {
-                    try {
-                        String fullURI = UMFileUtil.resolveLink(
-                                htmlC.getPageURL(), source);
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 590, fullURI);
-                        String pathInZip = fullURI.substring(
-                                UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 588, pathInZip);
-                        String mediaFileExtension = UMFileUtil.getExtension(source);
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 586, mediaFileExtension);
-                        Object mediaTypeObj = mediaExtensions.get(mediaFileExtension);
-
-                        UstadMobileSystemImpl.l(UMLog.VERBOSE, 427, pathInZip
-                                + ':' + mediaFileExtension + ':' + mediaTypeObj);
-
-                        if (mediaTypeObj != null) {
-                            in = view.containerZip.openInputStream(pathInZip);
-                            UstadMobileSystemImpl.l(UMLog.DEBUG, 584, fullURI);
-                                isPlaying = UstadMobileSystemImplJ2ME.getInstanceJ2ME().playMedia(in,
-                                    (String) mediaTypeObj, endOfMediaListener);
-                        } else {
-                            UstadMobileSystemImpl.l(UMLog.INFO, 120, src);
-                        }
-
-                    } catch (IOException e) {
-                        UstadMobileSystemImpl.l(UMLog.ERROR, 120, src, e);
-                    } finally {
-                        if (!isPlaying) {
-                            UMIOUtils.closeInputStream(in);
-                        }
-                    }
-                } else {
-                    UstadMobileSystemImpl.l(UMLog.INFO, 373, mediaElement.toString());
-                }
-
-            }
-
-        }, 1000);
-    }
-    
-    
 
 }

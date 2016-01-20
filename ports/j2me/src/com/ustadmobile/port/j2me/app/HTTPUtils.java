@@ -40,10 +40,10 @@ import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
-import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.URLTextUtil;
 import javax.microedition.pim.FieldFullException;
 
@@ -128,8 +128,8 @@ public class HTTPUtils {
             if (username.equals("") || username.equals(null)){
                 return 401;
             }
-            String encodedUserAndPass="Basic "+ Base64.encode(username,
-                    password);
+            String encodedUserAndPass="Basic "+ Base64Coder.encodeString(username
+                + ':' + password);
             httpConn.setRequestProperty("Authorization", encodedUserAndPass);
             Enumeration keys = headers.keys();
             String key, value;

@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -17,14 +19,17 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class CatalogActivity extends UstadBaseActivity implements CatalogOPDSFragment.OnFragmentInteractionListener, ListView.OnItemClickListener {
+public class CatalogActivity extends UstadBaseActivity implements  ListView.OnItemClickListener {
 
     private DrawerLayout mDrawerLayout;
 
@@ -44,35 +49,8 @@ public class CatalogActivity extends UstadBaseActivity implements CatalogOPDSFra
         setContentView(R.layout.activity_catalog);
         setUMToolbar(R.id.catalog_toolbar);
         setHandleUIStringsOnResume(false);
-
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.catalog_drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.catalog_left_drawer_list);
-
-        mDrawerList.setOnItemClickListener(this);
-
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        mDrawerToggle = new ActionBarDrawerToggle(this,//host activity
-                mDrawerLayout, //DrawerLayout object
-                getUMToolbar(), //
-                R.string.drawer_open,
-                R.string.drawer_close
-        ) {
-            public void onDrawerClosed(View view) {
-                //getActionBar().setTitle(getTitle());
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-
-            public void onDrawerOpened(View drawerView) {
-                //getActionBar().setTitle(getTitle());
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-            }
-        };
-
-        mDrawerToggle.syncState();
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-
         setDirectionFromSystem();
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         CatalogOPDSFragment currentFrag = CatalogOPDSFragment.newInstance(getIntent().getExtras());
         if(savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.catalog_fragment_container,
@@ -88,15 +66,8 @@ public class CatalogActivity extends UstadBaseActivity implements CatalogOPDSFra
 
 
     public void setMenuOptions(String[] menuOptions) {
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawermenuitem,
-                menuOptions));
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_catalog, menu);
-        return true;
+        //mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawermenuitem,
+        //        menuOptions));
     }
 
     @Override
@@ -104,18 +75,14 @@ public class CatalogActivity extends UstadBaseActivity implements CatalogOPDSFra
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                UstadMobileSystemImpl.getInstance().go(BasePointView.class,
+                    BasePointController.makeDefaultBasePointArgs(this), this);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void onFragmentInteraction(Uri uri) {
-
     }
 
     @Override

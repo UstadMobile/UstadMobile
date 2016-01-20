@@ -134,8 +134,31 @@ public class U {
         
         public static final int lang_ar = 47;
         
-        public static final int attendance = 48;
+
         
-        public static final int processing = 49;
-    }
+        public static final int downloaded_items = 48;
+        
+        public static final int browse_feeds = 49;
+        
+        public static final int choose_format = 50;
+        
+        public static final int language = 51;
+        
+        public static final int advanced = 52;
+        
+        public static final int server = 53;
+        
+        public static final int optional = 54;
+        
+        public static final int email = 55;
+        
+        public static final int regcode = 56;
+        
+        public static final int attendance = 57;
+        
+        public static final int processing = 58;
+
+         
+   }
+
 }

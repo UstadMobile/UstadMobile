@@ -30,6 +30,9 @@
  */
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.core.util.Base64Coder;
+import com.ustadmobile.core.util.UMFileUtil;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -47,18 +50,103 @@ public class HTTPResult {
     
     public static final String GET = "GET";
     
+    
+    public static final int HTTP_SIZE_NOT_GIVEN = -1;
+    
+    public static final int HTTP_SIZE_IO_EXCEPTION = -2;
+    
+    public static final String DATA_URI_PREFIX = "data:";
+    
     /**
      * 
      * @param response The byte response data from the server
      * @param status the response code returned by the server
-     * @param responseHeaders the headers returned by the server in a hashtable
+     * @param responseHeaders the headers returned by the server in a hashtable (all keys lower case)
      */
     public HTTPResult(byte[] response, int status, Hashtable responseHeaders) {
         this.response = response;
         this.status = status;
-        this.responseHeaders = responseHeaders;
+        
+        //put all headers into lower case to make them case insensitive
+        if(responseHeaders != null) {
+            this.responseHeaders = new Hashtable();
+            String headerName;
+            Enumeration keys = responseHeaders.keys();
+            while(keys.hasMoreElements()) {
+                headerName = (String)keys.nextElement();
+                this.responseHeaders.put(headerName.toLowerCase(), 
+                    responseHeaders.get(headerName));
+            }
+        }
     }
     
+    /**
+     * Make a result object based on a data URL with the bytes in the response
+     * byte array
+     * 
+     * As per: https://en.wikipedia.org/wiki/Data_URI_scheme
+     * 
+     * @param dataURL 
+     */
+    public HTTPResult(String dataURL) {
+        int dataStarts = dataURL.indexOf(',');
+        
+        responseHeaders = null;
+        boolean isBase64 = false;
+        
+        if(dataStarts > DATA_URI_PREFIX.length()) {
+            String infoSection = dataURL.substring(DATA_URI_PREFIX.length(), 
+                dataStarts);
+            Hashtable params = UMFileUtil.parseParams(infoSection, ';');
+            Enumeration keys = params.keys();
+            String paramName;
+            
+            String charset = null;
+            String mediaType = null;
+            while(keys.hasMoreElements()) {
+                paramName = (String)keys.nextElement();
+                if(paramName.equals("charset")) {
+                    charset = (String)params.get(paramName);
+                }else if(paramName.equals("base64")) {
+                    isBase64 = true;
+                }else {
+                    //it must be the media type
+                    mediaType = paramName;
+                }
+            }
+            
+            if(mediaType != null){
+                responseHeaders = new Hashtable();
+                if(charset != null) {
+                    mediaType += ";charset=" + charset;
+                }
+                responseHeaders.put("content-type", mediaType);
+            }
+        }
+        
+        if(isBase64) {
+            int offset = dataStarts+1;
+            char[] charArr = new char[dataURL.length()-offset];
+            char c;
+            int p = 0;
+            for(int i = offset; i < dataURL.length(); i++) {
+                c = dataURL.charAt(i);
+                if (c != ' ' && c != '\r' && c != '\n' && c != '\t') {
+                    charArr[p++] = c;
+                }
+            }
+            
+            response = Base64Coder.decode(charArr, 0, p);
+        }
+        
+    }
+    
+    /**
+     * Get a list of all the HTTP headers that have been provided for this
+     * request
+     * 
+     * @return String array of available http headers
+     */
     public String[] getHTTPHeaderKeys() {
         Enumeration e   = responseHeaders.keys();
         String[] headerKeys = new String[responseHeaders.size()];
@@ -73,12 +161,71 @@ public class HTTPResult {
     }
     
     /**
+     * Provides all responses headers (with the header itself in **lower case** 
+     * in a hashtable
+     * @return 
+     */
+    public Hashtable getResponseHeaders() {
+        return responseHeaders;
+    }
+    
+    /**
+     * Get the suggested filename for this HTTP Request: if the HTTP request
+     * has a content-disposition header we will use it to provide the filename;
+     * otherwise we will use the filename portion of the URL 
+     * 
+     * @param url The entire URL 
+     * 
+     * @return Filename suggested by content-disposition if any; otherwise the filename portion of the URL
+     */
+    public String getSuggestedFilename(String url) {
+        String suggestedFilename = null;
+        
+        if(responseHeaders != null && responseHeaders.containsKey("content-disposition")) {
+            Object dispositionHeaderStr = responseHeaders.get("content-disposition");
+            UMFileUtil.TypeWithParamHeader dispositionHeader = 
+                UMFileUtil.parseTypeWithParamHeader((String)dispositionHeaderStr);
+            if(dispositionHeader.params != null && dispositionHeader.params.containsKey("filename")) {
+                suggestedFilename = UMFileUtil.filterFilename(
+                    (String)dispositionHeader.params.get("filename"));
+            }
+        }
+        
+        
+        if(suggestedFilename == null){
+            suggestedFilename = UMFileUtil.getFilename(url);
+        }
+        
+        return suggestedFilename;   
+    }
+    
+    /**
+     * Return the size of this http request as per content-length.  This can
+     * be used in combination with the HEAD request method to request the content
+     * length without actually downloading the content itself
+     * 
+     * @see HTTPResult#HTTP_SIZE_IO_EXCEPTION
+     * @see HTTPResult#HTTP_SIZE_NOT_GIVEN
+     * 
+     * @return The content length in bytes if successful, an error flag < 0 otherwise
+     */
+    public int getContentLength() {
+        int retVal = HTTP_SIZE_NOT_GIVEN;
+        String contentLengthStr = getHeaderValue("content-length");
+        if(contentLengthStr != null) {
+            retVal = Integer.parseInt(contentLengthStr);
+        }
+        return retVal;
+    }
+    
+    
+    /**
      * 
      * @param value
      * @return 
      */
     public String getHeaderValue(String key) {
-        Object valObj = responseHeaders.get(key);
+        Object valObj = responseHeaders.get(key.toLowerCase());
         if(valObj != null) {
             return valObj.toString();
         }else {

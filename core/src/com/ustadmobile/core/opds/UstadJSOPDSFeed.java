@@ -31,6 +31,7 @@
 package com.ustadmobile.core.opds;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Vector;
@@ -44,6 +45,8 @@ import org.xmlpull.v1.XmlPullParserException;
 public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public UstadJSOPDSEntry[] entries;
+    
+    
     
     /**
      * The absolute URL of this catalog (HTTP or Filesystem based)
@@ -87,39 +90,45 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         
         UstadJSOPDSItem currentItem = resultFeed;
         Vector entryVector = new Vector();
+        
+        String[] linkAttrs;
         String rel;
         String mimeType;
         String href;
         //cache the content string of an entry in case we dont find summary
         String content = null;
+        String name;
+        
+        int i;
         do {
-            
+            name = null;
             if(evtType == XmlPullParser.START_TAG) {
-                if(xpp.getName().equals("entry")) {
-                    currentItem = new UstadJSOPDSEntry(resultFeed);
-                }
+                name = xpp.getName();
                 
-                if(xpp.getName().equals("title")) {                    
-                    currentItem.title = xpp.nextText();
-                }else if(xpp.getName().equals("id")) {
-                    currentItem.id = xpp.nextText();
-                }else if(xpp.getName().equals("link")){
-                    rel = xpp.getAttributeValue(null, "rel");
-                    mimeType = xpp.getAttributeValue(null, "type");
-                    href = xpp.getAttributeValue(null, "href");
-                    currentItem.addLink(rel, mimeType, href);
-                }else if(xpp.getName().equals("updated")){
-                    currentItem.updated = xpp.nextText();
-                }else if(xpp.getName().equals("summary")) {
-                    currentItem.summary = xpp.nextText();
-                }else if(xpp.getName().equals("content")) {
-                    content = xpp.nextText();
-                }else if(xpp.getName().equals("dc:publisher")){ // Fix this
-                    currentItem.publisher = xpp.nextText();
-                }else if(xpp.getName().equals("dcterms:publisher")){
-                    currentItem.publisher = xpp.nextText();
-                }
-                if(xpp.getName().equals("author")){
+                if(name.equals("entry")) {
+                    currentItem = new UstadJSOPDSEntry(resultFeed);
+                }else if(name.equals("title") && xpp.next() == XmlPullParser.TEXT) {                    
+                    currentItem.title = xpp.getText();
+                }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
+                    currentItem.id = xpp.getText();
+                }else if(name.equals("link")){
+                    linkAttrs = new String[LINK_ATTR_NAMES.length];
+                    for(i = 0; i < LINK_ATTR_NAMES.length; i++) {
+                        linkAttrs[i] = xpp.getAttributeValue(null, 
+                            LINK_ATTR_NAMES[i]);
+                    }
+                    currentItem.addLink(linkAttrs);
+                }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
+                    currentItem.updated = xpp.getText();
+                }else if(name.equals("summary") && xpp.next() == XmlPullParser.TEXT) {
+                    currentItem.summary = xpp.getText();
+                }else if(name.equals("content") && xpp.next() == XmlPullParser.TEXT) {
+                    content = xpp.getText();
+                }else if(name.equals("dc:publisher") && xpp.next() == XmlPullParser.TEXT){ // Fix this
+                    currentItem.publisher = xpp.getText();
+                }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
+                    currentItem.publisher = xpp.getText();
+                }else if(name.equals("author")){
                     
                     UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
                     do
@@ -185,6 +194,16 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         newEntries[entries.length] = entry;
         this.entries = newEntries;
     }
+    
+    /**
+     * Sort entries use a given comparer
+     * 
+     * @param comparer 
+     */
+    public void sortEntries(UMUtil.Comparer comparer) {
+        UMUtil.bubbleSort(entries, comparer);
+    }
+    
     
     public UstadJSOPDSEntry getEntryById (String id) {
         UstadJSOPDSEntry entry;

@@ -7,7 +7,11 @@ package com.ustadmobile.port.j2me.util;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMIOUtils;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.microedition.io.Connection;
 import javax.microedition.rms.RecordStore;
 import javax.microedition.rms.RecordStoreException;
@@ -37,6 +41,29 @@ public class J2MEIOUtils {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 169, null, re);
             }
         }
+    }
+    
+    public static ByteArrayInputStream readToByteArrayStream(InputStream in) throws IOException{
+        return readToByteArrayStream(in, 1024);
+    }
+    
+    public static ByteArrayInputStream readToByteArrayStream(InputStream in, int bufsize) throws IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        byte[] buf = new byte[bufsize];
+        int bytesRead;
+        IOException ioe = null;
+        try {
+            while((bytesRead = in.read(buf)) != -1) {
+                bout.write(buf, 0, bytesRead);
+            }
+        }catch(IOException e) {
+            ioe = e;
+        }finally {
+            UMIOUtils.closeInputStream(in);
+            UMIOUtils.throwIfNotNullIO(ioe);
+        }
+        
+        return new ByteArrayInputStream(bout.toByteArray());
     }
     
 }

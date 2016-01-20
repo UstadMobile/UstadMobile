@@ -55,12 +55,8 @@ NetBeans.  See README for instructions on building from source.
         
         <path id="ustadlibclasspath.ref">
             <fileset dir="${lib.dir}" >
-                <!--<include name="*.jar" />-->
-                
-		<!-- <include name="json-me.jar"/> -->
 	 	<include name="j2meunit.jar" />
                 <include name="kxml2-min-2.3.0.jar" />
-                <include name="LWUIT-MIDP-IO.jar" />
                 <include name="LWUIT-MIDP.jar" />            
             </fileset>
         </path>

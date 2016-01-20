@@ -35,6 +35,8 @@ package com.ustadmobile.port.android.view;
 import android.app.Activity;
 
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -62,6 +64,7 @@ import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
@@ -75,14 +78,11 @@ import java.util.WeakHashMap;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link CatalogOPDSFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link CatalogOPDSFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener {
-
-    private OnFragmentInteractionListener mListener;
 
     private View rootContainer;
 
@@ -92,13 +92,23 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private UstadJSOPDSEntry[] mSelectedEntries;
 
+    private int mMenuID = -1;
+
+    private int mFetchFlags;
+
+    public static final String ARG_MENUID = "frag-menuid";
+
+    private boolean hasDisplayed = false;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
+     * One can also put in the bundle frag-menuid to set the menuid to be used : otherwise menus
+     * will be set according to if the feed is acquisition or navigation type
+     *
      * @return A new instance of fragment CatalogOPDSFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static CatalogOPDSFragment newInstance(Bundle args) {
         CatalogOPDSFragment fragment = new CatalogOPDSFragment();
         Bundle bundle = new Bundle();
@@ -115,10 +125,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     public void loadCatalog(final String url, int resourceMode) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        final int fetchFlags = CatalogController.CACHE_ENABLED;
-
-        CatalogController.makeControllerForView(this, url, resourceMode, fetchFlags, this);
+        CatalogController.makeControllerForView(this, url, resourceMode, mFetchFlags, this);
     }
+
 
     @Override
     public void controllerReady(final UstadController controller, int flags) {
@@ -130,12 +139,14 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             impl.getAppView(getActivity()).showAlertDialog(impl.getString(U.id.error), errMsg);
         }else {
             //TODO: check that the activity has not been destroyed etc.
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    setupFromCatalogController((CatalogController) controller);
-                }
-            });
+            if(getActivity() != null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setupFromCatalogController((CatalogController) controller);
+                    }
+                });
+            }
         }
     }
 
@@ -151,6 +162,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         LayoutInflater inflater = getLayoutInflater(null);
         LinearLayout linearLayout = (LinearLayout)this.rootContainer.findViewById(
                 R.id.fragment_catalog_container);
+        linearLayout.removeAllViews();
 
         int entryStatus = -1;
         for(int i = 0; i < feed.entries.length; i++) {
@@ -177,6 +189,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
 
         getActivity().supportInvalidateOptionsMenu();
+        mCatalogController.loadThumbnails();
     }
 
     @Override
@@ -187,6 +200,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         // Inflate the layout for this fragment
         this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
         mSelectedEntries = new UstadJSOPDSEntry[0];
@@ -194,18 +208,41 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
 
-        String catalogURL = getArguments().getString(CatalogController.KEY_URL);
-        int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
-        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
-        loadCatalog(catalogURL, resourceMode);
+        mMenuID = getArguments().getInt(ARG_MENUID, -1);
+        mFetchFlags = getArguments().getInt(CatalogController.KEY_FLAGS,
+                CatalogController.CACHE_ENABLED);
+
+        loadCatalog();
 
         return rootContainer;
     }
 
+
+    /**
+     * Load the catalog from the arguments given
+     */
+    public void loadCatalog() {
+        String catalogURL = getArguments().getString(CatalogController.KEY_URL);
+        int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
+        loadCatalog(catalogURL, resourceMode);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(!hasDisplayed) {
+            hasDisplayed = true;
+        }else {
+            loadCatalog();
+        }
+
+    }
 
 
     /**
@@ -231,7 +268,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
+        if(mMenuID != -1) {
+            inflater.inflate(mMenuID, menu);
+        }else if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
             boolean isAcquisitionFeed = mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
             if(isAcquisitionFeed) {
                 inflater.inflate(R.menu.menu_opds_acquireopts, menu);
@@ -243,6 +282,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if(getActivity() instanceof UstadBaseActivity && mCatalogController != null) {
+            if(((UstadBaseActivity)getActivity()).handleClickAppMenuItem(item, mCatalogController)){
+                return true;
+            }
+        }
+
         switch(item.getItemId()) {
             case R.id.action_opds_acquire:
                 if(getSelectedEntries().length > 0) {
@@ -262,30 +307,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 
     @Override
@@ -374,7 +395,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setMenuOptions(String[] menuOptions) {
-        ((CatalogActivity)getActivity()).setMenuOptions(menuOptions);
+        if(getActivity() instanceof  CatalogActivity) {
+            ((CatalogActivity) getActivity()).setMenuOptions(menuOptions);
+        }
     }
 
     @Override
@@ -382,6 +405,23 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 idToCardMap.get(entryId).setOPDSEntryOverlay(status);
+            }
+        });
+    }
+
+    @Override
+    public void setEntrythumbnail(final String entryId, String iconFileURI) {
+        iconFileURI = UMFileUtil.stripPrefixIfPresent("file://", iconFileURI);
+
+        final Bitmap bitmap = BitmapFactory.decodeFile(iconFileURI);
+        final String errURI = iconFileURI;
+
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                //TODO: idToCardMap should not be null when this is called... this should only be called after cards are made...
+                if(idToCardMap != null && idToCardMap.get(entryId) != null) {
+                    idToCardMap.get(entryId).setThumbnail(bitmap);
+                }
             }
         });
     }
@@ -434,20 +474,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
 
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-    }
 
     public void handleClickMenuItem(int index) {
         if(mCatalogController != null) {

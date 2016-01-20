@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.util;
 
+import java.util.Hashtable;
 import java.util.Vector;
 
 /**
@@ -104,6 +105,11 @@ public class UMFileUtil {
             if(isAllChars) {
                 return link;
             }
+        }
+        
+        //Check if this is actually a data: link which should not be resolved
+        if(link.startsWith("data:")) {
+            return link;
         }
         
         if(link.length() > 2 && link.charAt(0) == '/' && link.charAt(1) == '/'){
@@ -263,6 +269,176 @@ public class UMFileUtil {
     }
     
     /**
+     * Parse a deliminated string with keys and values like Content-Type parameters
+     * and cache-control headers.  Keys can be present on their own e.g.
+     * no-cache in which case the no-cache key will be in the hashtable with a
+     * blank string value.  It can also have an = sign with quoted or unquoted
+     * text e.g. maxage=600 or maxage="600"
+     * 
+     * @param str String to parse
+     * @param deliminator deliminator character 
+     * @return Hashtable of parameters and values found
+     */
+    public static Hashtable parseParams(String str, char deliminator) {
+        String paramName = null;
+        Hashtable params = new Hashtable();
+        boolean inQuotes = false;
+        
+        int strLen = str.length();
+        StringBuffer sb = new StringBuffer();
+        char c;
+        
+        char lastChar = 0;
+        for(int i = 0; i < strLen; i++) {
+            c = str.charAt(i);
+            if(c == '"') {
+                if(!inQuotes) {
+                    inQuotes = true;
+                }else if(inQuotes && lastChar != '\\') {
+                    inQuotes = false;
+                }
+                
+            }
+
+            if((isWhiteSpace(c) && !inQuotes) || (c == '"' && i < strLen-1)) {
+                //do nothing more
+            }else if((c == deliminator || i == strLen-1)){
+                //check if we are here because it's the end... then we add this to bufer
+                if(i == strLen-1 && c != '"') {
+                    sb.append(c);
+                }
+                
+                if(paramName != null) {
+                    //this is a parameter with a value
+                    params.put(paramName, sb.toString());
+                }else {
+                    //this is a parameter on its own
+                    params.put(sb.toString(), "");
+                }
+                
+                sb = new StringBuffer();
+                paramName = null;
+            }else if(c == '='){
+                paramName = sb.toString();
+                sb = new StringBuffer();
+            }else {
+                sb.append(c);
+            }
+            
+            lastChar = c;
+        }
+        
+        return params;
+   }
+    
+    /**
+     * Parse type with params header fields (Content-Disposition; Content-Type etc)
+     * 
+     * TODO: Support params with *paramname and encoding e.g. http://tools.ietf.org/html/rfc6266 section 5 example 2
+     * 
+     * @return 
+     */
+    public static TypeWithParamHeader parseTypeWithParamHeader(String header) {
+        TypeWithParamHeader result = null;
+        
+        int semiPos = header.indexOf(';');
+        String typeStr = null;
+        Hashtable params = null;
+        
+        if(semiPos == -1) {
+            typeStr = header.trim();
+        }else {
+            typeStr = header.substring(0, semiPos).trim();
+        }
+        
+        if(semiPos != -1 && semiPos < header.length()-1) {
+            params = parseParams(header.substring(semiPos), ';');
+        }
+        
+        return new TypeWithParamHeader(typeStr, params);
+    }
+    
+    /**
+     * Filter filenames for characters that could be nasty attacks (e.g. /sdcard/absolutepath etc)
+     * 
+     * @param filename Filename from an untrusted source (e.g. http header)
+     * 
+     * @return Filename with sensitive characters (: / \ * > < ? ) removed
+     */
+    public static String filterFilename(String filename) {
+        StringBuffer newStr = new StringBuffer(filename.length());
+        char c;
+        
+        for(int i = 0; i < filename.length(); i++) {
+            c = filename.charAt(i);
+            if(!(c == ':' || c == '/' || c == '\\' || c == '*' || c == '>' || c == '<' || c == '?')) {
+                newStr.append(c);
+            }
+        }
+        
+        return newStr.toString();
+    }
+    
+    /**
+     * Simple wrapper class that represents a haeder field with a type
+     * and parameters.
+     */
+    public static class TypeWithParamHeader {
+        
+       /**
+        * The first parameter: e.g. the mime type; content disposition etc.
+        */
+       public String typeName;
+
+       /**
+        * Hashtable of parameters found (case sensitive)
+        */
+       public Hashtable params;
+
+       public TypeWithParamHeader(String typeName, Hashtable params) {
+           this.typeName = typeName;
+           this.params = params;
+       }
+       
+       public String getParam(String paramName) {
+           if(params != null && params.containsKey(paramName)) {
+               return (String)params.get(paramName);
+           }else {
+               return null;
+           }
+       }
+    }
+    
+    private static boolean isWhiteSpace(char c) {
+        if(c == ' ' || c == '\n' || c == '\t' || c == '\r') {
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
+    /**
+     * Return a String formatted to show the file size in a user friendly format
+     * 
+     * If < 1024 (kb) : size 'bytes'
+     * if 1024 < size < 1024^2 : size/1024 kB
+     * if 1024^ < size < 1023^3 : size/1024^2 MB
+     * 
+     * @param size Size of the file in bytes
+     * 
+     * @return Formatted string as above
+     */
+    public static String formatFileSize(int size) {
+        if(size < 1024) {
+            return size + " bytes";
+        }else if(size < 1048576) {
+            return (size/1024) + " kB";
+        }else {
+            return (size/1048576) + " MB";
+        }
+    }
+    
+    /**
      * Returns the parent filename of a given string uri 
      * 
      * @param uri e.g. /some/file/path or http://server.com/some/file.txt
@@ -326,4 +502,34 @@ public class UMFileUtil {
             return path.substring(prefix.length());
         }
     }
+    
+    /**
+     * Make sure that the given path has the given suffix; if it doesn't
+     * add the suffix.
+     * 
+     * @param suffix the suffix that the path must end with
+     * @param path The path to add the suffix to if missing
+     * 
+     * @return The path with the suffix added if it was originally missing
+     */
+    public static String ensurePathHasSuffix(String suffix, String path) {
+        if(!path.endsWith(suffix)) {
+            return path + suffix;
+        }else {
+            return path;
+        }
+    }
+    
+    /**
+     * Strip out mime type parameters if they are present 
+     * 
+     * @param mimeType Mime type e.g. application/atom+xml;profile=opds
+     * @return Mime type without any params e.g. application/atom+xml
+     */
+    public static String stripMimeParams(String mimeType) {
+        int i = mimeType.indexOf(';');
+        return i != -1 ? mimeType.substring(0, i).trim() : mimeType;
+    }
+    
+    
 }

@@ -32,10 +32,13 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.toughra.ustadmobile.R;
@@ -111,6 +114,15 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
             opdsStatusOverlay = null;
         }
         invalidate();
+    }
+
+    /**
+     * Set the thumbnail for this OPDS entry card
+     *
+     * @param bitmap Bitmap with thumbnail image
+     */
+    public void setThumbnail(Bitmap bitmap) {
+        ((ImageView)findViewById(R.id.opds_item_thumbnail)).setImageBitmap(bitmap);
     }
 
     @Override

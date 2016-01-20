@@ -34,11 +34,15 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Display;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.html.AsyncDocumentRequestHandler;
+import com.sun.lwuit.html.AsyncDocumentRequestHandler.IOCallback;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.DocumentRequestHandler;
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.layouts.BorderLayout;
+import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
+import com.sun.lwuit.mediaplayer.MIDPMediaPlayer;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -50,14 +54,21 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.port.j2me.impl.zip.UMZipEntryInputStream;
+import com.ustadmobile.port.j2me.util.J2MEIOUtils;
+import gnu.classpath.java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.json.me.JSONObject;
 
 /**
@@ -70,13 +81,13 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     private String title;
     
-    private int currentIndex;
+    private int currentIndex = -1;
     
     private UstadOCF ocf;
     
     private UstadJSOPF opf;
     
-    private DocumentRequestHandler requestHandler;
+    protected ContainerDocumentRequestHandler requestHandler;
     
     private String containerURI;
     
@@ -112,7 +123,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     static Hashtable mediaExtensions;
     
     long lastPageChangeTime = -1;
-        
+            
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
@@ -133,12 +144,15 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         containerZip = impl.getOpenZip();
         setLayout(new BorderLayout());
         
-        
-        ContainerController.makeControllerForView(this, openContainerBaseURI, 
-                mimeType, this);
+        args.put(ContainerController.ARG_OPENPATH, openContainerBaseURI);
+        ContainerController.makeControllerForView(this, args, this);
         
         requestHandler = new ContainerDocumentRequestHandler(this);
         htmlCallback = new ContainerViewHTMLCallback(this);
+        
+        //make the mediaplayer do vocal logging
+        MIDPMediaPlayer player = (MIDPMediaPlayer)DefaultLWUITMediaPlayerManager.getInstance().getPlayer();
+        player.setCallback(htmlCallback);
     }
 
     public void controllerReady(UstadController controller, int flags) {
@@ -184,21 +198,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     protected void initEPUB() {
         try {
-            HTTPUtils.httpDebug("getting ocf");
-            if (controller == null){
-                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 524, "");
-            }else{
-                UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 526, "");
-            }
-            UstadOCF ocf = controller.getOCF();
-            HTTPUtils.httpDebug("getting opf");
-            opf = controller.getOPF(0);
-            HTTPUtils.httpDebug("getting spine");
+            ocf = controller.getOCF();
+            opf = controller.getActiveOPF();
             spineURLs = opf.getLinearSpineURLS();
-            HTTPUtils.httpDebug("getting requesthandler");
-            
-            HTTPUtils.httpDebug("getting htmlcallback");
-            
+                        
             htmlC = new HTMLComponent(requestHandler);
             htmlC.setHTMLCallback(htmlCallback);
             htmlC.setImageConstrainPolicy(
@@ -206,21 +209,51 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             htmlC.setIgnoreCSS(true);
             htmlC.setEventsEnabled(true);
             htmlC.setAutoAddSubmitButton(false);
+            htmlC.setMediaPlayerEnabled(true);
+            
+            //see what we can do about caching
+            UMStorageDir[] dirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                CatalogController.SHARED_RESOURCE, getContext());
+            
+            long mostSpaceAvailable = 0;
+            int bestCacheDir = -1;
+            
+            long currentSpace;
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            for(int i = 0; i < dirs.length; i++) {
+                currentSpace = -1;
+
+                try { 
+                    currentSpace = impl.fileAvailableSize(dirs[i].getDirURI());
+                    if(currentSpace > mostSpaceAvailable) {
+                        mostSpaceAvailable = currentSpace;
+                        bestCacheDir = i;
+                    }
+                }catch(Exception e) {
+                    UstadMobileSystemImpl.l(UMLog.WARN, 205, 
+                        dirs[i].getDirURI(), e);
+                }
+
+            }
+            
+            if(bestCacheDir != -1) {
+                MIDPMediaPlayer.setCacheDir(dirs[bestCacheDir].getDirURI());
+                UstadMobileSystemImpl.l(UMLog.INFO, 375, 
+                    dirs[bestCacheDir].getDirURI() + " (" + mostSpaceAvailable+" bytes free)");
+            }
+            
             addCommand(cmdForward);
             addCommand(cmdBack);
             addCommand(cmdBackToCatalog);
             addCommandListener(this);
             
-            HTTPUtils.httpDebug("getting opfurl");
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
-            HTTPUtils.httpDebug("opfURL:" + opfURL);
-            HTTPUtils.httpDebug("title: " + title);
             Display.getInstance().callSerially(new Runnable() {
                 public void run() {
                     addComponent(BorderLayout.CENTER, htmlC);
-                    showPage(1);
+                    showPage(0);
                 }
             });
         }catch(Exception e) {
@@ -280,8 +313,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             return;
         }
         makePageStatement();
-        UstadMobileSystemImplJ2ME.getInstanceJ2ME().stopMedia();
-                
+        DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
+        
+        System.gc();
+        
         htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
         this.currentIndex = pageIndex;
         lastPageChangeTime = System.currentTimeMillis();
@@ -294,6 +329,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }else if(cmd.equals(cmdForward)) {
             showPage(this.currentIndex + 1);
         }else if(cmd.equals(cmdBackToCatalog)) {
+            DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
             UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
         }
     }
@@ -327,39 +363,143 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             impl.closeContainer(openContainerBaseURI);    
             openContainerBaseURI = null;
         }
+        
+        if(requestHandler != null && requestHandler.timer != null) {
+            requestHandler.stopTimer();
+        }
     }
     
     
     /**
      * Handles requests to load resources by pointing them to the openzip and
      * requests to play media
+     * 
      */
-    public class ContainerDocumentRequestHandler implements DocumentRequestHandler {
+    public static class ContainerDocumentRequestHandler implements AsyncDocumentRequestHandler {
 
         private ContainerViewJ2ME view;
         
+        protected Timer timer;
         
         public ContainerDocumentRequestHandler(ContainerViewJ2ME view) {
             this.view = view;
+            startTimer();
+        }
+        
+        protected void startTimer() {
+            if(timer == null) {
+                timer = new Timer();
+            }
+        }
+        
+        protected void stopTimer() {
+            if(timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+        }
+        
+        boolean shouldBeBufferEnabled(DocumentInfo di) {
+            int type = di.getExpectedContentType();
+            return (type != DocumentInfo.TYPE_AUDIO) && 
+                (type != DocumentInfo.TYPE_VIDEO);
+            //return true;
         }
         
         public InputStream resourceRequested(DocumentInfo di) {
+            
+            return resourceRequested(di.getUrl(), di.getExpectedContentType(), 
+                shouldBeBufferEnabled(di), di);
+        }
+        
+        public InputStream resourceRequested(String requestURL, int expectedType, boolean bufferEnabled, DocumentInfo di) {
             try {
-                String requestURL = di.getUrl();
                 System.out.println("requestURL " + requestURL);
-                String baseURL = di.getBaseURL();
-                System.out.println("baseURL " + baseURL);
-                if(di.getExpectedContentType() != DocumentInfo.TYPE_IMAGE) {
+                if(expectedType != DocumentInfo.TYPE_IMAGE && di != null) {
                     di.setEncoding(DocumentInfo.ENCODING_UTF8);
                 }
                 
-                String pathInZip = di.getUrl().substring(
+                String pathInZip = requestURL.substring(
                     UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
-                return view.containerZip.openInputStream(pathInZip);
+                InputStream src = view.containerZip.openInputStream(pathInZip);
+                
+                //see if we know what the size is...
+                if(di != null && src instanceof UMZipEntryInputStream) {
+                    di.setContentLength(
+                        (int)((UMZipEntryInputStream)src).getZipEntry().getSize());
+                }
+                
+                if(bufferEnabled) {
+                    return J2MEIOUtils.readToByteArrayStream(src);
+                }else {
+                    return new BufferedInputStream(src, 20*1024);
+                    //return src;
+                }
+                
             }catch(IOException e) {
                 return new ByteArrayInputStream("ERROR".getBytes());
             }
         }
+
+        public void resourceRequestedAsync(String url, IOCallback ioc, boolean bufferEnabled, int expectedType) {
+            timer.schedule(new ContainerDocumentRequestTask(url, ioc, this, 
+                bufferEnabled, expectedType), 50);
+        }
+        
+        public void resourceRequestedAsync(DocumentInfo di, IOCallback ioc, boolean bufferEnabled) {
+            timer.schedule(new ContainerDocumentRequestTask(di, ioc, this, 
+                bufferEnabled), 50);
+        }
+        
+        public void resourceRequestedAsync(DocumentInfo di, IOCallback ioc) {
+            resourceRequestedAsync(di, ioc, shouldBeBufferEnabled(di));
+        }
+        
+    }
+    
+    /**
+     * TimerTask to open resources 
+     * 
+     */
+    public static class ContainerDocumentRequestTask extends TimerTask {
+
+        private DocumentInfo di;
+        
+        private IOCallback ioc;
+        
+        private ContainerDocumentRequestHandler handler;
+        
+        private boolean bufferEnabled;
+        
+        private String url;
+        
+        private int expectedType;
+        
+        public ContainerDocumentRequestTask(DocumentInfo di, IOCallback ioc, ContainerDocumentRequestHandler handler, boolean bufferEnabled) {
+            this.di = di;
+            this.ioc = ioc;
+            this.handler = handler;
+            this.bufferEnabled = bufferEnabled;
+            
+            url = di.getUrl();
+            expectedType = di.getExpectedContentType();
+        }
+        
+        public ContainerDocumentRequestTask(String url, IOCallback ioc, ContainerDocumentRequestHandler handler, boolean bufferEnabled, int expectedType) {
+            this.url = url;
+            this.ioc = ioc;
+            this.bufferEnabled = bufferEnabled;
+            this.expectedType = expectedType;
+            this.di = null;
+            this.handler = handler;
+        }
+        
+        public void run() {
+            InputStream in = handler.resourceRequested(url, expectedType, bufferEnabled, di);
+            ioc.streamReady(in, di);
+        }
+        
+        
         
     }
     

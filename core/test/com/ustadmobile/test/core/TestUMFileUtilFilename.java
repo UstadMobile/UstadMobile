@@ -38,6 +38,7 @@ package com.ustadmobile.test.core;
 /* $endif$ */
 
 import com.ustadmobile.core.util.UMFileUtil;
+import java.util.Hashtable;
 
 
 /**
@@ -80,6 +81,54 @@ public class TestUMFileUtilFilename extends TestCase{
             UMFileUtil.getParentFilename("file.mp3") == null);
         assertTrue("Parent filename return nulls when path is one char long",
             UMFileUtil.getParentFilename(".") == null);
+        
+        
+        //test mime type parsing (will replace getMimeTypeParameters
+        UMFileUtil.TypeWithParamHeader header = UMFileUtil.parseTypeWithParamHeader(
+            "application/atom+xml;profile=opds-catalog;kind=navigation");
+        assertEquals("Correct type from header1", "application/atom+xml", 
+            header.typeName);
+        assertEquals("Correct profile parameter in header1", "opds-catalog", 
+            header.params.get("profile"));
+        assertEquals("Correct kind parameter in header1", "navigation",
+            header.params.get("kind"));
+        
+        header = UMFileUtil.parseTypeWithParamHeader(
+            "attachment; filename=\"some book.epub\"");
+        assertEquals("parse content-disposition type", "attachment",
+            header.typeName);
+        assertEquals("parse content disposition filename", "some book.epub",
+            header.params.get("filename"));
+        
+        header = UMFileUtil.parseTypeWithParamHeader("application/atom+xml");
+        assertEquals("Can parse header with no params", "application/atom+xml",
+            header.typeName);
+        assertEquals("Header with no params results in null param ht", null,
+            header.params);
+        
+        String cacheHeader = "private, community=UCI, maxage=600";
+        Hashtable cacheTable = UMFileUtil.parseParams(cacheHeader, ',');
+        
+        assertEquals("Cache control parsed private", "", 
+            cacheTable.get("private"));
+        assertEquals("Cache control get community", "UCI", 
+            cacheTable.get("community"));
+        assertEquals("Cache control get maxage", "600", 
+            cacheTable.get("maxage"));
+            
+        //test filtering nasty characters
+        assertEquals("removes security hazard characters from filename", 
+            "nastyname.so", UMFileUtil.filterFilename("/nastyname.*so"));
+        
+        int fileSize = 500;
+        assertEquals("Format filename in bytes", "500 bytes", 
+            UMFileUtil.formatFileSize(500));
+        fileSize *= 1024;
+        assertEquals("Format filename in kB", "500 kB", 
+            UMFileUtil.formatFileSize(fileSize));
+        fileSize *= 1024;
+        assertEquals("Format filename in kB", "500 MB", 
+            UMFileUtil.formatFileSize(fileSize));
     }
 
     public void runTest(){

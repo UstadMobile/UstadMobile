@@ -1,15 +1,15 @@
 package com.ustadmobile.port.android.impl.http;
 
+import android.util.Log;
+
 import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -89,9 +89,43 @@ public class EmbeddedHTTPD extends NanoHTTPD {
         return mimeResult != null ? mimeResult : "application/octet-stream";
     }
 
+    private int[] parseRangeRequest(IHTTPSession session, int totalLength) {
+        int[] range = null;
+        String header = session.getHeaders().get("range");
+        if(header != null  && header.startsWith("bytes=")) {
+            range = new int[] {0, -1};
+            header = header.substring("bytes=".length());
+            int dashPos = header.indexOf('-');
+            try {
+                if(dashPos > 0) {
+                    range[0] = Integer.parseInt(header.substring(0,dashPos));
+                }
+
+                if(dashPos == header.length()-1) {
+                    range[1] = totalLength;
+                }else if(dashPos > 0) {
+                    range[1] = Integer.parseInt(header.substring(dashPos+1));
+
+                }
+            }catch(NumberFormatException nfe) {
+
+            }
+            if(range[0] < 0 || range[1] > totalLength) {
+                range[0] = -1;//Error flag
+            }
+        }
+
+        return range;
+    }
+
     @Override
     public Response serve(IHTTPSession session) {
         String uri = session.getUri();
+        Response response = null;
+        int range[];
+        String ifNoneMatchHeader;
+        InputStream retInputStream;
+
         if(uri.startsWith(PREFIX_MOUNT)) {
             int nextSlash = uri.indexOf('/', PREFIX_MOUNT.length() + 1);
 
@@ -107,16 +141,29 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                         "Invalid: that zip is not mounted: " + uri);
             }
 
-            String pathInZip = uri.substring(nextSlash+1);
-
+            String pathInZip = uri.substring(nextSlash + 1);
             try {
                 MountedZip mountedZip = mountedEPUBs.get(zipMountPath);
                 ZipFile zipFile = new ZipFile(mountedZip.zipPath);
                 ZipEntry entry = zipFile.getEntry(pathInZip);
+
                 if(entry != null) {
+                    int totalLength = (int)entry.getSize();
+                    String etag = Integer.toHexString((zipMountPath + pathInZip + entry.getTime() + "" +
+                            totalLength).hashCode());
                     String extension = UMFileUtil.getExtension(pathInZip);
                     InputStream zipEntryStream = zipFile.getInputStream(entry);
-                    InputStream retInputStream = zipEntryStream;
+                    retInputStream = zipEntryStream;
+
+                    ifNoneMatchHeader = session.getHeaders().get("If-None-Match");
+                    if(ifNoneMatchHeader != null && ifNoneMatchHeader.equals(etag)) {
+                        Response r = new Response(Response.Status.NOT_MODIFIED, getMimeType(uri), "");
+                        r.addHeader("ETag", etag);
+                        return r;
+                    }
+                    
+
+                    range = parseRangeRequest(session, totalLength);
 
                     //see if this is an entry we need to filter.
                     if(extension != null) {
@@ -134,9 +181,31 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                         }
                     }
 
+                    if(range != null) {
+                        if(range[0] != -1) {
+                            retInputStream = new RangeInputStream(retInputStream, range[0], range[1]);
+                            Response r = new Response(Response.Status.PARTIAL_CONTENT, getMimeType(uri),
+                                    retInputStream);
+                            r.addHeader("ETag", etag);
+                            r.addHeader("Content-Length", String.valueOf(range[1] - range[0]));
+                            r.addHeader("Content-Range", "bytes " + range[0] + '-' + range[1] +
+                                '/' + totalLength);
+                            r.addHeader( "Accept-Ranges", "bytes");
+                            return r;
+                        }else {
+                            return new Response(Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
+                                    "Range request not satisfiable");
+                        }
 
-                    return new Response(Response.Status.OK, getMimeType(uri),
-                            retInputStream);
+                    }else {
+                        Response r = new Response(Response.Status.OK, getMimeType(uri),
+                                retInputStream);
+                        r.addHeader("ETag", etag);
+                        r.addHeader("Content-Length", String.valueOf(totalLength));
+                        return r;
+                    }
+
+
                 }else {
                     return new Response(Response.Status.NOT_FOUND, "text/plain", "Not found within zip: "
                         + pathInZip);

@@ -172,29 +172,4 @@ public class UMIOUtils {
         return canWriteChild;
     }
     
-    /**
-     * Tries to get the size of a file to be downloaded using the HTTP head method
-     * 
-     * @return the file size in bytes if possible: a negative int error flag otherwise
-     * @see UMIOUtils#HTTP_SIZE_NOT_GIVEN
-     * @see UMIOUtils#HTTP_SIZE_IO_EXCEPTION
-     */
-    public static int getHTTPDownloadSize(String url, Hashtable headers) {
-        int retVal = HTTP_SIZE_IO_EXCEPTION;
-        try {
-            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(url, 
-                headers, null,"HEAD");
-            String contentLengthStr = result.getHeaderValue("content-length");
-            if(contentLengthStr != null) {
-                retVal = Integer.parseInt(contentLengthStr);
-            }else {
-                retVal = HTTP_SIZE_NOT_GIVEN;
-            }
-        }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 165, url, e);
-        }
-        
-        return retVal;
-    }
-    
 }

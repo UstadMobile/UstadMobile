@@ -97,7 +97,7 @@ public class TestDownload extends TestCase implements  UMDownloadCompleteReceive
         
         String fileDownloadURL = httpRoot + "phonepic-smaller.png";
         
-        int downloadSize = UMIOUtils.getHTTPDownloadSize(fileDownloadURL, null);
+        int downloadSize = impl.makeRequest(fileDownloadURL, null, null, "HEAD").getContentLength();
         assertTrue("Can get size before starting", downloadSize > 0);
         
         downloadID = impl.queueFileDownload(fileDownloadURL, destFileURI, 

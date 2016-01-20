@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.port.j2me.impl;
 
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.events.ActionEvent;
@@ -51,12 +52,12 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.ZipFileHandle;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
@@ -65,8 +66,10 @@ import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.j2me.impl.qr.J2MEQRCodeImage;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
+import com.ustadmobile.port.j2me.util.WatchedInputStream;
 import com.ustadmobile.port.j2me.view.AppViewJ2ME;
-import com.ustadmobile.port.j2me.view.CatalogViewJ2ME;
+import com.ustadmobile.port.j2me.view.BasePointViewJ2ME;
+import com.ustadmobile.port.j2me.view.CatalogWrapperForm;
 import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
 import com.ustadmobile.port.j2me.view.LoginViewJ2ME;
 import com.ustadmobile.port.j2me.view.UserSettingsViewJ2ME;
@@ -74,18 +77,16 @@ import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.Vector;
 import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
-import javax.microedition.media.Manager;
-import javax.microedition.media.MediaException;
-import javax.microedition.media.Player;
-import javax.microedition.media.PlayerListener;
-import javax.microedition.media.control.VolumeControl;
 import jp.sourceforge.qrcode.data.QRCodeImage;
 import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
@@ -97,7 +98,7 @@ import org.json.me.*;
  *
  * @author varuna
  */
-public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements PlayerListener {
+public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     private UMLog umLogger;
     
@@ -111,11 +112,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     
     public static final String OPENZIP_PROTO = "zip:///";
     
-    private Player player;
-    public int volumeLevel=70;
-    
-    private InputStream mediaInputStream;
-    
+    public static final String MICRO_PROFILE_NAME = "micro";
+        
     /**
      * System property used to get the memory card location
      */
@@ -142,12 +140,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     private TinCanLogManagerJ2ME logManager;
     
     private DownloadServiceJ2ME downloadService = null;
-    
-    private PlayerListener onEndOfMediaListener;
-    
+        
     private Vector viewHistory;
     
     public static final int VIEW_HISTORY_LIMIT = 10;
+    
+    private Hashtable mimeTypeToExtTable;
+    
+    private Hashtable extToMimeTypeTable;
     
     public String getImplementationName() {
         return "J2ME";
@@ -156,8 +156,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     public UstadMobileSystemImplJ2ME() {
         umLogger = new UMLogJ2ME();
         appView = new AppViewJ2ME(this);
-        onEndOfMediaListener = null;
         viewHistory = new Vector();
+        
+        //init the mime type list - built in hard coded
+        mimeTypeToExtTable = new Hashtable();
+        mimeTypeToExtTable.put("image/jpeg", "jpg");
+        mimeTypeToExtTable.put("image/png", "png");
+        mimeTypeToExtTable.put("image/gif", "gif");
+        
+        extToMimeTypeTable = new Hashtable();
+        extToMimeTypeTable.put("jpg", "image/jpeg");
+        extToMimeTypeTable.put("jpeg", "image/jpeg");
+        extToMimeTypeTable.put("png", "image/png");
+        extToMimeTypeTable.put("gif", "image/gif");
     }
 
     /**
@@ -172,13 +183,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
      */
     public boolean queueTinCanStatement(JSONObject stmt, Object context) {
         l(UMLog.DEBUG, 538, "");
-        boolean result = false;
+        boolean result = true;
+        
+        /*
         try {
-            //return true;
+            
             return logManager.queueStatement(getActiveUser(context), stmt);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        */
         return result;
     }
     
@@ -202,8 +216,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
-        UIManager.getInstance().getLookAndFeel().setRTL(
-                getDirection() == UstadMobileConstants.DIR_RTL);
+        boolean isRTL = getDirection() == UstadMobileConstants.DIR_RTL;
+        UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
+        int x = 42;
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
@@ -522,16 +537,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         return systemInfo;
     }
     
-    public long modTimeDifference(String fileURI1, String fileURI2){
-        try{
-            long file1LastModified = FileUtils.getLastModified(fileURI1);
-            long file2LastModified = FileUtils.getLastModified(fileURI2);
-            if (file1LastModified != -1 || file2LastModified != -1 ){
-                long difference = file1LastModified - file2LastModified;
-                return difference;
-            }
-        }catch(Exception e){}
-        return -1;
+    public long fileLastModified(String fileURI) {
+        long result = -1;
+        FileConnection con = null;
+        try {
+            con = (FileConnection)Connector.open(fileURI);
+            result = con.lastModified();
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 136, fileURI, e);
+        }finally {
+            J2MEIOUtils.closeConnection(con);
+        }
+        
+        return result;
     }
         
     /**
@@ -551,7 +569,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
             e = new IOException(PREFIX_SECURITY_EXCEPTION  + se.toString());
         }
         
-        UMIOUtils.logAndThrowIfNotNullIO(e, UMLog.ERROR, volumeLevel, fileURI);
+        UMIOUtils.logAndThrowIfNotNullIO(e, UMLog.ERROR, 600, fileURI);
         
         return fileExists;
     }
@@ -666,6 +684,35 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         l(UMLog.VERBOSE, 545, fileURI + " (" + size + "bytes");
         return size;
     } 
+
+    /**
+     * {@inheritDoc}
+     */
+    public long fileAvailableSize(String fileURI) throws IOException {
+        long result = -1;
+        FileConnection fc = null;
+        IOException ioe = null;
+        try {
+            fc = (FileConnection)Connector.open(fileURI);
+            result = fc.availableSize();
+            l(UMLog.DEBUG, 564, fileURI+ ":" + result);
+        }catch(Exception e) {
+            l(UMLog.ERROR, 137, fileURI, e);
+            if(e instanceof IOException) {
+                ioe = (IOException)e;
+            }else {
+                ioe = new IOException(e.toString() + ":" + e.getMessage());
+            }
+        }finally {
+            J2MEIOUtils.closeConnection(fc);
+        }
+        
+        UMIOUtils.throwIfNotNullIO(ioe);
+        
+        return result;
+    }
+    
+    
     
     public boolean makeDirectory(String dirURI) throws IOException{
         getLogger().l(UMLog.VERBOSE, 401, dirURI);
@@ -1036,18 +1083,23 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     /**
      * {@inheritDoc}
      */
-    public InputStream openFileInputStream(String fileURI) throws IOException {
+    public InputStream openFileInputStream(String fileURI, String tag) throws IOException {
         l(UMLog.DEBUG, 599, fileURI);
         InputStream in = null;
         IOException e = null;
         try {
-            in = Connector.openInputStream(fileURI);
+            in = new WatchedInputStream(Connector.openInputStream(fileURI), fileURI+ "!" + tag);
         }catch(SecurityException se) {
             e = new IOException(PREFIX_SECURITY_EXCEPTION + se.toString());
         }
         UMIOUtils.throwIfNotNullIO(e);
         return in;
     }
+    
+    public InputStream openFileInputStream(String fileURI) throws IOException{
+        return openFileInputStream(fileURI, "");
+    }
+    
 
     /**
      *{@inheritDoc}
@@ -1068,11 +1120,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         if(cls.equals(LoginView.class)) {
             form = new LoginViewJ2ME(args, context);
         }else if(cls.equals(CatalogView.class)) {
-            form = new CatalogViewJ2ME(args, context);
+            form = new CatalogWrapperForm(args, context, true);
         }else if(cls.equals(ContainerView.class)) {
             form = new ContainerViewJ2ME(args, context);
         }else if(cls.equals(UserSettingsView.class)) {
             form = new UserSettingsViewJ2ME(args, context);
+        }else if(cls.equals(BasePointView.class)) {
+            form = new BasePointViewJ2ME(args, context, true);
         }
         
         return form;
@@ -1143,112 +1197,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
     public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
         downloadService.unregisterDownloadCompleteReceiver(receiver);
     }
-    
-    /**
-     * Plays the media's inputstream. Can be audio or video.
-     * @param mediaInputStream the InputStream to be played.
-     * @param encoding The encoding by which the player will get generated. 
-     * 
-     * @return true if play was started successfully, false otherwise
-     */
-    public boolean playMedia(InputStream mediaInputStream, String encoding) {
-        return playMedia(mediaInputStream, encoding, null);
-    }
-    
-    /**
-     * Plays the media's inputstream. Can be audio or video.
-     * @param mediaInputStream the InputStream to be played.
-     * @param encoding The encoding by which the player will get generated. 
-     * @param onEndOfMediaListener (Optional) a PlayerListener which will receive the END_OF_MEDIA event
-     * 
-     * @return true if play was started successfully, false otherwise
-     */
-    public boolean playMedia(InputStream mediaInputStream, String encoding, PlayerListener onEndOfMediaListener) {
-        l(UMLog.DEBUG, 563, encoding);
-        boolean status = false;
-        stopMedia();
-        
-        this.onEndOfMediaListener = onEndOfMediaListener;
-        this.mediaInputStream = mediaInputStream;
-        
-        VolumeControl vc = null;
-        PlayerListener pl = null;
-        
-        
-        try{
-            player = Manager.createPlayer(mediaInputStream, encoding);
-            player.addPlayerListener(this);
-            player.realize();
-            vc = (VolumeControl) player.getControl("VolumeControl");
-            if (vc != null){
-                vc.setLevel(volumeLevel);
-            }
-            player.start();
-            long playerTime = player.getDuration();
-            l(UMLog.DEBUG, 565, ""+playerTime);
-            status = true;            
-        }catch(Exception e){
-            l(UMLog.ERROR, 145, encoding, e);
-            if(onEndOfMediaListener != null) {
-                onEndOfMediaListener.playerUpdate(player, PlayerListener.END_OF_MEDIA, null);
-            }
-            stopMedia();
-        }
-        
-        return status;
-    }
-
-    /**
-     * Handle playerUpdate events: specifically watch for END_OF_MEDIA and 
-     * clean up when that is reached (inc. closing file input streams etc)
-     * 
-     * @param uPlayer
-     * @param event
-     * @param eventData 
-     */
-    public void playerUpdate(Player uPlayer, String event, Object eventData) {
-        if (event.equals(PlayerListener.END_OF_MEDIA)) {
-            PlayerListener endListener = onEndOfMediaListener;
-            stopMedia();
-            if(endListener != null) {
-                endListener.playerUpdate(uPlayer, event, eventData);
-            }
-        }
-    }
-        
-    /**
-     * Stops the media playing. 
-     * @return 
-     */
-    public boolean stopMedia() {
-        l(UMLog.DEBUG, 567, null);
-        boolean status = false;
-        if (player != null){
-            if(player.getState() != Player.CLOSED) {
-                try {
-                    player.stop();
-                    player.deallocate();
-                }catch(MediaException me) {
-                    l(UMLog.ERROR, 177, null, me);
-                }
-            }
-            
-            player.close();
-            player = null;
-                        
-            
-            l(UMLog.DEBUG, 597, null);
-        }else {
-            l(UMLog.DEBUG, 569, null);
-        }
-        
-        UMIOUtils.closeInputStream(mediaInputStream);
-        status = true;
-        mediaInputStream = null;
-        onEndOfMediaListener = null;
-        
-        return status;
-    }
 
     //This is just a placeholder so it compiles - we dont support OMR on J2ME just yet
     public QRCodeImage getQRCodeImage(InputStream in) {
@@ -1260,6 +1208,41 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl implements
         
         return null;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int[] getScreenSize(Object context) {
+        return new int[] {Display.getInstance().getDisplayWidth(),
+            Display.getInstance().getDisplayHeight()};
+    }
+
+    public String getUMProfileName() {
+        return MICRO_PROFILE_NAME;
+    }
+    
+    public String getMimeTypeFromExtension(String extension) {
+        String lcExt = extension.toLowerCase();
+        if(extToMimeTypeTable.containsKey(lcExt)) {
+            return (String)extToMimeTypeTable.get(extension);
+        }else {
+            return null;
+        }
+    }
+
+    public String getExtensionFromMimeType(String mimeType) {
+        if(mimeTypeToExtTable.containsKey(mimeType)) {
+            return (String)mimeTypeToExtTable.get(mimeType);
+        }else {
+            return null;
+        }
+    }
+    
+    public void blah() {
+        Calendar c = Calendar.getInstance();
+        
+    }
+    
     
     /**
      * Use when an output stream is bound to a connector, and we want to make sure

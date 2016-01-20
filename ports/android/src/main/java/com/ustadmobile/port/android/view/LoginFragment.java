@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -20,6 +21,7 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.LoginView;
+import android.widget.EditText;
 
 /**
  * Created by mike on 8/24/15.
@@ -58,6 +60,9 @@ public class LoginFragment extends Fragment {
         }
     }
 
+    private void setTextViewHint(ViewGroup viewGroup, int id, String hint) {
+        ((TextView)viewGroup.findViewById(id)).setHint(hint);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,7 +80,11 @@ public class LoginFragment extends Fragment {
                 loginButton.setOnClickListener(loginActivity);
                 ((TextView)viewGroup.findViewById(R.id.login_username)).setHint(loginActivity.mUsernameHint);
                 ((TextView)viewGroup.findViewById(R.id.login_password)).setHint(loginActivity.mPasswordHint);
-
+                ((EditText)viewGroup.findViewById(R.id.login_xapi_server)).setText(loginActivity.mXAPIServer);
+                CheckBox advancedCheckbox =(CheckBox) viewGroup.findViewById(R.id.login_advanced_checkbox);
+                advancedCheckbox.setText(loginActivity.mAdvancedLabel);
+                advancedCheckbox.setOnCheckedChangeListener(loginActivity);
+                ((TextView)viewGroup.findViewById(R.id.login_server_label)).setText(loginActivity.mServerLabel);
                 break;
             case LoginView.SECTION_REGISTER:
                 Spinner countrySpinner = (Spinner)viewGroup.findViewById(R.id.login_registercountry);
@@ -86,14 +95,19 @@ public class LoginFragment extends Fragment {
                 Button registerButton = (Button)viewGroup.findViewById(R.id.login_registerbutton);
                 registerButton.setOnClickListener(loginActivity);
                 registerButton.setText(loginActivity.mRegisterButtonText);
-                ((TextView)viewGroup.findViewById(R.id.login_registername)).setHint(
-                        loginActivity.mRegisterNameHint);
+                setTextViewHint(viewGroup, R.id.login_registername, loginActivity.mRegisterNameHint);
                 ((TextView)viewGroup.findViewById(R.id.login_registerphonenum)).setHint(
                         loginActivity.mRegisterPhoneNumberHint);
                 ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_male)).setText(
                         loginActivity.mRegisterGenderMaleLabel);
                 ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_female)).setText(
                         loginActivity.mRegisterGenderFemaleLable);
+                setTextViewHint(viewGroup, R.id.login_registerusername,
+                        loginActivity.mRegisterUsernameHint);
+                setTextViewHint(viewGroup, R.id.login_registerpassword,
+                        loginActivity.mRegisterPasswordHint);
+                setTextViewHint(viewGroup, R.id.login_registeremail, loginActivity.mRegisterEmailHint);
+                setTextViewHint(viewGroup, R.id.login_registerregcode, loginActivity.mRegisterRegcodeHint);
 
                 lookupCountry(countrySpinner, getActivity());
                 break;

@@ -5,13 +5,15 @@
  */
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.impl.UstadMobileConstants;
+
 /**
  *
  * @author mike
  */
 public class LocaleUtil {
     
-    public static final String subone = "%s";
+    public static final String SUBONE = "%s";
     
     /**
      * If the system locale is available - choose it.  Right now - works on only
@@ -20,17 +22,18 @@ public class LocaleUtil {
      * 
      * @param userPrefLocale The locale specified by this user. Blank string "" means use the system locale, null for no current user
      * @param systemLocale The locale according to the operating system
-     * @param supportedLocales The locales available that we support
+     * @param supportedLocales The locales available that we support : two 
+     * dimensional string in the form of {code, name}... e.g. {"en", "English"}, {"fr", "Francais"}
      * @param fallbackLang The language to use if the user's preferred system locale is not available (e.g. en)
      * 
      * @return locale to used based on arguments
      */
-    public static String chooseSystemLocale(String userPrefLocale, String systemLocale, String[] supportedLocales, String fallbackLang) {
+    public static String chooseSystemLocale(String userPrefLocale, String systemLocale, String[][] supportedLocales, String fallbackLang) {
         //first check the user's chosen locale is valid and overrides the systemLocale
         int i;
         if(userPrefLocale != null && !userPrefLocale.equals("")) {
             for(i = 0; i < supportedLocales.length; i++) {
-                if(supportedLocales[i].equals(userPrefLocale)) {
+                if(supportedLocales[i][UstadMobileConstants.LOCALE_CODE].equals(userPrefLocale)) {
                     return userPrefLocale;
                 }
             }
@@ -40,8 +43,8 @@ public class LocaleUtil {
         String systemLocaleShort = systemLocale.substring(0, 2);
         
         for(i = 0; i < supportedLocales.length; i++) {
-            if(supportedLocales[i].startsWith(systemLocaleShort)) {
-                return supportedLocales[i];
+            if(supportedLocales[i][UstadMobileConstants.LOCALE_CODE].startsWith(systemLocaleShort)) {
+                return supportedLocales[i][UstadMobileConstants.LOCALE_CODE];
             }
         }
         
@@ -57,7 +60,12 @@ public class LocaleUtil {
      * @return 
      */
     public static String formatMessage(String message, String substitution) {
-        int i = message.indexOf(subone);
+        int i = message.indexOf(SUBONE);
+        
+        if(i == -1) {//incorrectly done translation: missing %s 
+            return message;
+        }
+        
         StringBuffer sb = new StringBuffer();
         if(i != 0) {
             sb.append(message.substring(0, i));

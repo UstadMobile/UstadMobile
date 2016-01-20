@@ -30,12 +30,12 @@
  */
 package com.ustadmobile.port.j2me.impl.xapi;
 
-import com.ustadmobile.core.app.Base64;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.ByteArrayOutputStream;
@@ -655,8 +655,8 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             impl.l(UMLog.DEBUG, 558, "Got line username ok" );
                         }
                         
-                        String encodedUserAndPass="Basic "+ Base64.encode(statementUsername,
-                            password);
+                        String encodedUserAndPass="Basic "+ Base64Coder.encodeString(
+                            statementUsername + ':'+password);
                         tinCanHeaders.put("Authorization", encodedUserAndPass);
 
                         String statementString = logLine.substring(

@@ -30,7 +30,11 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.U;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.core.view.UserSettingsView;
+import java.util.Hashtable;
 
 /**
  * Base Controller that provides key functionality 
@@ -42,6 +46,20 @@ public abstract class UstadBaseController implements UstadController {
     private UstadView view;
     
     protected Object context;
+    
+    protected boolean isDestroyed = false;
+    
+    public static final int CMD_ABOUT = 1001;
+    
+    public static final int CMD_SETTINGS = 1002;
+    
+    public static final int CMD_LOGOUT = 1003;
+    
+    public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_ABOUT, 
+        CMD_SETTINGS, CMD_LOGOUT};
+    
+    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{U.id.about,
+        U.id.settings, U.id.logout};
     
     /**
      * Create a new controller with the given context
@@ -83,5 +101,77 @@ public abstract class UstadBaseController implements UstadController {
      * locale is changed
      */
     public abstract void setUIStrings();
+    
+    /**
+     * This should be called by the view when it is paused: e.g. when the user
+     * leaves the view
+     */
+    public void handleViewPause() {
+        
+    }
+    
+    /**
+     * This should be called by the view when the user has come back to
+     * the view
+     */
+    public void handleViewResume() {
+        
+    }
+    
+    /**
+     * This should be called by the view when it is being destroyed: this is
+     * irreversible and it is time to stop background activities 
+     */
+    public void handleViewDestroy() {
+        setDestroyed(true);
+    }
+    
+    /**
+     * Returns true if the view we are working for has been destroyed, false
+     * otherwise
+     * 
+     * @return true if view has been destroyed, false otherwise
+     */
+    protected synchronized boolean isDestroyed() {
+        return isDestroyed;
+    }
+    
+    /**
+     * Set if the view has been destroyed - this is in reality irreversible
+     * and lives in a synchronized method for purposes of thread safety
+     * 
+     * @param isDestroyed 
+     */
+    protected synchronized void setDestroyed(boolean isDestroyed) {
+        this.isDestroyed = isDestroyed;
+    }
+    
+    public boolean handleClickAppMenuItem(int cmdId) {
+        switch(cmdId) {
+            case CMD_ABOUT:
+                //do nothing yet
+                return true;
+            case CMD_SETTINGS:
+                UstadMobileSystemImpl.getInstance().go(UserSettingsView.class, 
+                    new Hashtable(), context);
+                return true;
+            case CMD_LOGOUT:
+                LoginController.handleLogout(context);
+                return true;
+        }
+        
+        return false;
+    }
+    
+    public void setStandardAppMenuOptions() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] labels = new String[STANDARD_APPEMNU_CMDS.length];
+        for(int i = 0; i < labels.length; i++) {
+            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i]);
+        }
+        
+        view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
+    }
+    
     
 }

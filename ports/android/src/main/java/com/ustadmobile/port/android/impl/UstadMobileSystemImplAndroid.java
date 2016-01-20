@@ -53,6 +53,7 @@ import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AttendanceView;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
@@ -62,13 +63,17 @@ import com.ustadmobile.port.android.impl.qr.AndroidQRCodeImage;
 import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
+import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.CatalogActivity;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
+import android.webkit.MimeTypeMap;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
@@ -117,6 +122,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
 
     /**
+     * Some mime types that the Android OS does not know about but we do...
+     * Mapped: Mime type -> extension
+     */
+    private HashMap<String, String> knownMimeToExtensionMap;
+
+    /**
      @deprecated
      */
     public UstadMobileSystemImplAndroid() {
@@ -124,6 +135,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         activityToHttpServiceMap = new HashMap<>();
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
+        knownMimeToExtensionMap = new HashMap<>();
+        knownMimeToExtensionMap.put("application/epub+zip", "epub");
     }
 
     /**
@@ -197,6 +210,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             androidClass = UserSettingsActivity.class;
         }else if(cls.equals(AttendanceView.class)) {
             androidClass = AttendanceActivity.class;
+        }else if(cls.equals(BasePointView.class)) {
+            androidClass = BasePointActivity.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);
@@ -289,8 +304,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public long modTimeDifference(String fileURI1, String fileURI2) {
-        return (new File(fileURI2).lastModified() - new File(fileURI1).lastModified());
+    public long fileLastModified(String fileURI) {
+        return new File(fileURI).lastModified();
     }
 
     @Override
@@ -406,6 +421,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public long fileSize(String path) {
         File file = new File(path);
         return file.length();
+    }
+
+    @Override
+    public long fileAvailableSize(String fileURI) throws IOException {
+        return new File(fileURI).getFreeSpace();
     }
 
     @Override
@@ -615,7 +635,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         int contentLen = conn.getContentLength();
         int statusCode = conn.getResponseCode();
-        InputStream in = conn.getInputStream();
+        InputStream in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
         byte[] buf = new byte[1024];
         int bytesRead = 0;
         int bytesReadTotal = 0;
@@ -658,7 +678,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return parser;
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -699,4 +718,30 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return UUID.randomUUID().toString();
     }
 
+
+    /**
+     * Running on Android we will take the "full fat" version of any files... eg. files without
+     * a x-umprofile tag
+     *
+     * @return
+     */
+    @Override
+    public String getUMProfileName() {
+        return null;
+    }
+
+    @Override
+    public String getMimeTypeFromExtension(String extension) {
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+    }
+
+    @Override
+    public String getExtensionFromMimeType(String mimeType) {
+        String extension =MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+        if(extension == null) {
+            extension = knownMimeToExtensionMap.get(mimeType);
+        }
+
+        return extension;
+    }
 }

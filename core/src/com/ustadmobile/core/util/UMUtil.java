@@ -76,6 +76,69 @@ public class UMUtil {
         return -1;
     }
     
+    /**
+     * Find the index of a string in an array of strings using
+     * equalsIgnoreCase to find the match
+     * 
+     * @param str String to locate array
+     * @param arr Array in which to search
+     * @return the index of the given string in the array if found; -1 otherwise
+     */
+    public static final int getIndexInArrayIgnoreCase(String str, String[] arr) {
+        for(int i = 0; i < arr.length; i++) {
+            if(arr[i] != null && arr[i].equalsIgnoreCase(str)) {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+    
+    /**
+     * Tokenize the given string into a vector with String elements
+     * 
+     * @param str the string to tokenize
+     * @param deliminators the characters that are to be used as deliminators
+     * @param start the position to start at (inclusive)
+     * @pparam end the position to end at (exclusive)
+     * 
+     * @return A vector with the string tokens as elements in the order in which they were found
+     */
+    public static Vector tokenize(String str, char[] deliminators, int start, int end) {
+        boolean inToken = false;
+        boolean isDelim;
+        
+        char c;
+        int i;
+        int j;
+        Vector tokens = new Vector();
+        int tStart = 0;
+        
+        
+        for(i = start; i < end; i++) {
+            c = str.charAt(i);
+            isDelim = false;
+            
+            for(j = 0; j < deliminators.length; j++) {
+                if(c == deliminators[j]) {
+                    isDelim = true;
+                    break;
+                }
+            }
+            
+            if(!isDelim && !inToken) {
+                tStart = i;
+                inToken = true;
+            }else if(inToken && (isDelim || i == end-1)) {
+                tokens.addElement(str.substring(tStart, isDelim ? i : i+1));
+                inToken = false;
+            }
+            
+        }
+        
+        return tokens;
+    }
+    
     public static final String[] filterArrByPrefix(String[] arr, String prefix) {
         boolean[] matches = new boolean[arr.length];
         
@@ -203,6 +266,51 @@ public class UMUtil {
                 return PORT_ALLOC_OTHER_ERR;
             }
         }
+    }
+    
+    /**
+     * This method is here because Arrays.sort is not available in J2ME
+     * 
+     * @param arr The array to be sorted
+     * @param c An interface that implements UMUtil.Comparer
+     * 
+     * @return The array sorted: the sort is also done to the originally referenced array 
+     */
+    public static Object[] bubbleSort(Object[] arr, Comparer c) {
+        int n = arr.length;
+        Object tmp = null;
+        
+        int j;
+        int diff;
+        
+        boolean swapped = true;
+        while(swapped) {
+            swapped = false;
+            for(j = 1; j < arr.length; j++) {
+                diff = c.compare(arr[j-1], arr[j]);
+                if(diff > 0) {
+                    tmp = arr[j-1];
+                    arr[j-1] = arr[j];
+                    arr[j] = tmp;
+                    swapped = true;
+                }
+            }
+        }
+        
+        return arr;
+    }
+    
+    public static interface Comparer {
+        
+        /**
+         * Return o1 - 02 as per java.util.Comparator
+         * @param o1 First object to be compared
+         * @param o2 Second object to be compared
+         * 
+         * @return 
+         */
+        public int compare(Object o1, Object o2);
+        
     }
     
     

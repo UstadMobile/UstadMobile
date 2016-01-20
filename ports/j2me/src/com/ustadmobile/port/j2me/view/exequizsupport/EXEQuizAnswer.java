@@ -185,8 +185,10 @@ public class EXEQuizAnswer implements PlayerListener{
                     pl = this;
                 }
                 
+                /* TODO: fix this to use the default playback system...
                 htmlCB.mediaPlayRequested(HTMLCallback.MEDIA_AUDIO, HTMLCallback.MEDIA_PLAY, 
                     htmlC, null, audioEl, pl);
+                */
             }else if(branchType != null && branchType.equals("immediate")) {
                 goRedirect();
             }

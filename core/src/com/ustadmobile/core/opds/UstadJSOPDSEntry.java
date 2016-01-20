@@ -86,6 +86,25 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         this.addLink(UstadJSOPDSEntry.LINK_ACQUIRE, mimeType, containerHREF);
     }
     
+    /**
+     * Creates a new OPDSEntry with one link for the given parent feed
+     * 
+     * @param parentFeed The parent feed that this item is part going to be part of
+     * @param title The title for this entry
+     * @param id An ID for this entry
+     * @param linkRel The link relation e.g. subsection or UstadJSOPDSEntry.LINK_ACQUIRE
+     * @param linkMimeType The mime type for the link
+     * @param linkHref The href for the link
+     */
+    public UstadJSOPDSEntry(UstadJSOPDSFeed parentFeed, String title, String id, String linkRel, String linkMimeType, String linkHref) {
+        this(parentFeed);
+        this.title = title;
+        this.id = id;
+        this.linkVector = new Vector();
+        this.addLink(linkRel, linkMimeType, linkHref);
+    }
+    
+    
     
     /**
      * Constructs an entry that can be added to another feed with one link with
