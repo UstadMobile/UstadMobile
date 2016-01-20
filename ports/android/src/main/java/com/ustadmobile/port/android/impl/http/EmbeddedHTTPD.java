@@ -177,7 +177,9 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                             zipEntryStream.close();
                             String contentStr = new String(bout.toByteArray(), "UTF-8");
                             contentStr = mountedZip.filterEntry(extension, contentStr);
-                            retInputStream = new ByteArrayInputStream(contentStr.getBytes("UTF-8"));
+                            byte[] strBytes = contentStr.getBytes("UTF-8");
+                            retInputStream = new ByteArrayInputStream(strBytes);
+                            totalLength = strBytes.length;
                         }
                     }
 
