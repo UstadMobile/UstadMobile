@@ -74,6 +74,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
+import android.webkit.WebView;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
@@ -137,6 +138,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         downloadCompleteReceivers = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
     }
 
     /**
