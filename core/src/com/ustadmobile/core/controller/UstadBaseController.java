@@ -32,6 +32,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UserSettingsView;
 import java.util.Hashtable;
@@ -55,11 +56,13 @@ public abstract class UstadBaseController implements UstadController {
     
     public static final int CMD_LOGOUT = 1003;
     
+    public static final int CMD_ATTENDANCE = 1004;
+    
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_ABOUT, 
-        CMD_SETTINGS, CMD_LOGOUT};
+        CMD_SETTINGS, CMD_LOGOUT, CMD_ATTENDANCE};
     
     public static final int[] STANDARD_APPMENU_STRIDS = new int[]{U.id.about,
-        U.id.settings, U.id.logout};
+        U.id.settings, U.id.logout, U.id.attendance};
     
     /**
      * Create a new controller with the given context
@@ -157,6 +160,10 @@ public abstract class UstadBaseController implements UstadController {
                 return true;
             case CMD_LOGOUT:
                 LoginController.handleLogout(context);
+                return true;
+            case CMD_ATTENDANCE:
+                UstadMobileSystemImpl.getInstance().go(AttendanceView.class,
+                    new Hashtable(), context);
                 return true;
         }
         
