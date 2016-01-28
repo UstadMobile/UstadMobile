@@ -1,5 +1,8 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +15,9 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.android.util.PythonServiceManager;
+
+import org.renpy.android.PythonService;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -34,8 +40,28 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     private String[] appMenuLabels;
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //Check if LRS Service is running..
+        if (isMyServiceRunning(PythonService.class)) {
+            //already running mate..
+            System.out.println("ServiceCheck: Already running bro..");
+        }else{
+            //start it.
+            System.out.println("ServiceCheck: Not running!");
+            PythonServiceManager psm = new PythonServiceManager();
+            psm.startThis(UstadBaseActivity.this);
+            System.out.println("ServiceCheck: Started.");
+        }
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         super.onCreate(savedInstanceState);
     }
