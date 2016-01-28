@@ -230,6 +230,12 @@ cp -r "LRSTEMP/LRSGradle" lrs/
 #Actually just copy it from somewhere.
 cp LRSTEMP/${LRS_ANDROIDMANIFEST} lrs/src/main/AndroidManifest.xml
 
+
+#To make sure it builds ok on Android Studio. Create Test file. So just do this.
+
+cp ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java.sample ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java 
+#You obviously have to edit the TestConstatns.java file so that it has the Constants. 
+
 #build itt
 ./gradlew assembleDebug
 
