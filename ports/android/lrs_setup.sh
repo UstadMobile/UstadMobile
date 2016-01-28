@@ -185,7 +185,7 @@ echo "}" >> build.gradle
 cd ../
 echo "Copying sources and assets.."
 
-DEST_SRC="LRSGradle/src/main"
+DEST_SRC="LRSGradle/src/main/"
 DEST_JAVA_SRC="LRSGradle/src/main/java"
 SOURCE_SRC="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/src"
 
