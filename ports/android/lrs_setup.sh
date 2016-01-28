@@ -4,6 +4,13 @@
 
 echo "Hey there"
 
+ANDROID_PATH=`which android`
+
+if [ "$ANDROID_PATH" == "" ];then
+   echo "Android path not found. set it. Exiting.."
+   exit 1
+fi
+
 
 #Steps to do this thing.
 #1. Make temp LRS working directory
