@@ -182,7 +182,7 @@ DEST_SRC="LRSGradle/src/main"
 DEST_JAVA_SRC="LRSGradle/src/main/java"
 SOURCE_SRC="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/src"
 
-ASSET_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/asset"
+ASSET_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/assets/"
 LIBS_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/libs"
 RES_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/res"
 
