@@ -105,3 +105,4 @@ ports/android/lrs
 ports/android/LRSTEMP
 ports/android/settings.gradle
 *.bak
+*~

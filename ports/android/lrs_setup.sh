@@ -30,28 +30,66 @@ ANDROID_PROJECT_DIR=`echo ${ANDROID_PROJECT_DIR}`
 
 cd ../../core/
 echo "Getting core libs.."
-ant getlibs
+echo ""
+#ant getlibs
 ant -f build.xml getlibs
-ant -f antenna-build.xml getlibs
+#ant -f antenna-build.xml getlibs
 cd ${ANDROID_PROJECT_DIR}
+
 echo "Updating core libs.."
 ./updatecore
 
 echo "Working from Android Project Dir: ${ANDROID_PROJECT_DIR}"
 
-echo "Making LRS temp directory"
-mkdir "LRSTEMP"
-#mkdir "LRSTEMP/LRSCode"
-#mkdir "LRSTEMP/LRSAndroid"
+NEW_BUILD=""
 
-#May not need this
-#mkdir "LRSTEMP/LRSGradle"
+if [ -d "LRSTEMP" ]; then 
+    if [ -d "LRSTEMP/LRSCode" ]; then
+	if [ -d "LRSTEMP/LRSAndroid" ]; then
+	    echo "Going to be an update."
+	else
+	    echo"Not an update. It is going to be a new build."
+	    NEW_BUILD="True"
+	fi
+    else
+	echo "Not an update. It is going to be a new build"
+	NEW_BUILD="True"
+    fi
+else 
+    echo "not an update. Its going to be a new build."; 
+    NEW_BUILD="True"
+fi
 
-cd "LRSTEMP"
-#Working directory is this.
+if [ "${NEW_BUILD}" == "True" ]; then 
+    if [ -d "LRSTEMP" ]; then
+        rm -rf "LRSTEMP"
+    fi
+    
+    echo "Making LRS temp directory"
+    mkdir "LRSTEMP"
+ 
+    cd "LRSTEMP"
+    #Working directory is this.
+ 
+    git clone https://github.com/UstadMobile/ADL_LRS LRSCode
+    git clone https://github.com/varunasingh/LRS_P4A_Frame.git LRSAndroid
+    
+else 
+    echo "Updating.."; 
+    cd "LRSTEMP"
+    if [ -d "LRSGradle" ]; then
+	rm -rf "LRSGradle"
+    fi
+    cd LRSCode
+    echo "Updating LRS Code.."
+    git pull
+    cd ../LRSAndroid
+    echo "Updating Ustad Mobile Code.."
+    git pull
+    cd ../
+fi
 
-git clone https://github.com/UstadMobile/ADL_LRS LRSCode
-git clone https://github.com/varunasingh/LRS_P4A_Frame.git LRSAndroid
+
 
 cp -r LRSCode/adl_lrs LRSAndroid/service/
 cp -r LRSCode/oauth2_provider LRSAndroid/service/
@@ -97,16 +135,36 @@ sed -i.bak "" ${URLS_FILE}
 
 
 cd LRSAndroid
-mkdir logs
+if [ -d "logs" ]; then
+    echo ""
+else
+    mkdir logs
+fi 
+
 cd logs
 >celery_tasks.log
 >django_request.log
 >lrs.log
 cd ../service/
-python manage.py syncdb --noinput
+
+echo "Setting up database for lrs.."
+echo "LRS Sync database: " > lrs_build_output.log
+python manage.py syncdb --noinput >> lrs_build_output.log
 
 cd ..
-buildozer -v android debug
+echo "Building Python and LRS for Android.."
+echo "  (this might take some time)"
+echo "Android build #1 (without httplib2): " >> lrs_build_output.log
+buildozer -v android debug > lrs_build_output.log
+if [ $? != 0 ]; then  
+    echo "Android LRS Build failed. Log file: lrs_build_output.log"; 
+    exit 1;
+else 
+    echo "  ..almost there.."; 
+
+fi
+
+
 
 #.....wait for it.....
 #This will take some time..
@@ -114,7 +172,15 @@ buildozer -v android debug
 cp -r httplib2 .buildozer/applibs/
 cp -r httplib2 .buildozer/android/app/_applibs/
 
-buildozer -v android debug
+echo "Android build #2 (with httplib2" >> lrs_build_output.log
+buildozer -v android debug >> lrs_build_output.log
+if [ $? != 0 ]; then  
+    echo "Android LRS Build failed. Log file: lrs_build_output.log"; 
+    exit 1;
+else 
+    echo "  Android LRS Build a success (log file: lrs_build_output.log)"; 
+    echo ""
+fi
 
 #To run:
 #buildozer android deploy run
@@ -142,22 +208,6 @@ cd LRSGradle/
 #Chage to: distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all.zip
 sed -e '/distributionUrl/ s/^#*/#/' -i.bak gradle/wrapper/gradle-wrapper.properties
 echo "distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all.zip" >> gradle/wrapper/gradle-wrapper.properties
-
-
-#change to this:
-#Replace mavenCentral() with jcenter()
-#release {
-#            minifyEnabled false
-#	     //proguardFile getDefaultProguardFile('proguard-android.txt')
-#	}
-#Change apply plugin from android to com.android.library
-#apply plugin 'com.android.library'
-
-#Add minSDK and targetSdk values
-#defaultConfig {
-#        minSdkVersion 14
-#        targetSdkVersion 14
-#    }
 
 echo "apply plugin: 'com.android.library'" > build.gradle
 
