@@ -273,7 +273,8 @@ echo "include ':lrs'" > settings.gradle
 #sed -i.bak -e '/^dependencies/,/^}/{/^}/i\    compile project('"'"'\:lrs'"'"')' -e '}' build.gradle
 
 cd ${ANDROID_PROJECT_DIR}
-cp -r "LRSTEMP/LRSGradle" lrs/
+rm -rf lrs
+cp -r "LRSTEMP/LRSGradle" lrs
 
 #comment out the intent at lrs's AndroidManifest.xml and many more things
 #sed -i.bak "" lrs/src/main/AndroidManifest.xml #Comment intent
