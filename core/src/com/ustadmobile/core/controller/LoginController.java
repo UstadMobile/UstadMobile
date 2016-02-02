@@ -81,6 +81,8 @@ public class LoginController extends UstadBaseController{
 
     public static final String LLRS_LOGIN_URL = "http://localhost:8425/umapi/login/";
 
+    public static final String LLRS_XAPI_ENDPOINT = "http://localhost:8425/xAPI/";
+
     public static boolean local_LRS = false;
     
     public LoginController(Object context) {
@@ -110,18 +112,17 @@ public class LoginController extends UstadBaseController{
         parameters.put("password", password);
         parameters.put("url", url);
 
-        /*headers.put("X-Experience-API-Version", "1.0.1");
-        String encodedUserAndPass = "Basic " + Base64Coder.encodeString(
-            username + ':' + password);
-        headers.put("Authorization", encodedUserAndPass);*/
-
-
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
                 LLRS_LOGIN_URL, null, parameters, "POST");
         return authResult.getStatus();
 
     }
-    
+
+    public static String encodeBasicAuth(String username, String password) {
+        return "Basic " + Base64Coder.encodeString(username +
+                ':' + password);
+    }
+
     /**
      * Try and login with the given username and password
      * 
@@ -134,9 +135,7 @@ public class LoginController extends UstadBaseController{
     public static int authenticate(String username, String password, String url) throws IOException{
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");
-        String encodedUserAndPass = "Basic " + Base64Coder.encodeString(
-            username + ':' + password);
-        headers.put("Authorization", encodedUserAndPass);
+        headers.put("Authorization", LoginController.encodeBasicAuth(username, password));
         
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
                 url, headers, null);
