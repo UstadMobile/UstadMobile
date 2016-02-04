@@ -79,9 +79,13 @@ public class LoginController extends UstadBaseController{
     
     public static final String REGISTER_REGCODE = "regcode";
 
-    public static final String LLRS_LOGIN_URL = "http://localhost:8425/umapi/login/";
+    public static final String LLRS_URL = "http://localhost:8425/";
 
-    public static final String LLRS_XAPI_ENDPOINT = "http://localhost:8425/xAPI/";
+    public static final String LLRS_LOGIN_URL = LLRS_URL + "umapi/login/";
+
+    public static final String LLRS_XAPI_ENDPOINT = LLRS_URL + "xAPI/";
+
+    public static final String LLRS_FORWARD_URL = LLRS_URL + "umapi/forward/";
 
     public static boolean local_LRS = false;
     

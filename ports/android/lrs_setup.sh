@@ -287,6 +287,11 @@ cp LRSTEMP/${LRS_ANDROIDMANIFEST} lrs/src/main/AndroidManifest.xml
 cp ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java.sample ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java 
 #You obviously have to edit the TestConstatns.java file so that it has the Constants. 
 
+#Make the service a normal background service. The app will control and restart when back to it.
+#This is just like whatsapp.
+PYTHONSERVICE="./lrs/src/main/java/org/renpy/android/PythonService.java"
+sed -i.bak -e 's/startForeground/\/\/startForeground/' ${PYTHONSERVICE}
+
 #build itt
 ./gradlew assembleDebug
 
