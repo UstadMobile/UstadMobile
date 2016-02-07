@@ -60,7 +60,6 @@ import java.util.Hashtable;
  */
 public class LoginController extends UstadBaseController{
     
-    //private LoginView view;
     public LoginView view;
     
     public static final String REGISTER_COUNTRY = "country";
@@ -110,7 +109,8 @@ public class LoginController extends UstadBaseController{
      * @return HTTP OK 200 if OK, 403 for unauthorized
      * @throws IOException if something goes wrong talking to server
      */
-    public static int authenticate_llrs(String username, String password, String url) throws IOException{
+    public static int authenticateLLRS(String username, String password,
+                                        String url) throws IOException{
         Hashtable parameters = new Hashtable();
         parameters.put("username", username);
         parameters.put("password", password);
@@ -136,7 +136,8 @@ public class LoginController extends UstadBaseController{
      * @return HTTP OK 200 if OK, 403 for unauthorized
      * @throws IOException if something goes wrong talking to server
      */
-    public static int authenticate(String username, String password, String url) throws IOException{
+    public static int authenticate(String username, String password,
+                                   String url) throws IOException{
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");
         headers.put("Authorization", LoginController.encodeBasicAuth(username, password));
@@ -302,16 +303,30 @@ public class LoginController extends UstadBaseController{
         }
     }
 
+
+    /**
+     * Defaults to xapi server if localLRS boolean varaiable is not given.
+     * @param username
+     * @param password
+     * @param xAPIServer
+     * @param localLRS : Endpoint
+     */
     public void handleClickLogin(final String username, final String password,
                                  final String xAPIServer, boolean localLRS) {
         if (localLRS == true){
             local_LRS = true;
         }
         handleClickLogin(username, password, xAPIServer);
-
     }
-    
-    public void handleClickLogin(final String username, final String password, final String xAPIServer) {
+
+    /**
+     * Handles what happens when in the app the login button is clicked.
+     * @param username
+     * @param password
+     * @param xAPIServer
+     */
+    public void handleClickLogin(final String username, final String password,
+                                 final String xAPIServer) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         updateXAPIServer(xAPIServer);
@@ -327,7 +342,7 @@ public class LoginController extends UstadBaseController{
 
                 try {
                     if (local_LRS == true){
-                        result = LoginController.authenticate_llrs(username, password,
+                        result = LoginController.authenticateLLRS(username, password,
                                 serverURL);
                     }else {
                         result = LoginController.authenticate(username, password,

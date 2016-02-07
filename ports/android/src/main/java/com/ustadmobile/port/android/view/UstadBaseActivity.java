@@ -53,11 +53,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         //Check if LRS Service is running..
         if (isMyServiceRunning(PythonService.class)) {
-            //already running mate..
-            System.out.println("ServiceCheck: Already running bro..");
+            System.out.println("ServiceCheck: Already running.");
         }else{
-            //start it.
-            System.out.println("ServiceCheck: Not running!");
+            System.out.println("ServiceCheck: Not running! Starting..");
             PythonServiceManager psm = new PythonServiceManager();
             psm.startThis(UstadBaseActivity.this);
             System.out.println("ServiceCheck: Started.");

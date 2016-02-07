@@ -63,17 +63,15 @@ import org.kamranzafar.jtar.*;
 
 /**
  * Created by varuna on 26/11/15.
+ * This service starts Python (its part of the Python for Android procedure)
+ * This enables the python application to be started on demand
  */
 public class PythonServiceManager {
 
     private static String TAG = "Python";
 
-    // The audio thread for streaming audio...
-    //private static AudioThread mAudioThread = null;
-
     // The SDLSurfaceView we contain.
     public static SDLSurfaceView mView = null;
-    //public static PythonActivity mActivity = null;
     public static ApplicationInfo mInfo = null;
 
     // Did we launch our thread?
@@ -91,24 +89,22 @@ public class PythonServiceManager {
 
     private static final String DB_INITIALIZED = "db_initialized";
 
-
     public Context context;
 
     public void startThis(Context context){
         this.context = context;
-        this.externalStorage = new File(Environment.getExternalStorageDirectory(), context.getPackageName());
+        this.externalStorage = new File(Environment.getExternalStorageDirectory(),
+                context.getPackageName());
         this.mPath = this.externalStorage;
         run();
-        start_service("Django", "Django is running", "/storage/emulated/0/com.toughra.ustadmobile/lrs-djandro.log");
-
-
+        start_service("UstadMobile", "UstadMobile is running",
+                "/storage/emulated/0/com.toughra.ustadmobile/lrs-djandro.log");
     }
 
     public void stop_service() {
         Intent serviceIntent = new Intent(this.context, PythonService.class);
         this.context.stopService(serviceIntent);
     }
-
 
     public void start_service(String serviceTitle, String serviceDescription,
                                      String pythonServiceArgument) {
@@ -128,125 +124,14 @@ public class PythonServiceManager {
     }
 
     protected void onCreate(Bundle savedInstanceState) {
+        System.out.println("");
 
-        String test="test";
-        /*
-        //super.onCreate(savedInstanceState);
-
-        //Hardware.context = this;
-        ///Action.context = this;
-        //this.mActivity = this;
-
-        //context.getWindowManager().getDefaultDisplay().getMetrics(Hardware.metrics);
-
-        resourceManager = new ResourceManager(this);
-        externalStorage = new File(Environment.getExternalStorageDirectory(), getPackageName());
-
-        // Figure out the directory where the game is. If the game was
-        // given to us via an intent, then we use the scheme-specific
-        // part of that intent to determine the file to launch. We
-        // also use the android.txt file to determine the orientation.
-        //
-        // Otherwise, we use the public data, if we have it, or the
-        // private data if we do not.
-        if (getIntent() != null && getIntent().getAction() != null &&
-                getIntent().getAction().equals("org.renpy.LAUNCH")) {
-            mPath = new File(getIntent().getData().getSchemeSpecificPart());
-
-            Project p = Project.scanDirectory(mPath);
-
-            if (p != null) {
-                if (p.landscape) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                }
-            }
-
-            // Let old apps know they started.
-            try {
-                FileWriter f = new FileWriter(new File(mPath, ".launch"));
-                f.write("started");
-                f.close();
-            } catch (IOException e) {
-                // pass
-            }
-
-
-
-        } else if (resourceManager.getString("public_version") != null) {
-            mPath = externalStorage;
-        } else {
-            mPath = getFilesDir();
-        }
-
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        // go to fullscreen mode if requested
-        try {
-            this.mInfo = this.getPackageManager().getApplicationInfo(
-                    this.getPackageName(), PackageManager.GET_META_DATA);
-            Log.v("python", "metadata fullscreen is" + this.mInfo.metaData.get("fullscreen"));
-            if ( (Integer)this.mInfo.metaData.get("fullscreen") == 1 ) {
-                getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-        }
-
-        if ( Configuration.use_billing ) {
-            mBillingHandler = new Handler();
-        }
-
-        // Start showing an SDLSurfaceView.
-        mView = new SDLSurfaceView(
-                this,
-                mPath.getAbsolutePath());
-
-        Hardware.view = mView;
-        setContentView(mView);
-
-        // Force the background window color if asked
-        if ( this.mInfo.metaData.containsKey("android.background_color") ) {
-            getWindow().getDecorView().setBackgroundColor(
-                    this.mInfo.metaData.getInt("android.background_color"));
-        }
-        //start_service("Django","Django is running","/storage/emulated/0/com.toughra.ustadmobile/djandro.log");
-        */
     }
-
-    /**
-     * Show an error using a toast. (Only makes sense from non-UI
-     * threads.)
-     */
-    /*
-    public void toastError(final String msg) {
-
-        final Activity thisActivity = this;
-
-        runOnUiThread(new Runnable () {
-            public void run() {
-                Toast.makeText(thisActivity, msg, Toast.LENGTH_LONG).show();
-            }
-        });
-
-        // Wait to show the error.
-        synchronized (this) {
-            try {
-                this.wait(1000);
-            } catch (InterruptedException e) {
-            }
-        }
-    }
-    */
-
 
     public class AssetExtract {
         private AssetManager mAssetManager = null;
-        //private Activity mActivity = null;
 
         AssetExtract(Context act) {
-            //mActivity = act;
             mAssetManager = act.getAssets();
         }
 
@@ -259,7 +144,8 @@ public class PythonServiceManager {
 
             try {
                 assetStream = mAssetManager.open(asset, AssetManager.ACCESS_STREAMING);
-                tis = new TarInputStream(new BufferedInputStream(new GZIPInputStream(new BufferedInputStream(assetStream, 8192)), 8192));
+                tis = new TarInputStream(new BufferedInputStream(new GZIPInputStream(
+                        new BufferedInputStream(assetStream, 8192)), 8192));
             } catch (IOException e) {
                 Log.e("python", "opening up extract tar", e);
                 return false;
@@ -387,7 +273,6 @@ public class PythonServiceManager {
 
             AssetExtract ae = new AssetExtract(this.context);
             if (!ae.extractTar(resource + ".mp3", target.getAbsolutePath())) {
-                //toastError("Could not extract " + resource + " data.");
                 System.out.println("Could not extract " + resource + " datta.");
             }
 
@@ -408,16 +293,6 @@ public class PythonServiceManager {
 
 
     public void run() {
-        /*
-
-        libjpeg.so
-        libpython2.7.so
-        libsdl_image.so
-        libsdl_ttf.so
-        libsqlite3.so
-        libvudroid.so
-         */
-
         unpackData("private", context.getFilesDir());
         unpackData("public", externalStorage);
 
@@ -445,13 +320,5 @@ public class PythonServiceManager {
         } catch(UnsatisfiedLinkError e) {
         }
 
-
-        /*runOnUiThread(new Runnable () {
-            public void run() {
-                mView.start();
-            }
-        });*/
     }
-
-
 }
