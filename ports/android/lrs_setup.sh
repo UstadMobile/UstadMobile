@@ -4,12 +4,67 @@
 
 echo "Hey there"
 
+#sudo pip install --upgrade buildozer
+BUILDOZER_PATH=`which buildozer`
+
+if [ "$BUILDOZER_PATH" == "" ];then
+   echo "Buildozer path not found. set it. Installing.."
+   sudo pip install --upgrade buildozer
+   BUILDOZER_PATH=`which buildozer`
+
+   if [ "$BUILDOZER_PATH" == "" ];then
+       echo "Buildozer not installed properly. Buildozer path not found. set it. Exiting.."
+       exit 1
+    fi
+fi
+
+#Latest with pip fix:  for buildozer issue 279
+BUILDOZER_VERSION=`buildozer --version`
+MIN_VER="0.32"
+
+if [[ $BUILDOZER_VERSION == *"dev" ]];then
+ echo "Buildozer ok."
+ ver=`echo $BUILDOZER_VERSION | awk -F' ' '{ print $2 }' | awk -F"dev" '{ print $1 }'`
+ if [ $(echo " $ver < $MIN_VER" | bc) -eq 1 ]; then
+  git clone https://github.com/kivy/buildozer
+  cd buildozer
+  sudo python2.7 setup.py install
+  cd ../
+  rm -rf buildozer
+ else
+  echo "Buildozer at desired version."
+ fi
+else
+ ver=`echo $BUILDOZER_VERSION | awk -F' ' '{ print $2 }'`
+ if [ $(echo " $ver < $MIN_VER" | bc) -eq 1 ]; then
+  git clone https://github.com/kivy/buildozer
+  cd buildozer
+  sudo python2.7 setup.py install
+  cd ../
+  rm -rf buildozer
+  
+ else
+  echo "Buildozer at desired version."
+ fi
+fi
+
+
 ANDROID_PATH=`which android`
 
 if [ "$ANDROID_PATH" == "" ];then
    echo "Android path not found. set it. Exiting.."
+   
    exit 1
 fi
+
+
+#DEPENDENCIES:
+sudo pip install django-endless-pagination
+sudo pip install south
+sudo pip install shortuuid
+sudo pip install django-jsonfield
+sudo pip install django-jsonify
+#sudo pip install django-extensions,shortuuid,django-jsonfield,isodate,oauth2,celery,openssl,pycrypto,rfc3987,bencode
 
 
 #Steps to do this thing.
@@ -201,7 +256,9 @@ fi
 
 
 #Obviously make sure you have android-19 or substitute with whatever
-android create project --path ./LRSGradle --activity LRSGradleActivity --package com.ustadmobile --target "android-14" --gradle --gradle-version '1.3.0'
+android create project --path ./LRSGradle --activity LRSGradleActivity --package com.ustadmobile --target "android-10" --gradle --gradle-version '1.3.0'
+
+#android create project --path ./LRSGradle --activity LRSGradleActivity --package com.ustadmobile --target "android-14" --gradle --gradle-version '1.3.0'
 
 cd LRSGradle/
 
@@ -213,7 +270,9 @@ echo "apply plugin: 'com.android.library'" > build.gradle
 
 echo "android {" >> build.gradle
 echo "    compileSdkVersion 14" >> build.gradle
-echo "    buildToolsVersion '23.0.2'" >> build.gradle
+#echo "    compileSdkVersion 10" >> build.gradle
+#echo "    buildToolsVersion '23.0.2'" >> build.gradle
+echo "    buildToolsVersion '23.0.1'" >> build.gradle
 
 echo "    defaultConfig {" >> build.gradle
 echo "        minSdkVersion 9" >> build.gradle

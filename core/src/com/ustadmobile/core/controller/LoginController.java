@@ -84,10 +84,6 @@ public class LoginController extends UstadBaseController{
 
     public static final String LLRS_XAPI_ENDPOINT = LLRS_URL + "xAPI/";
 
-    public static final String LLRS_FORWARD_URL = LLRS_URL + "umapi/forward/";
-
-    public static boolean local_LRS = false;
-    
     public LoginController(Object context) {
         super(context);
     }
@@ -305,18 +301,16 @@ public class LoginController extends UstadBaseController{
 
 
     /**
-     * Defaults to xapi server if localLRS boolean varaiable is not given.
+     * Handles what happens when in the app the login button is clicked.  By default will not
+     * expect to use a local LRS server
+     *
      * @param username
      * @param password
      * @param xAPIServer
-     * @param localLRS : Endpoint
      */
     public void handleClickLogin(final String username, final String password,
-                                 final String xAPIServer, boolean localLRS) {
-        if (localLRS == true){
-            local_LRS = true;
-        }
-        handleClickLogin(username, password, xAPIServer);
+                                 final String xAPIServer) {
+        handleClickLogin(username, password, xAPIServer, false);
     }
 
     /**
@@ -324,9 +318,10 @@ public class LoginController extends UstadBaseController{
      * @param username
      * @param password
      * @param xAPIServer
+     * @param localLRS True if we should authenticate against a local LRS server: false otherwise
      */
     public void handleClickLogin(final String username, final String password,
-                                 final String xAPIServer) {
+                                 final String xAPIServer, final boolean localLRS) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         updateXAPIServer(xAPIServer);
@@ -341,7 +336,7 @@ public class LoginController extends UstadBaseController{
                 IOException ioe = null;
 
                 try {
-                    if (local_LRS == true){
+                    if (localLRS){
                         result = LoginController.authenticateLLRS(username, password,
                                 serverURL);
                     }else {
