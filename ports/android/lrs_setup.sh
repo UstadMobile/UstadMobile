@@ -269,8 +269,8 @@ echo "distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all
 echo "apply plugin: 'com.android.library'" > build.gradle
 
 echo "android {" >> build.gradle
-echo "    compileSdkVersion 14" >> build.gradle
-#echo "    compileSdkVersion 10" >> build.gradle
+#echo "    compileSdkVersion 14" >> build.gradle
+echo "    compileSdkVersion 19" >> build.gradle
 #echo "    buildToolsVersion '23.0.2'" >> build.gradle
 echo "    buildToolsVersion '23.0.1'" >> build.gradle
 
