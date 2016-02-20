@@ -41,6 +41,7 @@ import com.ustadmobile.core.model.AttendanceRowModel;
 import com.ustadmobile.core.omr.OMRRecognizer;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
@@ -62,9 +63,17 @@ public class AttendanceController extends UstadBaseController{
     
     public static final float AREA_HEIGHT = 902f;
     
-    public static final float OMR_AREA_OFFSET_X = (311f/AREA_WIDTH);
+    //public static final float OMR_AREA_OFFSET_X = (311f/AREA_WIDTH);
     
-    public static final float OMR_AREA_OFFSET_Y = (37.5f/AREA_HEIGHT);
+    //public static final float OMR_AREA_OFFSET_Y = (37.5f/AREA_HEIGHT);
+
+    public static final float OMR_AREA_OFFSET_X_1 = (196.2f/AREA_WIDTH);
+
+    public static final float OMR_AREA_OFFSET_Y_1 = (41.1f/AREA_HEIGHT);
+
+    public static final float OMR_AREA_OFFSET_X_2 = (478f/AREA_WIDTH);
+
+    public static final float OMR_AREA_OFFSET_Y_2 = (41f/AREA_HEIGHT);
     
     public static final float OM_WIDTH = 26f/AREA_WIDTH;
     
@@ -189,12 +198,18 @@ public class AttendanceController extends UstadBaseController{
      * the view should call this to get the workflow started
      */
     public void handleStartFlow() {
-        String[] classList = new String[teacherClasses.length];
-        for(int i = 0; i < classList.length; i++) {
-            classList[i] = teacherClasses[i].name;
+        if (teacherClasses == null || teacherClasses.length == 0 ){
+            UstadMobileSystemImpl.getInstance().getAppView(context).showNotification(
+                    "You are not a teacher or no students assigned", AppView.LENGTH_LONG);
+            view.finish();
+        }else {
+            String[] classList = new String[teacherClasses.length];
+            for (int i = 0; i < classList.length; i++) {
+                classList[i] = teacherClasses[i].name;
+            }
+
+            view.showClassList(classList);
         }
-        
-        view.showClassList(classList);
     }
     
     
@@ -377,10 +392,24 @@ public class AttendanceController extends UstadBaseController{
                 boolean[][] bitmapImg = OMRRecognizer.convertImgToBitmap(img);
                 img = null;
 
-                boolean[][] marks = OMRRecognizer.getMarks(bitmapImg,
-                    OMR_AREA_OFFSET_X, OMR_AREA_OFFSET_Y, 
+                boolean[][] marks_1 = OMRRecognizer.getMarks(bitmapImg,
+                    OMR_AREA_OFFSET_X_1, OMR_AREA_OFFSET_Y_1,
                     OM_WIDTH, OM_HEIGHT, OM_ROW_HEIGHT, 
-                    4, 33, null);    
+                    4, 33, null);
+
+
+                boolean[][] marks_2 = OMRRecognizer.getMarks(bitmapImg,
+                        OMR_AREA_OFFSET_X_2, OMR_AREA_OFFSET_Y_2,
+                        OM_WIDTH, OM_HEIGHT, OM_ROW_HEIGHT,
+                        4, 33, null);
+
+                boolean[][] marks = new boolean[marks_1.length + marks_2.length][];
+
+                System.arraycopy(marks_1, 0, marks, 0, marks_1.length);
+                System.arraycopy(marks_2, 0, marks, marks_1.length, marks_2.length);
+
+                //boolean[][] marks = marks_1 + marks_2;
+
                 impl.getAppView(ctrl.getContext()).dismissProgressDialog();
                 ctrl.handleResultsDecoded(marks);
             }catch(Exception e) {
