@@ -136,9 +136,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         downloadCompleteReceivers = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            WebView.setWebContentsDebuggingEnabled(true);
-        }
+
     }
 
     /**
@@ -151,6 +149,17 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public void init(Object context) {
         super.init(context);
+
+        if(context instanceof Activity) {
+            ((Activity)context).runOnUiThread(new Runnable() {
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        WebView.setWebContentsDebuggingEnabled(true);
+                    }
+                }
+            });
+        }
+
     }
 
     @Override
