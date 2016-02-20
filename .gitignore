@@ -100,4 +100,9 @@ ports/j2me/src/com/ustadmobile/test/core/*.java
 testres/unittest-testresults.txt
 testres/unittest-result
 
-
+#Ignore LRS
+ports/android/lrs
+ports/android/LRSTEMP
+ports/android/settings.gradle
+*.bak
+*~

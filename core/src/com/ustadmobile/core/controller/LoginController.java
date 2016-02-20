@@ -62,7 +62,6 @@ import org.json.JSONException;
  */
 public class LoginController extends UstadBaseController{
     
-    //private LoginView view;
     public LoginView view;
     
     public static final String REGISTER_COUNTRY = "country";
@@ -80,7 +79,13 @@ public class LoginController extends UstadBaseController{
     public static final String REGISTER_EMAIL = "email";
     
     public static final String REGISTER_REGCODE = "regcode";
-    
+
+    public static final String LLRS_URL = "http://localhost:8425/";
+
+    public static final String LLRS_LOGIN_URL = LLRS_URL + "umapi/login/";
+
+    public static final String LLRS_XAPI_ENDPOINT = LLRS_URL + "xAPI/";
+
     public LoginController(Object context) {
         super(context);
     }
@@ -91,7 +96,35 @@ public class LoginController extends UstadBaseController{
         ctrl.setView(view);
         return ctrl;
     }
-    
+
+    /**
+     * Try and login local lrs with the given username and password and
+     * master server url (llrs stands for local lrs)
+     *
+     * @param username Username to authenticate as
+     * @param password Password to authenticate with
+     * @param master server url xAPI statements endpoint to authenticate against
+     * @return HTTP OK 200 if OK, 403 for unauthorized
+     * @throws IOException if something goes wrong talking to server
+     */
+    public static int authenticateLLRS(String username, String password,
+                                        String url) throws IOException{
+        Hashtable parameters = new Hashtable();
+        parameters.put("username", username);
+        parameters.put("password", password);
+        parameters.put("url", url);
+
+        HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
+                LLRS_LOGIN_URL, null, parameters, "POST");
+        return authResult.getStatus();
+
+    }
+
+    public static String encodeBasicAuth(String username, String password) {
+        return "Basic " + Base64Coder.encodeString(username +
+                ':' + password);
+    }
+
     /**
      * Try and login with the given username and password
      * 
@@ -101,12 +134,11 @@ public class LoginController extends UstadBaseController{
      * @return HTTP OK 200 if OK, 403 for unauthorized
      * @throws IOException if something goes wrong talking to server
      */
-    public static int authenticate(String username, String password, String url) throws IOException{
+    public static int authenticate(String username, String password,
+                                   String url) throws IOException{
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");
-        String encodedUserAndPass = "Basic " + Base64Coder.encodeString(
-            username + ':' + password);
-        headers.put("Authorization", encodedUserAndPass);
+        headers.put("Authorization", LoginController.encodeBasicAuth(username, password));
         
         HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
                 url, headers, null);
@@ -353,8 +385,8 @@ public class LoginController extends UstadBaseController{
     protected void updateXAPIServer(String newServer) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String currentServer = impl.getAppPref(
-                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
         
         //See if the user has changed hte xAPI Server
         if(!currentServer.equals(newServer)) {
@@ -362,9 +394,30 @@ public class LoginController extends UstadBaseController{
                 context);
         }
     }
-    
-    
-    public void handleClickLogin(final String username, final String password, final String xAPIServer) {
+
+
+    /**
+     * Handles what happens when in the app the login button is clicked.  By default will not
+     * expect to use a local LRS server
+     *
+     * @param username
+     * @param password
+     * @param xAPIServer
+     */
+    public void handleClickLogin(final String username, final String password,
+                                 final String xAPIServer) {
+        handleClickLogin(username, password, xAPIServer, false);
+    }
+
+    /**
+     * Handles what happens when in the app the login button is clicked.
+     * @param username
+     * @param password
+     * @param xAPIServer
+     * @param localLRS True if we should authenticate against a local LRS server: false otherwise
+     */
+    public void handleClickLogin(final String username, final String password,
+                                 final String xAPIServer, final boolean localLRS) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         updateXAPIServer(xAPIServer);
@@ -381,8 +434,13 @@ public class LoginController extends UstadBaseController{
                 IOException ioe = null;
 
                 try {
-                    result = LoginController.authenticate(username, password, 
-                        serverURL);
+                    if (localLRS){
+                        result = LoginController.authenticateLLRS(username, password,
+                                serverURL);
+                    }else {
+                        result = LoginController.authenticate(username, password,
+                                serverURL);
+                    }
                 }catch(IOException e) {
                     ioe = e;
                 }
@@ -519,3 +577,4 @@ public class LoginController extends UstadBaseController{
         view.setXAPIServerURL(xAPIURL);
     }
 }
+

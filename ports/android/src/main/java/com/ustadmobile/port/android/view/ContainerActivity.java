@@ -24,6 +24,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -31,6 +32,7 @@ import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
@@ -40,6 +42,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
@@ -200,9 +203,19 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             mContainerController.logContainerOpened(mOPF);
 
             String[] hrefArray = mOPF.getLinearSpineURLS();
+            String endpoint = "";
+            String username = UstadMobileSystemImpl.getInstance().getActiveUser(this);
+            String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(this);
+
+            String xAPIParams = "?actor=" +
+                    URLEncoder.encode(UMTinCanUtil.makeActorFromActiveUser(this).toString()) +
+                    "&auth=" + URLEncoder.encode(LoginController.encodeBasicAuth(username, password)) +
+                    "&endpoint=" + URLEncoder.encode(LoginController.LLRS_XAPI_ENDPOINT);
+
             urlArray = new String[hrefArray.length];
             for(int i = 0; i < hrefArray.length; i++) {
-                urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i]);
+                urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i])
+                        + xAPIParams;
             }
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 163, null, e);
