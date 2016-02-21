@@ -92,6 +92,11 @@ public class AttendanceController extends UstadBaseController{
     private AttendanceClassStudent[] classStudents;
     
     /**
+     * Argument required for attendance class id
+     */
+    public static final String KEY_CLASSID = "classid";
+    
+    /**
      * Mapping of standard tincan verbs to IDS as per 
      * AttendanceRowModel.STATUS_
      */
@@ -108,7 +113,7 @@ public class AttendanceController extends UstadBaseController{
     
     public AttendanceController(Object context) {
         super(context);
-        teacherClasses = loadTeacherClassListFromPrefs(view.getContext());
+        teacherClasses = loadTeacherClassListFromPrefs(context);
     }
     
     public static AttendanceController makeControllerForView(AttendanceView view) {
@@ -173,6 +178,8 @@ public class AttendanceController extends UstadBaseController{
 
         return teacherClasses;
     }
+    
+    
     
     public static AttendanceClassStudent[] loadClassStudentListFromPrefs(String classID, Object context) {
         AttendanceClassStudent[] result = null;

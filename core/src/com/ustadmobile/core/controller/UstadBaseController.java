@@ -57,14 +57,12 @@ public abstract class UstadBaseController implements UstadController {
     public static final int CMD_SETTINGS = 1002;
     
     public static final int CMD_LOGOUT = 1003;
-    
-    public static final int CMD_ATTENDANCE = 1004;
-    
+        
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_ABOUT, 
-        CMD_SETTINGS, CMD_LOGOUT, CMD_ATTENDANCE};
+        CMD_SETTINGS, CMD_LOGOUT};
     
     public static final int[] STANDARD_APPMENU_STRIDS = new int[]{U.id.about,
-        U.id.settings, U.id.logout, U.id.attendance};
+        U.id.settings, U.id.logout};
     
     /**
      * Create a new controller with the given context
@@ -162,10 +160,6 @@ public abstract class UstadBaseController implements UstadController {
                 return true;
             case CMD_LOGOUT:
                 LoginController.handleLogout(context);
-                return true;
-            case CMD_ATTENDANCE:
-                UstadMobileSystemImpl.getInstance().go(AttendanceView.class,
-                    new Hashtable(), context);
                 return true;
         }
         

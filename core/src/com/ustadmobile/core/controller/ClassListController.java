@@ -4,6 +4,9 @@ import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ClassListView;
 import com.ustadmobile.core.controller.AttendanceController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.ClassManagementView;
+import java.util.Hashtable;
 
 /**
  * Created by varuna on 20/02/16.
@@ -42,6 +45,10 @@ public class ClassListController extends UstadBaseController{
     }
 
     public void handleClassSelected(int index) {
-
+        Hashtable args = new Hashtable();
+        args.put(ClassManagementController.KEY_CLASSID, 
+                attendanceClasses[index].id);
+        UstadMobileSystemImpl.getInstance().go(ClassManagementView.class, args, 
+                context);
     }
 }
