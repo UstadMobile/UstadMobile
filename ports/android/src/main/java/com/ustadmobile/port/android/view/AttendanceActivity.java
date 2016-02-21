@@ -8,11 +8,16 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.AttendanceController;
+import com.ustadmobile.core.controller.ClassManagementController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.AttendanceRowModel;
 import com.ustadmobile.core.view.AttendanceView;
+import com.ustadmobile.core.view.ClassManagementView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,27 +45,37 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_attendance);
 
-        mController = AttendanceController.makeControllerForView(this);
+        mController = AttendanceController.makeControllerForView(this,
+                UMAndroidUtil.bundleToHashtable(getIntent().getExtras()));
         setBaseController(mController);
         setUMToolbar();
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Attendance");
         if(savedInstanceState == null) {
             mController.handleStartFlow();
         }
     }
 
+    /*
+
+    TODO: later this evening: implement up button
     @Override
-    public void showStartPrompt() {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                Hashtable args = new Hashtable();
+                args.put(ClassManagementController.KEY_CLASSID, theClass.id);
+                UstadMobileSystemImpl.getInstance().go(ClassManagementView.class,
+                        args, this);
+                return true;
+        }
 
+        return super.onOptionsItemSelected(item);
     }
-
-    @Override
-    public void showClassList(String[] classList) {
-        Fragment classListFrag = AttendanceSelectClassListFragment.newInstance(classList);
-        getSupportFragmentManager().beginTransaction().replace(R.id.attendance_fragment_container,
-                classListFrag, TAG_CLASSLISTFRAG).commit();
-    }
-
+    */
 
     @Override
     public void showTakePicture() {

@@ -84,10 +84,8 @@ public class AttendanceController extends UstadBaseController{
     private AttendanceRowModel[] attendanceResult; 
     
     private AttendanceView view;
-    
-    private AttendanceClass[] teacherClasses;
-    
-    private int selectedClass;
+        
+    private AttendanceClass theClass;
     
     private AttendanceClassStudent[] classStudents;
     
@@ -95,6 +93,7 @@ public class AttendanceController extends UstadBaseController{
      * Argument required for attendance class id
      */
     public static final String KEY_CLASSID = "classid";
+    
     
     /**
      * Mapping of standard tincan verbs to IDS as per 
@@ -111,39 +110,18 @@ public class AttendanceController extends UstadBaseController{
         "Attended", "Late", "Absent - Excused", "Skipped"
     };
     
-    public AttendanceController(Object context) {
+    public AttendanceController(Object context, String classId) {
         super(context);
-        teacherClasses = loadTeacherClassListFromPrefs(context);
+        theClass = ClassManagementController.getClassById(context, classId);
     }
     
-    public static AttendanceController makeControllerForView(AttendanceView view) {
-        AttendanceController ctrl = new AttendanceController(view.getContext());
+    public static AttendanceController makeControllerForView(AttendanceView view, Hashtable args) {
+        AttendanceController ctrl = new AttendanceController(view.getContext(), 
+            (String)args.get(KEY_CLASSID));
         ctrl.setView(view);
+        
 
         return ctrl;
-    }
-
-    /**
-     * Index of the class selected for taking attendance
-     * 
-     * @return 
-     */
-    public int getSelectedClass() {
-        return selectedClass;
-    }
-
-    /**
-     * Set the index of the class selected for taking attendance
-     * 
-     * @param selectedClass 
-     */
-    public void setSelectedClass(int selectedClass) {
-        this.selectedClass = selectedClass;
-    }
-    
-    public void handleClassSelected(int selectedClass) {
-        setSelectedClass(selectedClass);
-        view.showTakePicture();
     }
 
     /**
@@ -215,18 +193,7 @@ public class AttendanceController extends UstadBaseController{
      * the view should call this to get the workflow started
      */
     public void handleStartFlow() {
-        if (teacherClasses == null || teacherClasses.length == 0 ){
-            UstadMobileSystemImpl.getInstance().getAppView(context).showNotification(
-                    "You are not a teacher or no students assigned", AppView.LENGTH_LONG);
-            view.finish();
-        }else {
-            String[] classList = new String[teacherClasses.length];
-            for (int i = 0; i < classList.length; i++) {
-                classList[i] = teacherClasses[i].name;
-            }
-
-            view.showClassList(classList);
-        }
+        view.showTakePicture();
     }
     
     
@@ -260,7 +227,7 @@ public class AttendanceController extends UstadBaseController{
     
     public void handleResultsDecoded(boolean[][] opticalMarks) {
         classStudents = loadClassStudentListFromPrefs(
-                teacherClasses[selectedClass].id, context);
+            theClass.id, context);
 
         attendanceResult = new AttendanceRowModel[Math.min(opticalMarks.length, 
             classStudents.length)];
@@ -293,7 +260,7 @@ public class AttendanceController extends UstadBaseController{
         String registrationUUID = impl.generateUUID();
         
         JSONObject teacherStmt = makeAttendendedStmt(
-            teacherClasses[selectedClass].id, teacherClasses[selectedClass].name,
+            theClass.id, theClass.name,
             impl.getActiveUser(getContext()), xAPIServer, 
             "http://activitystrea.ms/schema/1.0/host", "hosted", registrationUUID, 
             null);
@@ -305,8 +272,8 @@ public class AttendanceController extends UstadBaseController{
         for(int i = 0; i < attendanceResult.length; i++) {
             int attendanceStatus = attendanceResult[i].attendanceStatus;
             if(attendanceStatus >= 0) {
-                studentStmt = makeAttendendedStmt(teacherClasses[selectedClass].id, 
-                    teacherClasses[selectedClass].name, attendanceResult[i].userId, 
+                studentStmt = makeAttendendedStmt(theClass.id, 
+                    theClass.name, attendanceResult[i].userId, 
                     xAPIServer, VERB_IDS[attendanceStatus], VERB_DISPLAYS[attendanceStatus], 
                     registrationUUID, instructorActor);
                 stmtArr.put(studentStmt);

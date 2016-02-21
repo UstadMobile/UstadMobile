@@ -37,13 +37,9 @@ import com.ustadmobile.core.model.AttendanceRowModel;
  * @author mike
  */
 public interface AttendanceView extends UstadView {
-    
-    public void showStartPrompt();
-    
+        
     public void showTakePicture();
-    
-    public void showClassList(String[] classList);
-    
+        
     public void showResult(AttendanceRowModel[] results);
     
     public void finish();

@@ -10,9 +10,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.util.PythonServiceManager;
@@ -171,6 +173,18 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     public Object getContext() {
         return this;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                UstadMobileSystemImpl.getInstance().go(BasePointView.class,
+                        BasePointController.makeDefaultBasePointArgs(this), this);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 

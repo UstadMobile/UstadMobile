@@ -70,20 +70,7 @@ public class CatalogActivity extends UstadBaseActivity implements  ListView.OnIt
         //        menuOptions));
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch(item.getItemId()) {
-            case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.class,
-                    BasePointController.makeDefaultBasePointArgs(this), this);
-                return true;
-        }
 
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
