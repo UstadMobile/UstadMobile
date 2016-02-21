@@ -158,7 +158,7 @@ public class U {
         
         public static final int processing = 58;
 
-         
+        public static final int classes = 59;
    }
 
 }

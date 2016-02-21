@@ -60,5 +60,13 @@ public interface BasePointView extends UstadView{
      * @param column INDEX_DOWNLOADEDENTRIES or INDEX_BROWSEFEEDS
      */
     public void refreshCatalog(int column);
+
+    /**
+     * If true the view should add a third tab for class
+     * management (e.g. user is a teacher)
+     *
+     * @param viewable
+     */
+    public void setClassListVisible(boolean visible);
     
 }

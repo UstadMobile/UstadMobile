@@ -1,0 +1,13 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ustadmobile.port.android.view.ClassListFragment">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="40.0sp"
+        android:layout_height="match_parent"
+        android:id="@+id/fragment_class_list_listview"
+        android:layout_gravity="left|top" />
+</FrameLayout>

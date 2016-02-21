@@ -38,7 +38,9 @@ import com.ustadmobile.core.view.UserSettingsView;
 import java.util.Hashtable;
 
 /**
- * Base Controller that provides key functionality 
+ * Base Controller that provides key functionality for any view :
+ * it contains the data or a reference to the data and handles events and
+ * logic.
  * 
  * @author mike
  */

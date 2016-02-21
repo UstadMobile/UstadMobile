@@ -41,15 +41,21 @@ public class BasePointController extends UstadBaseController{
      * Will get passed down as url -> http://server.com/file.opds
      */
     public static final String OPDS_ARGS_PREFIX = "-opds";
-    
-    public static final int NUM_TABS = 2;
-    
+
     /**
-     * 
+     * Indicates the tab for items already downloaded
      */
     public static final int INDEX_DOWNLOADEDENTRIES = 0;
-    
+
+    /**
+     * Indicates the tab for browsing OPDS feeds
+     */
     public static final int INDEX_BROWSEFEEDS = 1;
+
+    /**
+     * Indicates the tab for class management
+     */
+    public static final int INDEX_CLASSES = 2;
     
     public static final int OPDS_FEEDS_INDEX_URL = 0;
     
@@ -58,7 +64,9 @@ public class BasePointController extends UstadBaseController{
     public static final int OPDS_SELECTPROMPT = 0;
     
     public static final int OPDS_CUSTOM = 1;
-    
+
+    public static final int NUM_CATALOG_TABS = 2;
+
     private Hashtable args;
     
     public BasePointController(Object context) {
@@ -69,6 +77,7 @@ public class BasePointController extends UstadBaseController{
         BasePointController ctrl = new BasePointController(view.getContext());
         ctrl.args = args;
         ctrl.setView(view);
+        view.setClassListVisible(ctrl.isUserTeacher());
         return ctrl;
     }
     
@@ -81,7 +90,7 @@ public class BasePointController extends UstadBaseController{
         };
         
         String iPrefix;
-        for(int i = 0; i < BasePointController.NUM_TABS; i++) {
+        for(int i = 0; i < BasePointController.NUM_CATALOG_TABS; i++) {
             iPrefix = i+BasePointController.OPDS_ARGS_PREFIX;
             args.put(iPrefix + CatalogController.KEY_URL, basePointURLs[i]);
             args.put(iPrefix + CatalogController.KEY_HTTPUSER, 
@@ -210,8 +219,8 @@ public class BasePointController extends UstadBaseController{
     public static JSONArray getDefaultUserFeedList(Object context) {
         JSONArray retVal = null;
         String xAPIServer = UstadMobileSystemImpl.getInstance().getAppPref(
-            UstadMobileSystemImpl.PREFKEY_XAPISERVER, 
-            UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
         try {
             retVal = new JSONArray();
             JSONObject serverFeed = new JSONObject();
@@ -278,4 +287,17 @@ public class BasePointController extends UstadBaseController{
         
         basePointView.refreshCatalog(INDEX_BROWSEFEEDS);
     }
+
+    /**
+     * Determines if the current user is a teacher (e.g. would see
+     * class list management)
+     *
+     * TODO: Implement this
+     *
+     * @return true if user is teacher, false otherwise
+     */
+    public boolean isUserTeacher() {
+        return true;
+    }
+
 }

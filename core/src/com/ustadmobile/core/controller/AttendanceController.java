@@ -108,13 +108,13 @@ public class AttendanceController extends UstadBaseController{
     
     public AttendanceController(Object context) {
         super(context);
+        teacherClasses = loadTeacherClassListFromPrefs(view.getContext());
     }
     
     public static AttendanceController makeControllerForView(AttendanceView view) {
         AttendanceController ctrl = new AttendanceController(view.getContext());
         ctrl.setView(view);
-        ctrl.loadTeacherClassList();
-        
+
         return ctrl;
     }
 
@@ -140,14 +140,22 @@ public class AttendanceController extends UstadBaseController{
         setSelectedClass(selectedClass);
         view.showTakePicture();
     }
-    
-    private void loadTeacherClassList() {
+
+    /**
+     * Given the teacher class list stored in JSON in the preferences turn this into
+     * an array of the AttendanceClass model
+     *
+     * @param context Context object to use to access preferences
+     * @return Array of AttendanceClass that was decoded from json: null if preference is not set
+     */
+    public static AttendanceClass[] loadTeacherClassListFromPrefs(Object context) {
         //set the class list JSON
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String classListJSON = impl.getUserPref("teacherclasslist", getContext());
-        
+        String classListJSON = impl.getUserPref("teacherclasslist", context);
+        AttendanceClass[] teacherClasses = null;
+
         if(classListJSON == null) {
-            return;//not a teacher or no classes assigned
+            return null;//not a teacher or no classes assigned
         }
         
         try {
@@ -162,6 +170,8 @@ public class AttendanceController extends UstadBaseController{
         }catch(JSONException j) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 189, classListJSON, j);
         }
+
+        return teacherClasses;
     }
     
     public static AttendanceClassStudent[] loadClassStudentListFromPrefs(String classID, Object context) {
@@ -216,7 +226,7 @@ public class AttendanceController extends UstadBaseController{
     
 
     public void setView(UstadView view) {
-        super.setView(view); 
+        super.setView(view);
         this.view = (AttendanceView)view;
     }
     
