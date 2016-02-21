@@ -57,7 +57,8 @@
             android:label="@string/title_activity_user_settings"
             android:theme="@style/Theme.UstadTheme" />
         <activity android:name="com.ustadmobile.port.android.view.BasePointActivity" />
-        <activity android:name="com.ustadmobile.port.android.view.AttendanceActivity" >
+        <activity android:name="com.ustadmobile.port.android.view.AttendanceActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.ustadmobile.port.android.view.ClassManagementActivity"

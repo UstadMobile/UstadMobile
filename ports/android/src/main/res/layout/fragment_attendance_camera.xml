@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context="com.ustadmobile.port.android.view.AttendanceCameraFragment">
+
+    <FrameLayout
+        android:id="@+id/fragment_attendance_camera_preview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        />
+
+
+    <!-- TODO: Update blank fragment layout -->
+    <Button
+        android:id="@+id/fragment_attendance_camera_capture"
+        android:text="Capture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        />
+
+
+
+</LinearLayout>

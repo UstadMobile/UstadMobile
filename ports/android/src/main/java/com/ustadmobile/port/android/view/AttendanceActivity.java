@@ -28,11 +28,9 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
 
     protected AttendanceController mController;
 
-    public static final String TAG_STARTFRAG = "startfrag";
+    public static final String TAG_CAMERAFRAG= "camerafrag";
 
     public static final String TAG_RESULTSFRAG = "resultsfrag";
-
-    public static final String TAG_CLASSLISTFRAG = "classlistfrag";
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
@@ -54,6 +52,10 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         if(savedInstanceState == null) {
             mController.handleStartFlow();
         }
+    }
+
+    protected void setCapturedImagePath(String path) {
+        this.mCurrentImgPath = path;
     }
 
     /*
@@ -79,6 +81,11 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
 
     @Override
     public void showTakePicture() {
+        Fragment cameraFragment = AttendanceCameraFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().replace(R.id.attendance_fragment_container,
+                cameraFragment, TAG_CAMERAFRAG).commit();
+
+        /*
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             File photoFile = null;
@@ -94,6 +101,7 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
             }
 
         }
+        */
     }
 
     private File createImageFile() throws IOException {
@@ -106,6 +114,40 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         return image;
     }
 
+    protected void processImage(String imgPath) {
+        setCapturedImagePath(imgPath);
+
+        int targetW = 800;
+        int targetH = 1400;
+
+        //for offline usage of a fixed image via the emulator
+        //mCurrentImgPath = "/sdcard/IMG_20151025_241421713.jpg";
+
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+
+        BitmapFactory.decodeFile(mCurrentImgPath, bmOptions);
+
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        if(photoW > targetW || photoH > targetH) {
+            int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+            bmOptions.inSampleSize = scaleFactor;
+        }else {
+            bmOptions.inSampleSize = 1;
+        }
+
+
+        bmOptions.inJustDecodeBounds = false;
+        ;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(mCurrentImgPath, bmOptions);
+        mController.handlePictureAcquired(bitmap);
+    }
+
+    /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
@@ -138,6 +180,7 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
             mController.handlePictureAcquired(bitmap);
         }
     }
+    */
 
     @Override
     public void finish() {
