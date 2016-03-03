@@ -5,13 +5,21 @@
     android:layout_height="fill_parent"
     tools:context="com.ustadmobile.port.android.view.AttendanceCameraFragment">
 
+
     <FrameLayout
         android:id="@+id/fragment_attendance_camera_preview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
-        />
+        >
 
+        <com.ustadmobile.port.android.view.RectangleView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/customview_rectangle"
+            android:layout_gravity="left|top" />
+
+    </FrameLayout>
 
     <!-- TODO: Update blank fragment layout -->
     <Button

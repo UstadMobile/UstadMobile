@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.omr;
 
-
 import jp.sourceforge.qrcode.QRCodeDecoder;
 import jp.sourceforge.qrcode.data.QRCodeImage;
 import jp.sourceforge.qrcode.geom.Line;
@@ -56,6 +55,7 @@ public class OMRRecognizer {
     
     
     //measured in inkscape
+    //Most of these are for test cases and these arent the ones in use.
     public static final float AREA_WIDTH = 607f;
     
     public static final float AREA_HEIGHT = 902f;
@@ -69,11 +69,24 @@ public class OMRRecognizer {
     public static final float OM_HEIGHT = 20f/AREA_HEIGHT;
     
     public static final float OM_ROW_HEIGHT = 25.8f/AREA_HEIGHT;
-    
-    public static Point txPoint(Line[] boundaries, float x, float y) {
+
+    /**
+     * Method that finds the intersect between boundaries and x & y axis given to it.
+     * @param boundaries
+     * @param x
+     * @param y
+     * @param dc
+     * @return
+     */
+    public static Point txPoint(Line[] boundaries, float x, float y, DebugCanvas dc) {
         Line vertical = new Line(boundaries[TOP].getMidpoint(x), boundaries[BOTTOM].getMidpoint(x));
         Line horizontal = new Line(boundaries[LEFT].getMidpoint(y), boundaries[RIGHT].getMidpoint(y));
-        
+
+        /*if (dc!= null) {
+            dc.drawLine(vertical, 0xFF00FFFF); //cyan
+            dc.drawLine(horizontal, 0xFFFF00FF); //magenta
+        }*/
+
         Point intersect = vertical.getIntersect(horizontal);
         return intersect;
     }
@@ -154,20 +167,25 @@ public class OMRRecognizer {
         int i;
         int j;
         
-        Point stPoint = txPoint(bounds, offsetX, offsetY);
+        Point stPoint = txPoint(bounds, offsetX, offsetY, dc);
         
         if(dc != null) {
-            dc.drawCross(stPoint, 5);
+            dc.drawCross(stPoint, 0xFFFF0000); //red
         }
         
         for(i = 0; i < numRows; i++) {
             for(j = 0; j < numCols; j++) {
                 float xPos = offsetX + (j*omWidth);
                 float yPos = offsetY + (i*rowHeight);
-                Point imgPoint = txPoint(bounds, xPos, yPos);
+                Point imgPoint = txPoint(bounds, xPos, yPos, dc);
                 result[i][j] = img[imgPoint.getX()][imgPoint.getY()];
                 if(dc != null) {
-                    dc.drawCross(imgPoint, 5);
+                    if (result[i][j] == true){
+                        dc.drawCross(imgPoint, 0xFF00FF00); //Green
+                    }else{
+                        dc.drawCross(imgPoint, 0xFFFF0000); //red
+                    }
+
                 }
             }
         }
@@ -230,8 +248,16 @@ public class OMRRecognizer {
      */
     public static boolean[][] getMarks(boolean[][] img, float offsetX, float offsetY, float omWidth, float omHeight, float rowHeight, int numCols, int numRows, DebugCanvas dc) {
         Point[] centerList = FinderPattern.findCenters(img);
+        if (dc != null){
+            for (int c=0; c<centerList.length; c++){
+                dc.drawCross(centerList[c], 0xFF00FF00); //green
+            }
+        }
         Point[][] centers = sortCenters(centerList, img.length, img[0].length);
         Line[] bounds = getBoundaryLines(centers);
+        if (dc != null){
+            dc.drawLines(bounds, 0xFF0000FF); //blue
+        }
         return getMarks(img, bounds, offsetX, offsetY, omWidth, omHeight, rowHeight, numCols, numRows, dc);
     }
     
@@ -244,10 +270,12 @@ public class OMRRecognizer {
     public static boolean[][] convertImgToBitmap(QRCodeImage img) {
         int[][] imgArr = QRCodeDecoder.imageToIntArray(img);
         boolean[][] bitMap = QRCodeImageReader.filterImage(imgArr);
+        //int[][] imgArr = imageToIntArray(img);
+        //boolean[][] bitMap = filterImage(imgArr);
+
         return bitMap;
     }
-    
-    
+
     /**
      * Figure out which point is which and return an ordered array
      * 
@@ -278,7 +306,5 @@ public class OMRRecognizer {
         
         return retVal;
     }
-    
-    
-    
+
 }

@@ -26,4 +26,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <!--<Button
+        android:text="Again"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/attendance_tryagain_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />-->
+
+
 </RelativeLayout>

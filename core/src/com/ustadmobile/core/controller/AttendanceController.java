@@ -4,7 +4,7 @@
     Ustad Mobile Copyright (C) 2011-2014 UstadMobile Inc.
 
     Ustad Mobile is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
+    it under the terms of the GNU General Public `cense as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version with the following additional terms:
 
@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.util.Hashtable;
 import jp.sourceforge.qrcode.QRCodeDecoder;
 import jp.sourceforge.qrcode.data.QRCodeImage;
+import jp.sourceforge.qrcode.util.DebugCanvas;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,18 +65,17 @@ public class AttendanceController extends UstadBaseController{
     
     public static final float AREA_HEIGHT = 902f;
     
-    //public static final float OMR_AREA_OFFSET_X = (311f/AREA_WIDTH);
-    
-    //public static final float OMR_AREA_OFFSET_Y = (37.5f/AREA_HEIGHT);
+    //First column's X and Y Offset
+    public static final float OMR_AREA_OFFSET_X_1 = (197.2f/AREA_WIDTH);
 
-    public static final float OMR_AREA_OFFSET_X_1 = (196.2f/AREA_WIDTH);
+    public static final float OMR_AREA_OFFSET_Y_1 = (39.5f/AREA_HEIGHT);
 
-    public static final float OMR_AREA_OFFSET_Y_1 = (41.1f/AREA_HEIGHT);
+    //Second column's X and Y offset
+    public static final float OMR_AREA_OFFSET_X_2 = (479f/AREA_WIDTH);
 
-    public static final float OMR_AREA_OFFSET_X_2 = (478f/AREA_WIDTH);
+    public static final float OMR_AREA_OFFSET_Y_2 = (39.5f/AREA_HEIGHT);
 
-    public static final float OMR_AREA_OFFSET_Y_2 = (41f/AREA_HEIGHT);
-    
+    //Width between each blobs
     public static final float OM_WIDTH = 26f/AREA_WIDTH;
     
     public static final float OM_HEIGHT = 20f/AREA_HEIGHT;
@@ -119,7 +120,6 @@ public class AttendanceController extends UstadBaseController{
         AttendanceController ctrl = new AttendanceController(view.getContext(), 
             (String)args.get(KEY_CLASSID));
         ctrl.setView(view);
-        
 
         return ctrl;
     }
@@ -253,9 +253,8 @@ public class AttendanceController extends UstadBaseController{
     
     public void handleClickSubmitResults() {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String xAPIServer = UstadMobileSystemImpl.getInstance().getAppPref(
-                    UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+        //send to local LRS.
+        String xAPIServer = LoginController.LLRS_XAPI_ENDPOINT;
         JSONArray stmtArr = new JSONArray();
         String registrationUUID = impl.generateUUID();
         
@@ -372,31 +371,33 @@ public class AttendanceController extends UstadBaseController{
             try {
                 QRCodeDecoder decoder = new QRCodeDecoder();
                 QRCodeImage img = UstadMobileSystemImpl.getInstance().getQRCodeImage(
-                    sysImage);
+                        sysImage);
                 boolean[][] bitmapImg = OMRRecognizer.convertImgToBitmap(img);
                 img = null;
+
+                DebugCanvas debugCanvas = view.getDebugCanvas();
 
                 boolean[][] marks_1 = OMRRecognizer.getMarks(bitmapImg,
                     OMR_AREA_OFFSET_X_1, OMR_AREA_OFFSET_Y_1,
                     OM_WIDTH, OM_HEIGHT, OM_ROW_HEIGHT, 
-                    4, 33, null);
+                    4, 33, debugCanvas);
 
 
                 boolean[][] marks_2 = OMRRecognizer.getMarks(bitmapImg,
                         OMR_AREA_OFFSET_X_2, OMR_AREA_OFFSET_Y_2,
                         OM_WIDTH, OM_HEIGHT, OM_ROW_HEIGHT,
-                        4, 33, null);
+                        4, 33, debugCanvas);
 
                 boolean[][] marks = new boolean[marks_1.length + marks_2.length][];
 
                 System.arraycopy(marks_1, 0, marks, 0, marks_1.length);
                 System.arraycopy(marks_2, 0, marks, marks_1.length, marks_2.length);
 
-                //boolean[][] marks = marks_1 + marks_2;
-
+                view.saveDebugCanvasImage(true);
                 impl.getAppView(ctrl.getContext()).dismissProgressDialog();
                 ctrl.handleResultsDecoded(marks);
             }catch(Exception e) {
+                view.saveDebugCanvasImage(false);
                 impl.getAppView(ctrl.getContext()).dismissProgressDialog();
                 impl.getAppView(ctrl.getContext()).showAlertDialog("Decode failed", "Failed");
             }

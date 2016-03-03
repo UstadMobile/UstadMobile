@@ -60,8 +60,6 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
     }
 
 
@@ -97,7 +95,8 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         mCamera = getCameraInstance();
         FrameLayout preview = (FrameLayout)view.findViewById(R.id.fragment_attendance_camera_preview);
         mPreview = new CameraPreview(getContext(), mCamera);
-        preview.addView(mPreview);
+
+        preview.addView(mPreview, 0);
 
         Button captureButton = (Button)view.findViewById(R.id.fragment_attendance_camera_capture);
         captureButton.setOnClickListener(this);

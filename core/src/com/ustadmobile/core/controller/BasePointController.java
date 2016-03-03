@@ -297,7 +297,14 @@ public class BasePointController extends UstadBaseController{
      * @return true if user is teacher, false otherwise
      */
     public boolean isUserTeacher() {
-        return true;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String classListJSON = impl.getUserPref("teacherclasslist", context);
+
+        if(classListJSON == null) {
+            return false;//not a teacher or no classes assigned
+        }else {
+            return true;
+        }
     }
 
 }

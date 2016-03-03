@@ -65,6 +65,7 @@ public class AttendanceConfirmFragment extends Fragment implements View.OnClickL
                 ((AttendanceActivity)getActivity()).getAttendanceResults());
         mList.setAdapter(mListAdapter);
         ((Button)rootView.findViewById(R.id.attendance_confirm_button)).setOnClickListener(this);
+        //((Button)rootView.findViewById(R.id.attendance_tryagain_button)).setOnClickListener(this);
 
         return rootView;
     }

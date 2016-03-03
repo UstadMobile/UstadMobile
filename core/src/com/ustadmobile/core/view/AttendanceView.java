@@ -32,6 +32,8 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.model.AttendanceRowModel;
 
+import jp.sourceforge.qrcode.util.DebugCanvas;
+
 /**
  *
  * @author mike
@@ -43,5 +45,9 @@ public interface AttendanceView extends UstadView {
     public void showResult(AttendanceRowModel[] results);
     
     public void finish();
+
+    public DebugCanvas getDebugCanvas();
+
+    public boolean saveDebugCanvasImage(boolean decoded);
     
 }
