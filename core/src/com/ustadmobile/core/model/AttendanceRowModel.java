@@ -47,16 +47,23 @@ public class AttendanceRowModel {
     public int rollNum;
     
     public String name;
+
+    public String full_name;
     
     public String userId;
     
     public int attendanceStatus;
     
-    public AttendanceRowModel(int rollNum, String name, String userId, int attendanceStatus) {
+    public AttendanceRowModel(int rollNum, String name, String userId, int attendanceStatus, String fullName) {
         this.rollNum = rollNum;
         this.name = name;
         this.userId = userId;
         this.attendanceStatus = attendanceStatus;
+        this.full_name = fullName;
+    }
+
+    public String toString() {
+        return this.full_name;
     }
     
 }

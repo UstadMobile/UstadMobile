@@ -14,14 +14,17 @@ public class AttendanceClassStudent {
     public String username;
     
     public String name;
-    
-    public AttendanceClassStudent(String username, String name) {
+
+    public String full_name;
+
+    public AttendanceClassStudent(String username, String name, String full_name) {
         this.username = username;
         this.name = name;
+        this.full_name = full_name;
     }
     
     public String toString() {
-        return this.name;
+        return this.full_name;
     }
     
 }

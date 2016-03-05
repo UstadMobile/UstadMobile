@@ -82,7 +82,7 @@ public class AttendanceController extends UstadBaseController{
     
     public static final float OM_ROW_HEIGHT = 25.8f/AREA_HEIGHT;
 
-    private AttendanceRowModel[] attendanceResult; 
+    public AttendanceRowModel[] attendanceResult;
     
     private AttendanceView view;
         
@@ -95,7 +95,7 @@ public class AttendanceController extends UstadBaseController{
      */
     public static final String KEY_CLASSID = "classid";
     
-    
+
     /**
      * Mapping of standard tincan verbs to IDS as per 
      * AttendanceRowModel.STATUS_
@@ -173,7 +173,8 @@ public class AttendanceController extends UstadBaseController{
                     studentObj = arr.getJSONObject(i);
                     result[i] = new AttendanceClassStudent(
                         studentObj.getString("username"), 
-                        studentObj.getString("username"));
+                        studentObj.getString("username"),
+                        studentObj.getString("full_name")                            );
                 }
             }catch(JSONException e) {
                 
@@ -244,8 +245,8 @@ public class AttendanceController extends UstadBaseController{
                 }
             }
             
-            attendanceResult[i] = new AttendanceRowModel(i, classStudents[i].name, 
-                classStudents[i].username, attendanceVal);
+            attendanceResult[i] = new AttendanceRowModel(i, classStudents[i].name,
+                classStudents[i].username, attendanceVal,classStudents[i].full_name);
         }
         
         view.showResult(attendanceResult);

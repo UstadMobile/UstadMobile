@@ -2,12 +2,15 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -58,9 +61,43 @@ public class AttendanceConfirmFragment extends Fragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_attendance_confirm, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_attendance_confirm, container, false);
         mList = (ListView)rootView.findViewById(R.id.attendance_confirm_list);
 
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position,
+                                    long id) {
+
+                System.out.println("Heythre");
+                ImageView iconImageView = (ImageView) view.findViewById(R.id.attendance_item_icon);
+
+                int currentStatus =
+                        ((AttendanceActivity)getActivity()).mController.attendanceResult[(int)id].attendanceStatus;
+                //currentStatus values and meaning
+                //0: Attended
+                //1: Late
+                //2: Absent - Excused
+                //3: Absent
+                //-1: Nothing set
+
+                if (currentStatus == 3 ){
+                    currentStatus = 0;
+                    iconImageView.setImageResource(R.drawable.check);
+                }else if (currentStatus == 0 ){
+                    currentStatus = 3;
+                    iconImageView.setImageResource(R.drawable.cross);
+                }else{
+                    currentStatus = 0;
+                    iconImageView.setImageResource(R.drawable.check);
+                }
+
+                ((AttendanceActivity)getActivity()).mController.attendanceResult[(int)id].attendanceStatus = currentStatus;
+
+                int newStatus =
+                        ((AttendanceActivity)getActivity()).mController.attendanceResult[(int)id].attendanceStatus;
+            }
+        });
         mListAdapter = new AttendanceArrayAdapter<>(getContext(), 0,
                 ((AttendanceActivity)getActivity()).getAttendanceResults());
         mList.setAdapter(mListAdapter);
@@ -76,9 +113,6 @@ public class AttendanceConfirmFragment extends Fragment implements View.OnClickL
     }
 
     class AttendanceArrayAdapter<T> extends ArrayAdapter {
-
-
-
         AttendanceArrayAdapter(Context context, int resource, T[] objects) {
             super(context, resource, objects);
         }
@@ -92,7 +126,7 @@ public class AttendanceConfirmFragment extends Fragment implements View.OnClickL
                 convertView = inflater.inflate(R.layout.item_attendancerow, null);
             }
 
-            String rowText = (item.rollNum + 1) + ". " + item.name;
+            String rowText = (item.rollNum + 1) + ". " + item.full_name;
             ((TextView)convertView.findViewById(R.id.attendance_person_name)).setText(rowText);
 
             ImageView imgView =(ImageView) convertView.findViewById(R.id.attendance_item_icon);
