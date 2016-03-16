@@ -102,7 +102,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                 }
 
                 if(dashPos == header.length()-1) {
-                    range[1] = totalLength;
+                    range[1] = totalLength-1;
                 }else if(dashPos > 0) {
                     range[1] = Integer.parseInt(header.substring(dashPos+1));
 
@@ -159,6 +159,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                     if(ifNoneMatchHeader != null && ifNoneMatchHeader.equals(etag)) {
                         Response r = new Response(Response.Status.NOT_MODIFIED, getMimeType(uri), "");
                         r.addHeader("ETag", etag);
+                        r.addHeader("Connection", "close");
                         return r;
                     }
                     
@@ -189,10 +190,12 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                             Response r = new Response(Response.Status.PARTIAL_CONTENT, getMimeType(uri),
                                     retInputStream);
                             r.addHeader("ETag", etag);
-                            r.addHeader("Content-Length", String.valueOf(range[1] - range[0]));
+                            //range request is inclusive: e.g. range 0-1 length is 2 bytes
+                            r.addHeader("Content-Length", String.valueOf((range[1]+1) - range[0]));
                             r.addHeader("Content-Range", "bytes " + range[0] + '-' + range[1] +
                                 '/' + totalLength);
                             r.addHeader( "Accept-Ranges", "bytes");
+                            r.addHeader("Connection", "close");
                             return r;
                         }else {
                             return new Response(Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
@@ -204,6 +207,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                                 retInputStream);
                         r.addHeader("ETag", etag);
                         r.addHeader("Content-Length", String.valueOf(totalLength));
+                        r.addHeader("Connection", "close");
                         return r;
                     }
 

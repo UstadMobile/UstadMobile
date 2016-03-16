@@ -82,7 +82,7 @@ public class RangeInputStream extends FilterInputStream {
 
     @Override
     public int read() throws IOException {
-        if(pos < end) {
+        if(pos <= end) {
             pos++;
             return in.read();
         }else {
@@ -99,7 +99,7 @@ public class RangeInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
-        byteCount = Math.min(end - pos, byteCount);
+        byteCount = Math.min((end +1)- pos, byteCount);
         if(byteCount > 0) {
             int bytesRead = in.read(buffer, byteOffset, byteCount);
             pos += bytesRead;
