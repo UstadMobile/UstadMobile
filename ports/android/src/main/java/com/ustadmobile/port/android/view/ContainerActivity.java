@@ -81,6 +81,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private Hashtable mArgs;
 
+    private int lastPageShown = -1;
+
     @Override
     protected void onCreate(Bundle saved) {
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, saved);
@@ -91,7 +93,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         InputStream is = null;
         try {
             AssetManager asMgr = getApplicationContext().getAssets();
-            is =asMgr.open("onpageshow.js");
+            is = asMgr.open("onpageshow.js");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             UMIOUtils.readFully(is, bout, 1024);
             onpageSelectedJS = "javascript:" + new String(bout.toByteArray(), "UTF-8");
@@ -239,6 +241,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
                 @Override
                 public void onPageSelected(int position) {
+                    
+
                     ContainerPageFragment frag = (ContainerPageFragment) mPagerAdapter.getItem(
                         position);
                     frag.evaluateJavascript(onpageSelectedJS);

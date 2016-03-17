@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
@@ -176,6 +177,13 @@ public class ContainerPageFragment extends Fragment {
             if(!this.isFirstPage) {
                 this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
             }
+        }
+    }
+
+    public class JsObject {
+        @JavascriptInterface
+        public void stateSaved(){
+
         }
     }
 

@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.opf;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -192,18 +194,17 @@ public class UstadJSOPF {
                         isLinearStrVal = xpp.getAttributeValue(null, "linear");
 
                         Object spineItem = allItems.get(idref);
-                        if(spineItem == null){
-                            throw new RuntimeException("Invalid OPF: item not found: #" + idref);
+                        if(spineItem != null) {
+                            if(isLinearStrVal != null) {
+                                char isLinearChar = isLinearStrVal.charAt(0);
+                                isLinear = !(isLinearChar == 'n' | isLinearChar == 'N');
+                                ((UstadJSOPFItem)allItems.get(idref)).linear = isLinear;
+                            }
+
+                            spineItems.addElement(allItems.get(idref)); 
+                        }else {
+                            UstadMobileSystemImpl.l(UMLog.WARN, 209, idref);
                         }
-
-                        if(isLinearStrVal != null) {
-                            char isLinearChar = isLinearStrVal.charAt(0);
-                            isLinear = !(isLinearChar == 'n' | isLinearChar == 'N');
-                            ((UstadJSOPFItem)allItems.get(idref)).linear = isLinear;
-                        }
-
-                        spineItems.addElement(allItems.get(idref));
-
                     }
                 }else if(evtType == XmlPullParser.END_TAG){
                     if(xpp.getName().equals("manifest")){

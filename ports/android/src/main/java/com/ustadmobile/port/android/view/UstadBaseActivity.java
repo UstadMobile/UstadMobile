@@ -10,9 +10,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.util.PythonServiceManager;
@@ -41,8 +43,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     private String[] appMenuLabels;
 
     private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager manager = null;
+        manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            System.out.println(service.service.getClassName());
+            
             if (serviceClass.getName().equals(service.service.getClassName())) {
                 return true;
             }
@@ -51,13 +56,23 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if(getContext() != null && getContext().getClass().equals(SplashScreenActivity.class)){
+                System.out.println("Splash screen started this!");
+                PythonServiceManager psm = new PythonServiceManager();
+                psm.startThisOnThread(UstadBaseActivity.this);
+                System.out.println("ServiceCheck: Started (SplashScreen)");
+            }
         //Check if LRS Service is running..
-        if (isMyServiceRunning(PythonService.class)) {
+        else if (isMyServiceRunning(PythonService.class)) {
             System.out.println("ServiceCheck: Already running.");
+            if(getContext() != null && getContext().getClass().equals(SplashScreenActivity.class)){
+                System.out.println("Splash screen started this!");
+                UstadMobileSystemImpl.getInstance().startUI(getContext());
+            }
         }else{
             System.out.println("ServiceCheck: Not running! Starting..");
             PythonServiceManager psm = new PythonServiceManager();
-            psm.startThis(UstadBaseActivity.this);
+            psm.startThisOnThread(UstadBaseActivity.this);
             System.out.println("ServiceCheck: Started.");
         }
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
@@ -171,6 +186,18 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     public Object getContext() {
         return this;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                UstadMobileSystemImpl.getInstance().go(BasePointView.class,
+                        BasePointController.makeDefaultBasePointArgs(this), this);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
 
