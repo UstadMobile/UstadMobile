@@ -18,8 +18,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.AttendanceController;
+import com.ustadmobile.core.controller.ClassManagementController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.model.AttendanceRowModel;
 import com.ustadmobile.core.model.UserSettingItem;
+import com.ustadmobile.core.view.AttendanceView;
+import com.ustadmobile.core.view.ClassManagementView;
+
+import java.util.Hashtable;
 
 /**
  *
@@ -68,10 +76,7 @@ public class AttendanceConfirmFragment extends Fragment implements View.OnClickL
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,
                                     long id) {
-
-                System.out.println("Heythre");
                 ImageView iconImageView = (ImageView) view.findViewById(R.id.attendance_item_icon);
-
                 int currentStatus =
                         ((AttendanceActivity)getActivity()).mController.attendanceResult[(int)id].attendanceStatus;
                 //currentStatus values and meaning
@@ -102,14 +107,24 @@ public class AttendanceConfirmFragment extends Fragment implements View.OnClickL
                 ((AttendanceActivity)getActivity()).getAttendanceResults());
         mList.setAdapter(mListAdapter);
         ((Button)rootView.findViewById(R.id.attendance_confirm_button)).setOnClickListener(this);
-        //((Button)rootView.findViewById(R.id.attendance_tryagain_button)).setOnClickListener(this);
+        ((Button)rootView.findViewById(R.id.attendance_tryagain_button)).setOnClickListener(this);
 
         return rootView;
     }
 
     @Override
     public void onClick(View view) {
-        ((AttendanceActivity)getActivity()).mController.handleClickSubmitResults();
+
+        switch (view.getId()) {
+            case R.id.attendance_confirm_button:
+                ((AttendanceActivity)getActivity()).mController.handleClickSubmitResults();
+                break;
+            case R.id.attendance_tryagain_button:
+                //Go back to camera view
+                ((AttendanceActivity)getActivity()).mController.handleGoBack();
+                break;
+        }
+
     }
 
     class AttendanceArrayAdapter<T> extends ArrayAdapter {

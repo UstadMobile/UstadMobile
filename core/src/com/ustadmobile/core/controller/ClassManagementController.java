@@ -4,12 +4,16 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.model.AttendanceClassStudent;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.ClassManagementView;
+import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.UstadView;
+import java.io.IOException;
 import java.util.Hashtable;
 
 /**
@@ -23,12 +27,14 @@ public class ClassManagementController extends UstadBaseController{
      */
     public static final String KEY_CLASSID = "classid";
     
+    public static final String KEY_UPDATE_STUDENT_LIST = "updatestudentlist";
+    
     private AttendanceClass mClass; 
     
     private AttendanceClassStudent[] students;
     
     private ClassManagementView classView;
-    
+       
     /**
      * Create a new class management controller for the given class id
      * 
@@ -39,8 +45,17 @@ public class ClassManagementController extends UstadBaseController{
     public ClassManagementController(Object context, String classId) {
         super(context);
         mClass = getClassById(context, classId);
-        students = AttendanceController.loadClassStudentListFromPrefs(classId, 
-                context);
+        students = AttendanceController.loadClassStudentListFromPrefs(classId, context);
+    }
+    
+    public ClassManagementController(Object context, String classID, boolean refreshStudent){
+        super(context);
+        mClass = getClassById(context, classID);
+        if (refreshStudent){
+            students = AttendanceController.loadClassStudentListFromNet(classID, context);
+        }else{
+            students = AttendanceController.loadClassStudentListFromPrefs(classID, context);
+        }
     }
     
     /**
@@ -67,13 +82,53 @@ public class ClassManagementController extends UstadBaseController{
         classView = (ClassManagementView)view;
         classView.setStudentList(students);
     }
-    
+     
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         classView.setAttendanceLabel(impl.getString(U.id.attendance));
         classView.setReportsLabel(impl.getString(U.id.reports));
         classView.setExamsLabel(impl.getString(U.id.exams));
         classView.setClassName(mClass.name);
+    }
+    
+    public static void loadClassStudentListFromNet(
+            final String classID, final Object context, 
+            final ClassManagementView view) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        Thread getStudentListThread = new Thread() {
+
+            public void run() {
+                String username = impl.getActiveUser(context);
+                String password = impl.getActiveUserAuth(context);
+                String classURL = UMFileUtil.resolveLink(
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER,
+                    UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
+                        + classID;
+
+                String studentListJSON = null;
+                try {
+                    studentListJSON = LoginController.getJSONArrayResult(
+                            username, password, classURL);
+                } catch (IOException ex) {
+                    System.out.println("Something wrong with getting "
+                            + "Student List: " + ex.toString());
+
+                }
+                if(studentListJSON != null) {
+                    impl.setUserPref("studentlist."+classID,
+                            studentListJSON, context);
+                }
+                AttendanceClassStudent[] students = 
+                        AttendanceController.loadClassStudentListFromPrefs(classID, context);
+                view.updateStudentList(students);
+                
+            }
+        };
+        getStudentListThread.start();
+        
+        
+        //return AttendanceController.loadClassStudentListFromPrefs(classID, context);
     }
     
     /**
@@ -84,13 +139,27 @@ public class ClassManagementController extends UstadBaseController{
      * @return new ClassManagementController for this class
      */
     public static ClassManagementController makeControllerForView(ClassManagementView view, Hashtable args) {
+       
+       String classID = (String)args.get(KEY_CLASSID);
        ClassManagementController ctrl = new ClassManagementController(view.getContext(), 
             (String)args.get(KEY_CLASSID));
+       if (args.containsKey(KEY_UPDATE_STUDENT_LIST)){
+            //ctrl.students = loadClassStudentListFromNet(classID, view.getContext(), view);
+            loadClassStudentListFromNet(classID, view.getContext(), view);   
+       }
        ctrl.setView(view);
        ctrl.setUIStrings();
        return ctrl;
+
     }
     
+    public void handleShowEnrollForm(){
+        Hashtable args = new Hashtable();
+        args.put(AttendanceController.KEY_CLASSID, mClass.id);
+        UstadMobileSystemImpl.getInstance().go(EnrollStudentView.class, args, 
+                context);
+    }
+        
     public void handleClickAttendanceButton() {
         Hashtable args = new Hashtable();
         args.put(AttendanceController.KEY_CLASSID, mClass.id);

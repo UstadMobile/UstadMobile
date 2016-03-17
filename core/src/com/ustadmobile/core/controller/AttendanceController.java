@@ -46,6 +46,8 @@ import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jp.sourceforge.qrcode.QRCodeDecoder;
 import jp.sourceforge.qrcode.data.QRCodeImage;
 import jp.sourceforge.qrcode.util.DebugCanvas;
@@ -158,6 +160,40 @@ public class AttendanceController extends UstadBaseController{
     }
     
     
+    public static AttendanceClassStudent[] loadClassStudentListFromNet(final String classID, final Object context) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        Thread getStudentListThread = new Thread() {
+
+            public void run() {
+                String username = impl.getActiveUser(context);
+                String password = impl.getActiveUserAuth(context);
+                String classURL = UMFileUtil.resolveLink(
+                    UstadMobileDefaults.DEFAULT_XAPI_SERVER,
+                    UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
+                        + classID;
+
+                String studentListJSON = null;
+                try {
+                    studentListJSON = LoginController.getJSONArrayResult(
+                            username, password, classURL);
+                } catch (IOException ex) {
+                    System.out.println("Something wrong with getting "
+                            + "Student List: " + ex.toString());
+
+                }
+                if(studentListJSON != null) {
+                    impl.setUserPref("studentlist."+classID,
+                            studentListJSON, context);
+                }
+            }
+        };
+        getStudentListThread.start();
+        
+        
+        return loadClassStudentListFromPrefs(classID, context);
+    }
+    
     
     public static AttendanceClassStudent[] loadClassStudentListFromPrefs(String classID, Object context) {
         AttendanceClassStudent[] result = null;
@@ -250,6 +286,13 @@ public class AttendanceController extends UstadBaseController{
         }
         
         view.showResult(attendanceResult);
+    }
+
+    public void handleGoBack(){
+        Hashtable args = new Hashtable();
+        args.put(AttendanceController.KEY_CLASSID, theClass.id);
+        UstadMobileSystemImpl.getInstance().go(AttendanceView.class, args,
+                context);
     }
     
     public void handleClickSubmitResults() {

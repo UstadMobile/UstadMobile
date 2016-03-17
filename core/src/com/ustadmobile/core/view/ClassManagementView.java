@@ -23,4 +23,6 @@ public interface ClassManagementView extends UstadView{
     
     public void setReportsLabel(String reportsLabel);
     
+    public void updateStudentList(AttendanceClassStudent[] students);
+    
 }

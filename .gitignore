@@ -106,3 +106,6 @@ ports/android/LRSTEMP
 ports/android/settings.gradle
 *.bak
 *~
+
+#any keystore files
+*.ks

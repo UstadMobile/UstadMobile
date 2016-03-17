@@ -15,7 +15,8 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import android.widget.Button;
 import android.widget.AdapterView;
 
-public class ClassManagementActivity extends UstadBaseActivity implements ClassManagementView, View.OnClickListener {
+public class ClassManagementActivity extends UstadBaseActivity implements ClassManagementView,
+        View.OnClickListener {
 
     private ClassManagementController mController;
 
@@ -30,6 +31,8 @@ public class ClassManagementActivity extends UstadBaseActivity implements ClassM
         setUMToolbar();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((Button)findViewById(R.id.class_management_attendance_button)).setOnClickListener(this);
+        ((FloatingActionButton)findViewById(R.id.class_management_new_student_fab)
+            ).setOnClickListener(this);
 
     }
 
@@ -42,6 +45,19 @@ public class ClassManagementActivity extends UstadBaseActivity implements ClassM
     @Override
     public void setStudentList(AttendanceClassStudent[] students) {
         ((StudentListView)findViewById(R.id.class_management_studentlist)).setStudents(students);
+    }
+
+    @Override
+    public void updateStudentList(final AttendanceClassStudent[] students){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                //stuff that updates ui
+                ((StudentListView)findViewById(R.id.class_management_studentlist)).setStudents(students);
+
+            }
+        });
     }
 
     @Override
@@ -64,6 +80,9 @@ public class ClassManagementActivity extends UstadBaseActivity implements ClassM
         switch(v.getId()) {
             case R.id.class_management_attendance_button:
                 mController.handleClickAttendanceButton();
+                break;
+            case R.id.class_management_new_student_fab:
+                mController.handleShowEnrollForm();
                 break;
         }
     }

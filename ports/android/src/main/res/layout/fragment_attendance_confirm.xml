@@ -21,10 +21,29 @@
 
     <Button
         android:text="Confirm"
-        android:layout_alignParentBottom="true"
         android:id="@+id/attendance_confirm_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_width="wrap_content"
+        android:drawableTop="@drawable/check"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/attendance_tryagain_button"
+        android:layout_toStartOf="@+id/attendance_tryagain_button"
+        android:layout_marginRight="38dp"
+        android:layout_marginEnd="38dp" />
+
+    <Button
+        android:text="Again"
+        android:id="@+id/attendance_tryagain_button"
+        android:drawableTop="@drawable/cross"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="54dp"
+        android:layout_marginEnd="54dp" />
+
+
 
     <!--<Button
         android:text="Again"

@@ -16,5 +16,4 @@
         android:text="Heading"
         android:id="@+id/attendance_person_name" />
 
-
 </RelativeLayout>
