@@ -31,6 +31,7 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.omr.OMRRecognizer;
@@ -53,7 +55,7 @@ import jp.sourceforge.qrcode.QRCodeDecoder;
 import jp.sourceforge.qrcode.data.QRCodeImage;
 
 
-public class SplashScreenActivity extends ActionBarActivity {
+public class SplashScreenActivity extends UstadBaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +74,13 @@ public class SplashScreenActivity extends ActionBarActivity {
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
+
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        impl.handleActivityStart(this);
-        impl.startUI(this);
+        //impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.processing));
+
+        impl.handleActivityStart(this); //Doesn't really do anything..
+        //impl.startUI(this); // Let UstadBaseActivity handle this.
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
     @Override

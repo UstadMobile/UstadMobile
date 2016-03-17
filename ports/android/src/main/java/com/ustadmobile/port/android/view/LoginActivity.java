@@ -64,7 +64,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
     private int viewId;
 
     private LoginController mLoginController;
-
+ 
     protected String mTitle;
 
     protected String mUsernameHint;
@@ -104,7 +104,6 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
 
-
         mLoginController = LoginController.makeControllerForView(this);
         setBaseController(mLoginController);
 
@@ -119,6 +118,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         TabLayout tabLayout = (TabLayout)findViewById(R.id.login_sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
         mLoginController.setUIStrings();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
     @Override

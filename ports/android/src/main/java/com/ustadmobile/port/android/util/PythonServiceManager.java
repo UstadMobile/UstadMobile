@@ -59,6 +59,9 @@ import java.util.zip.GZIPInputStream;
 
 import android.content.res.AssetManager;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.view.SplashScreenActivity;
+
 import org.kamranzafar.jtar.*;
 
 /**
@@ -99,6 +102,63 @@ public class PythonServiceManager {
         run();
         start_service("UstadMobile", "UstadMobile is running",
                 "/storage/emulated/0/com.toughra.ustadmobile/lrs-djandro.log");
+    }
+
+
+    public void startThisOnThread(final Context context){
+
+        this.context = context;
+        this.externalStorage = new File(Environment.getExternalStorageDirectory(),
+                context.getPackageName());
+        this.mPath = this.externalStorage;
+        final Context finalContext = context;
+
+        Thread extractPythonFiles = new Thread() {
+            public void run() {
+
+                unpackData("private", finalContext.getFilesDir());
+                unpackData("public", externalStorage);
+
+                System.loadLibrary("sdl");
+                System.loadLibrary("sdl_image");
+                System.loadLibrary("sdl_ttf");
+                System.loadLibrary("sdl_mixer");
+                System.loadLibrary("python2.7");
+                System.loadLibrary("application");
+                System.loadLibrary("sdl_main");
+
+                System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_io.so");
+                System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/unicodedata.so");
+
+                try {
+                    System.loadLibrary("sqlite3");
+                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_sqlite3.so");
+                } catch(UnsatisfiedLinkError e) {
+                }
+
+                try {
+                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_imaging.so");
+                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_imagingft.so");
+                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_imagingmath.so");
+                } catch(UnsatisfiedLinkError e) {
+                }
+
+                start_service("UstadMobile", "UstadMobile is running",
+                        "/storage/emulated/0/com.toughra.ustadmobile/lrs-djandro.log");
+
+                if(context != null && context.getClass().equals(SplashScreenActivity.class)){
+                    System.out.println("Splash screen started this!");
+                    UstadMobileSystemImpl.getInstance().startUI(context);
+                }
+
+
+            }
+        };
+        extractPythonFiles.start();
+        //start_service("UstadMobile", "UstadMobile is running",
+        ///        "/storage/emulated/0/com.toughra.ustadmobile/lrs-djandro.log");
+
+
     }
 
     public void stop_service() {
