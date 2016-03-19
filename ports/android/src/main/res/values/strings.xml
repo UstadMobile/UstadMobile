@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Ustad Mobile</string>
     <string name="title_activity_login">Login</string>
-    <string name="login_footer">Copyright (C) 2014-2015 UstadMobile Inc.  V0.2.2.4 28/12/15</string>
+    <string name="login_footer">Copyright (C) 2014-2016 UstadMobile Inc.  V0.2.2.8 18/03/2016</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
