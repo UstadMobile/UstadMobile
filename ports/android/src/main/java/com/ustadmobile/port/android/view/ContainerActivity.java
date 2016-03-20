@@ -227,11 +227,14 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         if(urlArray != null) {
             setContainerTitle(mOPF.title);
             mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
+            final int numPages = urlArray.length;
             mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(), urlArray);
             mPager.setAdapter(mPagerAdapter);
             if(mSavedPosition != -1) {
                 mPager.setCurrentItem(mSavedPosition);
             }
+
+
 
             mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
                 @Override
@@ -241,11 +244,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
                 @Override
                 public void onPageSelected(int position) {
-                    
-
                     ContainerPageFragment frag = (ContainerPageFragment) mPagerAdapter.getItem(
                         position);
                     frag.evaluateJavascript(onpageSelectedJS);
+                    frag.showPagePosition(position+1, numPages);
                 }
 
                 @Override
