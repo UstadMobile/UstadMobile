@@ -12,6 +12,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 
@@ -99,6 +100,17 @@ public class ContainerPageFragment extends Fragment {
         if(webView != null) {
             webView.loadUrl(script);
         }
+    }
+
+    /**
+     * Shows a toast message with the page number / total number of pages
+     *
+     * @param index
+     * @param numPages
+     */
+    public void showPagePosition(int index, int numPages) {
+        Toast t = Toast.makeText(getContext(), index + "/" + numPages, Toast.LENGTH_SHORT);
+        t.show();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
