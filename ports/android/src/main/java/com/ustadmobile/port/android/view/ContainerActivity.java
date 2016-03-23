@@ -72,8 +72,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private String mBaseURL = null;
 
-    private UstadJSOPF mOPF;
-
     //Key when saving state for the current page
     private static final String OUTSTATE_CURRENTITEM = "currentitem";
 
@@ -137,8 +135,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     };
 
-
-
     public void initContent() {
         mBaseURL = mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
@@ -193,39 +189,17 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     }
 
     protected void showEPUB() {
-        UstadOCF ocf = null;
         String[] urlArray = null;
         Exception exc = null;
         try {
-            ocf = mContainerController.getOCF();
-            String opfPath = UMFileUtil.joinPaths(new String[]{mBaseURL, ocf.rootFiles[0].fullPath});
-
-            //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
-            mOPF = mContainerController.getActiveOPF();
-            mContainerController.logContainerOpened(mOPF);
-
-            String[] hrefArray = mOPF.getLinearSpineURLS();
-            String endpoint = "";
-            String username = UstadMobileSystemImpl.getInstance().getActiveUser(this);
-            String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(this);
-
-            String xAPIParams = "?actor=" +
-                    URLEncoder.encode(UMTinCanUtil.makeActorFromActiveUser(this).toString()) +
-                    "&auth=" + URLEncoder.encode(LoginController.encodeBasicAuth(username, password)) +
-                    "&endpoint=" + URLEncoder.encode(LoginController.LLRS_XAPI_ENDPOINT);
-
-            urlArray = new String[hrefArray.length];
-            for(int i = 0; i < hrefArray.length; i++) {
-                urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i])
-                        + xAPIParams;
-            }
+            urlArray = mContainerController.getSpineURLs(true);
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 163, null, e);
             exc = e;
         }
 
         if(urlArray != null) {
-            setContainerTitle(mOPF.title);
+            setContainerTitle(mContainerController.getActiveOPF().title);
             mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
             final int numPages = urlArray.length;
             mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(), urlArray);

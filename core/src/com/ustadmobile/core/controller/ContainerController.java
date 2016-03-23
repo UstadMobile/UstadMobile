@@ -47,6 +47,8 @@ import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.UstadView;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -225,6 +227,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         return result;
     }
     
+    /**
+     * The path that is being used to access the resource.  On many platforms
+     * we need to use an internal HTTP server etc. So this is the internal
+     * HTTP server URL path to the root of the container.
+     * 
+     * @return 
+     */
     public String getOpenPath() {
         return openPath;
     }
@@ -285,6 +294,43 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         opf = UstadJSOPF.loadFromOPF(xpp);
                 
         return opf;
+    }
+    
+    /**
+     * Make an array of the spine URLs using the currently active OPF.
+     * 
+     * @param addXAPIParams If true will add XAPI parameters to the end of the each URL
+     * 
+     * @return Array of URLs with resolved relative to the baseURL and each with the added xAPI parameters
+     * @throws IOException
+     * @throws XmlPullParserException 
+     */
+    public String[] getSpineURLs(boolean addXAPIParams) throws IOException, XmlPullParserException{
+        String[] spineURLs = null;
+        String opfPath = UMFileUtil.joinPaths(new String[]{openPath, 
+            getOCF().rootFiles[0].fullPath});
+        
+        String[] linearHREFs = getActiveOPF().getLinearSpineURLS();
+        
+        String xAPIParams = null;
+        if(addXAPIParams) {
+            String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
+            String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+            xAPIParams = "?actor=" +
+                    URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
+                    "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+                    "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT);
+        }
+        
+        spineURLs = new String[linearHREFs.length];
+        for(int i = 0; i < linearHREFs.length; i++) {
+            spineURLs[i] = UMFileUtil.resolveLink(opfPath, linearHREFs[i]);
+            if(addXAPIParams) {
+                spineURLs[i] += xAPIParams;
+            }
+        }
+        
+        return spineURLs;
     }
     
     /**
