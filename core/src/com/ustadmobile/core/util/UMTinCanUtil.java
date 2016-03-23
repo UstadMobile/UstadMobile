@@ -221,5 +221,12 @@ public class UMTinCanUtil {
         return obj;
     }
     
+    /**
+     * 
+     */
+    public static String generateUUID() {
+        return UMUUID.randomUUID().toString();
+    }
+    
     
 }
