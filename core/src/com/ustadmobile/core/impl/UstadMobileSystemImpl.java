@@ -37,6 +37,8 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.tincan.Registration;
+import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
@@ -991,6 +993,14 @@ public abstract class UstadMobileSystemImpl {
      * @return File extension for the mime type without the leading .
      */
     public abstract String getExtensionFromMimeType(String mimeType);
+    
+    
+    /**
+     * Should a list of resumable registrations for the given activity id
+     * 
+     * @param activityId The activity ID we are looking for registrations for
+     */
+    public abstract void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) throws IOException;
     
 }
 

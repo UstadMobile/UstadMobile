@@ -30,9 +30,12 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.tincan.Registration;
+import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
@@ -46,7 +49,7 @@ import java.net.URLEncoder;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView {
+public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView, AppViewChoiceListener {
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -80,6 +83,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     private Hashtable mArgs;
 
     private int lastPageShown = -1;
+
+    private Registration[] resumableRegistrations;
+
+    private final int CMD_CHOOSEREG = 1001;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -165,16 +172,52 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         setBaseController(controller);
         mContainerController.setUIStrings();
         if(mMimeType.startsWith("application/epub+zip")) {
-            showEPUB();
+            //check if there is a resumable registration for the activity ID
+            try {
+                mContainerController.getResumableRegistrations(new TinCanResultListener() {
+                    @Override
+                    public void resultReady(Object result) {
+                        int x = 0;
+                    }
+
+                    @Override
+                    public int getResultType() {
+                        return 0;
+                    }
+                });
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 185, null, e);
+            }
+
+            if(resumableRegistrations != null && resumableRegistrations.length > 0) {
+                //show a menu to choose
+                UstadMobileSystemImpl.getInstance().getAppView(this).showChoiceDialog("Resume?",
+                    mContainerController.getRegistrationLabels(resumableRegistrations), CMD_CHOOSEREG,
+                    this);
+            }else {
+                showEPUB();
+            }
         }else if(mMimeType.startsWith("application/pdf")) {
             showPDF();
         }
     }
 
     /**
+     * The user was asked to choose from a list of available registrations: handle choice
+     *
+     * @param commandId The command id that was supplied when using showChoiceDialog
+     * @param choice
+     */
+    @Override
+    public void appViewChoiceSelected(int commandId, int choice) {
+        mContainerController.setRegistrationUUID(resumableRegistrations[choice].uuid);
+        showEPUB();
+    }
+
+    /**
      * Show a PDF container using
      */
-    protected void showPDF() {
+    public void showPDF() {
         com.joanzapata.pdfview.PDFView pdfView;
         RelativeLayout container = (RelativeLayout)findViewById(R.id.container_relative_layout);
         container.removeView(findViewById(R.id.container_epubrunner_pager));
@@ -188,11 +231,13 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             .enableSwipe(true).load();
     }
 
-    protected void showEPUB() {
+    public void showEPUB() {
         String[] urlArray = null;
         Exception exc = null;
         try {
             urlArray = mContainerController.getSpineURLs(true);
+            UstadMobileSystemImpl.getInstance().queueTinCanStatement(
+                mContainerController.makeLaunchedStatement(), getContext());
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 163, null, e);
             exc = e;

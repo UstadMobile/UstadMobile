@@ -28,29 +28,16 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.view;
-
-import com.ustadmobile.core.controller.ContainerController;
+package com.ustadmobile.core.tincan;
 
 /**
  *
  * @author mike
  */
-public interface ContainerView extends UstadView {
+public interface TinCanResultListener {
     
-    public void setController(ContainerController controller);
-        
-    public void setContainerTitle(String containerTitle);
+    public void resultReady(Object result);
     
-    /**
-     * This is a PDF container : show the PDF now
-     */
-    public void showPDF();
-    
-    /**
-     * The content is an EPUB - show the EPUB
-     */
-    public void showEPUB();
-    
+    public int getResultType();
     
 }

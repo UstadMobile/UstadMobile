@@ -5,7 +5,17 @@
  */
 package com.ustadmobile.core.tincan;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.util.Hashtable;
+
+
+/* $if umplatform == 2  $
+    import org.json.me.*;
+ $else$ */
+    import org.json.*;
+/* $endif$ */
+
 
 /**
  *
@@ -25,9 +35,16 @@ public class Activity {
     
     private Hashtable extensions;
     
-    public Activity(String id, String aType) {
+    String lang;
+    
+    public Activity(String id, String aType, String lang) {
         this.id = id;
         this.aType = aType;
+        this.lang = lang;
+    }
+    
+    public Activity(String id, String aType) {
+        this(id, aType, "en");
     }
     
     /**
@@ -52,5 +69,45 @@ public class Activity {
             return extensions.get(key).toString();
         }
     }
+    
+    /**
+     * Gets the id of the activity
+     * 
+     * @return ID of activity as per "id" attribute
+     */
+    public String getId() {
+        return this.id;
+    }
+    
+    /**
+     * Gets the name of the activity as per it's child name tag 
+     * 
+     * @return Name of the activity
+     */
+    public String getName() {
+        return this.name;
+    }
+    
+    public String getDesc() {
+        return this.desc;
+    }
+    
+    /**
+     * Returns a minimal xAPI statement which references the ID of this activity
+     * @return 
+     */
+    public JSONObject getActivityJSON() {
+        JSONObject activityDef = null;
+        try {
+            activityDef = new JSONObject();
+            activityDef.put("id", this.id);
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 187,null, e);
+        }
+        
+        return activityDef;
+        
+    }
+    
     
 }

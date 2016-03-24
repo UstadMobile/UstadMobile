@@ -124,4 +124,15 @@ public class TinCanXML {
         return loadFromXML(xpp, 0);
     }
     
+    /**
+     * Returns the Activity for which contained a launch element.  As per the spec
+     * only one activity in a given tincan.xml file may contain a launch
+     * element.
+     * 
+     * @return the Activity for which there is a launch tag (if any) was found
+     */
+    public Activity getLaunchActivity() {
+        return launchActivity;
+    }
+    
 }

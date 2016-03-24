@@ -46,6 +46,8 @@ import com.ustadmobile.core.impl.ZipEntryHandle;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.tincan.Registration;
+import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
@@ -53,6 +55,15 @@ import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.UstadView;
 import java.io.InputStream;
 import java.util.Hashtable;
+
+
+
+/* $if umplatform == 2  $
+    import org.json.me.*;
+ $else$ */
+    import org.json.*;
+/* $endif$ */
+
 
 /**
  * Represents a container (e.g. epub file)
@@ -393,6 +404,56 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
     
     /**
+     * Generate a launched statement for this course
+     * 
+     * @return 
+     */
+    public JSONObject makeLaunchedStatement() {
+        JSONObject stmt = null;
+        
+        try {
+            stmt = new JSONObject();
+            
+            if(this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null) {
+                stmt.put("object", this.tinCanXMLSummary.getLaunchActivity().getActivityJSON());
+            }else {
+                JSONObject objectObj = new JSONObject();
+                objectObj.put("id", "epub:" + activeOPF.id);
+                stmt.put("object", objectObj);
+            }
+            
+            stmt.put("actor", UMTinCanUtil.makeActorFromActiveUser(getContext()));
+            
+            JSONObject verbDef = new JSONObject();
+            verbDef.put("id", "http://adlnet.gov/expapi/verbs/launched");
+            stmt.put("verb", verbDef);
+            stmt.put("context", getTinCanContext());
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 190, null, e);
+        }
+        
+        return stmt;
+    }
+    
+    /**
+     * Get a JSON Object representing the TinCan context of the container
+     * Really this is just here to put in the registration
+     * 
+     * @return 
+     */
+    public JSONObject getTinCanContext() {
+        JSONObject context = null;
+        try {
+            context = new JSONObject();
+            context.put("registration", registrationUUID);
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 189, null, e);
+        }
+        
+        return context;
+    }
+    
+    /**
      * Log that the given container has been opened.  This should be called
      * by the view.  it can then be used as the basis by which to sort items
      * 
@@ -448,8 +509,34 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         return this;
     }
     
-    private boolean isRegistrationResumable() {
-        return false;
+    /**
+     * Get a list of resuamble registrations (if any) for this container
+     * 
+     * @return Array of registration objects that are resumable registrations
+     * 
+     * @throws IOException 
+     */
+    public void getResumableRegistrations(TinCanResultListener listener) throws IOException{
+        if(this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null) {
+            UstadMobileSystemImpl.getInstance().getResumableRegistrations(
+                this.tinCanXMLSummary.getLaunchActivity().getId(), getContext(), listener);
+        }
+    }
+    
+    /**
+     * For the given array of registrations: make an array of the labels to use
+     * for a dialog
+     * 
+     * @param registrations
+     * @return 
+     */
+    public String[] getRegistrationLabels(Registration[] registrations) {
+        String[] str = new String[registrations.length];
+        for(int i = 0; i < str.length; i++) {
+            str[i] = registrations[i].uuid;
+        }
+        
+        return str;
     }
     
     public void setUIStrings() {
@@ -466,6 +553,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      */
     public String getRegistrationUUID() {
         return registrationUUID;
+    }
+    
+    /**
+     * Sets the current registration UUID to be used
+     */
+    public void setRegistrationUUID(String registrationUUID) {
+        this.registrationUUID = registrationUUID;
     }
     
 }

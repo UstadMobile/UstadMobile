@@ -30,9 +30,11 @@
  */
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import java.util.Hashtable;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -219,6 +221,22 @@ public class UMTinCanUtil {
         }
         
         return obj;
+    }
+    
+    /**
+     * Make a hashtable with X-Experience-API-Version and Authorization HTTP
+     * header
+     * 
+     * @param context
+     * @return 
+     */
+    public static Hashtable makeXAPIHeaders(Object context) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable ht = new Hashtable();
+        ht.put("X-Experience-API-Version", "1.0.1");
+        ht.put("Authorization", LoginController.encodeBasicAuth(
+            impl.getActiveUser(context), impl.getActiveUserAuth(context)));
+        return ht;
     }
     
     /**

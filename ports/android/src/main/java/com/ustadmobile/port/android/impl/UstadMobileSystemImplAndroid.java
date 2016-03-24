@@ -49,8 +49,14 @@ import java.net.URL;
 
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.*;
+import com.ustadmobile.core.tincan.Registration;
+import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
@@ -119,6 +125,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
     private HashMap<UMDownloadCompleteReceiver, BroadcastReceiver> downloadCompleteReceivers;
 
+    private Timer sendStatementsTimer;
 
     /**
      * Some mime types that the Android OS does not know about but we do...
@@ -182,8 +189,60 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public boolean queueTinCanStatement(JSONObject stmt, Object context) {
-        return false;
+    public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {
+        if(sendStatementsTimer == null) {
+            sendStatementsTimer = new Timer();
+        }
+
+        sendStatementsTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                HttpURLConnection conn = null;
+                OutputStream out = null;
+                int responseCode = 0;
+                String stmtId = null;
+
+                try {
+                    if(stmt.optString("id") == null || stmt.optString("id").length() == 0) {
+                        stmt.put("id", UMTinCanUtil.generateUUID());
+                    }
+                    stmtId = stmt.getString("id");
+
+                    String stmtEndpoint = LoginController.LLRS_XAPI_ENDPOINT +"statements?statementId="
+                            + URLEncoder.encode(stmtId, "UTF-8");
+
+                    URL url = new URL(stmtEndpoint);
+                    conn = (HttpURLConnection)url.openConnection();
+                    conn.setRequestProperty("X-Experience-API-Version", "1.0.1");
+                    conn.setRequestProperty("Authorization", LoginController.encodeBasicAuth(
+                            getActiveUser(context), getActiveUserAuth(context)));
+
+                    conn.setRequestMethod("PUT");
+                    conn.setDoOutput(true);
+                    out = conn.getOutputStream();
+                    out.write(stmt.toString().getBytes("UTF-8"));
+                    out.flush();
+                    out.close();
+
+
+                    conn.connect();
+                    responseCode = conn.getResponseCode();
+                    UstadMobileSystemImpl.l(UMLog.INFO, 377, " send stmt: " + stmtId + ": server responds: "
+                            + responseCode);
+                }catch(Exception e) {
+                    l(UMLog.ERROR, 191, stmtId, e);
+                }finally {
+                    UMIOUtils.closeOutputStream(out);
+                    if(conn != null) {
+                        conn.disconnect();
+                    }
+                }
+            }
+        }, 100);
+
+
+
+        return true;
     }
 
     /**
@@ -749,5 +808,32 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
 
         return extension;
+    }
+
+    @Override
+    public void getResumableRegistrations(final String activityId, final Object context, final TinCanResultListener listener) throws IOException {
+        new Thread(new Runnable() {
+            public void run() {
+                String stmtURL =  LoginController.LLRS_XAPI_ENDPOINT + "statements";
+                Hashtable headers = UMTinCanUtil.makeXAPIHeaders(context);
+
+                try {
+                    JSONObject actor = UMTinCanUtil.makeActorFromActiveUser(context);
+                    //Query local xAPI server
+                    String launchQueryURL = stmtURL + "?"
+                            +"verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/launched", "UTF-8")
+                            +"&agent=" + URLEncoder.encode(actor.toString(), "UTF-8")
+                            +"&activity=" + URLEncoder.encode(activityId, "UTF-8");
+
+
+                    HTTPResult launchedStmts = makeRequest(launchQueryURL, headers, null);
+                    String serverSays = new String(launchedStmts.getResponse());
+                    int x = 0;
+                    x+=1;
+                }catch(Exception e) {
+
+                }
+            }
+        }).start();
     }
 }
