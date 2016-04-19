@@ -152,6 +152,8 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      */
     private String[] resumableRegistrationIds;
     
+    
+    
     /**
      * Empty constructor - this creates a blank unusable object - required for async loading
      */
@@ -591,6 +593,9 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
                 impl.getAppView(getContext()).showAlertDialog("No sessions", 
                     "No resumable sessionss avaialble");
             }
+        }else {
+            impl.getAppView(getContext()).showAlertDialog("Error",
+                "Sorry - error fetching resumable sessions");
         }
     }
     

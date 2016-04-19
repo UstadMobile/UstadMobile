@@ -49,10 +49,12 @@ import java.net.URL;
 
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.tincan.Registration;
 import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.tincan.TinCanStatement;
 import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -826,7 +828,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                             +"&activity=" + URLEncoder.encode(activityId, "UTF-8");
 
                     String launchQueryURL = launchQueryBaseURL +
-                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/launched", "UTF-8");
+                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/launched", "UTF-8") +
+                            "&limit=" + RESUME_MAX_CHOICES;
+
+                    String[] invalidatingVerbs = new String[]{"http://adlnet.gov/expapi/verbs/completed",
+                            "http://adlnet.gov/expapi/verbs/terminated"};
+
+
                     String completedQueryURL = launchQueryBaseURL +
                             "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/completed", "UTF-8");
                     String terminatedQueryURL = launchQueryBaseURL +
@@ -834,7 +842,64 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
                     HTTPResult launchResult = makeRequest(launchQueryURL, headers, null);
                     String launchResponse = new String(launchResult.getResponse(), "UTF-8");
-                    JSONObject[] launchedStmts = UMTinCanUtil.getStatementsFromResult(launchResponse);
+                    TinCanStatement[] launchedStmts = UMTinCanUtil.getStatementsFromResult(launchResponse);
+
+                    //if null was returned then it means there was an error running
+                    if(launchedStmts == null) {
+                        listener.resultReady(null);
+                        return;
+                    }
+
+
+                    String currentReg;
+                    int x = 0;
+
+                    ArrayList<TinCanStatement> filteredStmts = new ArrayList<>();
+                    int j;
+                    String queryURL;
+                    HTTPResult queryResult;
+                    TinCanStatement[] queryStmts;
+
+                    long queryTimeCount = 0;
+                    long queryStartTime;
+                    for(int i = 0; i < launchedStmts.length && filteredStmts.size() < RESUME_MAX_CHOICES; i++) {
+                        currentReg = launchedStmts[i].getRegistrationUUID();
+                        if(currentReg == null) {
+                            continue;
+                        }
+
+                        boolean stmtComplete = false;
+
+                        for(j = 0; j < invalidatingVerbs.length && !stmtComplete; j++) {
+                            queryURL = launchQueryBaseURL + "&verb=" + URLEncoder.encode(
+                                invalidatingVerbs[j], "UTF-8") + "&registration=" + currentReg;
+
+                            queryStartTime = System.currentTimeMillis();
+                            queryResult = makeRequest(queryURL, headers, null);
+                            queryTimeCount += (System.currentTimeMillis() - queryStartTime);
+                            queryStmts = UMTinCanUtil.getStatementsFromResult(new String(
+                                    queryResult.getResponse(), "UTF-8"));
+                            if(queryStmts.length > 0) {
+                                stmtComplete = true;
+                            }
+                        }
+
+                        if(!stmtComplete) {
+                            //make sure there are actually statements here... not just something launched and never filled
+                            queryURL = launchQueryBaseURL + "&registration=" + currentReg + "&limit=3";
+                            queryStartTime = System.currentTimeMillis();
+                            queryResult = makeRequest(queryURL, headers, null);
+                            queryTimeCount += (System.currentTimeMillis() - queryStartTime);
+                            queryStmts  = UMTinCanUtil.getStatementsFromResult(new String(
+                                    queryResult.getResponse(), "UTF-8"));
+                            if(queryStmts.length > 2) {
+                                filteredStmts.add(launchedStmts[i]);
+                            }
+                        }
+                    }
+                    l(UMLog.INFO, 315, ""+queryTimeCount);
+
+                    /*
                     JSONObject[] completedStmts = UMTinCanUtil.getStatementsFromResult(
                             new String(makeRequest(completedQueryURL, headers, null).getResponse(), "UTF-8"));
                     JSONObject[] terminatedStmts = UMTinCanUtil.getStatementsFromResult(
@@ -843,11 +908,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                     String[] completedRegistrations = UMTinCanUtil.getDistinctRegistrations(completedStmts);
                     String[] terminatedRegistrations = UMTinCanUtil.getDistinctRegistrations(terminatedStmts);
 
+
                     JSONObject[] openStmts = UMTinCanUtil.filterByRegistration(completedRegistrations,
                             false, launchedStmts);
                     openStmts = UMTinCanUtil.filterByRegistration(terminatedRegistrations, false,
                             openStmts);
-                    listener.resultReady(openStmts);
+                    */
+                    TinCanStatement[] resultStmts = new TinCanStatement[filteredStmts.size()];
+                    filteredStmts.toArray(resultStmts);
+                    listener.resultReady(resultStmts);
                 }catch(Exception e) {
                     listener.resultReady(null);
 

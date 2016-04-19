@@ -37,7 +37,5 @@ package com.ustadmobile.core.tincan;
 public interface TinCanResultListener {
     
     public void resultReady(Object result);
-    
-    public int getResultType();
-    
+        
 }

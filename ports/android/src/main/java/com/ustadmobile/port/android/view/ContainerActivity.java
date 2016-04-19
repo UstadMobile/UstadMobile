@@ -193,11 +193,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     }
 
-    @Override
-    public int getResultType() {
-        return 0;
-    }
-
     /**
      * The user was asked to choose from a list of available registrations: handle choice
      *

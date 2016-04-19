@@ -34,6 +34,7 @@ import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.tincan.TinCanStatement;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -256,20 +257,20 @@ public class UMTinCanUtil {
      * @param jsonStr The JSON returned by the server as a string
      * @return 
      */
-    public static JSONObject[] getStatementsFromResult(String jsonStr) {
-        JSONObject[] result = null;
+    public static TinCanStatement[] getStatementsFromResult(String jsonStr) {
+        TinCanStatement[] result = null;
         try {
             JSONObject resultObj = new JSONObject(jsonStr);
             if(resultObj.has("statements")) {
                 //this is a StatementResult object
                 JSONArray stmtArray = resultObj.getJSONArray("statements");
-                result = new JSONObject[stmtArray.length()];
+                result = new TinCanStatement[stmtArray.length()];
                 for(int i = 0; i < result.length; i++) {
-                    result[i] = stmtArray.getJSONObject(i);
+                    result[i] = new TinCanStatement(stmtArray.getJSONObject(i));
                 }
             }else {
                 //this is an individual statement
-                result = new JSONObject[] { resultObj };
+                result = new TinCanStatement[] { new TinCanStatement(resultObj) };
             }
         }catch(JSONException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 192, jsonStr, e);
