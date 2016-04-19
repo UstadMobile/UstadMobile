@@ -34,7 +34,9 @@ import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -245,6 +247,143 @@ public class UMTinCanUtil {
     public static String generateUUID() {
         return UMUUID.randomUUID().toString();
     }
+    
+    /**
+     * Given a string that represents a statement result from the GET api
+     * of a TinCan endpoint this method will convert them into an array
+     * of JSON Objects each representing the individual statements themselves.
+     * 
+     * @param jsonStr The JSON returned by the server as a string
+     * @return 
+     */
+    public static JSONObject[] getStatementsFromResult(String jsonStr) {
+        JSONObject[] result = null;
+        try {
+            JSONObject resultObj = new JSONObject(jsonStr);
+            if(resultObj.has("statements")) {
+                //this is a StatementResult object
+                JSONArray stmtArray = resultObj.getJSONArray("statements");
+                result = new JSONObject[stmtArray.length()];
+                for(int i = 0; i < result.length; i++) {
+                    result[i] = stmtArray.getJSONObject(i);
+                }
+            }else {
+                //this is an individual statement
+                result = new JSONObject[] { resultObj };
+            }
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 192, jsonStr, e);
+        }
+        
+        return result;
+    }
+    
+    
+    /**
+     * Go through a given list of statements and provide a String array of
+     * all the distinct registration IDs found 
+     * 
+     * @param stmts Array of JSON objects, each should be an XAPI Statement
+     * @return A String array of registration UUIDs found, 0 length String array if none found.  Not necssarily in the same order.
+     */
+    public static String[] getDistinctRegistrations(JSONObject[] stmts) {
+        Vector resultVector = new Vector();
+        String registration;
+        for(int i = 0; i < stmts.length; i++) {
+            registration = getStatementRegistration(stmts[i]);
+            
+            if(registration != null && resultVector.contains(registration)) {
+                resultVector.addElement(registration);
+            }   
+        }
+        
+        String[] result = new String[resultVector.size()];
+        resultVector.copyInto(result);
+        return result;
+    }
+    
+    /**
+     * Gets the registration from a JSONObject representing an XAPI statement
+     * if it has one
+     * 
+     * @param stmt JSONObject that represents a TinCan statement
+     * @return The registration UUID if present in the context of statement, null otherwise
+     */
+    public static String getStatementRegistration(JSONObject stmt) {
+        try {
+            if(stmt.has("context")) {
+                JSONObject context = stmt.getJSONObject("context");
+                if(context.has("registration")) {
+                    return context.getString("registration");
+                }
+            }
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 194, null, e);
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Filters a list of registrations 
+     * 
+     * @param registrations List of registrations to filter 
+     * @param keep If true all matching registrations are including, otherwise they are excluded
+     * @param srcArr Array of registrations to go through
+     * 
+     * @return JSONObject array representing statements filtered according to params
+     */
+    public static JSONObject[] filterByRegistration(String[] registrations, boolean keep, JSONObject[] srcArr) {
+        Vector results = new Vector();
+        String stmtRegistration;
+        int j;
+        for(int i = 0; i < srcArr.length; i++) {
+            stmtRegistration = getStatementRegistration(srcArr[i]);
+            boolean match = false;
+            if(stmtRegistration != null) {
+                for(j = 0; j < registrations.length && !match; j++) {
+                    match = registrations[i].equals(stmtRegistration);
+                }
+            }
+            
+            if(match && keep) {
+                results.addElement(srcArr[i]);
+            }else if(!match && !keep) {
+                results.addElement(srcArr[i]);
+            }
+            
+        }
+        
+        JSONObject[] resultStmts = new JSONObject[results.size()];
+        results.copyInto(resultStmts);
+        return resultStmts;
+    }
+    
+    /**
+     * Parse the ISO 8601 combined date and time format string 
+     * 
+     * e.g. 
+     * 2016-04-18T17:08:07.563789+00:00
+     * 
+     */
+    public static Calendar parse8601Timestamp(String timestamp) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, Integer.parseInt(timestamp.substring(0, 4)));
+        cal.set(Calendar.MONTH, Integer.parseInt(timestamp.substring(5, 7)));
+        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(timestamp.substring(8, 10)));
+        
+        if(timestamp.length() < 12) {
+            return cal;
+        }
+        
+        //There is a time section
+        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timestamp.substring(11, 13)));
+        cal.set(Calendar.MINUTE, Integer.parseInt(timestamp.substring(14, 16)));
+        cal.set(Calendar.SECOND, Integer.parseInt(timestamp.substring(17, 19)));
+        
+        return cal;
+    }
+    
     
     
 }

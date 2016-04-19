@@ -46,10 +46,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView, AppViewChoiceListener {
+public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView, AppViewChoiceListener, TinCanResultListener {
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -85,8 +89,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     private int lastPageShown = -1;
 
     private Registration[] resumableRegistrations;
-
-    private final int CMD_CHOOSEREG = 1001;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -167,39 +169,33 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         });
     }
 
+
+
     protected void setupFromController(ContainerController controller) {
         //TODO: Deal with other content types here - but for right now we only have EPUB
         setBaseController(controller);
         mContainerController.setUIStrings();
         if(mMimeType.startsWith("application/epub+zip")) {
-            //check if there is a resumable registration for the activity ID
-            try {
-                mContainerController.getResumableRegistrations(new TinCanResultListener() {
-                    @Override
-                    public void resultReady(Object result) {
-                        int x = 0;
-                    }
-
-                    @Override
-                    public int getResultType() {
-                        return 0;
-                    }
-                });
-            }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 185, null, e);
-            }
-
-            if(resumableRegistrations != null && resumableRegistrations.length > 0) {
-                //show a menu to choose
-                UstadMobileSystemImpl.getInstance().getAppView(this).showChoiceDialog("Resume?",
-                    mContainerController.getRegistrationLabels(resumableRegistrations), CMD_CHOOSEREG,
-                    this);
-            }else {
-                showEPUB();
-            }
+            showEPUB();
         }else if(mMimeType.startsWith("application/pdf")) {
             showPDF();
         }
+    }
+
+    @Override
+    /**
+     * We requested the implementation to find resumable XAPI
+     * registrations - that has now been completed
+     *
+     *
+     */
+    public void resultReady(Object result) {
+
+    }
+
+    @Override
+    public int getResultType() {
+        return 0;
     }
 
     /**
@@ -282,6 +278,19 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
     }
 
+    @Override
+    public boolean refreshURLs() {
+        boolean success = false;
+        try {
+            String[] pageURLs = mContainerController.getSpineURLs(true);
+            mPagerAdapter.setPageList(pageURLs);
+            success = true;
+        }catch(Exception e) {
+            UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 197, null, e);
+        }
+
+        return success;
+    }
 
     public String getAutoplayRunJavascript() {
         return onpageSelectedJS;
@@ -334,6 +343,9 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
 
         switch(item.getItemId()) {
+            case ContainerController.CMD_RESUME_SESSION:
+                mContainerController.handleClickResumableRegistrationMenuItem();
+                return true;
             case android.R.id.home:
                 finish();
                 return true;
@@ -405,6 +417,19 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
                 this.pagesMap.put(Integer.valueOf(position), frag);
                 return frag;
+            }
+        }
+
+        public void setPageList(String[] pageList) {
+            this.pageList = pageList;
+            Iterator<Map.Entry<Integer, ContainerPageFragment>> iterator = pagesMap.entrySet().iterator();
+            ContainerPageFragment frag;
+            int index;
+            Map.Entry<Integer, ContainerPageFragment> entry;
+            while(iterator.hasNext()) {
+                entry = iterator.next();
+                frag = entry.getValue();
+                frag.setPageURL(pageList[entry.getKey()]);
             }
         }
 

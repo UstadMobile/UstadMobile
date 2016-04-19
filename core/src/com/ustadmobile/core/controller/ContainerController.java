@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -42,7 +43,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.ZipEntryHandle;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -52,9 +52,13 @@ import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.util.URLTextUtil;
+import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.UstadView;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.Vector;
 
 
 
@@ -71,7 +75,7 @@ import java.util.Hashtable;
  * 
  * @author mike
  */
-public class ContainerController extends UstadBaseController implements AsyncLoadableController{
+public class ContainerController extends UstadBaseController implements AsyncLoadableController, TinCanResultListener, AppViewChoiceListener{
     
     private ContainerView containerView;
     
@@ -136,6 +140,17 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * was given in the OPDS feed we will have a file called bookname.epub.thumb.png
      */
     public static final String THUMBNAIL_POSTFIX = ".thumb.";
+    
+    
+    public static final int CMD_RESUME_SESSION = 1011;
+    
+    public static final int CMD_CHOOSE_SESSION = 1012;
+    
+    /**
+     * After searching for resumable registrations: these are the ones that can 
+     * be resumed
+     */
+    private String[] resumableRegistrationIds;
     
     /**
      * Empty constructor - this creates a blank unusable object - required for async loading
@@ -510,18 +525,122 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
     
     /**
+     * Returns true if this content type supports resumable registrations: false otherwise
+     * 
+     * @return 
+     */
+    public boolean supportsResumableRegistrations() {
+        return this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null;
+    }
+    
+    /**
+     * Should be called by the view when the user selects the resume menu item
+     */
+    public void handleClickResumableRegistrationMenuItem() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(supportsResumableRegistrations()) {
+            impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.loading));
+            getResumableRegistrations(this);
+        }else {
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showAlertDialog(
+                "Ooops", "Sorry: No resumable sessions for this item");
+        }
+    }
+    
+    /**
+     * Handle when the TinCan Result is ready 
+     * @param result 
+     */
+    public void resultReady(Object result) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.getAppView(getContext()).dismissProgressDialog();
+        Vector regIds = new Vector();
+        Vector labels = new Vector();
+        if(result != null) {
+            JSONObject[] openSessions = (JSONObject[])result;
+            StringBuffer labelSb;
+            String regId;
+            Calendar cal;
+            for(int i = 0; i < openSessions.length; i++) {
+                try {
+                    regId = openSessions[i].getJSONObject("context").getString("registration");
+                    cal = UMTinCanUtil.parse8601Timestamp(
+                        openSessions[i].getString("timestamp"));
+                    labelSb = new StringBuffer();
+                    labelSb.append(cal.get(Calendar.DAY_OF_MONTH)).append('/');
+                    labelSb.append(cal.get(Calendar.MONTH)+1).append('/');
+                    labelSb.append(cal.get(Calendar.YEAR)).append(" - ");
+                    labelSb.append(cal.get(Calendar.HOUR_OF_DAY)).append(':');
+                    labelSb.append(pad0(cal.get(Calendar.MINUTE)));
+                    
+                    regIds.addElement(regId);
+                    labels.addElement(labelSb.toString());
+                }catch(JSONException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 196, null, e);
+                }
+            }
+            
+            if(labels.size() > 0) {
+                resumableRegistrationIds = new String[regIds.size()];
+                regIds.copyInto(resumableRegistrationIds);
+                String[] labelArr = new String[labels.size()];
+                labels.copyInto(labelArr);
+                impl.getAppView(getContext()).showChoiceDialog("Resume", labelArr, 
+                    CMD_CHOOSE_SESSION, this);
+            }else {
+                impl.getAppView(getContext()).showAlertDialog("No sessions", 
+                    "No resumable sessionss avaialble");
+            }
+        }
+    }
+    
+    private String pad0(int i) {
+        if(i > 9) {
+            return String.valueOf(i);
+        }else {
+            return "0"+i;
+        }
+    }
+
+    /**
+     * Handle when the user has chosen a session to resume
+     * 
+     * @param commandId
+     * @param choice 
+     */
+    public void appViewChoiceSelected(int commandId, int choice) {
+        switch(commandId) {
+            case CMD_CHOOSE_SESSION:
+                registrationUUID = resumableRegistrationIds[choice];
+                containerView.refreshURLs();
+                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
+                    "Loaded session", AppView.LENGTH_LONG);
+                break;
+        }
+    }
+    
+    
+
+    
+    public int getResultType() {
+        return 1;
+    }
+    
+    /**
      * Get a list of resuamble registrations (if any) for this container
      * 
      * @return Array of registration objects that are resumable registrations
      * 
      * @throws IOException 
      */
-    public void getResumableRegistrations(TinCanResultListener listener) throws IOException{
-        if(this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null) {
+    public void getResumableRegistrations(TinCanResultListener listener) {
+        //TODO: Add check that this is a resuambel act
+        if(supportsResumableRegistrations()) {
             UstadMobileSystemImpl.getInstance().getResumableRegistrations(
                 this.tinCanXMLSummary.getLaunchActivity().getId(), getContext(), listener);
         }
     }
+    
     
     /**
      * For the given array of registrations: make an array of the labels to use
@@ -540,7 +659,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
     
     public void setUIStrings() {
-        setStandardAppMenuOptions();
+        int[] cmds = new int[STANDARD_APPEMNU_CMDS.length + 1];
+        String[] labels = new String[STANDARD_APPEMNU_CMDS.length + 1];
+        cmds[0] = CMD_RESUME_SESSION;
+        labels[0] = "Resume";
+        
+        super.fillStandardMenuOptions(cmds, labels, 1);
+        getView().setAppMenuCommands(labels, cmds);
     }
     
     /**
@@ -561,5 +686,8 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public void setRegistrationUUID(String registrationUUID) {
         this.registrationUUID = registrationUUID;
     }
+
+    
+    
     
 }

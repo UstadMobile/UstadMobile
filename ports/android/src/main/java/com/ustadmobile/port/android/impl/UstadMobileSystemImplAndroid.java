@@ -80,6 +80,7 @@ import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
 
@@ -811,7 +812,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public void getResumableRegistrations(final String activityId, final Object context, final TinCanResultListener listener) throws IOException {
+    public void getResumableRegistrations(final String activityId, final Object context, final TinCanResultListener listener)  {
         new Thread(new Runnable() {
             public void run() {
                 String stmtURL =  LoginController.LLRS_XAPI_ENDPOINT + "statements";
@@ -820,17 +821,35 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 try {
                     JSONObject actor = UMTinCanUtil.makeActorFromActiveUser(context);
                     //Query local xAPI server
-                    String launchQueryURL = stmtURL + "?"
-                            +"verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/launched", "UTF-8")
-                            +"&agent=" + URLEncoder.encode(actor.toString(), "UTF-8")
+                    String launchQueryBaseURL = stmtURL + "?"
+                            +"agent=" + URLEncoder.encode(actor.toString(), "UTF-8")
                             +"&activity=" + URLEncoder.encode(activityId, "UTF-8");
 
+                    String launchQueryURL = launchQueryBaseURL +
+                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/launched", "UTF-8");
+                    String completedQueryURL = launchQueryBaseURL +
+                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/completed", "UTF-8");
+                    String terminatedQueryURL = launchQueryBaseURL +
+                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/terminated", "UTF-8");
 
-                    HTTPResult launchedStmts = makeRequest(launchQueryURL, headers, null);
-                    String serverSays = new String(launchedStmts.getResponse());
-                    int x = 0;
-                    x+=1;
+                    HTTPResult launchResult = makeRequest(launchQueryURL, headers, null);
+                    String launchResponse = new String(launchResult.getResponse(), "UTF-8");
+                    JSONObject[] launchedStmts = UMTinCanUtil.getStatementsFromResult(launchResponse);
+                    JSONObject[] completedStmts = UMTinCanUtil.getStatementsFromResult(
+                            new String(makeRequest(completedQueryURL, headers, null).getResponse(), "UTF-8"));
+                    JSONObject[] terminatedStmts = UMTinCanUtil.getStatementsFromResult(
+                            new String(makeRequest(terminatedQueryURL, headers, null).getResponse(), "UTF-8"));
+
+                    String[] completedRegistrations = UMTinCanUtil.getDistinctRegistrations(completedStmts);
+                    String[] terminatedRegistrations = UMTinCanUtil.getDistinctRegistrations(terminatedStmts);
+
+                    JSONObject[] openStmts = UMTinCanUtil.filterByRegistration(completedRegistrations,
+                            false, launchedStmts);
+                    openStmts = UMTinCanUtil.filterByRegistration(terminatedRegistrations, false,
+                            openStmts);
+                    listener.resultReady(openStmts);
                 }catch(Exception e) {
+                    listener.resultReady(null);
 
                 }
             }

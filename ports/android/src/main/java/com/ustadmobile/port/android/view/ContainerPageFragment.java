@@ -90,7 +90,7 @@ public class ContainerPageFragment extends Fragment {
             }
 
             webView.getSettings().setJavaScriptEnabled(true);
-	    webView.getSettings().setDomStorageEnabled(true);
+	        webView.getSettings().setDomStorageEnabled(true);
             webView.loadUrl(mPageURL);
             webView.setWebViewClient(new ContainerPageWebViewClient(webView));
         }
@@ -101,6 +101,17 @@ public class ContainerPageFragment extends Fragment {
         if(webView != null) {
             webView.loadUrl(script);
         }
+    }
+
+    public void setPageURL(String url) {
+        this.mPageURL = url;
+        if(webView != null) {
+            webView.loadUrl(url);
+        }
+    }
+
+    public String getPageURL() {
+        return mPageURL;
     }
 
     /**

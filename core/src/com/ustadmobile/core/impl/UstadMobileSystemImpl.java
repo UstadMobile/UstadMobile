@@ -1000,7 +1000,7 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param activityId The activity ID we are looking for registrations for
      */
-    public abstract void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) throws IOException;
+    public abstract void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener);
     
 }
 
