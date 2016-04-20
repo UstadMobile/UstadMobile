@@ -104,6 +104,7 @@ testres/unittest-result
 ports/android/lrs
 ports/android/LRSTEMP
 ports/android/settings.gradle
+ports/android/buildozer
 *.bak
 *~
 

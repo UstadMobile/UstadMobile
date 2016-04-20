@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -42,14 +43,31 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.ZipEntryHandle;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.tincan.Registration;
+import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.util.URLTextUtil;
+import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.UstadView;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.Vector;
+
+
+
+/* $if umplatform == 2  $
+    import org.json.me.*;
+ $else$ */
+    import org.json.*;
+/* $endif$ */
+
 
 /**
  * Represents a container (e.g. epub file)
@@ -57,7 +75,7 @@ import java.util.Hashtable;
  * 
  * @author mike
  */
-public class ContainerController extends UstadBaseController implements AsyncLoadableController{
+public class ContainerController extends UstadBaseController implements AsyncLoadableController, TinCanResultListener, AppViewChoiceListener{
     
     private ContainerView containerView;
     
@@ -72,6 +90,10 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     private UstadJSOPF activeOPF;
     
     private String[] opfTitles;
+    
+    private String registrationUUID;
+    
+    private TinCanXML tinCanXMLSummary;
     
     public static final String PREFKEY_PREFIX_LASTOPENED = "laxs-";
         
@@ -100,6 +122,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public static final String ARG_OPFINDEX = "OPFI";
     
     /**
+     * Use with loadController to specify the registration UUID if required
+     * (e.g. if the Mobile OS has destroyed the activity and it is being
+     * re-created)
+     */
+    public static final String ARG_XAPI_REGISTRATION = "XAPI_REG";
+    
+    /**
      * Hardcoded fixed path to the container.xml file as per the open container
      * format spec : META-INF/container.xml
      */
@@ -111,6 +140,19 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * was given in the OPDS feed we will have a file called bookname.epub.thumb.png
      */
     public static final String THUMBNAIL_POSTFIX = ".thumb.";
+    
+    
+    public static final int CMD_RESUME_SESSION = 1011;
+    
+    public static final int CMD_CHOOSE_SESSION = 1012;
+    
+    /**
+     * After searching for resumable registrations: these are the ones that can 
+     * be resumed
+     */
+    private String[] resumableRegistrationIds;
+    
+    
     
     /**
      * Empty constructor - this creates a blank unusable object - required for async loading
@@ -225,6 +267,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         return result;
     }
     
+    /**
+     * The path that is being used to access the resource.  On many platforms
+     * we need to use an internal HTTP server etc. So this is the internal
+     * HTTP server URL path to the root of the container.
+     * 
+     * @return 
+     */
     public String getOpenPath() {
         return openPath;
     }
@@ -272,6 +321,52 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         return ocf;
     }
     
+    /**
+     * 
+     * @param flags
+     * @return
+     * @throws IOException
+     * @throws XmlPullParserException 
+     */
+    public TinCanXML getTinCanXML(int flags) throws IOException, XmlPullParserException {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String tinCanXMLURI = UMFileUtil.joinPaths(
+                new String[]{openPath, "tincan.xml"});
+        TinCanXML tcXML = null;
+        
+        try {
+            HTTPResult res = impl.getInstance().readURLToString(tinCanXMLURI, null);
+            XmlPullParser xpp = impl.newPullParser();
+            xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
+            tcXML = TinCanXML.loadFromXML(xpp);
+        }catch(IOException e) {
+            //seems we don't have that...
+            UstadMobileSystemImpl.l(UMLog.WARN, 211, null, e);
+        }
+        
+        return tcXML;
+    }
+    
+    /**
+     * Returns a TinCanXML summary object that contains only the info on the
+     * activity with a launch element (if any).  To conserve memory we don't
+     * preserve info on all activities that may be contained in the tincan.xml
+     * 
+     * @return TinCanXML summary object as above
+     * 
+     * @throws IOException
+     * @throws XmlPullParserException 
+     */
+    public TinCanXML getTinCanXMLSummary() throws IOException, XmlPullParserException{
+        if(tinCanXMLSummary != null) {
+            return tinCanXMLSummary;
+        }
+        
+        tinCanXMLSummary = getTinCanXML(0);
+        return tinCanXMLSummary;
+    }
+    
+    
     public UstadJSOPF getOPF(int index) throws IOException, XmlPullParserException{
         UstadJSOPF opf = null;
         UstadOCF ocf = getOCF();
@@ -285,6 +380,94 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         opf = UstadJSOPF.loadFromOPF(xpp);
                 
         return opf;
+    }
+    
+    /**
+     * Make an array of the spine URLs using the currently active OPF.
+     * 
+     * @param addXAPIParams If true will add XAPI parameters to the end of the each URL
+     * 
+     * @return Array of URLs with resolved relative to the baseURL and each with the added xAPI parameters
+     * @throws IOException
+     * @throws XmlPullParserException 
+     */
+    public String[] getSpineURLs(boolean addXAPIParams) throws IOException, XmlPullParserException{
+        String[] spineURLs = null;
+        String opfPath = UMFileUtil.joinPaths(new String[]{openPath, 
+            getOCF().rootFiles[0].fullPath});
+        
+        String[] linearHREFs = getActiveOPF().getLinearSpineURLS();
+        
+        String xAPIParams = null;
+        if(addXAPIParams) {
+            String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
+            String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+            xAPIParams = "?actor=" +
+                    URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
+                    "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+                    "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT) +
+                    "&registration=" + registrationUUID;
+        }
+        
+        spineURLs = new String[linearHREFs.length];
+        for(int i = 0; i < linearHREFs.length; i++) {
+            spineURLs[i] = UMFileUtil.resolveLink(opfPath, linearHREFs[i]);
+            if(addXAPIParams) {
+                spineURLs[i] += xAPIParams;
+            }
+        }
+        
+        return spineURLs;
+    }
+    
+    /**
+     * Generate a launched statement for this course
+     * 
+     * @return 
+     */
+    public JSONObject makeLaunchedStatement() {
+        JSONObject stmt = null;
+        
+        try {
+            stmt = new JSONObject();
+            
+            if(this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null) {
+                stmt.put("object", this.tinCanXMLSummary.getLaunchActivity().getActivityJSON());
+            }else {
+                JSONObject objectObj = new JSONObject();
+                objectObj.put("id", "epub:" + activeOPF.id);
+                stmt.put("object", objectObj);
+            }
+            
+            stmt.put("actor", UMTinCanUtil.makeActorFromActiveUser(getContext()));
+            
+            JSONObject verbDef = new JSONObject();
+            verbDef.put("id", "http://adlnet.gov/expapi/verbs/launched");
+            stmt.put("verb", verbDef);
+            stmt.put("context", getTinCanContext());
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 190, null, e);
+        }
+        
+        return stmt;
+    }
+    
+    /**
+     * Get a JSON Object representing the TinCan context of the container
+     * Really this is just here to put in the registration
+     * 
+     * @return 
+     */
+    public JSONObject getTinCanContext() {
+        JSONObject context = null;
+        try {
+            context = new JSONObject();
+            context.put("registration", registrationUUID);
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 189, null, e);
+        }
+        
+        return context;
     }
     
     /**
@@ -332,11 +515,184 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
             }
         }
         
+        TinCanXML tc = getTinCanXMLSummary();
+        
+        if(args.containsKey(ARG_XAPI_REGISTRATION)) {
+            registrationUUID = (String)args.get(ARG_XAPI_REGISTRATION);
+        }else {
+            registrationUUID = UMTinCanUtil.generateUUID();
+        }
+        
         return this;
     }
-
-    public void setUIStrings() {
-        setStandardAppMenuOptions();
+    
+    /**
+     * Returns true if this content type supports resumable registrations: false otherwise
+     * 
+     * @return 
+     */
+    public boolean supportsResumableRegistrations() {
+        return this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null;
     }
+    
+    /**
+     * Should be called by the view when the user selects the resume menu item
+     */
+    public void handleClickResumableRegistrationMenuItem() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(supportsResumableRegistrations()) {
+            impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.loading));
+            getResumableRegistrations(this);
+        }else {
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showAlertDialog(
+                "Ooops", "Sorry: No resumable sessions for this item");
+        }
+    }
+    
+    /**
+     * Handle when the TinCan Result is ready 
+     * @param result 
+     */
+    public void resultReady(Object result) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.getAppView(getContext()).dismissProgressDialog();
+        Vector regIds = new Vector();
+        Vector labels = new Vector();
+        if(result != null) {
+            JSONObject[] openSessions = (JSONObject[])result;
+            StringBuffer labelSb;
+            String regId;
+            Calendar cal;
+            for(int i = 0; i < openSessions.length; i++) {
+                try {
+                    regId = openSessions[i].getJSONObject("context").getString("registration");
+                    cal = UMTinCanUtil.parse8601Timestamp(
+                        openSessions[i].getString("timestamp"));
+                    labelSb = new StringBuffer();
+                    labelSb.append(cal.get(Calendar.DAY_OF_MONTH)).append('/');
+                    labelSb.append(cal.get(Calendar.MONTH)+1).append('/');
+                    labelSb.append(cal.get(Calendar.YEAR)).append(" - ");
+                    labelSb.append(cal.get(Calendar.HOUR_OF_DAY)).append(':');
+                    labelSb.append(pad0(cal.get(Calendar.MINUTE)));
+                    
+                    regIds.addElement(regId);
+                    labels.addElement(labelSb.toString());
+                }catch(JSONException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 196, null, e);
+                }
+            }
+            
+            if(labels.size() > 0) {
+                resumableRegistrationIds = new String[regIds.size()];
+                regIds.copyInto(resumableRegistrationIds);
+                String[] labelArr = new String[labels.size()];
+                labels.copyInto(labelArr);
+                impl.getAppView(getContext()).showChoiceDialog("Resume", labelArr, 
+                    CMD_CHOOSE_SESSION, this);
+            }else {
+                impl.getAppView(getContext()).showAlertDialog("No sessions", 
+                    "No resumable sessionss avaialble");
+            }
+        }else {
+            impl.getAppView(getContext()).showAlertDialog("Error",
+                "Sorry - error fetching resumable sessions");
+        }
+    }
+    
+    private String pad0(int i) {
+        if(i > 9) {
+            return String.valueOf(i);
+        }else {
+            return "0"+i;
+        }
+    }
+
+    /**
+     * Handle when the user has chosen a session to resume
+     * 
+     * @param commandId
+     * @param choice 
+     */
+    public void appViewChoiceSelected(int commandId, int choice) {
+        switch(commandId) {
+            case CMD_CHOOSE_SESSION:
+                registrationUUID = resumableRegistrationIds[choice];
+                containerView.refreshURLs();
+                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
+                    "Loaded session", AppView.LENGTH_LONG);
+                break;
+        }
+    }
+    
+    
+
+    
+    public int getResultType() {
+        return 1;
+    }
+    
+    /**
+     * Get a list of resuamble registrations (if any) for this container
+     * 
+     * @return Array of registration objects that are resumable registrations
+     * 
+     * @throws IOException 
+     */
+    public void getResumableRegistrations(TinCanResultListener listener) {
+        //TODO: Add check that this is a resuambel act
+        if(supportsResumableRegistrations()) {
+            UstadMobileSystemImpl.getInstance().getResumableRegistrations(
+                this.tinCanXMLSummary.getLaunchActivity().getId(), getContext(), listener);
+        }
+    }
+    
+    
+    /**
+     * For the given array of registrations: make an array of the labels to use
+     * for a dialog
+     * 
+     * @param registrations
+     * @return 
+     */
+    public String[] getRegistrationLabels(Registration[] registrations) {
+        String[] str = new String[registrations.length];
+        for(int i = 0; i < str.length; i++) {
+            str[i] = registrations[i].uuid;
+        }
+        
+        return str;
+    }
+    
+    public void setUIStrings() {
+        int[] cmds = new int[STANDARD_APPEMNU_CMDS.length + 1];
+        String[] labels = new String[STANDARD_APPEMNU_CMDS.length + 1];
+        cmds[0] = CMD_RESUME_SESSION;
+        labels[0] = "Resume";
+        
+        super.fillStandardMenuOptions(cmds, labels, 1);
+        getView().setAppMenuCommands(labels, cmds);
+    }
+    
+    /**
+     * Gets the current registration UUID that is being used for the container.
+     * 
+     * This is generated at random or loaded from a saved value and handled
+     * when loadController runs.
+     * 
+     * @return XAPI Registration UUID as a String
+     */
+    public String getRegistrationUUID() {
+        return registrationUUID;
+    }
+    
+    /**
+     * Sets the current registration UUID to be used
+     */
+    public void setRegistrationUUID(String registrationUUID) {
+        this.registrationUUID = registrationUUID;
+    }
+
+    
+    
     
 }

@@ -37,6 +37,8 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.tincan.Registration;
+import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
@@ -185,6 +187,12 @@ public abstract class UstadMobileSystemImpl {
      * The user specific http cache dir
      */
     protected HTTPCacheDir userHttpCacheDir;
+    
+    /**
+     * The maximum number of sessions to show for the user to be able to resume
+     * This is limited both for usability and performance.
+     */
+    public static final int RESUME_MAX_CHOICES = 5;
     
     /**
      * Get an instance of the system implementation - relies on the platform
@@ -987,6 +995,16 @@ public abstract class UstadMobileSystemImpl {
      * @return File extension for the mime type without the leading .
      */
     public abstract String getExtensionFromMimeType(String mimeType);
+    
+    
+    /**
+     * Should a list of resumable registrations for the given activity id.  On
+     * smartphone / desktop platforms this can be done talking to the local LRS.
+     * On limited platforms this will need to be done differently.
+     * 
+     * @param activityId The activity ID we are looking for registrations for
+     */
+    public abstract void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener);
     
 }
 

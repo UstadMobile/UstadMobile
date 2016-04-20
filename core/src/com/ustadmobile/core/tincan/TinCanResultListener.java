@@ -28,37 +28,14 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.core.view;
-
-import com.ustadmobile.core.controller.ContainerController;
+package com.ustadmobile.core.tincan;
 
 /**
  *
  * @author mike
  */
-public interface ContainerView extends UstadView {
+public interface TinCanResultListener {
     
-    public void setController(ContainerController controller);
+    public void resultReady(Object result);
         
-    public void setContainerTitle(String containerTitle);
-    
-    /**
-     * This is a PDF container : show the PDF now
-     */
-    public void showPDF();
-    
-    /**
-     * The content is an EPUB - show the EPUB
-     */
-    public void showEPUB();
-    
-    /**
-     * Orders the view to look again at the URLs of each page.  This is used for
-     * instance when the registration is changed... thus changing the URL of each
-     * page.
-     * 
-     * @return true if successfully executed, false otherwise
-     */
-    public boolean refreshURLs();
-    
 }

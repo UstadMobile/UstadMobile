@@ -166,13 +166,25 @@ public abstract class UstadBaseController implements UstadController {
         return false;
     }
     
+    /**
+     * Fills in the standard menu options into the given arrays
+     * 
+     * @param cmds Array to be filled with the commands as per STANDARD_APPEMNU_CMDS
+     * @param labels Array of be filled with the labels for each command
+     * @param offset Offset in array to start filling from
+     */
+    protected void fillStandardMenuOptions(int[] cmds, String[] labels, int offset) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        for(int i = offset; i < STANDARD_APPEMNU_CMDS.length + offset; i++) {
+            cmds[i] = STANDARD_APPEMNU_CMDS[i - offset];
+            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i - offset]);
+        }
+    }
+    
     public void setStandardAppMenuOptions() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String[] labels = new String[STANDARD_APPEMNU_CMDS.length];
-        for(int i = 0; i < labels.length; i++) {
-            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i]);
-        }
-        
+        fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
     }
     

@@ -30,9 +30,12 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.tincan.Registration;
+import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
@@ -43,10 +46,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView {
+public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView, AppViewChoiceListener, TinCanResultListener {
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -72,8 +79,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private String mBaseURL = null;
 
-    private UstadJSOPF mOPF;
-
     //Key when saving state for the current page
     private static final String OUTSTATE_CURRENTITEM = "currentitem";
 
@@ -82,6 +87,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     private Hashtable mArgs;
 
     private int lastPageShown = -1;
+
+    private Registration[] resumableRegistrations;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -137,8 +144,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     };
 
-
-
     public void initContent() {
         mBaseURL = mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
@@ -164,6 +169,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         });
     }
 
+
+
     protected void setupFromController(ContainerController controller) {
         //TODO: Deal with other content types here - but for right now we only have EPUB
         setBaseController(controller);
@@ -175,10 +182,33 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
     }
 
+    @Override
+    /**
+     * We requested the implementation to find resumable XAPI
+     * registrations - that has now been completed
+     *
+     *
+     */
+    public void resultReady(Object result) {
+
+    }
+
+    /**
+     * The user was asked to choose from a list of available registrations: handle choice
+     *
+     * @param commandId The command id that was supplied when using showChoiceDialog
+     * @param choice
+     */
+    @Override
+    public void appViewChoiceSelected(int commandId, int choice) {
+        mContainerController.setRegistrationUUID(resumableRegistrations[choice].uuid);
+        showEPUB();
+    }
+
     /**
      * Show a PDF container using
      */
-    protected void showPDF() {
+    public void showPDF() {
         com.joanzapata.pdfview.PDFView pdfView;
         RelativeLayout container = (RelativeLayout)findViewById(R.id.container_relative_layout);
         container.removeView(findViewById(R.id.container_epubrunner_pager));
@@ -192,40 +222,20 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             .enableSwipe(true).load();
     }
 
-    protected void showEPUB() {
-        UstadOCF ocf = null;
+    public void showEPUB() {
         String[] urlArray = null;
         Exception exc = null;
         try {
-            ocf = mContainerController.getOCF();
-            String opfPath = UMFileUtil.joinPaths(new String[]{mBaseURL, ocf.rootFiles[0].fullPath});
-
-            //TODO: One Open Container File (.epub zipped file) can contain in theory multiple publications: Show user a choice
-            mOPF = mContainerController.getActiveOPF();
-            mContainerController.logContainerOpened(mOPF);
-
-            String[] hrefArray = mOPF.getLinearSpineURLS();
-            String endpoint = "";
-            String username = UstadMobileSystemImpl.getInstance().getActiveUser(this);
-            String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(this);
-
-            String xAPIParams = "?actor=" +
-                    URLEncoder.encode(UMTinCanUtil.makeActorFromActiveUser(this).toString()) +
-                    "&auth=" + URLEncoder.encode(LoginController.encodeBasicAuth(username, password)) +
-                    "&endpoint=" + URLEncoder.encode(LoginController.LLRS_XAPI_ENDPOINT);
-
-            urlArray = new String[hrefArray.length];
-            for(int i = 0; i < hrefArray.length; i++) {
-                urlArray[i] = UMFileUtil.resolveLink(opfPath, hrefArray[i])
-                        + xAPIParams;
-            }
+            urlArray = mContainerController.getSpineURLs(true);
+            UstadMobileSystemImpl.getInstance().queueTinCanStatement(
+                mContainerController.makeLaunchedStatement(), getContext());
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 163, null, e);
             exc = e;
         }
 
         if(urlArray != null) {
-            setContainerTitle(mOPF.title);
+            setContainerTitle(mContainerController.getActiveOPF().title);
             mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
             final int numPages = urlArray.length;
             mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(), urlArray);
@@ -263,6 +273,19 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
     }
 
+    @Override
+    public boolean refreshURLs() {
+        boolean success = false;
+        try {
+            String[] pageURLs = mContainerController.getSpineURLs(true);
+            mPagerAdapter.setPageList(pageURLs);
+            success = true;
+        }catch(Exception e) {
+            UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 197, null, e);
+        }
+
+        return success;
+    }
 
     public String getAutoplayRunJavascript() {
         return onpageSelectedJS;
@@ -315,6 +338,9 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
 
         switch(item.getItemId()) {
+            case ContainerController.CMD_RESUME_SESSION:
+                mContainerController.handleClickResumableRegistrationMenuItem();
+                return true;
             case android.R.id.home:
                 finish();
                 return true;
@@ -386,6 +412,19 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
                 this.pagesMap.put(Integer.valueOf(position), frag);
                 return frag;
+            }
+        }
+
+        public void setPageList(String[] pageList) {
+            this.pageList = pageList;
+            Iterator<Map.Entry<Integer, ContainerPageFragment>> iterator = pagesMap.entrySet().iterator();
+            ContainerPageFragment frag;
+            int index;
+            Map.Entry<Integer, ContainerPageFragment> entry;
+            while(iterator.hasNext()) {
+                entry = iterator.next();
+                frag = entry.getValue();
+                frag.setPageURL(pageList[entry.getKey()]);
             }
         }
 
