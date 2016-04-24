@@ -35,6 +35,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.LoginView;
@@ -106,7 +107,7 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         int id = evt.getCommand().getId();
         if(id == CMD_LOGIN) {
             this.controller.handleClickLogin(usernameField.getText(),
-                passwordField.getText());
+                passwordField.getText(), UstadMobileDefaults.DEFAULT_XAPI_SERVER);
         }
     }
 
@@ -125,6 +126,11 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         loginButton.setText(buttonText);
     }
 
+    /*
+    TODO: Below: to be brought up to speed with Android implementation 
+    */
+    
+    
     public void setRegisterPhoneNumberHint(String phoneNumberHint) {
     }
 
@@ -138,6 +144,38 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
     }
 
     public void setRegisterButtonText(String registerButtonText) {
+    }
+
+    public void setRegisterUsernameHint(String usernameHint) {
+        
+    }
+
+    public void setRegisterPasswordHint(String passwordHint) {
+        
+    }
+
+    public void setRegisterEmailHint(String registerEmailHint) {
+        
+    }
+
+    public void setRegisterRegcodeHint(String registerRegcodHint) {
+        
+    }
+
+    public void setServerLabel(String serverLabel) {
+        
+    }
+
+    public void setXAPIServerURL(String xAPIServerURL) {
+        
+    }
+
+    public void setAdvancedLabel(String advancedLabel) {
+        
+    }
+
+    public void setAdvancedSettingsVisible(boolean visible) {
+        
     }
 
    

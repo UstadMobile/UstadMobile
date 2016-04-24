@@ -52,6 +52,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
@@ -1237,11 +1238,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             return null;
         }
     }
-    
-    public void blah() {
-        Calendar c = Calendar.getInstance();
-        
+
+    /**
+     * TODO: Implement resumable (attempt) registrations on J2ME
+     * 
+     * @param activityId
+     * @param context
+     * @param listener 
+     */
+    public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
+        //not implemented on J2ME yet
     }
+    
+    
     
     
     /**

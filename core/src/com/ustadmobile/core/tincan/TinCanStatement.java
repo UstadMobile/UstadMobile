@@ -30,10 +30,10 @@
  */
 package com.ustadmobile.core.tincan;
 
+import java.lang.ref.WeakReference;
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-import java.lang.ref.WeakReference;
     import org.json.*;
 /* $endif$ */
 

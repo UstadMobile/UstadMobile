@@ -368,6 +368,20 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             requestHandler.stopTimer();
         }
     }
+
+    public void showPDF() {
+        //not supported on J2ME
+    }
+
+    public void showEPUB() {
+        //everything is an epub really on J2ME
+    }
+
+    public boolean refreshURLs() {
+        return true;//we don't handle registrations using URL params on J2ME
+    }
+    
+    
     
     
     /**
