@@ -60,16 +60,20 @@ import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.port.j2me.impl.zip.UMZipEntryInputStream;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import gnu.classpath.java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import org.json.me.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlSerializer;
 
 /**
  *
@@ -437,11 +441,21 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                     UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
                 InputStream src = view.containerZip.openInputStream(pathInZip);
                 
+                int entrySize = (int)((UMZipEntryInputStream)src).getZipEntry().getSize();
+                
+                //TODO here: Check if the page needs split up
+                if(di != null && di.getExpectedContentType() == DocumentInfo.TYPE_HTML) {
+                    if(entrySize > UstadMobileConstants.MICRO_ED_PAGESPLIT_THRESHOLD) {
+                        
+                    }
+                }
+                
                 //see if we know what the size is...
                 if(di != null && src instanceof UMZipEntryInputStream) {
-                    di.setContentLength(
-                        (int)((UMZipEntryInputStream)src).getZipEntry().getSize());
+                    di.setContentLength(entrySize);
                 }
+                
+                
                 
                 if(bufferEnabled) {
                     return J2MEIOUtils.readToByteArrayStream(src);
@@ -517,4 +531,5 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         
     }
     
+
 }
