@@ -65,14 +65,18 @@ import com.ustadmobile.port.j2me.impl.zip.UMZipEntryInputStream;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import gnu.classpath.java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
+import org.json.me.JSONArray;
 import org.json.me.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
@@ -127,6 +131,24 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     static Hashtable mediaExtensions;
     
     long lastPageChangeTime = -1;
+    
+    /**
+     * When a page has been split into sections - this is the index of the current section
+     */
+    private int sectionIndex;
+    
+    /**
+     * JSON Object in the form of:
+     * 
+     * {
+     *   "0" : [ [0,0], [5, 10]]
+     * }
+     * 
+     * Where:
+     *  "0" a string representation of the index of the page in the spine
+     *  The array of arrays is in the form of section boundaries - each as [line, col]
+     */
+    private Hashtable sectionBoundaries;
             
     static {
         mediaExtensions = new Hashtable();
@@ -257,7 +279,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             Display.getInstance().callSerially(new Runnable() {
                 public void run() {
                     addComponent(BorderLayout.CENTER, htmlC);
-                    showPage(0);
+                    showPage(0, 0);
                 }
             });
         }catch(Exception e) {
@@ -312,8 +334,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
      * 
      * @param pageIndex Index of page number to show
      */
-    public void showPage(int pageIndex) {
-        if(pageIndex == currentIndex) {
+    public void showPage(int pageIndex, int sectionNum) {
+        if(pageIndex == currentIndex && sectionNum == sectionIndex) {
             return;
         }
         makePageStatement();
@@ -321,17 +343,45 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         
         System.gc();
         
-        htmlC.setPage(UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]));
+        String pageURL = UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]);
+        if(sectionNum != 0) {
+            int[] startFrom = (int[])getSectionBoundaries(pageURL).elementAt(sectionNum-1);
+            pageURL += "?s-index=" + sectionNum + "&startline=" + startFrom[0] + 
+                "&startcol=" + startFrom[1];
+        }
+        
+        htmlC.setPage(pageURL);
         this.currentIndex = pageIndex;
+        this.sectionIndex = sectionNum;
         lastPageChangeTime = System.currentTimeMillis();
     }
 
     public void actionPerformed(ActionEvent ae) {
         Command cmd = ae.getCommand();
         if(cmd.equals(cmdBack)) {
-            showPage(this.currentIndex -1);
+            showPage(this.currentIndex -1, 0);
         }else if(cmd.equals(cmdForward)) {
-            showPage(this.currentIndex + 1);
+            String pageURL = UMFileUtil.resolveLink(opfURL, 
+                spineURLs[this.currentIndex]);
+            int pageIndex = this.currentIndex;
+            int sectionNum = this.sectionIndex;
+            
+            if(getSectionBoundaries(pageURL) != null) {
+                Vector pgSections = getSectionBoundaries(pageURL);
+                int[] currentBoundaries = (int[])pgSections.elementAt(sectionNum);
+                if(currentBoundaries[0] >= 0) {
+                    pageIndex = this.currentIndex;
+                    sectionNum = this.sectionIndex+1;
+                }else {
+                    pageIndex = this.currentIndex+1;
+                    sectionNum = 0;
+                }
+            }else {
+                pageIndex = this.currentIndex+1;
+                sectionNum = 0;
+            }
+            
+            showPage(pageIndex, sectionNum);
         }else if(cmd.equals(cmdBackToCatalog)) {
             DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
             UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
@@ -385,7 +435,37 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         return true;//we don't handle registrations using URL params on J2ME
     }
     
+    /**
+     * JSON Object in the form of:
+     * 
+     * {
+     *   "0" : [ [0,0], [5, 10]]
+     * }
+     * 
+     * Where:
+     *  "0" a string representation of the index of the page in the spine
+     *  The array of arrays is in the form of section boundaries - each as [line, col]
+     */
+    public Hashtable getSectionBoundaries() {
+        return sectionBoundaries;
+    }
     
+    
+    public Vector getSectionBoundaries(String pageURL) {
+        if(sectionBoundaries != null && sectionBoundaries.containsKey(pageURL)) {
+            return (Vector)sectionBoundaries.get(pageURL);
+        }else {
+            return null;
+        }
+    }
+    
+    public void setSectionBoundaries(String pageURL, Vector boundaries) {
+        if(sectionBoundaries == null) {
+            sectionBoundaries = new Hashtable();
+        }
+        
+        sectionBoundaries.put(pageURL, boundaries);
+    }
     
     
     /**
@@ -421,7 +501,6 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             int type = di.getExpectedContentType();
             return (type != DocumentInfo.TYPE_AUDIO) && 
                 (type != DocumentInfo.TYPE_VIDEO);
-            //return true;
         }
         
         public InputStream resourceRequested(DocumentInfo di) {
@@ -439,6 +518,14 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 
                 String pathInZip = requestURL.substring(
                     UstadMobileSystemImplJ2ME.OPENZIP_PROTO.length());
+                int queryPos = pathInZip.indexOf('?');
+                String urlQuery = null;
+                
+                if(queryPos != -1) {
+                    pathInZip = pathInZip.substring(0, queryPos);
+                    urlQuery = requestURL.substring(requestURL.indexOf('?')+1);
+                }
+                
                 InputStream src = view.containerZip.openInputStream(pathInZip);
                 
                 int entrySize = (int)((UMZipEntryInputStream)src).getZipEntry().getSize();
@@ -446,7 +533,58 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 //TODO here: Check if the page needs split up
                 if(di != null && di.getExpectedContentType() == DocumentInfo.TYPE_HTML) {
                     if(entrySize > UstadMobileConstants.MICRO_ED_PAGESPLIT_THRESHOLD) {
+                        String pageURL = requestURL;
+                        if(pageURL.indexOf('?') != -1) {
+                            pageURL = pageURL.substring(0, pageURL.indexOf('?'));
+                        }
                         
+                        Vector boundaries = view.getSectionBoundaries(pageURL);
+                        if(boundaries == null) {
+                            boundaries = new Vector();
+                        }
+                        
+                        //look through the URL params to see which section to use
+                        int index = 0;
+                        int line = 0;
+                        int col = 0;
+                        Hashtable params = null;
+                        
+                        if(urlQuery != null) {
+                            params = UMFileUtil.parseURLQueryString(urlQuery);
+                        }
+                        
+                        if(params != null && params.containsKey("s-index")) {
+                            index = Integer.parseInt((String)params.get("s-index"));
+                        }
+                        
+                        if(params != null && params.containsKey("startline")) {
+                            line = Integer.parseInt((String)params.get("startline"));
+                            col = Integer.parseInt((String)params.get("startcol"));
+                        }
+                        
+                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                        try {
+                            int[] endingPos = ContainerViewPageSplitter.dividePage(src, bout, 
+                                UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, 
+                                line, col);
+                            
+                            if(index == boundaries.size()) {
+                                //we need to add this to the vector
+                                boundaries.addElement(endingPos);
+                                view.setSectionBoundaries(requestURL, boundaries);
+                            }
+                            
+                            byte[] bytes = bout.toByteArray();
+                            String pageStr = new String(bytes, "UTF-8");
+                            
+                            src = new ByteArrayInputStream(bout.toByteArray());
+                            di.setContentLength(bytes.length);
+                        }catch(Exception xe) {
+                            UstadMobileSystemImpl.l(UMLog.ERROR, 198, null, xe);
+                            throw new IOException(xe.toString());
+                        }finally {
+                            bout = null;
+                        }
                     }
                 }
                 
@@ -456,15 +594,16 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 }
                 
                 
-                
-                if(bufferEnabled) {
+                if(src instanceof ByteArrayInputStream) {
+                    return src;
+                }else if(bufferEnabled) {
                     return J2MEIOUtils.readToByteArrayStream(src);
                 }else {
                     return new BufferedInputStream(src, 20*1024);
-                    //return src;
                 }
                 
-            }catch(IOException e) {
+            }catch(Exception e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 199, null, e);
                 return new ByteArrayInputStream("ERROR".getBytes());
             }
         }

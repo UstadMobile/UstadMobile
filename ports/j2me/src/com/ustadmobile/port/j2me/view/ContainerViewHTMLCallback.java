@@ -172,7 +172,13 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     public boolean linkClicked(HTMLComponent htmlC, String url) {
         parsingError(600, "a", "src", url, "link click");
-        UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog("Click2", "u\n clicked");
+        if(url.startsWith(UstadMobileSystemImplJ2ME.OPENZIP_PROTO)) {
+            return true;
+        }else {
+            UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog(
+                "Link not supported", url);
+        }
+        
         return false;
     }
 

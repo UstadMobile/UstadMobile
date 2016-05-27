@@ -1002,8 +1002,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             try {
                 in = openZip.openInputStream(url.substring(
                     OPENZIP_PROTO.length()));
-                bout = new ByteArrayOutputStream();
-                UMIOUtils.readFully(in, bout, 1024);
+                if(in != null) {
+                    bout = new ByteArrayOutputStream();
+                    UMIOUtils.readFully(in, bout, 1024);
+                }else {
+                    ioe = new IOException("Zip entry not found: " + url);
+                }
             }catch(IOException e) {
                 getLogger().l(UMLog.INFO, 320, url, e);
                 ioe = e;

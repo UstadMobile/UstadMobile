@@ -300,6 +300,21 @@ public class UMUtil {
         return arr;
     }
     
+    /**
+     * Copy references from one hashtable to another hashtable
+     * 
+     * @param src Source hashtable to copy from
+     * @param dst Destination hashtable to copy into
+     */
+    public static void copyHashtable(Hashtable src, Hashtable dst) {
+        Enumeration keys = src.keys();
+        Object key;
+        while(keys.hasMoreElements()) {
+            key = keys.nextElement();
+            dst.put(key, src.get(key));
+        }
+    }
+    
     public static interface Comparer {
         
         /**
@@ -312,6 +327,7 @@ public class UMUtil {
         public int compare(Object o1, Object o2);
         
     }
+    
     
     
     

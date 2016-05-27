@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.util;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -329,7 +330,60 @@ public class UMFileUtil {
         }
         
         return params;
-   }
+    }
+    
+    /**
+     * 
+     * @param urlQuery
+     * @return 
+     */
+    public static Hashtable parseURLQueryString(String urlQuery) {
+        int queryPos = urlQuery.indexOf('?');
+        if(queryPos != -1) {
+            urlQuery = urlQuery.substring(queryPos+1);
+        }
+        
+        Hashtable parsedParams = parseParams(urlQuery, '&');
+        Hashtable decodedParams = new Hashtable();
+        Enumeration e = parsedParams.keys();
+        String key;
+        while(e.hasMoreElements()) {
+            key = (String)e.nextElement();
+            decodedParams.put(URLTextUtil.urlDecodeUTF8(key), 
+                URLTextUtil.urlDecodeUTF8((String)parsedParams.get(key)));
+        }
+        
+        return decodedParams;
+    }
+    
+    /**
+     * Turns a hashtable into a URL encoded query string
+     * 
+     * @param ht Hashtable of param keys to values (keys and values must be strings)
+     * 
+     * @return String in the form of foo=bar&foo2=bar2 ... (URL Encoded)
+     */
+    public static String hashtableToQueryString(Hashtable ht) {
+        StringBuffer sb = new StringBuffer();
+        
+        Enumeration keys = ht.keys();
+        String key;
+        boolean firstEl = true;
+        while(keys.hasMoreElements()) {
+            if(!firstEl) {
+                sb.append('&');
+            }else {
+                firstEl = false;
+            }
+            
+            key = (String)keys.nextElement();
+            sb.append(URLTextUtil.urlEncodeUTF8(key)).append('=');
+            sb.append(URLTextUtil.urlEncodeUTF8((String)ht.get(key)));
+        }
+        
+        return sb.toString();
+    }
+    
     
     /**
      * Parse type with params header fields (Content-Disposition; Content-Type etc)

@@ -92,7 +92,7 @@ public class UstadMobileConstants {
      * 
      * Applies to micro edition only.
      */
-    public static final int MICRO_ED_PAGESPLIT_THRESHOLD = 50000;
+    public static final int MICRO_ED_PAGESPLIT_THRESHOLD = 10000;
     
     /**
      * The size of chunks into which page will be split (number of bytes of actual
@@ -100,7 +100,7 @@ public class UstadMobileConstants {
      * 
      * Applies to micro edition only.
      */
-    public static final int MICRO_ED_PAGESPLIT_TEXTLEN = 25000;
+    public static final int MICRO_ED_PAGESPLIT_TEXTLEN = 1500;
     
     public static final String[][] OPDS_FEEDS_PRESETS = new String[][]{
         {"", "Select a feed"},

@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.port.j2me.view;
 
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -50,6 +52,12 @@ import org.xmlpull.v1.XmlSerializer;
  */
 public class ContainerViewPageSplitter {
     
+    /**
+     * The parameter name in the URL that indicates the current index
+     */
+    public static final String SPLIT_INDEX_ARG = "s-index";
+    
+    public static final int POS_FINAL_SECTION = -100;
     
     public static void passThrough(XmlPullParser xpp, XmlSerializer xs) throws IOException, XmlPullParserException{
         int evtType = xpp.getEventType();
@@ -70,6 +78,23 @@ public class ContainerViewPageSplitter {
         }
     }
     
+    public static String makeSplitLink(String baseURL, Hashtable urlParams, int sectionIndex, int dir, int endLineNum, int endColNum) {
+        Hashtable newParams = new Hashtable(dir == 1 ? 
+            urlParams.size() + 1 : urlParams.size());
+        
+        UMUtil.copyHashtable(urlParams, newParams);
+        String pageIndexKey = "page-" + sectionIndex;
+        if(dir == 1) {
+            //next page section link
+            newParams.put(pageIndexKey, "" + endLineNum + '-' + endColNum);
+        }else {
+            //previous page section link
+            newParams.remove(pageIndexKey);
+        }
+        
+        return baseURL + '?' + UMFileUtil.hashtableToQueryString(newParams);
+    }
+    
     public static int[] dividePage(InputStream in, OutputStream out, int textLenLimit, int startlineNum, int startColNum) throws IOException, XmlPullParserException{
         KXmlParser xpp = new KXmlParser();
         XmlSerializer xs = new KXmlSerializer();
@@ -83,8 +108,6 @@ public class ContainerViewPageSplitter {
         int lineNum;
         int colNum;
         int lenCount = 0;
-        int[] endPos = null;
-        StringBuffer sectionBuffer = new StringBuffer();
         
         do {
             lineNum = xpp.getLineNumber();
@@ -103,18 +126,10 @@ public class ContainerViewPageSplitter {
                     }
                 }
                 
-                if(!inRange) {
-                    openTags.addElement(new StartTag(xpp));
-                }
+                //TODO: If in range we don't need to keep the attributes 
+                openTags.addElement(new StartTag(xpp));                
             }else if(evtType == XmlPullParser.END_TAG) {
-                if(!inRange) {
-                    openTags.removeElementAt(openTags.size()-1);
-                }
-                
                 if(inRange && lenCount >= textLenLimit) {
-                    passThrough(xpp, xs);
-                    inRange = false;
-                    
                     StartTag tag;
                     for(int i = openTags.size()-1; i >= 0; i--) {
                         //close tags that need closed
@@ -123,9 +138,10 @@ public class ContainerViewPageSplitter {
                     }
                     
                     xs.endDocument();
-                    endPos = new int[] {lineNum, colNum};
-                    return endPos;
+                    return new int[] {lineNum, colNum};
                 }
+                
+                openTags.removeElementAt(openTags.size()-1);
             }
             
             if(inRange && evtType == XmlPullParser.TEXT) {
@@ -139,8 +155,7 @@ public class ContainerViewPageSplitter {
             evtType = xpp.next();
         }while(evtType != XmlPullParser.END_DOCUMENT);
         
-        
-        return endPos;
+        return new int[]{POS_FINAL_SECTION, POS_FINAL_SECTION};
     }
     
     
