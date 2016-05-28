@@ -37,7 +37,6 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler.IOCallback;
 import com.sun.lwuit.html.DocumentInfo;
-import com.sun.lwuit.html.DocumentRequestHandler;
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.layouts.BorderLayout;
@@ -51,7 +50,6 @@ import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
@@ -68,18 +66,20 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
-import org.json.me.JSONArray;
 import org.json.me.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
+ * 
+ * Implementation of the Container (content e.g. epub) view for J2ME.  This is
+ * based on the LWUIT HTMLComponent.  A custom document request handler is used
+ * to answer requests and load them directly from the epub zip file.  
+ * 
+ * As J2ME is resource constrained pages can be divided up into sections using
+ * ContainerViewPageSplitter.  
  *
  * @author mike
  */
@@ -138,15 +138,9 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     private int sectionIndex;
     
     /**
-     * JSON Object in the form of:
-     * 
-     * {
-     *   "0" : [ [0,0], [5, 10]]
-     * }
-     * 
-     * Where:
-     *  "0" a string representation of the index of the page in the spine
-     *  The array of arrays is in the form of section boundaries - each as [line, col]
+     * Hashtable in the form of pageURL to a Vector if that page is broken up 
+     * into sections.  The vectors contain int[] arrays with two items - where 
+     * parsing ended for that section as line number, column number
      */
     private Hashtable sectionBoundaries;
             
@@ -333,6 +327,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
      * Show the page as per the index in the spineURLs
      * 
      * @param pageIndex Index of page number to show
+     * @param sectionNum index of the section chunk to show
      */
     public void showPage(int pageIndex, int sectionNum) {
         if(pageIndex == currentIndex && sectionNum == sectionIndex) {
@@ -340,9 +335,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }
         makePageStatement();
         DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
-        
-        System.gc();
-        
+                
         String pageURL = UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]);
         if(sectionNum != 0) {
             int[] startFrom = (int[])getSectionBoundaries(pageURL).elementAt(sectionNum-1);
@@ -358,31 +351,55 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
 
     public void actionPerformed(ActionEvent ae) {
         Command cmd = ae.getCommand();
-        if(cmd.equals(cmdBack)) {
-            showPage(this.currentIndex -1, 0);
-        }else if(cmd.equals(cmdForward)) {
+        
+        if(cmd.equals(cmdBack) || cmd.equals(cmdForward)) {
+            int dir = cmd.equals(cmdBack) ? -1 : 1;
+            
             String pageURL = UMFileUtil.resolveLink(opfURL, 
                 spineURLs[this.currentIndex]);
-            int pageIndex = this.currentIndex;
-            int sectionNum = this.sectionIndex;
+            int pageIndex = -1;
+            int sectionNum = -1;
             
+            /*
+             * Check and see if there are page sections on this page for
+             * back/next as requested
+             */
             if(getSectionBoundaries(pageURL) != null) {
                 Vector pgSections = getSectionBoundaries(pageURL);
-                int[] currentBoundaries = (int[])pgSections.elementAt(sectionNum);
-                if(currentBoundaries[0] >= 0) {
+                int[] currentBoundaries = (int[])pgSections.elementAt(this.sectionIndex);
+
+                if(dir == 1 && currentBoundaries[0] >= 0 || dir == -1 && sectionIndex > 0) {
                     pageIndex = this.currentIndex;
-                    sectionNum = this.sectionIndex+1;
-                }else {
-                    pageIndex = this.currentIndex+1;
-                    sectionNum = 0;
+                    sectionNum = this.sectionIndex+dir;
                 }
-            }else {
-                pageIndex = this.currentIndex+1;
-                sectionNum = 0;
             }
             
-            showPage(pageIndex, sectionNum);
-        }else if(cmd.equals(cmdBackToCatalog)) {
+            /*
+             * If there is not an appropriate section within the current page 
+             * to go to
+             */
+            if(pageIndex == -1){
+                pageIndex = this.currentIndex+dir;
+                //see if that page is also broken into sections
+                if(pageIndex >= 0 && pageIndex < spineURLs.length) {
+                    pageURL = UMFileUtil.resolveLink(opfURL, 
+                        spineURLs[pageIndex]);
+                    
+                    if(dir == 1 || getSectionBoundaries(pageURL) == null) {
+                        sectionNum = 0;
+                    }else {
+                        sectionNum = getSectionBoundaries(pageURL).size()-1;
+                    }
+                }
+            }
+
+            if(pageIndex >= 0 && pageIndex < spineURLs.length) {
+                showPage(pageIndex, sectionNum);
+            }
+            
+        }
+        
+        if(cmd.equals(cmdBackToCatalog)) {
             DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
             UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
         }
