@@ -184,6 +184,7 @@ public class UstadJSOPF {
                         item2.href = filename;
                         item2.mimeType = itemMime;
                         item2.properties = properties;
+                        item2.id = id;
 
 
                         allItems.put(id, item2);

@@ -8,6 +8,7 @@ package com.ustadmobile.port.j2me.view.exequizsupport;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
 import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
+import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
 import java.util.Vector;
 
 /**
@@ -27,6 +28,8 @@ public class EXEQuizIdevice {
     Object context;
     
     String pageTinCanID;
+        
+    private String registrationUUID;
     
     /**
      * Represents an idevice made in eXeLearning that can have multiple questions
@@ -57,12 +60,42 @@ public class EXEQuizIdevice {
     }
     
     /**
+     * Set the registration UUID to use in Experience API statements when
+     * a question is answered
+     * 
+     * @param registrationUUID Registration UUID to use
+     */
+    public void setRegistrationUUID(String registrationUUID) {
+        this.registrationUUID = registrationUUID;
+    }
+    
+    /**
+     * Gets the registration UUID to use for Experience API statements
+     * when a question is answered
+     * 
+     * @return UUID as above
+     */
+    public String getRegistrationUUID() {
+        return registrationUUID;
+    }
+    
+    
+    /**
+     * Gets the full TinCan ID of this idevice
+     */
+    public String getTinCanId() {
+        return pageTinCanID + '/' + id;
+    }
+    
+    /**
      * Setup this idevice given the element that is the idevice container itself
      * 
      * @param ideviceEl 
      */
     public void setupFromElement(HTMLElement ideviceEl) {
-        id = ideviceEl.getAttributeById(HTMLElement.ATTR_ID);
+        //All idevices must have an id attribute in the form of id='idXX' where XX 
+        //is the actual idevice ID as eXe has been generating it
+        id = ideviceEl.getAttributeById(HTMLElement.ATTR_ID).substring(2);
         questions = new Vector();
         
         //eXeLearning makes id="id20" etc. - chop the id prefix off

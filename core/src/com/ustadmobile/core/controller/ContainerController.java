@@ -367,6 +367,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
     
     
+    
     public UstadJSOPF getOPF(int index) throws IOException, XmlPullParserException{
         UstadJSOPF opf = null;
         UstadOCF ocf = getOCF();
@@ -453,12 +454,31 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
     
     /**
-     * Get a JSON Object representing the TinCan context of the container
-     * Really this is just here to put in the registration
+     * Retrieves the TinCan ID that's being used as the base ID of this container
      * 
-     * @return 
+     * If tincan.xml is used this means the activity which contains a launch
+     * element.  Otherwise we'll use epub:opfId for an EPUB file
+     * 
+     * Child activities should be in the form of baseId/PageId/ideviceId
+     * 
+     * @return The base tincan ID for this container as above
      */
-    public JSONObject getTinCanContext() {
+    public String getBaseTinCanId() {
+        if(this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null) {
+            return this.tinCanXMLSummary.getLaunchActivity().getId();
+        }else {
+            return "epub:" + activeOPF.id;
+        }
+    }
+    
+    /**
+     * Make a JSON Object for the TinCan context object with the for the given
+     * registration 
+     * 
+     * @param registrationUUID Registration UUID for the context as per xAPI spec
+     * @return JSON Object with the registration property set
+     */
+    public static JSONObject makeTinCanContext(String registrationUUID) {
         JSONObject context = null;
         try {
             context = new JSONObject();
@@ -468,6 +488,16 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         }
         
         return context;
+    }
+    
+    /**
+     * Get a JSON Object representing the TinCan context of the container
+     * Really this is just here to put in the registration
+     * 
+     * @return 
+     */
+    public JSONObject getTinCanContext() {
+        return makeTinCanContext(this.registrationUUID);
     }
     
     /**

@@ -126,7 +126,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     public static final int CMDBACK_TO_CATALOG_ID = 3;
     
-    private HTMLCallback htmlCallback;
+    private ContainerViewHTMLCallback htmlCallback;
     
     static Hashtable mediaExtensions;
     
@@ -177,7 +177,9 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
 
     public void controllerReady(UstadController controller, int flags) {
         if(controller != null) {
-            setController((ContainerController)controller);
+            ContainerController cController = (ContainerController)controller;
+            setController(cController);
+            htmlCallback.setRegistrationUUID(cController.getRegistrationUUID());
             initByContentType();
         }else {
             UstadMobileSystemImpl.l(UMLog.ERROR, 175, containerURI);
@@ -282,19 +284,35 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     }
     
     /**
-     * Return the TinCan ID of the current page
+     * Return the full tincan id of the current page
      * 
      * @return 
      */
     public String getCurrentTinCanPageID() {
-        return UMFileUtil.joinPaths(new String[]{
-            UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id, 
-            spineURLs[currentIndex]});
+        return UMFileUtil.joinPaths(new String[]{getContainerTinCanID(), 
+            getCurrentTinCanPageID()});
     }
     
     public String getContainerTinCanID() {
-        return UMFileUtil.joinPaths(new String[]{
-            UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id});
+        return controller.getBaseTinCanId();
+    }
+    
+    public String getCurrentPageOPFId() {
+        UstadJSOPF opf = controller.getActiveOPF();
+        return opf.spine[currentIndex].id;
+    }
+    
+    public JSONObject getTinCanContext() {
+        return controller.getTinCanContext();
+    }
+    
+    /**
+     * The main HTML Component showing the content
+     * 
+     * @return LWUIT HTML Component used to show content
+     */
+    public HTMLComponent getHtmlComponent() {
+        return this.htmlC;
     }
     
     /**

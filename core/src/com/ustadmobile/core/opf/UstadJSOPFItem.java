@@ -39,6 +39,7 @@ public class UstadJSOPFItem {
     public String mimeType;
     public String properties;
     public boolean linear;
+    public String id;
     
     public UstadJSOPFItem(){
         this.linear = true;

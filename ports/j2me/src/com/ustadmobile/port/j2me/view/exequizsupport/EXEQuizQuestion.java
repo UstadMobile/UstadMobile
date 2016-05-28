@@ -108,6 +108,7 @@ public class EXEQuizQuestion {
     
     public JSONObject getTinCanObject() {
         JSONObject obj = new JSONObject();
+        
         String id = UMFileUtil.joinPaths(new String[] {
             iDevice.pageTinCanID, iDevice.getID(), getID()});
         try {

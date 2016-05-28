@@ -71,6 +71,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     String containerTinCanID;
     
     Object context;
+    
+    private String registrationUUID;
         
     static {
         mediaExtensions = new Hashtable();
@@ -87,12 +89,30 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         this.containerTinCanID = containerTinCanID;
         this.context = context;
     }
-
+    
     public ContainerViewHTMLCallback(ContainerViewJ2ME view) {
         this.view = view;
         this.context = view.getContext();
     }
 
+    /**
+     * Get the registration UUID to be used for Experience API statements
+     * 
+     * @return the registration UUID to be used for Experience API statements
+     */
+    public String getRegistrationUUID() {
+        return registrationUUID;
+    }
+
+    /**
+     * Set the registration UUID to be used for Experience API statements
+     * 
+     * @param registrationUUID the registration UUID to be used for Experience API statements
+     */
+    public void setRegistrationUUID(String registrationUUID) {
+        this.registrationUUID = registrationUUID;
+    }
+    
     /**
      * Find eXeLearning generated MCQ questions and set them up so we can
      * dynamically show / hide the feedback for those answers
@@ -114,11 +134,12 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         
         mcqQuizzes = new Hashtable();
         String pageTinCanID = containerTinCanID + '/' + 
-                UMFileUtil.getFilename(htmlC.getPageURL());
+                view.getCurrentPageOPFId();
         for(int i = 0; i < quizElements.size(); i++) {
             EXEQuizIdevice quizDevice = new EXEQuizIdevice(
                     (HTMLElement)quizElements.elementAt(i), htmlC, context, 
                     pageTinCanID, i);
+            quizDevice.setRegistrationUUID(registrationUUID);
             mcqQuizzes.put(quizDevice.getID(), quizDevice);
         }
         

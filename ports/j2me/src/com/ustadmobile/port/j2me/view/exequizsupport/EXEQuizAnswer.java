@@ -33,11 +33,11 @@ package com.ustadmobile.port.j2me.view.exequizsupport;
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
+import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
-import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import java.util.Vector;
 import javax.microedition.media.Player;
@@ -214,7 +214,14 @@ public class EXEQuizAnswer implements PlayerListener{
             resultObj.put("response", getID());
             stmt.put("result", resultObj);
             
-            JSONObject context = new JSONObject();
+            JSONObject context;
+            String registrationUUID = question.iDevice.getRegistrationUUID();
+            if(registrationUUID != null) {
+                context = ContainerController.makeTinCanContext(registrationUUID);
+            }else {
+                context = new JSONObject();
+            }
+            
             JSONObject contextActivities = new JSONObject();
             JSONArray parentArr = new JSONArray();
             JSONObject parentObj = new JSONObject();
@@ -223,8 +230,8 @@ public class EXEQuizAnswer implements PlayerListener{
             parentArr.put(parentObj);
             contextActivities.put("parent", parentArr);
             context.put("contextActivities", contextActivities);
+            
             stmt.put("context", context);
-            stmtStr = stmt.toString();
         }catch(JSONException je) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 195, "exequizanswer.maketincanstmt");
         }
