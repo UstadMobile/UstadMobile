@@ -95,6 +95,26 @@ public class ContainerViewPageSplitter {
         return baseURL + '?' + UMFileUtil.hashtableToQueryString(newParams);
     }
     
+    /**
+     * If this method returns true it indicates that the current elemeent
+     * should not be split into multiple sections.
+     * 
+     * This will return true for Multichoice idevices to avoid them be split up
+     * 
+     * @param xpp XmlPullParser which is processing the START_TAG event
+     * 
+     * @return true if this element is an element not to split across sections, false otherwise (default)
+     */
+    private static boolean isNoSplitElement(XmlPullParser xpp) {
+        String classVal = xpp.getAttributeValue(xpp.getNamespace(), "class");
+        if(classVal != null && classVal.indexOf("MultichoiceIdevice") != -1) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+    
+    
     public static int[] dividePage(InputStream in, OutputStream out, int textLenLimit, int startlineNum, int startColNum) throws IOException, XmlPullParserException{
         KXmlParser xpp = new KXmlParser();
         XmlSerializer xs = new KXmlSerializer();
@@ -108,6 +128,10 @@ public class ContainerViewPageSplitter {
         int lineNum;
         int colNum;
         int lenCount = 0;
+        
+        String dontSplitAttr;
+        String dontSplitTag = null;
+        int dontSplitDepth = -1;
         
         do {
             lineNum = xpp.getLineNumber();
@@ -126,10 +150,20 @@ public class ContainerViewPageSplitter {
                     }
                 }
                 
+                if(inRange && dontSplitTag == null && isNoSplitElement(xpp)) {
+                    dontSplitTag = xpp.getName();
+                    dontSplitDepth = xpp.getDepth();
+                }
+                
                 //TODO: If in range we don't need to keep the attributes 
                 openTags.addElement(new StartTag(xpp));                
             }else if(evtType == XmlPullParser.END_TAG) {
-                if(inRange && lenCount >= textLenLimit) {
+                if(dontSplitTag != null && xpp.getDepth() == dontSplitDepth && xpp.getName().equals(dontSplitTag)) {
+                    //that's the end of the don't split section
+                    dontSplitTag = null;
+                }
+                
+                if(inRange && lenCount >= textLenLimit && dontSplitTag == null) {
                     StartTag tag;
                     for(int i = openTags.size()-1; i >= 0; i--) {
                         //close tags that need closed
