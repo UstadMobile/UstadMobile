@@ -143,6 +143,12 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
      * parsing ended for that section as line number, column number
      */
     private Hashtable sectionBoundaries;
+    
+    /**
+     * The state document for this container for this registration - e.g. as
+     * per the Experience API state API
+     */
+    private JSONObject state;
             
     static {
         mediaExtensions = new Hashtable();
@@ -173,6 +179,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         //make the mediaplayer do vocal logging
         MIDPMediaPlayer player = (MIDPMediaPlayer)DefaultLWUITMediaPlayerManager.getInstance().getPlayer();
         player.setCallback(htmlCallback);
+        state = new JSONObject();
     }
 
     public void controllerReady(UstadController controller, int flags) {
@@ -180,6 +187,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             ContainerController cController = (ContainerController)controller;
             setController(cController);
             htmlCallback.setRegistrationUUID(cController.getRegistrationUUID());
+            htmlCallback.setState(state);
             initByContentType();
         }else {
             UstadMobileSystemImpl.l(UMLog.ERROR, 175, containerURI);
@@ -305,6 +313,21 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     public JSONObject getTinCanContext() {
         return controller.getTinCanContext();
     }
+    
+    /**
+     * The state document for this container for this registration - e.g. as
+     * per the Experience API state API
+     * 
+     * This doesn't yet send itself to the xAPI master server but it could
+     * do one day
+     * 
+     * @return JSONObject representing the state of the current registration
+     */
+    public JSONObject getState() {
+        return state;
+    }
+    
+    
     
     /**
      * The main HTML Component showing the content

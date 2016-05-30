@@ -210,9 +210,59 @@ public class EXEQuizQuestion {
         return null;
     }
     
+    /**
+     * Find the answer by the ID of the answer itself
+     * 
+     * @param id ID of the answer to find
+     * @return The EXEQuizAnswer object if found, null otherwise
+     */
+    public EXEQuizAnswer getAnswerById(String id) {
+        EXEQuizAnswer curAnswer;
+        for(int i = 0; i < answers.size(); i++) {
+            curAnswer = (EXEQuizAnswer)answers.elementAt(i);
+            if(curAnswer.getID().equals(id)) {
+                return curAnswer;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Handles when the user has selected an answer (e.g. the selected the 
+     * radio button)
+     * 
+     * @param inputElement Input Element that was acted upon
+     * @return true if changes have been made to the DOM, false otherwise
+     */
     public boolean handleSelectAnswer(HTMLElement inputElement) {
         EXEQuizAnswer selectedAnswer = getAnswerByInputElement(inputElement);
-        return showMCQFeedback(selectedAnswer);
+        if(iDevice.getState() != null) {
+            selectedAnswer.setStateSelectedAnswer(iDevice.getState());
+        }
+        
+        boolean domChanged = showMCQFeedback(selectedAnswer);
+        UstadMobileSystemImpl.getInstance().queueTinCanStatement(
+            selectedAnswer.makeTinCanStmt(), iDevice.context);
+        return domChanged;
+    }
+    
+    /**
+     * Set the state of this question - this should be a JSON object in the form
+     * of : {'response': 'answerid', 'score' : xx.yy} - the same as the JSON
+     * which is stored in localStorage in the HTML5 version.
+     * 
+     * @param state State object for this question as described above.
+     */
+    public void setState(JSONObject state) throws JSONException {
+        String answerId = state.optString("response", null);
+        if(answerId != null) {
+            EXEQuizAnswer answer = getAnswerById(answerId);
+            if(answer != null) {
+                answer.getInputElement().setAttribute("checked", "checked");
+                showMCQFeedback(answer, false);
+            }
+        }
     }
     
     /**
@@ -220,8 +270,9 @@ public class EXEQuizQuestion {
      * all others
      * 
      * @param selectedAnswer 
+     * @param scrollToFeedback If true scroll to the feedback element
      */
-    public boolean showMCQFeedback(EXEQuizAnswer selectedAnswer) {
+    public boolean showMCQFeedback(EXEQuizAnswer selectedAnswer, boolean scrollToFeedback) {
         if(currentSelectedAnswer == selectedAnswer) {
             //do nothing
             return false;
@@ -241,6 +292,10 @@ public class EXEQuizQuestion {
         
         htmlC.scrollToElement(feedbackEl, true);
         return true;
+    }
+    
+    public boolean showMCQFeedback(EXEQuizAnswer selectedAnswer) {
+        return showMCQFeedback(selectedAnswer, true);
     }
     
     /**

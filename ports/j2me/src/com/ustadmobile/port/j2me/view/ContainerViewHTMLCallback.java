@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import org.json.me.JSONObject;
 
 /**
  *
@@ -73,6 +74,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     Object context;
     
     private String registrationUUID;
+    
+    private JSONObject state;
         
     static {
         mediaExtensions = new Hashtable();
@@ -113,6 +116,14 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         this.registrationUUID = registrationUUID;
     }
     
+    public void setState(JSONObject state) {
+        this.state = state;
+    }
+    
+    public JSONObject getState() {
+        return state;
+    }
+    
     /**
      * Find eXeLearning generated MCQ questions and set them up so we can
      * dynamically show / hide the feedback for those answers
@@ -140,6 +151,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
                     (HTMLElement)quizElements.elementAt(i), htmlC, context, 
                     pageTinCanID, i);
             quizDevice.setRegistrationUUID(registrationUUID);
+            quizDevice.setState(state);
             mcqQuizzes.put(quizDevice.getID(), quizDevice);
         }
         

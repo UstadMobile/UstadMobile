@@ -168,8 +168,6 @@ public class EXEQuizAnswer implements PlayerListener{
      */
     public void showFeedback() {
         if(!feedbackShowing && feedbackElement != null) {
-            UstadMobileSystemImpl.getInstance().queueTinCanStatement(makeTinCanStmt(),
-                question.iDevice.context);
             feedbackElementParent.addChild(feedbackElement);
             feedbackShowing = true;
             
@@ -196,6 +194,52 @@ public class EXEQuizAnswer implements PlayerListener{
     }
     
     /**
+     * Marks the given state object for this question id that this answer is the
+     * selected answer
+     * 
+     * @param state 
+     */
+    public void setStateSelectedAnswer(JSONObject state) {
+        if(state != null) {
+            try {
+                JSONObject stateObj = new JSONObject();
+                stateObj.put("response", getID());
+                float score = getScore();
+                if(score != Float.NaN) {
+                    stateObj.put("score", score);
+                }
+                
+                state.put("id" + question.getID(), stateObj);
+            }catch(JSONException e) {
+                
+            }
+        }
+    }
+    
+    /**
+     * Get the score associated with this answer as a float - reflects the value
+     * put in place by exe as data-score.  
+     * 
+     * If data-score is not present on the attribute or an exception is thrown
+     * whilst parsing that value this method will return Float.NaN
+     * 
+     * @return Score as a float if data-score is present and valid, Float.NaN otherwise
+     */
+    public float getScore() {
+        try {
+            String scoreStr = answerContentElement.getAttribute("data-score");
+            if(scoreStr != null) {
+                return Float.parseFloat(scoreStr);
+            }
+        }catch(NumberFormatException n) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 184, null, n);
+        }
+        
+        return Float.NaN;
+    }
+    
+    
+    /**
      * Make a statement for the selection of the given answer
      * 
      * TODO: Move section generating the tincan definition to the question
@@ -203,7 +247,6 @@ public class EXEQuizAnswer implements PlayerListener{
      */
     public JSONObject makeTinCanStmt() {
         JSONObject stmt = new JSONObject();
-        String stmtStr =  null;
         try {
             stmt.put("object", question.getTinCanObject());
             stmt.put("actor", UMTinCanUtil.makeActorFromActiveUser(
@@ -212,6 +255,16 @@ public class EXEQuizAnswer implements PlayerListener{
                 "http://adlnet.gov/expapi/verbs/answered", "en-US", "answered"));
             JSONObject resultObj = new JSONObject();
             resultObj.put("response", getID());
+            
+            float answerScore = getScore();
+            if(answerScore != Float.NaN) {
+                try {
+                    JSONObject scoreObj = new JSONObject();
+                    scoreObj.put("raw", answerScore);
+                    resultObj.put("score", scoreObj);
+                }catch(Exception e) {}
+            }
+            
             stmt.put("result", resultObj);
             
             JSONObject context;

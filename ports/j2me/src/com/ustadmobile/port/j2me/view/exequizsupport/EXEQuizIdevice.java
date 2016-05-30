@@ -7,9 +7,13 @@ package com.ustadmobile.port.j2me.view.exequizsupport;
 
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import com.ustadmobile.port.j2me.view.ContainerViewJ2ME;
 import java.util.Vector;
+import org.json.me.JSONException;
+import org.json.me.JSONObject;
 
 /**
  * Represents a Quiz Idevice element created using eXeLearning
@@ -30,6 +34,8 @@ public class EXEQuizIdevice {
     String pageTinCanID;
         
     private String registrationUUID;
+    
+    private JSONObject state;
     
     /**
      * Represents an idevice made in eXeLearning that can have multiple questions
@@ -78,6 +84,36 @@ public class EXEQuizIdevice {
     public String getRegistrationUUID() {
         return registrationUUID;
     }
+
+    public JSONObject getState() {
+        return state;
+    }
+
+    /**
+     * Takes in the state saved by the Container so that we can restore the 
+     * user's previously given responses.
+     * 
+     * @param state 
+     */
+    public void setState(JSONObject state) {
+        this.state = state;
+        EXEQuizQuestion question;
+        String questionId;
+        for(int i = 0; i < questions.size(); i++) {
+            question = (EXEQuizQuestion)questions.elementAt(i);
+            questionId = question.getID();
+            if(state.has("id"+questionId)) {
+                try {
+                    question.setState(state.getJSONObject("id"+questionId));
+                }catch(JSONException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 188, null, e);
+                }
+            }
+        }
+        
+    }
+    
+    
     
     
     /**
