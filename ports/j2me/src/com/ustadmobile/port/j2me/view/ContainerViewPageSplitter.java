@@ -78,23 +78,6 @@ public class ContainerViewPageSplitter {
         }
     }
     
-    public static String makeSplitLink(String baseURL, Hashtable urlParams, int sectionIndex, int dir, int endLineNum, int endColNum) {
-        Hashtable newParams = new Hashtable(dir == 1 ? 
-            urlParams.size() + 1 : urlParams.size());
-        
-        UMUtil.copyHashtable(urlParams, newParams);
-        String pageIndexKey = "page-" + sectionIndex;
-        if(dir == 1) {
-            //next page section link
-            newParams.put(pageIndexKey, "" + endLineNum + '-' + endColNum);
-        }else {
-            //previous page section link
-            newParams.remove(pageIndexKey);
-        }
-        
-        return baseURL + '?' + UMFileUtil.hashtableToQueryString(newParams);
-    }
-    
     /**
      * If this method returns true it indicates that the current elemeent
      * should not be split into multiple sections.
@@ -228,34 +211,6 @@ public class ContainerViewPageSplitter {
 
         public void serializeEnd(XmlSerializer xs) throws IOException {
             xs.endTag(namespace, tagName);
-        }
-
-        /**
-         * Returns the opening of the tag (only)
-         * @return 
-         */
-        public String getOpening() {
-            StringBuffer retVal = new StringBuffer();
-            retVal.append('<').append(tagName);
-
-            if(attrs != null) {
-                Enumeration e = attrs.keys();
-                String attrName;
-                while(e.hasMoreElements()) {
-                    attrName = (String)e.nextElement();
-                    retVal.append(' ');
-                    retVal.append(attrName).append('=').append('\"');
-                    retVal.append((String)attrs.get(attrName));
-                    retVal.append('\"');
-                }
-            }
-
-            retVal.append('>');
-            return retVal.toString();
-        }
-
-        public String getClosing() {
-            return "</" + tagName +">";
         }
 
     }

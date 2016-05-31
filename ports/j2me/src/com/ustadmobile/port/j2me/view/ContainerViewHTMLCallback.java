@@ -146,16 +146,27 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         mcqQuizzes = new Hashtable();
         String pageTinCanID = containerTinCanID + '/' + 
                 view.getCurrentPageOPFId();
+        
+        HTMLElement quizEl;
+        int numQuizzes = 0;
         for(int i = 0; i < quizElements.size(); i++) {
+            quizEl = (HTMLElement)quizElements.elementAt(i);
+            
+            //There can be faulty empty idevices generated somehow... skip if this is what we found
+            if(quizEl.getNumChildren() == 0) {
+                continue;
+            }
+            
             EXEQuizIdevice quizDevice = new EXEQuizIdevice(
                     (HTMLElement)quizElements.elementAt(i), htmlC, context, 
                     pageTinCanID, i);
             quizDevice.setRegistrationUUID(registrationUUID);
             quizDevice.setState(state);
             mcqQuizzes.put(quizDevice.getID(), quizDevice);
+            numQuizzes++;
         }
         
-        return true;
+        return numQuizzes > 0;
     }
     
     public Hashtable getMCQQuizzes() {
