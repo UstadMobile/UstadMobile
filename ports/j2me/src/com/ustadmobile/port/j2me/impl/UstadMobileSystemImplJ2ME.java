@@ -875,6 +875,15 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 }
             }
             
+            /*
+             * Important trivia on J2ME HTTP Post requests: J2ME will only use
+             * Transfer-Encoding chunked which marks the length within the post
+             * body itself - and therefor Content-Length headers must NOT be added.
+             *
+             * J2ME emulator will silently remove Content-Length headers but not
+             * Content-length - even though HTTP headers are supposed to be case
+             * insensitive
+             */
             if(type.equals("POST")){
                 byte[] toSend;
                 if(params == null && postBody != null) {
