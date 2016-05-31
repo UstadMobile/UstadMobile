@@ -183,18 +183,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc}
      */
     public boolean queueTinCanStatement(JSONObject stmt, Object context) {
-        l(UMLog.DEBUG, 538, "");
-        boolean result = true;
-        
-        /*
+        l(UMLog.DEBUG, 538, "");        
         try {
-            
             return logManager.queueStatement(getActiveUser(context), stmt);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            UstadMobileSystemImpl.l(UMLog.ERROR, 174, null, ex);
         }
-        */
-        return result;
+        
+        return false;
     }
     
     
@@ -214,7 +210,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         logSendTimer = new Timer();
         logManager = new TinCanLogManagerJ2ME();
-        logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
+        //logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
+        logSendTimer.scheduleAtFixedRate(logManager, (60*1000), (60*1000));
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
         boolean isRTL = getDirection() == UstadMobileConstants.DIR_RTL;
@@ -839,11 +836,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             // Setup HTTP Request to GET/POST
             if(type.equals("POST")){
                 httpConn.setRequestProperty("User-Agent",
-                    "Profile/MIDP-1.0 Confirguration/CLDC-1.0");
+                    "Profile/MIDP-2.0 Configuration/CLDC-1.0");
                 httpConn.setRequestProperty("Accept_Language","en-US");
-                //Content-Type is must to pass parameters in POST Request
-                httpConn.setRequestProperty("Content-Type", 
-                        "application/x-www-form-urlencoded");
             }
             
             //Add Parameters
@@ -882,34 +876,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             }
             
             if(type.equals("POST")){
-                if(params == null && postBody != null){
-                    //Content-Length to be set
-                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(postBody.length));
-                    httpConn.setRequestProperty("Content-length", 
-                            String.valueOf(postBody.length));
-                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
-                    //httpConn.setRequestProperty(url, type);
-                    l(UMLog.DEBUG, 800, "openingOutputStream");
-                    os = httpConn.openOutputStream();
-                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
-                    os.write(postBody);
-                    l(UMLog.DEBUG, 800, "flushing..");
-                    os.flush();
-                    l(UMLog.DEBUG, 800, "flushed.");
-                }else{
-                    //Content-Length to be set
-                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(params.getBytes().length));
-                    httpConn.setRequestProperty("Content-length", 
-                            String.valueOf(params.getBytes().length));
-                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
-                    //httpConn.setRequestProperty(url, type);
-                    l(UMLog.DEBUG, 800, "openingOutputStream");
-                    os = httpConn.openOutputStream();
-                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
-                    os.write(params.getBytes());
-                    //os.flush();
+                byte[] toSend;
+                if(params == null && postBody != null) {
+                    toSend = postBody;
+                }else {
+                    toSend = params.getBytes(UstadMobileConstants.UTF8);
+                    httpConn.setRequestProperty("Content-Type", 
+                        "application/x-www-form-urlencoded");
                 }
                 
+                os = httpConn.openOutputStream();
+                os.write(toSend);
+                os.flush();
+                l(UMLog.DEBUG, 582, "" + toSend.length);
             } 
             
             // Read Response from the Server
@@ -918,8 +897,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             
             UMIOUtils.readFully(is, bout, 1024);
             
-            byte[] response = null;
-            response = bout.toByteArray();
+            byte[] response = bout.toByteArray();
             Hashtable responseHeaders = new Hashtable();
             String headerKey;
             String headerVal;

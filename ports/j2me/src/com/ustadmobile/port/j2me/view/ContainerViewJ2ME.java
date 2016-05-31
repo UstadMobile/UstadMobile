@@ -280,6 +280,9 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             opfURL = UMFileUtil.joinPaths(
                     new String[]{UstadMobileSystemImplJ2ME.OPENZIP_PROTO, 
                     ocf.rootFiles[0].fullPath});
+            UstadMobileSystemImpl.getInstance().queueTinCanStatement(
+                controller.makeLaunchedStatement(), getContext());
+            
             Display.getInstance().callSerially(new Runnable() {
                 public void run() {
                     addComponent(BorderLayout.CENTER, htmlC);

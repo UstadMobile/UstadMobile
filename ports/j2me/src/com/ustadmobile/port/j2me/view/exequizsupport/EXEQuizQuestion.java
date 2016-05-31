@@ -110,7 +110,7 @@ public class EXEQuizQuestion {
         JSONObject obj = new JSONObject();
         
         String id = UMFileUtil.joinPaths(new String[] {
-            iDevice.pageTinCanID, iDevice.getID(), getID()});
+            iDevice.pageTinCanID, getID()});
         try {
             obj.put("id", id);
             obj.put("objectType", "Activity");
