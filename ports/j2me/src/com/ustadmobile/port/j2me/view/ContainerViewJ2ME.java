@@ -37,6 +37,7 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler.IOCallback;
 import com.sun.lwuit.html.DocumentInfo;
+import com.sun.lwuit.html.DocumentRequestHandler;
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.layouts.BorderLayout;
@@ -226,21 +227,27 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }
     }
     
+    private HTMLComponent makeHTMLC() {
+        HTMLComponent comp =  new HTMLComponent(requestHandler);
+        comp.setHTMLCallback(htmlCallback);
+        comp.setImageConstrainPolicy(
+            HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
+        comp.setIgnoreCSS(true);
+        comp.setEventsEnabled(true);
+        comp.setAutoAddSubmitButton(false);
+        comp.setMediaPlayerEnabled(false);
+        //  comp.setShowImages(false);
+        return comp;
+    }
+    
     protected void initEPUB() {
         try {
             ocf = controller.getOCF();
             opf = controller.getActiveOPF();
             spineURLs = opf.getLinearSpineURLS();
                         
-            htmlC = new HTMLComponent(requestHandler);
-            htmlC.setHTMLCallback(htmlCallback);
-            htmlC.setImageConstrainPolicy(
-                HTMLComponent.IMG_CONSTRAIN_WIDTH | HTMLComponent.IMG_CONSTRAIN_HEIGHT);
-            htmlC.setIgnoreCSS(true);
-            htmlC.setEventsEnabled(true);
-            htmlC.setAutoAddSubmitButton(false);
-            htmlC.setMediaPlayerEnabled(true);
-            
+            htmlC = makeHTMLC();
+                
             //see what we can do about caching
             UMStorageDir[] dirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogController.SHARED_RESOURCE, getContext());
@@ -362,7 +369,9 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 UstadMobileDefaults.DEFAULT_TINCAN_PREFIX, opf.id, currentPage});
             JSONObject stmt = UMTinCanUtil.makePageViewStmt(tinCanId,
                 title, "en-US", duration, actor);
-            UstadMobileSystemImpl.getInstance().queueTinCanStatement(stmt, getContext());
+            
+            //TODO: Temporarily disabled whilst checking memory consumption
+            //UstadMobileSystemImpl.getInstance().queueTinCanStatement(stmt, getContext());
         }
     }
     
@@ -533,8 +542,12 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
      * Handles requests to load resources by pointing them to the openzip and
      * requests to play media
      * 
+     * To run non sync: 
+     * public static class ContainerDocumentRequestHandler implements DocumentRequestHandler {
+     * async:
+     * public static class ContainerDocumentRequestHandler implements AsyncDocumentRequestHandler {
      */
-    public static class ContainerDocumentRequestHandler implements AsyncDocumentRequestHandler {
+    public static class ContainerDocumentRequestHandler implements DocumentRequestHandler {
 
         private ContainerViewJ2ME view;
         
@@ -571,6 +584,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }
         
         public InputStream resourceRequested(String requestURL, int expectedType, boolean bufferEnabled, DocumentInfo di) {
+            InputStream src;
             try {
                 System.out.println("requestURL " + requestURL);
                 if(expectedType != DocumentInfo.TYPE_IMAGE && di != null) {
@@ -587,65 +601,65 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                     urlQuery = requestURL.substring(requestURL.indexOf('?')+1);
                 }
                 
-                InputStream src = view.containerZip.openInputStream(pathInZip);
+                src = view.containerZip.openInputStream(pathInZip);
                 
                 int entrySize = (int)((UMZipEntryInputStream)src).getZipEntry().getSize();
                 
-                //TODO here: Check if the page needs split up
+                //If we are getting HTML: split the page into chunks
                 if(di != null && di.getExpectedContentType() == DocumentInfo.TYPE_HTML) {
-                    if(entrySize > UstadMobileConstants.MICRO_ED_PAGESPLIT_THRESHOLD) {
-                        String pageURL = requestURL;
-                        if(pageURL.indexOf('?') != -1) {
-                            pageURL = pageURL.substring(0, pageURL.indexOf('?'));
+                    String pageURL = requestURL;
+                    if(pageURL.indexOf('?') != -1) {
+                        pageURL = pageURL.substring(0, pageURL.indexOf('?'));
+                    }
+
+                    Vector boundaries = view.getSectionBoundaries(pageURL);
+                    if(boundaries == null) {
+                        boundaries = new Vector();
+                    }
+
+                    //look through the URL params to see which section to use
+                    int index = 0;
+                    int line = 0;
+                    int col = 0;
+                    Hashtable params = null;
+
+                    if(urlQuery != null) {
+                        params = UMFileUtil.parseURLQueryString(urlQuery);
+                    }
+
+                    if(params != null && params.containsKey("s-index")) {
+                        index = Integer.parseInt((String)params.get("s-index"));
+                    }
+
+                    if(params != null && params.containsKey("startline")) {
+                        line = Integer.parseInt((String)params.get("startline"));
+                        col = Integer.parseInt((String)params.get("startcol"));
+                    }
+
+                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                    try {
+                        int[] endingPos = ContainerViewPageSplitter.dividePage(src, bout, 
+                            UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, 
+                            Display.getInstance().getDisplayWidth() * Display.getInstance().getDisplayHeight() * 2,
+                            line, col);
+
+                        if(index == boundaries.size()) {
+                            //we need to add this to the vector
+                            boundaries.addElement(endingPos);
+                            view.setSectionBoundaries(requestURL, boundaries);
                         }
-                        
-                        Vector boundaries = view.getSectionBoundaries(pageURL);
-                        if(boundaries == null) {
-                            boundaries = new Vector();
-                        }
-                        
-                        //look through the URL params to see which section to use
-                        int index = 0;
-                        int line = 0;
-                        int col = 0;
-                        Hashtable params = null;
-                        
-                        if(urlQuery != null) {
-                            params = UMFileUtil.parseURLQueryString(urlQuery);
-                        }
-                        
-                        if(params != null && params.containsKey("s-index")) {
-                            index = Integer.parseInt((String)params.get("s-index"));
-                        }
-                        
-                        if(params != null && params.containsKey("startline")) {
-                            line = Integer.parseInt((String)params.get("startline"));
-                            col = Integer.parseInt((String)params.get("startcol"));
-                        }
-                        
-                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                        try {
-                            int[] endingPos = ContainerViewPageSplitter.dividePage(src, bout, 
-                                UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, 
-                                line, col);
-                            
-                            if(index == boundaries.size()) {
-                                //we need to add this to the vector
-                                boundaries.addElement(endingPos);
-                                view.setSectionBoundaries(requestURL, boundaries);
-                            }
-                            
-                            byte[] bytes = bout.toByteArray();
-                            String pageStr = new String(bytes, "UTF-8");
-                            
-                            src = new ByteArrayInputStream(bout.toByteArray());
-                            di.setContentLength(bytes.length);
-                        }catch(Exception xe) {
-                            UstadMobileSystemImpl.l(UMLog.ERROR, 198, null, xe);
-                            throw new IOException(xe.toString());
-                        }finally {
-                            bout = null;
-                        }
+
+                        byte[] bytes = bout.toByteArray();
+                        //String pageStr = new String(bytes, "UTF-8");
+                        src.close();
+
+                        src = new ByteArrayInputStream(bytes);
+                        di.setContentLength(bytes.length);
+                    }catch(Exception xe) {
+                        UstadMobileSystemImpl.l(UMLog.ERROR, 198, null, xe);
+                        throw new IOException(xe.toString());
+                    }finally {
+                        bout = null;
                     }
                 }
                 
@@ -658,6 +672,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 if(src instanceof ByteArrayInputStream) {
                     return src;
                 }else if(bufferEnabled) {
+                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
                     return J2MEIOUtils.readToByteArrayStream(src);
                 }else {
                     return new BufferedInputStream(src, 20*1024);

@@ -87,20 +87,12 @@ public class UstadMobileConstants {
     public static String UMPROFILE_MICRO = "micro";
     
     /**
-     * The threshold after which if a page exceeds that size it will sent
-     * to the page splitter
-     * 
-     * Applies to micro edition only.
-     */
-    public static final int MICRO_ED_PAGESPLIT_THRESHOLD = 10000;
-    
-    /**
      * The size of chunks into which page will be split (number of bytes of actual
      * text)
      * 
      * Applies to micro edition only.
      */
-    public static final int MICRO_ED_PAGESPLIT_TEXTLEN = 1500;
+    public static final int MICRO_ED_PAGESPLIT_TEXTLEN = 750;
     
     public static final String[][] OPDS_FEEDS_PRESETS = new String[][]{
         {"", "Select a feed"},

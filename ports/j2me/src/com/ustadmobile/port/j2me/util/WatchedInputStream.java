@@ -9,6 +9,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.Vector;
 
 /**
@@ -38,18 +39,37 @@ public class WatchedInputStream extends InputStream{
     }
     
     public static void printActiveStreams() {
+        System.out.print("Active: [");
+        WeakReference ref;
         for(int i = 0; i <openStreams.size(); i++) {
-            System.out.println(i + ": " + streamNames.elementAt(i));
+            ref = (WeakReference)openStreams.elementAt(i);
+            if(ref.get() != null) {
+                System.out.print(i + ": " + streamNames.elementAt(i) + ",");
+            }
         }
+        System.out.println("]");
+    }
+    
+    private static int getNumStreams() {
+        WeakReference ref;
+        int numStreams = 0;
+        for(int i = 0; i < openStreams.size(); i++) {
+            ref = (WeakReference)openStreams.elementAt(i);
+            if(ref != null) {
+                numStreams++;
+            }
+        }
+        
+        return numStreams;
     }
     
     private void addToActiveStreams() {
-        openStreams.addElement(this);
+        openStreams.addElement(new WeakReference(this));
         streamNames.addElement(name);
         UstadMobileSystemImpl.l(UMLog.INFO, 399, "#Active Streams: " 
-            + openStreams.size() + " : +"  +this.name);
-        System.out.println("ADD: " + name);
-        //printActiveStreams();
+            + getNumStreams() + " : +"  +this.name);
+        System.out.print("ADD: " + name +  " ( " + openStreams.size() + " streams)");
+        printActiveStreams();
     }
     
     private void removeFromActiveStreams() {
@@ -63,9 +83,8 @@ public class WatchedInputStream extends InputStream{
         streamNames.removeElementAt(index);
         
         UstadMobileSystemImpl.l(UMLog.INFO, 398, "#Active Streams: " 
-            + openStreams.size() + " : -"  +this.name);
-        System.out.println("REMOVE: " + name);
-        //printActiveStreams();
+            + getNumStreams() + " : -"  +this.name);
+        System.out.println("REMOVE: " + name + " ( " + openStreams.size() + " streams)");
     }
     
     public boolean markSupported() {

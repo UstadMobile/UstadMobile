@@ -210,13 +210,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         logSendTimer = new Timer();
         logManager = new TinCanLogManagerJ2ME();
-        //logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
-        logSendTimer.scheduleAtFixedRate(logManager, (60*1000), (60*1000));
+        //Run the log sender every 2 mins
+        logSendTimer.scheduleAtFixedRate(logManager, (2*60*1000), (2*60*1000));
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
         boolean isRTL = getDirection() == UstadMobileConstants.DIR_RTL;
         UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
-        int x = 42;
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {

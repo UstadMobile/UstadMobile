@@ -89,7 +89,7 @@ public class TestPageSplitter extends j2meunit.framework.TestCase{
                 fin = impl.openFileInputStream(fileURI);
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 startingPos = ContainerViewPageSplitter.dividePage(fin, bout, 
-                    UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, startingPos[0], startingPos[1]);
+                    UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, 200000, startingPos[0], startingPos[1]);
                 fin.close();
             }while(startingPos[0] != ContainerViewPageSplitter.POS_FINAL_SECTION);
         }catch(Throwable t2) {

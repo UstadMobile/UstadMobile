@@ -30,8 +30,7 @@
  */
 package com.ustadmobile.port.j2me.view;
 
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMUtil;
+import com.sun.lwuit.Display;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,6 +57,13 @@ public class ContainerViewPageSplitter {
     public static final String SPLIT_INDEX_ARG = "s-index";
     
     public static final int POS_FINAL_SECTION = -100;
+    
+    /**
+     * Roughly how many bytes get used for each character of text in the LWUIT
+     * HTML component.
+     */
+    public static final int BYTES_PER_CHAR = 230;
+    
     
     public static void passThrough(XmlPullParser xpp, XmlSerializer xs) throws IOException, XmlPullParserException{
         int evtType = xpp.getEventType();
@@ -98,7 +104,24 @@ public class ContainerViewPageSplitter {
     }
     
     
-    public static int[] dividePage(InputStream in, OutputStream out, int textLenLimit, int startlineNum, int startColNum) throws IOException, XmlPullParserException{
+    /**
+     * Divides a page from the given inputstream into an outputstream : starts at 
+     * the specified position startLineNum and startColNum and continues until
+     * it hits/exceeds the textLenLimit or byteCountLimit
+     * 
+     * @param in InoutStream source of the page itself
+     * @param out OutputStream to which the divided output will be written
+     * @param textLenLimit - Maximum number of text characters in tags that are actually displayed to the user
+     * @param byteCountLimit - Calculating number of bytes used after which to cut off or -1 for no 
+     * @param startlineNum - The line number to start output from
+     * @param startColNum - The column number to start output from
+     * 
+     * @return The line number and column number of the last tag after limits were hit (e.g. use these as parameters for the next section of the page). 
+     * 
+     * @throws IOException
+     * @throws XmlPullParserException 
+     */
+    public static int[] dividePage(InputStream in, OutputStream out, int textLenLimit, int byteCountLimit, int startlineNum, int startColNum) throws IOException, XmlPullParserException{
         KXmlParser xpp = new KXmlParser();
         XmlSerializer xs = new KXmlSerializer();
         xs.setOutput(out, "UTF-8");
@@ -111,8 +134,8 @@ public class ContainerViewPageSplitter {
         int lineNum;
         int colNum;
         int lenCount = 0;
+        int byteCount = 0;
         
-        String dontSplitAttr;
         String dontSplitTag = null;
         int dontSplitDepth = -1;
         
@@ -120,53 +143,81 @@ public class ContainerViewPageSplitter {
             lineNum = xpp.getLineNumber();
             colNum = xpp.getColumnNumber();
             
-            if(evtType == XmlPullParser.START_DOCUMENT) {
-                xs.startDocument("UTF-8", Boolean.FALSE);
-            }else if(evtType == XmlPullParser.START_TAG) {
-                if(!inRange && (lineNum > startlineNum || lineNum == startlineNum && colNum >= startColNum)) {
-                    inRange = true;
+            switch(evtType) {
+                case XmlPullParser.START_DOCUMENT:
+                    xs.startDocument("UTF-8", Boolean.FALSE);
+                    break;
                     
-                    StartTag tag;
-                    for(int i = 0; i < openTags.size(); i++) {
-                        tag = (StartTag)openTags.elementAt(i);
-                        tag.serializeOpening(xs);
+                case XmlPullParser.START_TAG:
+                    if(!inRange && (lineNum > startlineNum || lineNum == startlineNum && colNum > startColNum)) {
+                        inRange = true;
+
+                        StartTag tag;
+                        for(int i = 0; i < openTags.size(); i++) {
+                            tag = (StartTag)openTags.elementAt(i);
+                            tag.serializeOpening(xs);
+                        }
                     }
-                }
-                
-                if(inRange && dontSplitTag == null && isNoSplitElement(xpp)) {
-                    dontSplitTag = xpp.getName();
-                    dontSplitDepth = xpp.getDepth();
-                }
-                
-                //TODO: If in range we don't need to keep the attributes 
-                openTags.addElement(new StartTag(xpp));                
-            }else if(evtType == XmlPullParser.END_TAG) {
-                if(dontSplitTag != null && xpp.getDepth() == dontSplitDepth && xpp.getName().equals(dontSplitTag)) {
-                    //that's the end of the don't split section
-                    dontSplitTag = null;
-                }
-                
-                if(inRange && lenCount >= textLenLimit && dontSplitTag == null) {
-                    StartTag tag;
-                    for(int i = openTags.size()-1; i >= 0; i--) {
-                        //close tags that need closed
-                        tag = (StartTag)openTags.elementAt(i);
-                        tag.serializeEnd(xs);
+
+                    if(inRange && dontSplitTag == null && isNoSplitElement(xpp)) {
+                        dontSplitTag = xpp.getName();
+                        dontSplitDepth = xpp.getDepth();
                     }
-                    
-                    xs.endDocument();
-                    return new int[] {lineNum, colNum};
-                }
+
+                    if(inRange && xpp.getName().equals("img")) {
+                        int width, height;
+                        String strVal = xpp.getAttributeValue(null, "width");
+                        if(strVal != null) {
+                            width = Integer.parseInt(strVal);
+                        }else {
+                            width = Display.getInstance().getDisplayWidth();
+                        }
+                        strVal = xpp.getAttributeValue(null, "height");
+
+                        if(strVal != null) {
+                            height = Integer.parseInt(strVal);
+                        }else{
+                            height = Display.getInstance().getDisplayHeight();
+                        }
+
+                        byteCount += width * height * 4;
+                    }
+
+
+                    //TODO: If in range we don't need to keep the attributes 
+                    openTags.addElement(new StartTag(xpp));
+                    break;
                 
-                openTags.removeElementAt(openTags.size()-1);
+                case XmlPullParser.END_TAG:
+                    if(dontSplitTag != null && xpp.getDepth() == dontSplitDepth && xpp.getName().equals(dontSplitTag)) {
+                        //that's the end of the don't split section
+                        dontSplitTag = null;
+                    }
+
+                    if(inRange && (lenCount >= textLenLimit || (byteCount != -1 && byteCount >= byteCountLimit)) && dontSplitTag == null) {
+                        StartTag tag;
+                        for(int i = openTags.size()-1; i >= 0; i--) {
+                            //close tags that need closed
+                            tag = (StartTag)openTags.elementAt(i);
+                            tag.serializeEnd(xs);
+                        }
+
+                        xs.endDocument();
+                        return new int[] {lineNum, colNum};
+                    }
+
+                    openTags.removeElementAt(openTags.size()-1);
+                    break;
             }
             
             if(inRange && evtType == XmlPullParser.TEXT) {
-                lenCount += xpp.getText().length();
+                int textLen = xpp.getText().length();
+                lenCount += textLen;
+                byteCount += textLen * BYTES_PER_CHAR;
             }
             
             if(inRange) {
-                 passThrough(xpp, xs);
+                passThrough(xpp, xs);
             }
             
             evtType = xpp.next();
