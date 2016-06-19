@@ -27,3 +27,8 @@ To Build and Sign:
 ant -f antenna-build.xml sign -lib /path/to/antenna-dir
 ```
 
+To run/debug using MicroEmu:
+
+* Create a plain Java project with the src and src-microemueun directories
+* Run UstadMobileMicroEmuRun.java with microemulator.jar and microemu's JSR-75 and JSR-135 jars in the classpath
+

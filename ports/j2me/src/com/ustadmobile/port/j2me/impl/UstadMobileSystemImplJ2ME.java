@@ -321,6 +321,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             
             for(int i = 0; i < potentialCacheDirs.size(); i++) {
                 currentDir = (String)potentialCacheDirs.elementAt(i);
+                currentDir = UMFileUtil.ensurePathHasPrefix("file:///", currentDir);
                 if(UMIOUtils.canWriteChildFile(currentDir)) {
                     baseSystemDir = UMFileUtil.joinPaths(new String[] {
                         currentDir, CONTENT_DIR_NAME});

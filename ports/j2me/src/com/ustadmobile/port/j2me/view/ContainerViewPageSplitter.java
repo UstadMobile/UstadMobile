@@ -61,6 +61,21 @@ public class ContainerViewPageSplitter {
     /**
      * Roughly how many bytes get used for each character of text in the LWUIT
      * HTML component.
+     * 
+     * To repeat this experiment: modify HTMLComponent.java around line 3,000 
+     * after:
+     * 
+     * <pre>
+       if (FIXED_WIDTH) {
+            comps=showTextFixedWidth(text, curAlign);
+       } else {
+            comps=showText(text, curAlign);
+       }
+       </pre>
+     * 
+     * Memory usage before that statement runs vs. after will tell how many
+     * bytes were used.
+     *
      */
     public static final int BYTES_PER_CHAR = 230;
     

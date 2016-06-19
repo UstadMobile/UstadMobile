@@ -235,7 +235,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         comp.setIgnoreCSS(true);
         comp.setEventsEnabled(true);
         comp.setAutoAddSubmitButton(false);
-        comp.setMediaPlayerEnabled(false);
+        comp.setMediaPlayerEnabled(true);
         //  comp.setShowImages(false);
         return comp;
     }
