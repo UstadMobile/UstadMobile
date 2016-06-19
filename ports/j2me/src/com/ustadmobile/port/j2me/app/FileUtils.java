@@ -26,13 +26,10 @@ import com.ustadmobile.core.util.URLTextUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-import javax.microedition.amms.control.PriorityControl;
 import javax.microedition.io.Connector;
-import javax.microedition.io.OutputConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
 
