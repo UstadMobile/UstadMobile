@@ -48,8 +48,8 @@
             <!-- Prebop preprocessor -->
             <url url="http://www.ustadmobile.com/build-dep/com.objfac.ant.preprocess_0.9.1.zip"/>
   
-            <!-- Stock LWUIT Build from the Nokia Series 40 branch -->
-            <url url="http://www.ustadmobile.com/build-dep/LWUIT-MIDP.jar"/>
+            <!-- LWUIT Build from Jenkins -->
+            <url url="http://devserver2.ustadmobile.com:8084/job/LWUIT/lastSuccessfulBuild/artifact/MIDP-binaries/LWUIT-MIDP.jar"/>
 
             <!-- J2ME Unit -->
             <url url="http://www.ustadmobile.com/build-dep/j2meunit.jar"/>
@@ -61,7 +61,7 @@
             <url url="http://www.ustadmobile.com/build-dep/proguard4.10.zip"/>
 
             <!-- QRCode -->
-            <url url="http://devserver2.ustadmobile.com:8080/job/QRCode/lastSuccessfulBuild/artifact/lib/qrcode.jar"/>
+            <url url="http://devserver2.ustadmobile.com:8084/job/QRCode/lastSuccessfulBuild/artifact/lib/qrcode.jar"/>
         </get>
 
         <unzip dest="${lib.dir}">
