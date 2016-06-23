@@ -710,6 +710,37 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return result;
     }
     
+    public boolean makeDirectoryRecursive(String dirURI) throws IOException{
+        return makeDirectoryRecursive(dirURI, null);
+    }
+    
+    public boolean makeDirectoryRecursive(String dirURI, Vector roots) throws IOException {
+        l(UMLog.INFO, 372, dirURI);
+        boolean created = false;
+        try {
+            if(roots == null) {
+                roots = new Vector();
+                UMUtil.addEnumerationToVector(FileSystemRegistry.listRoots(),
+                    roots);
+            }
+            
+            if(roots.contains(dirURI)) {
+                created = true;
+            }else if(dirURI.equals("file:///")) {
+                created =  true;
+            }else {
+                if(makeDirectoryRecursive(UMFileUtil.getParentFilename(dirURI), roots)) {
+                    return makeDirectory(dirURI);
+                }
+            }
+        }catch(IOException e) {
+            l(UMLog.ERROR, 186, dirURI, e);
+            throw e;
+        }
+        
+        return created;
+    }
+    
     
     
     public boolean makeDirectory(String dirURI) throws IOException{

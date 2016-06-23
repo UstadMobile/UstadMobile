@@ -323,23 +323,67 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
     }
 
+
+
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
+        String systemBaseDir = getSystemBaseDir();
+
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(getSystemBaseDir(), getString(U.id.device), false, true, false));
+            dirList.add(new UMStorageDir(systemBaseDir, getString(U.id.device), false, true, false));
         }
 
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
-            String userBase = UMFileUtil.joinPaths(new String[]{getSystemBaseDir(), "user-"
+            String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
             dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
         }
+
+        //Find external directories
+        HashSet<String> externalDirs = getExternalMounts();
+
 
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
         dirList.toArray(retVal);
         return retVal;
     }
+
+    public HashSet<String> getExternalMounts() {
+        final HashSet<String> out = new HashSet<String>();
+        String reg = "(?i).*vold.*(vfat|ntfs|exfat|fat32|ext3|ext4).*rw.*";
+        String s = "";
+        try {
+            final Process process = new ProcessBuilder().command("mount")
+                    .redirectErrorStream(true).start();
+            process.waitFor();
+            final InputStream is = process.getInputStream();
+            final byte[] buffer = new byte[1024];
+            while (is.read(buffer) != -1) {
+                s = s + new String(buffer);
+            }
+            is.close();
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
+        // parse output
+        final String[] lines = s.split("\n");
+        for (String line : lines) {
+            if (!line.toLowerCase(Locale.US).contains("asec")) {
+                if (line.matches(reg)) {
+                    String[] parts = line.split(" ");
+                    for (String part : parts) {
+                        if (part.startsWith("/"))
+                            if (!part.toLowerCase(Locale.US).contains("vold"))
+                                out.add(part);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
 
     @Override
     public String getSharedContentDir() {
@@ -502,7 +546,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public boolean makeDirectory(String dirPath) throws IOException {
         File newDir = new File(dirPath);
-        return newDir.mkdirs();
+        return newDir.mkdir();
+    }
+
+    @Override
+    public boolean makeDirectoryRecursive(String dirURI) throws IOException {
+        return new File(dirURI).mkdirs();
     }
 
     @Override

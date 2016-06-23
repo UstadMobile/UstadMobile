@@ -646,6 +646,17 @@ public abstract class UstadMobileSystemImpl {
     public abstract boolean removeRecursively(String dirURI);
     
     /**
+     * Make the given directory as per the dirURI parameter recursively creating 
+     * any new parent directories needed
+     * 
+     * @param dirURI Directory to be created
+     * 
+     * @return true if successful, false otherwise
+     * @throws IOException if an IOException occurs during the process
+     */
+    public abstract boolean makeDirectoryRecursive(String dirURI) throws IOException;
+    
+    /**
      * Set the currently active user: the one that we need to know about for
      * preferences etc. currently
      * 

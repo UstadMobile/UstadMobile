@@ -75,7 +75,7 @@ public class AllTestCases extends TestCase {
         
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestLocalization());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
-        
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());
         
         allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());
         allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());

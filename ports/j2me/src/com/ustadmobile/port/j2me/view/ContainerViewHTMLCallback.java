@@ -144,9 +144,16 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         }
         
         mcqQuizzes = new Hashtable();
-        String pageTinCanID = containerTinCanID + '/' + 
-                view.getCurrentPageOPFId();
         
+        String pageIdSection = null;
+        if(view != null) {
+            pageIdSection = view.getCurrentPageOPFId();
+        }else if(htmlC.getPageURL() != null) {
+            pageIdSection = UMFileUtil.getFilename(htmlC.getPageURL());
+        }
+        
+        String pageTinCanID = containerTinCanID + '/' + pageIdSection;
+            
         HTMLElement quizEl;
         int numQuizzes = 0;
         for(int i = 0; i < quizElements.size(); i++) {

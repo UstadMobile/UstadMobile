@@ -97,6 +97,11 @@ public class EXEQuizIdevice {
      */
     public void setState(JSONObject state) {
         this.state = state;
+        
+        if(state == null) {
+            return;
+        }
+        
         EXEQuizQuestion question;
         String questionId;
         for(int i = 0; i < questions.size(); i++) {
