@@ -332,6 +332,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(U.id.device), false, true, false));
+
+            //Find external directories
+            String[] externalDirs = findRemovableStorage();
+            for(String extDir : externalDirs) {
+                dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
+                    UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(U.id.memory_card),
+                        true, true, false));
+            }
         }
 
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
@@ -340,8 +348,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
         }
 
-        //Find external directories
-        HashSet<String> externalDirs = getExternalMounts();
+
 
 
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
@@ -349,39 +356,29 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return retVal;
     }
 
-    public HashSet<String> getExternalMounts() {
-        final HashSet<String> out = new HashSet<String>();
-        String reg = "(?i).*vold.*(vfat|ntfs|exfat|fat32|ext3|ext4).*rw.*";
-        String s = "";
-        try {
-            final Process process = new ProcessBuilder().command("mount")
-                    .redirectErrorStream(true).start();
-            process.waitFor();
-            final InputStream is = process.getInputStream();
-            final byte[] buffer = new byte[1024];
-            while (is.read(buffer) != -1) {
-                s = s + new String(buffer);
-            }
-            is.close();
-        } catch (final Exception e) {
-            e.printStackTrace();
+    /**
+     * Method to accomplish the surprisingly tricky task of finding the external SD card (if this
+     * device has one)
+     *
+     * Approach borrowed from:
+     *  http://pietromaggi.com/2014/10/19/finding-the-sdcard-path-on-android-devices/
+     *
+     * Note: Approaches that use a mount based way of looking at things are returning paths that
+     * actually are not actually usable.  Therefor: use the approach based on environment variables.
+     *
+     * @return A HashSet of paths to any external memory cards mounted
+     */
+    public String[] findRemovableStorage() {
+        String secondaryStorage = System.getenv("SECONDARY_STORAGE");
+        if(secondaryStorage == null || secondaryStorage.length() == 0) {
+            secondaryStorage = System.getenv("EXTERNAL_SDCARD_STORAGE");
         }
 
-        // parse output
-        final String[] lines = s.split("\n");
-        for (String line : lines) {
-            if (!line.toLowerCase(Locale.US).contains("asec")) {
-                if (line.matches(reg)) {
-                    String[] parts = line.split(" ");
-                    for (String part : parts) {
-                        if (part.startsWith("/"))
-                            if (!part.toLowerCase(Locale.US).contains("vold"))
-                                out.add(part);
-                    }
-                }
-            }
+        if(secondaryStorage != null) {
+            return secondaryStorage.split(":");
+        }else {
+            return new String[0];
         }
-        return out;
     }
 
 

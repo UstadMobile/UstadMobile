@@ -1530,14 +1530,18 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         UstadJSOPDSEntry epubEntry;
         UstadJSOPDSFeed containerFeed;
         String entryCacheFile;
-        boolean isEPUB = false;
+        boolean isEPUB;
         
         for(i = 0; i < containerFiles.length; i++) {
             containerFeed = null;
             impl.l(UMLog.VERBOSE, 408, containerFiles[i]);
             
             try {
-                entryCacheFile = containerFiles[i] + CONTAINER_INFOCACHE_EXT;
+                entryCacheFile = UMFileUtil.joinPaths(new String[] {
+                    impl.getCacheDir(containerFileModes[i] ? USER_RESOURCE : SHARED_RESOURCE, context),
+                    UMFileUtil.stripPrefixIfPresent("file:///", containerFiles[i])
+                        + CONTAINER_INFOCACHE_EXT
+                });
                 isEPUB = containerFiles[i].endsWith(EPUB_EXTENSION);
                 //see oif
                 if(impl.fileExists(entryCacheFile) && (impl.fileLastModified(entryCacheFile) > impl.fileLastModified(containerFiles[i])) || !isEPUB) {
@@ -1549,9 +1553,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                     }
                 }
                 
-                if(containerFeed == null) {
+                if(containerFeed == null && isEPUB) {
                     containerFeed = ContainerController.generateContainerFeed(
-                        containerFiles[i], containerFiles[i] + CONTAINER_INFOCACHE_EXT);
+                        containerFiles[i], entryCacheFile);
                     try {
                         impl.writeStringToFile(containerFeed.toString(), 
                             entryCacheFile, "UTF-8");
@@ -1559,7 +1563,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         impl.l(UMLog.ERROR, 138, entryCacheFile, e);
                     }
                 }
-                
                 
                 
                 for(j = 0; j < containerFeed.entries.length; j++) {
