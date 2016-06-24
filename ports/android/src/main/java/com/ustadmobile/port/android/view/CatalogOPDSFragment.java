@@ -32,14 +32,13 @@
 
 package com.ustadmobile.port.android.view;
 
-import android.app.Activity;
 
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -48,8 +47,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -66,23 +63,17 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * to handle interaction events.
- * Use the {@link CatalogOPDSFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * An Android Fragment that implements the CatalogView to show an OPDS Catalog
+ *
+ * Use newInstance to create a new Fragment and use the FragmentManager in the normal way
+ *
  */
-public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener {
+public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener, SwipeRefreshLayout.OnRefreshListener {
 
     private View rootContainer;
 
@@ -99,6 +90,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public static final String ARG_MENUID = "frag-menuid";
 
     private boolean hasDisplayed = false;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    //Trackers whether or not there is a loading operation (e.g. refresh) going on
+    private boolean isLoading = false;
 
     /**
      * Use this factory method to create a new instance of
@@ -122,31 +118,66 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         // Required empty public constructor
     }
 
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
+        mSelectedEntries = new UstadJSOPDSEntry[0];
+        setHasOptionsMenu(true);
+
+        idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
+
+        mMenuID = getArguments().getInt(ARG_MENUID, -1);
+        mFetchFlags = getArguments().getInt(CatalogController.KEY_FLAGS,
+                CatalogController.CACHE_ENABLED);
+        mSwipeRefreshLayout = (SwipeRefreshLayout)rootContainer.findViewById(
+                R.id.fragment_catalog_swiperefreshview);
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+        mSwipeRefreshLayout.setRefreshing(true);
+        loadCatalog();
+
+        return rootContainer;
+    }
+
 
     public void loadCatalog(final String url, int resourceMode) {
+        isLoading = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         CatalogController.makeControllerForView(this, url, resourceMode, mFetchFlags, this);
+    }
+
+    /**
+     * Load the catalog from the arguments given
+     */
+    public void loadCatalog() {
+        String catalogURL = getArguments().getString(CatalogController.KEY_URL);
+        int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
+        loadCatalog(catalogURL, resourceMode);
     }
 
 
     @Override
     public void controllerReady(final UstadController controller, int flags) {
-        if(controller == null) {
-            //there was an error loading the controller
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            String errMsg = LocaleUtil.formatMessage(impl.getString(U.id.course_catalog_load_error),
-                    "Catalog controller");
-            impl.getAppView(getActivity()).showAlertDialog(impl.getString(U.id.error), errMsg);
-        }else {
-            //TODO: check that the activity has not been destroyed etc.
-            if(getActivity() != null) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+        final SwipeRefreshLayout refreshLayout = mSwipeRefreshLayout;
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        isLoading = false;
+        if(getActivity() != null) {//in case user left activity when loading was going on
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    refreshLayout.setRefreshing(false);
+                    if (controller == null) {
+                        String errMsg = LocaleUtil.formatMessage(
+                                impl.getString(U.id.course_catalog_load_error), "Catalog controller");
+                        impl.getAppView(getActivity()).showAlertDialog(impl.getString(U.id.error),
+                                errMsg);
+                    } else {
                         setupFromCatalogController((CatalogController) controller);
                     }
-                });
-            }
+                }
+            });
         }
     }
 
@@ -187,7 +218,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
             idToCardMap.put(feed.entries[i].id, cardView);
         }
-
+        mSwipeRefreshLayout.setRefreshing(false);
         getActivity().supportInvalidateOptionsMenu();
         mCatalogController.loadThumbnails();
     }
@@ -197,36 +228,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         super.onCreate(savedInstanceState);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        // Inflate the layout for this fragment
-        this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
-        mSelectedEntries = new UstadJSOPDSEntry[0];
-        setHasOptionsMenu(true);
-
-        idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
-
-        mMenuID = getArguments().getInt(ARG_MENUID, -1);
-        mFetchFlags = getArguments().getInt(CatalogController.KEY_FLAGS,
-                CatalogController.CACHE_ENABLED);
-
-        loadCatalog();
-
-        return rootContainer;
-    }
-
-
-    /**
-     * Load the catalog from the arguments given
-     */
-    public void loadCatalog() {
-        String catalogURL = getArguments().getString(CatalogController.KEY_URL);
-        int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
-        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
-        loadCatalog(catalogURL, resourceMode);
-    }
 
     @Override
     public void onStart() {
@@ -473,12 +474,19 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
 
-
-
     public void handleClickMenuItem(int index) {
         if(mCatalogController != null) {
             mCatalogController.handleClickMenuItem(index);
         }
     }
 
+    /**
+     * Handle when the user selects to refresh
+     */
+    @Override
+    public void onRefresh() {
+        if(!isLoading) {
+            loadCatalog();
+        }
+    }
 }
