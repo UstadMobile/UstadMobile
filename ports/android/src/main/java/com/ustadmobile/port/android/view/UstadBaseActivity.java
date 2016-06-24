@@ -128,7 +128,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     }
 
     public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {
-        if(controller.handleClickAppMenuItem(item.getItemId())) {
+        if(controller != null && controller.handleClickAppMenuItem(item.getItemId())) {
             return true;
         }else {
             return false;

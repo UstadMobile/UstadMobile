@@ -338,7 +338,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             for(String extDir : externalDirs) {
                 dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
                     UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(U.id.memory_card),
-                        true, true, false));
+                        true, true, false, false));
             }
         }
 

@@ -454,7 +454,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @param resourceMode as per makeControllerByURL 
      * @param flags as per makeControllerByURL
      * 
-     * @see CatalogController#makeControllerByURL(java.lang.String, com.ustadmobile.core.impl.UstadMobileSystemImpl, int, java.lang.String, java.lang.String, int) 
+     * @see CatalogController#makeControllerByURL(java.lang.String, int, java.lang.String, java.lang.String, int, java.lang.Object) 
      * 
      * @throws IOException
      * @throws XmlPullParserException 
@@ -633,9 +633,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * Make a catalog representing the files that are now in the shared and user
      * directories
      * 
-     * @param sharedDir - Shared directory to use: or null to use default shared directory
-     * @param userDir - User content directory to use: or null to use default user directory
-     * @param dirFlags - Set which directories to scan: inc USER_RESOURCE , SHARED_RESOURCE
+     * @param dirs - Content directories that should be scanned represented by the UMStorageDir object
+     * @param dirFlags - Set which directories to scan: e.g. USER_RESOURCE | SHARED_RESOURCE
+     * @param context - Context object being used by the controller
      * 
      * @return CatalogController representing files on the device
      */
@@ -744,7 +744,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * be another OPDS catalog Feed to display or it could be a container
      * entry.
      * 
-     * @param item 
+     * @param entry 
      */
     public void handleClickEntry(final UstadJSOPDSEntry entry) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -804,7 +804,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             storageMode, getContext());
         Vector availableVector = new Vector();
         for(int i = 0; i < allDirs.length; i++) {
-            if(allDirs[i].isAvailable()) {
+            if(allDirs[i].isAvailable() && allDirs[i].isWritable()) {
                 availableVector.addElement(allDirs[i]);
             }
         }
@@ -1557,6 +1557,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                     containerFeed = ContainerController.generateContainerFeed(
                         containerFiles[i], entryCacheFile);
                     try {
+                        impl.makeDirectoryRecursive(
+                            UMFileUtil.getParentFilename(entryCacheFile));
                         impl.writeStringToFile(containerFeed.toString(), 
                             entryCacheFile, "UTF-8");
                     }catch(IOException e) {
@@ -1659,7 +1661,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * preference
      * 
      * @param entryID the OPDS ID of the entry in question
-     * @param entryInfo CatalogEntryInfo object with required info about entry
+     * @param info CatalogEntryInfo object with required info about entry
      * @param resourceMode  USER_RESOURCE or SHARED_RESOURCE to be set as a user or shared preference
      * Use USER_RESOURCE when the file is in the users own directory, SHARED_RESOURCE otherwise
      */

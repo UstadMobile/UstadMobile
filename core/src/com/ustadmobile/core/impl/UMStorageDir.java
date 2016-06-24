@@ -31,7 +31,10 @@
 package com.ustadmobile.core.impl;
 
 /**
- *
+ * This class represents a storage directory on the system.  It is a place that
+ * normally should be scanned for content files (e.g. epub) and may be usable
+ * for purposes of saving content that has been downloaded.
+ * 
  * @author mike
  */
 public class UMStorageDir {
@@ -46,14 +49,40 @@ public class UMStorageDir {
     
     private boolean userSpecific;
     
-    public UMStorageDir(String dirURI, String name, boolean removableMedia, boolean available, boolean userSpecific) {
+    private boolean writable;
+    
+    /**
+     * Constructor 
+     * 
+     * @param dirURI Sets the location file URI we are referring to
+     * @param name Sets the name this is known to for the user (e.g. "Device" or "Memory Card")
+     * @param removableMedia True if this is removable media - false otherwise
+     * @param available True if this medium is currently usable - false otherwise
+     * @param userSpecific True if this is a user specific directory - false otherwise
+     * @param writable True if it is possible to write to this directory, false otherwise
+     */
+    public UMStorageDir(String dirURI, String name, boolean removableMedia, boolean available, boolean userSpecific, boolean writable) {
         this.dirURI = dirURI;
         this.name = name;
         this.removableMedia = removableMedia;
         this.available = available;
         this.userSpecific = userSpecific;
+        this.writable = writable;
     }
     
+    /**
+     * Constructor - Assumes the directory is writable
+     * 
+     * @param dirURI Sets the location file URI we are referring to
+     * @param name Sets the name this is known to for the user (e.g. "Device" or "Memory Card")
+     * @param removableMedia True if this is removable media - false otherwise
+     * @param available True if this medium is currently usable - false otherwise
+     * @param userSpecific True if this is a user specific directory - false otherwise
+     */
+    public UMStorageDir(String dirURI, String name, boolean removableMedia, boolean available, boolean userSpecific) {
+        this(dirURI, name, removableMedia, available, userSpecific, true);
+        
+    }
     
     public String toString() {
         StringBuffer sb = new StringBuffer(dirURI);
@@ -83,7 +112,22 @@ public class UMStorageDir {
         this.userSpecific = userSpecific;
     }
 
+    /**
+     * Whether or not the directory is writable
+     * 
+     * @return True if this directory is writable for saving content
+     */
+    public boolean isWritable() {
+        return writable;
+    }
 
+    /**
+     * Set whether or not the directory is writable
+     * @param writable 
+     */
+    public void setWritable(boolean writable) {
+        this.writable = writable;
+    }
     
     /**
      * Whether or not this storage location is currently available for use

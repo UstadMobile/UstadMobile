@@ -336,9 +336,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         
         try {
             HTTPResult res = impl.getInstance().readURLToString(tinCanXMLURI, null);
-            XmlPullParser xpp = impl.newPullParser();
-            xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
-            tcXML = TinCanXML.loadFromXML(xpp);
+            if(res != null && res.getStatus() == 200) {
+                XmlPullParser xpp = impl.newPullParser();
+                xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
+                tcXML = TinCanXML.loadFromXML(xpp);
+            }else {
+                UstadMobileSystemImpl.l(UMLog.WARN, 2, openPath);
+            }
         }catch(IOException e) {
             //seems we don't have that...
             UstadMobileSystemImpl.l(UMLog.WARN, 211, null, e);
