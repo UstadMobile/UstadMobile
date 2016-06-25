@@ -58,6 +58,15 @@ public interface UstadView {
      */
     public void setDirection(int dir);
     
+    /**
+     * Sets commands / buttons that should be available to the user to select.
+     * 
+     * These are normally put in the Command menus on J2ME and in the 
+     * top right menu (with three dots) in Android
+     * 
+     * @param labels
+     * @param ids 
+     */
     public void setAppMenuCommands(String[] labels, int[] ids);
     
 }

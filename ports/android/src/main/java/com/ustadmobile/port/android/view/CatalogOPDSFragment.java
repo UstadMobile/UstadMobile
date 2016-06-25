@@ -394,12 +394,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         builder.create().show();
     }
 
-    @Override
-    public void setMenuOptions(String[] menuOptions) {
-        if(getActivity() instanceof  CatalogActivity) {
-            ((CatalogActivity) getActivity()).setMenuOptions(menuOptions);
-        }
-    }
 
     @Override
     public void setEntryStatus(final String entryId, final int status) {
@@ -470,13 +464,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             }
 
             idToCardMap.get(thisFeed.entries[i].id).setSelected(isSelected);
-        }
-    }
-
-
-    public void handleClickMenuItem(int index) {
-        if(mCatalogController != null) {
-            mCatalogController.handleClickMenuItem(index);
         }
     }
 

@@ -36,17 +36,12 @@ import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipEntryHandle;
-import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.model.CatalogModel;
-import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
-import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
@@ -55,6 +50,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
@@ -194,19 +190,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     
     //this is where the feed (and its entries) live.
     private CatalogModel model;
-    
-    public static int[] catalogMenuOptIDS = new int[]{U.id.mycourses, 
-        U.id.onthisdevice, U.id.logout, U.id.about, U.id.settings};
-    
-    public static final int MENUINDEX_MYCOURSES = 0;
-    
-    public static final int MENUINDEX_MYDEVICE = 1;
-    
-    public static final int MENUINDEX_LOGOUT = 2;
-    
-    public static final int MENUINDEX_ABOUT = 3;
-    
-    public static final int MENUINDEX_SETTINGS = 4;
     
     public static final String LOCALOPDS_ID_SUFFIX = "-local";
     
@@ -364,13 +347,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void setResourceMode(int resourceMode) {
         this.resourceMode = resourceMode;
     }
-
-    
-    //methods go here..
-    
-    public void handleClickRefresh() {
-        
-    }
     
     //shows the view
     /**
@@ -386,12 +362,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void setUIStrings() {
         CatalogView cView = (CatalogView)view;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] menuOpts = new String[catalogMenuOptIDS.length];
-        for(int i = 0; i < menuOpts.length; i++) {
-            menuOpts[i] = impl.getString(catalogMenuOptIDS[i]);
-        }
-        
-        cView.setMenuOptions(menuOpts);
         cView.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
         
         setStandardAppMenuOptions();
@@ -1013,36 +983,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             }
         });
         startDownloadThread.start();
-    }
-    
-    
-    /**
-     * Called when the user selects an item from the menu (e.g. Drawer, J2ME options
-     * menu etc)
-     * 
-     * @param index Index of the item clicked corresponding with the menuitem string array
-     */
-    public void handleClickMenuItem(int index) {
-        switch(index) {
-            case MENUINDEX_LOGOUT:
-                UstadMobileSystemImpl.getInstance().go(LoginView.class, 
-                    null, getContext());
-                break;
-            case MENUINDEX_MYDEVICE:
-                Hashtable args = new Hashtable();
-                args.put(KEY_URL, OPDS_PROTO_DEVICE);
-                args.put(KEY_RESMOD, new Integer(USER_RESOURCE | SHARED_RESOURCE));
-                args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
-                
-                UstadMobileSystemImpl.getInstance().go(CatalogView.class,
-                        args, getContext());
-                
-                break;
-            case MENUINDEX_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(UserSettingsView.class, 
-                        new Hashtable(), getContext());
-                break;
-        }
     }
     
     /**

@@ -274,9 +274,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public void setActiveUser(String username, Object context) {
         AppPref.addSetting("CURRENTUSER", username);
-        UserPref.setActiveUser(username);
         
         if(username != null) {
+            UserPref.setActiveUser(username);
             String userBaseDir = UMFileUtil.joinPaths(new String[] {baseSystemDir,
             username});
             try {

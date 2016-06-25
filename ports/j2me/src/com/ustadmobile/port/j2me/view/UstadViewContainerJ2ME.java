@@ -58,16 +58,31 @@ public class UstadViewContainerJ2ME extends Container implements UstadView, Acti
     
     private UstadViewFormJ2ME ustadForm;
     
+    Vector appMenuCommands;
+    
     public UstadViewContainerJ2ME(Hashtable args, Object context, UstadViewFormJ2ME ustadForm) {
         this.args = args;
         this.context = context;
         //TODO: Centralize this
         this.umViewDirection = UIManager.getInstance().getLookAndFeel().isRTL() ? UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
         this.ustadForm = ustadForm;
+        appMenuCommands = new Vector();
     }
     
     public void setAppMenuCommands(String[] labels, int[] ids) {
-        //do nothing for the moment
+        appMenuCommands.removeAllElements();
+        
+        for(int i = 0; i < labels.length; i++) {
+            appMenuCommands.addElement(new Command(labels[i], ids[i]));
+        }
+        
+        ustadForm.invalidateMenuCommands();
+    }
+    
+    public void onCreateMenuCommands(Vector cmdVector) {
+        for(int i = 0; i < appMenuCommands.size(); i++) {
+            cmdVector.addElement(appMenuCommands.elementAt(i));
+        }
     }
     
     public Object getContext() {
@@ -99,9 +114,7 @@ public class UstadViewContainerJ2ME extends Container implements UstadView, Acti
         
     }
     
-    public void onCreateMenuCommands(Vector cmdVector) {
-        
-    }
+    
 
     /**
      * Will receive action performed events when this is the active containe

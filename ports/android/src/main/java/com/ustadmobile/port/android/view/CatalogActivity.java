@@ -29,16 +29,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-public class CatalogActivity extends UstadBaseActivity implements  ListView.OnItemClickListener {
-
-    private DrawerLayout mDrawerLayout;
-
-    private ListView mDrawerList;
-
-    private ActionBarDrawerToggle mDrawerToggle;
+public class CatalogActivity extends UstadBaseActivity  {
 
     public static final String FRAGMENT_CATALOG_TAG = "CAT";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +58,6 @@ public class CatalogActivity extends UstadBaseActivity implements  ListView.OnIt
     }
 
 
-    public void setMenuOptions(String[] menuOptions) {
-        //mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawermenuitem,
-        //        menuOptions));
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -85,12 +73,5 @@ public class CatalogActivity extends UstadBaseActivity implements  ListView.OnIt
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        //someone has clicked the menu from the sidebar - direct this to fragment
-        Fragment currentFrag = getSupportFragmentManager().findFragmentByTag(FRAGMENT_CATALOG_TAG);
-        if(currentFrag != null) {
-            ((CatalogOPDSFragment)currentFrag).handleClickMenuItem(i);
-        }
-    }
+
 }

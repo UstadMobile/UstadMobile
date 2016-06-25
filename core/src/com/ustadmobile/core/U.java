@@ -152,7 +152,8 @@ public class U {
         
         public static final int regcode = 56;
         
+        public static final int home = 57;
         
-         
+        
    }
 }

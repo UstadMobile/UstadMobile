@@ -42,8 +42,10 @@ import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.port.j2me.view.CatalogOPDSContainer;
 import java.util.Hashtable;
 
 /**
@@ -108,9 +110,10 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     }
     
     public void actionPerformed(ActionEvent evt) {
-        if(evt.getCommand().getId() == CatalogOPDSContainer.CMDID_ADDFEED) {
+        int cmdId = evt.getCommand().getId();
+        if(cmdId == CatalogOPDSContainer.CMDID_ADDFEED) {
             basePointController.handleClickAddFeed();
-        }else if(evt.getCommand().getId() == CatalogOPDSContainer.CMDID_REMOVEFEED) {
+        }else if(cmdId == CatalogOPDSContainer.CMDID_REMOVEFEED) {
             basePointController.handleRemoveItemsFromUserFeed(
                 opdsContainers[BasePointController.INDEX_BROWSEFEEDS].getSelectedEntries());
         }
