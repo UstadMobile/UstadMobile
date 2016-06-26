@@ -1477,10 +1477,20 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             impl.l(UMLog.VERBOSE, 408, containerFiles[i]);
             
             try {
+                //the relative path within the cache directory
+                entryCacheFile = UMFileUtil.stripPrefixIfPresent("file:///", containerFiles[i])
+                        + CONTAINER_INFOCACHE_EXT;
+                
+                /*
+                 On J2ME roots often look like file://E:/ for the memory card etc.
+                 The ':' comes from the drive letter and is not valid in a normal
+                 filename so must be replaced
+                */
+                entryCacheFile = entryCacheFile.replace(':', '_');
+                
                 entryCacheFile = UMFileUtil.joinPaths(new String[] {
                     impl.getCacheDir(containerFileModes[i] ? USER_RESOURCE : SHARED_RESOURCE, context),
-                    UMFileUtil.stripPrefixIfPresent("file:///", containerFiles[i])
-                        + CONTAINER_INFOCACHE_EXT
+                    entryCacheFile
                 });
                 isEPUB = containerFiles[i].endsWith(EPUB_EXTENSION);
                 //see oif

@@ -538,9 +538,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public long fileLastModified(String fileURI) {
         long result = -1;
         FileConnection con = null;
+        
         try {
             con = (FileConnection)Connector.open(fileURI);
             result = con.lastModified();
+            l(UMLog.DEBUG, 570, fileURI + " :  " + result);
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 136, fileURI, e);
         }finally {
