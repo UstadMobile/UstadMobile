@@ -181,6 +181,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         MIDPMediaPlayer player = (MIDPMediaPlayer)DefaultLWUITMediaPlayerManager.getInstance().getPlayer();
         player.setCallback(htmlCallback);
         state = new JSONObject();
+        
+        setScrollToCompWhenVisible(false);
     }
 
     public void controllerReady(UstadController controller, int flags) {
