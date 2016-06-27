@@ -32,6 +32,7 @@ package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Display;
+import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler;
@@ -43,6 +44,7 @@ import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
 import com.sun.lwuit.mediaplayer.MIDPMediaPlayer;
+import com.sun.lwuit.plaf.UIManager;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -58,8 +60,11 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.epubnav.EPUBNavDocument;
+import com.ustadmobile.core.epubnav.EPUBNavItem;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.j2me.impl.zip.UMZipEntryInputStream;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import gnu.classpath.java.io.BufferedInputStream;
@@ -71,6 +76,7 @@ import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import javax.xml.rpc.NamespaceConstants;
 import org.json.me.JSONObject;
 
 /**
@@ -78,6 +84,10 @@ import org.json.me.JSONObject;
  * Implementation of the Container (content e.g. epub) view for J2ME.  This is
  * based on the LWUIT HTMLComponent.  A custom document request handler is used
  * to answer requests and load them directly from the epub zip file.  
+ * 
+ * Note that ContainerViewPageSplitter is used to split up relatively long 
+ * XHTML so that low resource devices do not run out of memory.  Each page
+ * is split into sections as required.
  * 
  * As J2ME is resource constrained pages can be divided up into sections using
  * ContainerViewPageSplitter.  
@@ -121,11 +131,27 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     
     private Command cmdBackToCatalog;
     
+    private Command cmdTOC;
+    
+    private Command cmdOpen;
+    
+    private Command cmdTOCHide;
+    
+    private Command[] mainViewCommands;
+    
+    private Command[] tocCommands;
+    
     public static final int CMDBACK_ID = 1;
     
     public static final int CMDFORWARD_ID = 2;
     
     public static final int CMDBACK_TO_CATALOG_ID = 3;
+    
+    public static final int CMD_TO_TOC_ID = 4;
+    
+    public static final int CMD_TOC_OPEN_ID = 5;
+    
+    public static final int CMD_TOC_HIDE = 6;
     
     private ContainerViewHTMLCallback htmlCallback;
     
@@ -150,6 +176,13 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
      * per the Experience API state API
      */
     private JSONObject state;
+    
+    /**
+     * The table of contents list - this is null when the table of contents is
+     * not on display
+     */
+    private List tocList;
+    
             
     static {
         mediaExtensions = new Hashtable();
@@ -166,6 +199,12 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);
         cmdForward = new Command(impl.getString(U.id.next), CMDFORWARD_ID);
         cmdBackToCatalog = new Command("Exit course", CMDBACK_TO_CATALOG_ID);
+        cmdTOC = new Command("Contents", CMD_TO_TOC_ID);
+        cmdOpen = new Command("Open", CMD_TOC_OPEN_ID);
+        cmdTOCHide = new Command(impl.getString(U.id.back), CMD_TOC_HIDE);
+        
+        mainViewCommands = new Command[]{cmdForward, cmdBack, cmdBackToCatalog, cmdTOC};
+        tocCommands = new Command[]{cmdTOCHide, cmdOpen};
         
         openContainerBaseURI = impl.openContainer(containerURI, mimeType);
         containerZip = impl.getOpenZip();
@@ -238,7 +277,6 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         comp.setEventsEnabled(true);
         comp.setAutoAddSubmitButton(false);
         comp.setMediaPlayerEnabled(true);
-        //  comp.setShowImages(false);
         return comp;
     }
     
@@ -281,9 +319,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                     dirs[bestCacheDir].getDirURI() + " (" + mostSpaceAvailable+" bytes free)");
             }
             
-            addCommand(cmdForward);
-            addCommand(cmdBack);
-            addCommand(cmdBackToCatalog);
+            setCommands(mainViewCommands);
             addCommandListener(this);
             
             opfURL = UMFileUtil.joinPaths(
@@ -300,6 +336,13 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             });
         }catch(Exception e) {
             UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 350, null, e);
+        }
+    }
+    
+    private void setCommands(Command[] cmds) {
+        removeAllCommands();
+        for(int i = 0; i < cmds.length; i++) {
+            addCommand(cmds[i]);
         }
     }
     
@@ -403,62 +446,158 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         this.sectionIndex = sectionNum;
         lastPageChangeTime = System.currentTimeMillis();
     }
+    
+    /**
+     * Uses LoadNavDocTask to load the table of contents from the navigation 
+     * document and show them.
+     */
+    public void showTOC() {
+        //Change me to not run this on the main thread
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.loading));
+        requestHandler.schedule(new LoadNavDocTask(), 50);
+    }
+    
+    /**
+     * Called by the LoadNavDocTask once the toc document has been parsed
+     * 
+     * @param navDoc 
+     */
+    public void handleNavDocReady(EPUBNavDocument navDoc) {
+        final EPUBNavItem tocItem = navDoc != null ? navDoc.getNavById("toc") : null;
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final ContainerViewJ2ME view = this;
+        impl.getAppView(getContext()).dismissProgressDialog();
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                if(tocItem != null) {
+                    Vector tocItems = tocItem.getChildrenRecursive(new Vector());
+                    tocList = new List(tocItems);
+                    tocList.addActionListener(view);
 
-    public void actionPerformed(ActionEvent ae) {
-        Command cmd = ae.getCommand();
-        
-        if(cmd.equals(cmdBack) || cmd.equals(cmdForward)) {
-            int dir = cmd.equals(cmdBack) ? -1 : 1;
-            
-            String pageURL = UMFileUtil.resolveLink(opfURL, 
-                spineURLs[this.currentIndex]);
-            int pageIndex = -1;
-            int sectionNum = -1;
-            
-            /*
-             * Check and see if there are page sections on this page for
-             * back/next as requested
-             */
-            if(getSectionBoundaries(pageURL) != null) {
-                Vector pgSections = getSectionBoundaries(pageURL);
-                int[] currentBoundaries = (int[])pgSections.elementAt(this.sectionIndex);
-
-                if(dir == 1 && currentBoundaries[0] >= 0 || dir == -1 && sectionIndex > 0) {
-                    pageIndex = this.currentIndex;
-                    sectionNum = this.sectionIndex+dir;
-                }
-            }
-            
-            /*
-             * If there is not an appropriate section within the current page 
-             * to go to
-             */
-            if(pageIndex == -1){
-                pageIndex = this.currentIndex+dir;
-                //see if that page is also broken into sections
-                if(pageIndex >= 0 && pageIndex < spineURLs.length) {
-                    pageURL = UMFileUtil.resolveLink(opfURL, 
-                        spineURLs[pageIndex]);
+                    int selectIndex = EPUBNavItem.findItemInVectorByHref(
+                        spineURLs[currentIndex], tocItems);
                     
-                    if(dir == 1 || getSectionBoundaries(pageURL) == null) {
-                        sectionNum = 0;
-                    }else {
-                        sectionNum = getSectionBoundaries(pageURL).size()-1;
+                    removeComponent(htmlC);
+                    addComponent(BorderLayout.CENTER, tocList);
+                    setFocused(tocList);
+                    
+                    if(selectIndex != -1) {
+                        tocList.setSelectedIndex(selectIndex);
                     }
+                    setCommands(tocCommands);
                 }
             }
-
-            if(pageIndex >= 0 && pageIndex < spineURLs.length) {
-                showPage(pageIndex, sectionNum);
-            }
-            
-        }
+        });
         
-        if(cmd.equals(cmdBackToCatalog)) {
-            DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
-            UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
+    }
+    
+    /**
+     * Hide the table of contents
+     * 
+     * @param index 
+     */
+    public void hideTOC() {
+        removeComponent(tocList);
+        addComponent(BorderLayout.CENTER, htmlC);
+        tocList = null;
+        setCommands(mainViewCommands);
+    }
+    
+    public void openSelectedTOCEntry() {
+        Object selectedObj = tocList.getSelectedItem();
+        hideTOC();
+        if(selectedObj != null) {
+            EPUBNavItem selectedItem = (EPUBNavItem)selectedObj;
+            String href = selectedItem.href;//TODO: remove any anchor text after #
+            int spinePos = opf.getLinearSpinePositionByHREF(href);
+            showPage(spinePos, 0);
         }
     }
+
+    public void actionPerformed(ActionEvent ae) {
+        if(ae.getSource() == tocList) {
+            openSelectedTOCEntry();
+            return;
+        }
+        
+        int cmdId = ae.getCommand() != null ? ae.getCommand().getId() : -1;
+        switch(cmdId) {
+            case CMDBACK_ID:
+            case CMDFORWARD_ID:
+                int dir = cmdId == CMDBACK_ID ? -1 : 1;
+                go(dir);
+                break;
+
+            case CMDBACK_TO_CATALOG_ID:
+                DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
+                UstadMobileSystemImplJ2ME.getInstanceJ2ME().goBack(getContext());
+                break;
+
+            case CMD_TO_TOC_ID:
+                showTOC();
+                break;
+                
+            case CMD_TOC_HIDE:
+                hideTOC();
+                break;
+                
+            case CMD_TOC_OPEN_ID:
+                openSelectedTOCEntry();
+                break;
+        }
+    }
+    
+    /**
+     * Moves along the content from one section to the next, and if there is
+     * no section left in the page moves to the next page / previous page
+     * 
+     * @param dir 
+     */
+    public void go(int dir) {
+        String pageURL = UMFileUtil.resolveLink(opfURL, 
+            spineURLs[this.currentIndex]);
+        int pageIndex = -1;
+        int sectionNum = -1;
+
+        /*
+         * Check and see if there are page sections on this page for
+         * back/next as requested
+         */
+        if(getSectionBoundaries(pageURL) != null) {
+            Vector pgSections = getSectionBoundaries(pageURL);
+            int[] currentBoundaries = (int[])pgSections.elementAt(this.sectionIndex);
+
+            if(dir == 1 && currentBoundaries[0] >= 0 || dir == -1 && sectionIndex > 0) {
+                pageIndex = this.currentIndex;
+                sectionNum = this.sectionIndex+dir;
+            }
+        }
+
+        /*
+         * If there is not an appropriate section within the current page 
+         * to go to
+         */
+        if(pageIndex == -1){
+            pageIndex = this.currentIndex+dir;
+            //see if that page is also broken into sections
+            if(pageIndex >= 0 && pageIndex < spineURLs.length) {
+                pageURL = UMFileUtil.resolveLink(opfURL, 
+                    spineURLs[pageIndex]);
+
+                if(dir == 1 || getSectionBoundaries(pageURL) == null) {
+                    sectionNum = 0;
+                }else {
+                    sectionNum = getSectionBoundaries(pageURL).size()-1;
+                }
+            }
+        }
+
+        if(pageIndex >= 0 && pageIndex < spineURLs.length) {
+            showPage(pageIndex, sectionNum);
+        }
+    }
+    
 
     public void setContainerTitle(String containerTitle) {
         setTitle(containerTitle);
@@ -549,7 +688,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
      * async:
      * public static class ContainerDocumentRequestHandler implements AsyncDocumentRequestHandler {
      */
-    public static class ContainerDocumentRequestHandler implements DocumentRequestHandler {
+    public static class ContainerDocumentRequestHandler implements AsyncDocumentRequestHandler {
 
         private ContainerViewJ2ME view;
         
@@ -560,6 +699,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             startTimer();
         }
         
+        /**
+         * Creates / starts the timer if it does not already exist.  Calling this
+         * multiple times will have no  effect
+         */
         protected void startTimer() {
             if(timer == null) {
                 timer = new Timer();
@@ -571,6 +714,11 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                 timer.cancel();
                 timer = null;
             }
+        }
+        
+        protected void schedule(TimerTask task, long delay) {
+            startTimer();
+            timer.schedule(task, delay);
         }
         
         boolean shouldBeBufferEnabled(DocumentInfo di) {
@@ -628,40 +776,42 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                     if(urlQuery != null) {
                         params = UMFileUtil.parseURLQueryString(urlQuery);
                     }
-
-                    if(params != null && params.containsKey("s-index")) {
-                        index = Integer.parseInt((String)params.get("s-index"));
-                    }
-
-                    if(params != null && params.containsKey("startline")) {
-                        line = Integer.parseInt((String)params.get("startline"));
-                        col = Integer.parseInt((String)params.get("startcol"));
-                    }
-
-                    ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                    try {
-                        int[] endingPos = ContainerViewPageSplitter.dividePage(src, bout, 
-                            UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, 
-                            Display.getInstance().getDisplayWidth() * Display.getInstance().getDisplayHeight() * 2,
-                            line, col);
-
-                        if(index == boundaries.size()) {
-                            //we need to add this to the vector
-                            boundaries.addElement(endingPos);
-                            view.setSectionBoundaries(requestURL, boundaries);
+                    
+                    if(params == null || !params.containsKey("nosplit")) {
+                        if(params != null && params.containsKey("s-index")) {
+                            index = Integer.parseInt((String)params.get("s-index"));
                         }
 
-                        byte[] bytes = bout.toByteArray();
-                        //String pageStr = new String(bytes, "UTF-8");
-                        src.close();
+                        if(params != null && params.containsKey("startline")) {
+                            line = Integer.parseInt((String)params.get("startline"));
+                            col = Integer.parseInt((String)params.get("startcol"));
+                        }
 
-                        src = new ByteArrayInputStream(bytes);
-                        di.setContentLength(bytes.length);
-                    }catch(Exception xe) {
-                        UstadMobileSystemImpl.l(UMLog.ERROR, 198, null, xe);
-                        throw new IOException(xe.toString());
-                    }finally {
-                        bout = null;
+                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                        try {
+                            int[] endingPos = ContainerViewPageSplitter.dividePage(src, bout, 
+                                UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, 
+                                Display.getInstance().getDisplayWidth() * Display.getInstance().getDisplayHeight() * 2,
+                                line, col);
+
+                            if(index == boundaries.size()) {
+                                //we need to add this to the vector
+                                boundaries.addElement(endingPos);
+                                view.setSectionBoundaries(requestURL, boundaries);
+                            }
+
+                            byte[] bytes = bout.toByteArray();
+                            //String pageStr = new String(bytes, "UTF-8");
+                            src.close();
+
+                            src = new ByteArrayInputStream(bytes);
+                            di.setContentLength(bytes.length);
+                        }catch(Exception xe) {
+                            UstadMobileSystemImpl.l(UMLog.ERROR, 198, null, xe);
+                            throw new IOException(xe.toString());
+                        }finally {
+                            bout = null;
+                        }
                     }
                 }
                 
@@ -687,12 +837,12 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }
 
         public void resourceRequestedAsync(String url, IOCallback ioc, boolean bufferEnabled, int expectedType) {
-            timer.schedule(new ContainerDocumentRequestTask(url, ioc, this, 
+            schedule(new ContainerDocumentRequestTask(url, ioc, this, 
                 bufferEnabled, expectedType), 50);
         }
         
         public void resourceRequestedAsync(DocumentInfo di, IOCallback ioc, boolean bufferEnabled) {
-            timer.schedule(new ContainerDocumentRequestTask(di, ioc, this, 
+            schedule(new ContainerDocumentRequestTask(di, ioc, this, 
                 bufferEnabled), 50);
         }
         
@@ -743,9 +893,30 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             InputStream in = handler.resourceRequested(url, expectedType, bufferEnabled, di);
             ioc.streamReady(in, di);
         }
-        
-        
-        
+    }
+    
+    /**
+     * Timer task that runs on the background using ContainerDocumentRequestHandler's
+     * timer.
+     */
+    public class LoadNavDocTask extends TimerTask {
+        public void run() {
+            InputStream in = null;
+            EPUBNavDocument navDoc = null;
+            try {
+                in = requestHandler.resourceRequested(
+                    new DocumentInfo(UMFileUtil.resolveLink(opfURL, 
+                        ContainerViewJ2ME.this.opf.navItem.href) + "?nosplit=true", 
+                        DocumentInfo.TYPE_HTML));
+                navDoc = EPUBNavDocument.load(in);
+            }catch(Exception e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 1, title);
+            }finally {
+                UMIOUtils.closeInputStream(in);
+            }
+            
+            ContainerViewJ2ME.this.handleNavDocReady(navDoc);
+        }
     }
     
 

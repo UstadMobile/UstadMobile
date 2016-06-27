@@ -558,6 +558,23 @@ public class UMFileUtil {
     }
     
     /**
+     * Remove the anchor section of a link if present (e.g. for index.html#foo
+     * remove #foo)
+     * 
+     * @param uri The complete URI e.g. some/path.html#foo
+     * 
+     * @return the given uri without the anchor if it was found in the uri
+     */
+    public static String stripAnchorIfPresent(String uri) {
+        int charPos = uri.lastIndexOf('#');
+        if(charPos != -1) {
+            return uri.substring(0, charPos);
+        }else {
+            return uri;
+        }
+    }
+    
+    /**
      * Make sure that the given path has the given suffix; if it doesn't
      * add the suffix.
      * 

@@ -53,6 +53,12 @@ public class UstadJSOPF {
     
     public UstadJSOPFItem[] spine;
     
+    /**
+     * The item from the OPF that contains "nav" in it's properties.  As per the 
+     * EPUB spec there must be exactly one such item
+     */
+    public UstadJSOPFItem navItem;
+    
     public String title;
     
     public String id;
@@ -185,7 +191,10 @@ public class UstadJSOPF {
                         item2.mimeType = itemMime;
                         item2.properties = properties;
                         item2.id = id;
-
+                        
+                        if(properties != null && properties.indexOf("nav") != -1) {
+                            result.navItem = item2;
+                        }
 
                         allItems.put(id, item2);
 
