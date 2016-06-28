@@ -376,7 +376,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             mDrawerList.setAdapter(new ArrayAdapter<EPUBNavItem>(this, R.layout.item_containerview_toc,
                     drawerNavItems));
             mDrawerList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            //mDrawerList.setSelection(0);
             mDrawerList.setItemChecked(0, true);
         }
     }
