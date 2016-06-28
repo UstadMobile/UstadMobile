@@ -190,7 +190,11 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                             Response r = new Response(Response.Status.PARTIAL_CONTENT, getMimeType(uri),
                                     retInputStream);
                             r.addHeader("ETag", etag);
-                            //range request is inclusive: e.g. range 0-1 length is 2 bytes
+
+                            /*
+                             * range request is inclusive: e.g. range 0-1 length is 2 bytes as per
+                             * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html 14.35.1 Byte Ranges
+                             */
                             r.addHeader("Content-Length", String.valueOf((range[1]+1) - range[0]));
                             r.addHeader("Content-Range", "bytes " + range[0] + '-' + range[1] +
                                 '/' + totalLength);
@@ -203,8 +207,12 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                         }
 
                     }else {
+                        //Workaround : NanoHTTPD is using the InputStream.available method incorrectly
+                        // see RangeInputStream.available
+                        retInputStream = new RangeInputStream(retInputStream, 0, totalLength);
                         Response r = new Response(Response.Status.OK, getMimeType(uri),
                                 retInputStream);
+
                         r.addHeader("ETag", etag);
                         r.addHeader("Content-Length", String.valueOf(totalLength));
                         r.addHeader("Connection", "close");
