@@ -9,11 +9,50 @@
 
     <include android:id="@+id/container_toolbar" layout="@layout/toolbar"/>
 
-
-    <android.support.v4.view.ViewPager
+    <android.support.v4.widget.DrawerLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/container_epubrunner_pager"
+        android:id="@+id/container_drawer_layout"
         android:layout_below="@id/container_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+
+        <android.support.v4.view.ViewPager
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/container_epubrunner_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_gravity="start"
+            android:background="?attr/colorPrimary"
+            android:id="@+id/container_tocdrawer_relativelayout">
+
+            <Button
+                android:text="Contents"
+                android:textAppearance="@android:style/TextAppearance.Large"
+                android:background="@drawable/containerview_toclist_selector"
+                android:textColor="@color/containerview_draweritem_fgcolor"
+                android:id="@+id/container_tocdrawer_upbutton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <ListView android:id="@+id/container_tocdrawer"
+                android:layout_below="@id/container_tocdrawer_upbutton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:choiceMode="singleChoice"
+                android:divider="@color/primary_light"
+                android:listSelector="@drawable/containerview_toclist_selector"
+                android:dividerHeight="1dp"
+                />
+
+
+        </RelativeLayout>
+
+
+    </android.support.v4.widget.DrawerLayout>
 </RelativeLayout>

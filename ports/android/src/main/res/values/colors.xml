@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="umblue" type="color">#FF33B5E5</item>
+    <!--
+    <item name="colorPrimary" type='color'>#BBDEFB</item>
+    <item name="colorPrimaryDark" type='color'>#FF303F9F</item>
+    <item name="textColorPrimary" type="color">#FF000000</item>
+    -->
+    <color name="primary">#607D8B</color>
+    <color name="primary_dark">#455A64</color>
+    <color name="primary_light">#CFD8DC</color>
+    <color name="accent">#4CAF50</color>
+    <color name="primary_text">#FFFFFF</color>
+    <color name="secondary_text">#727272</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
+
+    <item name="umblue" type="color">#FF3F31B5</item>
     <item name="opds_card_pressed" type="color">#FF888888</item>
     <item name="opds_card_normal" type="color">#FFFFFFFF</item>
 </resources>

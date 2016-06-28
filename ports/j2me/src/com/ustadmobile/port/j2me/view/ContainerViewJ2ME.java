@@ -284,7 +284,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         try {
             ocf = controller.getOCF();
             opf = controller.getActiveOPF();
-            spineURLs = opf.getLinearSpineURLS();
+            spineURLs = opf.getLinearSpineHREFs();
                         
             htmlC = makeHTMLC();
                 

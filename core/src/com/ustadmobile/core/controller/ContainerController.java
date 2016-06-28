@@ -278,6 +278,21 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         return openPath;
     }
     
+    /**
+     * The directory in which a given OPF is; 
+     * 
+     * e.g. If the open path for the container is http://server:1234/container
+     * and the given OPF files comes from EPUB/package.opf within the container
+     * this will return http://server:1234/container/EPUB
+     * 
+     * @return The directory from which the given opf has been opened
+     */
+    public String getOPFBasePath(UstadJSOPF opf){
+        int opfIndex = 0;//TODO: this should select the index as per the OPF arg
+        return UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
+            new String[] {openPath, ocf.rootFiles[opfIndex].fullPath}));
+    }
+   
     
     public String getMimeType() {
         return mimeType;
@@ -397,33 +412,55 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * @throws XmlPullParserException 
      */
     public String[] getSpineURLs(boolean addXAPIParams) throws IOException, XmlPullParserException{
-        String[] spineURLs = null;
-        String opfPath = UMFileUtil.joinPaths(new String[]{openPath, 
-            getOCF().rootFiles[0].fullPath});
-        
-        String[] linearHREFs = getActiveOPF().getLinearSpineURLS();
-        
-        String xAPIParams = null;
-        if(addXAPIParams) {
-            String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
-            String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
-            xAPIParams = "?actor=" +
-                    URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
-                    "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
-                    "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT) +
-                    "&registration=" + registrationUUID;
-        }
-        
-        spineURLs = new String[linearHREFs.length];
-        for(int i = 0; i < linearHREFs.length; i++) {
-            spineURLs[i] = UMFileUtil.resolveLink(opfPath, linearHREFs[i]);
-            if(addXAPIParams) {
-                spineURLs[i] += xAPIParams;
-            }
-        }
-        
-        return spineURLs;
+        return resolveHREFS(activeOPF, getActiveOPF().getLinearSpineHREFs(), 
+            addXAPIParams ? getXAPIQuery() : null);
     }
+    
+    /**
+     * Returns a Query String for the xAPI parameters for the container including 
+     * the tincan actor, authorization, endpoint, and registration UUID
+     * 
+     * @return Query string as above
+     */
+    public String getXAPIQuery() {
+        String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
+        String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+        return "?actor=" +
+            URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
+            "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+            "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT) +
+            "&registration=" + registrationUUID;
+    }
+    
+    
+    /**
+     * Resolve an HREF from an OPF item to a full path
+     * 
+     * @param opf
+     * @param href
+     * 
+     * @return 
+     */
+    public String[] resolveHREFS(UstadJSOPF opf, String hrefs[], String postfix) {
+        String[] resolved = null;
+        try {
+            resolved = new String[hrefs.length];
+            String opfPath = UMFileUtil.joinPaths(new String[]{openPath, 
+                getOCF().rootFiles[0].fullPath});
+            for(int i = 0; i < hrefs.length; i++) {
+                resolved[i] = UMFileUtil.resolveLink(opfPath, hrefs[i]);
+                if(postfix != null) {
+                    resolved[i] += postfix;
+                }
+            }
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 168, opf.id, e);
+        }
+        
+        return resolved;
+    }
+    
+    
     
     /**
      * Generate a launched statement for this course

@@ -11,12 +11,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 import com.joanzapata.pdfview.PDFView;
@@ -24,36 +30,35 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.epubnav.EPUBNavDocument;
+import com.ustadmobile.core.epubnav.EPUBNavItem;
+import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.ocf.UstadOCF;
-import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.tincan.Registration;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.util.Enumeration;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+import java.util.Vector;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView, AppViewChoiceListener, TinCanResultListener {
+public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView, AppViewChoiceListener, TinCanResultListener, ListView.OnItemClickListener {
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -86,9 +91,20 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private Hashtable mArgs;
 
-    private int lastPageShown = -1;
-
     private Registration[] resumableRegistrations;
+
+    private DrawerLayout mDrawerLayout;
+
+    private ActionBarDrawerToggle mDrawerToggle;
+
+    private ListView mDrawerList;
+
+    private EPUBNavDocument navDocument;
+
+    /**
+     * Navigation items in the order in which they appear in the drawer on the left
+     */
+    private EPUBNavItem[] drawerNavItems;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -121,8 +137,16 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mDrawerLayout = (DrawerLayout)findViewById(R.id.container_drawer_layout);
+        mDrawerToggle = new ActionBarDrawerToggle(this,
+                mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+        mDrawerToggle.syncState();
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+        mDrawerList = (ListView)findViewById(R.id.container_tocdrawer);
+        mDrawerList.setOnItemClickListener(this);
 
         //now bind to the HTTPService - the onServiceConnected method will call initContent
         Intent intent = new Intent(this, HTTPService.class);
@@ -155,6 +179,25 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     @Override
     public void controllerReady(final UstadController controller, int flags) {
         final Context ctx = this;
+        String navDocHREF = null;
+        try {
+            /*
+            Load the navigation document here - this event handler is on the thread that loaded
+            the controller itself - thus off the UI thread.  The controller itself won't load this
+            as the J2ME version only loads the navigation when the user goes to the TOC page
+            */
+            ContainerController containerCtrl =(ContainerController)controller;
+            navDocHREF = containerCtrl.resolveHREFS(containerCtrl.getActiveOPF(),
+                    new String[]{containerCtrl.getActiveOPF().navItem.href}, null)[0];
+            HTTPResult navDocResult= UstadMobileSystemImpl.getInstance().makeRequest(navDocHREF,
+                    null, null);
+
+            navDocument = EPUBNavDocument.load(new ByteArrayInputStream(navDocResult.getResponse()));
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 166, navDocHREF, e);
+        }
+
+
         runOnUiThread(new Runnable() {
             public void run() {
                 if (controller != null) {
@@ -206,6 +249,21 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     }
 
     /**
+     * Override the onCreateOptionsMenu : In Container mode we don't show the standard app menu
+     * options like logout, about etc.  We show only a close button in the top right to make things
+     * simple
+     *
+     * @param menu
+     *
+     * @return true as we will have added items
+     */
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_container, menu);
+        return true;
+    }
+
+    /**
      * Show a PDF container using
      */
     public void showPDF() {
@@ -222,11 +280,44 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             .enableSwipe(true).load();
     }
 
+    /**
+     * Update the selected item in the drawer
+     */
+    private void updateTOCSelection(String currentPageHREF) {
+        if(drawerNavItems != null) {
+            for(int i = 0; i < drawerNavItems.length; i++) {
+                if(drawerNavItems[i].href != null && drawerNavItems[i].href.equals(currentPageHREF)) {
+                    mDrawerList.setItemChecked(i, true);
+                    return;
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle when the user has tapped an item from the table of contents on the drawer
+     *
+     * @param adapterView
+     * @param view
+     * @param i
+     * @param l
+     */
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        if(drawerNavItems != null) {
+            int fragPos = mPagerAdapter.getFragmentIndexByHREF(drawerNavItems[i].href);
+            if(fragPos != -1) {
+                mPager.setCurrentItem(fragPos);
+                mDrawerLayout.closeDrawers();
+            }
+        }
+    }
+
     public void showEPUB() {
         String[] urlArray = null;
         Exception exc = null;
         try {
-            urlArray = mContainerController.getSpineURLs(true);
+            urlArray = mContainerController.getActiveOPF().getLinearSpineHREFs();
             UstadMobileSystemImpl.getInstance().queueTinCanStatement(
                 mContainerController.makeLaunchedStatement(), getContext());
         }catch(Exception e) {
@@ -238,7 +329,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             setContainerTitle(mContainerController.getActiveOPF().title);
             mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
             final int numPages = urlArray.length;
-            mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(), urlArray);
+            mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(),
+                    mContainerController.getOPFBasePath(mContainerController.getActiveOPF()),
+                    mContainerController.getActiveOPF().getLinearSpineHREFs(),
+                    mContainerController.getXAPIQuery());
             mPager.setAdapter(mPagerAdapter);
             if(mSavedPosition != -1) {
                 mPager.setCurrentItem(mSavedPosition);
@@ -253,11 +347,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                 }
 
                 @Override
-                public void onPageSelected(int position) {
-                    ContainerPageFragment frag = (ContainerPageFragment) mPagerAdapter.getItem(
-                        position);
+                public void onPageSelected(int pos) {
+                    ContainerPageFragment frag = (ContainerPageFragment) mPagerAdapter.getItem(pos);
                     frag.evaluateJavascript(onpageSelectedJS);
-                    frag.showPagePosition(position+1, numPages);
+                    frag.showPagePosition(pos+1, numPages);
+                    updateTOCSelection(frag.getPageHref());
                 }
 
                 @Override
@@ -265,11 +359,25 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
                 }
             });
+
         }else {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             String message = "what a terrible failure: " + exc.toString();
             exc.printStackTrace();
             impl.getAppView(this).showAlertDialog(impl.getString(U.id.error), message);
+        }
+
+        if(navDocument != null) {
+            //show TOC
+            Vector navVector = navDocument.getNavById("toc").getChildrenRecursive(new Vector());
+            drawerNavItems = new EPUBNavItem[navVector.size()];
+            navVector.toArray(drawerNavItems);
+
+            mDrawerList.setAdapter(new ArrayAdapter<EPUBNavItem>(this, R.layout.item_containerview_toc,
+                    drawerNavItems));
+            mDrawerList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            //mDrawerList.setSelection(0);
+            mDrawerList.setItemChecked(0, true);
         }
     }
 
@@ -277,8 +385,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     public boolean refreshURLs() {
         boolean success = false;
         try {
-            String[] pageURLs = mContainerController.getSpineURLs(true);
-            mPagerAdapter.setPageList(pageURLs);
+            mPagerAdapter.updatePageProps(mContainerController.getOPFBasePath(
+                    mContainerController.getActiveOPF()),
+                    mContainerController.getActiveOPF().getLinearSpineHREFs(),
+                    mContainerController.getXAPIQuery(), true);
             success = true;
         }catch(Exception e) {
             UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 197, null, e);
@@ -341,7 +451,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             case ContainerController.CMD_RESUME_SESSION:
                 mContainerController.handleClickResumableRegistrationMenuItem();
                 return true;
-            case android.R.id.home:
+            case R.id.action_leavecontainer:
                 finish();
                 return true;
         }
@@ -382,13 +492,25 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         WeakHashMap<Integer, ContainerPageFragment> pagesMap;
 
         /**
-         * Array of pages to be shown
+         * Array of the page HREF items to be shown
          */
-        private String[] pageList;
+        private String[] hrefList;
 
-        public ContainerViewPagerAdapter(FragmentManager fm, String[] pageList) {
+        /**
+         * Base URL of pages (directory name)
+         */
+        private String baseURI;
+
+        /**
+         * Query string to append to the end of each page
+         */
+        private String query;
+
+        public ContainerViewPagerAdapter(FragmentManager fm, String baseURI, String[] hrefList, String query) {
             super(fm);
-            this.pageList = pageList;
+            this.baseURI = baseURI;
+            this.hrefList = hrefList;
+            this.query = query;
             this.pagesMap = new WeakHashMap<>();
         }
 
@@ -408,29 +530,38 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                 return existingFrag;
             }else {
                 ContainerPageFragment frag =
-                        ContainerPageFragment.newInstance(pageList[position]);
+                        ContainerPageFragment.newInstance(baseURI, hrefList[position], query);
 
                 this.pagesMap.put(Integer.valueOf(position), frag);
                 return frag;
             }
         }
 
-        public void setPageList(String[] pageList) {
-            this.pageList = pageList;
+        public int getFragmentIndexByHREF(String href) {
+            return Arrays.asList(hrefList).indexOf(href);
+        }
+
+
+        public void updatePageProps(String baseURI, String[] hrefList, String query, boolean reload) {
+            this.baseURI = baseURI;
+            this.hrefList = hrefList;
+            this.query = query;
+
             Iterator<Map.Entry<Integer, ContainerPageFragment>> iterator = pagesMap.entrySet().iterator();
             ContainerPageFragment frag;
-            int index;
             Map.Entry<Integer, ContainerPageFragment> entry;
             while(iterator.hasNext()) {
                 entry = iterator.next();
                 frag = entry.getValue();
-                frag.setPageURL(pageList[entry.getKey()]);
+                frag.setBaseURI(baseURI, false);
+                frag.setPageHref(hrefList[entry.getKey()], false);
+                frag.setQuery(query, reload);
             }
         }
 
         @Override
         public int getCount() {
-            return pageList.length;
+            return hrefList.length;
         }
     }
 
