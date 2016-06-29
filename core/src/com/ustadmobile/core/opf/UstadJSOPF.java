@@ -53,6 +53,12 @@ public class UstadJSOPF {
     
     public UstadJSOPFItem[] spine;
     
+    /**
+     * The item from the OPF that contains "nav" in it's properties.  As per the 
+     * EPUB spec there must be exactly one such item
+     */
+    public UstadJSOPFItem navItem;
+    
     public String title;
     
     public String id;
@@ -184,7 +190,11 @@ public class UstadJSOPF {
                         item2.href = filename;
                         item2.mimeType = itemMime;
                         item2.properties = properties;
-
+                        item2.id = id;
+                        
+                        if(properties != null && properties.indexOf("nav") != -1) {
+                            result.navItem = item2;
+                        }
 
                         allItems.put(id, item2);
 
@@ -277,16 +287,21 @@ public class UstadJSOPF {
         return spineURLs;
     }
     
-    public String[] getLinearSpineURLS() {
-        Vector spineURLs = new Vector();
+    /**
+     * Gets an array of linear hrefs from the spine
+     * 
+     * @return String array of all the HREFs that are in the linear spine order
+     */
+    public String[] getLinearSpineHREFs() {
+        Vector spineHREFs = new Vector();
         for(int i = 0; i < this.spine.length; i++) {
             if(this.spine[i].linear) {
-                spineURLs.addElement(this.spine[i].href);
+                spineHREFs.addElement(this.spine[i].href);
             }
         }
         
-        String[] linearSpine = new String[spineURLs.size()];
-        spineURLs.copyInto(linearSpine);
+        String[] linearSpine = new String[spineHREFs.size()];
+        spineHREFs.copyInto(linearSpine);
         return linearSpine;
     }
     
@@ -297,7 +312,7 @@ public class UstadJSOPF {
      * @return position of that item in the linear spine or -1 if not found
      */
     public int getLinearSpinePositionByHREF(String href) {
-        String[] linearSpine = getLinearSpineURLS();
+        String[] linearSpine = getLinearSpineHREFs();
         for(int i = 0; i < linearSpine.length; i++) {
             if(linearSpine[i].equals(href)) {
                 return i;

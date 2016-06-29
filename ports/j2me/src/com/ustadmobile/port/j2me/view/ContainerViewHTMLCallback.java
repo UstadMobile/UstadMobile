@@ -48,6 +48,7 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import org.json.me.JSONObject;
 
 /**
  *
@@ -71,6 +72,10 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     String containerTinCanID;
     
     Object context;
+    
+    private String registrationUUID;
+    
+    private JSONObject state;
         
     static {
         mediaExtensions = new Hashtable();
@@ -87,12 +92,38 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         this.containerTinCanID = containerTinCanID;
         this.context = context;
     }
-
+    
     public ContainerViewHTMLCallback(ContainerViewJ2ME view) {
         this.view = view;
         this.context = view.getContext();
     }
 
+    /**
+     * Get the registration UUID to be used for Experience API statements
+     * 
+     * @return the registration UUID to be used for Experience API statements
+     */
+    public String getRegistrationUUID() {
+        return registrationUUID;
+    }
+
+    /**
+     * Set the registration UUID to be used for Experience API statements
+     * 
+     * @param registrationUUID the registration UUID to be used for Experience API statements
+     */
+    public void setRegistrationUUID(String registrationUUID) {
+        this.registrationUUID = registrationUUID;
+    }
+    
+    public void setState(JSONObject state) {
+        this.state = state;
+    }
+    
+    public JSONObject getState() {
+        return state;
+    }
+    
     /**
      * Find eXeLearning generated MCQ questions and set them up so we can
      * dynamically show / hide the feedback for those answers
@@ -113,16 +144,36 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         }
         
         mcqQuizzes = new Hashtable();
-        String pageTinCanID = containerTinCanID + '/' + 
-                UMFileUtil.getFilename(htmlC.getPageURL());
+        
+        String pageIdSection = null;
+        if(view != null) {
+            pageIdSection = view.getCurrentPageOPFId();
+        }else if(htmlC.getPageURL() != null) {
+            pageIdSection = UMFileUtil.getFilename(htmlC.getPageURL());
+        }
+        
+        String pageTinCanID = containerTinCanID + '/' + pageIdSection;
+            
+        HTMLElement quizEl;
+        int numQuizzes = 0;
         for(int i = 0; i < quizElements.size(); i++) {
+            quizEl = (HTMLElement)quizElements.elementAt(i);
+            
+            //There can be faulty empty idevices generated somehow... skip if this is what we found
+            if(quizEl.getNumChildren() == 0) {
+                continue;
+            }
+            
             EXEQuizIdevice quizDevice = new EXEQuizIdevice(
                     (HTMLElement)quizElements.elementAt(i), htmlC, context, 
                     pageTinCanID, i);
+            quizDevice.setRegistrationUUID(registrationUUID);
+            quizDevice.setState(state);
             mcqQuizzes.put(quizDevice.getID(), quizDevice);
+            numQuizzes++;
         }
         
-        return true;
+        return numQuizzes > 0;
     }
     
     public Hashtable getMCQQuizzes() {
@@ -172,7 +223,13 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     public boolean linkClicked(HTMLComponent htmlC, String url) {
         parsingError(600, "a", "src", url, "link click");
-        UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog("Click2", "u\n clicked");
+        if(url.startsWith(UstadMobileSystemImplJ2ME.OPENZIP_PROTO)) {
+            return true;
+        }else {
+            UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog(
+                "Link not supported", url);
+        }
+        
         return false;
     }
 

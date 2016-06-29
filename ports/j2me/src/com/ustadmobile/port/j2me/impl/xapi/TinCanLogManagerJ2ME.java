@@ -180,7 +180,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         StringBuffer sb = new StringBuffer();
         String status = "3";
         boolean outcome = false;
-        if (userid != null && userid != ""){
+        if (userid != null && userid.length() > 0){
             status = "0";
             impl.l(UMLog.DEBUG, 540, "user id ok" );
         }
@@ -642,7 +642,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         //on J2ME we don't really need a context to get the current username - it's a static singleton
                         String password = impl.getAppPref("password-"+statementUsername, this);
                         
-                        if (statementUsername == null || statementUsername == ""){
+                        if (statementUsername == null || statementUsername.length() == 0){
                             //Blank username bro
                             impl.l(UMLog.DEBUG, 558, "Not a valid username bro" );
                             logLine = logLine + ":03";
@@ -677,6 +677,8 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         //HTTPResult result = HTTPUtils.makeHTTPRequest(tincanEndpointURL,
                         //        null, tinCanHeaders, "POST", statementBytes);
                         return_code = result.getStatus();
+                        String serverSays = new String(result.getResponse(), 
+                            UstadMobileConstants.UTF8);
 
                         if (return_code == 200){
                             impl.l(UMLog.DEBUG, 558, "Line went ok" );

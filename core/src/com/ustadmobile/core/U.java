@@ -154,15 +154,17 @@ public class U {
         
         public static final int regcode = 56;
         
-        public static final int attendance = 57;
+        public static final int home = 57;
         
-        public static final int processing = 58;
+        public static final int attendance = 100;
+        
+        public static final int processing = 101;
 
-        public static final int classes = 59;
+        public static final int classes = 102;
         
-        public static final int exams = 60;
+        public static final int exams = 103;
         
-        public static final int reports = 61;
+        public static final int reports = 104;
    }
 
 }

@@ -48,6 +48,7 @@ import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -68,18 +69,11 @@ import java.util.Vector;
 public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements CatalogView, ActionListener, Runnable, ControllerReadyListener{
 
     
-    public static final int OPDSCMDID_MAX = 999;
-    
-    public static int OPDSCMDID_OFFSET = 30;
-    
-    public static int MENUCMD_OFFSET = 10;
-    
     private CatalogController controller;
     
     private UstadJSOPDSEntry[] entries;
     
     final private Hashtable entryIdToButtons;
-    
     
     final private int CMD_REFRESH = 0;
     
@@ -120,9 +114,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     private int fetchFlags;
     
     boolean acquisition = false;
-    
-    private Command[] menuCommands;
-    
+        
     private Command[] extraCommands;
     
     public CatalogOPDSContainer(Hashtable args, Object context, UstadViewFormJ2ME ustadForm) {
@@ -149,25 +141,28 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     public void loadCatalog(String url, int resourceMode) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
+        //impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.loading));
         CatalogController.makeControllerForView(this, url, resourceMode, 
                 fetchFlags, this);
     }
     
     public void controllerReady(final UstadController controller, final int flags) {
-        if(controller != null) {
-            Display.getInstance().callSerially(new Runnable() {
-                public void run() {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final Object context = getContext();
+        Display.getInstance().callSerially(new Runnable() {
+            public void run() {
+                //impl.getAppView(context).dismissProgressDialog();
+                if(controller != null) {
                     setController((CatalogController)controller);
+                }else {
+                    String errMsg = LocaleUtil.formatMessage(
+                        impl.getString(U.id.course_catalog_load_error),
+                        "Catalog controller");
+                    impl.getAppView(getContext()).showAlertDialog(impl.getString(U.id.error),
+                        errMsg);
                 }
-            });
-        }else {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            String errMsg = LocaleUtil.formatMessage(impl.getString(U.id.course_catalog_load_error),
-                    "Catalog controller");
-            impl.getAppView(getContext()).showAlertDialog(impl.getString(U.id.error),
-                errMsg);
-        }
+            }
+        });
     }
     
     public void setController(CatalogController controller) {
@@ -188,7 +183,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         
         for(i=0; i<entries.length; i++){
             String title = entries[i].title;
-            Command entryCmd = new Command(title, i+OPDSCMDID_OFFSET);
+            Command entryCmd = new Command(title);
             OPDSItemButton entryButton = new OPDSItemButton(entryCmd, entries[i]);
             entryButton.setAllStylesAlignment(alignment);
             
@@ -206,12 +201,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         }
         
         Label spaceLabel = new Label(" ");
-        addComponent(spaceLabel);
-        
-        Command refreshCmd = new Command(impl.getString(U.id.refresh), CMD_REFRESH);
-        Button refreshButton = new Button(refreshCmd);
-        this.addComponent(refreshButton);
-        
+        addComponent(spaceLabel);        
         
         if (acquisition){
             Command downloadAll = new Command(impl.getString(U.id.download_all), CMD_DOWNLOAD_ALL);
@@ -234,11 +224,9 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     public void actionPerformed(ActionEvent evt) {
         int cmdId = evt.getCommand().getId();
-        if(cmdId >= OPDSCMDID_OFFSET && cmdId < OPDSCMDID_MAX) {
-            UstadJSOPDSEntry clickedEntry = controller.getModel().opdsFeed.entries[cmdId - OPDSCMDID_OFFSET];
-            this.controller.handleClickEntry(clickedEntry);
-        }else if(cmdId >= MENUCMD_OFFSET) {
-            this.controller.handleClickMenuItem(cmdId - MENUCMD_OFFSET);
+        Object component = evt.getComponent();
+        if(component != null && component instanceof OPDSItemButton) {
+            this.controller.handleClickEntry(((OPDSItemButton)component).getEntry());
         }else if(cmdId == CMD_CONFIRM_OK || cmdId == CMD_CONFIRM_CANCEL) {
             confirmDialog.setVisible(false);
             confirmDialog.dispose();
@@ -255,6 +243,8 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
                     UstadMobileSystemImpl.getInstance().getString(U.id.nothing_selected),
                     AppView.LENGTH_LONG);
             }
+        }else if(cmdId == CMD_REFRESH) {
+            refresh();
         }
     }
     
@@ -401,42 +391,20 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     }
     
 
-    /**
-     * Sets the options available in the menu (this could be a drawer, J2ME menu, etc)
-     * 
-     * When an item is clicked/tapped called controller.handleMenuItemClick(index)
-     * 
-     * @param String array of options to show in the menu
-     */
-    public void setMenuOptions(String[] menuOptions){
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        //removeAllCommands();
-        
-        menuCommands = new Command[menuOptions.length+1];
-        menuCommands[0] = new Command(impl.getString(U.id.delete), 
-                CMD_DELETE_ENTRY);
-        
-        for(int i = 0; i < menuOptions.length; i++) {
-            menuCommands[i+1] = new Command(menuOptions[i], i + MENUCMD_OFFSET);
-        }
-        
-        getUstadForm().invalidateMenuCommands();
-    }
-
     public void onCreateMenuCommands(Vector cmdVector) {
-        if(menuCommands == null) {
-            return;//not ready yet
-        }
+        super.onCreateMenuCommands(cmdVector);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        
+        cmdVector.addElement(new Command(impl.getString(U.id.delete), 
+                CMD_DELETE_ENTRY));
+        cmdVector.addElement(new Command(impl.getString(U.id.refresh),
+            CMD_REFRESH));
         
         int i;
         if(extraCommands != null) {
             for(i = 0; i < extraCommands.length; i++) {
                 cmdVector.addElement(extraCommands[i]);
             }
-        }
-        
-        for(i = 0; i < menuCommands.length; i++) {
-            cmdVector.addElement(menuCommands[i]);
         }
     }
     
@@ -493,5 +461,10 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
             controller.handleViewDestroy();
         }
     }
+    
+    public void refresh() {
+        loadCatalog();
+    }
+    
 
 }

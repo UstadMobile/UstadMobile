@@ -40,12 +40,9 @@ import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
-import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
-import com.ustadmobile.core.util.URLTextUtil;
-import javax.microedition.pim.FieldFullException;
 
 /**
  *

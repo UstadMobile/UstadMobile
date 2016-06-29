@@ -36,17 +36,12 @@ import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipEntryHandle;
-import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.model.CatalogModel;
-import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
-import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
@@ -56,6 +51,7 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.AttendanceView;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
@@ -195,21 +191,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     
     //this is where the feed (and its entries) live.
     private CatalogModel model;
-    
-    public static int[] catalogMenuOptIDS = new int[]{U.id.mycourses, 
-        U.id.onthisdevice, U.id.logout, U.id.about, U.id.settings, U.id.attendance};
-    
-    public static final int MENUINDEX_MYCOURSES = 0;
-    
-    public static final int MENUINDEX_MYDEVICE = 1;
-    
-    public static final int MENUINDEX_LOGOUT = 2;
-    
-    public static final int MENUINDEX_ABOUT = 3;
-    
-    public static final int MENUINDEX_SETTINGS = 4;
-    
-    public static final int MENUINDEX_ATTENDANCE = 5;
     
     public static final String LOCALOPDS_ID_SUFFIX = "-local";
     
@@ -367,13 +348,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void setResourceMode(int resourceMode) {
         this.resourceMode = resourceMode;
     }
-
-    
-    //methods go here..
-    
-    public void handleClickRefresh() {
-        
-    }
     
     //shows the view
     /**
@@ -389,12 +363,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void setUIStrings() {
         CatalogView cView = (CatalogView)view;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] menuOpts = new String[catalogMenuOptIDS.length];
-        for(int i = 0; i < menuOpts.length; i++) {
-            menuOpts[i] = impl.getString(catalogMenuOptIDS[i]);
-        }
-        
-        cView.setMenuOptions(menuOpts);
         cView.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
         
         setStandardAppMenuOptions();
@@ -457,7 +425,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @param resourceMode as per makeControllerByURL 
      * @param flags as per makeControllerByURL
      * 
-     * @see CatalogController#makeControllerByURL(java.lang.String, com.ustadmobile.core.impl.UstadMobileSystemImpl, int, java.lang.String, java.lang.String, int) 
+     * @see CatalogController#makeControllerByURL(java.lang.String, int, java.lang.String, java.lang.String, int, java.lang.Object) 
      * 
      * @throws IOException
      * @throws XmlPullParserException 
@@ -636,9 +604,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * Make a catalog representing the files that are now in the shared and user
      * directories
      * 
-     * @param sharedDir - Shared directory to use: or null to use default shared directory
-     * @param userDir - User content directory to use: or null to use default user directory
-     * @param dirFlags - Set which directories to scan: inc USER_RESOURCE , SHARED_RESOURCE
+     * @param dirs - Content directories that should be scanned represented by the UMStorageDir object
+     * @param dirFlags - Set which directories to scan: e.g. USER_RESOURCE | SHARED_RESOURCE
+     * @param context - Context object being used by the controller
      * 
      * @return CatalogController representing files on the device
      */
@@ -747,7 +715,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * be another OPDS catalog Feed to display or it could be a container
      * entry.
      * 
-     * @param item 
+     * @param entry 
      */
     public void handleClickEntry(final UstadJSOPDSEntry entry) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -807,7 +775,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             storageMode, getContext());
         Vector availableVector = new Vector();
         for(int i = 0; i < allDirs.length; i++) {
-            if(allDirs[i].isAvailable()) {
+            if(allDirs[i].isAvailable() && allDirs[i].isWritable()) {
                 availableVector.addElement(allDirs[i]);
             }
         }
@@ -1016,40 +984,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             }
         });
         startDownloadThread.start();
-    }
-    
-    
-    /**
-     * Called when the user selects an item from the menu (e.g. Drawer, J2ME options
-     * menu etc)
-     * 
-     * @param index Index of the item clicked corresponding with the menuitem string array
-     */
-    public void handleClickMenuItem(int index) {
-        switch(index) {
-            case MENUINDEX_LOGOUT:
-                UstadMobileSystemImpl.getInstance().go(LoginView.class, 
-                    null, getContext());
-                break;
-            case MENUINDEX_MYDEVICE:
-                Hashtable args = new Hashtable();
-                args.put(KEY_URL, OPDS_PROTO_DEVICE);
-                args.put(KEY_RESMOD, new Integer(USER_RESOURCE | SHARED_RESOURCE));
-                args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
-                
-                UstadMobileSystemImpl.getInstance().go(CatalogView.class,
-                        args, getContext());
-                
-                break;
-            case MENUINDEX_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(UserSettingsView.class, 
-                        new Hashtable(), getContext());
-                break;
-            case MENUINDEX_ATTENDANCE:
-                UstadMobileSystemImpl.getInstance().go(AttendanceView.class, 
-                    new Hashtable(), getContext());
-                break;
-        }
     }
     
     /**
@@ -1537,14 +1471,28 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         UstadJSOPDSEntry epubEntry;
         UstadJSOPDSFeed containerFeed;
         String entryCacheFile;
-        boolean isEPUB = false;
+        boolean isEPUB;
         
         for(i = 0; i < containerFiles.length; i++) {
             containerFeed = null;
             impl.l(UMLog.VERBOSE, 408, containerFiles[i]);
             
             try {
-                entryCacheFile = containerFiles[i] + CONTAINER_INFOCACHE_EXT;
+                //the relative path within the cache directory
+                entryCacheFile = UMFileUtil.stripPrefixIfPresent("file:///", containerFiles[i])
+                        + CONTAINER_INFOCACHE_EXT;
+                
+                /*
+                 On J2ME roots often look like file://E:/ for the memory card etc.
+                 The ':' comes from the drive letter and is not valid in a normal
+                 filename so must be replaced
+                */
+                entryCacheFile = entryCacheFile.replace(':', '_');
+                
+                entryCacheFile = UMFileUtil.joinPaths(new String[] {
+                    impl.getCacheDir(containerFileModes[i] ? USER_RESOURCE : SHARED_RESOURCE, context),
+                    entryCacheFile
+                });
                 isEPUB = containerFiles[i].endsWith(EPUB_EXTENSION);
                 //see oif
                 if(impl.fileExists(entryCacheFile) && (impl.fileLastModified(entryCacheFile) > impl.fileLastModified(containerFiles[i])) || !isEPUB) {
@@ -1556,17 +1504,18 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                     }
                 }
                 
-                if(containerFeed == null) {
+                if(containerFeed == null && isEPUB) {
                     containerFeed = ContainerController.generateContainerFeed(
-                        containerFiles[i], containerFiles[i] + CONTAINER_INFOCACHE_EXT);
+                        containerFiles[i], entryCacheFile);
                     try {
+                        impl.makeDirectoryRecursive(
+                            UMFileUtil.getParentFilename(entryCacheFile));
                         impl.writeStringToFile(containerFeed.toString(), 
                             entryCacheFile, "UTF-8");
                     }catch(IOException e) {
                         impl.l(UMLog.ERROR, 138, entryCacheFile, e);
                     }
                 }
-                
                 
                 
                 for(j = 0; j < containerFeed.entries.length; j++) {
@@ -1663,7 +1612,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * preference
      * 
      * @param entryID the OPDS ID of the entry in question
-     * @param entryInfo CatalogEntryInfo object with required info about entry
+     * @param info CatalogEntryInfo object with required info about entry
      * @param resourceMode  USER_RESOURCE or SHARED_RESOURCE to be set as a user or shared preference
      * Use USER_RESOURCE when the file is in the users own directory, SHARED_RESOURCE otherwise
      */

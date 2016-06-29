@@ -70,15 +70,6 @@ public interface CatalogView extends UstadView{
      */
     public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId);
     
-   
-    /**
-     * Sets the options available in the menu (this could be a drawer, J2ME menu, etc)
-     * 
-     * When an item is clicked/tapped called controller.handleMenuItemClick(index)
-     * 
-     * @param String array of options to show in the menu
-     */
-    public void setMenuOptions(String[] menuOptions);
     
     /**
      * Set the status of a given entry (e.g. acquired, not acquired, in progress) 

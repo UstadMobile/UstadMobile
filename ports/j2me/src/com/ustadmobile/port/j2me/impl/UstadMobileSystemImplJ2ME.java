@@ -52,6 +52,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
@@ -182,18 +183,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc}
      */
     public boolean queueTinCanStatement(JSONObject stmt, Object context) {
-        l(UMLog.DEBUG, 538, "");
-        boolean result = true;
-        
-        /*
+        l(UMLog.DEBUG, 538, "");        
         try {
-            
             return logManager.queueStatement(getActiveUser(context), stmt);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            UstadMobileSystemImpl.l(UMLog.ERROR, 174, null, ex);
         }
-        */
-        return result;
+        
+        return false;
     }
     
     
@@ -213,12 +210,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         logSendTimer = new Timer();
         logManager = new TinCanLogManagerJ2ME();
-        logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
+        //Run the log sender every 2 mins
+        logSendTimer.scheduleAtFixedRate(logManager, (2*60*1000), (2*60*1000));
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
         boolean isRTL = getDirection() == UstadMobileConstants.DIR_RTL;
         UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
-        int x = 42;
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
@@ -277,9 +274,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public void setActiveUser(String username, Object context) {
         AppPref.addSetting("CURRENTUSER", username);
-        UserPref.setActiveUser(username);
         
         if(username != null) {
+            UserPref.setActiveUser(username);
             String userBaseDir = UMFileUtil.joinPaths(new String[] {baseSystemDir,
             username});
             try {
@@ -324,6 +321,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             
             for(int i = 0; i < potentialCacheDirs.size(); i++) {
                 currentDir = (String)potentialCacheDirs.elementAt(i);
+                currentDir = UMFileUtil.ensurePathHasPrefix("file:///", currentDir);
                 if(UMIOUtils.canWriteChildFile(currentDir)) {
                     baseSystemDir = UMFileUtil.joinPaths(new String[] {
                         currentDir, CONTENT_DIR_NAME});
@@ -540,9 +538,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public long fileLastModified(String fileURI) {
         long result = -1;
         FileConnection con = null;
+        
         try {
             con = (FileConnection)Connector.open(fileURI);
             result = con.lastModified();
+            l(UMLog.DEBUG, 570, fileURI + " :  " + result);
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 136, fileURI, e);
         }finally {
@@ -712,6 +712,37 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return result;
     }
     
+    public boolean makeDirectoryRecursive(String dirURI) throws IOException{
+        return makeDirectoryRecursive(dirURI, null);
+    }
+    
+    public boolean makeDirectoryRecursive(String dirURI, Vector roots) throws IOException {
+        l(UMLog.INFO, 372, dirURI);
+        boolean created = false;
+        try {
+            if(roots == null) {
+                roots = new Vector();
+                UMUtil.addEnumerationToVector(FileSystemRegistry.listRoots(),
+                    roots);
+            }
+            
+            if(roots.contains(dirURI)) {
+                created = true;
+            }else if(dirURI.equals("file:///")) {
+                created =  true;
+            }else {
+                if(makeDirectoryRecursive(UMFileUtil.getParentFilename(dirURI), roots)) {
+                    return makeDirectory(dirURI);
+                }
+            }
+        }catch(IOException e) {
+            l(UMLog.ERROR, 186, dirURI, e);
+            throw e;
+        }
+        
+        return created;
+    }
+    
     
     
     public boolean makeDirectory(String dirURI) throws IOException{
@@ -838,11 +869,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             // Setup HTTP Request to GET/POST
             if(type.equals("POST")){
                 httpConn.setRequestProperty("User-Agent",
-                    "Profile/MIDP-1.0 Confirguration/CLDC-1.0");
+                    "Profile/MIDP-2.0 Configuration/CLDC-1.0");
                 httpConn.setRequestProperty("Accept_Language","en-US");
-                //Content-Type is must to pass parameters in POST Request
-                httpConn.setRequestProperty("Content-Type", 
-                        "application/x-www-form-urlencoded");
             }
             
             //Add Parameters
@@ -880,35 +908,29 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 }
             }
             
+            /*
+             * Important trivia on J2ME HTTP Post requests: J2ME will only use
+             * Transfer-Encoding chunked which marks the length within the post
+             * body itself - and therefor Content-Length headers must NOT be added.
+             *
+             * J2ME emulator will silently remove Content-Length headers but not
+             * Content-length - even though HTTP headers are supposed to be case
+             * insensitive
+             */
             if(type.equals("POST")){
-                if(params == null && postBody != null){
-                    //Content-Length to be set
-                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(postBody.length));
-                    httpConn.setRequestProperty("Content-length", 
-                            String.valueOf(postBody.length));
-                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
-                    //httpConn.setRequestProperty(url, type);
-                    l(UMLog.DEBUG, 800, "openingOutputStream");
-                    os = httpConn.openOutputStream();
-                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
-                    os.write(postBody);
-                    l(UMLog.DEBUG, 800, "flushing..");
-                    os.flush();
-                    l(UMLog.DEBUG, 800, "flushed.");
-                }else{
-                    //Content-Length to be set
-                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(params.getBytes().length));
-                    httpConn.setRequestProperty("Content-length", 
-                            String.valueOf(params.getBytes().length));
-                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
-                    //httpConn.setRequestProperty(url, type);
-                    l(UMLog.DEBUG, 800, "openingOutputStream");
-                    os = httpConn.openOutputStream();
-                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
-                    os.write(params.getBytes());
-                    //os.flush();
+                byte[] toSend;
+                if(params == null && postBody != null) {
+                    toSend = postBody;
+                }else {
+                    toSend = params.getBytes(UstadMobileConstants.UTF8);
+                    httpConn.setRequestProperty("Content-Type", 
+                        "application/x-www-form-urlencoded");
                 }
                 
+                os = httpConn.openOutputStream();
+                os.write(toSend);
+                os.flush();
+                l(UMLog.DEBUG, 582, "" + toSend.length);
             } 
             
             // Read Response from the Server
@@ -917,8 +939,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             
             UMIOUtils.readFully(is, bout, 1024);
             
-            byte[] response = null;
-            response = bout.toByteArray();
+            byte[] response = bout.toByteArray();
             Hashtable responseHeaders = new Hashtable();
             String headerKey;
             String headerVal;
@@ -1001,8 +1022,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             try {
                 in = openZip.openInputStream(url.substring(
                     OPENZIP_PROTO.length()));
-                bout = new ByteArrayOutputStream();
-                UMIOUtils.readFully(in, bout, 1024);
+                if(in != null) {
+                    bout = new ByteArrayOutputStream();
+                    UMIOUtils.readFully(in, bout, 1024);
+                }else {
+                    ioe = new IOException("Zip entry not found: " + url);
+                }
             }catch(IOException e) {
                 getLogger().l(UMLog.INFO, 320, url, e);
                 ioe = e;
@@ -1237,11 +1262,19 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             return null;
         }
     }
-    
-    public void blah() {
-        Calendar c = Calendar.getInstance();
-        
+
+    /**
+     * TODO: Implement resumable (attempt) registrations on J2ME
+     * 
+     * @param activityId
+     * @param context
+     * @param listener 
+     */
+    public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
+        //not implemented on J2ME yet
     }
+    
+    
     
     
     /**

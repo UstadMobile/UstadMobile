@@ -36,6 +36,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.plaf.UIManager;
 import com.ustadmobile.core.U;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
@@ -67,6 +68,10 @@ public class UstadViewFormJ2ME extends Form {
     private boolean backCommandEnabled = true;
     
     private UstadViewContainerJ2ME activeContainer;
+    
+    private String[] menuCommandLabels;
+    
+    private int[] menuCommandIds;
 
     public UstadViewFormJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
         this.args = args;
@@ -86,8 +91,10 @@ public class UstadViewFormJ2ME extends Form {
         this(args, context, true);
     }
     
+    
     public void setAppMenuCommands(String[] labels, int[] ids) {
-        //do nothing
+        this.menuCommandLabels = labels;
+        this.menuCommandIds = ids;
     }
 
     public boolean isIsBackCommandEnabled() {
@@ -139,7 +146,7 @@ public class UstadViewFormJ2ME extends Form {
         return umViewDirection;
     }
     
-    public static class UstadFormCommandListener implements ActionListener{
+    public class UstadFormCommandListener implements ActionListener{
 
         final private Object context;
         
@@ -151,6 +158,9 @@ public class UstadViewFormJ2ME extends Form {
             if(evt.getCommand() != null && evt.getCommand().getId() == UstadViewFormJ2ME.CMD_BACK_ID) {
                 UstadMobileSystemImplJ2ME impl = UstadMobileSystemImplJ2ME.getInstanceJ2ME();
                 impl.goBack(context);
+            }else if(evt.getCommand() != null){
+                UstadBaseController.handleClickAppMenuItem(evt.getCommand().getId(),
+                    context);
             }
         }
         
@@ -183,7 +193,12 @@ public class UstadViewFormJ2ME extends Form {
     }
     
     public void onCreateMenuCommands(Vector cmdVector) {
-        
+        if(menuCommandIds != null) {
+            for(int i = 0; i < menuCommandIds.length; i++) {
+                cmdVector.addElement(new Command(menuCommandLabels[i], 
+                    menuCommandIds[i]));
+            }
+        }
     }
     
     public void invalidateMenuCommands() {

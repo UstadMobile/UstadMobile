@@ -15,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.util.UMFileUtil;
 
 /**
  * A simple Fragment that uses a WebView to show one part of a piece of content
@@ -25,12 +26,17 @@ public class ContainerPageFragment extends Fragment {
     /**
      * The argument key for the page number this fragment represents.
      */
-    public static final String ARG_PAGEURL = "page";
+    public static final String ARG_PAGE_BASE_URI = "baseuri";
 
-    /**
-     * The url of the page to be loaded
-     */
-    private String mPageURL;
+    public static final String ARG_PAGE_HREF = "href";
+
+    public static final String ARG_PAGE_QUERY = "query";
+
+    private String mBaseURI;
+
+    private String mHref;
+
+    private String mQuery;
 
     /**
      * The webView for the given URL
@@ -49,15 +55,20 @@ public class ContainerPageFragment extends Fragment {
     /**
      * Generates a new Fragment for a page fragment
      *
-     * @param mPageURL The URL
+     * @param baseURI The base URI of the page (normally where the EPUB OPF itself is) - e.g. http://localhost:1234/mount/EPUB.
+     *                 This must be a directory e.g. full url to load is baseURI/href
+     * @param href The HREF of the page itself as per it's entry in the OPF manifest
+     * @param query Query string to append to the URL (including the '?')
      *
      * @return A new instance of fragment ContainerPageFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ContainerPageFragment newInstance(String mPageURL) {
+    public static ContainerPageFragment newInstance(String baseURI, String href, String query) {
         ContainerPageFragment fragment = new ContainerPageFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PAGEURL, mPageURL);
+        args.putString(ARG_PAGE_BASE_URI, baseURI);
+        args.putString(ARG_PAGE_HREF, href);
+        args.putString(ARG_PAGE_QUERY, query);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,7 +81,9 @@ public class ContainerPageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.mPageURL = getArguments().getString(ARG_PAGEURL);
+            mBaseURI = getArguments().getString(ARG_PAGE_BASE_URI);
+            mHref = getArguments().getString(ARG_PAGE_HREF);
+            mQuery = getArguments().getString(ARG_PAGE_QUERY);
         }
         this.autoplayRunJavascript = ((ContainerActivity)getActivity()).getAutoplayRunJavascript();
     }
@@ -91,27 +104,53 @@ public class ContainerPageFragment extends Fragment {
 
             webView.getSettings().setJavaScriptEnabled(true);
 	        webView.getSettings().setDomStorageEnabled(true);
-            webView.loadUrl(mPageURL);
+            webView.loadUrl(getPageURL());
             webView.setWebViewClient(new ContainerPageWebViewClient(webView));
         }
         return viewGroup;
     }
 
     public void evaluateJavascript(String script) {
-        if(webView != null) {
+        if (webView != null) {
             webView.loadUrl(script);
         }
     }
 
-    public void setPageURL(String url) {
-        this.mPageURL = url;
+    private void loadURL() {
         if(webView != null) {
-            webView.loadUrl(url);
+            webView.loadUrl(getPageURL());
         }
     }
 
+    public void setPageHref(String href, boolean reload) {
+        mHref = href;
+        if(reload)
+            loadURL();
+    }
+
+    public String getPageHref() {
+        return mHref;
+    }
+
+    public void setBaseURI(String baseURI, boolean reload) {
+        mBaseURI = baseURI;
+        if(reload)
+            loadURL();
+    }
+
+    public String getBaseURI() {
+        return mBaseURI;
+    }
+
+    public void setQuery(String query, boolean reload) {
+        mQuery = query;
+        if(reload)
+            loadURL();
+    }
+
+
     public String getPageURL() {
-        return mPageURL;
+        return UMFileUtil.joinPaths(new String[] {mBaseURI, mHref}) + mQuery;
     }
 
     /**

@@ -334,23 +334,64 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
     }
 
+
+
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
+        String systemBaseDir = getSystemBaseDir();
+
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(getSystemBaseDir(), getString(U.id.device), false, true, false));
+            dirList.add(new UMStorageDir(systemBaseDir, getString(U.id.device), false, true, false));
+
+            //Find external directories
+            String[] externalDirs = findRemovableStorage();
+            for(String extDir : externalDirs) {
+                dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
+                    UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(U.id.memory_card),
+                        true, true, false, false));
+            }
         }
 
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
-            String userBase = UMFileUtil.joinPaths(new String[]{getSystemBaseDir(), "user-"
+            String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
             dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
         }
+
+
+
 
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
         dirList.toArray(retVal);
         return retVal;
     }
+
+    /**
+     * Method to accomplish the surprisingly tricky task of finding the external SD card (if this
+     * device has one)
+     *
+     * Approach borrowed from:
+     *  http://pietromaggi.com/2014/10/19/finding-the-sdcard-path-on-android-devices/
+     *
+     * Note: Approaches that use a mount based way of looking at things are returning paths that
+     * actually are not actually usable.  Therefor: use the approach based on environment variables.
+     *
+     * @return A HashSet of paths to any external memory cards mounted
+     */
+    public String[] findRemovableStorage() {
+        String secondaryStorage = System.getenv("SECONDARY_STORAGE");
+        if(secondaryStorage == null || secondaryStorage.length() == 0) {
+            secondaryStorage = System.getenv("EXTERNAL_SDCARD_STORAGE");
+        }
+
+        if(secondaryStorage != null) {
+            return secondaryStorage.split(":");
+        }else {
+            return new String[0];
+        }
+    }
+
 
     @Override
     public String getSharedContentDir() {
@@ -513,7 +554,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public boolean makeDirectory(String dirPath) throws IOException {
         File newDir = new File(dirPath);
-        return newDir.mkdirs();
+        return newDir.mkdir();
+    }
+
+    @Override
+    public boolean makeDirectoryRecursive(String dirURI) throws IOException {
+        return new File(dirURI).mkdirs();
     }
 
     @Override

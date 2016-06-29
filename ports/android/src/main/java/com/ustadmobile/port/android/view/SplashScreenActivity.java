@@ -109,7 +109,7 @@ public class SplashScreenActivity extends UstadBaseActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_leavecontainer) {
             return true;
         }
 

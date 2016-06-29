@@ -57,12 +57,14 @@ public abstract class UstadBaseController implements UstadController {
     public static final int CMD_SETTINGS = 1002;
     
     public static final int CMD_LOGOUT = 1003;
-        
-    public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_ABOUT, 
-        CMD_SETTINGS, CMD_LOGOUT};
     
-    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{U.id.about,
-        U.id.settings, U.id.logout};
+    public static final int CMD_HOME = 1004;
+    
+    public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
+        CMD_ABOUT, CMD_SETTINGS, CMD_LOGOUT};
+    
+    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{U.id.home, 
+        U.id.about, U.id.settings, U.id.logout};
     
     /**
      * Create a new controller with the given context
@@ -149,7 +151,17 @@ public abstract class UstadBaseController implements UstadController {
         this.isDestroyed = isDestroyed;
     }
     
-    public boolean handleClickAppMenuItem(int cmdId) {
+    /**
+     * Handle when users have clicked a standard option from the menu
+     * 
+     * Note: This method is static so it can be used without a controller object
+     * (e.g. in the event a controller failed to load)
+     * 
+     * @param cmdId - Command ID - CMD_ABOUT, CMD_SETTINGS or CMD_LOGOUT
+     * @param context - Platform context object
+     * @return true if the command id matches something we know about and it was handled, false otherwise
+     */
+    public static boolean handleClickAppMenuItem(int cmdId, Object context) {
         switch(cmdId) {
             case CMD_ABOUT:
                 //do nothing yet
@@ -164,6 +176,10 @@ public abstract class UstadBaseController implements UstadController {
         }
         
         return false;
+    }
+    
+    public boolean handleClickAppMenuItem(int cmdId) {
+        return handleClickAppMenuItem(cmdId, getContext());
     }
     
     /**

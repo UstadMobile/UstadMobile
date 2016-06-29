@@ -347,7 +347,9 @@ public class HTTPCacheDir {
                 resultBuf[0] = result;
             }
             
-            return cacheResult(url, result, filename);
+            if(result.getStatus() >= 200 && result.getStatus() < 300) {
+                return cacheResult(url, result, filename);
+            }
         }catch(IOException e) {
             impl.l(UMLog.ERROR, 162, url, e);
         }

@@ -91,6 +91,12 @@ public class TestFileImpl extends TestCase {
         assertTrue("Newly created dir exists: " + testMkDirPath,
             impl.dirExists(testMkDirPath));
         
+        String testRecursivePath = UMFileUtil.joinPaths(new String[]{ 
+            testMkDirPath, "some", "sub", "dir"});
+        impl.makeDirectoryRecursive(testRecursivePath);
+        assertTrue("New recursively created dir exists", 
+            impl.dirExists(testRecursivePath));
+        
         impl.removeRecursively(testMkDirPath);
         assertTrue("Newly created dir removed", !impl.dirExists(testMkDirPath));
         

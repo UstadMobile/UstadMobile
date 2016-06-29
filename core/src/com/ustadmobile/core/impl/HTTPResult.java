@@ -137,6 +137,7 @@ public class HTTPResult {
             }
             
             response = Base64Coder.decode(charArr, 0, p);
+            status = 200;
         }
         
     }

@@ -63,16 +63,19 @@ public class AllTestCases extends TestCase {
         
        
         TestSuite allTestSuite = new TestSuite("AllTestSuite");
+        allTestSuite.addTest(new TestPageSplitter());
         allTestSuite.addTest(new TestHTTPResult());
         allTestSuite.addTest(new TestHTTPCacheDir());
 
         ///allTestSuite.addTest(new com.ustadmobile.test.core.TestUMTinCanUtils());
         allTestSuite.addTest(new TestJ2MEEXEMCQ());
         
-        allTestSuite.addTest(new TestTinCanLogManagerJ2ME());
+        //TODO: Uncomment me
+        //allTestSuite.addTest(new TestTinCanLogManagerJ2ME());
+        
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestLocalization());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
-        
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());
         
         allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());
         allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());

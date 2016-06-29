@@ -278,6 +278,21 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         return openPath;
     }
     
+    /**
+     * The directory in which a given OPF is; 
+     * 
+     * e.g. If the open path for the container is http://server:1234/container
+     * and the given OPF files comes from EPUB/package.opf within the container
+     * this will return http://server:1234/container/EPUB
+     * 
+     * @return The directory from which the given opf has been opened
+     */
+    public String getOPFBasePath(UstadJSOPF opf){
+        int opfIndex = 0;//TODO: this should select the index as per the OPF arg
+        return UMFileUtil.getParentFilename(UMFileUtil.joinPaths(
+            new String[] {openPath, ocf.rootFiles[opfIndex].fullPath}));
+    }
+   
     
     public String getMimeType() {
         return mimeType;
@@ -336,9 +351,13 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         
         try {
             HTTPResult res = impl.getInstance().readURLToString(tinCanXMLURI, null);
-            XmlPullParser xpp = impl.newPullParser();
-            xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
-            tcXML = TinCanXML.loadFromXML(xpp);
+            if(res != null && res.getStatus() == 200) {
+                XmlPullParser xpp = impl.newPullParser();
+                xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
+                tcXML = TinCanXML.loadFromXML(xpp);
+            }else {
+                UstadMobileSystemImpl.l(UMLog.WARN, 2, openPath);
+            }
         }catch(IOException e) {
             //seems we don't have that...
             UstadMobileSystemImpl.l(UMLog.WARN, 211, null, e);
@@ -367,6 +386,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
     
     
+    
     public UstadJSOPF getOPF(int index) throws IOException, XmlPullParserException{
         UstadJSOPF opf = null;
         UstadOCF ocf = getOCF();
@@ -392,33 +412,55 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * @throws XmlPullParserException 
      */
     public String[] getSpineURLs(boolean addXAPIParams) throws IOException, XmlPullParserException{
-        String[] spineURLs = null;
-        String opfPath = UMFileUtil.joinPaths(new String[]{openPath, 
-            getOCF().rootFiles[0].fullPath});
-        
-        String[] linearHREFs = getActiveOPF().getLinearSpineURLS();
-        
-        String xAPIParams = null;
-        if(addXAPIParams) {
-            String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
-            String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
-            xAPIParams = "?actor=" +
-                    URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
-                    "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
-                    "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT) +
-                    "&registration=" + registrationUUID;
-        }
-        
-        spineURLs = new String[linearHREFs.length];
-        for(int i = 0; i < linearHREFs.length; i++) {
-            spineURLs[i] = UMFileUtil.resolveLink(opfPath, linearHREFs[i]);
-            if(addXAPIParams) {
-                spineURLs[i] += xAPIParams;
-            }
-        }
-        
-        return spineURLs;
+        return resolveHREFS(activeOPF, getActiveOPF().getLinearSpineHREFs(), 
+            addXAPIParams ? getXAPIQuery() : null);
     }
+    
+    /**
+     * Returns a Query String for the xAPI parameters for the container including 
+     * the tincan actor, authorization, endpoint, and registration UUID
+     * 
+     * @return Query string as above
+     */
+    public String getXAPIQuery() {
+        String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
+        String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+        return "?actor=" +
+            URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
+            "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
+            "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT) +
+            "&registration=" + registrationUUID;
+    }
+    
+    
+    /**
+     * Resolve an HREF from an OPF item to a full path
+     * 
+     * @param opf
+     * @param href
+     * 
+     * @return 
+     */
+    public String[] resolveHREFS(UstadJSOPF opf, String hrefs[], String postfix) {
+        String[] resolved = null;
+        try {
+            resolved = new String[hrefs.length];
+            String opfPath = UMFileUtil.joinPaths(new String[]{openPath, 
+                getOCF().rootFiles[0].fullPath});
+            for(int i = 0; i < hrefs.length; i++) {
+                resolved[i] = UMFileUtil.resolveLink(opfPath, hrefs[i]);
+                if(postfix != null) {
+                    resolved[i] += postfix;
+                }
+            }
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 168, opf.id, e);
+        }
+        
+        return resolved;
+    }
+    
+    
     
     /**
      * Generate a launched statement for this course
@@ -453,12 +495,31 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     }
     
     /**
-     * Get a JSON Object representing the TinCan context of the container
-     * Really this is just here to put in the registration
+     * Retrieves the TinCan ID that's being used as the base ID of this container
      * 
-     * @return 
+     * If tincan.xml is used this means the activity which contains a launch
+     * element.  Otherwise we'll use epub:opfId for an EPUB file
+     * 
+     * Child activities should be in the form of baseId/PageId/ideviceId
+     * 
+     * @return The base tincan ID for this container as above
      */
-    public JSONObject getTinCanContext() {
+    public String getBaseTinCanId() {
+        if(this.tinCanXMLSummary != null && this.tinCanXMLSummary.getLaunchActivity() != null) {
+            return this.tinCanXMLSummary.getLaunchActivity().getId();
+        }else {
+            return "epub:" + activeOPF.id;
+        }
+    }
+    
+    /**
+     * Make a JSON Object for the TinCan context object with the for the given
+     * registration 
+     * 
+     * @param registrationUUID Registration UUID for the context as per xAPI spec
+     * @return JSON Object with the registration property set
+     */
+    public static JSONObject makeTinCanContext(String registrationUUID) {
         JSONObject context = null;
         try {
             context = new JSONObject();
@@ -468,6 +529,16 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         }
         
         return context;
+    }
+    
+    /**
+     * Get a JSON Object representing the TinCan context of the container
+     * Really this is just here to put in the registration
+     * 
+     * @return 
+     */
+    public JSONObject getTinCanContext() {
+        return makeTinCanContext(this.registrationUUID);
     }
     
     /**

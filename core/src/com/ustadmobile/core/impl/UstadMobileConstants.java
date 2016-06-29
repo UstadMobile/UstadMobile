@@ -91,6 +91,14 @@ public class UstadMobileConstants {
      */
     public static String UMPROFILE_MICRO = "micro";
     
+    /**
+     * The size of chunks into which page will be split (number of bytes of actual
+     * text)
+     * 
+     * Applies to micro edition only.
+     */
+    public static final int MICRO_ED_PAGESPLIT_TEXTLEN = 750;
+    
     public static final String[][] OPDS_FEEDS_PRESETS = new String[][]{
         {"", "Select a feed"},
         {"", "Custom Feed"},
