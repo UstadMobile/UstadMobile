@@ -9,6 +9,6 @@
     android:paddingRight="16dp"
     android:paddingBottom="4dp"
     android:textColor="@color/containerview_draweritem_fgcolor"
-    android:background="@drawable/containerview_toclist_selector"
+    android:background="@drawable/toclist_selector2"
 
     />

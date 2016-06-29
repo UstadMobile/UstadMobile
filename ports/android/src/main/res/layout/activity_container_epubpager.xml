@@ -28,13 +28,13 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:layout_gravity="start"
-            android:background="?attr/colorPrimary"
+            android:background="@color/primary"
             android:id="@+id/container_tocdrawer_relativelayout">
 
             <Button
                 android:text="Contents"
                 android:textAppearance="@android:style/TextAppearance.Large"
-                android:background="@drawable/containerview_toclist_selector"
+                android:background="@drawable/toclist_selector2"
                 android:textColor="@color/containerview_draweritem_fgcolor"
                 android:id="@+id/container_tocdrawer_upbutton"
                 android:layout_width="match_parent"
@@ -46,7 +46,7 @@
                 android:layout_height="match_parent"
                 android:choiceMode="singleChoice"
                 android:divider="@color/primary_light"
-                android:listSelector="@drawable/containerview_toclist_selector"
+                android:listSelector="@drawable/toclist_selector2"
                 android:dividerHeight="1dp"
                 />
 
