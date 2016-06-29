@@ -101,6 +101,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private EPUBNavDocument navDocument;
 
+    private int drawerSelectedIndex = -1;
+
     /**
      * Navigation items in the order in which they appear in the drawer on the left
      */
@@ -141,7 +143,25 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.container_drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this,
-                mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
+                mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
+
+            public void onDrawerOpened(View drawerView) {
+                drawerSelectedIndex = -1;
+            }
+
+            public void onDrawerClosed(View drawerView) {
+                if(drawerSelectedIndex != -1) {
+                    if(drawerNavItems != null) {
+                        int fragPos = mPagerAdapter.getFragmentIndexByHREF(drawerNavItems[drawerSelectedIndex].href);
+                        if(fragPos != -1) {
+                            mPager.setCurrentItem(fragPos, true);
+                            drawerSelectedIndex = -1;
+                        }
+                    }
+                }
+            }
+
+        };
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
@@ -286,8 +306,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     private void updateTOCSelection(String currentPageHREF) {
         if(drawerNavItems != null) {
             for(int i = 0; i < drawerNavItems.length; i++) {
+                int numVisible = mDrawerList.getLastVisiblePosition() - mDrawerList.getFirstVisiblePosition();
                 if(drawerNavItems[i].href != null && drawerNavItems[i].href.equals(currentPageHREF)) {
                     mDrawerList.setItemChecked(i, true);
+                    mDrawerList.setSelection(Math.max(i-(numVisible/2), 0));//Put the selected item in the middle
                     return;
                 }
             }
@@ -304,13 +326,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
      */
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        if(drawerNavItems != null) {
-            int fragPos = mPagerAdapter.getFragmentIndexByHREF(drawerNavItems[i].href);
-            if(fragPos != -1) {
-                mPager.setCurrentItem(fragPos);
-                mDrawerLayout.closeDrawers();
-            }
-        }
+        drawerSelectedIndex = i;
+        mDrawerLayout.closeDrawers();
     }
 
     public void showEPUB() {
