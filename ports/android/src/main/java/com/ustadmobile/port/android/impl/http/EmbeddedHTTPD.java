@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -144,7 +145,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
             String pathInZip = uri.substring(nextSlash + 1);
             try {
                 MountedZip mountedZip = mountedEPUBs.get(zipMountPath);
-                ZipFile zipFile = new ZipFile(mountedZip.zipPath);
+                ZipFile zipFile = mountedZip.getZipFile();
                 ZipEntry entry = zipFile.getEntry(pathInZip);
 
                 if(entry != null) {
@@ -155,7 +156,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                     InputStream zipEntryStream = zipFile.getInputStream(entry);
                     retInputStream = zipEntryStream;
 
-                    ifNoneMatchHeader = session.getHeaders().get("If-None-Match");
+                    ifNoneMatchHeader = session.getHeaders().get("if-none-match");
                     if(ifNoneMatchHeader != null && ifNoneMatchHeader.equals(etag)) {
                         Response r = new Response(Response.Status.NOT_MODIFIED, getMimeType(uri), "");
                         r.addHeader("ETag", etag);
@@ -266,9 +267,19 @@ public class EmbeddedHTTPD extends NanoHTTPD {
 
         public HashMap<String, List<MountedZipFilter>> filters;
 
+        private ZipFile zipFile;
+
         public MountedZip(String mountPath, String zipPath) {
             this.mountPath = mountPath;
             this.zipPath = zipPath;
+        }
+
+        public ZipFile getZipFile() throws IOException{
+            if(zipFile == null) {
+                zipFile = new ZipFile(zipPath);
+            }
+
+            return zipFile;
         }
 
         public void addFilter(String extension, String regex, String replacement) {

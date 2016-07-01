@@ -350,6 +350,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                     mContainerController.getOPFBasePath(mContainerController.getActiveOPF()),
                     mContainerController.getActiveOPF().getLinearSpineHREFs(),
                     mContainerController.getXAPIQuery());
+            mPager.setOffscreenPageLimit(1);
             mPager.setAdapter(mPagerAdapter);
             if(mSavedPosition != -1) {
                 mPager.setCurrentItem(mSavedPosition);

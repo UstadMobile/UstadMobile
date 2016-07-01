@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
@@ -104,6 +105,7 @@ public class ContainerPageFragment extends Fragment {
 
             webView.getSettings().setJavaScriptEnabled(true);
 	        webView.getSettings().setDomStorageEnabled(true);
+            webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
             webView.loadUrl(getPageURL());
             webView.setWebViewClient(new ContainerPageWebViewClient(webView));
         }
@@ -160,8 +162,8 @@ public class ContainerPageFragment extends Fragment {
      * @param numPages
      */
     public void showPagePosition(int index, int numPages) {
-        Toast t = Toast.makeText(getContext(), index + "/" + numPages, Toast.LENGTH_SHORT);
-        t.show();
+        //Toast t = Toast.makeText(getContext(), index + "/" + numPages, Toast.LENGTH_SHORT);
+        //t.show();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
