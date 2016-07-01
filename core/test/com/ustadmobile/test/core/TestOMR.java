@@ -76,11 +76,10 @@ public class TestOMR extends TestCase {
     }
     
     public void testOMR() throws IOException{
-        //required to init the debug canvas adapter - otherwise subsequent calls throw nullpointerexception
-        QRCodeDecoder decoder = new QRCodeDecoder();
-        
-        QRCodeImage img = UstadMobileSystemImpl.getInstance().getQRCodeImage(
-            new ByteArrayInputStream(imgBytes));
+        QRCodeImage img = UstadMobileSystemImpl.getInstance().makeQRCodeImage(imgBytes);
+        int[] expectedCorners = OMRRecognizer.getExpectedCenters(485, 722, 
+            img.getWidth(), img.getHeight(), 0.1f);
+
         imgBytes = null;
         
         assertNotNull("Can get QR Code image from stream", img);

@@ -262,7 +262,41 @@ public class OMRRecognizer {
     }
     
     /**
-     * Convert the given QRCodeImage to a bitmap
+     * Find centers on the image efficiently by examining only those parts of the 
+     * image that are expected to contain a corner finder pattern.  
+     * 
+     * @param img QRCodeImage implementation used to get RGB values from a specific x/y coordinate
+     * @param expectedCenters x,y coordinates on the image where the center should be if it's in position
+     * @param searchSize The width/height of the area to search around the expectedCenter
+     *   e.g. search will start at expectedCorner[i].x - (searchSize/2) for a width of searchSize, same for y axis
+     * @param foundCenters Array of points that will be filled with points found from the centers
+     */
+    public static boolean getCenters(QRCodeImage img, Point[] expectedCenters, int searchSize, Point[] foundCenters) {
+        int imgArr[][];
+        boolean imgBool[][];
+        Point[] tmpCenters;
+        
+        int x;
+        int y;
+        for(int i = 0; i < expectedCenters.length ;i++) {
+            x = expectedCenters[i].getX() - (searchSize/2);
+            y = expectedCenters[i].getY() - (searchSize/2);
+            imgArr = QRCodeDecoder.imageToIntArray(img, x, y, searchSize, searchSize);
+            imgBool = QRCodeImageReader.filterImage(imgArr);
+            tmpCenters = FinderPattern.findCenters(imgBool);
+            if(tmpCenters == null || tmpCenters.length == 0) {
+                return false;
+            }else {
+                foundCenters[i] = tmpCenters[0];
+            }
+        }
+        
+        return true;
+    }
+    
+    
+    /**
+     * Convert the given QRCodeImage to a bitmap array
      * 
      * @param img
      * @return 
@@ -306,5 +340,44 @@ public class OMRRecognizer {
         
         return retVal;
     }
+    
+    /**
+     * Determines where we expect the centers to be.  We will have a zone width
+     * and height (e.g. A4 paper) and an image width and height (e.g. the image
+     * from the camera).
+     * 
+     * Within the image we will have an expected margin - if the zone is relatively
+     * wide this is determined by how it fits into the x plane (e.g. a wide screen
+     * phone in portrait mode); 
+     * 
+     * @param zoneWidth Width of the zone we are looking for finder patterns (units are irrelevant - only used to calculate the aspect ratio)
+     * @param zoneHeight Height of the zone we are looking for finder patterns (units are irrelevant - only used to calculate the aspect ratio)
+     * @param imgWidth Width of the image in which we are expecting the zone
+     * @param imgHeight Height of the image in which we are expecting the zone
+     * @param margin Float representing the percentage margin to apply either to width/height: whichever is the tighter fit.
+     * 
+     * @return int array of x, y, width, height where centers should be within this image if it's in the middle
+     */
+    public static int[] getExpectedCenters(int zoneWidth, int zoneHeight, int imgWidth, int imgHeight, float margin) {
+        float zoneRatio = (float)zoneWidth/(float)zoneHeight;
+        float imgRatio = (float)imgWidth/(float)imgHeight;
+                
+        int marginX;
+        int marginY;
+        float scale;
+        if(zoneRatio > imgRatio) {
+            //the recognition zone is relatively wider than the image it's to be found within
+            marginX = Math.round(margin * imgWidth);
+            scale = (float)(imgWidth - (marginX*2))/(float)zoneWidth;
+            marginY = Math.round((imgHeight -  (zoneHeight * scale))/2);
+        }else {
+            marginY = Math.round(margin * imgHeight);
+            scale = (float)(imgHeight - (marginY*2))/(float)zoneHeight;
+            marginX = Math.round((imgWidth-  (zoneWidth * scale))/2);
+        }
+        
+        return new int[]{marginX, marginY, imgWidth-(marginX*2), imgHeight-(marginY*2)};
+    }
+    
 
 }

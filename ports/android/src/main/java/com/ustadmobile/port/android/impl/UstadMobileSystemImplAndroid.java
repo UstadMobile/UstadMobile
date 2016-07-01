@@ -36,6 +36,7 @@ import android.app.DownloadManager;
 import android.content.*;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -813,6 +814,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public QRCodeImage getQRCodeImage(Object sysImage) {
         Bitmap bitmap = (Bitmap)sysImage;
         return new AndroidQRCodeImage(bitmap);
+    }
+
+    @Override
+    public QRCodeImage makeQRCodeImage(byte[] data) {
+        return getQRCodeImage(BitmapFactory.decodeByteArray(data, 0, data.length));
     }
 
     @Override

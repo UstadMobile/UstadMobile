@@ -893,6 +893,15 @@ public abstract class UstadMobileSystemImpl {
     public abstract QRCodeImage getQRCodeImage(Object sysImage);
     
     /**
+     * Make a QR Code Image from a byte array of jpeg data
+     * 
+     * @param data jpeg data
+     * @return QRCodeImage
+     */
+    public abstract QRCodeImage makeQRCodeImage(byte[] data);
+    
+    
+    /**
      * Get access to the App View to do common UI activities (e.g. show
      * progress dialog, flash message, etc)
      * 

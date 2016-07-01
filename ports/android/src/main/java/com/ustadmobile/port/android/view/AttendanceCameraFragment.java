@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Bundle;
@@ -72,6 +73,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         catch (Exception e){
             // Camera is not available (in use or does not exist)
         }
+        Camera.Size size = c.getParameters().getPreviewSize();
         return c; // returns null if camera is unavailable
     }
 
