@@ -94,6 +94,8 @@ import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.json.me.*;
+import org.kxml2.io.KXmlSerializer;
+import org.xmlpull.v1.XmlSerializer;
  
 /**
  *
@@ -976,6 +978,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return parser;
     }
 
+    public XmlSerializer newXMLSerializer() {
+        return new KXmlSerializer();
+    }
+    
     public String getUserPref(String key, Object context) {
         String value = UserPref.getSetting(key);
         l(UMLog.DEBUG, 555, key + '=' + value);

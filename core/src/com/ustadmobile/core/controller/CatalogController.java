@@ -67,6 +67,7 @@ import java.util.TimerTask;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 
 /* $if umplatform == 2  $
@@ -1296,7 +1297,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         String savePath = UMFileUtil.joinPaths(new String[]{baseDir, filename});
         impl.getLogger().l(UMLog.DEBUG, 516, savePath);
-        impl.writeStringToFile(newFeed.toString(), savePath, "UTF-8");
+        newFeed.serialize(impl.openFileOutputStream(savePath, 0));
         
         return newFeed;
     }
@@ -1506,13 +1507,19 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 if(containerFeed == null && isEPUB) {
                     containerFeed = ContainerController.generateContainerFeed(
                         containerFiles[i], entryCacheFile);
+                    OutputStream fout = null;
                     try {
                         impl.makeDirectoryRecursive(
                             UMFileUtil.getParentFilename(entryCacheFile));
-                        impl.writeStringToFile(containerFeed.toString(), 
-                            entryCacheFile, "UTF-8");
+                        fout = impl.openFileOutputStream(entryCacheFile, 0);
+                        XmlSerializer xs = impl.newXMLSerializer();
+                        xs.setOutput(fout, "UTF-8");
+                        containerFeed.serialize(xs);
+                        fout.flush();
                     }catch(IOException e) {
                         impl.l(UMLog.ERROR, 138, entryCacheFile, e);
+                    }finally {
+                        UMIOUtils.closeOutputStream(fout);
                     }
                 }
                 
@@ -1576,8 +1583,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         if(looseContainerFeed.entries.length > 0) {
             try {
-                impl.writeStringToFile(looseContainerFeed.toString(), looseContainerFile, 
-                    "UTF-8");
+                looseContainerFeed.serialize(impl.openFileOutputStream(looseContainerFile, 0));
             }catch(IOException e) {
                 //impl.getAppView().showNotification(impl.getString(U.id.error)
                 //    + " : 159", AppView.LENGTH_LONG);
@@ -1834,8 +1840,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         entryFeed.addEntry(newEntry);
             
         try {
-            UstadMobileSystemImpl.getInstance().writeStringToFile(entryFeed.toString(), 
-                info.fileURI + CONTAINER_INFOCACHE_EXT, "UTF-8");
+            entryFeed.serialize(UstadMobileSystemImpl.getInstance().openFileOutputStream(
+                info.fileURI + CONTAINER_INFOCACHE_EXT, 0));
             savedOK = true;
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 160,info.fileURI + 

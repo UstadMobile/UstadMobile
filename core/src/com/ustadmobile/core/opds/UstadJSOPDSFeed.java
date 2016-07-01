@@ -31,18 +31,28 @@
 package com.ustadmobile.core.opds;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 /**
  *
  * @author varuna
  */
 public class UstadJSOPDSFeed extends UstadJSOPDSItem{
+    
+    public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
+    
+    public static final String NS_DC = "http://purl.org/dc/terms/";
+    
+    public static final String NS_OPDS = "http://opds-spec.org/2010/catalog";
+    
     
     public UstadJSOPDSEntry[] entries;
     
@@ -239,20 +249,45 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         return (entries.length > 0);
     }
     
-    public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("<?xml version='1.0' encoding='UTF-8'?>\n");
-        buffer.append("<feed xmlns=\"http://www.w3.org/2005/Atom\" \n"); 
-        buffer.append("  xmlns:dc=\"http://purl.org/dc/terms/\" \n");
-        buffer.append("  xmlns:opds=\"http://opds-spec.org/2010/catalog\">\n");
-        buffer.append(super.toString());
+    public void serialize(XmlSerializer xs) throws IOException {
+        xs.startDocument("UTF-8", Boolean.FALSE);
+        xs.setPrefix("", NS_ATOM);
+        xs.setPrefix("dc", NS_DC);
+        xs.setPrefix("opds", NS_OPDS);
+        xs.startTag(NS_ATOM, "feed");
+        serializeAttrs(xs);
+        
         for(int i = 0; i < entries.length; i++) {
-            buffer.append("<entry>");
-            buffer.append(entries[i].toString());
-            buffer.append("</entry>");
+            entries[i].serializeEntry(xs);
         }
-        buffer.append("</feed>");
-        return buffer.toString();
+        xs.endTag(NS_ATOM, "feed");
+        xs.endDocument();
     }
-
+    
+    /**
+     * Serializes the feed as XML to the given output stream.  This will flush
+     * and close the output stream.  Closing will happen even if there is
+     * an exception when writing
+     * 
+     * @param out
+     * @throws IOException 
+     */
+    public void serialize(OutputStream out) throws IOException {
+        IOException ioe = null;
+        XmlSerializer serializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
+        try {
+            serializer.setOutput(out, "UTF-8");
+            serialize(serializer);
+            out.flush();
+        }catch(IOException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 170, title, e);
+            ioe = e;
+        }finally {
+            UMIOUtils.closeOutputStream(out);
+            UMIOUtils.throwIfNotNullIO(ioe);
+        }
+        
+    }
+    
+    
 }

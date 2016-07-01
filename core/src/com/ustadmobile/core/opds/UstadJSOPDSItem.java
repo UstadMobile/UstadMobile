@@ -30,7 +30,9 @@
  */
 package com.ustadmobile.core.opds;
 
+import java.io.IOException;
 import java.util.Vector;
+import org.xmlpull.v1.XmlSerializer;
 
 /**
  *
@@ -235,39 +237,50 @@ public abstract class UstadJSOPDSItem {
     }
     
     /**
-     * Makes an XML fragment representing this item
-     * @return 
+     * 
+     * @param xs
+     * @throws IOException 
      */
-    public String toString() {
-        StringBuffer buffer = new StringBuffer();
+    public void serializeAttrs(XmlSerializer xs) throws IOException{
+        xs.startTag(UstadJSOPDSFeed.NS_ATOM, "title").text(title).endTag(
+            UstadJSOPDSFeed.NS_ATOM, "title");
         
-        buffer.append("<title>").append(title).append("</title>\n");
-        buffer.append("<id>").append(id).append("</id>\n");
+        xs.startTag(UstadJSOPDSFeed.NS_ATOM, "id").text(id).endTag(
+            UstadJSOPDSFeed.NS_ATOM, "id");
+        
         if(summary != null) {
-            buffer.append("<summary>").append(summary).append("</summary>\n");
+            xs.startTag(UstadJSOPDSFeed.NS_ATOM, "summary").text(summary).endTag(
+                UstadJSOPDSFeed.NS_ATOM, "summary");
         }
+        
         if(updated != null) {
-            buffer.append("<updated>").append(updated).append("</updated>\n");
+            xs.startTag(UstadJSOPDSFeed.NS_ATOM, "updated").text(updated).endTag(
+                UstadJSOPDSFeed.NS_ATOM, "updated");
         }
         
         if(publisher != null) {
-            buffer.append("<dc:publisher>").append(publisher).append("</dc:publisher>\n");
+            xs.startTag(UstadJSOPDSFeed.NS_DC, "publisher").text(publisher).endTag(
+                UstadJSOPDSFeed.NS_DC, "publisher");
         }
         
         for(int i = 0; i < linkVector.size(); i++) {
             String[] thisLink = (String[])linkVector.elementAt(i);
-            //As per the ATOM Spec: href is mandatory
-            buffer.append("<link href=\"").append(thisLink[LINK_HREF]).append("\" ");
+            xs.startTag(UstadJSOPDSFeed.NS_ATOM, "link");
+            xs.attribute(null, "href", thisLink[LINK_HREF]);
             if(thisLink[LINK_REL] != null) {
-                buffer.append("rel=\"").append(thisLink[LINK_REL]).append("\" ");
+                xs.attribute(null, "rel", thisLink[LINK_REL]);
             }
             if(thisLink[LINK_MIMETYPE] != null) {
-                buffer.append("type=\"").append(thisLink[LINK_MIMETYPE]).append("\" ");
+                xs.attribute(null, "type", thisLink[LINK_MIMETYPE]);
             }
-            buffer.append("/>\n");
+            xs.endTag(UstadJSOPDSFeed.NS_ATOM, "link");
         }
-        
-        return buffer.toString();
+    }
+    
+    public void serializeEntry(XmlSerializer xs) throws IOException{
+        xs.startTag(UstadJSOPDSFeed.NS_ATOM, "entry");
+        serializeAttrs(xs);
+        xs.endTag(UstadJSOPDSFeed.NS_ATOM, "entry");
     }
 
 }

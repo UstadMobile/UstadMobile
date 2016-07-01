@@ -78,6 +78,7 @@ import com.ustadmobile.port.android.view.UserSettingsActivity;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Xml;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
@@ -787,6 +788,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
         return parser;
+    }
+
+    @Override
+    public XmlSerializer newXMLSerializer() {
+        return Xml.newSerializer();
     }
 
     /**

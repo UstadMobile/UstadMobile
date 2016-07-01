@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
 import jp.sourceforge.qrcode.data.QRCodeImage;
+import org.xmlpull.v1.XmlSerializer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -859,6 +860,13 @@ public abstract class UstadMobileSystemImpl {
     public abstract XmlPullParser newPullParser() throws XmlPullParserException;
     
     /**
+     * Make a new instance of an XmlSerializer (org.xmlpull.v1.XmlSerializer)
+     * 
+     * @return New instance of an XML Serializer
+     */
+    public abstract XmlSerializer newXMLSerializer();
+    
+    /**
      * Make a new XmlPullParser from a given inputstream
      * @param in InputStream to read from
      * @param encoding Encoding to be used e.g. UTF-8
@@ -871,6 +879,9 @@ public abstract class UstadMobileSystemImpl {
         xpp.setInput(in, encoding);
         return xpp;
     }
+    
+    
+    
     
     /**
      * Make a new XmlPullParser from a given inputstream assuming UTF-8 encoding
