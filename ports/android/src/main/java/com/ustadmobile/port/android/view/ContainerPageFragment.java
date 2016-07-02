@@ -16,6 +16,8 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 
 /**
@@ -94,21 +96,24 @@ public class ContainerPageFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         if(viewGroup == null) {
-            viewGroup = (RelativeLayout)inflater.inflate(R.layout.fragment_container_page,
+            viewGroup = (RelativeLayout) inflater.inflate(R.layout.fragment_container_page,
                     container, false);
-            webView = (WebView)viewGroup.findViewById(R.id.fragment_container_page_webview);
-
-            //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
-            if(Build.VERSION.SDK_INT >= 17) {
-                webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
-            }
-
-            webView.getSettings().setJavaScriptEnabled(true);
-	        webView.getSettings().setDomStorageEnabled(true);
-            webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
-            webView.loadUrl(getPageURL());
-            webView.setWebViewClient(new ContainerPageWebViewClient(webView));
+            webView = (WebView) viewGroup.findViewById(R.id.fragment_container_page_webview);
+        }else {
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 517, "Containerpage: recycled onCreateView");
         }
+
+        //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
+        if(Build.VERSION.SDK_INT >= 17) {
+            webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        }
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webView.loadUrl(getPageURL());
+        webView.setWebViewClient(new ContainerPageWebViewClient(webView));
+
         return viewGroup;
     }
 
@@ -242,13 +247,6 @@ public class ContainerPageFragment extends Fragment {
             if(!this.isFirstPage) {
                 this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
             }
-        }
-    }
-
-    public class JsObject {
-        @JavascriptInterface
-        public void stateSaved(){
-
         }
     }
 
