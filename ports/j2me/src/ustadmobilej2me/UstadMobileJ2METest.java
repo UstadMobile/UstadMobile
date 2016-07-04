@@ -174,10 +174,9 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                             UstadMobileAppController.getPlatform().toString());
                     
                     try {
-                        HTTPUtils.sendPost(
+                        UstadMobileSystemImpl.getInstance().makeRequest(
                             TestUtils.testSettings.get("testposturl").toString(), 
-                                testResult);
-
+                            null, testResult);
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
@@ -195,8 +194,6 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         }
         
         //Exiting automatically..
-        System.out.println("Time to Exit..");
-        HTTPUtils.httpDebug("Time to Exit.");
         //notifyDestroyed();
         //destroyApp(bScreenOutput);
     }

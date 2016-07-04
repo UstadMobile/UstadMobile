@@ -377,6 +377,25 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         boolean sdCardAvailable = false;
         
         String sdcardURI = System.getProperty(SYSTEMPROP_SDCARD);
+        l(UMLog.DEBUG, 592, sdcardURI);
+        
+        /* In case this device does not support the standard system property
+         * to indicate the external memory card it might be listed in the roots.
+         *
+         * We will simply take the first root that is not used for the 
+         */
+        if(sdcardURI == null) {
+            Enumeration rootList = FileSystemRegistry.listRoots();
+            String cRoot;
+            while(rootList.hasMoreElements() && sdcardURI == null) {
+                cRoot = UMFileUtil.ensurePathHasPrefix("file:///", 
+                    rootList.nextElement().toString());
+                if(!baseSystemDir.startsWith(cRoot)) {
+                    sdcardURI = cRoot;
+                }
+            }
+        }
+        
         if(sdcardURI != null) {
             hasSDCard = true;
             try {
@@ -417,91 +436,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc} 
      */
     public String getSharedContentDir(){ 
-        if(sharedContentDir != null) {
-            return sharedContentDir;
-        } else {
-            Vector systemFsRoots = new Vector();
-            String dirURI = System.getProperty(SYSTEMPROP_SDCARD);
-            
-            if(dirURI != null) {
-                l(UMLog.DEBUG, 587, SYSTEMPROP_SDCARD + '=' + dirURI);
-                systemFsRoots.addElement(dirURI);
-            }
-
-            dirURI = System.getProperty(SYSTEMPROP_PHOTODIR);
-            if(dirURI != null) {
-                l(UMLog.DEBUG, 587, SYSTEMPROP_PHOTODIR + '=' + dirURI);
-                systemFsRoots.addElement(dirURI);
-            }
-            
-            DeviceRoots dt = FileUtils.getBestRoot();
-            if(dt != null && dt.path != null) {
-                systemFsRoots.addElement(dt.path);
-            }
-            
-            if(systemFsRoots.size() > 0) {
-                boolean canUse = false;
-                String currentDir = null;
-                boolean exists = false;
-                boolean isDir = false;
-                boolean canWrite = false;
-                
-                for(int i = 0; i < systemFsRoots.size(); i++) {
-                    FileConnection fc = null;
-                    currentDir = (String)systemFsRoots.elementAt(i);
-                    canUse = false;
-                    canWrite = false;
-                    
-                    try {
-                        fc = (FileConnection)Connector.open(currentDir);
-                        exists = fc.exists();
-                        String childFileUri = UMFileUtil.joinPaths(new String[] {
-                            currentDir, "umfiletest.txt"});
-                        if(exists) {
-                            writeStringToFile("OK", childFileUri, "UTF-8");
-                            canWrite = true;
-                            canUse = true;
-                        }
-                    }catch(Exception e) {
-                        l(UMLog.ERROR, 151, (String)systemFsRoots.elementAt(i), e);
-                    }finally {
-                        J2MEIOUtils.closeConnection(fc);
-                    }
-                    
-                    if(canUse) {
-                        l(UMLog.VERBOSE, 417, currentDir);
-                        sharedContentDir = UMFileUtil.joinPaths(new String[]{ 
-                            currentDir, CONTENT_DIR_NAME});
-                        return sharedContentDir;
-                    }else {
-                        l(UMLog.VERBOSE, 419, currentDir + "exists:" + exists
-                            + " dir:" + isDir + " write:" + canWrite);
-                    }
-                }
-            } else {
-                //This will be in something like ustadmobileContent
-                //appData is different
-                try{
-                    dt = FileUtils.getBestRoot();
-                    sharedContentDir = FileUtils.joinPath(dt.path, 
-                            FileUtils.USTAD_CONTENT_DIR);
-
-                    //Check if it is created. If it isnt, create it.       
-                    if(FileUtils.createFileOrDir(sharedContentDir, 
-                            Connector.READ_WRITE, true)){
-                        return sharedContentDir;
-                    }
-
-                    //Return null if it doens't exist.
-                    if (!FileUtils.checkDir(sharedContentDir)){
-                        return null;
-                    }
-                }catch (Exception e){}
-            }
-        }
-        
-        l(UMLog.VERBOSE, 421, sharedContentDir);
-        return null;
+        return findSystemBaseDir();
     }
     
     public String getUserContentDirectory(String username){
