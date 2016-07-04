@@ -53,15 +53,19 @@ NetBeans.  See README for instructions on building from source.
         
         <!-- end of properties to make it build outside of netbeans -->
         
+        <!-- Include if building tests -->
+        <path id="ustadlibclasspath_test.ref">
+            <fileset dir="${lib.dir}" >
+	 	        <include name="j2meunit.jar" />         
+            </fileset>
+        </path>
+        
         <path id="ustadlibclasspath.ref">
             <fileset dir="${lib.dir}" >
-	 	<include name="j2meunit.jar" />
                 <include name="kxml2-min-2.3.0.jar" />
                 <include name="LWUIT-MIDP.jar" />            
             </fileset>
         </path>
-        
-        
         
         <wtkpreprocess verbose="false"  
            srcdir="${src.dir}" 
@@ -81,7 +85,7 @@ NetBeans.  See README for instructions on building from source.
             destdir="${classes.dir.ANTENNA}"
             preverify="false" 
             bootclasspath="${wtk.active.bootclasspath}:${classpath.antennaui}"
-            classpath="${toString:ustadlibclasspath.ref}">
+            classpath="${toString:ustadlibclasspath.ref}:${toString:ustadlibclasspath_test.ref}">
 
         </wtkbuild>
     </target>
@@ -152,7 +156,7 @@ NetBeans.  See README for instructions on building from source.
             profile="MIDP-2.0"
             obfuscate="${ustadmobile.obfuscate}"
             preverify="true"
-            libclasspath="${toString:ustadlibclasspath.ref}"
+            libclasspath="${toString:ustadlibclasspath.ref}:${toString:ustadlibclasspath_test.ref}"
             bootclasspath="${wtk.active.bootclasspath}:${wtk.proguard.home}/lib/proguard.jar:${classpath.antennaui}" 
             includes="${javac.includes}">
 		<preserve class="com.ustadmobile.test.core.TestUstadOCF"/>
@@ -207,13 +211,15 @@ NetBeans.  See README for instructions on building from source.
             jadfile="${dist.dir.ANTENNA}/${MidletSuite2}.jad"
             config="CLDC-1.1"
             profile="MIDP-2.0"
-            obfuscate="${ustadmobile.obfuscate}"
+            obfuscate="false"
             preverify="true"
             libclasspath="${toString:ustadlibclasspath.ref}"
             bootclasspath="${wtk.active.bootclasspath}:${wtk.proguard.home}/lib/proguard.jar:${classpath.antennaui}" 
             includes="${javac.includes}">
-                <fileset dir="${classes.dir.ANTENNA}"/>
-
+                <fileset dir="${classes.dir.ANTENNA}">
+                    <exclude name="com/ustadmobile/test/**/*.class"/>
+                    <exclude name="ustadmobilej2me/UstadMobileJ2METest.class"/>
+                </fileset>
         </wtkpackage>
     </target>
 
