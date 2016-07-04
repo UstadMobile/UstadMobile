@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import jp.sourceforge.qrcode.data.QRCodeImage;
 import org.xmlpull.v1.XmlSerializer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -62,6 +61,7 @@ import org.xmlpull.v1.XmlPullParserException;
     import org.json.me.*;
  $else$ */
     import org.json.*;
+    import jp.sourceforge.qrcode.data.QRCodeImage;
 /* $endif$ */
 
 
@@ -895,13 +895,17 @@ public abstract class UstadMobileSystemImpl {
     
     /**
      * Generates a QRCodeImage compatible object for the platform that we're on
-     * with the given input stream
+     * with the given input stream.
+     * 
+     * This is not implemented on J2ME / Micro Edition
      * 
      * @param in
      * 
      * @return 
      */
+    /* $if umplatform != 2  $ */
     public abstract QRCodeImage getQRCodeImage(InputStream in);
+    /* $endif$ */
     
     /**
      * Get access to the App View to do common UI activities (e.g. show

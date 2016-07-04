@@ -22,6 +22,10 @@ fi
 #go back to base directory
 cd ../..
 pwd
-cp -rv lib/checkout/qrcode/src/jp src/
 
+# Temporarily; remove QRCode from J2ME lib to save space
+#cp -rv lib/checkout/qrcode/src/jp src/
+
+rm -r src/com/ustadmobile/core/omr
+rm src/com/ustadmobile/test/core/TestOMR.java
 

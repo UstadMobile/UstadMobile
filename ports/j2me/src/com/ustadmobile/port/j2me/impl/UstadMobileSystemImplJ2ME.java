@@ -64,7 +64,6 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
-import com.ustadmobile.port.j2me.impl.qr.J2MEQRCodeImage;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.util.WatchedInputStream;
@@ -88,7 +87,6 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
-import jp.sourceforge.qrcode.data.QRCodeImage;
 import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -1227,17 +1225,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
         downloadService.unregisterDownloadCompleteReceiver(receiver);
-    }
-
-    //This is just a placeholder so it compiles - we dont support OMR on J2ME just yet
-    public QRCodeImage getQRCodeImage(InputStream in) {
-        try {
-            return new J2MEQRCodeImage(Image.createImage(in));
-        }catch(IOException e) {
-            
-        }
-        
-        return null;
     }
 
     /**
