@@ -36,7 +36,7 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
-import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -128,17 +128,22 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         
         //Check if file exists 
         String deviceDir = UstadMobileSystemImplJ2ME.getInstanceJ2ME().findSystemBaseDir();
-        String tincanDir = FileUtils.joinPath(deviceDir, LOG_FOLDER);
-        boolean xapi_created = FileUtils.createFileOrDir(tincanDir, Connector.READ_WRITE, true);
-        if (!xapi_created){
+        //String tincanDir = FileUtils.joinPath(deviceDir, LOG_FOLDER);
+        String tincanDir = UMFileUtil.joinPaths(new String[]{deviceDir, LOG_FOLDER});
+        //boolean xapi_created = FileUtils.createFileOrDir(tincanDir, Connector.READ_WRITE, true);
+        boolean xapi_created = impl.makeDirectory(tincanDir);
+        
+        if (!impl.dirExists(tincanDir)){
             impl.l(UMLog.DEBUG, 554, "Unable to create xapi folder in phone memory" );
         }
        
-        String logPath = FileUtils.joinPath(tincanDir, logName.toString());
+        //String logPath = FileUtils.joinPath(tincanDir, logName.toString());
+        String logPath = UMFileUtil.joinPaths(new String[]{tincanDir, logName.toString()});
         impl.l(UMLog.DEBUG, 552, "Checking and creating logPath : " + logPath );
         String logPathPosition = logPath + ".status";
         impl.l(UMLog.DEBUG, 552, "Checking and creating logPathPosition : " + logPathPosition );
         
+        /*
         if (!FileUtils.checkFile(logPath)){
             FileUtils.createFileOrDir(logPath, Connector.READ_WRITE, false);
         }
@@ -146,14 +151,16 @@ public class TinCanLogManagerJ2ME extends TimerTask{
             FileUtils.createFileOrDir(logPathPosition, Connector.READ_WRITE, false);
             //FileUtils.writeStringToFile("0", logPathPosition, false);
         }
+        */
         
         impl.l(UMLog.DEBUG, 552, "created temp files too" );
         
         
-        FileConnection fCon = null;
+        //FileConnection fCon = null;
         try{
-            fCon = (FileConnection)Connector.open(logPath, Connector.READ_WRITE);
-            logOut = fCon.openOutputStream();
+            //fCon = (FileConnection)Connector.open(logPath, Connector.READ_WRITE);
+            //logOut = fCon.openOutputStream();
+            logOut = impl.openFileOutputStream(logPath, 0);
             currentFile = logPath;
             success = true;
         }catch(Exception e){
@@ -162,11 +169,13 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             e.getMessage() + ",  " + e.toString());
             
             success = false;
-        }finally{
+        }
+        /*finally{
             if (fCon != null){
                 fCon.close();
             }
         }
+        */
         
         if (success){
             return logPath;
@@ -182,11 +191,12 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         boolean outcome = false;
         if (userid != null && userid.length() > 0){
             status = "0";
-            impl.l(UMLog.DEBUG, 540, "user id ok" );
+            impl.l(UMLog.DEBUG, 600, null);
         }
+        
         sb.append('u').append(':').append(userid).append(':').append("statementstart:").append(
                 stmt.toString()).append(":statementend:").append(status);
-        impl.l(UMLog.DEBUG, 540, "appended statement to be queued ok");
+        impl.l(UMLog.DEBUG, 540, null);
         if (logOut == null){
             openNewLog();
         }
@@ -196,11 +206,11 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                 logOut.write((int)'\n');
                 logOut.flush();
                 outcome = true;
-                impl.l(UMLog.DEBUG, 540, "Outcome is good" );
+                impl.l(UMLog.DEBUG, 6-2, null);
             }
         }catch(IOException e) {
             outcome = false;
-            impl.l(UMLog.DEBUG, 542, e.getMessage() + ", " + e.toString());
+            impl.l(UMLog.DEBUG, 542, null, e);
         }
         
         return outcome;
@@ -312,20 +322,25 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         
         String[] filesToReplicate = null;
         String deviceDir = UstadMobileSystemImplJ2ME.getInstanceJ2ME().findSystemBaseDir();
-        String tincanDir = FileUtils.joinPath(deviceDir, LOG_FOLDER);
+        //String tincanDir = FileUtils.joinPath(deviceDir, LOG_FOLDER);
+        String tincanDir = UMFileUtil.joinPaths(new String[]{deviceDir, LOG_FOLDER});
         filesToReplicate = impl.listDirectory(tincanDir);
         //filesToReplicate = impl.listDirectory(currentFile)
         //filesToReplicate = listDir(appdir /tincan);
-        String newLogMade = FileUtils.getBaseName(newName);
+        //String newLogMade = FileUtils.getBaseName(newName);
+        String newLogMade = UMFileUtil.getFilename(newName);
         //Go through all log files available..
         impl.l(UMLog.DEBUG, 548, "Scanning all files in xapi directory" );
         for(int i = 0; i < filesToReplicate.length; i++) {
             impl.l(UMLog.DEBUG, 548, "Current file:" + filesToReplicate[i] );
             if(filesToReplicate[i].endsWith(".log")) {
                 
-                String currentLogFileURI = FileUtils.joinPath(tincanDir, filesToReplicate[i]);
-                String statusFile = filesToReplicate[i].toString() + ".status";
-                String statusFileURI = FileUtils.joinPath(tincanDir, statusFile);
+                //String currentLogFileURI = FileUtils.joinPath(tincanDir, filesToReplicate[i]);
+                String currentLogFileURI = UMFileUtil.joinPaths(new String[]{tincanDir, 
+                    filesToReplicate[i]});
+                String statusFile = filesToReplicate[i] + ".status";
+                //String statusFileURI = FileUtils.joinPath(tincanDir, statusFile);
+                String statusFileURI = UMFileUtil.joinPaths(new String[]{tincanDir, statusFile});
                 int logLineNumber = 0;
                 int tempLineNumber = 0;
                 
@@ -334,6 +349,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                 FileConnection statusCon = null;
                 InputStream logIn = null;
                 FileConnection logCon = null;
+                String logURI = null;
                 
                 if (filesToReplicate[i].equals(newLogMade)){
                     //Dont do it. Skip.
@@ -341,7 +357,8 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     continue;
                 }
                 
-                if (FileUtils.checkDir(statusFileURI)){
+                //if (FileUtils.checkDir(statusFileURI)){
+                if (impl.fileExists(statusFileURI)){
                     impl.l(UMLog.DEBUG, 548, "!Both log and temp file found (status file)" );
                     //Both temp and log file exists. There are stuff left to scan through, etc
                     
@@ -394,14 +411,18 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                                 "after (log and temp) post send: okay and closed." );
                         if (resultCode == 1){
                             //delete .log, rename .tmp to .done
-                            FileUtils.deleteRecursively(
-                                    FileUtils.joinPath(tincanDir, 
-                                            filesToReplicate[i]), false);
+                            //FileUtils.deleteRecursively(
+                            //        FileUtils.joinPath(tincanDir, 
+                            //                filesToReplicate[i]), false);
+                            impl.removeRecursively(UMFileUtil.joinPaths(
+                                new String[]{tincanDir,filesToReplicate[i]}));
                             String statusFileURIDone = statusFileURI + ".done";
                             impl.renameFile(statusFileURI, statusFileURIDone);
                         }else if (resultCode == 2){
-                            String tempB4Delete = FileUtils.joinPath(tincanDir, 
-                                            filesToReplicate[i]) + ".origi";
+                            //String tempB4Delete = FileUtils.joinPath(tincanDir, 
+                            //                filesToReplicate[i]) + ".origi";
+                            String tempB4Delete = UMFileUtil.joinPaths(
+                                new String[]{tincanDir, filesToReplicate[i] + ".origi"});
                             impl.renameFile(currentLogFileURI, tempB4Delete);
                             /*FileUtils.renameFileOrDir( 
                                     FileUtils.joinPath(tincanDir, 
@@ -417,8 +438,8 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                                     Connector.READ_WRITE, false);
                             */
                             
-                            FileUtils.deleteRecursively(tempB4Delete, false);
-
+                            //FileUtils.deleteRecursively(tempB4Delete, false);
+                            impl.removeFile(tempB4Delete);
                         }else{
                             impl.l(UMLog.DEBUG, 556, "Something went wrong in POST" );
                         }
@@ -429,13 +450,17 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         impl.l(UMLog.DEBUG, 548, "temp line number " + 
                             "" + " is not lower than log line number" +
                                 "");
-                        FileUtils.deleteRecursively(
-                                    FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]), false);
+                        //FileUtils.deleteRecursively(
+                        //            FileUtils.joinPath(tincanDir, 
+                        //                filesToReplicate[i]), false);
+                        impl.removeFile(UMFileUtil.joinPaths(new String[] {
+                            tincanDir, filesToReplicate[i]}));
+                        
                         String statusFileURIDone = statusFileURI + ".done";
-                        FileUtils.renameFileOrDir(statusFileURI,
-                                statusFileURIDone, Connector.READ_WRITE, false);
-                       
+                        
+                        //FileUtils.renameFileOrDir(statusFileURI,
+                        //        statusFileURIDone, Connector.READ_WRITE, false);
+                        impl.renameFile(statusFileURI, statusFileURIDone);
                         continue;
                     }
                     
@@ -444,25 +469,30 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                 }
                 
                 //Create a blank status file if it doesnt exist.
+                /*
                 if (!FileUtils.checkFile(statusFileURI)){
                     FileUtils.createFileOrDir(statusFileURI, Connector.READ_WRITE, false);
                 }
+                */
                 
                 //If created okay
-                if (FileUtils.checkFile(statusFileURI)){
+                //if (FileUtils.checkFile(statusFileURI)){
                     impl.l(UMLog.DEBUG, 548, "created temp file" + statusFileURI );
                     //Ready the status file: to be written.
-                    statusCon = (FileConnection)Connector.open(statusFileURI, Connector.READ_WRITE);
-                    //get status' file's output stream
-                    statusOut = statusCon.openOutputStream();
+                    //statusCon = (FileConnection)Connector.open(statusFileURI, Connector.READ_WRITE);
                     
-                    logCon = (FileConnection) Connector.open(
-                            FileUtils.joinPath(tincanDir, filesToReplicate[i]),
-                            Connector.READ);
+                    //get status' file's output stream
+                    //statusOut = statusCon.openOutputStream();
+                    statusOut = impl.openFileOutputStream(statusFileURI, 0);
+                    
+                    //logCon = (FileConnection) Connector.open(
+                    //        FileUtils.joinPath(tincanDir, filesToReplicate[i]),
+                    //        Connector.READ);
                     
                     impl.l(UMLog.DEBUG, 548, "got log FileConnection" );
                     //if nothing in the log file, all done, etc
-                    if (logCon.availableSize() == 0){
+                    //if (logCon.availableSize() == 0){
+                    if (impl.fileSize(statusFileURI) == 0){
                         impl.l(UMLog.DEBUG, 548, "log is empty. Setting to done." );
                         if (logCon != null){
                             logCon.close();
@@ -504,38 +534,52 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     impl.l(UMLog.DEBUG, 548, "after post send: okay and closed." );
                     if (resultCode == 1){
                         //delete .log, rename .tmp to .done
-                        FileUtils.deleteRecursively(
-                                FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]), false);
+                        //FileUtils.deleteRecursively(
+                        //        FileUtils.joinPath(tincanDir, 
+                        //                filesToReplicate[i]), false);
+                        impl.removeFile(UMFileUtil.joinPaths(new String[]{tincanDir, 
+                            filesToReplicate[i]}));
+                        
                         String statusFileURIDone = statusFileURI + ".done";
                         impl.renameFile(statusFileURI, statusFileURIDone);
                         //FileUtils.renameFileOrDir(statusFileURI,
                         //        statusFileURIDone, Connector.READ_WRITE, false);
                     }else if (resultCode == 2){
-                        String tempB4Delete = FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]) + ".origi";
+                        ///String tempB4Delete = FileUtils.joinPath(tincanDir, 
+                        //                filesToReplicate[i]) + ".origi";
+                        String tempB4Delete = UMFileUtil.joinPaths(new String[]{
+                            tincanDir, filesToReplicate[i]}) + ".origi";
                         
-                        FileUtils.renameFileOrDir( 
-                                FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]),
-                                tempB4Delete,
-                                Connector.READ_WRITE, false);
+                        //FileUtils.renameFileOrDir( 
+                        //        FileUtils.joinPath(tincanDir, 
+                        //                filesToReplicate[i]),
+                        //        tempB4Delete,
+                        //        Connector.READ_WRITE, false);
                         
-                        FileUtils.renameFileOrDir(statusFileURI, 
-                                FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]), 
-                                Connector.READ_WRITE, false);
+                        impl.renameFile(UMFileUtil.joinPaths(new String[]{
+                            tincanDir, filesToReplicate[i]}), tempB4Delete);
                         
-                        FileUtils.deleteRecursively(tempB4Delete, false);
                         
+//                        FileUtils.renameFileOrDir(statusFileURI, 
+//                                FileUtils.joinPath(tincanDir, 
+//                                        filesToReplicate[i]), 
+//                                Connector.READ_WRITE, false);
+//                        
+                        impl.renameFile(statusFileURI, 
+                                UMFileUtil.joinPaths(new String[]{tincanDir, 
+                                        filesToReplicate[i]}));
+                        
+                        
+                        //FileUtils.deleteRecursively(tempB4Delete, false);
+                        impl.removeFile(tempB4Delete);
                     }else{
                         impl.l(UMLog.DEBUG, 556, "NOT CREATED: " + statusFileURI );
                         //-\_(^-^)_/-
                     }
                     
-                }else{
+                //}else{
                     
-                }                
+                //}                
             }
             
         }
@@ -665,9 +709,13 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         statementString = statementString.substring("statementstart:".length(), statementString.length());
                         byte[] statementBytes = statementString.getBytes();
 
-                        String tincanEndpointURL = 
-                                FileUtils.joinPath(UstadMobileDefaults.DEFAULT_XAPI_SERVER, 
-                                        "statements");
+//                        String tincanEndpointURL = 
+//                                FileUtils.joinPath(UstadMobileDefaults.DEFAULT_XAPI_SERVER, 
+//                                        "statements");
+
+                        String tincanEndpointURL = UMFileUtil.joinPaths(new String[]{
+                            UstadMobileDefaults.DEFAULT_XAPI_SERVER, "statemetns"});
+                        
                         //        UstadMobileDefaults.DEFAULT_XAPI_STATEMENT_SERVER;
                         //impl.l(UMLog.DEBUG, 558, "POST-in log line" );
                         
