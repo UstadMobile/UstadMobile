@@ -34,7 +34,6 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.port.j2me.util.PageSplitter;
 import com.ustadmobile.port.j2me.view.ContainerViewPageSplitter;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;

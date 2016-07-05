@@ -310,15 +310,13 @@ public class HTTPCacheDir {
                 if (timeNow < entryExpires) {
                     //we can serve it direct from the cache - no validation needed
                     isValid = true;
-                    System.out.println("Cache HIT" + url);
+                    impl.l(UMLog.DEBUG, 606, url);
                 } else if(dataURL == null){
                     //needs to be validated
                     
                     result = impl.makeRequest(url, headers, null, "HEAD");
                     isValid = validateCacheEntry(entry, result);
-                    if(isValid) {
-                        System.out.println("Cache validated HIT" + url);
-                    }
+                    impl.l(UMLog.DEBUG, 607, url + ':' + isValid);
                 }
                 
                 if(isValid) {

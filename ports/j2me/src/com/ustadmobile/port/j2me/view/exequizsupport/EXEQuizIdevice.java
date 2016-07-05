@@ -152,10 +152,7 @@ public class EXEQuizIdevice {
         String currentName;
         EXEQuizQuestion currentQuestion;
         int qCount = 0;
-        if(questionForms == null) {
-            System.out.println("what a terrible failure: null ");
-        }
-        
+
         for(int i = 0; i < questionForms.size(); i++) {
             currentEl = (HTMLElement)questionForms.elementAt(i);
             currentName = currentEl.getAttributeById(HTMLElement.ATTR_NAME);

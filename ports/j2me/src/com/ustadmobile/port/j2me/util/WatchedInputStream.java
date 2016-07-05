@@ -39,15 +39,16 @@ public class WatchedInputStream extends InputStream{
     }
     
     public static void printActiveStreams() {
-        System.out.print("Active: [");
+        StringBuffer sb = new StringBuffer('[');
         WeakReference ref;
         for(int i = 0; i <openStreams.size(); i++) {
             ref = (WeakReference)openStreams.elementAt(i);
             if(ref.get() != null) {
-                System.out.print(i + ": " + streamNames.elementAt(i) + ",");
+                sb.append(i).append(':').append(streamNames.elementAt(i)).append(',');
             }
         }
-        System.out.println("]");
+        sb.append(']');
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 605, sb.toString());
     }
     
     private static int getNumStreams() {
@@ -66,9 +67,7 @@ public class WatchedInputStream extends InputStream{
     private void addToActiveStreams() {
         openStreams.addElement(new WeakReference(this));
         streamNames.addElement(name);
-        UstadMobileSystemImpl.l(UMLog.INFO, 399, "#Active Streams: " 
-            + getNumStreams() + " : +"  +this.name);
-        System.out.print("ADD: " + name +  " ( " + openStreams.size() + " streams)");
+        UstadMobileSystemImpl.l(UMLog.INFO, 399, getNumStreams() + " : +" + this.name);
         printActiveStreams();
     }
     
@@ -82,9 +81,7 @@ public class WatchedInputStream extends InputStream{
         openStreams.removeElementAt(index);
         streamNames.removeElementAt(index);
         
-        UstadMobileSystemImpl.l(UMLog.INFO, 398, "#Active Streams: " 
-            + getNumStreams() + " : -"  +this.name);
-        System.out.println("REMOVE: " + name + " ( " + openStreams.size() + " streams)");
+        UstadMobileSystemImpl.l(UMLog.INFO, 398, getNumStreams() + " : -"  +this.name);
     }
     
     public boolean markSupported() {
