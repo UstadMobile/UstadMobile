@@ -100,7 +100,7 @@ public class OPDSItemButton extends Button {
             checkImg = (Image)checkVal;
         }else {
             try {
-                checkImg = Image.createImage("/res/img/check.png");
+                checkImg = Image.createImage("/res/img/check.gif");
                 checkImgRef = new WeakReference(checkImg);
             }catch(IOException e) {
                 UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR, 330, null, e);

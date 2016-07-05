@@ -102,9 +102,6 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         Vector entryVector = new Vector();
         
         String[] linkAttrs;
-        String rel;
-        String mimeType;
-        String href;
         //cache the content string of an entry in case we dont find summary
         String content = null;
         String name;
@@ -115,22 +112,22 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
             if(evtType == XmlPullParser.START_TAG) {
                 name = xpp.getName();
                 
-                if(name.equals("entry")) {
+                if(name.equals(ATTR_NAMES[ATTR_ENTRY])) {
                     currentItem = new UstadJSOPDSEntry(resultFeed);
-                }else if(name.equals("title") && xpp.next() == XmlPullParser.TEXT) {                    
+                }else if(name.equals(ATTR_NAMES[ATTR_TITLE]) && xpp.next() == XmlPullParser.TEXT) {                    
                     currentItem.title = xpp.getText();
                 }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
                     currentItem.id = xpp.getText();
                 }else if(name.equals("link")){
-                    linkAttrs = new String[LINK_ATTR_NAMES.length];
-                    for(i = 0; i < LINK_ATTR_NAMES.length; i++) {
+                    linkAttrs = new String[UstadJSOPDSItem.LINK_ATTRS_END];
+                    for(i = 0; i < UstadJSOPDSItem.LINK_ATTRS_END; i++) {
                         linkAttrs[i] = xpp.getAttributeValue(null, 
-                            LINK_ATTR_NAMES[i]);
+                            ATTR_NAMES[i]);
                     }
                     currentItem.addLink(linkAttrs);
                 }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
                     currentItem.updated = xpp.getText();
-                }else if(name.equals("summary") && xpp.next() == XmlPullParser.TEXT) {
+                }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {
                     currentItem.summary = xpp.getText();
                 }else if(name.equals("content") && xpp.next() == XmlPullParser.TEXT) {
                     content = xpp.getText();

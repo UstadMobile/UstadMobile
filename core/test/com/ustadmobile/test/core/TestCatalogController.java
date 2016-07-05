@@ -170,7 +170,7 @@ public class TestCatalogController extends TestCase{
         assertEquals("After filtering two links are remaining", 2, 
             filteredLinks.size());
         assertEquals("After filtering null type only plain link remains",
-            "application/epub+zip",filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+            "application/epub+zip",filteredLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
         
         // tst filtering acquisition links for the micro profile
         filteredLinks = CatalogController.filterAcquisitionLinksByProfile(
@@ -181,7 +181,7 @@ public class TestCatalogController extends TestCase{
             filteredLinks.size());
         assertEquals("After filtering micro type micro epub link remains",
             "application/epub+zip;x-umprofile=micro",
-            filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+            filteredLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
     }
     
     public void runTest() throws IOException, XmlPullParserException{

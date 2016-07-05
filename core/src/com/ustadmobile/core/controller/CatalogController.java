@@ -727,7 +727,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             if(entryLinks.size() > 0) {
                 String[] firstLink = (String[])entryLinks.elementAt(0);
                 final String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
-                    firstLink[UstadJSOPDSItem.LINK_HREF]);
+                    firstLink[UstadJSOPDSItem.ATTR_HREF]);
                 
                 Hashtable args = new Hashtable();
                 args.put(KEY_URL, url);
@@ -929,29 +929,29 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 //set this one and continue
                 currentLink = (String[])acquireLinks.elementAt(0);
                 acquireRequest.setSelectedFormat(i, 
-                    currentLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+                    currentLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
             }else {
                 String mimeChoices[] = new String[acquireLinks.size()];
                 String choiceLabels[] = new String[acquireLinks.size()];
                 
                 for(j = 0; j < mimeChoices.length; j++) {
                     currentLink = (String[])acquireLinks.elementAt(j);
-                    mimeChoices[j] = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
-                    if(currentLink[UstadJSOPDSItem.LINK_TITLE] != null) {
-                        choiceLabels[j] = currentLink[UstadJSOPDSItem.LINK_TITLE];
+                    mimeChoices[j] = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
+                    if(currentLink[UstadJSOPDSItem.ATTR_TITLE] != null) {
+                        choiceLabels[j] = currentLink[UstadJSOPDSItem.ATTR_TITLE];
                     }else {
-                        choiceLabels[j] = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
+                        choiceLabels[j] = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
                     }
                     
-                    if(currentLink[UstadJSOPDSItem.LINK_LENGTH] != null) {
+                    if(currentLink[UstadJSOPDSItem.ATTR_LENGTH] != null) {
                         try {
                             choiceLabels[j] += "(" + UMFileUtil.formatFileSize(
-                                Integer.parseInt(currentLink[UstadJSOPDSItem.LINK_LENGTH])) +
+                                Integer.parseInt(currentLink[UstadJSOPDSItem.ATTR_LENGTH])) +
                                 ")";
                         }catch(Exception e) {
                             //number format exception of some kind probably...
                             impl.l(UMLog.WARN, 207, 
-                                currentLink[UstadJSOPDSItem.LINK_LENGTH], e);
+                                currentLink[UstadJSOPDSItem.ATTR_LENGTH], e);
                         }
                     }
                 }
@@ -1280,7 +1280,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 
                 for(j = 0; j < entryLinks.size(); j++) {
                     String[] thisLink = (String[])entryLinks.elementAt(j);
-                    if(thisLink[UstadJSOPDSItem.LINK_REL].startsWith(UstadJSOPDSEntry.LINK_ACQUIRE)) {
+                    if(thisLink[UstadJSOPDSItem.ATTR_REL].startsWith(UstadJSOPDSEntry.LINK_ACQUIRE)) {
                         linksToRemove.addElement(thisLink);
                     }
                 }
@@ -1680,7 +1680,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         int semiPos;
         for(int i = 0; i < links.size(); i++) {
             currentLink = (String[])links.elementAt(i);
-            currentMime = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
+            currentMime = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
             semiPos = currentMime.indexOf(';');
             if(semiPos != -1) {
                 currentMime = currentMime.substring(0, semiPos).trim();
@@ -1691,9 +1691,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 Integer otherIndex = (Integer)linksByType.get(currentMime);
                 String[] otherLink = (String[])links.elementAt(otherIndex.intValue());
                 String otherProfile = UMFileUtil.parseTypeWithParamHeader(
-                    otherLink[UstadJSOPDSItem.LINK_MIMETYPE]).getParam("x-umprofile");
+                    otherLink[UstadJSOPDSItem.ATTR_MIMETYPE]).getParam("x-umprofile");
                 String currentProfile = UMFileUtil.parseTypeWithParamHeader(
-                    currentLink[UstadJSOPDSItem.LINK_MIMETYPE]).getParam("x-umprofile");
+                    currentLink[UstadJSOPDSItem.ATTR_MIMETYPE]).getParam("x-umprofile");
                 
                 boolean otherMatches = false;
                 boolean currentMatches = false;
@@ -1767,8 +1767,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             
             preferredLink = (String[])acquisitionLinks.elementAt(0);
             
-            itemHref = preferredLink[UstadJSOPDSItem.LINK_HREF];
-            mimeTypes[i] = preferredLink[UstadJSOPDSItem.LINK_MIMETYPE];
+            itemHref = preferredLink[UstadJSOPDSItem.ATTR_HREF];
+            mimeTypes[i] = preferredLink[UstadJSOPDSItem.ATTR_MIMETYPE];
             
             itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
                     itemHref);

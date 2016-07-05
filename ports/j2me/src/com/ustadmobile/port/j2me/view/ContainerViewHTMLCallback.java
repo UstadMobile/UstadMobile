@@ -247,7 +247,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     
 
     public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
-        System.out.println("Status: " + status + " url " + url);
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 604, url+':'+status);
         if (status == STATUS_REQUESTED) {
             fixedPage = false;
         }else if (status == STATUS_DISPLAYED && fixedPage == false) {

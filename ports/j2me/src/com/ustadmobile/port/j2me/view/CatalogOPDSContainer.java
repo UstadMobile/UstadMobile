@@ -148,10 +148,8 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     public void controllerReady(final UstadController controller, final int flags) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        final Object context = getContext();
         Display.getInstance().callSerially(new Runnable() {
             public void run() {
-                //impl.getAppView(context).dismissProgressDialog();
                 if(controller != null) {
                     setController((CatalogController)controller);
                 }else {

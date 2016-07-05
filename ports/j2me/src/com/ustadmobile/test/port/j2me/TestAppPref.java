@@ -30,8 +30,8 @@
  */
 package com.ustadmobile.test.port.j2me;
 
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.port.j2me.app.AppPref;
-import com.ustadmobile.port.j2me.app.FileUtils;
 import j2meunit.framework.TestCase;
 import java.util.Hashtable;
 
@@ -66,8 +66,8 @@ public class TestAppPref extends TestCase {
                 "http://umcloud1.ustadmobile.com/", appSettings.get("umcloud"));
         
         //Get all keys
-        String [] prefKeys = 
-                FileUtils.enumerationToStringArray(appSettings.keys());
+        String[] prefKeys = UMUtil.enumerationToStringArray(appSettings.keys());
+        
         boolean found=false;
         for (int i=0; i<prefKeys.length; i++){
             if(prefKeys[i].indexOf("tincan") >=0 ){

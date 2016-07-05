@@ -33,7 +33,6 @@ package com.ustadmobile.port.j2me.app.controller;
 import com.ustadmobile.port.j2me.app.DeviceRoots;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
-import com.ustadmobile.port.j2me.app.FileUtils;
 import com.ustadmobile.port.j2me.app.RMSUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,11 +51,6 @@ public class UstadMobileAppController {
      */
     public static String appDataDir = null;
     
-    public static final int MENUITEM_CATALOG = 0;
-    public static final int MENUITEM_LIBRARY = 1;
-    public static final int MENUITEM_DOWNLOAD = 2;
-    public static final int MENUITEM_USERAUTH = 3;
-    public static final int MENUITEM_ABOUT = 4;
     
     //Default app settings.
     public static Hashtable appSettings;
@@ -104,39 +98,6 @@ public class UstadMobileAppController {
         //return null;
     }
     
-        //defaultMimeTypes.put("gif", "image/gif");
-    
-    /**
-     * Find out where we should put the base folder by finding the root folder
-     * with the maximum amount of space (this should be the memory card generally)
-     */
-    public static String getAppDataDir() throws IOException{
-        DeviceRoots bestRoot = FileUtils.getBestRoot();
-        if (bestRoot==null){
-            return null;
-        }
-        //String baseFolder = bestRoot.path + "umobiledata" +"/";
-        String baseFolder = FileUtils.joinPath(bestRoot.path, "umobiledata", true);
-        FileConnection bCon = null;
-        try{
-            bCon = (FileConnection)Connector.open(baseFolder, 
-                    Connector.READ_WRITE);
-            if (!bCon.exists()){
-                bCon.mkdir();
-            }
-            if (!bCon.isDirectory()){
-                bCon.mkdir();
-            }
-            appDataDir = baseFolder;
-            return appDataDir;
-        }catch (Exception ce){
-            return null;
-        } finally {
-            if (bCon != null){
-                bCon.close();
-            }
-        }
-    }
     
     public static String getPlatform(){
         return System.getProperty("microedition.platform");
@@ -146,26 +107,6 @@ public class UstadMobileAppController {
         return System.getProperty("microedition.locale");
     }
 
-     /**
-     * Find out where we should put the base folder by finding the root folder
-     * with the maximum amount of space (this should be the memory card generally)
-     */
-    public static String setupAppDataDir() {
-        String baseFolder = System.getProperty("fileconn.dir.photos") + 
-                "umobiledata";
-        
-        try {
-            FileConnection bCon = (FileConnection)Connector.open(baseFolder);
-            if(!bCon.isDirectory()) {
-                bCon.mkdir();
-            }
-            bCon.close();
-            appDataDir = baseFolder;
-            return baseFolder;//all OK
-        }catch(Exception e3) {
-        }
-        return null;
-    }
     
     public static XmlPullParser parseXml(InputStream is) throws 
             XmlPullParserException, IOException{
@@ -174,90 +115,8 @@ public class UstadMobileAppController {
         return parser;
     }
     
-    public static String getBaseDir() {
-        return appDataDir;
-    }
     
-    public static void handleMenuClick(int itemId){
-        
-        switch(itemId){
-            case UstadMobileAppController.MENUITEM_LIBRARY:
-                //go to page
-                break;
-            case UstadMobileAppController.MENUITEM_DOWNLOAD:
-                //go to page
-                break;
-            case UstadMobileAppController.MENUITEM_USERAUTH:
-                //go to page
-                break;
-            case UstadMobileAppController.MENUITEM_ABOUT:
-                //go to page
-                break;
-            case UstadMobileAppController.MENUITEM_CATALOG:
-                //go to page
-                break;
-        }
-    }
     
-        /**
-     * Returns an input stream by checking the URL.  
-     * URL starts file:// - will use IOWatcher to preload the file contents
-     *  if this is not a media file ending with mp3, 3gp or wav
-     * If URL starts file:// and is a media file will return FileConnection.openInputStream
-     * If URL starts with / will return getClass().getResourceAsStream
-     * Else will interpret as a relative link, prefix the currentPackageURI, and apply
-     * the same logic as if for file://
-     * 
-     * @param URL URL as above
-     * @return InputStream for the URL
-     * @throws IOException if there is an IOException dealing with the file system
-     */
-    public static InputStream getInputStreamReaderByURL(String URL) throws IOException{
-        boolean isMedia = URL.endsWith("mp3") || URL.endsWith("3gp") || 
-                URL.endsWith("wav") || URL.endsWith("mpg") 
-                        || URL.endsWith("mp4");
-                
-        if(URL.startsWith("file://")) {
-            if(isMedia) {
-                //logMsg("Opening " + URL + " Direct");
-                return Connector.openInputStream(URL);
-            }else {
-                //make for url
-                return null;
-            }
-        }else {
-            //this is a relative link
-            //ToDo
-            return null;
-        }
-    }
     
-    /**
-     * Utility method used with player - returns mime type for files ending
-     * .mp3, .au, .wav, .3gp, .mpg
-     * 
-     * @param fileName
-     * @return 
-     */
-    public static String getContentType(String fileName) {
-        String fileNameLower = fileName.toLowerCase();
-        if(fileNameLower.endsWith(".mp3")) {
-            return "audio/mp3";
-        }else if(fileNameLower.endsWith(".au")) {
-            return "audio/basic";
-        }else if(fileNameLower.endsWith(".wav")) {
-            return "audio/X-wav";
-        }else if(fileNameLower.endsWith(".mpg")) {
-            return "video/mpeg";
-        }else if(fileNameLower.endsWith(".3gp")) {
-            return "video/3gpp";
-        }else if(fileNameLower.endsWith(".mp4")) {
-            return "video/mp4";
-        }
-
-
-        //not known
-        return null;
-    }
    
 }

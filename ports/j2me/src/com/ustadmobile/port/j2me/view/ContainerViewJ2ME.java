@@ -38,13 +38,10 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler.IOCallback;
 import com.sun.lwuit.html.DocumentInfo;
-import com.sun.lwuit.html.DocumentRequestHandler;
-import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
 import com.sun.lwuit.mediaplayer.MIDPMediaPlayer;
-import com.sun.lwuit.plaf.UIManager;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -64,6 +61,7 @@ import com.ustadmobile.core.epubnav.EPUBNavDocument;
 import com.ustadmobile.core.epubnav.EPUBNavItem;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.j2me.impl.zip.UMZipEntryInputStream;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
@@ -76,7 +74,6 @@ import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
-import javax.xml.rpc.NamespaceConstants;
 import org.json.me.JSONObject;
 
 /**
@@ -263,7 +260,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     }
     
     public void initByContentType() {
-        if(controller.getMimeType().startsWith("application/epub+zip")) {
+        if(controller.getMimeType().startsWith(UstadJSOPDSItem.TYPE_EPUBCONTAINER)) {
             initEPUB();
         }
     }
@@ -736,7 +733,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         public InputStream resourceRequested(String requestURL, int expectedType, boolean bufferEnabled, DocumentInfo di) {
             InputStream src;
             try {
-                System.out.println("requestURL " + requestURL);
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 603, requestURL);
                 if(expectedType != DocumentInfo.TYPE_IMAGE && di != null) {
                     di.setEncoding(DocumentInfo.ENCODING_UTF8);
                 }

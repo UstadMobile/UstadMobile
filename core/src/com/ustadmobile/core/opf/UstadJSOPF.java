@@ -217,12 +217,9 @@ public class UstadJSOPF {
                         }
                     }
                 }else if(evtType == XmlPullParser.END_TAG){
-                    if(xpp.getName().equals("manifest")){
-                        System.out.println("End of manifest.");
-                    }else if(xpp.getName().equals("spine")){
+                    if(xpp.getName().equals("spine")){
                         result.spine = new UstadJSOPFItem[spineItems.size()];
                         spineItems.copyInto(result.spine);
-
                     }
                 }
             }
