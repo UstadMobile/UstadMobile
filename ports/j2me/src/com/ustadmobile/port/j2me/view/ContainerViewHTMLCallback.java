@@ -237,8 +237,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     
     public boolean parsingError(int errorId, String tag, String attribute, String value, String description) {
         UstadMobileSystemImpl.l(UMLog.ERROR, 300, "parsingError: id:" + errorId +
-            "tag " + tag + " /attribute: " + attribute + " /value: " + value +
-            "/description: " + description);
+            "tag " + tag + " /attr: " + attribute + " /value: " + value +
+            "/desc: " + description);
         
         
         return super.parsingError(errorId, tag, attribute, value, description); 

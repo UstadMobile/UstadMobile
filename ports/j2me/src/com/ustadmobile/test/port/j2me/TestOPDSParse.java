@@ -29,7 +29,6 @@
 
  */
 package com.ustadmobile.test.port.j2me;
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 
 import com.ustadmobile.core.opds.UstadJSOPDSAuthor;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;

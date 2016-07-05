@@ -28,7 +28,7 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.app.controller;
+package com.ustadmobile.test.port.j2me;
 
 import com.ustadmobile.port.j2me.app.DeviceRoots;
 import javax.microedition.io.Connector;

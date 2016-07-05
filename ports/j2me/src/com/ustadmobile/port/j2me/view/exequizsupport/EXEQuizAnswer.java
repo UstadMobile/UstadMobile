@@ -286,7 +286,7 @@ public class EXEQuizAnswer implements PlayerListener{
             
             stmt.put("context", context);
         }catch(JSONException je) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 195, "exequizanswer.maketincanstmt");
+            UstadMobileSystemImpl.l(UMLog.ERROR, 195, "a");
         }
         
         return stmt;

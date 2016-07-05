@@ -36,7 +36,6 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import org.xmlpull.v1.XmlPullParser;
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import java.io.IOException;
 import javax.microedition.io.file.FileConnection;
 

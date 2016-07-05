@@ -230,9 +230,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         }catch(Exception e){
             e.printStackTrace();
         }finally{
-            if (fCon != null){
-                fCon.close();
-            }
+            J2MEIOUtils.closeConnection(fCon);
         }
 
         final StringBuffer buf = new StringBuffer();
@@ -332,16 +330,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         //Send log from log file IS and work on Status file OS
                         int resultCode = sendLog(logIn, statusOut, tempLineNumber);
 
-                        if (logIn != null){
-                            logIn.close();
-                        }
-                        if (logOut != null){
-                            logOut.close();
-                        }
-                        if (statusOut != null){
-                            statusOut.flush();
-                            statusOut.close();
-                        }
+                        UMIOUtils.closeInputStream(logIn);
+                        UMIOUtils.closeOutputStream(logOut);
+                        UMIOUtils.closeOutputStream(statusOut, true);
+                        
                         impl.l(UMLog.DEBUG, 618, null);
                         
                         switch(resultCode) {

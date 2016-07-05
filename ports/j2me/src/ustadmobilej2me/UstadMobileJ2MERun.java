@@ -13,7 +13,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import com.ustadmobile.port.j2me.view.LoadingForm;
 import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -73,7 +72,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         }
         
         
-        UstadViewFormJ2ME loadingForm = new LoadingForm(new Hashtable(), this);
+        UstadViewFormJ2ME loadingForm = new UstadViewFormJ2ME(new Hashtable(), this);
         loadingForm.show();
         impl.handleFormShow(loadingForm);
         impl.startUI(this);

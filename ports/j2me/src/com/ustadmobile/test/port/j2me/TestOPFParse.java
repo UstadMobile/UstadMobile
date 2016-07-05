@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import j2meunit.framework.TestCase;
 import java.io.ByteArrayInputStream;

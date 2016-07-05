@@ -185,9 +185,6 @@ public class OPDSItemButton extends Button {
         if(isProgressBarVisible()) {
             int x = this.getWidth();
             int y = this.getHeight();
-            int yAxis = y - progressHeight;
-
-            String ourText = getText();
 
             float percentageWidth = ((float)x/100) * progressPercentage;
 
