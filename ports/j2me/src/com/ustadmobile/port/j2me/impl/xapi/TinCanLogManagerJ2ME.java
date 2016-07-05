@@ -37,6 +37,7 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -346,7 +347,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                 
                 int readFrom = 0;
                 OutputStream statusOut = null;
-                FileConnection statusCon = null;
+                //FileConnection statusCon = null;
                 InputStream logIn = null;
                 FileConnection logCon = null;
                 String logURI = null;
@@ -376,15 +377,17 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     if (tempLineNumber < logLineNumber){
                         
                         //Ready the status file: to be written.
-                        statusCon = (FileConnection)Connector.open(statusFileURI, 
-                                Connector.READ_WRITE);
+                        //statusCon = (FileConnection)Connector.open(statusFileURI, 
+                        //        Connector.READ_WRITE);
                         //get status' file's output stream to append
-                        statusOut = statusCon.openOutputStream(statusCon.fileSize());
+                        //statusOut = statusCon.openOutputStream(statusCon.fileSize());
+                        statusOut = impl.openFileOutputStream(statusFileURI, 
+                            UstadMobileSystemImpl.FILE_APPEND);
                         //Dont need statusCon no more
-                        if (statusCon != null){
-                            statusCon.close();
-                            impl.l(UMLog.DEBUG, 548, "closed temp file con ok" );
-                        }
+//                        if (statusCon != null){
+//                            statusCon.close();
+//                            impl.l(UMLog.DEBUG, 548, "closed temp file con ok" );
+//                        }
                         
                         //ToDo
                         //get log file to be read.
@@ -497,20 +500,22 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         if (logCon != null){
                             logCon.close();
                         }
+                        
                         if (statusOut != null){
                             statusOut.flush();
                             statusOut.close();
                         }
                         String doneLogName = filesToReplicate[i].toString()
                                 + ".done";
-                        statusCon.rename(doneLogName);
-                        statusCon.close();
+                        //statusCon.rename(doneLogName);
+                        impl.renameFile(statusFileURI, doneLogName);
+                        //statusCon.close();
                         continue;
                     }
-                    if (statusCon != null){
-                        statusCon.close();
-                        impl.l(UMLog.DEBUG, 548, "closed temp file con ok" );
-                    }
+//                    if (statusCon != null){
+//                        statusCon.close();
+//                        impl.l(UMLog.DEBUG, 548, "closed temp file con ok" );
+//                    }
                     
                     //Get log file's input stream 
                     logIn = logCon.openInputStream();
@@ -714,7 +719,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
 //                                        "statements");
 
                         String tincanEndpointURL = UMFileUtil.joinPaths(new String[]{
-                            UstadMobileDefaults.DEFAULT_XAPI_SERVER, "statemetns"});
+                            UstadMobileDefaults.DEFAULT_XAPI_SERVER, "statements"});
                         
                         //        UstadMobileDefaults.DEFAULT_XAPI_STATEMENT_SERVER;
                         //impl.l(UMLog.DEBUG, 558, "POST-in log line" );
@@ -801,7 +806,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
             impl.l(UMLog.DEBUG, 544, "starting to transmitt" );
             transmitQueue();//send the logs up
         } catch (Exception e){
-            impl.l(UMLog.DEBUG, 546, e.getMessage() + ",  " + e.toString() );
+            impl.l(UMLog.DEBUG, 546, null, e);
         }
     }
     
