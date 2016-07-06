@@ -148,6 +148,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     private Hashtable extToMimeTypeTable;
     
+    //#expand public static long BUILDSTAMP = %BUILDSTAMP%L;
+    
+    //#ifndef BUILDSTAMP
+    public static long BUILDSTAMP = 0;
+    //#endif
+    
     public String getImplementationName() {
         return "J2ME";
     }

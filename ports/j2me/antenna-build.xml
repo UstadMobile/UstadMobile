@@ -67,12 +67,19 @@ NetBeans.  See README for instructions on building from source.
             </fileset>
         </path>
         
+        <script language="javascript">
+          <![CDATA[
+            property = project.setProperty("now",new Date().getTime());
+          ]]>
+        </script>        
+        
         <wtkpreprocess verbose="false"  
            srcdir="${src.dir}" 
             destdir="${src.preprocessed.ANTENNA}"
             device="Antenna"
             version="2"
             printsymbols="true"
+            symbols="BUILDSTAMP=${now}" 
         />
 
 
@@ -140,13 +147,16 @@ NetBeans.  See README for instructions on building from source.
         <copy file="${src.dir}/com/ustadmobile/test/port/j2me/test-settings.xml" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test-settings.xml"/>
 
 	
-        <copy file="${src.dir}/nokia_non_touch_theme.res" todir="${classes.dir.ANTENNA}"/>
+        <copy file="${src.dir}/theme.res" todir="${classes.dir.ANTENNA}"/>
         <copy file="${src.dir}/umicon_micro.png" todir="${classes.dir.ANTENNA}"/>        
 
         <mkdir dir="${classes.dir.ANTENNA}/res"/>
         <copy todir="${classes.dir.ANTENNA}/res" verbose="true">
             <fileset dir="${src.dir}/res"/>
         </copy>
+        
+        
+        <echo file="${classes.dir.ANTENNA}/res/buildstamp">Built ${time.stamp}</echo>
 
         <echo message="looking for proguard in: ${wtk.proguard.home}/lib/proguard.jar"/>
         <wtkpackage basedir="${classes.dir.ANTENNA}" 

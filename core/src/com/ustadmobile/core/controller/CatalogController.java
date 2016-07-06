@@ -612,6 +612,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static UstadJSOPDSFeed makeDeviceFeed(UMStorageDir[] dirs, int dirFlags, Object context) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.l(UMLog.DEBUG, 637, null);
+        
         boolean incShared = (dirFlags & SHARED_RESOURCE) == SHARED_RESOURCE;
         boolean incUser = (dirFlags & USER_RESOURCE) == USER_RESOURCE;
         
@@ -647,6 +649,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         String looseFilePath = UMFileUtil.joinPaths(new String[] {
             impl.getCacheDir(incUser ? USER_RESOURCE : SHARED_RESOURCE, context), 
             "cache-loose"});
+        impl.l(UMLog.DEBUG, 638, looseFilePath);
         
         boolean[] userOPDSFiles = new boolean[opdsFiles.length];
         UMUtil.fillBooleanArray(userOPDSFiles, true, opdsUserStartIndex, 
@@ -1458,6 +1461,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static UstadJSOPDSFeed scanFiles(String[] opdsFiles, boolean[] opdsFileModes, String[] containerFiles, boolean[] containerFileModes, String looseContainerFile, String baseHREF, String title, String feedID, Object context) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.l(UMLog.DEBUG, 639, null);
         UstadJSOPDSFeed retVal = new UstadJSOPDSFeed(
                 UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHREF), 
                 title, feedID);

@@ -38,7 +38,6 @@ $endif$ */
 
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
-    import com.ustadmobile.port.j2me.app.HTTPUtils;
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
