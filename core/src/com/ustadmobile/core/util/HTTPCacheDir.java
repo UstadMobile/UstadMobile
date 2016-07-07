@@ -86,6 +86,7 @@ public class HTTPCacheDir {
             INDEX_FILENAME});
         
         try {
+            impl.makeDirectoryRecursive(dirName);
             if(impl.fileExists(indexFileURI)) {
                 cacheIndex = new JSONObject(impl.readFileAsText(indexFileURI, 
                     "UTF-8"));

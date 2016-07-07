@@ -648,7 +648,8 @@ public abstract class UstadMobileSystemImpl {
     
     /**
      * Make the given directory as per the dirURI parameter recursively creating 
-     * any new parent directories needed
+     * any new parent directories needed.  If the directory already exists this
+     * method must simply return false and not throw an exception.
      * 
      * @param dirURI Directory to be created
      * 

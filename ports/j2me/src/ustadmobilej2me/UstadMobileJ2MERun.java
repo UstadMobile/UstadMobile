@@ -33,7 +33,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         
         //Uncomment this below to connect to a local or remote log server
         
-        
+        /*
         try {
             String serverName = "devserver2.ustadmobile.com";
             int rawPort = UMUtil.requestDodgyHTTPDPort("http://" + serverName + ":8075/", "newrawserver", "j2merun");
@@ -48,7 +48,7 @@ public class UstadMobileJ2MERun extends MIDlet {
             System.err.println("Error connecting to testlog socket");
             e.printStackTrace();
         }        
-        
+        */
         
         impl.init(this);
 
@@ -66,7 +66,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         
         try{
             Resources r = Resources.open("/theme.res");
-            Hashtable theme = r.getTheme("Makeover");
+            Hashtable theme = r.getTheme("NokiaTheme");
             UIManager.getInstance().setThemeProps(theme);
             Display.getInstance().setBidiAlgorithm(true);
         }catch(Exception e) {

@@ -103,14 +103,18 @@ public class EXEQuizAnswer implements PlayerListener{
          The input element has an id in the form of id='iXX_YY where XX_YY 
          matches up with a div which will have an id of answer-XX_YY
          */
-        String answerID = inputElement.getAttributeById(HTMLElement.ATTR_ID).substring(1);
+        //String answerID = inputElement.getAttributeById(HTMLElement.ATTR_ID).substring(1);
         answerContentElement = (HTMLElement)answerEl.getElementById("answer-" 
-            + answerID);
+            + getID());
         hideFeedback();
     }
     
     public String getID() {
-        return inputElement.getAttributeById(HTMLElement.ATTR_ID);
+        /* 
+         The input element has an id in the form of id='iXX_YY where XX_YY 
+         matches up with a div which will have an id of answer-XX_YY
+         */
+        return inputElement.getAttributeById(HTMLElement.ATTR_ID).substring(1);
     }
         
     public int getAnswerIndex() {

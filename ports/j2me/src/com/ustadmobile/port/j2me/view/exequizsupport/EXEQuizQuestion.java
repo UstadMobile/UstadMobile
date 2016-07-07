@@ -106,7 +106,16 @@ public class EXEQuizQuestion {
         }
     }
     
-    public JSONObject getTinCanObject() {
+    /**
+     * Generates a JSON Object to represent the statement. 
+     * 
+     * @param includeDefinition If true it will include the statement definition 
+     * in the JSON, false otherwise (e.g. the server already knows the object id: 
+     * no need to send more data)
+     * 
+     * @return 
+     */
+    public JSONObject getTinCanObject(boolean includeDefinition) {
         JSONObject obj = new JSONObject();
         
         String id = UMFileUtil.joinPaths(new String[] {
@@ -114,13 +123,18 @@ public class EXEQuizQuestion {
         try {
             obj.put("id", id);
             obj.put("objectType", "Activity");
-            obj.put("definition", getTinCanObjectDefinition());
+            obj.put("definition", includeDefinition ? getTinCanObjectDefinition() : null);
         }catch(JSONException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 195, "exequizquestion.getTinCanObject");
         }
         
         return obj;
     }
+    
+    public JSONObject getTinCanObject() {
+        return getTinCanObject(false);
+    }
+    
     
     
     /**
