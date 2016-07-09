@@ -100,8 +100,8 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
         preview.addView(mPreview, 0);
 
-        Button captureButton = (Button)view.findViewById(R.id.fragment_attendance_camera_capture);
-        captureButton.setOnClickListener(this);
+        //Button captureButton = (Button)view.findViewById(R.id.fragment_attendance_camera_capture);
+        //captureButton.setOnClickListener(this);
 
         return view;
     }

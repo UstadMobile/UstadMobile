@@ -2,10 +2,13 @@ package com.ustadmobile.port.android.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.graphics.Paint.Style;
 import android.view.View;
+
+import com.ustadmobile.core.omr.OMRRecognizer;
 
 /**
  * Created by varuna on 22/02/16.
@@ -16,6 +19,8 @@ public class RectangleView extends View{
 
     int parentWidth;
     int parentHeight;
+
+    private int[] pageArea;
 
     public RectangleView(Context context) {
         super(context);
@@ -35,58 +40,41 @@ public class RectangleView extends View{
 
     @Override
     protected void onDraw(Canvas canvas) {
-        // this is the canvas where you will draw all your stuff
+        paint.setStyle(Style.FILL);
+        paint.setAlpha(128);
 
-        paint.setStyle(Style.STROKE); // set style to paint
-        paint.setColor(0xFFE80926); // set color - its red.
-        paint.setStrokeWidth(10); // set stroke width
+        //Right side (x axis) of the page area
+        int pgAreaRight = pageArea[OMRRecognizer.X] + pageArea[OMRRecognizer.WIDTH];
 
-        float offset = 50;
-        float lineLength = 150;
+        //Bottom side (y axis) of the page area
+        int pgAreaBottom = pageArea[OMRRecognizer.Y] + pageArea[OMRRecognizer.HEIGHT];
 
-        float maxX;
-        float maxY;
-        float minX;
-        float minY;
+        paint.setColor(Color.BLACK);
+        paint.setAlpha(128);
 
-        if (parentHeight >= parentWidth) {
+        //top margin zone
+        canvas.drawRect(0, 0, parentWidth, pageArea[OMRRecognizer.Y], paint);
 
-            maxX = parentWidth - offset;
-            maxY = (1.414f * maxX); //Keep it A4
-            minX = offset;
-            minY = (1.414f * minX); //Keep it A4
-        }else{
-            maxY = parentHeight - offset;
-            maxX = (maxY / 1.414f); //Keep it A4;
-            minY = offset;
-            minX = (minY / 1.414f); //Keep it A4;
-        }
+        //left side
+        canvas.drawRect(0, pageArea[OMRRecognizer.Y],
+                pageArea[OMRRecognizer.X], pgAreaBottom, paint);
 
-        //top left
-        canvas.drawLine((minX),(minY),(minX),
-                (minY) + lineLength,paint);
-        canvas.drawLine((minX),(minY),
-                (minX) + lineLength,(minY),paint);
+        //right side
+        canvas.drawRect(pgAreaRight, pageArea[OMRRecognizer.Y],
+                parentWidth, pgAreaBottom, paint);
 
-        //bottom left
-        canvas.drawLine((minX ),(minY + maxY),(minX ),(minY + maxY) - lineLength,paint);
-        canvas.drawLine((minX ),(minY + maxY),(minX ) + lineLength,(minY + maxY) ,paint);
-
-        //top right
-        canvas.drawLine((maxX),(minY),(maxX) - lineLength,(minY),paint);
-        canvas.drawLine((maxX),(minY),(maxX),(minY) + lineLength,paint);
-
-        //bottom right
-        canvas.drawLine((maxX),(minY + maxY),(maxX),(minY + maxY) - lineLength,paint);
-        canvas.drawLine((maxX),(minY + maxY),(maxX) - lineLength,(minY + maxY),paint);
-
+        //bottom margin zone
+        canvas.drawRect(0, pgAreaBottom, parentWidth, parentHeight, paint);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         parentWidth = MeasureSpec.getSize(widthMeasureSpec);
         parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+        pageArea = OMRRecognizer.getExpectedPageArea(210, 297,
+                parentWidth, parentHeight, 0.1f);
+
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
     }
 

@@ -1,6 +1,5 @@
 Ustad Mobile for Android
 
-
 The Android version uses an ant task to copy the core source into
 it's directory.  This is to aid debugging: Android studio does not
 respect breakpoints in JARs even when the sources are known to it.
@@ -21,7 +20,19 @@ Update core library
 ./updatecore
 
 Run tests:
-./gradlew connectedAndroidTest
+
+Normally Android test runs are done using ./gradlew connectedAndroidTest .
+We however have tests that require the test server to run which
+simulates broken connections etc.  Tests must be run on an emulator
+or a connected Android device which is on the same network as the 
+host from which runtests is run.
+
+To run tests:
+./runtests
+
+To update test config (set network addresses to local IP address):
+./runtests updateonly
+
 
 Build Debug Version:
 ./gradlew assembleDebug

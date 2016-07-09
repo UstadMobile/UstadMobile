@@ -76,8 +76,9 @@ public class TestOMR extends TestCase {
     }
     
     public void testOMR() throws IOException{
-        QRCodeImage img = UstadMobileSystemImpl.getInstance().makeQRCodeImage(imgBytes);
-        int[] expectedCorners = OMRRecognizer.getExpectedCenters(485, 722, 
+        QRCodeImage img = UstadMobileSystemImpl.getInstance().getQRCodeImage(
+            new ByteArrayInputStream(imgBytes));
+        int[] expectedCorners = OMRRecognizer.getExpectedPageArea(485, 722, 
             img.getWidth(), img.getHeight(), 0.1f);
 
         imgBytes = null;

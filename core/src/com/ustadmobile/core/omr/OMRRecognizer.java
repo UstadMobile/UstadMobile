@@ -45,14 +45,47 @@ import jp.sourceforge.qrcode.util.DebugCanvas;
 public class OMRRecognizer {
 
     
+    /**
+     * Top corner for both arrays of points and rectangle coordinates 
+     */
     public static final int TOP = 0;
     
+    
+    /**
+     * Left corner for both arrays of points and rectangle coordinates 
+     */
     public static final int LEFT = 1;
     
+    /**
+     * Bottom corner for arrays of points
+     */
     public static final int BOTTOM = 2;
     
+    /**
+     * Right corner for arrays of points
+     */
     public static final int RIGHT = 3;
     
+    
+    /**
+     * X coordinate for rectangle cordinates returned as int array
+     */
+    public static final int X = 0;
+    
+    /**
+     * Y coordinate for rectangle coordinates return as int array
+     */
+    public static final int Y = 1;
+    
+    /**
+     * Width for rectangle coordinates returned as an int array
+     */
+    public static final int WIDTH = 2;
+
+    /**
+     * Height for rectangle coordinates return as an int array
+     */
+    public static final int HEIGHT = 3;
     
     //measured in inkscape
     //Most of these are for test cases and these arent the ones in use.
@@ -358,7 +391,7 @@ public class OMRRecognizer {
      * 
      * @return int array of x, y, width, height where centers should be within this image if it's in the middle
      */
-    public static int[] getExpectedCenters(int zoneWidth, int zoneHeight, int imgWidth, int imgHeight, float margin) {
+    public static int[] getExpectedPageArea(int zoneWidth, int zoneHeight, int imgWidth, int imgHeight, float margin) {
         float zoneRatio = (float)zoneWidth/(float)zoneHeight;
         float imgRatio = (float)imgWidth/(float)imgHeight;
                 

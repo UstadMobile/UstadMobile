@@ -14,14 +14,17 @@
         >
 
         <com.ustadmobile.port.android.view.RectangleView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:id="@+id/customview_rectangle"
             android:layout_gravity="left|top" />
 
     </FrameLayout>
 
     <!-- TODO: Update blank fragment layout -->
+
+
+    <!--
     <Button
         android:id="@+id/fragment_attendance_camera_capture"
         android:text="Capture"
@@ -29,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         />
-
+    -->
 
 
 </LinearLayout>
