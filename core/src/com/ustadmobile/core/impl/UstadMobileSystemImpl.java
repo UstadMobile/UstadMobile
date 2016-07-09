@@ -53,7 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import jp.sourceforge.qrcode.data.QRCodeImage;
+import org.xmlpull.v1.XmlSerializer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -61,6 +61,7 @@ import org.xmlpull.v1.XmlPullParserException;
     import org.json.me.*;
  $else$ */
     import org.json.*;
+    import jp.sourceforge.qrcode.data.QRCodeImage;
 /* $endif$ */
 
 
@@ -647,7 +648,8 @@ public abstract class UstadMobileSystemImpl {
     
     /**
      * Make the given directory as per the dirURI parameter recursively creating 
-     * any new parent directories needed
+     * any new parent directories needed.  If the directory already exists this
+     * method must simply return false and not throw an exception.
      * 
      * @param dirURI Directory to be created
      * 
@@ -859,6 +861,13 @@ public abstract class UstadMobileSystemImpl {
     public abstract XmlPullParser newPullParser() throws XmlPullParserException;
     
     /**
+     * Make a new instance of an XmlSerializer (org.xmlpull.v1.XmlSerializer)
+     * 
+     * @return New instance of an XML Serializer
+     */
+    public abstract XmlSerializer newXMLSerializer();
+    
+    /**
      * Make a new XmlPullParser from a given inputstream
      * @param in InputStream to read from
      * @param encoding Encoding to be used e.g. UTF-8
@@ -872,6 +881,9 @@ public abstract class UstadMobileSystemImpl {
         return xpp;
     }
     
+    
+    
+    
     /**
      * Make a new XmlPullParser from a given inputstream assuming UTF-8 encoding
      * @param in InputStream to read from
@@ -884,7 +896,9 @@ public abstract class UstadMobileSystemImpl {
     
     /**
      * Generates a QRCodeImage compatible object for the platform that we're on
-     * with the given input stream
+     * with the given input stream.
+     * 
+     * This is not implemented on J2ME / Micro Edition
      * 
      * @param sysImage System dependent image object: on Android: Bitmap, on J2ME: lwuit Image
      * 
@@ -898,8 +912,9 @@ public abstract class UstadMobileSystemImpl {
      * @param data jpeg data
      * @return QRCodeImage
      */
-    public abstract QRCodeImage makeQRCodeImage(byte[] data);
-    
+    /* $if umplatform != 2  $ */
+    public abstract QRCodeImage getQRCodeImage(InputStream in);
+    /* $endif$ */
     
     /**
      * Get access to the App View to do common UI activities (e.g. show

@@ -41,6 +41,9 @@
 
             <!-- kXML JAR from UstadMobile.com -->
             <url url="http://www.ustadmobile.com/build-dep/kxml2-min-2.3.0.jar"/>
+            
+            <!-- kXML full JAR -->
+            <url url="http://www.ustadmobile.com/build-dep/kxml2-2.3.0.jar"/>
 
             <!-- JSON -->
 	    <url url="http://central.maven.org/maven2/org/json/json/20141113/json-20141113.jar"/>

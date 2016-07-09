@@ -7,6 +7,7 @@ package com.ustadmobile.port.j2me.util;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import gnu.classpath.java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -16,9 +17,8 @@ import java.util.Vector;
  *
  * @author mike
  */
-public class WatchedInputStream extends InputStream{ 
+public class WatchedInputStream extends FilterInputStream{ 
 
-    private InputStream in;
     
     public static Vector openStreams = new Vector();
     
@@ -27,27 +27,26 @@ public class WatchedInputStream extends InputStream{
     private String name;
     
     public WatchedInputStream(InputStream in) {
-        this.in = in;
-        this.name = in.toString();
-        addToActiveStreams();
+        this(in, in.toString());
     }
     
     public WatchedInputStream(InputStream in, String name) {
-        this.in = in;
+        super(in);
         this.name = name;
         addToActiveStreams();
     }
     
     public static void printActiveStreams() {
-        System.out.print("Active: [");
+        StringBuffer sb = new StringBuffer('[');
         WeakReference ref;
         for(int i = 0; i <openStreams.size(); i++) {
             ref = (WeakReference)openStreams.elementAt(i);
             if(ref.get() != null) {
-                System.out.print(i + ": " + streamNames.elementAt(i) + ",");
+                sb.append(i).append(':').append(streamNames.elementAt(i)).append(',');
             }
         }
-        System.out.println("]");
+        sb.append(']');
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 605, sb.toString());
     }
     
     private static int getNumStreams() {
@@ -66,62 +65,27 @@ public class WatchedInputStream extends InputStream{
     private void addToActiveStreams() {
         openStreams.addElement(new WeakReference(this));
         streamNames.addElement(name);
-        UstadMobileSystemImpl.l(UMLog.INFO, 399, "#Active Streams: " 
-            + getNumStreams() + " : +"  +this.name);
-        System.out.print("ADD: " + name +  " ( " + openStreams.size() + " streams)");
+        UstadMobileSystemImpl.l(UMLog.INFO, 399, getNumStreams() + " : +" + this.name);
         printActiveStreams();
     }
     
     private void removeFromActiveStreams() {
-        int index = openStreams.indexOf(this);
-        if(index == -1) {
-            //already closed - do nothing
-            return;
+        WeakReference ref;
+        for(int i = 0; i < openStreams.size(); i++) {
+            ref = (WeakReference)openStreams.elementAt(i);
+            if(ref.get() == this) {
+                openStreams.removeElementAt(i);
+                streamNames.removeElementAt(i);
+                UstadMobileSystemImpl.l(UMLog.INFO, 398, getNumStreams() + " : -"  +this.name);
+                return;
+            }
         }
-        
-        openStreams.removeElementAt(index);
-        streamNames.removeElementAt(index);
-        
-        UstadMobileSystemImpl.l(UMLog.INFO, 398, "#Active Streams: " 
-            + getNumStreams() + " : -"  +this.name);
-        System.out.println("REMOVE: " + name + " ( " + openStreams.size() + " streams)");
-    }
-    
-    public boolean markSupported() {
-        return in.markSupported(); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public synchronized void reset() throws IOException {
-        in.reset(); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public synchronized void mark(int readlimit) {
-        in.mark(readlimit); //To change body of generated methods, choose Tools | Templates.
     }
 
     public void close() throws IOException {
-        in.close();
+        super.close();
         removeFromActiveStreams();
     }
 
-    public int available() throws IOException {
-        return in.available();
-    }
-
-    public long skip(long n) throws IOException {
-        return in.skip(n);
-    }
-
-    public int read(byte[] b, int off, int len) throws IOException {
-        return in.read(b, off, len); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public int read(byte[] b) throws IOException {
-        return in.read(b); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public int read() throws IOException {
-        return in.read();
-    }
     
 }

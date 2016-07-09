@@ -68,6 +68,7 @@ import java.util.TimerTask;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 
 /* $if umplatform == 2  $
@@ -612,6 +613,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static UstadJSOPDSFeed makeDeviceFeed(UMStorageDir[] dirs, int dirFlags, Object context) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.l(UMLog.DEBUG, 637, null);
+        
         boolean incShared = (dirFlags & SHARED_RESOURCE) == SHARED_RESOURCE;
         boolean incUser = (dirFlags & USER_RESOURCE) == USER_RESOURCE;
         
@@ -647,6 +650,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         String looseFilePath = UMFileUtil.joinPaths(new String[] {
             impl.getCacheDir(incUser ? USER_RESOURCE : SHARED_RESOURCE, context), 
             "cache-loose"});
+        impl.l(UMLog.DEBUG, 638, looseFilePath);
         
         boolean[] userOPDSFiles = new boolean[opdsFiles.length];
         UMUtil.fillBooleanArray(userOPDSFiles, true, opdsUserStartIndex, 
@@ -727,7 +731,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             if(entryLinks.size() > 0) {
                 String[] firstLink = (String[])entryLinks.elementAt(0);
                 final String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
-                    firstLink[UstadJSOPDSItem.LINK_HREF]);
+                    firstLink[UstadJSOPDSItem.ATTR_HREF]);
                 
                 Hashtable args = new Hashtable();
                 args.put(KEY_URL, url);
@@ -929,29 +933,29 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 //set this one and continue
                 currentLink = (String[])acquireLinks.elementAt(0);
                 acquireRequest.setSelectedFormat(i, 
-                    currentLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+                    currentLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
             }else {
                 String mimeChoices[] = new String[acquireLinks.size()];
                 String choiceLabels[] = new String[acquireLinks.size()];
                 
                 for(j = 0; j < mimeChoices.length; j++) {
                     currentLink = (String[])acquireLinks.elementAt(j);
-                    mimeChoices[j] = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
-                    if(currentLink[UstadJSOPDSItem.LINK_TITLE] != null) {
-                        choiceLabels[j] = currentLink[UstadJSOPDSItem.LINK_TITLE];
+                    mimeChoices[j] = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
+                    if(currentLink[UstadJSOPDSItem.ATTR_TITLE] != null) {
+                        choiceLabels[j] = currentLink[UstadJSOPDSItem.ATTR_TITLE];
                     }else {
-                        choiceLabels[j] = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
+                        choiceLabels[j] = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
                     }
                     
-                    if(currentLink[UstadJSOPDSItem.LINK_LENGTH] != null) {
+                    if(currentLink[UstadJSOPDSItem.ATTR_LENGTH] != null) {
                         try {
                             choiceLabels[j] += "(" + UMFileUtil.formatFileSize(
-                                Integer.parseInt(currentLink[UstadJSOPDSItem.LINK_LENGTH])) +
+                                Integer.parseInt(currentLink[UstadJSOPDSItem.ATTR_LENGTH])) +
                                 ")";
                         }catch(Exception e) {
                             //number format exception of some kind probably...
                             impl.l(UMLog.WARN, 207, 
-                                currentLink[UstadJSOPDSItem.LINK_LENGTH], e);
+                                currentLink[UstadJSOPDSItem.ATTR_LENGTH], e);
                         }
                     }
                 }
@@ -1280,7 +1284,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 
                 for(j = 0; j < entryLinks.size(); j++) {
                     String[] thisLink = (String[])entryLinks.elementAt(j);
-                    if(thisLink[UstadJSOPDSItem.LINK_REL].startsWith(UstadJSOPDSEntry.LINK_ACQUIRE)) {
+                    if(thisLink[UstadJSOPDSItem.ATTR_REL].startsWith(UstadJSOPDSEntry.LINK_ACQUIRE)) {
                         linksToRemove.addElement(thisLink);
                     }
                 }
@@ -1297,7 +1301,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         String savePath = UMFileUtil.joinPaths(new String[]{baseDir, filename});
         impl.getLogger().l(UMLog.DEBUG, 516, savePath);
-        impl.writeStringToFile(newFeed.toString(), savePath, "UTF-8");
+        newFeed.serialize(impl.openFileOutputStream(savePath, 0));
         
         return newFeed;
     }
@@ -1458,6 +1462,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static UstadJSOPDSFeed scanFiles(String[] opdsFiles, boolean[] opdsFileModes, String[] containerFiles, boolean[] containerFileModes, String looseContainerFile, String baseHREF, String title, String feedID, Object context) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.l(UMLog.DEBUG, 639, null);
         UstadJSOPDSFeed retVal = new UstadJSOPDSFeed(
                 UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHREF), 
                 title, feedID);
@@ -1507,13 +1512,19 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 if(containerFeed == null && isEPUB) {
                     containerFeed = ContainerController.generateContainerFeed(
                         containerFiles[i], entryCacheFile);
+                    OutputStream fout = null;
                     try {
                         impl.makeDirectoryRecursive(
                             UMFileUtil.getParentFilename(entryCacheFile));
-                        impl.writeStringToFile(containerFeed.toString(), 
-                            entryCacheFile, "UTF-8");
+                        fout = impl.openFileOutputStream(entryCacheFile, 0);
+                        XmlSerializer xs = impl.newXMLSerializer();
+                        xs.setOutput(fout, "UTF-8");
+                        containerFeed.serialize(xs);
+                        fout.flush();
                     }catch(IOException e) {
                         impl.l(UMLog.ERROR, 138, entryCacheFile, e);
+                    }finally {
+                        UMIOUtils.closeOutputStream(fout);
                     }
                 }
                 
@@ -1577,8 +1588,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         if(looseContainerFeed.entries.length > 0) {
             try {
-                impl.writeStringToFile(looseContainerFeed.toString(), looseContainerFile, 
-                    "UTF-8");
+                looseContainerFeed.serialize(impl.openFileOutputStream(looseContainerFile, 0));
             }catch(IOException e) {
                 //impl.getAppView().showNotification(impl.getString(U.id.error)
                 //    + " : 159", AppView.LENGTH_LONG);
@@ -1675,7 +1685,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         int semiPos;
         for(int i = 0; i < links.size(); i++) {
             currentLink = (String[])links.elementAt(i);
-            currentMime = currentLink[UstadJSOPDSItem.LINK_MIMETYPE];
+            currentMime = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
             semiPos = currentMime.indexOf(';');
             if(semiPos != -1) {
                 currentMime = currentMime.substring(0, semiPos).trim();
@@ -1686,9 +1696,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 Integer otherIndex = (Integer)linksByType.get(currentMime);
                 String[] otherLink = (String[])links.elementAt(otherIndex.intValue());
                 String otherProfile = UMFileUtil.parseTypeWithParamHeader(
-                    otherLink[UstadJSOPDSItem.LINK_MIMETYPE]).getParam("x-umprofile");
+                    otherLink[UstadJSOPDSItem.ATTR_MIMETYPE]).getParam("x-umprofile");
                 String currentProfile = UMFileUtil.parseTypeWithParamHeader(
-                    currentLink[UstadJSOPDSItem.LINK_MIMETYPE]).getParam("x-umprofile");
+                    currentLink[UstadJSOPDSItem.ATTR_MIMETYPE]).getParam("x-umprofile");
                 
                 boolean otherMatches = false;
                 boolean currentMatches = false;
@@ -1762,8 +1772,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             
             preferredLink = (String[])acquisitionLinks.elementAt(0);
             
-            itemHref = preferredLink[UstadJSOPDSItem.LINK_HREF];
-            mimeTypes[i] = preferredLink[UstadJSOPDSItem.LINK_MIMETYPE];
+            itemHref = preferredLink[UstadJSOPDSItem.ATTR_HREF];
+            mimeTypes[i] = preferredLink[UstadJSOPDSItem.ATTR_MIMETYPE];
             
             itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
                     itemHref);
@@ -1835,8 +1845,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         entryFeed.addEntry(newEntry);
             
         try {
-            UstadMobileSystemImpl.getInstance().writeStringToFile(entryFeed.toString(), 
-                info.fileURI + CONTAINER_INFOCACHE_EXT, "UTF-8");
+            entryFeed.serialize(UstadMobileSystemImpl.getInstance().openFileOutputStream(
+                info.fileURI + CONTAINER_INFOCACHE_EXT, 0));
             savedOK = true;
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 160,info.fileURI + 

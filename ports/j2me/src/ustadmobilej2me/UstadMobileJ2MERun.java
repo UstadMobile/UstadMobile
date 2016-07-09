@@ -10,10 +10,10 @@ import com.sun.lwuit.plaf.UIManager;
 import com.sun.lwuit.util.Resources;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import com.ustadmobile.port.j2me.view.LoadingForm;
 import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -40,6 +40,7 @@ public class UstadMobileJ2MERun extends MIDlet {
             UMLogJ2ME umLog = (UMLogJ2ME)UstadMobileSystemImpl.getInstance().getLogger();
             umLog.connectLogToSocket(serverName + ':' + rawPort);
             umLog.l(UMLog.INFO, 350, "=====Connected to log server socket=====");
+            umLog.l(UMLog.INFO, 354, HTTPCacheDir.makeHTTPDate(UstadMobileSystemImplJ2ME.BUILDSTAMP));
             Hashtable systemProps = UstadMobileSystemImpl.getInstance().getSystemInfo();
             String htStr = systemProps.toString();
             umLog.l(UMLog.INFO, 351, htStr);
@@ -64,7 +65,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         
         
         try{
-            Resources r = Resources.open("/nokia_non_touch_theme.res");
+            Resources r = Resources.open("/theme.res");
             Hashtable theme = r.getTheme("NokiaTheme");
             UIManager.getInstance().setThemeProps(theme);
             Display.getInstance().setBidiAlgorithm(true);
@@ -73,7 +74,7 @@ public class UstadMobileJ2MERun extends MIDlet {
         }
         
         
-        UstadViewFormJ2ME loadingForm = new LoadingForm(new Hashtable(), this);
+        UstadViewFormJ2ME loadingForm = new UstadViewFormJ2ME(new Hashtable(), this);
         loadingForm.show();
         impl.handleFormShow(loadingForm);
         impl.startUI(this);

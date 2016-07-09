@@ -11,8 +11,7 @@ import com.sun.lwuit.Display;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMUtil;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
+import com.ustadmobile.test.port.j2me.UstadMobileAppController;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import com.ustadmobile.test.core.TestConstants;
 import com.ustadmobile.test.core.UMContextGetter;
@@ -174,10 +173,9 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
                             UstadMobileAppController.getPlatform().toString());
                     
                     try {
-                        HTTPUtils.sendPost(
+                        UstadMobileSystemImpl.getInstance().makeRequest(
                             TestUtils.testSettings.get("testposturl").toString(), 
-                                testResult);
-
+                            null, testResult);
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
@@ -195,8 +193,6 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
         }
         
         //Exiting automatically..
-        System.out.println("Time to Exit..");
-        HTTPUtils.httpDebug("Time to Exit.");
         //notifyDestroyed();
         //destroyApp(bScreenOutput);
     }

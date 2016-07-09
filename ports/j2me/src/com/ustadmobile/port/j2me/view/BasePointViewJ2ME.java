@@ -62,7 +62,6 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     private BasePointController basePointController;
     
     private int[] tabTitles =  new int[]{U.id.downloaded_items, U.id.browse_feeds};
-    private String[] tabNames;
     
     /**
      * Form used for adding new feeds to the user's list
@@ -174,7 +173,6 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
         RadioButton btn = (RadioButton)cmpnt;
         int selectedIndex = getTabSelectedByTitle(btn.getText());
         setActiveUstadViewContainer(opdsContainers[selectedIndex]);
-        System.out.println("FocusGained Selected " + selectedIndex + " : " + cmpnt);
     }
 
     public void focusLost(Component cmpnt) {

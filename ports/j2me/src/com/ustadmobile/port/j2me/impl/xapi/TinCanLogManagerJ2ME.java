@@ -36,8 +36,10 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
-import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
+import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -120,52 +122,31 @@ public class TinCanLogManagerJ2ME extends TimerTask{
     }
     
     public String openNewLog() throws IOException {
-        impl.l(UMLog.DEBUG, 552, "starting up" );
+        impl.l(UMLog.DEBUG, 608, null);
         boolean success = false;
         StringBuffer logName = new StringBuffer();
         logName.append("tincan-").append(getDateLogStr()).append(".log");
-        impl.l(UMLog.DEBUG, 552, "name suggested: " + logName.toString() );
+        impl.l(UMLog.DEBUG, 609, logName.toString());
         
         //Check if file exists 
         String deviceDir = UstadMobileSystemImplJ2ME.getInstanceJ2ME().findSystemBaseDir();
-        String tincanDir = FileUtils.joinPath(deviceDir, LOG_FOLDER);
-        boolean xapi_created = FileUtils.createFileOrDir(tincanDir, Connector.READ_WRITE, true);
-        if (!xapi_created){
-            impl.l(UMLog.DEBUG, 554, "Unable to create xapi folder in phone memory" );
+        String tincanDir = UMFileUtil.joinPaths(new String[]{deviceDir, LOG_FOLDER});
+        impl.makeDirectory(tincanDir);
+        
+        if (!impl.dirExists(tincanDir)){
+            impl.l(UMLog.ERROR, 100, null);
         }
        
-        String logPath = FileUtils.joinPath(tincanDir, logName.toString());
-        impl.l(UMLog.DEBUG, 552, "Checking and creating logPath : " + logPath );
-        String logPathPosition = logPath + ".status";
-        impl.l(UMLog.DEBUG, 552, "Checking and creating logPathPosition : " + logPathPosition );
+        String logPath = UMFileUtil.joinPaths(new String[]{tincanDir, logName.toString()});
+        String logPathPosition = logPath + ".status";                
         
-        if (!FileUtils.checkFile(logPath)){
-            FileUtils.createFileOrDir(logPath, Connector.READ_WRITE, false);
-        }
-        if (!FileUtils.checkFile(logPathPosition)){
-            FileUtils.createFileOrDir(logPathPosition, Connector.READ_WRITE, false);
-            //FileUtils.writeStringToFile("0", logPathPosition, false);
-        }
-        
-        impl.l(UMLog.DEBUG, 552, "created temp files too" );
-        
-        
-        FileConnection fCon = null;
         try{
-            fCon = (FileConnection)Connector.open(logPath, Connector.READ_WRITE);
-            logOut = fCon.openOutputStream();
+            logOut = impl.openFileOutputStream(logPath, 0);
             currentFile = logPath;
             success = true;
         }catch(Exception e){
-            impl.l(UMLog.DEBUG, 554, 
-                    "Unable to make logPath file Connection and OutputStream " +
-                            e.getMessage() + ",  " + e.toString());
-            
+            impl.l(UMLog.ERROR, 172, logPath, e);
             success = false;
-        }finally{
-            if (fCon != null){
-                fCon.close();
-            }
         }
         
         if (success){
@@ -176,17 +157,17 @@ public class TinCanLogManagerJ2ME extends TimerTask{
     }
     
     public boolean queueStatement(String userid, JSONObject stmt) throws IOException {
-        impl.l(UMLog.DEBUG, 540, " userid: " + userid );
+        impl.l(UMLog.DEBUG, 610,  userid );
         StringBuffer sb = new StringBuffer();
         String status = "3";
         boolean outcome = false;
         if (userid != null && userid.length() > 0){
             status = "0";
-            impl.l(UMLog.DEBUG, 540, "user id ok" );
         }
+        
         sb.append('u').append(':').append(userid).append(':').append("statementstart:").append(
                 stmt.toString()).append(":statementend:").append(status);
-        impl.l(UMLog.DEBUG, 540, "appended statement to be queued ok");
+        impl.l(UMLog.DEBUG, 540, null);
         if (logOut == null){
             openNewLog();
         }
@@ -196,11 +177,11 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                 logOut.write((int)'\n');
                 logOut.flush();
                 outcome = true;
-                impl.l(UMLog.DEBUG, 540, "Outcome is good" );
+                impl.l(UMLog.DEBUG, 602, null);
             }
         }catch(IOException e) {
             outcome = false;
-            impl.l(UMLog.DEBUG, 542, e.getMessage() + ", " + e.toString());
+            impl.l(UMLog.ERROR, 176, null, e);
         }
         
         return outcome;
@@ -227,35 +208,20 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     }
                 }
             }catch(Exception ire){
-                impl.l(UMLog.DEBUG, 800, "ReadLine Exception: " + ire.getMessage()
-                + ",  " + ire.toString());
+                impl.l(UMLog.DEBUG, 178, fileURI, ire);
             }
             
         }catch(Exception e){
-            impl.l(UMLog.DEBUG, 800, "getLineNumbe Exception: " + e.getMessage()
-                + ",  " + e.toString());
+            impl.l(UMLog.DEBUG, 180, fileURI, e);
         }finally{
-            if (fileCon != null){
-                fileCon.close();
-            }
-            if (fileIS != null){
-                fileIS.close();
-            }
+            J2MEIOUtils.closeConnection(fileCon);
+            UMIOUtils.closeInputStream(fileIS);
         }
-        if (lineCount != 0){
-            return lineCount;
-        }else{
-            return lineCount;
-        }
+        
+        return lineCount;
     }
     
     private InputStream readLine(String fileURI, int lineNum) throws IOException {
-        
-  
-        if (lineNum < 0) {
-            System.out.println("Cannot read line a number " + lineNum);
-        }
-        
         FileConnection fCon = null;
         InputStream fIS = null;
         try{
@@ -264,9 +230,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         }catch(Exception e){
             e.printStackTrace();
         }finally{
-            if (fCon != null){
-                fCon.close();
-            }
+            J2MEIOUtils.closeConnection(fCon);
         }
 
         final StringBuffer buf = new StringBuffer();
@@ -274,7 +238,6 @@ public class TinCanLogManagerJ2ME extends TimerTask{
 
         int curLine = 1;
         while (((c = (byte) fIS.read()) != -1)) {
-            //System.out.println((char)c);
             if (c == cret || c == nline) {
                 ++curLine;
                 if (curLine > lineNum) {
@@ -291,58 +254,51 @@ public class TinCanLogManagerJ2ME extends TimerTask{
     }
     
     public void transmitQueue() throws IOException, Exception {
-        impl.l(UMLog.DEBUG, 548, "starting up" );
+        impl.l(UMLog.DEBUG, 611, null);
         
         String newName = "";
         synchronized(this) {
             try {
-                if (logOut != null){
-                    logOut.flush();
-                    logOut.close();
-                }
+                UMIOUtils.closeOutputStream(logOut, true);
                 newName = openNewLog();
-                impl.l(UMLog.DEBUG, 548, "new log name is:" + newName );
+                impl.l(UMLog.DEBUG, 612, newName);
             }catch(Exception e) {
-                impl.l(UMLog.DEBUG, 550, e.getMessage() + ",  " + e.toString() );
-                if (logOut != null){
-                    logOut.close();
-                }
+                impl.l(UMLog.DEBUG, 182, newName, e);
+                UMIOUtils.closeOutputStream(logOut);
             }
         }
         
         String[] filesToReplicate = null;
         String deviceDir = UstadMobileSystemImplJ2ME.getInstanceJ2ME().findSystemBaseDir();
-        String tincanDir = FileUtils.joinPath(deviceDir, LOG_FOLDER);
+        String tincanDir = UMFileUtil.joinPaths(new String[]{deviceDir, LOG_FOLDER});
         filesToReplicate = impl.listDirectory(tincanDir);
-        //filesToReplicate = impl.listDirectory(currentFile)
-        //filesToReplicate = listDir(appdir /tincan);
-        String newLogMade = FileUtils.getBaseName(newName);
+        String newLogMade = UMFileUtil.getFilename(newName);
         //Go through all log files available..
-        impl.l(UMLog.DEBUG, 548, "Scanning all files in xapi directory" );
+        impl.l(UMLog.DEBUG, 613, null);
         for(int i = 0; i < filesToReplicate.length; i++) {
-            impl.l(UMLog.DEBUG, 548, "Current file:" + filesToReplicate[i] );
+            impl.l(UMLog.DEBUG, 614, filesToReplicate[i] );
             if(filesToReplicate[i].endsWith(".log")) {
                 
-                String currentLogFileURI = FileUtils.joinPath(tincanDir, filesToReplicate[i]);
-                String statusFile = filesToReplicate[i].toString() + ".status";
-                String statusFileURI = FileUtils.joinPath(tincanDir, statusFile);
+                String currentLogFileURI = UMFileUtil.joinPaths(new String[]{tincanDir, 
+                    filesToReplicate[i]});
+                String statusFile = filesToReplicate[i] + ".status";
+                String statusFileURI = UMFileUtil.joinPaths(new String[]{tincanDir, statusFile});
                 int logLineNumber = 0;
                 int tempLineNumber = 0;
                 
-                int readFrom = 0;
                 OutputStream statusOut = null;
-                FileConnection statusCon = null;
                 InputStream logIn = null;
                 FileConnection logCon = null;
+                String logURI = null;
                 
                 if (filesToReplicate[i].equals(newLogMade)){
                     //Dont do it. Skip.
-                    impl.l(UMLog.DEBUG, 548, "skipping just created file" );
+                    impl.l(UMLog.DEBUG, 615, null);
                     continue;
                 }
                 
-                if (FileUtils.checkDir(statusFileURI)){
-                    impl.l(UMLog.DEBUG, 548, "!Both log and temp file found (status file)" );
+                if (impl.fileExists(statusFileURI)){
+                    impl.l(UMLog.DEBUG, 548, null);
                     //Both temp and log file exists. There are stuff left to scan through, etc
                     
                     //1. get the log lines for temp file
@@ -359,15 +315,9 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     if (tempLineNumber < logLineNumber){
                         
                         //Ready the status file: to be written.
-                        statusCon = (FileConnection)Connector.open(statusFileURI, 
-                                Connector.READ_WRITE);
                         //get status' file's output stream to append
-                        statusOut = statusCon.openOutputStream(statusCon.fileSize());
-                        //Dont need statusCon no more
-                        if (statusCon != null){
-                            statusCon.close();
-                            impl.l(UMLog.DEBUG, 548, "closed temp file con ok" );
-                        }
+                        statusOut = impl.openFileOutputStream(statusFileURI, 
+                            UstadMobileSystemImpl.FILE_APPEND);
                         
                         //ToDo
                         //get log file to be read.
@@ -375,167 +325,109 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             Connector.READ);
                         //Get log file's input stream 
                         logIn = logCon.openInputStream();
-                        impl.l(UMLog.DEBUG, 548, "got log file input stream" );
+                        impl.l(UMLog.DEBUG, 548, null);
                         
                         //Send log from log file IS and work on Status file OS
                         int resultCode = sendLog(logIn, statusOut, tempLineNumber);
 
-                        if (logIn != null){
-                            logIn.close();
-                        }
-                        if (logOut != null){
-                            logOut.close();
-                        }
-                        if (statusOut != null){
-                            statusOut.flush();
-                            statusOut.close();
-                        }
-                        impl.l(UMLog.DEBUG, 548, 
-                                "after (log and temp) post send: okay and closed." );
-                        if (resultCode == 1){
-                            //delete .log, rename .tmp to .done
-                            FileUtils.deleteRecursively(
-                                    FileUtils.joinPath(tincanDir, 
-                                            filesToReplicate[i]), false);
-                            String statusFileURIDone = statusFileURI + ".done";
-                            impl.renameFile(statusFileURI, statusFileURIDone);
-                        }else if (resultCode == 2){
-                            String tempB4Delete = FileUtils.joinPath(tincanDir, 
-                                            filesToReplicate[i]) + ".origi";
-                            impl.renameFile(currentLogFileURI, tempB4Delete);
-                            /*FileUtils.renameFileOrDir( 
-                                    FileUtils.joinPath(tincanDir, 
-                                            filesToReplicate[i]),
-                                    tempB4Delete,
-                                    Connector.READ_WRITE, false);
-                            */
-                            impl.renameFile(statusFileURI, currentLogFileURI);
-                            /*
-                            FileUtils.renameFileOrDir(statusFileURI, 
-                                    FileUtils.joinPath(tincanDir, 
-                                            filesToReplicate[i]), 
-                                    Connector.READ_WRITE, false);
-                            */
+                        UMIOUtils.closeInputStream(logIn);
+                        UMIOUtils.closeOutputStream(logOut);
+                        UMIOUtils.closeOutputStream(statusOut, true);
+                        
+                        impl.l(UMLog.DEBUG, 618, null);
+                        
+                        switch(resultCode) {
+                            case 1:
+                                impl.removeRecursively(UMFileUtil.joinPaths(
+                                new String[]{tincanDir,filesToReplicate[i]}));
+                                String statusFileURIDone = statusFileURI + ".done";
+                                impl.renameFile(statusFileURI, statusFileURIDone);
+                                break;
+                                
+                            case 2:
+                                String tempB4Delete = UMFileUtil.joinPaths(
+                                new String[]{tincanDir, filesToReplicate[i] + ".origi"});
+                                impl.renameFile(currentLogFileURI, tempB4Delete);
+                                impl.renameFile(statusFileURI, currentLogFileURI);
+                                impl.removeFile(tempB4Delete);
+                                break;
                             
-                            FileUtils.deleteRecursively(tempB4Delete, false);
-
-                        }else{
-                            impl.l(UMLog.DEBUG, 556, "Something went wrong in POST" );
+                            default:
+                                impl.l(UMLog.DEBUG, 99, null);
+                                
                         }
                         
                         continue;
                         
                     }else{
-                        impl.l(UMLog.DEBUG, 548, "temp line number " + 
-                            "" + " is not lower than log line number" +
-                                "");
-                        FileUtils.deleteRecursively(
-                                    FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]), false);
+                        impl.l(UMLog.DEBUG,619, null);
+                        impl.removeFile(UMFileUtil.joinPaths(new String[] {
+                            tincanDir, filesToReplicate[i]}));
+                        
                         String statusFileURIDone = statusFileURI + ".done";
-                        FileUtils.renameFileOrDir(statusFileURI,
-                                statusFileURIDone, Connector.READ_WRITE, false);
-                       
+                        
+                        impl.renameFile(statusFileURI, statusFileURIDone);
                         continue;
                     }
-                    
-                    
-                    
                 }
                 
                 //Create a blank status file if it doesnt exist.
-                if (!FileUtils.checkFile(statusFileURI)){
-                    FileUtils.createFileOrDir(statusFileURI, Connector.READ_WRITE, false);
-                }
-                
                 //If created okay
-                if (FileUtils.checkFile(statusFileURI)){
-                    impl.l(UMLog.DEBUG, 548, "created temp file" + statusFileURI );
-                    //Ready the status file: to be written.
-                    statusCon = (FileConnection)Connector.open(statusFileURI, Connector.READ_WRITE);
-                    //get status' file's output stream
-                    statusOut = statusCon.openOutputStream();
+                impl.l(UMLog.DEBUG, 620, statusFileURI );
+                //Ready the status file: to be written.
+                //get status' file's output stream
+                statusOut = impl.openFileOutputStream(statusFileURI, 0);
+
+                //if nothing in the log file, all done, etc
+                if (impl.fileSize(statusFileURI) == 0){
+                    impl.l(UMLog.DEBUG, 621, null);
+                    J2MEIOUtils.closeConnection(logCon);
                     
-                    logCon = (FileConnection) Connector.open(
-                            FileUtils.joinPath(tincanDir, filesToReplicate[i]),
-                            Connector.READ);
-                    
-                    impl.l(UMLog.DEBUG, 548, "got log FileConnection" );
-                    //if nothing in the log file, all done, etc
-                    if (logCon.availableSize() == 0){
-                        impl.l(UMLog.DEBUG, 548, "log is empty. Setting to done." );
-                        if (logCon != null){
-                            logCon.close();
-                        }
-                        if (statusOut != null){
-                            statusOut.flush();
-                            statusOut.close();
-                        }
-                        String doneLogName = filesToReplicate[i].toString()
-                                + ".done";
-                        statusCon.rename(doneLogName);
-                        statusCon.close();
-                        continue;
-                    }
-                    if (statusCon != null){
-                        statusCon.close();
-                        impl.l(UMLog.DEBUG, 548, "closed temp file con ok" );
-                    }
-                    
-                    //Get log file's input stream 
-                    logIn = logCon.openInputStream();
-                    impl.l(UMLog.DEBUG, 548, "got log file input stream" );
-                    
-                    //Send log from log file IS and work on Status file OS
-                    int resultCode = sendLog(logIn, statusOut);
-                    
-                    if (logIn != null){
-                        logIn.close();
-                    }
-                    if (logOut != null){
-                        logOut.close();
-                    }
-                    if (statusOut != null){
-                        statusOut.flush();
-                        statusOut.close();
-                    }
-                    
-                    
-                    impl.l(UMLog.DEBUG, 548, "after post send: okay and closed." );
-                    if (resultCode == 1){
-                        //delete .log, rename .tmp to .done
-                        FileUtils.deleteRecursively(
-                                FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]), false);
-                        String statusFileURIDone = statusFileURI + ".done";
-                        impl.renameFile(statusFileURI, statusFileURIDone);
-                        //FileUtils.renameFileOrDir(statusFileURI,
-                        //        statusFileURIDone, Connector.READ_WRITE, false);
-                    }else if (resultCode == 2){
-                        String tempB4Delete = FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]) + ".origi";
-                        
-                        FileUtils.renameFileOrDir( 
-                                FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]),
-                                tempB4Delete,
-                                Connector.READ_WRITE, false);
-                        
-                        FileUtils.renameFileOrDir(statusFileURI, 
-                                FileUtils.joinPath(tincanDir, 
-                                        filesToReplicate[i]), 
-                                Connector.READ_WRITE, false);
-                        
-                        FileUtils.deleteRecursively(tempB4Delete, false);
-                        
-                    }else{
-                        impl.l(UMLog.DEBUG, 556, "NOT CREATED: " + statusFileURI );
-                        //-\_(^-^)_/-
-                    }
-                    
+                    UMIOUtils.closeOutputStream(statusOut, true);
+                    String doneLogName = filesToReplicate[i] + ".done";
+                    impl.renameFile(statusFileURI, doneLogName);
+                    continue;
+                }
+
+                //Get log file's input stream 
+                logIn = logCon.openInputStream();
+                impl.l(UMLog.DEBUG, 622, null);
+
+                //Send log from log file IS and work on Status file OS
+                int resultCode = sendLog(logIn, statusOut);
+
+                UMIOUtils.closeInputStream(logIn);
+                UMIOUtils.closeOutputStream(logOut);
+                UMIOUtils.closeOutputStream(statusOut, true);
+                
+
+                impl.l(UMLog.DEBUG, 623, null);
+                if (resultCode == 1){
+                    //delete .log, rename .tmp to .done
+                    impl.removeFile(UMFileUtil.joinPaths(new String[]{tincanDir, 
+                        filesToReplicate[i]}));
+
+                    String statusFileURIDone = statusFileURI + ".done";
+                    impl.renameFile(statusFileURI, statusFileURIDone);
+                }else if (resultCode == 2){
+                    String tempB4Delete = UMFileUtil.joinPaths(new String[]{
+                        tincanDir, filesToReplicate[i]}) + ".origi";
+
+
+                    impl.renameFile(UMFileUtil.joinPaths(new String[]{
+                        tincanDir, filesToReplicate[i]}), tempB4Delete);
+
+
+                    impl.renameFile(statusFileURI, 
+                            UMFileUtil.joinPaths(new String[]{tincanDir, 
+                                    filesToReplicate[i]}));
+
+
+                    impl.removeFile(tempB4Delete);
                 }else{
-                    
-                }                
+                    impl.l(UMLog.ERROR, 98, statusFileURI );
+                }
+
             }
             
         }
@@ -549,10 +441,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
     
     public int sendLog(InputStream logIn, OutputStream statusOut, 
             int logLineNumber) throws IOException, Exception{
-        impl.l(UMLog.DEBUG, 558, "starting.." );
+        impl.l(UMLog.DEBUG, 624,null);
         
          if (logLineNumber < 0) {
-            impl.l(UMLog.DEBUG, 558, "Invalid Line Number.." );
+            impl.l(UMLog.DEBUG, 625, null);
             logLineNumber = 0;
         }
         //send the log - return how many bytes were sent through
@@ -597,7 +489,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                     while(trial < max_tries){
                         if(logLine.endsWith(":0") || logLine.endsWith(":2")){
                             //Time to try this.
-                            impl.l(UMLog.DEBUG, 558, "New Log Line or needs ReTrial" );
+                            impl.l(UMLog.DEBUG, 626, null);
                             /*
                             logLineWOCode = logLine.substring(0, logLine.length()-2);
                             doneTries = logLineWOCode.substring(logLine.lastIndexOf(':'),
@@ -611,7 +503,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             }
                             */     
                         }else if (logLine.endsWith(":3")){
-                            impl.l(UMLog.DEBUG, 558, "Log Line already has an error." );
+                            impl.l(UMLog.DEBUG, 627, null);
                             //Not a valid line. Put it in the status file
                             logLine = logLine.substring(0, logLine.length()-1);
                             logLine = logLine + "3";
@@ -621,7 +513,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             trial = max_tries + 10;
                             break; //I want to break free
                         }else if (logLine.endsWith(":1")){
-                            impl.l(UMLog.DEBUG, 558, "Log Line already sent" );
+                            impl.l(UMLog.DEBUG, 628, null);
                             //Already sent
                             lineBytes = logLine.getBytes();
                             statusOut.write(lineBytes);
@@ -629,7 +521,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             break;
                         }else{
                             //Unknown
-                            impl.l(UMLog.DEBUG, 558, "Unknown log line detected. Marking as error" );
+                            impl.l(UMLog.DEBUG, 629, null);
                             logLine = logLine + ":03";
                             lineBytes = logLine.getBytes();
                             statusOut.write(lineBytes);
@@ -644,7 +536,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         
                         if (statementUsername == null || statementUsername.length() == 0){
                             //Blank username bro
-                            impl.l(UMLog.DEBUG, 558, "Not a valid username bro" );
+                            impl.l(UMLog.DEBUG, 97, null);
                             logLine = logLine + ":03";
                             lineBytes = logLine.getBytes();
                             statusOut.write(lineBytes);
@@ -652,7 +544,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             
                             break;
                         }else{
-                            impl.l(UMLog.DEBUG, 558, "Got line username ok" );
+                            impl.l(UMLog.DEBUG, 630, null);
                         }
                         
                         String encodedUserAndPass="Basic "+ Base64Coder.encodeString(
@@ -665,9 +557,13 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         statementString = statementString.substring("statementstart:".length(), statementString.length());
                         byte[] statementBytes = statementString.getBytes();
 
-                        String tincanEndpointURL = 
-                                FileUtils.joinPath(UstadMobileDefaults.DEFAULT_XAPI_SERVER, 
-                                        "statements");
+//                        String tincanEndpointURL = 
+//                                FileUtils.joinPath(UstadMobileDefaults.DEFAULT_XAPI_SERVER, 
+//                                        "statements");
+
+                        String tincanEndpointURL = UMFileUtil.joinPaths(new String[]{
+                            UstadMobileDefaults.DEFAULT_XAPI_SERVER, "statements"});
+                        
                         //        UstadMobileDefaults.DEFAULT_XAPI_STATEMENT_SERVER;
                         //impl.l(UMLog.DEBUG, 558, "POST-in log line" );
                         
@@ -681,7 +577,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             UstadMobileConstants.UTF8);
 
                         if (return_code == 200){
-                            impl.l(UMLog.DEBUG, 558, "Line went ok" );
+                            impl.l(UMLog.DEBUG, 631, null);
                             logLine = logLine.substring(0, logLine.length()-1);
                             logLine = logLine + "1";
                             lineBytes = logLine.getBytes();
@@ -691,9 +587,9 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             break;
                         }else if (return_code == 401 || 
                             return_code == 404 || return_code == 403){
-                            impl.l(UMLog.DEBUG, 558, "Line needs a retry" );
+                            impl.l(UMLog.DEBUG, 632, null);
                             if (trial + 2 > max_tries){
-                                impl.l(UMLog.DEBUG, 558, "Line got a timeout" );
+                                impl.l(UMLog.DEBUG, 633, null);
                                 noErrors = false;
                                 //Maxed out
                                 logLine = logLine.substring(0, logLine.length()-1);
@@ -707,7 +603,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                             trial = trial + 1;
                             //Got to keep on trying 
                         }else{
-                            impl.l(UMLog.DEBUG, 558, "Line is faulty" );
+                            impl.l(UMLog.DEBUG, 634, null);
                             
                             //Not a valid line. Put it in the status file
                             logLine = logLine.substring(0, logLine.length()-1);
@@ -729,10 +625,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         }
         
         if (noErrors){
-            impl.l(UMLog.DEBUG, 558, "No errors. No retries needed. All good. " );
+            impl.l(UMLog.DEBUG, 634, null);
             return 1;
         }else{
-            impl.l(UMLog.DEBUG, 558, "Need to retry a few log lines" );
+            impl.l(UMLog.DEBUG, 635, null);
             return 2;
         }
         
@@ -750,10 +646,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
 
     public void run() {
         try {
-            impl.l(UMLog.DEBUG, 544, "starting to transmitt" );
+            impl.l(UMLog.DEBUG, 636,null);
             transmitQueue();//send the logs up
         } catch (Exception e){
-            impl.l(UMLog.DEBUG, 546, e.getMessage() + ",  " + e.toString() );
+            impl.l(UMLog.DEBUG, 96, null, e);
         }
     }
     

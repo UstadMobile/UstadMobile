@@ -85,6 +85,7 @@ import com.ustadmobile.port.android.view.UserSettingsActivity;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Xml;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
@@ -807,6 +808,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return parser;
     }
 
+    @Override
+    public XmlSerializer newXMLSerializer() {
+        return Xml.newSerializer();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -817,8 +823,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     }
 
     @Override
-    public QRCodeImage makeQRCodeImage(byte[] data) {
-        return getQRCodeImage(BitmapFactory.decodeByteArray(data, 0, data.length));
+    public QRCodeImage getQRCodeImage(InputStream in) {
+        return getQRCodeImage(BitmapFactory.decodeStream(in));
     }
 
     @Override

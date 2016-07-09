@@ -30,6 +30,9 @@
  */
 package com.ustadmobile.port.j2me.app;
 
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -225,7 +228,7 @@ public class UserPref {
         RMSUtils appRms = new RMSUtils(REC_STORE);
         Hashtable curretSettings = getUserSettings();
         String allUserKeys[] = 
-                FileUtils.enumerationToStringArray(curretSettings.keys());
+                UMUtil.enumerationToStringArray(curretSettings.keys());
         
         String username = getActiveUser();
         if (username == null){
@@ -239,7 +242,8 @@ public class UserPref {
             }
         }
         
-        String userKeys[] = FileUtils.vectorToStringArray(userKeysVector);
+        String[] userKeys = new String[userKeysVector.size()];
+        userKeysVector.copyInto(userKeys);
         String simpleUserKeys[] = new String[userKeys.length];
         int prefixLength = (username + "-").length();
         for ( int i = 0; i < userKeys.length; i++){
@@ -287,14 +291,10 @@ public class UserPref {
      * with the maximum amount of space (this should be the memory card generally)
      */
     public static String getUserDataDir(){
-        DeviceRoots bestRoot = FileUtils.getBestRoot();
-        if (bestRoot==null){
-            return null;
-        }
         UstadMobileSystemImplJ2ME umsij = new UstadMobileSystemImplJ2ME();
         String userData = umsij.getSharedContentDir();
-        String userFolder = FileUtils.joinPath(userData, 
-                userSettings.get("username").toString());
+        String userFolder = UMFileUtil.joinPaths(new String[]{userData, 
+                userSettings.get("username").toString()});
         try{
             FileConnection bCon = (FileConnection)Connector.open(userFolder);
             if (!bCon.isDirectory()){

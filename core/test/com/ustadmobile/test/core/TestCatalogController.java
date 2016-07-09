@@ -39,10 +39,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
-
+import org.xmlpull.v1.XmlSerializer;
 
 /* $if umplatform == 1 $
         import android.test.ActivityInstrumentationTestCase2;
@@ -115,9 +116,15 @@ public class TestCatalogController extends TestCase{
         
         
         UstadJSOPDSFeed feedItem = controller.getModel().opdsFeed;
-        String feedXML = feedItem.toString();
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        XmlSerializer serializer = impl.newXMLSerializer();
+        serializer.setOutput(bout, "UTF-8");
+        feedItem.serialize(serializer);
+        bout.flush();
         ByteArrayInputStream bin = new ByteArrayInputStream(
-            feedXML.getBytes("UTF-8"));
+            bout.toByteArray());
+        bout = null;
+        
         XmlPullParser parser = impl.newPullParser();
         parser.setInput(bin, "UTF-8");
         UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
@@ -163,7 +170,7 @@ public class TestCatalogController extends TestCase{
         assertEquals("After filtering two links are remaining", 2, 
             filteredLinks.size());
         assertEquals("After filtering null type only plain link remains",
-            "application/epub+zip",filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+            "application/epub+zip",filteredLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
         
         // tst filtering acquisition links for the micro profile
         filteredLinks = CatalogController.filterAcquisitionLinksByProfile(
@@ -174,7 +181,7 @@ public class TestCatalogController extends TestCase{
             filteredLinks.size());
         assertEquals("After filtering micro type micro epub link remains",
             "application/epub+zip;x-umprofile=micro",
-            filteredLink[UstadJSOPDSItem.LINK_MIMETYPE]);
+            filteredLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
     }
     
     public void runTest() throws IOException, XmlPullParserException{

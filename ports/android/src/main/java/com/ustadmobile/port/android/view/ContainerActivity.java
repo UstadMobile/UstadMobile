@@ -84,10 +84,17 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private String mBaseURL = null;
 
+    private String mMountedPath;
+
     //Key when saving state for the current page
     private static final String OUTSTATE_CURRENTITEM = "currentitem";
 
+    //Key when saving state for the current mount point
+    private static final String OUTSTATE_MOUNTPOINT = "mountpt";
+
     private int mSavedPosition = -1;
+
+    private String mSavedMountPoint;
 
     private Hashtable mArgs;
 
@@ -133,8 +140,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         mMimeType = getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
         mArgs = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
 
-        if(saved != null && saved.getInt(OUTSTATE_CURRENTITEM, -1) != -1) {
-            mSavedPosition = saved.getInt(OUTSTATE_CURRENTITEM);
+        if(saved != null) {
+            if(saved.getInt(OUTSTATE_CURRENTITEM, -1) != -1) {
+                mSavedPosition = saved.getInt(OUTSTATE_CURRENTITEM);
+            }
+            mSavedMountPoint = saved.getString(OUTSTATE_MOUNTPOINT);
         }
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
@@ -152,9 +162,14 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             public void onDrawerClosed(View drawerView) {
                 if(drawerSelectedIndex != -1) {
                     if(drawerNavItems != null) {
-                        int fragPos = mPagerAdapter.getFragmentIndexByHREF(drawerNavItems[drawerSelectedIndex].href);
+                        final int fragPos = mPagerAdapter.getFragmentIndexByHREF(drawerNavItems[drawerSelectedIndex].href);
                         if(fragPos != -1) {
-                            mPager.setCurrentItem(fragPos, true);
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    mPager.setCurrentItem(fragPos, true);
+                                }
+                            });
+
                             drawerSelectedIndex = -1;
                         }
                     }
@@ -189,7 +204,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     };
 
     public void initContent() {
-        mBaseURL = mHttpService.mountZIP(ContainerActivity.this.mContainerURI);
+        mMountedPath = mHttpService.mountZIP(ContainerActivity.this.mContainerURI, mSavedMountPoint);
+        mBaseURL = mHttpService.getZipMountURL() + mMountedPath;
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
         UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + "on " + mBaseURL + " type "
                 + mMimeType);
@@ -350,6 +366,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                     mContainerController.getOPFBasePath(mContainerController.getActiveOPF()),
                     mContainerController.getActiveOPF().getLinearSpineHREFs(),
                     mContainerController.getXAPIQuery());
+            mPager.setOffscreenPageLimit(1);
             mPager.setAdapter(mPagerAdapter);
             if(mSavedPosition != -1) {
                 mPager.setCurrentItem(mSavedPosition);
@@ -445,16 +462,24 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         if(mPager != null) {
             outState.putInt(OUTSTATE_CURRENTITEM, mPager.getCurrentItem());
         }
+        if(mMountedPath != null) {
+            outState.putString(OUTSTATE_MOUNTPOINT, mMountedPath);
+        }
     }
 
     public void onDestroy() {
-        super.onDestroy();
+        if(mMountedPath != null) {
+            mHttpService.ummountZIP(mMountedPath);
+        }
+
         unbindService(mConnection);
         mContainerURI = null;
         mMimeType = null;
         mSavedPosition = -1;
 
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
+
+        super.onDestroy();
     }
 
     @Override

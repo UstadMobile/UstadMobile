@@ -32,7 +32,6 @@ package com.ustadmobile.test.port.j2me;
 
 import com.ustadmobile.port.j2me.app.RMSUtils;
 import com.ustadmobile.port.j2me.app.SerializedHashtable;
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import j2meunit.framework.TestCase;
 import java.util.Hashtable;
 

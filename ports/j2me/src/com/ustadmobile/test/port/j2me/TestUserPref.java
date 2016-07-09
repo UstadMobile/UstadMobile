@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.port.j2me.app.FileUtils;
+import com.ustadmobile.core.util.UMUtil;
 import j2meunit.framework.TestCase;
 import java.util.Hashtable;
 import com.ustadmobile.port.j2me.app.UserPref;
@@ -69,7 +69,7 @@ public class TestUserPref extends TestCase {
         
         //Get all keys
         String [] prefKeys = 
-                FileUtils.enumerationToStringArray(userSettings.keys());
+                UMUtil.enumerationToStringArray(userSettings.keys());
         boolean found=false;
         for (int i=0; i<prefKeys.length; i++){
             if(prefKeys[i].indexOf("password") >=0 ){

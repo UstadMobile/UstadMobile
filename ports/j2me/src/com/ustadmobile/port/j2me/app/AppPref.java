@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.port.j2me.app;
 
+import com.ustadmobile.core.util.UMUtil;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
@@ -200,7 +201,7 @@ public class AppPref {
     public static String[] getAllKeys(){
         RMSUtils appRms = new RMSUtils(REC_STORE);
         Hashtable curretSettings = getAppSettings();
-        return FileUtils.enumerationToStringArray(curretSettings.keys());
+        return UMUtil.enumerationToStringArray(curretSettings.keys());
     }
     
     public static Hashtable getAppSettings(){
@@ -217,13 +218,6 @@ public class AppPref {
         Hashtable appSettingsRMS = SerializedHashtable.streamToHashtable
                 (appSettingsByteArrayRMS);
         //appRms.closeRMS();
-        if (appSettingsRMS.isEmpty()){
-            System.out.print("empty");
-        }else{
-            System.out.print("not empty");
-        }
-        System.out.print("Size is: " + appSettingsRMS.size());
-        System.out.print("Size should be: " + appSettings.size());
         
         if (appSettingsRMS.isEmpty() || appSettingsRMS.size() < appSettings.size()){
             //wipe it.
@@ -248,28 +242,6 @@ public class AppPref {
     }
     
    
-    /**
-     * Find out where we should put the base folder by finding the root folder
-     * with the maximum amount of space (this should be the memory card generally)
-     */
-    public static String getAppDataDir(){
-        DeviceRoots bestRoot = FileUtils.getBestRoot();
-        if (bestRoot==null){
-            return null;
-        }
-        String baseFolder = bestRoot.path + "umobiledata";
-        try{
-            FileConnection bCon = (FileConnection)Connector.open(baseFolder);
-            if (!bCon.isDirectory()){
-                bCon.mkdir();
-            }
-            bCon.close();
-            appDataDir = baseFolder;
-            return appDataDir;
-        }catch (Exception ce){
-            return null;
-        }
-    }
     
     public static String getPlatform(){
         return System.getProperty("microedition.platform");

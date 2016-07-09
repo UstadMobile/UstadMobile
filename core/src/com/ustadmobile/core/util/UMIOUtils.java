@@ -70,15 +70,28 @@ public class UMIOUtils {
      * Close the given output stream if not null
      * 
      * @param out An input stream to close
+     * @param flush if true - flush the stream before closing
      */
-    public static final void closeOutputStream(OutputStream out) {
+    public static final void closeOutputStream(OutputStream out, boolean flush) {
         try {
             if(out != null) {
+                if(flush)
+                    out.flush();
                 out.close();
             }
         }catch(IOException e) {
             
         }
+    }
+    
+    /**
+     * Close the output stream give if not null.  Will not flush the output stream:
+     *  e.g. the same as calling closeOutputSteam(out, false)
+     * 
+     * @param out 
+     */
+    public static final void closeOutputStream(OutputStream out) {
+        closeOutputStream(out, false);
     }
     
     /**

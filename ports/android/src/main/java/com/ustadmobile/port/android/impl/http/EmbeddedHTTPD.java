@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.impl.http;
 
+
 import android.util.Log;
 
 import com.ustadmobile.core.util.UMFileUtil;
@@ -16,11 +17,18 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import fi.iki.elonen.*;
 
 /**
+ * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
+ *
+ * Mounted zips will be acessible under http://IP:PORT/mount/mountName
+ *
+ * For performance reasons mounted zip files are served with cache headers with a max-age to prevent
+ * additional requests - therefor the mountName should include a date or timestamp component to prevent
+ * stale files being served.
+ *
  * Created by mike on 8/14/15.
  */
 public class EmbeddedHTTPD extends NanoHTTPD {
@@ -125,6 +133,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
         int range[];
         String ifNoneMatchHeader;
         InputStream retInputStream;
+        Log.i("HTTPD", uri);
 
         if(uri.startsWith(PREFIX_MOUNT)) {
             int nextSlash = uri.indexOf('/', PREFIX_MOUNT.length() + 1);
@@ -144,7 +153,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
             String pathInZip = uri.substring(nextSlash + 1);
             try {
                 MountedZip mountedZip = mountedEPUBs.get(zipMountPath);
-                ZipFile zipFile = new ZipFile(mountedZip.zipPath);
+                ZipFile zipFile = mountedZip.getZipFile();
                 ZipEntry entry = zipFile.getEntry(pathInZip);
 
                 if(entry != null) {
@@ -155,7 +164,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                     InputStream zipEntryStream = zipFile.getInputStream(entry);
                     retInputStream = zipEntryStream;
 
-                    ifNoneMatchHeader = session.getHeaders().get("If-None-Match");
+                    ifNoneMatchHeader = session.getHeaders().get("if-none-match");
                     if(ifNoneMatchHeader != null && ifNoneMatchHeader.equals(etag)) {
                         Response r = new Response(Response.Status.NOT_MODIFIED, getMimeType(uri), "");
                         r.addHeader("ETag", etag);
@@ -216,6 +225,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                         r.addHeader("ETag", etag);
                         r.addHeader("Content-Length", String.valueOf(totalLength));
                         r.addHeader("Connection", "close");
+                        r.addHeader("Cache-Control", "cache, max-age=86400");
                         return r;
                     }
 
@@ -242,10 +252,29 @@ public class EmbeddedHTTPD extends NanoHTTPD {
         return new Response(msg);
     }
 
+    /**
+     * Mount a zip to the given path.  The contents of the zip file will then be accessible by
+     * HTTP using http://IP:PORT/mount/mountPath
+     *
+     * Zips should be unmounted when they are no longer needed.  Depending on how Android feels
+     * this service may live on after an activity is finished.  The mounted zip keeps a cached
+     * copy of the ZipFile object containing entry names, file sizes, data positions etc.
+     *
+     * For performance the mountPath should include a time/date component.  All files served will be
+     * with cache a 1 year maxage cache header
+     *
+     * @param mountPath The path to use after /mount .
+     * @param zipPath The local filesystem path to the zip file (e.g. /path/to/file.epub)
+     */
     public void mountZip(String mountPath, String zipPath) {
         mountedEPUBs.put(mountPath, new MountedZip(mountPath, zipPath));
     }
 
+    /**
+     * Unmount a zip that was mounted with mountZip
+     *
+     * @param mountPath The mount path given to mount the zip
+     */
     public void unmountZip(String mountPath) {
         mountedEPUBs.remove(mountPath);
     }
@@ -266,9 +295,19 @@ public class EmbeddedHTTPD extends NanoHTTPD {
 
         public HashMap<String, List<MountedZipFilter>> filters;
 
+        private ZipFile zipFile;
+
         public MountedZip(String mountPath, String zipPath) {
             this.mountPath = mountPath;
             this.zipPath = zipPath;
+        }
+
+        public ZipFile getZipFile() throws IOException{
+            if(zipFile == null) {
+                zipFile = new ZipFile(zipPath);
+            }
+
+            return zipFile;
         }
 
         public void addFilter(String extension, String regex, String replacement) {
@@ -320,6 +359,7 @@ public class EmbeddedHTTPD extends NanoHTTPD {
         public String replacement;
 
     }
+
 
 
 
