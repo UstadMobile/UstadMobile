@@ -65,6 +65,13 @@ public class RectangleView extends View{
 
         //bottom margin zone
         canvas.drawRect(0, pgAreaBottom, parentWidth, parentHeight, paint);
+
+        paint.setStyle(Style.STROKE);
+        paint.setAlpha(255);
+        paint.setStrokeWidth(4);
+        canvas.drawRect(pageArea[OMRRecognizer.X], pageArea[OMRRecognizer.Y],
+                pgAreaRight, pgAreaBottom, paint);
+
     }
 
     @Override

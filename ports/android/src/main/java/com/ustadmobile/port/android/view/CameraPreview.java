@@ -13,14 +13,16 @@ import java.util.List;
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
+    private Camera.PreviewCallback mPreviewCallback;
 
     private int targetWidth= 1400;
 
     private int targetHeight = 800;
 
-    public CameraPreview(Context context, Camera camera) {
+    public CameraPreview(Context context, Camera camera, Camera.PreviewCallback previewCallback) {
         super(context);
         mCamera = camera;
+        mPreviewCallback = previewCallback;
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -98,6 +100,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mHolder);
+            if(mPreviewCallback != null) {
+                mCamera.setPreviewCallback(mPreviewCallback);
+            }
+
             mCamera.startPreview();
 
         } catch (Exception e){

@@ -22,19 +22,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link AttendanceCameraFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AttendanceCameraFragment extends Fragment implements View.OnClickListener {
+public class AttendanceCameraFragment extends Fragment implements View.OnClickListener, Camera.PreviewCallback {
 
     private CameraPreview mPreview;
 
     private Camera mCamera;
 
     private String mCurrentImgPath;
+
+    private byte[] mPreviewFrameBuffer;
+
+    private ReentrantLock lock;
 
 
     /**
@@ -92,13 +97,14 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        lock = new ReentrantLock();
         View view = inflater.inflate(R.layout.fragment_attendance_camera, container, false);
         mCamera = getCameraInstance();
         FrameLayout preview = (FrameLayout)view.findViewById(R.id.fragment_attendance_camera_preview);
-        mPreview = new CameraPreview(getContext(), mCamera);
+        mPreview = new CameraPreview(getContext(), mCamera, this);
 
         preview.addView(mPreview, 0);
+        //mPreview.setOnTouchListener(this);
 
         //Button captureButton = (Button)view.findViewById(R.id.fragment_attendance_camera_capture);
         //captureButton.setOnClickListener(this);
@@ -146,4 +152,15 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
             }
         }
     };
+
+    @Override
+    public void onPreviewFrame(byte[] bytes, Camera camera) {
+        try {
+            lock.lock();
+            mPreviewFrameBuffer = bytes;
+        }finally{
+            lock.unlock();
+        }
+
+    }
 }
