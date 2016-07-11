@@ -16,7 +16,7 @@
         <com.ustadmobile.port.android.view.RectangleView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/customview_rectangle"
+            android:id="@+id/fragment_attendance_rectangleview"
             android:layout_gravity="left|top" />
 
     </FrameLayout>

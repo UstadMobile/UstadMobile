@@ -1,6 +1,13 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ImageFormat;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.net.Uri;
@@ -9,27 +16,44 @@ import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.AttendanceSheetImage;
+import com.ustadmobile.core.omr.OMRRecognizer;
+import com.ustadmobile.port.android.impl.UMLogAndroid;
+import com.ustadmobile.port.android.impl.qr.NV21OMRImageSource;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_X_DISTANCE;
+import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_Y_DISTANCE;
+
+
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.jar.Pack200;
+
+import jp.sourceforge.qrcode.data.QRCodeImage;
+import jp.sourceforge.qrcode.geom.Point;
+import jp.sourceforge.qrcode.pattern.FinderPattern;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link AttendanceCameraFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AttendanceCameraFragment extends Fragment implements View.OnClickListener, Camera.PreviewCallback {
+public class AttendanceCameraFragment extends Fragment implements View.OnClickListener, Camera.PreviewCallback, View.OnTouchListener {
 
     private CameraPreview mPreview;
 
@@ -39,15 +63,15 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
     private byte[] mPreviewFrameBuffer;
 
-    private ReentrantLock lock;
+    private Object lockObj;
+
+    private RectangleView mRectangleView;
 
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment AttendanceCameraFragment.
      */
     // TODO: Rename and change types and number of parameters
@@ -97,15 +121,19 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        lock = new ReentrantLock();
+        lockObj = new Object();
         View view = inflater.inflate(R.layout.fragment_attendance_camera, container, false);
         mCamera = getCameraInstance();
         FrameLayout preview = (FrameLayout)view.findViewById(R.id.fragment_attendance_camera_preview);
-        mPreview = new CameraPreview(getContext(), mCamera, this);
+        View rectView = view.findViewById(R.id.fragment_attendance_rectangleview);
+        rectView.setOnTouchListener(this);
 
-        preview.addView(mPreview, 0);
+        mPreview = new CameraPreview(getContext(), mCamera, this);
         //mPreview.setOnTouchListener(this);
 
+        mRectangleView = (RectangleView)view.findViewById(R.id.fragment_attendance_rectangleview);
+
+        preview.addView(mPreview, 0);
         //Button captureButton = (Button)view.findViewById(R.id.fragment_attendance_camera_capture);
         //captureButton.setOnClickListener(this);
 
@@ -155,11 +183,86 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
+        synchronized (lockObj) {
+            mPreviewFrameBuffer = bytes;
+        }
+        /*
         try {
             lock.lock();
             mPreviewFrameBuffer = bytes;
         }finally{
             lock.unlock();
+        }
+        */
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        int action = motionEvent.getAction();
+        switch(motionEvent.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                processYuvImage();
+                break;
+        }
+
+        return false;
+    }
+
+    public void processYuvImage() {
+        //see
+        // http://stackoverflow.com/questions/5272388/extract-black-and-white-image-from-android-cameras-nv21-format/12702836#12702836
+        long procTime = -1;
+        long patternTime = -1;
+        long decodeTime = -1;
+        int[] pixels;
+        byte[] imgBuffer;
+        synchronized (lockObj) {
+            imgBuffer = mPreviewFrameBuffer;
+        }
+
+        try {
+            //lock.lock();
+            Camera.Parameters params = mCamera.getParameters();
+            Camera.Size size = params.getPreviewSize();
+            AttendanceSheetImage sheetImage = new AttendanceSheetImage(
+                    AttendanceSheetImage.DEFAULT_PAGE_AREA_MARGIN, 297, 210,
+                    new float[]{ DEFAULT_PAGE_X_DISTANCE, DEFAULT_PAGE_Y_DISTANCE,
+                            DEFAULT_PAGE_X_DISTANCE, DEFAULT_PAGE_Y_DISTANCE},
+                    841.8897637795275f/40f);
+            NV21OMRImageSource imgSource = new NV21OMRImageSource(size.width, size.height);
+            imgSource.setNV21Buffer(mPreviewFrameBuffer);
+            sheetImage.setImageSource(imgSource);
+
+            int[] imgBuf = new int[size.width * size.height];
+            imgSource.decodeGreyscale(imgBuf, 0, 0, size.width, size.height);
+            Bitmap imgBitmap = Bitmap.createBitmap(imgBuf, size.width, size.height,
+                    Bitmap.Config.ARGB_8888);
+            AndroidDebugCanvas dc = new AndroidDebugCanvas(imgBitmap);
+            sheetImage.drawAreas(dc);
+            File cropDestFile = new File(Environment.getExternalStorageDirectory(),
+                    "ustadmobileContent/attendance/gray-debug-" + System.currentTimeMillis() + ".jpg");
+            FileOutputStream fout = new FileOutputStream(cropDestFile);
+            dc.getMutableBitmap().compress(Bitmap.CompressFormat.JPEG, 100, fout);
+            fout.flush();
+            fout.close();
+
+
+
+            /*
+            time = System.currentTimeMillis();
+            QRCodeImage qrImg = UstadMobileSystemImpl.getInstance().getQRCodeImage(bm);
+            boolean[][] bitmap = OMRRecognizer.convertImgToBitmap(qrImg);
+            Point[] pt = FinderPattern.findCenters(bitmap);
+            patternTime = System.currentTimeMillis() - time;
+            */
+        }catch(Exception e) {
+            Log.e(UMLogAndroid.LOGTAG, "shisse", e);
+            e.printStackTrace();
+        }finally {
+            Log.i(UMLogAndroid.LOGTAG, "Process time = " + procTime +
+                    " pattern find time = " + patternTime +
+                    " deocde time = " + decodeTime);
+            //lock.unlock();
         }
 
     }

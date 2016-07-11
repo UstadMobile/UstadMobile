@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.SurfaceHolder;
@@ -103,6 +104,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             if(mPreviewCallback != null) {
                 mCamera.setPreviewCallback(mPreviewCallback);
             }
+            mCamera.getParameters().setPreviewFormat(ImageFormat.NV21);
 
             mCamera.startPreview();
 

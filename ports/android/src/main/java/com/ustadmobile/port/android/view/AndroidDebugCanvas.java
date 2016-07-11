@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 
 import jp.sourceforge.qrcode.geom.Line;
 import jp.sourceforge.qrcode.geom.Point;
@@ -62,8 +63,17 @@ public class AndroidDebugCanvas extends Canvas implements DebugCanvas {
 
     }
 
-    public  void drawPolygon(Point[] points, int color){
-
+    public  void drawPolygon(Point[] points, int color) {
+        Path p = new Path();
+        p.moveTo(points[0].getX(), points[0].getY());
+        for(int i = 1; i < points.length; i++) {
+            p.lineTo(points[i].getX(), points[i].getY());
+        }
+        p.lineTo(points[0].getX(), points[0].getY());
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setColor(color);
+        canvas.drawPath(p, paint);
     }
 
     public  void drawPoints(Point[] points, int color){
@@ -82,6 +92,10 @@ public class AndroidDebugCanvas extends Canvas implements DebugCanvas {
                 new Line(x - 5, y, x + 5, y),new Line(x, y - 5, x ,y + 5)
         };
         drawLines(lines, color);
+    }
+
+    public Bitmap getMutableBitmap() {
+        return mutableBitmap;
     }
 
     public Bitmap getImage() {

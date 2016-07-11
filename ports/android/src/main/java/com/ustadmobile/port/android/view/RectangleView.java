@@ -74,6 +74,12 @@ public class RectangleView extends View{
 
     }
 
+    public int[] getPageArea() {
+        return pageArea;
+    }
+
+
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         parentWidth = MeasureSpec.getSize(widthMeasureSpec);

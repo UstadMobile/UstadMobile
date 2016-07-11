@@ -412,5 +412,57 @@ public class OMRRecognizer {
         return new int[]{marginX, marginY, imgWidth-(marginX*2), imgHeight-(marginY*2)};
     }
     
+    
+    /**
+     * 
+     * @param pgArea
+     * @param distances : Array of the distance from the edge to the finder pattern center in the order of TOP LEFT BOTTOM RIGHT
+     * @param areaSize
+     * @return 
+     */
+    public static int[][] getFinderPatternSearchAreas(int[] pgArea, float[] distances, float areaSize) {
+        int[][] result = new int[4][0];
+        int[] pDistances = new int[distances.length];
+        int i;
+        
+        /* 
+         * Calculate the distances in pixels now. TOP and BOTTOM (0 and 2) are 
+         * out of height hence the % 2 decision 
+         */
+        for(i = 0; i < distances.length; i++) {
+            pDistances[i] = Math.round(pgArea[i % 2 == 0 ? HEIGHT : WIDTH] * distances[i]);
+        }
+        
+        int size = Math.round(areaSize * pgArea[WIDTH]);
+        
+        //top left point
+        result[0] = getSquareCoordsByCenter(
+            pgArea[X] + pDistances[LEFT],
+            pgArea[Y] + pDistances[TOP], size);
+        
+        //top right point
+        result[1] = getSquareCoordsByCenter(
+            (pgArea[X] + pgArea[WIDTH]) - pDistances[RIGHT],
+            pgArea[Y] + pDistances[TOP], size);
+        
+        //bottom left point
+        result[2] = getSquareCoordsByCenter(
+            pgArea[X] + pDistances[LEFT],
+            (pgArea[Y]+ pgArea[HEIGHT])-pDistances[BOTTOM], size);
+        
+        //bottom right point
+        result[3] = getSquareCoordsByCenter(
+            (pgArea[X] + pgArea[WIDTH]) - pDistances[RIGHT],
+            (pgArea[Y]+ pgArea[HEIGHT])-pDistances[BOTTOM], size);
+            
+        
+        return result;
+    }
+    
+    public static int[] getSquareCoordsByCenter(int x, int y, int size) {
+        int halfSize = size/2;
+        return new int[]{x-halfSize, y-halfSize, size, size};
+    }
+    
 
 }
