@@ -2,6 +2,8 @@ package com.ustadmobile.port.android.impl.qr;
 
 import com.ustadmobile.core.omr.OMRImageSource;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Created by mike on 7/11/16.
  */
@@ -20,6 +22,12 @@ public class NV21OMRImageSource implements OMRImageSource {
 
     public void setNV21Buffer(byte[] nv21Buffer) {
         this.nv21Buffer = nv21Buffer;
+    }
+
+
+    @Override
+    public void setBuffer(byte[] buf) {
+        nv21Buffer = buf;
     }
 
 

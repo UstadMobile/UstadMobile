@@ -7,6 +7,7 @@ package com.ustadmobile.core.model;
 
 import com.ustadmobile.core.omr.OMRImageSource;
 import com.ustadmobile.core.omr.OMRRecognizer;
+import java.util.concurrent.locks.ReentrantLock;
 import jp.sourceforge.qrcode.geom.Point;
 import jp.sourceforge.qrcode.util.DebugCanvas;
 
@@ -83,6 +84,16 @@ public class AttendanceSheetImage {
     
     private float finderPatternSize;
     
+    /**
+     * Thread that runs to check if the current image is a sheet with finder 
+     * patterns etc.
+     */
+    private Thread recognitionThread;
+    
+    
+    private ReentrantLock recognitionLock;
+    
+    
     public AttendanceSheetImage(float margin, int pageWidth, int pageHeight, float[] pageDistances, float finderPatternSize) {
         this.pageAreaMargin = margin;
         this.pageWidth = pageWidth;
@@ -121,6 +132,19 @@ public class AttendanceSheetImage {
             expectedPageArea, pageDistances, finderPatternSize);
     }
     
+    public OMRImageSource getImageSource() {
+        return imageSource;
+    }
+    
+    public final void updateImageSource(byte[] buf) {
+        try {
+            recognitionLock.lock();
+            imageSource.setBuffer(buf);
+        }finally {
+            recognitionLock.unlock();
+        }
+    }
+    
     /**
      * Draw on the given debug canvas the areas of the image as understood 
      * here
@@ -143,6 +167,11 @@ public class AttendanceSheetImage {
         }, color);
     }
     
+    public void startChecking() {
+        
+    }
+    
+    
     public boolean isAligned() {
         int i;
         for(i = 0; i < finderPatternSearchAreas.length; i++) {
@@ -152,6 +181,18 @@ public class AttendanceSheetImage {
         return false;
     }
     
-    
+    public class RecognitionThread extends Thread{
+        
+        public void run() {
+            ReentrantLock lock = AttendanceSheetImage.this.recognitionLock;
+            try {
+                lock.lock();
+                
+            }finally {
+                lock.unlock();
+            }
+        }
+        
+    }
     
 }

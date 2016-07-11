@@ -48,6 +48,11 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
     private RectangleView mRectangleView;
 
+    private AttendanceSheetImage mSheet;
+
+    private RotatedNV21OMRImageSource mOMRImageSource;
+
+    private Camera.Size mCamPreviewSize;
 
     /**
      * Use this factory method to create a new instance of
@@ -75,7 +80,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
 
     /** A safe way to get an instance of the Camera object. */
-    public static Camera getCameraInstance(){
+    public Camera getCameraInstance(){
         Camera c = null;
         try {
             c = Camera.open(); // attempt to get a Camera instance
@@ -83,7 +88,9 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         catch (Exception e){
             // Camera is not available (in use or does not exist)
         }
-        Camera.Size size = c.getParameters().getPreviewSize();
+        mCamPreviewSize = c.getParameters().getPreviewSize();
+        mOMRImageSource = new RotatedNV21OMRImageSource(mCamPreviewSize.width, mCamPreviewSize.height);
+        mSheet.setImageSource(mOMRImageSource);
         return c; // returns null if camera is unavailable
     }
 
@@ -117,6 +124,8 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         preview.addView(mPreview, 0);
         //Button captureButton = (Button)view.findViewById(R.id.fragment_attendance_camera_capture);
         //captureButton.setOnClickListener(this);
+        mSheet = new AttendanceSheetImage();
+
 
         return view;
     }
@@ -164,9 +173,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
-        synchronized (lockObj) {
-            mPreviewFrameBuffer = bytes;
-        }
+        mSheet.updateImageSource(bytes);
         /*
         try {
             lock.lock();
@@ -205,11 +212,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
             //lock.lock();
             Camera.Parameters params = mCamera.getParameters();
             Camera.Size size = params.getPreviewSize();
-            AttendanceSheetImage sheetImage = new AttendanceSheetImage(
-                    AttendanceSheetImage.DEFAULT_PAGE_AREA_MARGIN, 297, 210,
-                    new float[]{ DEFAULT_PAGE_X_DISTANCE, DEFAULT_PAGE_Y_DISTANCE,
-                            DEFAULT_PAGE_X_DISTANCE, DEFAULT_PAGE_Y_DISTANCE},
-                    841.8897637795275f/40f);
+            AttendanceSheetImage sheetImage = new AttendanceSheetImage();
             NV21OMRImageSource imgSource = new RotatedNV21OMRImageSource(size.width, size.height);
             imgSource.setNV21Buffer(mPreviewFrameBuffer);
             sheetImage.setImageSource(imgSource);

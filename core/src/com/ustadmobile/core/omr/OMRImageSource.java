@@ -42,4 +42,11 @@ public interface OMRImageSource {
      */
     public int getHeight();
     
+    /**
+     * Update the raw buffer of the image data
+     * 
+     * @param buf 
+     */
+    public void setBuffer(byte[] buf);
+    
 }
