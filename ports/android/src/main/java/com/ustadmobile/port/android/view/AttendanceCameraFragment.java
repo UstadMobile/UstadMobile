@@ -2,15 +2,7 @@ package com.ustadmobile.port.android.view;
 
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.ImageFormat;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.Camera;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -19,17 +11,14 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.AttendanceSheetImage;
-import com.ustadmobile.core.omr.OMRRecognizer;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
 import com.ustadmobile.port.android.impl.qr.NV21OMRImageSource;
+import com.ustadmobile.port.android.impl.qr.RotatedNV21OMRImageSource;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -39,14 +28,6 @@ import java.util.Date;
 
 import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_X_DISTANCE;
 import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_Y_DISTANCE;
-
-
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.jar.Pack200;
-
-import jp.sourceforge.qrcode.data.QRCodeImage;
-import jp.sourceforge.qrcode.geom.Point;
-import jp.sourceforge.qrcode.pattern.FinderPattern;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -229,13 +210,13 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
                     new float[]{ DEFAULT_PAGE_X_DISTANCE, DEFAULT_PAGE_Y_DISTANCE,
                             DEFAULT_PAGE_X_DISTANCE, DEFAULT_PAGE_Y_DISTANCE},
                     841.8897637795275f/40f);
-            NV21OMRImageSource imgSource = new NV21OMRImageSource(size.width, size.height);
+            NV21OMRImageSource imgSource = new RotatedNV21OMRImageSource(size.width, size.height);
             imgSource.setNV21Buffer(mPreviewFrameBuffer);
             sheetImage.setImageSource(imgSource);
 
             int[] imgBuf = new int[size.width * size.height];
-            imgSource.decodeGreyscale(imgBuf, 0, 0, size.width, size.height);
-            Bitmap imgBitmap = Bitmap.createBitmap(imgBuf, size.width, size.height,
+            imgSource.decodeGrayscale(imgBuf, 0, 0, size.height, size.width);
+            Bitmap imgBitmap = Bitmap.createBitmap(imgBuf, size.height, size.width,
                     Bitmap.Config.ARGB_8888);
             AndroidDebugCanvas dc = new AndroidDebugCanvas(imgBitmap);
             sheetImage.drawAreas(dc);

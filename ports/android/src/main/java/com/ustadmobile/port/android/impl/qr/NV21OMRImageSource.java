@@ -7,11 +7,11 @@ import com.ustadmobile.core.omr.OMRImageSource;
  */
 public class NV21OMRImageSource implements OMRImageSource {
 
-    private int nv21Width;
+    protected int nv21Width;
 
-    private int nv21Height;
+    protected int nv21Height;
 
-    private byte[] nv21Buffer;
+    protected byte[] nv21Buffer;
 
     public NV21OMRImageSource(int nv21Width, int nv21Height) {
         this.nv21Width = nv21Width;
@@ -38,13 +38,13 @@ public class NV21OMRImageSource implements OMRImageSource {
         return nv21Height;
     }
 
-    public void decodeGreyscale(int[] buf, int cropX, int cropY, int cropWidth, int cropHeight) {
+    public void decodeGrayscale(int[] buf, int cropX, int cropY, int cropWidth, int cropHeight) {
         int lineStart;
         int l;
         for(int y = 0; y < cropHeight; y++) {
             lineStart = (cropY + y) * nv21Width;
             for(int x = 0; x < cropWidth; x++) {
-                l = nv21Buffer[lineStart + x + cropX] & 0xFF;
+                l = nv21Buffer[lineStart + (x + cropX)] & 0xFF;
                 buf[(y*cropWidth)+x] = 0xff000000 | l<<16 | l<<8 | l;
             }
         }
@@ -56,7 +56,7 @@ public class NV21OMRImageSource implements OMRImageSource {
      *
      * @return
      */
-    private int[] decodeGreyscale() {
+    private int[] decodeGrayscale() {
         int pixelCount = nv21Width * nv21Height;
         int[] out = new int[pixelCount];
         int l;
