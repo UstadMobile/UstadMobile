@@ -20,9 +20,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     private int targetHeight = 800;
 
-    public CameraPreview(Context context, Camera camera, Camera.PreviewCallback previewCallback) {
+    private PreviewStartedCallback mPreviewStartCallback;
+
+    public CameraPreview(Context context, Camera camera, Camera.PreviewCallback previewCallback, PreviewStartedCallback previewStartCallback) {
         super(context);
         mPreviewCallback = previewCallback;
+        mPreviewStartCallback = previewStartCallback;
 
         mCamera = camera;
 
@@ -69,6 +72,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
 
             mCamera.startPreview();
+            if(mPreviewStartCallback != null) {
+                mPreviewStartCallback.onPreviewStarted(this, mCamera);
+            }
         } catch (IOException e) {
             Log.d("cwtf", "Error setting camera preview: " + e.getMessage());
         }
@@ -115,4 +121,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             Log.d("cwtf", "Error starting camera preview: " + e.getMessage());
         }
     }
+
+    public static interface PreviewStartedCallback {
+
+        public void onPreviewStarted(CameraPreview preview, Camera camera);
+
+    }
+
 }

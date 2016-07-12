@@ -49,4 +49,19 @@ public interface OMRImageSource {
      */
     public void setBuffer(byte[] buf);
     
+    /**
+     * Get the raw buffer of the image data
+     */
+    public byte[] getBuffer();
+    
+    /**
+     * Return a shallow copy (e.g. references only) of this OMRImageSource
+     * e.g. a new instance of the same class with the same width and height
+     * 
+     * This is used by the thread that runs in the background to check for matches
+     * 
+     * @return new instance of the same implementing class with the same width and height
+     */
+    public OMRImageSource copy();
+    
 }

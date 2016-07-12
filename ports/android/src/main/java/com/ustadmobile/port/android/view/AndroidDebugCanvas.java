@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -132,11 +133,12 @@ public class AndroidDebugCanvas extends Canvas implements DebugCanvas {
      * @param image
      * @return
      */
-    static Bitmap intArrayToImage(int[][] image){
+    public static Bitmap intArrayToImage(int[][] image){
         int [] rgb1D = rgbTo1DArray(image);
         Bitmap postImage = Bitmap.createBitmap(rgb1D, image.length, image[0].length, Bitmap.Config.ARGB_8888);
         return postImage;
     }
+
 
     /**
      * Method to convert a boolean (B/W) 2D array into a Bitmap image.
@@ -144,7 +146,22 @@ public class AndroidDebugCanvas extends Canvas implements DebugCanvas {
      * @return
      */
     static Bitmap booleanArrayToBitmap(boolean[][] image) {
+        int width = image.length;
+        int height = image[0].length;
+        int[] rgb1D = new int[width*height];
+        int lineStart;
+        for(int y = 0; y < height; y++) {
+            lineStart = y*width;
+            for(int x = 0; x < width; x++) {
+                rgb1D[lineStart+x] = image[x][y] ? Color.BLACK : Color.WHITE;
+            }
+        }
+
+        return Bitmap.createBitmap(rgb1D, width, height, Bitmap.Config.ARGB_8888);
+
+        /*
         Bitmap imageFromBool = Bitmap.createBitmap(image.length, image[0].length, Bitmap.Config.ARGB_8888);
+
         for(int i=0;i<image.length;i++){
             for(int j=0;j<image[0].length;j++){
                 if(image[i][j]) imageFromBool.setPixel(i, j, Color.BLACK);
@@ -152,6 +169,7 @@ public class AndroidDebugCanvas extends Canvas implements DebugCanvas {
             }
         }
         return imageFromBool;
+        */
     }
 }
 

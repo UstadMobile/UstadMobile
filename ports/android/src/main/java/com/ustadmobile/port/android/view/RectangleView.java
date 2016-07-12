@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.graphics.Paint.Style;
 import android.view.View;
 
+import com.ustadmobile.core.model.AttendanceSheetImage;
 import com.ustadmobile.core.omr.OMRRecognizer;
 
 /**
@@ -21,6 +22,7 @@ public class RectangleView extends View{
     int parentHeight;
 
     private int[] pageArea;
+    private int[][] fpSearchAreas;
 
     public RectangleView(Context context) {
         super(context);
@@ -66,11 +68,21 @@ public class RectangleView extends View{
         //bottom margin zone
         canvas.drawRect(0, pgAreaBottom, parentWidth, parentHeight, paint);
 
+
+
         paint.setStyle(Style.STROKE);
         paint.setAlpha(255);
         paint.setStrokeWidth(4);
         canvas.drawRect(pageArea[OMRRecognizer.X], pageArea[OMRRecognizer.Y],
                 pgAreaRight, pgAreaBottom, paint);
+
+        paint.setColor(Color.BLUE);
+        paint.setStrokeWidth(2);
+        for(int i = 0; i < fpSearchAreas.length; i++) {
+            canvas.drawRect(fpSearchAreas[i][OMRRecognizer.X], fpSearchAreas[i][OMRRecognizer.Y],
+                    fpSearchAreas[i][OMRRecognizer.X] + fpSearchAreas[i][OMRRecognizer.WIDTH],
+                    fpSearchAreas[i][OMRRecognizer.Y] + fpSearchAreas[i][OMRRecognizer.HEIGHT], paint);
+        }
 
     }
 
@@ -86,6 +98,9 @@ public class RectangleView extends View{
         parentHeight = MeasureSpec.getSize(heightMeasureSpec);
         pageArea = OMRRecognizer.getExpectedPageArea(210, 297,
                 parentWidth, parentHeight, 0.1f);
+        fpSearchAreas = OMRRecognizer.getFinderPatternSearchAreas(
+                pageArea, AttendanceSheetImage.DEFAULT_PAGE_DISTANCES,
+                AttendanceSheetImage.DEFAULT_FINDER_PATTERN_SIZE* 3f);
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 

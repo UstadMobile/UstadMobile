@@ -46,6 +46,18 @@ public class NV21OMRImageSource implements OMRImageSource {
         return nv21Height;
     }
 
+    @Override
+    public byte[] getBuffer() {
+        return nv21Buffer;
+    }
+
+    @Override
+    public OMRImageSource copy() {
+        OMRImageSource copy = new NV21OMRImageSource(nv21Width, nv21Height);
+        copy.setBuffer(nv21Buffer);
+        return copy;
+    }
+
     public void decodeGrayscale(int[] buf, int cropX, int cropY, int cropWidth, int cropHeight) {
         int lineStart;
         int l;
