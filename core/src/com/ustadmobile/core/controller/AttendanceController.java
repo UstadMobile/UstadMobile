@@ -38,6 +38,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.model.AttendanceClassStudent;
 import com.ustadmobile.core.model.AttendanceRowModel;
+import com.ustadmobile.core.model.AttendanceSheetImage;
 import com.ustadmobile.core.omr.OMRRecognizer;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
@@ -63,12 +64,15 @@ import org.json.JSONObject;
 public class AttendanceController extends UstadBaseController{
 
     //areas in which optical marks are to be found on the paper
+    
     public static final float AREA_WIDTH = 607f;
     
     public static final float AREA_HEIGHT = 902f;
     
     //First column's X and Y Offset
-    public static final float OMR_AREA_OFFSET_X_1 = (197.2f/AREA_WIDTH);
+    
+    //as per the calculation in points of the sheet generator itself. - used to be (197.2f/AREA_WIDTH);
+    public static final float OMR_AREA_OFFSET_X_1 = (156f)/485f;
 
     public static final float OMR_AREA_OFFSET_Y_1 = (39.5f/AREA_HEIGHT);
 
@@ -83,6 +87,8 @@ public class AttendanceController extends UstadBaseController{
     public static final float OM_HEIGHT = 20f/AREA_HEIGHT;
     
     public static final float OM_ROW_HEIGHT = 25.8f/AREA_HEIGHT;
+    
+    public static final int DEFAULT_GS_THRESHOLD = 128;
 
     public AttendanceRowModel[] attendanceResult;
     
@@ -247,6 +253,16 @@ public class AttendanceController extends UstadBaseController{
         view.showTakePicture();
     }
     
+    public void handleSheetRecognized(final AttendanceSheetImage sheet, final DebugCanvas dc) {
+        boolean[][] marks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
+            DEFAULT_GS_THRESHOLD, 0.5f, OMR_AREA_OFFSET_X_1, OMR_AREA_OFFSET_Y_1,
+            OM_WIDTH, OM_HEIGHT/2, OM_ROW_HEIGHT, 
+            4, 33, dc);
+        handleResultsDecoded(marks);
+
+    }
+    
+    
     /**
      * Handle when the image has been taken by the underlying system - start
      * processing the image in a new threads
@@ -260,6 +276,8 @@ public class AttendanceController extends UstadBaseController{
             U.id.processing));
         new ProcessAttendancePictureThread(sysImage, this).start();
     }
+    
+    
     
     
     public void handleResultsDecoded(boolean[][] opticalMarks) {

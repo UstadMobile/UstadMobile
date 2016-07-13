@@ -352,7 +352,7 @@ public class OMRRecognizer {
      * 
      * @return 
      */
-    static Point[][] sortCenters(Point[] centers, int width, int height) {
+    public static Point[][] sortCenters(Point[] centers, int width, int height) {
         Point[][] retVal = new Point[2][2];
         
         for(int i = 0; i < centers.length; i++) {

@@ -37,6 +37,7 @@ import java.util.List;
 import jp.sourceforge.qrcode.geom.Point;
 import jp.sourceforge.qrcode.pattern.FinderPattern;
 import jp.sourceforge.qrcode.reader.QRCodeImageReader;
+import jp.sourceforge.qrcode.util.DebugCanvas;
 
 import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_X_DISTANCE;
 import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_Y_DISTANCE;
@@ -65,6 +66,10 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     private RotatedNV21OMRImageSource mOMRImageSource;
 
     private Camera.Size mCamPreviewSize;
+
+    private int targetWidth= 1400;
+
+    private int targetHeight = 800;
 
 
     /**
@@ -106,7 +111,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         mOMRImageSource = new RotatedNV21OMRImageSource(mCamPreviewSize.width, mCamPreviewSize.height);
 
         //set exposure compensation because it's white paper
-        float targetEV = 5f/3f;
+        float targetEV = 1f;
         int step = Math.round(targetEV/params.getExposureCompensationStep());
         params.setExposureCompensation(step);
 
@@ -142,6 +147,31 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
             focusList.add(new Camera.Area(omrIntsToRect(fpAreas[i]), 1000));
         }
         params.setMeteringAreas(focusList);
+
+        List<String> focusModes = params.getSupportedFocusModes();
+        if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+            // Autofocus mode is supported
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        }
+
+        //Docs don't say so: but these are all values in landscape
+        List<Camera.Size> picSizes = params.getSupportedPictureSizes();
+
+        int bestWidth = -1;
+        int bestHeight = -1;
+        Camera.Size cSize;
+        for(int i = 0; i < picSizes.size(); i++) {
+            cSize = picSizes.get(i);
+            if(cSize.width >= targetWidth && cSize.height >= targetHeight) {
+                if(bestWidth == -1 ||cSize.width < bestWidth) {
+                    bestWidth = cSize.width;
+                    bestHeight = cSize.height;
+                }
+            }
+        }
+        params.setPictureSize(bestWidth, bestHeight);
+        params.setRotation(90);
+        c.setDisplayOrientation(90);
         c.setParameters(params);
 
         return c; // returns null if camera is unavailable
@@ -187,37 +217,67 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
                              Bundle savedInstanceState) {
         lockObj = new Object();
         View view = inflater.inflate(R.layout.fragment_attendance_camera, container, false);
-        mCamera = getCameraInstance();
+
         FrameLayout preview = (FrameLayout)view.findViewById(R.id.fragment_attendance_camera_preview);
         View rectView = view.findViewById(R.id.fragment_attendance_rectangleview);
         rectView.setOnTouchListener(this);
 
-        mPreview = new CameraPreview(getContext(), mCamera, this, this);
+        mPreview = new CameraPreview(getContext(), this);
         //mPreview.setOnTouchListener(this);
 
         mRectangleView = (RectangleView)view.findViewById(R.id.fragment_attendance_rectangleview);
 
         preview.addView(mPreview, 0);
-        //Button captureButton = (Button)view.findViewById(R.id.fragment_attendance_camera_capture);
-        //captureButton.setOnClickListener(this);
-
-
-
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mCamera = getCameraInstance();
+        mPreview.setPreviewCallback(this);
+        mPreview.setCamera(mCamera);
+    }
+
+
+    @Override
+    public void onPause() {
+        mSheet.stopChecking();
+        mPreview.stopAndRelease();
+        mCamera = null;
+        super.onPause();
+    }
 
     protected void handleImageCaptured(String fileURI) {
         ((AttendanceActivity)getActivity()).processImage(fileURI);
     }
 
     @Override
-    public void sheetRecognized(AttendanceSheetImage sheet) {
+    public void sheetRecognized(final AttendanceSheetImage sheet) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 Toast.makeText(getContext(), "Sheet recognized", Toast.LENGTH_LONG).show();
             }
         });
+        OMRImageSource imgSrc = sheet.getImageSource();
+
+        int[][] buf2D = new int[imgSrc.getWidth()][imgSrc.getHeight()];
+        sheet.getRecognizedImage().getGrayscaleImage(buf2D, 0, 0, imgSrc.getWidth(), imgSrc.getHeight());
+        AndroidDebugCanvas dc = new AndroidDebugCanvas(Bitmap.createBitmap(AndroidDebugCanvas.rgbTo1DArray(buf2D),
+                imgSrc.getWidth(), imgSrc.getHeight(), Bitmap.Config.ARGB_8888));
+        ((AttendanceActivity)getActivity()).mController.handleSheetRecognized(sheet, dc);
+        FileOutputStream fout = null;
+        File destFile = new File(Environment.getExternalStorageDirectory(),
+                "ustadmobileContent/attendance/gray-capture-" + ".png");
+        try {
+            fout = new FileOutputStream(destFile);
+            dc.getMutableBitmap().compress(Bitmap.CompressFormat.PNG, 100, fout);
+            fout.flush();
+        }catch(IOException e) {
+            Log.e(UMLogAndroid.LOGTAG, "exception saving debug image", e);
+        }finally {
+            UMIOUtils.closeOutputStream(fout);
+        }
     }
 
     @Override
@@ -277,7 +337,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         int action = motionEvent.getAction();
         switch(action) {
             case MotionEvent.ACTION_DOWN:
-                saveDebugImage(mSheet, mSheet.getImageSource());
+                //saveDebugImage(mSheet, mSheet.getImageSource());
                 break;
         }
 
@@ -389,67 +449,5 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
                 out[x][y] = (gs[x][y] & 0xFF) < threshold;
             }
         }
-    }
-
-
-    public void processYuvImage() {
-        //see
-        // http://stackoverflow.com/questions/5272388/extract-black-and-white-image-from-android-cameras-nv21-format/12702836#12702836
-        long procTime = -1;
-        long patternTime = -1;
-        long decodeTime = -1;
-        int[] pixels;
-        byte[] imgBuffer;
-        synchronized (lockObj) {
-            imgBuffer = mPreviewFrameBuffer;
-        }
-        long time = System.currentTimeMillis();
-        //mSheet.isAligned();
-        procTime = System.currentTimeMillis();
-        System.out.println("time = " + procTime  + "ms");
-
-        /*
-        try {
-            //lock.lock();
-            Camera.Parameters params = mCamera.gewwtParameters();
-            Camera.Size size = params.getPreviewSize();
-            AttendanceSheetImage sheetImage = new AttendanceSheetImage();
-            NV21OMRImageSource imgSource = new RotatedNV21OMRImageSource(size.width, size.height);
-            imgSource.setNV21Buffer(mPreviewFrameBuffer);
-            sheetImage.setImageSource(imgSource);
-
-            int[] imgBuf = new int[size.width * size.height];
-            imgSource.decodeGrayscale(imgBuf, 0, 0, size.height, size.width);
-            Bitmap imgBitmap = Bitmap.createBitmap(imgBuf, size.height, size.width,
-                    Bitmap.Config.ARGB_8888);
-            AndroidDebugCanvas dc = new AndroidDebugCanvas(imgBitmap);
-            sheetImage.drawAreas(dc);
-            File cropDestFile = new File(Environment.getExternalStorageDirectory(),
-                    "ustadmobileContent/attendance/gray-debug-" + System.currentTimeMillis() + ".jpg");
-            FileOutputStream fout = new FileOutputStream(cropDestFile);
-            dc.getMutableBitmap().compress(Bitmap.CompressFormat.JPEG, 100, fout);
-            fout.flush();
-            fout.close();
-
-
-
-            /*
-            time = System.currentTimeMillis();
-            QRCodeImage qrImg = UstadMobileSystemImpl.getInstance().getQRCodeImage(bm);
-            boolean[][] bitmap = OMRRecognizer.convertImgToBitmap(qrImg);
-            Point[] pt = FinderPattern.findCenters(bitmap);
-            patternTime = System.currentTimeMillis() - time;
-
-        }catch(Exception e) {
-            Log.e(UMLogAndroid.LOGTAG, "shisse", e);
-            e.printStackTrace();
-        }finally {
-            Log.i(UMLogAndroid.LOGTAG, "Process time = " + procTime +
-                    " pattern find time = " + patternTime +
-                    " deocde time = " + decodeTime);
-            //lock.unlock();
-        }
-        */
-
     }
 }

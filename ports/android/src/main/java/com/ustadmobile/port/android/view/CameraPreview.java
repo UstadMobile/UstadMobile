@@ -10,87 +10,95 @@ import android.view.SurfaceView;
 import java.io.IOException;
 import java.util.List;
 
-/** A basic Camera preview class */
+/**
+ * A basic Camera preview class
+ *
+ * Based on https://developer.android.com/guide/topics/media/camera.html#custom-camera
+ *
+ */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private Camera.PreviewCallback mPreviewCallback;
-
-    private int targetWidth= 1400;
-
-    private int targetHeight = 800;
-
     private PreviewStartedCallback mPreviewStartCallback;
 
-    public CameraPreview(Context context, Camera camera, Camera.PreviewCallback previewCallback, PreviewStartedCallback previewStartCallback) {
+    private boolean mPreviewActive = false;
+
+
+    public CameraPreview(Context context, PreviewStartedCallback previewStartCallback) {
         super(context);
-        mPreviewCallback = previewCallback;
         mPreviewStartCallback = previewStartCallback;
-
-        mCamera = camera;
-
-
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
         mHolder = getHolder();
         mHolder.addCallback(this);
         // deprecated setting, but required on Android versions prior to 3.0
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    }
 
+    public Camera.PreviewCallback getPreviewCallback() {
+        return mPreviewCallback;
+    }
+
+    public void setPreviewCallback(Camera.PreviewCallback previewCallback) {
+        mPreviewCallback = previewCallback;
+    }
+
+
+    public void setCamera(Camera camera) {
+        mCamera = camera;
+        previewIfReady();
     }
 
     public void surfaceCreated(SurfaceHolder holder) {
         // The Surface has been created, now tell the camera where to draw the preview.
-        try {
-            Camera.Parameters params = mCamera.getParameters();
-            List<String> focusModes = params.getSupportedFocusModes();
-            if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                // Autofocus mode is supported
-                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        mHolder = holder;
+        previewIfReady();
+    }
+
+    public void previewIfReady() {
+        if(!mPreviewActive && mCamera != null && mHolder != null) {
+            //good to go now
+            if(mPreviewCallback != null) {
+                mCamera.setPreviewCallback(mPreviewCallback);
             }
 
-            //Docs don't say so: but these are all values in landscape
-            List<Camera.Size> picSizes = params.getSupportedPictureSizes();
+            try {
+                //Camera.Parameters params = mCamera.getParameters();
+                mCamera.setPreviewDisplay(mHolder);
+                mCamera.startPreview();
+                mPreviewActive = true;
 
-            int bestWidth = -1;
-            int bestHeight = -1;
-            Camera.Size cSize;
-            for(int i = 0; i < picSizes.size(); i++) {
-                cSize = picSizes.get(i);
-                if(cSize.width >= targetWidth && cSize.height >= targetHeight) {
-                    if(bestWidth == -1 ||cSize.width < bestWidth) {
-                        bestWidth = cSize.width;
-                        bestHeight = cSize.height;
-                    }
+                if(mPreviewStartCallback != null) {
+                    mPreviewStartCallback.onPreviewStarted(this, mCamera);
                 }
+            } catch (IOException e) {
+                Log.d("cwtf", "Error setting camera preview: " + e.getMessage());
             }
-            params.setPictureSize(bestWidth, bestHeight);
-            params.setRotation(90);
-            mCamera.setParameters(params);
-            mCamera.setPreviewDisplay(holder);
-            mCamera.setDisplayOrientation(90);
-
-
-            mCamera.startPreview();
-            if(mPreviewStartCallback != null) {
-                mPreviewStartCallback.onPreviewStarted(this, mCamera);
-            }
-        } catch (IOException e) {
-            Log.d("cwtf", "Error setting camera preview: " + e.getMessage());
         }
     }
 
-    public void surfaceDestroyed(SurfaceHolder holder) {
+    public void stopAndRelease() {
         if (mCamera != null){
+            mCamera.setPreviewCallback(null);
+            mCamera.stopPreview();
             mCamera.release();        // release the camera for other applications
             mCamera = null;
         }
+        mPreviewActive = false;
+    }
+
+
+
+    public void surfaceDestroyed(SurfaceHolder holder) {
+        //stopping camera must be handled in onPause of Fragment or Activity
+        mHolder = null;
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
-
+        mHolder = holder;
 
         if (mHolder.getSurface() == null){
             // preview surface does not exist

@@ -8,9 +8,9 @@ package com.ustadmobile.core.model;
 import com.ustadmobile.core.omr.OMRImageSource;
 import com.ustadmobile.core.omr.OMRRecognizer;
 import java.util.concurrent.locks.ReentrantLock;
+import jp.sourceforge.qrcode.geom.Line;
 import jp.sourceforge.qrcode.geom.Point;
 import jp.sourceforge.qrcode.pattern.FinderPattern;
-import jp.sourceforge.qrcode.reader.QRCodeImageReader;
 import jp.sourceforge.qrcode.util.DebugCanvas;
 
 /**
@@ -100,7 +100,7 @@ public class AttendanceSheetImage {
      * Thread that runs to check if the current image is a sheet with finder 
      * patterns etc.
      */
-    private Thread recognitionThread;
+    private RecognitionThread recognitionThread;
     
     
     private ReentrantLock recognitionLock;
@@ -118,13 +118,28 @@ public class AttendanceSheetImage {
     private boolean[][] searchPatternBmBuf;
     
     /**
-     * Array of the finder patterns that have been found
+     * Array of the finder patterns that have been found : in order of fpSearchAreas
      */
     private Point[] finderPatterns;
+    
+    /**
+     * Two dimensional array of finder patterns as follows:
+     *  { 
+     *    { TOP LEFT, BOTTOM LEFT },
+     *    { BOTTOM LEFT, BOTTOM RIGHT} 
+     *  }
+     */
+    private Point[][] recognizedFinderPatterns;
     
     private DebugSaveRequestListener debugSaveListener;
     
     private SheetRecognizedListener recognizedListener;
+    
+    /**
+     * Once the image has been recognized as a sheet by finding all the finder
+     * patterns this will be used to keep a reference to that exact frame
+     */
+    private OMRImageSource recognizedImage;
     
     public AttendanceSheetImage(float margin, int pageWidth, int pageHeight, float[] pageDistances, float finderPatternSize) {
         this.pageAreaMargin = margin;
@@ -292,6 +307,10 @@ public class AttendanceSheetImage {
          recognitionThread.start();
     }
     
+    public void stopChecking() {
+        recognitionThread.stopProcesing();;
+    }
+    
     public int isAligned(OMRImageSource src) {
         Point[] foundPoints;
         int numFound = 0;
@@ -305,15 +324,159 @@ public class AttendanceSheetImage {
                 searchPatternBmBuf, gs2BitmapThreshold);
             foundPoints = FinderPattern.findCenters(searchPatternBmBuf);
             if(foundPoints == null || foundPoints.length == 0) {
-                //do nothing for now
+                return numFound;//if one point is missing - there is no point to checking further
             }else {
                 finderPatterns[i] = foundPoints[0];
                 numFound++;
             }
         }
         
+        handleImageRecognized(src);
+        
         return numFound;
     }
+    
+    /**
+     * Handles what needs to be done when the image has been recognized as a valid
+     * sheet with all finder patterns located
+     * 
+     * We need to save a reference to the frame recognized, calculate out where
+     * finder patterns are.
+     * 
+     * @param src 
+     */
+    private void handleImageRecognized(OMRImageSource src) {
+        /*
+          Translate the finder points to their position on the master image itself
+          as they were found within the fpSearchArea
+         */
+        for(int i = 0; i < finderPatterns.length; i++) {
+            finderPatterns[i].translate(fpSearchAreas[i][OMRRecognizer.X], 
+                fpSearchAreas[i][OMRRecognizer.Y]);
+        }
+        
+        recognizedFinderPatterns = OMRRecognizer.sortCenters(finderPatterns, 
+            imageSource.getWidth(), imageSource.getHeight());
+        
+        try {
+            recognitionLock.lock();
+            this.recognizedImage = src.copy();
+            this.recognizedImage.setBuffer(src.getBuffer());
+        }finally {
+            recognitionLock.unlock();
+        }
+    }
+    
+    public OMRImageSource getRecognizedImage() {
+        return recognizedImage;
+    }
+    
+    /**
+     * Get Line objects that represent the boundaries : essentially a square
+     * where the corners are in the center of the finder pattern
+     * 
+     * @return 
+     */
+    public Line[] getBoundaryLines() {
+        checkImageRecognized();
+        Point[][] ptsSorted = OMRRecognizer.sortCenters(finderPatterns, 
+            recognizedImage.getWidth(), recognizedImage.getHeight());
+        return OMRRecognizer.getBoundaryLines(ptsSorted);
+    }
+    
+    
+    
+    
+    /**
+     * Throw an IllegalStateException 
+     */
+    private void checkImageRecognized() {
+        if(recognizedImage == null) {
+            //this method has been called before the image was recognized - not OK!
+            throw new IllegalStateException("Method called before image recognized");
+        }
+    }
+    
+    
+    public boolean[][] getOMRsByRow(OMRImageSource src, int gsThreshold, float shadedThreshold, float offsetX, float offsetY, float omWidth, float omSearchDistance, float rowHeight, int numCols, int numRows, DebugCanvas dc) {
+        checkImageRecognized();
+        
+        boolean[][] result = new boolean[numRows][numCols];
+        Line[] bounds = getBoundaryLines();
+        
+        int i, j;
+        Point imgPoint;
+        
+        /* 
+         search distance in pixels when determining if a spot is an optical mark 
+         is the width between top left and top right point multiplied by 
+         omSearchDistance arg
+        */
+        int omSearchDistancePx = Math.round(recognizedFinderPatterns[0][0].distanceOf(
+            recognizedFinderPatterns[0][1]) * omSearchDistance);
+        int omSearchWidth = omSearchDistancePx*2;
+        int[][] gsBuf = new int[omSearchWidth][omSearchWidth];
+        boolean[][] bmBuf = new boolean[omSearchWidth][omSearchWidth];
+        
+        for(i = 0; i < numRows; i++) {
+            for(j = 0; j < numCols; j++) {
+                float xPos = offsetX + (j*omWidth);
+                float yPos = offsetY + (i*rowHeight);
+                imgPoint = OMRRecognizer.txPoint(bounds, xPos, yPos, dc);
+                //result[i][j] = img[imgPoint.getX()][imgPoint.getY()];
+                result[i][j] = isOMRMark(src, imgPoint, omSearchDistancePx,
+                    gsThreshold, shadedThreshold, gsBuf, bmBuf, dc);
+                if(dc != null) {
+                    if (result[i][j] == true){
+                        dc.drawCross(imgPoint, 0xFF00FF00); //Green
+                    }else{
+                        dc.drawCross(imgPoint, 0xFFFF0000); //red
+                    }
+
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    
+    
+    
+    /**
+     * Determine if the given point is marked or not
+     * 
+     * @param src
+     * @param pt
+     * @param searchDistance
+     * @param gsThreshold Treshold between 0 and 255 to determine if grayscale pixel is considered black or white
+     * @float shadedThreshold % of pixels looked at that should be black to be considered a marked point
+     * @param gsBuf
+     * @param bmBuf
+     * @return 
+     */
+    private boolean isOMRMark(OMRImageSource src, Point pt, int searchDistance, int gsThreshold, float shadedThreshold, int[][] gsBuf, boolean[][] bmBuf, DebugCanvas dc) {
+        src.getGrayscaleImage(gsBuf, pt.getX()-searchDistance, pt.getY()-searchDistance, 
+            searchDistance*2, searchDistance*2);
+        grayScaleToBitmap(gsBuf, bmBuf, gsThreshold);
+        int x, y, count = 0;
+        
+        for(x = 0; x < bmBuf.length; x++) {
+            for(y = 0; y < bmBuf[0].length; y++) {
+                if(bmBuf[x][y]) {
+                    count++;
+                }
+            }
+        }
+        
+        if(dc != null) {
+            drawRect(new int[]{pt.getX()-searchDistance, pt.getY()-searchDistance, 
+                searchDistance*2, searchDistance*2}, dc, 0xFF0000FF);
+        }
+        
+        return ((float)count/(float)bmBuf.length*bmBuf[0].length) > shadedThreshold;
+    }
+    
     
     /**
      * Convert the given grayscale image to a boolean bitmap array
@@ -358,15 +521,15 @@ public class AttendanceSheetImage {
             boolean running = true;
             boolean aligned = false;
             byte[] lastChecked = null;
-            byte[] newBuf;
+            byte[] newBuf = null;
             int numPoints;
-            int life = 0;
             
             long lastSaved = 0;
             long timeNow = 0;
             while(running && !aligned) {
                 try {
                     lock.lock();
+                    running = threadActive;
                     newBuf = AttendanceSheetImage.this.imageSource.getBuffer();
                 }finally {
                     lock.unlock();
@@ -376,9 +539,6 @@ public class AttendanceSheetImage {
                     //check the image
                     src.setBuffer(newBuf);
                     numPoints = AttendanceSheetImage.this.isAligned(src);
-                    if(numPoints > 0) {
-                        life = life+42;
-                    }
                     aligned = numPoints == 4;
                     lastChecked = newBuf;
                 }else {
@@ -388,26 +548,23 @@ public class AttendanceSheetImage {
                 }
                 
                 
-                //check and see if we should still be running
-                try {
-                    lock.lock();
-                    if(AttendanceSheetImage.this.debugSaveListener != null) {
-                        timeNow = System.currentTimeMillis();
-                        if(timeNow - lastSaved > 10000 && newBuf != null) {
-                            AttendanceSheetImage.this.debugSaveListener.saveDebugImage(AttendanceSheetImage.this, src);
+                //see if we need to save debug imagery
+                if(AttendanceSheetImage.this.debugSaveListener != null) {
+                    timeNow = System.currentTimeMillis();
+                    if(timeNow - lastSaved > 10000 && newBuf != null) {
+                        try {
+                            lock.lock();
+                            AttendanceSheetImage.this.debugSaveListener.saveDebugImage(
+                                AttendanceSheetImage.this, src);
                             lastSaved = timeNow;
+                        }finally {
+                            lock.unlock();
                         }
                     }
-                    
-                    running = threadActive;
-                }finally {
-                    lock.unlock();
                 }
-                
-                
             }
             
-            if(recognizedListener != null) {
+            if(recognizedListener != null && aligned) {
                 recognizedListener.sheetRecognized(AttendanceSheetImage.this);
             }
         }
