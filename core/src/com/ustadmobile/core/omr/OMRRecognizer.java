@@ -445,15 +445,17 @@ public class OMRRecognizer {
             (pgArea[X] + pgArea[WIDTH]) - pDistances[RIGHT],
             pgArea[Y] + pDistances[TOP], size);
         
-        //bottom left point
+        //bottom right point
         result[2] = getSquareCoordsByCenter(
+            (pgArea[X] + pgArea[WIDTH]) - pDistances[RIGHT],
+            (pgArea[Y]+ pgArea[HEIGHT])-pDistances[BOTTOM], size);
+        
+        //bottom left point
+        result[3] = getSquareCoordsByCenter(
             pgArea[X] + pDistances[LEFT],
             (pgArea[Y]+ pgArea[HEIGHT])-pDistances[BOTTOM], size);
         
-        //bottom right point
-        result[3] = getSquareCoordsByCenter(
-            (pgArea[X] + pgArea[WIDTH]) - pDistances[RIGHT],
-            (pgArea[Y]+ pgArea[HEIGHT])-pDistances[BOTTOM], size);
+        
             
         
         return result;

@@ -65,6 +65,34 @@ public class AttendanceController extends UstadBaseController{
 
     //areas in which optical marks are to be found on the paper
     
+    
+    public static final float AREA_WIDTH = 485f;
+    
+    public static final float AREA_HEIGHT = 722f;
+    
+    //First column's X and Y Offset
+    
+    //as per the calculation in points of the sheet generator itself. - used to be (197.2f/AREA_WIDTH);
+    public static final float OMR_AREA_OFFSET_X_1 = 156f/AREA_WIDTH;
+
+    public static final float OMR_AREA_OFFSET_Y_1 = (31.6f/AREA_HEIGHT);
+
+    //Second column's X and Y offset
+    public static final float OMR_AREA_OFFSET_X_2 = (479f/AREA_WIDTH);
+
+    public static final float OMR_AREA_OFFSET_Y_2 = (39.5f/AREA_HEIGHT);
+
+    //Width between each blobs
+    public static final float OM_WIDTH = 20.8f/AREA_WIDTH;
+    
+    public static final float OM_HEIGHT = 16f/AREA_HEIGHT;
+    
+    public static final float OM_ROW_HEIGHT = 20.651441242f/AREA_HEIGHT;
+    
+    public static final int DEFAULT_GS_THRESHOLD = 128;
+    
+    
+    /*
     public static final float AREA_WIDTH = 607f;
     
     public static final float AREA_HEIGHT = 902f;
@@ -89,7 +117,8 @@ public class AttendanceController extends UstadBaseController{
     public static final float OM_ROW_HEIGHT = 25.8f/AREA_HEIGHT;
     
     public static final int DEFAULT_GS_THRESHOLD = 128;
-
+    */
+    
     public AttendanceRowModel[] attendanceResult;
     
     private AttendanceView view;
@@ -255,8 +284,10 @@ public class AttendanceController extends UstadBaseController{
     
     public void handleSheetRecognized(final AttendanceSheetImage sheet, final DebugCanvas dc) {
         boolean[][] marks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
-            DEFAULT_GS_THRESHOLD, 0.5f, OMR_AREA_OFFSET_X_1, OMR_AREA_OFFSET_Y_1,
-            OM_WIDTH, OM_HEIGHT/2, OM_ROW_HEIGHT, 
+            DEFAULT_GS_THRESHOLD, 0.5f, AttendanceSheetImage.DEFAULT_OMR_OFFSET_X_1,
+            AttendanceSheetImage.DEFAULT_OMR_OFFSET_Y,
+            AttendanceSheetImage.DEFAULT_OM_DISTANCE_X, OM_HEIGHT/2, 
+            AttendanceSheetImage.DEFAULT_OM_DISTANCE_Y, 
             4, 33, dc);
         handleResultsDecoded(marks);
 

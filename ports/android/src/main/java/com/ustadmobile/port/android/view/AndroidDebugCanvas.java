@@ -20,7 +20,7 @@ public class AndroidDebugCanvas extends Canvas implements DebugCanvas {
     Bitmap mutableBitmap;
     Paint paint;
     Canvas canvas;
-    static final int strokeWidth = 2;
+    static final int strokeWidth = 1;
 
     public AndroidDebugCanvas(Bitmap bitmap) {
         //super(bitmap);

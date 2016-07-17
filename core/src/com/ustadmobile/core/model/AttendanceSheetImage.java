@@ -5,8 +5,11 @@
  */
 package com.ustadmobile.core.model;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.omr.OMRImageSource;
 import com.ustadmobile.core.omr.OMRRecognizer;
+import com.ustadmobile.core.omr.PerspectiveTransform;
 import java.util.concurrent.locks.ReentrantLock;
 import jp.sourceforge.qrcode.geom.Line;
 import jp.sourceforge.qrcode.geom.Point;
@@ -57,6 +60,49 @@ public class AttendanceSheetImage {
     public static final float DEFAULT_PAGE_Y_DISTANCE = ((841.8897637795275f - 722)/2)/841.8897637795275f;
     
     /**
+     * The width (units irrelevant) between the centers of the finders pattern - left to right
+     * 
+     * Default number is in pts as used by the sheet creator
+     */
+    public static final int DEFAULT_ZONE_WIDTH = 485;
+    
+    /**
+     * The height (units irrelevant) between the centers of the finder patterns - top to bottom
+     * 
+     * Default number is in pts as used by the sheet creator
+     */
+    public static final int DEFAULT_ZONE_HEIGHT = 722;
+    
+    /**
+     * The default left offset between the left centers of the finder patterns 
+     * and the center of the first OMR mark in the first page column
+     */
+    public static final float DEFAULT_OMR_OFFSET_X_1 = (12+144);//The margin plus name row width
+    
+    /**
+     * The default left offset between the left centers of the finder pattern and
+     * the first center of the first OMR mark in the second page column
+     */
+    public static final float DEFAULT_OMR_OFFSET_X_2 = (237.44f+144);//the margin plus name row width
+    
+    /**
+     * The default distance between the top of the page's finder patterns and the
+     * middle of the OMR space.
+     */
+    public static final float DEFAULT_OMR_OFFSET_Y = 31.6f;
+    
+    /**
+     * Default distance between optical marks on the x axis - same units as ZONE_WIDTH / ZONE_HEIGHT
+     */
+    public static final float DEFAULT_OM_DISTANCE_X = 20.8f;
+    
+    /**
+     * Default distance between optical marks on the y axis - same units as ZONE_WIDTH / ZONE_HEIGHT
+     */
+    public static final float DEFAULT_OM_DISTANCE_Y = 20.651441242f;
+    
+    
+    /**
      * Default distances from the edge of the page to the center of the finder
      * pattern : TOP, LEFT, BOTTOM, RIGHT
      */
@@ -89,6 +135,10 @@ public class AttendanceSheetImage {
     private int pageWidth;
     
     private int pageHeight;
+    
+    private float zoneWidth;
+    
+    private float zoneHeight;
     
     private float[] pageDistances;
     
@@ -141,19 +191,24 @@ public class AttendanceSheetImage {
      */
     private OMRImageSource recognizedImage;
     
-    public AttendanceSheetImage(float margin, int pageWidth, int pageHeight, float[] pageDistances, float finderPatternSize) {
+    private boolean focused = false;
+    
+    public AttendanceSheetImage(float margin, int pageWidth, int pageHeight, float zoneWidth, float zoneHeight, float[] pageDistances, float finderPatternSize) {
         this.pageAreaMargin = margin;
         this.pageWidth = pageWidth;
         this.pageHeight = pageHeight;
         this.pageDistances = pageDistances;
         this.finderPatternSize = finderPatternSize;
+        this.zoneWidth = zoneWidth;
+        this.zoneHeight = zoneHeight;
         recognitionLock = new ReentrantLock();
         gs2BitmapThreshold = DEFAULT_GS2BITMAP_THRESHOLD;
     }
     
     public AttendanceSheetImage() {
         this(DEFAULT_PAGE_AREA_MARGIN, DEFAULT_PAGE_WIDTH, DEFAULT_PAGE_HEIGHT,
-            DEFAULT_PAGE_DISTANCES, DEFAULT_FINDER_PATTERN_SIZE);
+            DEFAULT_ZONE_WIDTH, DEFAULT_ZONE_HEIGHT, DEFAULT_PAGE_DISTANCES, 
+            DEFAULT_FINDER_PATTERN_SIZE);
     }
     
     
@@ -224,6 +279,45 @@ public class AttendanceSheetImage {
         return pageHeight;
     }
     
+    /**
+     * The width between the vertical centers of the finder patterns : left and 
+     * right lines
+     * 
+     * The units are arbitary as they are used for a perspective transform
+     * but they should be consistent between zoneWidth, zoneHeight and parameters
+     * passed to getOMRsByRow
+     * 
+     * @return  Zone width as above
+     */
+    public float getZoneWidth() {
+        return zoneWidth;
+    }
+    
+    /**
+     * The height between the horizontal centers of the finder patterns : top
+     * and bottom lines
+     * 
+     * The units are arbitary as they are used for a perspective transform
+     * but they should be consistent between zoneWidth, zoneHeight and parameters
+     * passed to getOMRsByRow
+     * 
+     * @return Zone height as above
+     */
+    public float getZoneHeight() {
+        return zoneHeight;
+    }
+    
+    /**
+     * Expected distances between the edge of the page and the centers of finder
+     * patterns: in the order : TOP LEFT BOTTOM RIGHT
+     * 
+     * Expressed as a percentage of the dimension: Eg. TOP and BOTTOM are float
+     * values between 0 and 1 as a percentage of the height, LEFT and RIGHT
+     * are float values between 0 and 1 as a percentage of the width.
+     * 
+     * @return Array of floats representing the expected distance between the edge
+     * of the page and the center of the finder patterns
+     */
     public float[] getPageDistances() {
         return pageDistances;
     }
@@ -245,6 +339,16 @@ public class AttendanceSheetImage {
             recognitionLock.unlock();
         }
     }
+    
+    public void setSourceFocused(boolean focused) {
+        try {
+            recognitionLock.lock();
+            this.focused = focused;
+        }finally {
+            recognitionLock.unlock();
+        }
+    }
+    
     
     /**
      * Determines the size of the search area in which we look for the finder
@@ -399,13 +503,22 @@ public class AttendanceSheetImage {
     
     
     public boolean[][] getOMRsByRow(OMRImageSource src, int gsThreshold, float shadedThreshold, float offsetX, float offsetY, float omWidth, float omSearchDistance, float rowHeight, int numCols, int numRows, DebugCanvas dc) {
-        checkImageRecognized();
-        
         boolean[][] result = new boolean[numRows][numCols];
         Line[] bounds = getBoundaryLines();
         
         int i, j;
         Point imgPoint;
+        
+        if(dc != null) {
+            dc.drawPolygon(new Point[]{
+                recognizedFinderPatterns[0][0], recognizedFinderPatterns[1][0],
+                recognizedFinderPatterns[1][1], recognizedFinderPatterns[0][1]
+            }, 0xFF0000FF);
+            
+            for(i = 0; i < finderPatterns.length; i++) {
+                dc.drawCross(finderPatterns[i], 0xFFFF0000);
+            }
+        }
         
         /* 
          search distance in pixels when determining if a spot is an optical mark 
@@ -418,12 +531,24 @@ public class AttendanceSheetImage {
         int[][] gsBuf = new int[omSearchWidth][omSearchWidth];
         boolean[][] bmBuf = new boolean[omSearchWidth][omSearchWidth];
         
+        double[] srcPts=  new double[numRows*numCols*2];
+        double[] imgPts = new double[srcPts.length];
+        
         for(i = 0; i < numRows; i++) {
             for(j = 0; j < numCols; j++) {
-                float xPos = offsetX + (j*omWidth);
-                float yPos = offsetY + (i*rowHeight);
-                imgPoint = OMRRecognizer.txPoint(bounds, xPos, yPos, dc);
-                //result[i][j] = img[imgPoint.getX()][imgPoint.getY()];
+                srcPts[(i*numCols)+j] = (offsetX + (j*omWidth));
+                srcPts[(i*numCols) + j + 1] = (offsetY + (i*rowHeight));
+            }
+        }
+        PerspectiveTransform tx = getPerspectiveTransform(getZoneWidth(), getZoneHeight());
+        
+        tx.transform(srcPts, 0, imgPts, 0, numRows*numCols);
+        
+        for(i = 0; i < numRows; i++) {
+            for(j = 0; j < numCols; j++) {
+                imgPoint = new Point((int)Math.round(imgPts[(i*numCols)+j]),
+                    (int)Math.round(imgPts[(i*numCols) + j + 1]));
+                
                 result[i][j] = isOMRMark(src, imgPoint, omSearchDistancePx,
                     gsThreshold, shadedThreshold, gsBuf, bmBuf, dc);
                 if(dc != null) {
@@ -438,6 +563,33 @@ public class AttendanceSheetImage {
         }
         
         return result;
+    }
+    
+    public PerspectiveTransform getPerspectiveTransform(double width, double height) {
+        return getPerspectiveTransform(new Point[] {
+            recognizedFinderPatterns[0][0], recognizedFinderPatterns[1][0],
+            recognizedFinderPatterns[1][1], recognizedFinderPatterns[0][1]
+        }, width, height);
+    }
+    
+    /**
+     * 
+     * @param corners Array of points in the order of Top left, top right, bottom right, bottom left
+     * @return 
+     */
+    public PerspectiveTransform getPerspectiveTransform(Point[] corners, double width, double height) {
+        PerspectiveTransform tx = PerspectiveTransform.getQuadToQuad(
+            corners[0].getX(), corners[0].getY(), corners[1].getX(), corners[1].getY(),
+            corners[2].getX(), corners[2].getY(), corners[3].getX(), corners[3].getY(),
+            0, 0, width,0,        width,height,      0,height);
+        try {
+            tx = tx.createInverse();
+        }catch(CloneNotSupportedException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 90, null, e);
+            tx = null;
+        }
+        
+        return tx;
     }
     
     
@@ -526,16 +678,18 @@ public class AttendanceSheetImage {
             
             long lastSaved = 0;
             long timeNow = 0;
+            boolean focused;
             while(running && !aligned) {
                 try {
                     lock.lock();
+                    focused = AttendanceSheetImage.this.focused;
                     running = threadActive;
                     newBuf = AttendanceSheetImage.this.imageSource.getBuffer();
                 }finally {
                     lock.unlock();
                 }
                 
-                if(newBuf != lastChecked) {
+                if(newBuf != lastChecked && focused) {
                     //check the image
                     src.setBuffer(newBuf);
                     numPoints = AttendanceSheetImage.this.isAligned(src);
