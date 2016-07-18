@@ -128,6 +128,8 @@ public class AttendanceSheetImage {
      */
     public static final int DEFAULT_GS2BITMAP_THRESHOLD = 128;
     
+   
+    
     private int gs2BitmapThreshold;
     
     private float pageAreaMargin;
@@ -159,13 +161,13 @@ public class AttendanceSheetImage {
      * Buffer used to get the grayscale version of an area in which we are looking
      * for the finder pattern
      */
-    private int[][] searchPatternGsBuf;
+    private int[][][] searchPatternGsBuf;
     
     /**
      * Buffer used to get the bitmap version of an area in which we are looking
      * for the finder pattern
      */
-    private boolean[][] searchPatternBmBuf;
+    private boolean[][][] searchPatternBmBuf;
     
     /**
      * Array of the finder patterns that have been found : in order of fpSearchAreas
@@ -191,7 +193,7 @@ public class AttendanceSheetImage {
      */
     private OMRImageSource recognizedImage;
     
-    private boolean focused = false;
+    private boolean focusMoving = false;
     
     public AttendanceSheetImage(float margin, int pageWidth, int pageHeight, float zoneWidth, float zoneHeight, float[] pageDistances, float finderPatternSize) {
         this.pageAreaMargin = margin;
@@ -254,8 +256,8 @@ public class AttendanceSheetImage {
         fpSearchAreas = OMRRecognizer.getFinderPatternSearchAreas(
             expectedPageArea, pageDistances, finderPatternSize * searchAreaFactor);
         int fpSizePx = fpSearchAreas[0][OMRRecognizer.WIDTH];
-        searchPatternGsBuf = new int[fpSizePx][fpSizePx];
-        searchPatternBmBuf = new boolean[fpSizePx][fpSizePx];
+        searchPatternGsBuf = new int[fpSearchAreas.length][fpSizePx][fpSizePx];
+        searchPatternBmBuf = new boolean[fpSearchAreas.length][fpSizePx][fpSizePx];
         finderPatterns = new Point[fpSearchAreas.length];
     }
     
@@ -277,6 +279,16 @@ public class AttendanceSheetImage {
     
     public int getPageHeight() {
         return pageHeight;
+    }
+    
+    /**
+     * The Threshold between 0 and 255 for considering a pixel as either black
+     * or white.
+     * 
+     * @return Threshold value as above.
+     */
+    public int getGrayscaleThreshold() {
+        return gs2BitmapThreshold;
     }
     
     /**
@@ -340,10 +352,18 @@ public class AttendanceSheetImage {
         }
     }
     
-    public void setSourceFocused(boolean focused) {
+    /**
+     * For those devices that know when the focus is moving it's best to wait
+     * until the focus has stopped moving.  
+     * 
+     * When this is set to true it will effectively suspend checking the image
+     * 
+     * @param focusMoving
+     */
+    public void setSourceFocusMoving(boolean focusMoving) {
         try {
             recognitionLock.lock();
-            this.focused = focused;
+            this.focusMoving = focusMoving;
         }finally {
             recognitionLock.unlock();
         }
@@ -417,16 +437,35 @@ public class AttendanceSheetImage {
     
     public int isAligned(OMRImageSource src) {
         Point[] foundPoints;
-        int numFound = 0;
-        for(int i = 0; i < fpSearchAreas.length; i++) {
-            src.getGrayscaleImage(searchPatternGsBuf, 
+        int i, numFound = 0;
+        short[] minMaxBuf = new short[2];
+        short[] minMax = new short[]{-1, -1};
+        
+        for(i = 0; i < fpSearchAreas.length; i++) {
+            src.getGrayscaleImage(searchPatternGsBuf[i], 
                 fpSearchAreas[i][OMRRecognizer.X], 
                 fpSearchAreas[i][OMRRecognizer.Y],
                 fpSearchAreas[i][OMRRecognizer.WIDTH],
-                fpSearchAreas[i][OMRRecognizer.HEIGHT]);
-            AttendanceSheetImage.grayScaleToBitmap(searchPatternGsBuf,
-                searchPatternBmBuf, gs2BitmapThreshold);
-            foundPoints = FinderPattern.findCenters(searchPatternBmBuf);
+                fpSearchAreas[i][OMRRecognizer.HEIGHT],
+                minMaxBuf);
+            
+            if(minMaxBuf[OMRImageSource.MINMAX_BUF_MIN] < minMax[OMRImageSource.MINMAX_BUF_MIN] || minMax[OMRImageSource.MINMAX_BUF_MIN] == -1) {
+                minMax[OMRImageSource.MINMAX_BUF_MIN] = minMaxBuf[OMRImageSource.MINMAX_BUF_MIN];
+            }
+            
+            if(minMaxBuf[OMRImageSource.MINMAX_BUF_MAX] > minMax[OMRImageSource.MINMAX_BUF_MAX] || minMax[OMRImageSource.MINMAX_BUF_MAX] == -1) {
+                minMax[OMRImageSource.MINMAX_BUF_MAX] = minMaxBuf[OMRImageSource.MINMAX_BUF_MAX];
+            }
+            
+        }
+        
+        int gsThreshold = minMax[OMRImageSource.MINMAX_BUF_MIN] + ((minMax[OMRImageSource.MINMAX_BUF_MAX] -
+            minMax[OMRImageSource.MINMAX_BUF_MIN])/2);
+        
+        for(i = 0; i < fpSearchAreas.length; i++) {
+            AttendanceSheetImage.grayScaleToBitmap(searchPatternGsBuf[i],
+                searchPatternBmBuf[i], gsThreshold);
+            foundPoints = FinderPattern.findCenters(searchPatternBmBuf[i]);
             if(foundPoints == null || foundPoints.length == 0) {
                 return numFound;//if one point is missing - there is no point to checking further
             }else {
@@ -435,6 +474,8 @@ public class AttendanceSheetImage {
             }
         }
         
+        //Temporarily don't do this - more testing needed - leave the default level
+        //this.gs2BitmapThreshold = gsThreshold;
         handleImageRecognized(src);
         
         return numFound;
@@ -534,10 +575,12 @@ public class AttendanceSheetImage {
         double[] srcPts=  new double[numRows*numCols*2];
         double[] imgPts = new double[srcPts.length];
         
+        int ptIndex;
         for(i = 0; i < numRows; i++) {
             for(j = 0; j < numCols; j++) {
-                srcPts[(i*numCols)+j] = (offsetX + (j*omWidth));
-                srcPts[(i*numCols) + j + 1] = (offsetY + (i*rowHeight));
+                ptIndex = ((i*numCols) + j) * 2;
+                srcPts[ptIndex] = (offsetX + (j*omWidth));
+                srcPts[ptIndex + 1] = (offsetY + (i*rowHeight));
             }
         }
         PerspectiveTransform tx = getPerspectiveTransform(getZoneWidth(), getZoneHeight());
@@ -546,8 +589,9 @@ public class AttendanceSheetImage {
         
         for(i = 0; i < numRows; i++) {
             for(j = 0; j < numCols; j++) {
-                imgPoint = new Point((int)Math.round(imgPts[(i*numCols)+j]),
-                    (int)Math.round(imgPts[(i*numCols) + j + 1]));
+                ptIndex = ((i*numCols) + j) * 2;
+                imgPoint = new Point((int)Math.round(imgPts[ptIndex]),
+                    (int)Math.round(imgPts[ptIndex + 1]));
                 
                 result[i][j] = isOMRMark(src, imgPoint, omSearchDistancePx,
                     gsThreshold, shadedThreshold, gsBuf, bmBuf, dc);
@@ -609,7 +653,7 @@ public class AttendanceSheetImage {
      */
     private boolean isOMRMark(OMRImageSource src, Point pt, int searchDistance, int gsThreshold, float shadedThreshold, int[][] gsBuf, boolean[][] bmBuf, DebugCanvas dc) {
         src.getGrayscaleImage(gsBuf, pt.getX()-searchDistance, pt.getY()-searchDistance, 
-            searchDistance*2, searchDistance*2);
+            searchDistance*2, searchDistance*2, null);
         grayScaleToBitmap(gsBuf, bmBuf, gsThreshold);
         int x, y, count = 0;
         
@@ -626,7 +670,7 @@ public class AttendanceSheetImage {
                 searchDistance*2, searchDistance*2}, dc, 0xFF0000FF);
         }
         
-        return ((float)count/(float)bmBuf.length*bmBuf[0].length) > shadedThreshold;
+        return ((float)count/((float)bmBuf.length*bmBuf[0].length) > shadedThreshold);
     }
     
     
@@ -678,18 +722,18 @@ public class AttendanceSheetImage {
             
             long lastSaved = 0;
             long timeNow = 0;
-            boolean focused;
+            boolean focusMoving;
             while(running && !aligned) {
                 try {
                     lock.lock();
-                    focused = AttendanceSheetImage.this.focused;
+                    focusMoving = AttendanceSheetImage.this.focusMoving;
                     running = threadActive;
                     newBuf = AttendanceSheetImage.this.imageSource.getBuffer();
                 }finally {
                     lock.unlock();
                 }
                 
-                if(newBuf != lastChecked && focused) {
+                if(newBuf != lastChecked && !focusMoving) {
                     //check the image
                     src.setBuffer(newBuf);
                     numPoints = AttendanceSheetImage.this.isAligned(src);

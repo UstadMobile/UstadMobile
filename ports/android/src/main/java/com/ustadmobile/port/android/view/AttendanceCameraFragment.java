@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -9,6 +10,7 @@ import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,7 +33,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.annotation.Target;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,8 +51,7 @@ import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_Y_DIS
  * Use the {@link AttendanceCameraFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-@TargetApi(16)
-public class AttendanceCameraFragment extends Fragment implements View.OnClickListener, Camera.PreviewCallback, Camera.AutoFocusMoveCallback, View.OnTouchListener, CameraPreview.PreviewStartedCallback, AttendanceSheetImage.DebugSaveRequestListener, AttendanceSheetImage.SheetRecognizedListener {
+public class AttendanceCameraFragment extends Fragment implements View.OnClickListener, Camera.PreviewCallback, View.OnTouchListener, CameraPreview.PreviewStartedCallback, AttendanceSheetImage.DebugSaveRequestListener, AttendanceSheetImage.SheetRecognizedListener {
 
     private CameraPreview mPreview;
 
@@ -74,6 +74,8 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     private int targetWidth= 1400;
 
     private int targetHeight = 800;
+
+    private Object mAutoFocusMoveCallback;
 
 
     /**
@@ -115,7 +117,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         mOMRImageSource = new RotatedNV21OMRImageSource(mCamPreviewSize.width, mCamPreviewSize.height);
 
         //set exposure compensation because it's white paper
-        float targetEV = 5f/3f;
+        float targetEV = 4f/3f;
         int step = Math.round(targetEV/params.getExposureCompensationStep());
         params.setExposureCompensation(step);
 
@@ -155,11 +157,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
         List<String> focusModes = params.getSupportedFocusModes();
         if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-            if(Build.VERSION.SDK_INT >=16 ) {
-                // Autofocus mode is supported
-                params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-
-            }
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
 
         //Docs don't say so: but these are all values in landscape
@@ -245,7 +243,10 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     public void onResume() {
         super.onResume();
         mCamera = getCameraInstance();
-        mPreview.setmAutoFocusMoveCallback(this);
+        if(Build.VERSION.SDK_INT >= 16) {
+            mPreview.setAutoFocusMoveCallback(new AutoFocusMoveCallback());
+        }
+
         mPreview.setPreviewCallback(this);
         mPreview.setCamera(mCamera);
     }
@@ -267,23 +268,24 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     public void sheetRecognized(final AttendanceSheetImage sheet) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                Toast.makeText(getContext(), "Sheet recognized", Toast.LENGTH_LONG).show();
+                Vibrator v = (Vibrator)getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(500);
             }
         });
         OMRImageSource imgSrc = sheet.getRecognizedImage();
 
         int[][] buf2D = new int[imgSrc.getWidth()][imgSrc.getHeight()];
-        sheet.getRecognizedImage().getGrayscaleImage(buf2D, 0, 0, imgSrc.getWidth(), imgSrc.getHeight());
+        sheet.getRecognizedImage().getGrayscaleImage(buf2D, 0, 0, imgSrc.getWidth(), imgSrc.getHeight(), null);
         AndroidDebugCanvas dc = new AndroidDebugCanvas(Bitmap.createBitmap(AndroidDebugCanvas.rgbTo1DArray(buf2D),
                 imgSrc.getWidth(), imgSrc.getHeight(), Bitmap.Config.ARGB_8888));
         ((AttendanceActivity)getActivity()).mController.handleSheetRecognized(sheet, dc);
         FileOutputStream fout = null;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-dd-MM-kkmmss");
-        File destFile = new File(Environment.getExternalStorageDirectory(),
-                "ustadmobileContent/attendance/gray-" + dateFormat.format(new Date()) +"-recognized.png");
 
-
-
+        File destDir = new File(Environment.getExternalStorageDirectory(),
+                "ustadmobileContent/attendance");
+        destDir.mkdirs();
+        File destFile = new File(destDir, "gray-" + dateFormat.format(new Date()) +"-recognized.png");
         try {
             fout = new FileOutputStream(destFile);
             dc.getMutableBitmap().compress(Bitmap.CompressFormat.PNG, 100, fout);
@@ -293,14 +295,24 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         }finally {
             UMIOUtils.closeOutputStream(fout);
         }
+
+        boolean[][] bm2D = new boolean[imgSrc.getWidth()][imgSrc.getHeight()];
+        AttendanceSheetImage.grayScaleToBitmap(buf2D, bm2D, 128);
+        Bitmap bitmapBM = AndroidDebugCanvas.booleanArrayToBitmap(bm2D);
+        destFile = new File(destDir, "gray-" + dateFormat.format(new Date()) +"-bitmap.png");
+        try {
+            fout = new FileOutputStream(destFile);
+            bitmapBM.compress(Bitmap.CompressFormat.PNG, 100, fout);
+            fout.flush();
+        }catch(IOException e) {
+            Log.e(UMLogAndroid.LOGTAG, "exception saving debug image", e);
+        }finally {
+            UMIOUtils.closeOutputStream(fout);
+        }
     }
 
 
-    @Override
-    public void onAutoFocusMoving(boolean moving, Camera camera) {
-        //saveSheetDebugImage(mSheet, b ? "focusstart" : "focusend");
-        mSheet.setSourceFocused(!moving);
-    }
+
 
     public void saveSheetDebugImage(AttendanceSheetImage sheet, String postfix) {
         OMRImageSource imgSrc = null;
@@ -321,7 +333,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         }
 
         int[][] buf2D = new int[imgSrc.getWidth()][imgSrc.getHeight()];
-        imgSrc.getGrayscaleImage(buf2D, 0, 0, imgSrc.getWidth(), imgSrc.getHeight());
+        imgSrc.getGrayscaleImage(buf2D, 0, 0, imgSrc.getWidth(), imgSrc.getHeight(), null);
         AndroidDebugCanvas dc = new AndroidDebugCanvas(Bitmap.createBitmap(AndroidDebugCanvas.rgbTo1DArray(buf2D),
                 imgSrc.getWidth(), imgSrc.getHeight(), Bitmap.Config.ARGB_8888));
         //((AttendanceActivity)getActivity()).mController.handleSheetRecognized(sheet, dc);
@@ -436,7 +448,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
         //save an image of what the whole bitmap looks like
         int[][] gsBuf = new int[mCamPreviewSize.height][mCamPreviewSize.width];
-        imgSrc.getGrayscaleImage(gsBuf, 0, 0, mCamPreviewSize.height, mCamPreviewSize.width);
+        imgSrc.getGrayscaleImage(gsBuf, 0, 0, mCamPreviewSize.height, mCamPreviewSize.width, null);
         debugDestFile = new File(Environment.getExternalStorageDirectory(),
                 "ustadmobileContent/attendance/gray-debug-bw" + ".jpg");
         boolean[][] imgBoolean = QRCodeImageReader.grayScaleToBitmap(gsBuf);
@@ -466,7 +478,7 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
             imgSrc.getGrayscaleImage(fpImg, fpSearchAreas[i][OMRRecognizer.X],
                     fpSearchAreas[i][OMRRecognizer.Y],
                     fpSearchAreas[i][OMRRecognizer.WIDTH],
-                    fpSearchAreas[i][OMRRecognizer.HEIGHT]);
+                    fpSearchAreas[i][OMRRecognizer.HEIGHT],null);
             fpAreaBM = AndroidDebugCanvas.intArrayToImage(fpImg);
             fpFile = new File(Environment.getExternalStorageDirectory(),
                     "ustadmobileContent/attendance/gray-debug-fparea" + i + ".jpg");
@@ -513,4 +525,18 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
             }
         }
     }
+
+    /**
+     * Small internal class to keep this implements line out of the way for those devices that
+     * don't support API >= 16
+     */
+    @TargetApi(16)
+    public class AutoFocusMoveCallback implements Camera.AutoFocusMoveCallback{
+
+        @Override
+        public void onAutoFocusMoving(boolean moving, Camera camera) {
+            mSheet.setSourceFocusMoving(moving);
+        }
+    }
+
 }

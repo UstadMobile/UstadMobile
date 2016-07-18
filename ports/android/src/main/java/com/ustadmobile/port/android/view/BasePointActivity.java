@@ -44,7 +44,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     protected BasePointPagerAdapter mPagerAdapter;
 
     private int[] tabIconsIds = new int[]{R.drawable.ic_sd_card_black_24dp,
-            R.drawable.ic_public_black_24dp, R.drawable.ic_public_black_24dp};
+            R.drawable.ic_public_black_24dp, R.drawable.ic_group_black_24dp};
 
     protected Dialog addFeedDialog;
 

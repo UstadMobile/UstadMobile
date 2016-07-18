@@ -283,12 +283,32 @@ public class AttendanceController extends UstadBaseController{
     }
     
     public void handleSheetRecognized(final AttendanceSheetImage sheet, final DebugCanvas dc) {
+        int numRows = 33; // number of rows of marks
+        int numOffsetCols = 2;//number of columns 
+        int numOMRsPerCol = 4;
+        boolean[][] marks = new boolean[numRows * numOffsetCols][numOMRsPerCol];
+        float[] offsetsX = new float[]{AttendanceSheetImage.DEFAULT_OMR_OFFSET_X_1,
+            AttendanceSheetImage.DEFAULT_OMR_OFFSET_X_2};
+        
+        boolean[][] colMarks;
+        for(int i = 0; i < offsetsX.length; i++) {
+            colMarks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
+                sheet.getGrayscaleThreshold(), 0.5f, offsetsX[i],
+                AttendanceSheetImage.DEFAULT_OMR_OFFSET_Y,
+                AttendanceSheetImage.DEFAULT_OM_DISTANCE_X, OM_HEIGHT/2, 
+                AttendanceSheetImage.DEFAULT_OM_DISTANCE_Y, 
+                numOMRsPerCol, numRows, dc);
+            System.arraycopy(colMarks, 0, marks, (i*numRows), numRows);
+        }
+        
+        /*
         boolean[][] marks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
-            DEFAULT_GS_THRESHOLD, 0.5f, AttendanceSheetImage.DEFAULT_OMR_OFFSET_X_1,
+            sheet.getGrayscaleThreshold(), 0.5f, AttendanceSheetImage.DEFAULT_OMR_OFFSET_X_1,
             AttendanceSheetImage.DEFAULT_OMR_OFFSET_Y,
             AttendanceSheetImage.DEFAULT_OM_DISTANCE_X, OM_HEIGHT/2, 
             AttendanceSheetImage.DEFAULT_OM_DISTANCE_Y, 
             4, 33, dc);
+        */
         handleResultsDecoded(marks);
 
     }

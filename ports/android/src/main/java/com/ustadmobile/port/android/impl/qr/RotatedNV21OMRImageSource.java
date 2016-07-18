@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.impl.qr;
 
+import com.ustadmobile.core.model.AttendanceSheetImage;
 import com.ustadmobile.core.omr.OMRImageSource;
 
 /**
@@ -43,8 +44,9 @@ public class RotatedNV21OMRImageSource extends NV21OMRImageSource{
     }
 
     @Override
-    public void getGrayscaleImage(int[][] buf, int cropX, int cropY, int cropWidth, int cropHeight) {
+    public void getGrayscaleImage(int[][] buf, int cropX, int cropY, int cropWidth, int cropHeight, short[] minMaxBuf) {
         int yStart, l, x;
+        short min = -1, max = -1;
         for(int y = 0; y < cropHeight; y++) {
             yStart = nv21Height - cropX;
             for (x = 0; x < cropWidth; x++) {
@@ -55,7 +57,17 @@ public class RotatedNV21OMRImageSource extends NV21OMRImageSource{
                  */
                 l = nv21Buffer[((yStart - x) * nv21Width) + (cropY + y)] & 0xFF;
                 buf[x][y] = 0xff000000 | l<<16 | l<<8 | l;
+                if(l < min || min == -1) {
+                    min = (short)l;
+                }else if(l > max || max == -1) {
+                    max = (short)l;
+                }
             }
+        }
+
+        if(minMaxBuf != null) {
+            minMaxBuf[OMRImageSource.MINMAX_BUF_MIN] = min;
+            minMaxBuf[OMRImageSource.MINMAX_BUF_MAX] = max;
         }
     }
 

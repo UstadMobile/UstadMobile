@@ -16,6 +16,16 @@ package com.ustadmobile.core.omr;
  */
 public interface OMRImageSource {
     
+     /**
+     * Flag used with getGrayscaleImage etc. for it to store min and max values found: indicates the minimum (e.g. darkest) spot found
+     */
+    public static final int MINMAX_BUF_MIN = 0;
+    
+    /**
+     * Flag used with getGrayscaleImage etc. for it to store min and max values found: indicates the maximum (e.g. brightest) spot found
+     */
+    public static final int MINMAX_BUF_MAX = 1;
+    
     /**
      * Puts the grayscale image into the given buffer
      * 
@@ -24,9 +34,10 @@ public interface OMRImageSource {
      * @param y
      * @param width
      * @param height
+     * @@param minMaxBuffer a Buffer that will contain the minimum (e.g. darkest) and maximum (e.g. brightest) value found
      * @return 
      */
-    public void getGrayscaleImage(int[][] buf, int x, int y, int width, int height);
+    public void getGrayscaleImage(int[][] buf, int x, int y, int width, int height, short[] minMaxBuffer);
     
     /**
      * Returns the width of the image

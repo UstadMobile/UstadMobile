@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
+import android.os.Build;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -17,13 +18,12 @@ import java.util.List;
  * Based on https://developer.android.com/guide/topics/media/camera.html#custom-camera
  *
  */
-@TargetApi(16)
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private SurfaceHolder mHolder;
     private Camera mCamera;
     private Camera.PreviewCallback mPreviewCallback;
     private PreviewStartedCallback mPreviewStartCallback;
-    private Camera.AutoFocusMoveCallback mAutoFocusMoveCallback;
+    private Object mAutoFocusMoveCallback;
 
 
     private boolean mPreviewActive = false;
@@ -48,7 +48,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mPreviewCallback = previewCallback;
     }
 
-    public void setmAutoFocusMoveCallback(Camera.AutoFocusMoveCallback moveCallback) {
+    public void setAutoFocusMoveCallback(Object moveCallback) {
         mAutoFocusMoveCallback = moveCallback;
     }
 
@@ -71,8 +71,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 mCamera.setPreviewCallback(mPreviewCallback);
             }
 
-            if(mAutoFocusMoveCallback != null) {
-                mCamera.setAutoFocusMoveCallback(mAutoFocusMoveCallback);
+            if(mAutoFocusMoveCallback != null && Build.VERSION.SDK_INT >= 16) {
+                mCamera.setAutoFocusMoveCallback((Camera.AutoFocusMoveCallback)mAutoFocusMoveCallback);
             }
 
             try {
@@ -93,6 +93,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void stopAndRelease() {
         if (mCamera != null){
             mCamera.setPreviewCallback(null);
+            if(mAutoFocusMoveCallback != null && Build.VERSION.SDK_INT >= 16) {
+                mCamera.setAutoFocusMoveCallback(null);
+            }
             mCamera.stopPreview();
             mCamera.release();        // release the camera for other applications
             mCamera = null;
@@ -134,8 +137,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 mCamera.setPreviewCallback(mPreviewCallback);
             }
 
-            if(mAutoFocusMoveCallback != null) {
-                mCamera.setAutoFocusMoveCallback(mAutoFocusMoveCallback);
+            if(mAutoFocusMoveCallback != null && Build.VERSION.SDK_INT >= 16) {
+                mCamera.setAutoFocusMoveCallback((Camera.AutoFocusMoveCallback)mAutoFocusMoveCallback);
             }
 
             mCamera.getParameters().setPreviewFormat(ImageFormat.NV21);
