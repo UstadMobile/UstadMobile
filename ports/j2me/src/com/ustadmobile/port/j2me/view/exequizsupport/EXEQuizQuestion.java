@@ -106,74 +106,10 @@ public class EXEQuizQuestion {
         }
     }
     
-    /**
-     * Generates a JSON Object to represent the statement. 
-     * 
-     * @param includeDefinition If true it will include the statement definition 
-     * in the JSON, false otherwise (e.g. the server already knows the object id: 
-     * no need to send more data)
-     * 
-     * @return 
-     */
-    public JSONObject getTinCanObject(boolean includeDefinition) {
-        JSONObject obj = new JSONObject();
-        
-        String id = UMFileUtil.joinPaths(new String[] {
-            iDevice.pageTinCanID, getID()});
-        try {
-            obj.put("id", id);
-            obj.put("objectType", "Activity");
-            obj.put("definition", includeDefinition ? getTinCanObjectDefinition() : null);
-        }catch(JSONException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 195, "exequizquestion.getTinCanObject");
-        }
-        
-        return obj;
-    }
-    
     public JSONObject getTinCanObject() {
-        return getTinCanObject(false);
+        return UMTinCanUtil.makeActivityObjectById(UMFileUtil.joinPaths(new String[] {
+            iDevice.pageTinCanID, getID()}));
     }
-    
-    
-    
-    /**
-     * Generate a TinCan compliant definition of this question
-     * 
-     * @return 
-     */
-    public JSONObject getTinCanObjectDefinition() {
-        JSONObject def = new JSONObject();
-        String questionText = questionEl.toText();
-        String questionName = htmlC.getTitle() + ": Question : " + (questionNum+1);
-        try {
-            def.put("type", 
-                "http://adlnet.gov/expapi/activities/cmi.interaction");
-            def.put("interactionType", "choice");
-            def.put("description", UMTinCanUtil.makeLangMapVal("en-US", 
-                    questionText));
-            def.put("name", UMTinCanUtil.makeLangMapVal("en-US", 
-                    questionName));
-            JSONArray choicesArr = new JSONArray();
-            JSONObject choiceObj;
-            EXEQuizAnswer curAnswer;
-            for(int i = 0; i < answers.size(); i++) {
-                curAnswer = (EXEQuizAnswer)answers.elementAt(i);
-                choiceObj = new JSONObject();
-                choiceObj.put("id", curAnswer.getID());
-                choiceObj.put("description", UMTinCanUtil.makeLangMapVal("en-US", 
-                    curAnswer.answerContentElement.toText()));
-                choicesArr.put(choiceObj);
-            }
-            def.put("choices", choicesArr);
-        }catch(JSONException e) {
-            //this should never happen with simple strings going into json object
-            UstadMobileSystemImpl.l(UMLog.ERROR, 195, null);
-        }
-        
-        return def;
-    }
-    
     
     /**
      * Get the HTMLElement that contains the question itself
