@@ -37,6 +37,7 @@ import com.sun.lwuit.html.DefaultHTMLCallback;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
+import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -275,9 +276,9 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
             String dirtyAttrVal = currentEl.getAttribute("data-dirty");
             if(dirtyAttrVal != null && state != null) {
                 JSONObject stmt = new JSONObject();
-                String ideviceId = "id" + currentEl.getAttributeById(
+                String ideviceId = currentEl.getAttributeById(
                     HTMLElement.ATTR_ID).substring(TEXTENTRY_INPUTEL_PREFIX.length());
-                String responseVal = state.optString(ideviceId, null);
+                String responseVal = state.optString("id" + ideviceId, null);
                 try {
                     stmt.put("object", UMTinCanUtil.makeActivityObjectById(
                         getPageTinCanID(htmlC) + '/' + ideviceId));
@@ -288,8 +289,15 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
                     JSONObject resultObj = new JSONObject();
                     resultObj.put("response", responseVal);
                     stmt.put("result", resultObj);
+                    if(registrationUUID != null) {
+                        context = ContainerController.makeTinCanContext(registrationUUID);
+                    }else {
+                        context = new JSONObject();
+                    }
+                    stmt.put("context", context);
+                    
                     UstadMobileSystemImpl.getInstance().queueTinCanStatement(stmt, 
-                        context);
+                        this.context);
                     currentEl.removeAttribute("data-dirty");
                 }catch(JSONException e) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 195, ideviceId, e);
