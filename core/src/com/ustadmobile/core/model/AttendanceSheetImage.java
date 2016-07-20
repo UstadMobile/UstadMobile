@@ -432,7 +432,7 @@ public class AttendanceSheetImage {
     }
     
     public void stopChecking() {
-        recognitionThread.stopProcesing();;
+        recognitionThread.stopProcesing();
     }
     
     public int isAligned(OMRImageSource src) {
@@ -459,6 +459,10 @@ public class AttendanceSheetImage {
             
         }
         
+        /* 
+         In QRCode Lib this is set to being simply the average of the two: not the midpoint 
+         See QRCodeImageReader.java line 151 : This might work better.
+        */
         int gsThreshold = minMax[OMRImageSource.MINMAX_BUF_MIN] + ((minMax[OMRImageSource.MINMAX_BUF_MAX] -
             minMax[OMRImageSource.MINMAX_BUF_MIN])/2);
         
