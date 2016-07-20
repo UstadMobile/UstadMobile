@@ -445,7 +445,7 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                                 impl.removeRecursively(UMFileUtil.joinPaths(
                                     new String[]{tincanDir,filesToReplicate[i]}));//remove .log
                                 String statusFileURIDone = statusFileURI + ".done";
-                                impl.renameFile(statusFileURI, statusFileURIDone);//rename .status to .log
+                                impl.renameFile(statusFileURI, statusFileURIDone);//rename .status to .done
                                 
                                 break;
                             //4b.
@@ -530,7 +530,54 @@ public class TinCanLogManagerJ2ME extends TimerTask{
                         break;
                 }
                 
-            }//end of scan log dir   
+            }//end of scan log dir  
+            else if(filesToReplicate[i].endsWith(STATUS_FILE_EXTENSION)) {
+                /*
+                Check if status file is empty. If it is - move it to done- it 
+                will get deleted in the next iteration..
+                Check if there is log file associated with the status file:
+                If yes, skip the log will will be processed with this status file
+                If not then rename the status file to log file so next iteration
+                can handle it.
+                If everything got sent, rename status to done
+                
+                */
+                /*Status file URI..*/
+                String currentStatusFileURI = UMFileUtil.joinPaths(new String[]{tincanDir, 
+                                                filesToReplicate[i]});
+                
+                String logFile = filesToReplicate[i].substring(0,
+                        filesToReplicate[i].length() - STATUS_FILE_EXTENSION.length());
+                String logFileURI = UMFileUtil.joinPaths(new String[]{tincanDir, 
+                                                logFile});
+                
+                /* Check if the current Status file has anything to work on.
+                If its empty then we can mark this log file as "done and
+                continue to the next file
+                */
+                if (impl.fileSize(currentStatusFileURI) == 0){
+                    impl.l(UMLog.DEBUG, 621, null);
+                    String doneLogName = filesToReplicate[i] + ".done";
+                    String doneLogNameURI = UMFileUtil.joinPaths(new String[]{tincanDir, 
+                                                doneLogName});
+                    impl.renameFile(currentStatusFileURI, doneLogNameURI);
+                    continue;
+                }
+                
+                if (impl.fileExists(logFileURI)){
+                    continue; //We will process the status file when its log file comes
+                }else{
+                    //Rename status file to log file
+                    //Next iteration will check this log file and mark as done
+                    //if all the statements have been already sent or will 
+                    //process further if more processing needed.
+                    impl.renameFile(currentStatusFileURI, logFileURI);
+                }
+                
+                
+                
+                
+            }
         }//end of scan dir
     }
     
