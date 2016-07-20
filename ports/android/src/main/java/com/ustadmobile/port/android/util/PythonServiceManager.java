@@ -20,7 +20,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 
 import android.os.Handler;
@@ -38,6 +40,7 @@ import org.renpy.android.Action;
 import org.renpy.android.Configuration;
 import org.renpy.android.Hardware;
 import org.renpy.android.Project;
+import org.renpy.android.PythonActivity;
 import org.renpy.android.PythonService;
 import org.renpy.android.ResourceManager;
 import org.renpy.android.SDLSurfaceView;
@@ -94,6 +97,7 @@ public class PythonServiceManager {
 
     public Context context;
 
+    /*Old way of running: Dont think this is ever used..*/
     public void startThis(Context context){
         this.context = context;
         this.externalStorage = new File(Environment.getExternalStorageDirectory(),
@@ -109,15 +113,16 @@ public class PythonServiceManager {
 
         this.context = context;
         this.externalStorage = new File(Environment.getExternalStorageDirectory(),
-                context.getPackageName());
+                context.getPackageName()); //Gets the external (user accessible directory)
         this.mPath = this.externalStorage;
         final Context finalContext = context;
 
         Thread extractPythonFiles = new Thread() {
             public void run() {
 
+                //There is no such thing as public. Why is this even here?
+                //unpackData("public", externalStorage);
                 unpackData("private", finalContext.getFilesDir());
-                unpackData("public", externalStorage);
 
                 System.loadLibrary("sdl");
                 System.loadLibrary("sdl_image");
@@ -155,9 +160,6 @@ public class PythonServiceManager {
             }
         };
         extractPythonFiles.start();
-        //start_service("UstadMobile", "UstadMobile is running",
-        ///        "/storage/emulated/0/com.toughra.ustadmobile/lrs-djandro.log");
-
 
     }
 
@@ -292,6 +294,13 @@ public class PythonServiceManager {
         f.delete();
     }
 
+    public static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMddHHmm");//ddMMyyyyHHmm
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
+    }
+
     /**
      * This determines if unpacking one the zip files included in
      * the .apk is necessary. If it is, the zip file is unpacked.
@@ -299,19 +308,31 @@ public class PythonServiceManager {
     public void unpackData(final String resource, File target) {
 
         // The version of data in memory and on disk.
+        //resourceManager = new ResourceManager(PythonActivity.mActivity.getParent());
         //String data_version = resourceManager.getString(resource + "_version");
-        String data_version = "1448183454.66";
+        //String data_version = "1448183454.66";
+        String data_version = null;
         String disk_version = null;
 
-        // If no version, no unpacking is necessary.
-        if (data_version == null) {
-            return;
-        }
+        String filesDir = target.getAbsolutePath();
+        String data_version_fn = filesDir + "/" + resource + ".version";
+
 
         // Check the current disk version, if any.
+        //GET THE VERSION ON THE APK -DATA VERSION
+        try {
+            byte buf[] = new byte[64];
+            InputStream is = new FileInputStream(data_version_fn);
+            int len = is.read(buf);
+            data_version = new String(buf, 0, len);
+            is.close();
+        } catch (Exception e) {
+            data_version = "";
+            Log.v(TAG, "Could Not get disk version" + e.toString());
+        }
 
-        String filesDir = target.getAbsolutePath();
-        String disk_version_fn = filesDir + "/" + resource + ".version";
+        //GET THE VERSION ON DISK (on the phone) -DISK VERSION
+        String  disk_version_fn = filesDir + "/"  + "date.extracted";
 
         try {
             byte buf[] = new byte[64];
@@ -321,21 +342,55 @@ public class PythonServiceManager {
             is.close();
         } catch (Exception e) {
             disk_version = "";
+            Log.v(TAG, "Could Not get disk version" + e.toString());
         }
+
+        data_version = data_version.replace("\n", "").replace("\r", "");
+        disk_version = disk_version.replace("\n", "").replace("\r", "");
+
+        long disk_ver, data_ver;
+        try{
+            disk_ver = Long.valueOf(disk_version);
+            data_ver = Long.valueOf(data_version);
+        } catch (Exception e){
+            disk_ver = 0;
+            data_ver = 0;
+        }
+
 
         // If the disk data is out of date, extract it and write the
         // version file.
-        if (! data_version.equals(disk_version)) {
+        //OR if disk version was not obtained (we cant make judgements, let it extract)
+        //if (! data_version.equals(disk_version) || disk_version == "") {
+        if(data_ver > disk_ver || data_ver == 0 || disk_ver == 0){
             Log.v(TAG, "Extracting " + resource + " assets.");
 
             recursiveDelete(target);
             target.mkdirs();
 
-            AssetExtract ae = new AssetExtract(this.context);
-            if (!ae.extractTar(resource + ".mp3", target.getAbsolutePath())) {
-                System.out.println("Could not extract " + resource + " datta.");
+            //Make a file that marked that you've already extracted this
+            disk_version = getCurrentTimeStamp();
+            try {
+                // Create new date.extracted file if not already..
+                new File(target, "date.extracted").delete();
+                new File(target, "date.extracted").createNewFile();
+
+                // Write datetime to the file..
+                FileOutputStream os = new FileOutputStream(disk_version_fn);
+                os.write(disk_version.getBytes());
+                os.close();
+            } catch (Exception e) {
+                Log.w("python", e);
+                Log.v(TAG, "Written When extracted to file: date.extracted");
             }
 
+            AssetExtract ae = new AssetExtract(this.context);
+            if (!ae.extractTar(resource + ".mp3", target.getAbsolutePath())) {
+                System.out.println("Could not extract " + resource + " data.");
+            }
+
+            //why are we even creating this ?
+            /*
             try {
                 // Write .nomedia.
                 new File(target, ".nomedia").createNewFile();
@@ -347,14 +402,16 @@ public class PythonServiceManager {
             } catch (Exception e) {
                 Log.w("python", e);
             }
+            */
         }
 
     }
 
 
+    /*Seems like we never run this.. */
     public void run() {
         unpackData("private", context.getFilesDir());
-        unpackData("public", externalStorage);
+        //unpackData("public", externalStorage); //Wont exist
 
         System.loadLibrary("sdl");
         System.loadLibrary("sdl_image");
