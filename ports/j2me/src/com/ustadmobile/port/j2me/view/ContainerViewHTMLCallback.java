@@ -275,7 +275,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
             String dirtyAttrVal = currentEl.getAttribute("data-dirty");
             if(dirtyAttrVal != null && state != null) {
                 JSONObject stmt = new JSONObject();
-                String ideviceId = currentEl.getAttributeById(
+                String ideviceId = "id" + currentEl.getAttributeById(
                     HTMLElement.ATTR_ID).substring(TEXTENTRY_INPUTEL_PREFIX.length());
                 String responseVal = state.optString(ideviceId, null);
                 try {
