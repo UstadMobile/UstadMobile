@@ -39,6 +39,7 @@ import com.sun.lwuit.html.AsyncDocumentRequestHandler;
 import com.sun.lwuit.html.AsyncDocumentRequestHandler.IOCallback;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.HTMLComponent;
+import com.sun.lwuit.html.HTMLElement;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.mediaplayer.DefaultLWUITMediaPlayerManager;
 import com.sun.lwuit.mediaplayer.MIDPMediaPlayer;
@@ -417,7 +418,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         }
     }
     
-    
+   
     /**
      * Show the page as per the index in the spineURLs
      * 
@@ -429,6 +430,8 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             return;
         }
         makePageStatement();
+        htmlCallback.makeTextEntryStatements(htmlC);
+        
         DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
                 
         String pageURL = UMFileUtil.resolveLink(opfURL, spineURLs[pageIndex]);

@@ -41,6 +41,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizIdevice;
 import java.io.IOException;
@@ -49,6 +50,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import org.json.me.JSONObject;
+import org.json.me.JSONException;
 
 /**
  *
@@ -76,6 +78,11 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     private String registrationUUID;
     
     private JSONObject state;
+    
+    public static final String IDEVICE_CLASS_TEXTENTRY = "TextEntryIdevice";
+    
+    public static final String TEXTENTRY_INPUTEL_PREFIX = "exe_tei_textel_";
+    
         
     static {
         mediaExtensions = new Hashtable();
@@ -125,6 +132,27 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     }
     
     /**
+     * Return the full TinCan ID of the current page: e.g.
+     * epub:uuid/page-item-id
+     * 
+     * @return Full TinCan ID for the page as above
+     */
+    public String getPageTinCanID(HTMLComponent htmlC) {
+        if(containerTinCanID == null && view != null) {
+            containerTinCanID = view.getContainerTinCanID();
+        }
+        
+        String pageIdSection = null;
+        if(view != null) {
+            pageIdSection = view.getCurrentPageOPFId();
+        }else if(htmlC.getPageURL() != null) {
+            pageIdSection = UMFileUtil.getFilename(htmlC.getPageURL());
+        }
+        
+        return containerTinCanID + '/' + pageIdSection;
+    }
+    
+    /**
      * Find eXeLearning generated MCQ questions and set them up so we can
      * dynamically show / hide the feedback for those answers
      *
@@ -139,20 +167,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
             return false;
         }
         
-        if(containerTinCanID == null && view != null) {
-            containerTinCanID = view.getContainerTinCanID();
-        }
-        
         mcqQuizzes = new Hashtable();
-        
-        String pageIdSection = null;
-        if(view != null) {
-            pageIdSection = view.getCurrentPageOPFId();
-        }else if(htmlC.getPageURL() != null) {
-            pageIdSection = UMFileUtil.getFilename(htmlC.getPageURL());
-        }
-        
-        String pageTinCanID = containerTinCanID + '/' + pageIdSection;
+        String pageTinCanID = getPageTinCanID(htmlC);
             
         HTMLElement quizEl;
         int numQuizzes = 0;
@@ -244,6 +260,122 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         return super.parsingError(errorId, tag, attribute, value, description); 
     }
     
+    public void makeTextEntryStatements(HTMLComponent htmlC) {
+        HTMLElement htmlEl = htmlC.getDOM();
+        if(htmlEl == null)
+            return;
+        
+        Vector textEntryInputEls = getTextEntryInputEls(htmlEl);
+        if(textEntryInputEls == null)
+            return;
+        
+        
+        for(int i = 0; i < textEntryInputEls.size(); i++) {
+            HTMLElement currentEl = (HTMLElement)textEntryInputEls.elementAt(i);
+            String dirtyAttrVal = currentEl.getAttribute("data-dirty");
+            if(dirtyAttrVal != null && state != null) {
+                JSONObject stmt = new JSONObject();
+                String ideviceId = currentEl.getAttributeById(
+                    HTMLElement.ATTR_ID).substring(TEXTENTRY_INPUTEL_PREFIX.length());
+                String responseVal = state.optString(ideviceId, null);
+                try {
+                    stmt.put("object", UMTinCanUtil.makeActivityObjectById(
+                        getPageTinCanID(htmlC) + '/' + ideviceId));
+                    stmt.put("actor", UMTinCanUtil.makeActorFromActiveUser(
+                        context));
+                    stmt.put("verb", UMTinCanUtil.makeVerbObject(
+                        "http://adlnet.gov/expapi/verbs/answered", "en-US", "answered"));
+                    JSONObject resultObj = new JSONObject();
+                    resultObj.put("response", responseVal);
+                    stmt.put("result", resultObj);
+                    UstadMobileSystemImpl.getInstance().queueTinCanStatement(stmt, 
+                        context);
+                    currentEl.removeAttribute("data-dirty");
+                }catch(JSONException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 195, ideviceId, e);
+                }
+            }
+        }
+    }
+    
+    private Vector getTextEntryInputEls(HTMLElement parentEl) {
+        Vector returnVal = null;
+        Vector textEntryIdevices = parentEl.getDescendantsByClass(
+                IDEVICE_CLASS_TEXTENTRY, IDEVICE_TAG_IDS);
+        Vector inputEls;
+        HTMLElement ideviceEl;
+        HTMLElement inputEl;
+        String id;
+        for(int i = 0; i < textEntryIdevices.size(); i++) {
+            ideviceEl = (HTMLElement)textEntryIdevices.elementAt(i);
+            inputEls = ideviceEl.getDescendantsByTagId(HTMLElement.TAG_INPUT);
+            if(inputEls == null || inputEls.size() ==0) {
+                inputEls = ideviceEl.getDescendantsByTagId(HTMLElement.TAG_TEXTAREA);
+            }
+
+            inputEl = (inputEls != null && inputEls.size() > 0) ? (HTMLElement)inputEls.elementAt(0) : null;
+            if(inputEl != null) {
+                id = inputEl.getAttributeById(HTMLElement.ATTR_ID);
+                if(id != null && id.startsWith(TEXTENTRY_INPUTEL_PREFIX)) {
+                    if(returnVal == null) {
+                        returnVal = new Vector();
+                    }
+                    returnVal.addElement(inputEl);
+                }
+            }
+        }
+
+        return returnVal;
+    }
+    
+    
+    
+    /**
+     * Go through text entry idevices : if there are state values from previous
+     * answers update the DOM so that these values will be shown.
+     * 
+     * @param htmlC HTMLComponent being operated on
+     * @param state JSON state object
+     * 
+     * @return true if the DOM was modified; false otherwise
+     */
+    protected boolean setInputValuesFromState(HTMLComponent htmlC, JSONObject state) {
+        boolean modified = false;
+        if(state != null && htmlC.getDOM() != null) {
+            Vector textEntryInputEls = getTextEntryInputEls(htmlC.getDOM());
+            
+            if(textEntryInputEls == null || textEntryInputEls.size() == 0) {
+                return modified;
+            }
+            
+            HTMLElement inputEl;
+            String ideviceId, value;
+            for(int i = 0; i < textEntryInputEls.size(); i++) {
+                inputEl = (HTMLElement)textEntryInputEls.elementAt(i);
+                ideviceId = "id" + inputEl.getAttributeById(HTMLElement.ATTR_ID).substring(
+                    TEXTENTRY_INPUTEL_PREFIX.length());
+                if(state.has(ideviceId)) {
+                    value = state.optString(ideviceId, null);
+                    switch(inputEl.getTagId()) {
+                        case HTMLElement.TAG_INPUT:
+                            inputEl.setAttributeById(HTMLElement.ATTR_VALUE, 
+                                value);
+                            break;
+                        case HTMLElement.TAG_TEXTAREA:
+                            int numChildren = inputEl.getNumChildren();
+                            for(int j = numChildren-1; j >= 0; j--) {
+                                inputEl.removeChildAt(j);
+                            };
+                            inputEl.addChild(new HTMLElement(value, true));
+                            break;
+                    }
+                    modified = true;
+                }
+            }
+        }
+        
+        return modified;
+    }
     
 
     public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
@@ -260,6 +392,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
             modified = findEXEMCQs(htmlC) || modified;
             modified = hideExtras(htmlC) || modified;
+            modified = setInputValuesFromState(htmlC, state) || modified;
             
             Enumeration quizzesOnPage = mcqQuizzes.elements();
             EXEQuizIdevice currentQuiz;
@@ -275,12 +408,23 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
             fixedPage = true;
         }
-
+        
         super.pageStatusChanged(htmlC, status, url);
     }
 
     public void dataChanged(int type, int index, HTMLComponent htmlC, TextField textField, HTMLElement element) {
-        super.dataChanged(type, index, htmlC, textField, element); //To change body of generated methods, choose Tools | Templates.
+        String elId = element.getAttributeById(HTMLElement.ATTR_ID);
+        if(elId != null && elId.startsWith("exe_tei_") && state != null) {
+            String ideviceId = "id" + elId.substring(elId.lastIndexOf('_')+1);
+            try {
+                state.put(ideviceId, textField.getText());
+                element.setAttribute("data-dirty", "true");
+            }catch(JSONException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 195, null, e);
+            }
+        }
+        
+        super.dataChanged(type, index, htmlC, textField, element); 
     }
 
     public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {
