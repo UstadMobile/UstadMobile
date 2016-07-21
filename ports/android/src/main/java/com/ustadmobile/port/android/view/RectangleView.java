@@ -76,12 +76,18 @@ public class RectangleView extends View{
         canvas.drawRect(pageArea[OMRRecognizer.X], pageArea[OMRRecognizer.Y],
                 pgAreaRight, pgAreaBottom, paint);
 
-        paint.setColor(Color.BLUE);
+        //paint.setColor(Color.BLUE);
         paint.setStrokeWidth(2);
+        int boxTop, boxLeft, boxBottom, boxRight;
         for(int i = 0; i < fpSearchAreas.length; i++) {
-            canvas.drawRect(fpSearchAreas[i][OMRRecognizer.X], fpSearchAreas[i][OMRRecognizer.Y],
-                    fpSearchAreas[i][OMRRecognizer.X] + fpSearchAreas[i][OMRRecognizer.WIDTH],
-                    fpSearchAreas[i][OMRRecognizer.Y] + fpSearchAreas[i][OMRRecognizer.HEIGHT], paint);
+            boxLeft = Math.max(fpSearchAreas[i][OMRRecognizer.X], pageArea[OMRRecognizer.X]);
+            boxTop = Math.max(fpSearchAreas[i][OMRRecognizer.Y], pageArea[OMRRecognizer.Y]);
+            boxRight = Math.min(fpSearchAreas[i][OMRRecognizer.X] + fpSearchAreas[i][OMRRecognizer.WIDTH],
+                    pgAreaRight);
+            boxBottom = Math.min(fpSearchAreas[i][OMRRecognizer.Y] + fpSearchAreas[i][OMRRecognizer.HEIGHT],
+                    pgAreaBottom);
+
+            canvas.drawRect(boxLeft, boxTop, boxRight, boxBottom, paint);
         }
 
     }

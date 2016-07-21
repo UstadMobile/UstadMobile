@@ -191,6 +191,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
                 UstadMobileSystemImpl.getInstance().go(BasePointView.class,
                         BasePointController.makeDefaultBasePointArgs(this), this);
                 return true;
+
+        }
+
+        if(handleClickAppMenuItem(item, baseController)) {
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

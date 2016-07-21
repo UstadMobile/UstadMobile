@@ -283,12 +283,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(getActivity() instanceof UstadBaseActivity && mCatalogController != null) {
-            if(((UstadBaseActivity)getActivity()).handleClickAppMenuItem(item, mCatalogController)){
-                return true;
-            }
-        }
-
         switch(item.getItemId()) {
             case R.id.action_opds_acquire:
                 if(getSelectedEntries().length > 0) {
