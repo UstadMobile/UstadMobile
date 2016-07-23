@@ -67,8 +67,6 @@ import org.json.me.JSONException;
 public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     private ContainerViewJ2ME view;
-
-    private Hashtable mcqQuizzes;
     
     boolean fixedPage = true;
 
@@ -88,6 +86,15 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     
     private Hashtable pageIdevices;
     
+    public static final String[] IDEVICE_CSS_CLASSES = new String[]{"Idevice",
+        "iDevice_wrapper"};
+    
+    /**
+     * Marked as true when the dom has been changed and then refreshDOM needs
+     * to be called
+     */
+    private boolean domInvalid;
+    
     /**
      * Hashtable of idevice classes to the class that will be used to handle it
      */
@@ -99,6 +106,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         
         ideviceClasses = new Hashtable();
         ideviceClasses.put("TextEntryIdevice", TextEntryIdevice.class);
+        ideviceClasses.put("MultichoiceIdevice", EXEQuizIdevice.class);
     }
     
     
@@ -119,6 +127,17 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         this.context = view.getContext();
     }
 
+    
+    /**
+     * Returns a hashtable mapped as id to Idevice object of the idevices that
+     * are on the page
+     * 
+     * @return Hashtable as above
+     */
+    public Hashtable getPageIdevices() {
+        return pageIdevices;
+    }
+    
     /**
      * Get the registration UUID to be used for Experience API statements
      * 
@@ -145,6 +164,15 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         return state;
     }
     
+    public void invalidateDOM() {
+        domInvalid = true;
+    }
+    
+    protected void refreshDOM(HTMLComponent htmlC) {
+        htmlC.refreshDOM();
+        domInvalid = false;
+    }
+    
     /**
      * Return the full TinCan ID of the current page: e.g.
      * epub:uuid/page-item-id
@@ -164,50 +192,6 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         }
         
         return containerTinCanID + '/' + pageIdSection;
-    }
-    
-    /**
-     * Find eXeLearning generated MCQ questions and set them up so we can
-     * dynamically show / hide the feedback for those answers
-     *
-     * @param htmlC HTML Componet in question
-     * @return true if the DOM was modified - false otherwise
-     */
-    private boolean findEXEMCQs(HTMLComponent htmlC) {
-        Vector quizElements = htmlC.getDOM().getDescendantsByClass("MultichoiceIdevice", 
-                IDEVICE_TAG_IDS);   
-        
-        if(quizElements.size() == 0) {
-            return false;
-        }
-        
-        mcqQuizzes = new Hashtable();
-        String pageTinCanID = getPageTinCanID(htmlC);
-            
-        HTMLElement quizEl;
-        int numQuizzes = 0;
-        for(int i = 0; i < quizElements.size(); i++) {
-            quizEl = (HTMLElement)quizElements.elementAt(i);
-            
-            //There can be faulty empty idevices generated somehow... skip if this is what we found
-            if(quizEl.getNumChildren() == 0) {
-                continue;
-            }
-            
-            EXEQuizIdevice quizDevice = new EXEQuizIdevice(
-                    (HTMLElement)quizElements.elementAt(i), htmlC, context, 
-                    pageTinCanID, i);
-            quizDevice.setRegistrationUUID(registrationUUID);
-            quizDevice.setState(state);
-            mcqQuizzes.put(quizDevice.getID(), quizDevice);
-            numQuizzes++;
-        }
-        
-        return numQuizzes > 0;
-    }
-    
-    public Hashtable getMCQQuizzes() {
-        return mcqQuizzes;
     }
 
     /**
@@ -294,7 +278,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     
     
     protected boolean findIdevices(HTMLComponent htmlC) {
-        Vector ideviceEls = htmlC.getDOM().getDescendantsByClass("Idevice", 
+        Vector ideviceEls = htmlC.getDOM().getDescendantsByClasses(IDEVICE_CSS_CLASSES, 
             IDEVICE_TAG_IDS);
         HTMLElement currentEl;
         Enumeration ideviceCSSClasses;
@@ -302,22 +286,26 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         String pageTinCanID = getPageTinCanID(htmlC);
         boolean modified = false;
         
+        boolean ideviceFound;
         for(int i = 0; i < ideviceEls.size(); i++) {
             currentEl = (HTMLElement)ideviceEls.elementAt(i);
+            ideviceFound = false;
             ideviceCSSClasses = ContainerViewHTMLCallback.ideviceClasses.keys();
-            while(ideviceCSSClasses.hasMoreElements()) {
+            while(ideviceCSSClasses.hasMoreElements() && !ideviceFound) {
                 ideviceClassName = (String)ideviceCSSClasses.nextElement();
                 if(currentEl.hasClass(ideviceClassName)) {
                     IdeviceJ2ME idevice = null;
                     try {
                         idevice = (IdeviceJ2ME)((Class)ideviceClasses.get(ideviceClassName)).newInstance();
                         idevice.setHtmlC(htmlC);
+                        idevice.setHtmlCallback(this);
                         idevice.setIdeviceElement(currentEl);
                         idevice.setPageTinCanId(pageTinCanID);
                         idevice.setState(state);
                         idevice.setRegistrationUUID(registrationUUID);
                         modified = idevice.enhance() || modified;
                         pageIdevices.put(idevice.getId(), idevice);
+                        ideviceFound = true;
                     }catch(Exception e) {
                         UstadMobileSystemImpl.l(UMLog.ERROR, i, 
                             currentEl.getAttributeById(HTMLElement.ATTR_ID), e);
@@ -334,6 +322,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 604, url+':'+status);
         if (status == STATUS_REQUESTED) {
             fixedPage = false;
+            domInvalid = false;
             if(pageIdevices == null) {
                 pageIdevices= new Hashtable();
             }else {
@@ -345,21 +334,8 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
             }
             
             boolean modified = false;
-            modified = findIdevices(htmlC);
-            
-            mcqQuizzes = new Hashtable();
-            
-            modified = findEXEMCQs(htmlC) || modified;
             modified = hideExtras(htmlC) || modified;
-            
-            Enumeration quizzesOnPage = mcqQuizzes.elements();
-            EXEQuizIdevice currentQuiz;
-            while(quizzesOnPage.hasMoreElements()) {
-                currentQuiz = (EXEQuizIdevice)quizzesOnPage.nextElement();
-                modified = currentQuiz.formatQuestionsAsTables() || modified;
-            }
-            currentQuiz = null;
-
+            modified = findIdevices(htmlC);
             if (modified) {
                 htmlC.refreshDOM();
             }
@@ -383,30 +359,18 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         super.dataChanged(type, index, htmlC, textField, element); 
     }
 
-    public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {
-        boolean domChanged = false;
-        if (element != null && element.getTagId() == HTMLElement.TAG_INPUT) {
-            String inputType = element.getAttributeById(HTMLElement.ATTR_TYPE);
-            if (inputType.equalsIgnoreCase("radio")) {
-                String mcqName = element.getAttributeById(HTMLElement.ATTR_NAME);
-                if (mcqName == null || !mcqName.startsWith("option")) {
-                    return;//this is not an eXeLearning MCQ
-                }
-
-                //In eXeLearning the questionID comes immediately after the option in name
-                //e.g. "option20_67" MCQ ID = 20_67
-                String quizID = mcqName.substring(6, mcqName.indexOf('_', 6));
-                
-                if (mcqQuizzes.containsKey(quizID)) {
-                    EXEQuizIdevice quizDevice = (EXEQuizIdevice)mcqQuizzes.get(quizID);
-                    domChanged = quizDevice.handleSelectAnswer(element) || domChanged;
-                }
-
+    public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {        
+        Enumeration idevices = pageIdevices.elements();
+        IdeviceJ2ME idevice;
+        while(idevices.hasMoreElements()) {
+            idevice = (IdeviceJ2ME)idevices.nextElement();
+            if(element.isDescendantOf(idevice.getIdeviceElement())) {
+                idevice.actionPerformed(evt, htmlC, element);
             }
         }
         
-        if(domChanged) {
-            htmlC.refreshDOM();
+        if(domInvalid) {
+            refreshDOM(htmlC);
         }
 
         super.actionPerformed(evt, htmlC, element); //To change body of generated methods, choose Tools | Templates.

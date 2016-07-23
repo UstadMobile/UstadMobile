@@ -91,7 +91,8 @@ public class TestJ2MEEXEMCQ extends TestCase {
         
         assertEquals("Page status is ready", HTMLCallback.STATUS_COMPLETED,
             htmlC.getPageStatus());
-        Hashtable exeQuizzes = callback.getMCQQuizzes();
+        
+        Hashtable exeQuizzes = callback.getPageIdevices();
         assertTrue("Container view has found quizzes", exeQuizzes != null);
         String ideviceID = (String)exeQuizzes.keys().nextElement();
         EXEQuizIdevice idevice = (EXEQuizIdevice)exeQuizzes.get(ideviceID);

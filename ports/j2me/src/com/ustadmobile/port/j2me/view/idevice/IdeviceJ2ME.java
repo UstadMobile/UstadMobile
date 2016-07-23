@@ -17,6 +17,7 @@ import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import org.json.me.JSONException;
 import org.json.me.JSONObject;
 
@@ -42,6 +43,8 @@ public class IdeviceJ2ME implements HTMLCallback {
     protected JSONObject state;
     
     protected String registrationUUID;
+    
+    protected ContainerViewHTMLCallback htmlCallback;
     
     public IdeviceJ2ME() {
         //blank constructor as this is created by class.newInstance
@@ -102,8 +105,14 @@ public class IdeviceJ2ME implements HTMLCallback {
     public void setRegistrationUUID(String registrationUUID) {
         this.registrationUUID = registrationUUID;
     }
-    
-    
+
+    public ContainerViewHTMLCallback getHtmlCallback() {
+        return htmlCallback;
+    }
+
+    public void setHtmlCallback(ContainerViewHTMLCallback htmlCallback) {
+        this.htmlCallback = htmlCallback;
+    }
     
     /**
      * Return the idevice id: optionally including the "id" prefix added by eXeLearning
@@ -131,6 +140,10 @@ public class IdeviceJ2ME implements HTMLCallback {
     
     public void setState(JSONObject state) {
         this.state = state;
+    }
+    
+    public JSONObject getState() {
+        return state;
     }
     
     /**

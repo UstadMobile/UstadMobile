@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.port.j2me.view.exequizsupport;
 
+import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
 import com.ustadmobile.core.impl.UMLog;
@@ -53,9 +54,7 @@ public class EXEQuizQuestion {
     private String id;
     
     private Vector answers;
-    
-    private HTMLComponent htmlC;
-    
+        
     private HTMLElement formEl;
     
     private HTMLElement questionEl;
@@ -81,7 +80,6 @@ public class EXEQuizQuestion {
      */
     public EXEQuizQuestion(HTMLElement qFormEl, EXEQuizIdevice iDevice, int questionNum) {
         this.iDevice = iDevice;
-        this.htmlC = iDevice.htmlC;
         this.questionNum = questionNum;
         setupFromElement(qFormEl);
         currentSelectedAnswer = null;
@@ -100,15 +98,14 @@ public class EXEQuizQuestion {
         
         for(int i = 0; i < answerEls.size(); i++) {
             HTMLElement answerEl = (HTMLElement)answerEls.elementAt(i);
-            EXEQuizAnswer answer = new EXEQuizAnswer(i, this, answerEl, qFormEl,
-                htmlC);
+            EXEQuizAnswer answer = new EXEQuizAnswer(i, this, answerEl, qFormEl);
             answers.addElement(answer);
         }
     }
     
     public JSONObject getTinCanObject() {
         return UMTinCanUtil.makeActivityObjectById(UMFileUtil.joinPaths(new String[] {
-            iDevice.pageTinCanID, getID()}));
+            iDevice.getPageTinCanId(), iDevice.getId(false), getID()}));
     }
     
     /**
@@ -185,15 +182,16 @@ public class EXEQuizQuestion {
      * @param inputElement Input Element that was acted upon
      * @return true if changes have been made to the DOM, false otherwise
      */
-    public boolean handleSelectAnswer(HTMLElement inputElement) {
+    public boolean handleSelectAnswer(HTMLElement inputElement, HTMLComponent htmlC) {
         EXEQuizAnswer selectedAnswer = getAnswerByInputElement(inputElement);
+        JSONObject iState = iDevice.getState();
         if(iDevice.getState() != null) {
             selectedAnswer.setStateSelectedAnswer(iDevice.getState());
         }
         
-        boolean domChanged = showMCQFeedback(selectedAnswer);
+        boolean domChanged = showMCQFeedback(selectedAnswer, htmlC);
         UstadMobileSystemImpl.getInstance().queueTinCanStatement(
-            selectedAnswer.makeTinCanStmt(), iDevice.context);
+            selectedAnswer.makeTinCanStmt(), iDevice.getContext());
         return domChanged;
     }
     
@@ -210,7 +208,7 @@ public class EXEQuizQuestion {
             EXEQuizAnswer answer = getAnswerById(answerId);
             if(answer != null) {
                 answer.getInputElement().setAttribute("checked", "checked");
-                showMCQFeedback(answer, false);
+                showMCQFeedback(answer, false, null);
             }
         }
     }
@@ -222,7 +220,7 @@ public class EXEQuizQuestion {
      * @param selectedAnswer 
      * @param scrollToFeedback If true scroll to the feedback element
      */
-    public boolean showMCQFeedback(EXEQuizAnswer selectedAnswer, boolean scrollToFeedback) {
+    public boolean showMCQFeedback(EXEQuizAnswer selectedAnswer, boolean scrollToFeedback, HTMLComponent htmlC) {
         if(currentSelectedAnswer == selectedAnswer) {
             //do nothing
             return false;
@@ -232,7 +230,7 @@ public class EXEQuizQuestion {
         for(int i = 0; i < answers.size(); i++) {
             curAnswer = (EXEQuizAnswer)answers.elementAt(i);
             if(curAnswer == selectedAnswer) {
-                curAnswer.showFeedback();
+                curAnswer.showFeedback(htmlC);
             }else {
                 curAnswer.hideFeedback();
             }
@@ -240,12 +238,15 @@ public class EXEQuizQuestion {
         currentSelectedAnswer = selectedAnswer;
         HTMLElement feedbackEl = selectedAnswer.getFeedbackElement();
         
-        htmlC.scrollToElement(feedbackEl, true);
+        if(scrollToFeedback && htmlC != null) {
+            htmlC.scrollToElement(feedbackEl, true);
+        }
+        
         return true;
     }
     
-    public boolean showMCQFeedback(EXEQuizAnswer selectedAnswer) {
-        return showMCQFeedback(selectedAnswer, true);
+    public boolean showMCQFeedback(EXEQuizAnswer selectedAnswer, HTMLComponent htmlC) {
+        return showMCQFeedback(selectedAnswer, true, htmlC);
     }
     
     /**
