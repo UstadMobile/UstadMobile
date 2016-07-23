@@ -430,7 +430,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             return;
         }
         makePageStatement();
-        htmlCallback.makeTextEntryStatements(htmlC);
+        htmlCallback.beforeUnload(htmlC);
         
         DefaultLWUITMediaPlayerManager.getInstance().getPlayer().stopAllPlayers(true);
                 
