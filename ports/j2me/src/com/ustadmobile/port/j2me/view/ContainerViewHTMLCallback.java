@@ -46,6 +46,7 @@ import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.port.j2me.view.idevice.EXEQuizIdevice;
 import com.ustadmobile.port.j2me.view.idevice.IdeviceJ2ME;
+import com.ustadmobile.port.j2me.view.idevice.ScoreFeedbackIdevice;
 import com.ustadmobile.port.j2me.view.idevice.TextEntryIdevice;
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,6 +108,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         ideviceClasses = new Hashtable();
         ideviceClasses.put("TextEntryIdevice", TextEntryIdevice.class);
         ideviceClasses.put("MultichoiceIdevice", EXEQuizIdevice.class);
+        ideviceClasses.put("ScoreFeedbackIdevice", ScoreFeedbackIdevice.class);
     }
     
     

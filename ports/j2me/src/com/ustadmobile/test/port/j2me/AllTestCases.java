@@ -60,6 +60,8 @@ public class AllTestCases extends TestCase {
         }
          
         TestSuite allTestSuite = new TestSuite("AllTestSuite");
+        
+        allTestSuite.addTest(new TestScoreFeedbackIdevice());
         allTestSuite.addTest(new TestPageSplitter());
         allTestSuite.addTest(new TestHTTPResult());
         allTestSuite.addTest(new TestHTTPCacheDir());

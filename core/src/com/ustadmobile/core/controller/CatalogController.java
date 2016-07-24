@@ -440,9 +440,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         args.put(KEY_RESMOD, new Integer(resourceMode));
         args.put(KEY_FLAGS, new Integer(flags));
         
-        if(impl.getActiveUser(ctx) != null && impl.getActiveUserAuth(ctx) != null) {
-            args.put(KEY_HTTPUSER, impl.getActiveUser(ctx));
-            args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(ctx));
+        String activeUser = impl.getActiveUser(ctx);
+        String activeAuth = impl.getActiveUserAuth(ctx);
+        if(activeUser != null && activeAuth != null) {
+            args.put(KEY_HTTPUSER, activeUser);
+            args.put(KEY_HTTPPPASS, activeAuth);
         }
         
         CatalogController controller = new CatalogController(ctx);
