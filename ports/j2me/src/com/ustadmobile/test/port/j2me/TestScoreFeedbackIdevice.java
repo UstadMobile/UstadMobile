@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.test.port.j2me;
 
+import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import com.ustadmobile.port.j2me.view.idevice.ScoreFeedbackIdevice;
 import org.json.me.JSONException;
 import org.json.me.JSONObject;
@@ -77,6 +78,9 @@ public class TestScoreFeedbackIdevice extends TestCase{
         assertTrue("Basic expr: 1.1 > 1.0", 
             ScoreFeedbackIdevice.evaluateExpr(
             "eXeTinCan.getPkgStateScoreSync(\"epub:4f73f3b4-642f-49d4-b5ba-2a20d6d83159/Page_1.xhtml/0_1\") > 1.0 && eXeTinCan.getPkgStateScoreSync(\"epub:4f73f3b4-642f-49d4-b5ba-2a20d6d83159/Page_1.xhtml/0_2\") == 1", stateVals));
+        
+        assertTrue("Add up total score in state", 
+            ContainerViewHTMLCallback.calcTotalScore(stateVals) == 4.3);
         
     }
     

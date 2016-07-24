@@ -33,6 +33,7 @@ package com.ustadmobile.port.j2me.view.idevice;
 import com.sun.lwuit.html.HTMLElement;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
 import java.util.Vector;
 import org.json.me.JSONException;
 import org.json.me.JSONObject;
@@ -238,6 +239,10 @@ public class ScoreFeedbackIdevice extends IdeviceJ2ME{
             }
             
             String stateId = substr.substring(startPos, endPos);
+            if(stateId.equals(ContainerViewHTMLCallback.XAPI_RESULT_SCOREKEY)) {
+                return ContainerViewHTMLCallback.calcTotalScore(state);
+            }
+            
             stateId = "id" + stateId.substring(stateId.lastIndexOf('/') + 1);
             
             if(state.has(stateId)) {

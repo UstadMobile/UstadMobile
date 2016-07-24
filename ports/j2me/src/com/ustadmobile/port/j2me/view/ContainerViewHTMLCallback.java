@@ -85,6 +85,9 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     
     public static final String TEXTENTRY_INPUTEL_PREFIX = "exe_tei_textel_";
     
+    //The property in an xAPI result object tha tcontains the score
+    public static final String XAPI_RESULT_SCOREKEY = "score";
+    
     private Hashtable pageIdevices;
     
     public static final String[] IDEVICE_CSS_CLASSES = new String[]{"Idevice",
@@ -376,6 +379,33 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         }
 
         super.actionPerformed(evt, htmlC, element); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    /**
+     * Calculate the total score represented in the state object
+     * 
+     * @param state JSONObject with the state params from answering questions
+     * 
+     * @return the total score
+     */
+    public static double calcTotalScore(JSONObject state) {
+        double score = 0;
+        Enumeration keys = state.keys();
+        String key;
+        JSONObject currentObj;
+        while(keys.hasMoreElements()) {
+            key = (String)keys.nextElement();
+            try {
+                currentObj = state.optJSONObject(key);
+                if(currentObj != null && currentObj.has(XAPI_RESULT_SCOREKEY)) {
+                    score += currentObj.getDouble(XAPI_RESULT_SCOREKEY);
+                }
+            }catch(JSONException e) {
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 644, key, e);
+            }
+        }
+        
+        return score;
     }
 
 }
