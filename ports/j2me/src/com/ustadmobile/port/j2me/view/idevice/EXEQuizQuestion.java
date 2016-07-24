@@ -28,7 +28,7 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.view.exequizsupport;
+package com.ustadmobile.port.j2me.view.idevice;
 
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;

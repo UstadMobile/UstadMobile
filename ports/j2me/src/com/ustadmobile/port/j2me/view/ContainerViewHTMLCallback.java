@@ -44,7 +44,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizIdevice;
+import com.ustadmobile.port.j2me.view.idevice.EXEQuizIdevice;
 import com.ustadmobile.port.j2me.view.idevice.IdeviceJ2ME;
 import com.ustadmobile.port.j2me.view.idevice.TextEntryIdevice;
 import java.io.IOException;

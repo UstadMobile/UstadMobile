@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ustadmobile.port.j2me.view.exequizsupport;
+package com.ustadmobile.port.j2me.view.idevice;
 
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.html.HTMLComponent;
