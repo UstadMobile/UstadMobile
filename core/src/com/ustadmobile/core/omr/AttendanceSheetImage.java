@@ -3,18 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ustadmobile.core.model;
+package com.ustadmobile.core.omr;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.omr.OMRImageSource;
 import com.ustadmobile.core.omr.OMRRecognizer;
 import com.ustadmobile.core.omr.PerspectiveTransform;
-import java.util.concurrent.locks.ReentrantLock;
 import jp.sourceforge.qrcode.geom.Line;
 import jp.sourceforge.qrcode.geom.Point;
 import jp.sourceforge.qrcode.pattern.FinderPattern;
 import jp.sourceforge.qrcode.util.DebugCanvas;
+
+/* $if umplatform != 2  $ */
+import java.util.concurrent.locks.ReentrantLock;
+/* $endif */
 
 /**
  *
@@ -154,8 +157,9 @@ public class AttendanceSheetImage {
      */
     private RecognitionThread recognitionThread;
     
-    
+    /* $if umplatform != 2  $ */
     private ReentrantLock recognitionLock;
+    /* $endif */
     
     /**
      * Buffer used to get the grayscale version of an area in which we are looking
@@ -203,8 +207,10 @@ public class AttendanceSheetImage {
         this.finderPatternSize = finderPatternSize;
         this.zoneWidth = zoneWidth;
         this.zoneHeight = zoneHeight;
-        recognitionLock = new ReentrantLock();
         gs2BitmapThreshold = DEFAULT_GS2BITMAP_THRESHOLD;
+        /* $if umplatform != 2  $ */
+        recognitionLock = new ReentrantLock();
+        /* $endif$ */
     }
     
     public AttendanceSheetImage() {
@@ -344,12 +350,14 @@ public class AttendanceSheetImage {
      * @param buf 
      */
     public final void updateImageSource(byte[] buf) {
+        /* $if umplatform != 2  $ */
         try {
             recognitionLock.lock();
             imageSource.setBuffer(buf);
         }finally {
             recognitionLock.unlock();
         }
+        /* $endif$ */
     }
     
     /**
@@ -361,12 +369,14 @@ public class AttendanceSheetImage {
      * @param focusMoving
      */
     public void setSourceFocusMoving(boolean focusMoving) {
+        /* $if umplatform != 2  $ */
         try {
             recognitionLock.lock();
             this.focusMoving = focusMoving;
         }finally {
             recognitionLock.unlock();
         }
+        /* $endif$ */
     }
     
     
@@ -410,9 +420,11 @@ public class AttendanceSheetImage {
         }
     }
     
+    /* $if umplatform != 2  $ */
     public ReentrantLock getLock() {
         return recognitionLock;
     }
+    /* $endif */
     
     private void drawRect(int[] rect, DebugCanvas dc, int color) {
         dc.drawPolygon(new Point[] {
@@ -508,11 +520,16 @@ public class AttendanceSheetImage {
             imageSource.getWidth(), imageSource.getHeight());
         
         try {
+            /* $if umplatform != 2  $ */
             recognitionLock.lock();
+            /* $endif$ */
+            
             this.recognizedImage = src.copy();
             this.recognizedImage.setBuffer(src.getBuffer());
         }finally {
+            /* $if umplatform != 2  $ */
             recognitionLock.unlock();
+            /* $endif$ */
         }
     }
     
@@ -570,7 +587,7 @@ public class AttendanceSheetImage {
          is the width between top left and top right point multiplied by 
          omSearchDistance arg
         */
-        int omSearchDistancePx = Math.round(recognizedFinderPatterns[0][0].distanceOf(
+        int omSearchDistancePx = round(recognizedFinderPatterns[0][0].distanceOf(
             recognizedFinderPatterns[0][1]) * omSearchDistance);
         int omSearchWidth = omSearchDistancePx*2;
         int[][] gsBuf = new int[omSearchWidth][omSearchWidth];
@@ -594,8 +611,8 @@ public class AttendanceSheetImage {
         for(i = 0; i < numRows; i++) {
             for(j = 0; j < numCols; j++) {
                 ptIndex = ((i*numCols) + j) * 2;
-                imgPoint = new Point((int)Math.round(imgPts[ptIndex]),
-                    (int)Math.round(imgPts[ptIndex + 1]));
+                imgPoint = new Point((int)round(imgPts[ptIndex]),
+                    (int)round(imgPts[ptIndex + 1]));
                 
                 result[i][j] = isOMRMark(src, imgPoint, omSearchDistancePx,
                     gsThreshold, shadedThreshold, gsBuf, bmBuf, dc);
@@ -632,7 +649,7 @@ public class AttendanceSheetImage {
             0, 0, width,0,        width,height,      0,height);
         try {
             tx = tx.createInverse();
-        }catch(CloneNotSupportedException e) {
+        }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 90, null, e);
             tx = null;
         }
@@ -707,16 +724,22 @@ public class AttendanceSheetImage {
         
         public RecognitionThread() {
             try {
+                /* $if umplatform != 2  $ */
                 AttendanceSheetImage.this.recognitionLock.lock();
+                /* $endif$ */
                 this.src = AttendanceSheetImage.this.imageSource.copy();
             }finally {
+                /* $if umplatform != 2  $ */
                 AttendanceSheetImage.this.recognitionLock.unlock();
+                /* $endif */
             }
             
         }
         
         public void run() {
+            /* $if umplatform != 2  $ */
             ReentrantLock lock = AttendanceSheetImage.this.recognitionLock;
+            /* $endif$ */
             
             boolean running = true;
             boolean aligned = false;
@@ -729,12 +752,16 @@ public class AttendanceSheetImage {
             boolean focusMoving;
             while(running && !aligned) {
                 try {
+                    /* $if umplatform != 2  $ */
                     lock.lock();
+                    /* $endif */
                     focusMoving = AttendanceSheetImage.this.focusMoving;
                     running = threadActive;
                     newBuf = AttendanceSheetImage.this.imageSource.getBuffer();
                 }finally {
+                    /* $if umplatform != 2  $ */
                     lock.unlock();
+                    /* $endif$ */
                 }
                 
                 if(newBuf != lastChecked && !focusMoving) {
@@ -755,12 +782,16 @@ public class AttendanceSheetImage {
                     timeNow = System.currentTimeMillis();
                     if(timeNow - lastSaved > 10000 && newBuf != null) {
                         try {
+                            /* $if umplatform != 2  $ */
                             lock.lock();
+                            /* $endif$ */
                             AttendanceSheetImage.this.debugSaveListener.saveDebugImage(
                                 AttendanceSheetImage.this, src);
                             lastSaved = timeNow;
                         }finally {
+                            /* $if umplatform != 2  $ */
                             lock.unlock();
+                            /* $endif */
                         }
                     }
                 }
@@ -773,10 +804,14 @@ public class AttendanceSheetImage {
         
         public void stopProcesing() {
             try {
+                /* $if umplatform != 2  $ */
                 AttendanceSheetImage.this.recognitionLock.lock();
+                /* $endif$ */
                 threadActive = false;
             }finally {
+                /* $if umplatform != 2  $ */
                 AttendanceSheetImage.this.recognitionLock.unlock();
+                /* $endif$ */
             }
         }
         
@@ -789,4 +824,21 @@ public class AttendanceSheetImage {
     public static interface SheetRecognizedListener {
         public void sheetRecognized(AttendanceSheetImage sheet);
     }
+    
+    public static final int round(float val) {
+        /* $if umplatform != 2  $ */
+        return Math.round(val);
+        /* $else$
+            return (int) Math.floor( val + ( float )0.5 );
+        $endif $ */
+    }
+    
+    public static final long round(double val) {
+        /* $if umplatform != 2  $ */
+        return Math.round(val);
+        /* $else$ 
+            return (long) Math.floor( val + 0.5 );
+        $endif$*/
+    }
+    
 }

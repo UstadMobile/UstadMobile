@@ -45,14 +45,12 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 
 /* $if umplatform == 2  $
-    import org.json.me.JSONObject;
+    import org.json.me.*;
  $else$ */
-    import org.json.JSONObject;
+    import org.json.*;
 /* $endif$ */
 
 

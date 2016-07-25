@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.impl.qr;
 
-import com.ustadmobile.core.model.AttendanceSheetImage;
 import com.ustadmobile.core.omr.OMRImageSource;
 
 /**

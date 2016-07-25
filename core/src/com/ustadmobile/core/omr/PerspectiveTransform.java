@@ -45,8 +45,11 @@ import java.io.Serializable;
  *        Y = y' / w
  * </pre>
  */
+/* $if umplatform != 2  $ */
 public final class PerspectiveTransform implements Cloneable, Serializable {
-
+/* $else$ 
+public final class PerspectiveTransform {
+ $endif$ */    
     private static final double PERSPECTIVE_DIVIDE_EPSILON = 1.0e-10;
 
     /** An element of the transform matrix. */
@@ -857,8 +860,13 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
      * of the current transform.
      * @throws NoninvertibleTransformException if transform cannot be inverted
      */
-     public PerspectiveTransform createInverse()
-         throws IllegalStateException, CloneNotSupportedException {
+    /* $if umplatform != 2  $ */
+    public PerspectiveTransform createInverse() throws IllegalStateException, CloneNotSupportedException {
+    /* $else$
+    public PerspectiveTransform createInverse() throws IllegalStateException {
+    $endif$ */
+    
+    
 
 	     PerspectiveTransform tx = (PerspectiveTransform)clone();
 	     tx.makeAdjoint();
@@ -883,8 +891,11 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
      * to normalize the adjoint, it is both faster to compute and more
      * numerically stable than the true inverse.
      */
-    public PerspectiveTransform createAdjoint()
-    throws CloneNotSupportedException{
+    /* $if umplatform != 2  $ */
+    public PerspectiveTransform createAdjoint()throws CloneNotSupportedException{
+    /* $else$ 
+    public PerspectiveTransform createAdjoint() {
+    $endif$ */
 
 	    PerspectiveTransform tx = (PerspectiveTransform)clone();
 	    tx.makeAdjoint();
@@ -1161,12 +1172,16 @@ public final class PerspectiveTransform implements Cloneable, Serializable {
      * Returns a copy of this PerspectiveTransform object.
      */
     public Object clone() {
+        /* $if umplatform != 2  $ */
 	try {
 	    return super.clone();
 	} catch (CloneNotSupportedException e) {
 	    // this shouldn't happen, since we are Cloneable
 	    throw new InternalError();
 	}
+        /* $else$ 
+        throw new RuntimeException("ptx not on j2me yet");
+        $endif$ */
     }
 
 

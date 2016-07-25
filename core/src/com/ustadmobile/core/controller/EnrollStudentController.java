@@ -16,9 +16,6 @@ import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.json.JSONObject;
 
 /**
  *

@@ -400,13 +400,13 @@ public class OMRRecognizer {
         float scale;
         if(zoneRatio > imgRatio) {
             //the recognition zone is relatively wider than the image it's to be found within
-            marginX = Math.round(margin * imgWidth);
+            marginX = AttendanceSheetImage.round(margin * imgWidth);
             scale = (float)(imgWidth - (marginX*2))/(float)zoneWidth;
-            marginY = Math.round((imgHeight -  (zoneHeight * scale))/2);
+            marginY = AttendanceSheetImage.round((imgHeight -  (zoneHeight * scale))/2);
         }else {
-            marginY = Math.round(margin * imgHeight);
+            marginY = AttendanceSheetImage.round(margin * imgHeight);
             scale = (float)(imgHeight - (marginY*2))/(float)zoneHeight;
-            marginX = Math.round((imgWidth-  (zoneWidth * scale))/2);
+            marginX = AttendanceSheetImage.round((imgWidth-  (zoneWidth * scale))/2);
         }
         
         return new int[]{marginX, marginY, imgWidth-(marginX*2), imgHeight-(marginY*2)};
@@ -430,10 +430,10 @@ public class OMRRecognizer {
          * out of height hence the % 2 decision 
          */
         for(i = 0; i < distances.length; i++) {
-            pDistances[i] = Math.round(pgArea[i % 2 == 0 ? HEIGHT : WIDTH] * distances[i]);
+            pDistances[i] = AttendanceSheetImage.round(pgArea[i % 2 == 0 ? HEIGHT : WIDTH] * distances[i]);
         }
         
-        int size = Math.round(areaSize * pgArea[WIDTH]);
+        int size = AttendanceSheetImage.round(areaSize * pgArea[WIDTH]);
         
         //top left point
         result[0] = getSquareCoordsByCenter(

@@ -21,7 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.model.AttendanceSheetImage;
+import com.ustadmobile.core.omr.AttendanceSheetImage;
 import com.ustadmobile.core.omr.OMRImageSource;
 import com.ustadmobile.core.omr.OMRRecognizer;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -43,15 +43,13 @@ import jp.sourceforge.qrcode.pattern.FinderPattern;
 import jp.sourceforge.qrcode.reader.QRCodeImageReader;
 import jp.sourceforge.qrcode.util.DebugCanvas;
 
-import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_X_DISTANCE;
-import static com.ustadmobile.core.model.AttendanceSheetImage.DEFAULT_PAGE_Y_DISTANCE;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link AttendanceCameraFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AttendanceCameraFragment extends Fragment implements View.OnClickListener, Camera.PreviewCallback, View.OnTouchListener, CameraPreview.PreviewStartedCallback, AttendanceSheetImage.DebugSaveRequestListener, AttendanceSheetImage.SheetRecognizedListener {
+public class AttendanceCameraFragment extends Fragment implements  Camera.PreviewCallback, CameraPreview.PreviewStartedCallback, AttendanceSheetImage.DebugSaveRequestListener, AttendanceSheetImage.SheetRecognizedListener {
 
     private CameraPreview mPreview;
 
@@ -227,12 +225,8 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         View view = inflater.inflate(R.layout.fragment_attendance_camera, container, false);
 
         FrameLayout preview = (FrameLayout)view.findViewById(R.id.fragment_attendance_camera_preview);
-        View rectView = view.findViewById(R.id.fragment_attendance_rectangleview);
-        rectView.setOnTouchListener(this);
 
         mPreview = new CameraPreview(getContext(), this);
-        //mPreview.setOnTouchListener(this);
-
         mRectangleView = (RectangleView)view.findViewById(R.id.fragment_attendance_rectangleview);
 
         preview.addView(mPreview, 0);
@@ -258,10 +252,6 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
         mPreview.stopAndRelease();
         mCamera = null;
         super.onPause();
-    }
-
-    protected void handleImageCaptured(String fileURI) {
-        ((AttendanceActivity)getActivity()).processImage(fileURI);
     }
 
     @Override
@@ -355,41 +345,6 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
 
     }
 
-    @Override
-    public void onClick(View v) {
-        mCamera.takePicture(null, null, mPicture);
-    }
-
-    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
-
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-            File pictureFile = null;
-            Exception e = null;
-            try {
-                pictureFile = createImageFile();
-            }catch(IOException ioe) {
-                e = ioe;
-            }
-
-            if (pictureFile == null){
-                Log.d("cwtf", "Error creating media file, check storage permissions: " +
-                        e.getMessage());
-                return;
-            }
-
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
-                fos.close();
-                AttendanceCameraFragment.this.handleImageCaptured(pictureFile.getAbsolutePath());
-            } catch (FileNotFoundException fe) {
-                Log.d("cwtf", "File not found: " + fe.getMessage());
-            } catch (IOException ioe) {
-                Log.d("cwtf", "Error accessing file: " + ioe.getMessage());
-            }
-        }
-    };
 
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
@@ -404,19 +359,6 @@ public class AttendanceCameraFragment extends Fragment implements View.OnClickLi
     @Override
     public void onPreviewStarted(CameraPreview preview, Camera camera) {
         mSheet.startChecking();
-    }
-
-
-    @Override
-    public boolean onTouch(View view, MotionEvent motionEvent) {
-        int action = motionEvent.getAction();
-        switch(action) {
-            case MotionEvent.ACTION_DOWN:
-                //saveDebugImage(mSheet, mSheet.getImageSource());
-                break;
-        }
-
-        return false;
     }
 
     @Override

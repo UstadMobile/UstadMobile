@@ -5,8 +5,6 @@
  */
 package com.ustadmobile.core.omr;
 
-import com.ustadmobile.core.model.AttendanceSheetImage;
-
 /**
  *
  * @author mike

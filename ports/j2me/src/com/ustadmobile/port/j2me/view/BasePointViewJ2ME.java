@@ -72,6 +72,12 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     
     private Command removeFeedCmd;
     
+    /**
+     * At this point J2ME does not support the class list tab: there are always two tabs (downloaded and feeds)
+     */
+    public static final int NUM_TABS = 2;
+    
+    
     public BasePointViewJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
         super(args, context, backCommandEnabled);
         setLayout(new BorderLayout());
@@ -86,9 +92,9 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
             tabs = new Tabs(Component.TOP);
             tabs.addTabsFocusListener(this);
             tabs.setChangeTabOnFocus(true);
-            opdsContainers = new CatalogOPDSContainer[BasePointController.NUM_TABS];
+            opdsContainers = new CatalogOPDSContainer[NUM_TABS];
             Hashtable opdsArgs;
-            for(int i = 0; i < BasePointController.NUM_TABS; i++) {
+            for(int i = 0; i < NUM_TABS; i++) {
                 opdsArgs = basePointController.getCatalogOPDSArguments(i);
                 opdsContainers[i] = new CatalogOPDSContainer(opdsArgs, 
                     getContext(), this);
@@ -176,6 +182,10 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     }
 
     public void focusLost(Component cmpnt) {
+    }
+
+    public void setClassListVisible(boolean visible) {
+        //this is not supported on J2ME
     }
     
 }

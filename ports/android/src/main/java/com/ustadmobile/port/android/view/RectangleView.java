@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.graphics.Paint.Style;
 import android.view.View;
 
-import com.ustadmobile.core.model.AttendanceSheetImage;
+import com.ustadmobile.core.omr.AttendanceSheetImage;
 import com.ustadmobile.core.omr.OMRRecognizer;
 
 /**

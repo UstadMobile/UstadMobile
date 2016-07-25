@@ -61,7 +61,6 @@ import org.xmlpull.v1.XmlPullParserException;
     import org.json.me.*;
  $else$ */
     import org.json.*;
-    import jp.sourceforge.qrcode.data.QRCodeImage;
 /* $endif$ */
 
 
@@ -900,28 +899,6 @@ public abstract class UstadMobileSystemImpl {
     }
     
     /**
-     * Generates a QRCodeImage compatible object for the platform that we're on
-     * with the given input stream.
-     * 
-     * This is not implemented on J2ME / Micro Edition
-     * 
-     * @param sysImage System dependent image object: on Android: Bitmap, on J2ME: lwuit Image
-     * 
-     * @return QRCodeImage to use
-     */
-    public abstract QRCodeImage getQRCodeImage(Object sysImage);
-    
-    /**
-     * Make a QR Code Image from a byte array of jpeg data
-     * 
-     * @param data jpeg data
-     * @return QRCodeImage
-     */
-    /* $if umplatform != 2  $ */
-    public abstract QRCodeImage getQRCodeImage(InputStream in);
-    /* $endif$ */
-    
-    /**
      * Get access to the App View to do common UI activities (e.g. show
      * progress dialog, flash message, etc)
      * 
@@ -945,16 +922,7 @@ public abstract class UstadMobileSystemImpl {
      * @return ZipFileHandle representing the zip opened
      */
     public abstract ZipFileHandle openZip(String name) throws IOException;
-    
-    /**
-     * Generate a new Random UUID e.g. with Java 1.5+ using java.util.UUID.randomUUID()
-     * 
-     * @return a random UUID
-     */
-    public abstract String generateUUID();
-
-    
-    
+        
     /**
      * When selecting a link to download we can use the mime type parameter
      * x-umprofile to determine the type of device the link is intended for

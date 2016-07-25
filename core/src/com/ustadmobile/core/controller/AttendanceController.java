@@ -38,24 +38,21 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.model.AttendanceClassStudent;
 import com.ustadmobile.core.model.AttendanceRowModel;
-import com.ustadmobile.core.model.AttendanceSheetImage;
-import com.ustadmobile.core.omr.OMRRecognizer;
+import com.ustadmobile.core.omr.AttendanceSheetImage;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import jp.sourceforge.qrcode.QRCodeDecoder;
-import jp.sourceforge.qrcode.data.QRCodeImage;
 import jp.sourceforge.qrcode.util.DebugCanvas;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+/* $if umplatform == 2  $
+    import org.json.me.*;
+ $else$ */
+    import org.json.*;
+/* $endif$ */
+
 
 /**
  *
@@ -301,37 +298,12 @@ public class AttendanceController extends UstadBaseController{
             System.arraycopy(colMarks, 0, marks, (i*numRows), numRows);
         }
         
-        /*
-        boolean[][] marks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
-            sheet.getGrayscaleThreshold(), 0.5f, AttendanceSheetImage.DEFAULT_OMR_OFFSET_X_1,
-            AttendanceSheetImage.DEFAULT_OMR_OFFSET_Y,
-            AttendanceSheetImage.DEFAULT_OM_DISTANCE_X, OM_HEIGHT/2, 
-            AttendanceSheetImage.DEFAULT_OM_DISTANCE_Y, 
-            4, 33, dc);
-        */
         handleResultsDecoded(marks);
 
     }
     
     
-    /**
-     * Handle when the image has been taken by the underlying system - start
-     * processing the image in a new threads
-     * 
-     * @param sysImage - the image captured by the system - in a system dependent
-     * format e.g. Bitmap on Android, J2ME Image etc.
-     */
-    public void handlePictureAcquired(Object sysImage) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.getAppView(getContext()).showProgressDialog(impl.getString(
-            U.id.processing));
-        new ProcessAttendancePictureThread(sysImage, this).start();
-    }
-    
-    
-    
-    
-    public void handleResultsDecoded(boolean[][] opticalMarks) {
+   public void handleResultsDecoded(boolean[][] opticalMarks) {
         classStudents = loadClassStudentListFromPrefs(
             theClass.id, context);
 
@@ -369,7 +341,7 @@ public class AttendanceController extends UstadBaseController{
         //send to local LRS.
         String xAPIServer = LoginController.LLRS_XAPI_ENDPOINT;
         JSONArray stmtArr = new JSONArray();
-        String registrationUUID = impl.generateUUID();
+        String registrationUUID = UMTinCanUtil.generateUUID();
         
         JSONObject teacherStmt = makeAttendendedStmt(
             theClass.id, theClass.name,
@@ -466,56 +438,6 @@ public class AttendanceController extends UstadBaseController{
     }
 
     
-    /**
-     * Forks a thread to handle processing the image here.
-     */
-    public class ProcessAttendancePictureThread extends Thread {
-        
-        Object sysImage;
-        AttendanceController ctrl;
-        
-        public ProcessAttendancePictureThread(Object sysImage, AttendanceController ctrl) {
-            this.sysImage = sysImage;
-            this.ctrl = ctrl;
-        }
-        
-        public void run() {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            try {
-                QRCodeDecoder decoder = new QRCodeDecoder();
-                QRCodeImage img = UstadMobileSystemImpl.getInstance().getQRCodeImage(
-                        sysImage);
-                boolean[][] bitmapImg = OMRRecognizer.convertImgToBitmap(img);
-                img = null;
-
-                DebugCanvas debugCanvas = view.getDebugCanvas();
-
-                boolean[][] marks_1 = OMRRecognizer.getMarks(bitmapImg,
-                    OMR_AREA_OFFSET_X_1, OMR_AREA_OFFSET_Y_1,
-                    OM_WIDTH, OM_HEIGHT, OM_ROW_HEIGHT, 
-                    4, 33, debugCanvas);
-
-
-                boolean[][] marks_2 = OMRRecognizer.getMarks(bitmapImg,
-                        OMR_AREA_OFFSET_X_2, OMR_AREA_OFFSET_Y_2,
-                        OM_WIDTH, OM_HEIGHT, OM_ROW_HEIGHT,
-                        4, 33, debugCanvas);
-
-                boolean[][] marks = new boolean[marks_1.length + marks_2.length][];
-
-                System.arraycopy(marks_1, 0, marks, 0, marks_1.length);
-                System.arraycopy(marks_2, 0, marks, marks_1.length, marks_2.length);
-
-                view.saveDebugCanvasImage(true);
-                impl.getAppView(ctrl.getContext()).dismissProgressDialog();
-                ctrl.handleResultsDecoded(marks);
-            }catch(Exception e) {
-                view.saveDebugCanvasImage(false);
-                impl.getAppView(ctrl.getContext()).dismissProgressDialog();
-                impl.getAppView(ctrl.getContext()).showAlertDialog("Decode failed", "Failed");
-            }
-        }
-    }
     
     
 }

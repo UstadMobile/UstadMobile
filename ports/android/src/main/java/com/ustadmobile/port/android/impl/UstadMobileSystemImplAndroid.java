@@ -813,20 +813,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return Xml.newSerializer();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public QRCodeImage getQRCodeImage(Object sysImage) {
-        Bitmap bitmap = (Bitmap)sysImage;
-        return new AndroidQRCodeImage(bitmap);
-    }
-
-    @Override
-    public QRCodeImage getQRCodeImage(InputStream in) {
-        return getQRCodeImage(BitmapFactory.decodeStream(in));
-    }
-
     @Override
     public AppView getAppView(Object context) {
         Activity activity = (Activity)context;
@@ -852,12 +838,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     public ZipFileHandle openZip(String name) throws IOException{
         return new ZipFileHandleAndroid(name);
     }
-
-    @Override
-    public String generateUUID() {
-        return UUID.randomUUID().toString();
-    }
-
 
     /**
      * Running on Android we will take the "full fat" version of any files... eg. files without
