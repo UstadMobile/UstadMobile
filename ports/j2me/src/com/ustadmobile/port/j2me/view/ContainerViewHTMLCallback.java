@@ -37,18 +37,24 @@ import com.sun.lwuit.html.DefaultHTMLCallback;
 import com.sun.lwuit.html.DocumentInfo;
 import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
+import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizIdevice;
+import com.ustadmobile.port.j2me.view.idevice.EXEQuizIdevice;
+import com.ustadmobile.port.j2me.view.idevice.IdeviceJ2ME;
+import com.ustadmobile.port.j2me.view.idevice.ScoreFeedbackIdevice;
+import com.ustadmobile.port.j2me.view.idevice.TextEntryIdevice;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import org.json.me.JSONObject;
+import org.json.me.JSONException;
 
 /**
  *
@@ -62,8 +68,6 @@ import org.json.me.JSONObject;
 public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
     private ContainerViewJ2ME view;
-
-    private Hashtable mcqQuizzes;
     
     boolean fixedPage = true;
 
@@ -76,11 +80,41 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     private String registrationUUID;
     
     private JSONObject state;
+    
+    public static final String IDEVICE_CLASS_TEXTENTRY = "TextEntryIdevice";
+    
+    public static final String TEXTENTRY_INPUTEL_PREFIX = "exe_tei_textel_";
+    
+    //The property in an xAPI result object tha tcontains the score
+    public static final String XAPI_RESULT_SCOREKEY = "score";
+    
+    private Hashtable pageIdevices;
+    
+    public static final String[] IDEVICE_CSS_CLASSES = new String[]{"Idevice",
+        "iDevice_wrapper"};
+    
+    /**
+     * Marked as true when the dom has been changed and then refreshDOM needs
+     * to be called
+     */
+    private boolean domInvalid;
+    
+    /**
+     * Hashtable of idevice classes to the class that will be used to handle it
+     */
+    private static Hashtable ideviceClasses;
         
     static {
         mediaExtensions = new Hashtable();
         mediaExtensions.put("mp3", "audio/mpeg");
+        
+        ideviceClasses = new Hashtable();
+        ideviceClasses.put("TextEntryIdevice", TextEntryIdevice.class);
+        ideviceClasses.put("MultichoiceIdevice", EXEQuizIdevice.class);
+        ideviceClasses.put("ScoreFeedbackIdevice", ScoreFeedbackIdevice.class);
     }
+    
+    
 
     public static final int[] IDEVICE_TAG_IDS = new int[] { HTMLElement.TAG_DIV, 
         HTMLElement.TAG_SECTION, HTMLElement.TAG_ARTICLE};
@@ -98,6 +132,17 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         this.context = view.getContext();
     }
 
+    
+    /**
+     * Returns a hashtable mapped as id to Idevice object of the idevices that
+     * are on the page
+     * 
+     * @return Hashtable as above
+     */
+    public Hashtable getPageIdevices() {
+        return pageIdevices;
+    }
+    
     /**
      * Get the registration UUID to be used for Experience API statements
      * 
@@ -124,26 +169,25 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
         return state;
     }
     
+    public void invalidateDOM() {
+        domInvalid = true;
+    }
+    
+    protected void refreshDOM(HTMLComponent htmlC) {
+        htmlC.refreshDOM();
+        domInvalid = false;
+    }
+    
     /**
-     * Find eXeLearning generated MCQ questions and set them up so we can
-     * dynamically show / hide the feedback for those answers
-     *
-     * @param htmlC HTML Componet in question
-     * @return true if the DOM was modified - false otherwise
+     * Return the full TinCan ID of the current page: e.g.
+     * epub:uuid/page-item-id
+     * 
+     * @return Full TinCan ID for the page as above
      */
-    private boolean findEXEMCQs(HTMLComponent htmlC) {
-        Vector quizElements = htmlC.getDOM().getDescendantsByClass("MultichoiceIdevice", 
-                IDEVICE_TAG_IDS);   
-        
-        if(quizElements.size() == 0) {
-            return false;
-        }
-        
+    public String getPageTinCanID(HTMLComponent htmlC) {
         if(containerTinCanID == null && view != null) {
             containerTinCanID = view.getContainerTinCanID();
         }
-        
-        mcqQuizzes = new Hashtable();
         
         String pageIdSection = null;
         if(view != null) {
@@ -152,32 +196,7 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
             pageIdSection = UMFileUtil.getFilename(htmlC.getPageURL());
         }
         
-        String pageTinCanID = containerTinCanID + '/' + pageIdSection;
-            
-        HTMLElement quizEl;
-        int numQuizzes = 0;
-        for(int i = 0; i < quizElements.size(); i++) {
-            quizEl = (HTMLElement)quizElements.elementAt(i);
-            
-            //There can be faulty empty idevices generated somehow... skip if this is what we found
-            if(quizEl.getNumChildren() == 0) {
-                continue;
-            }
-            
-            EXEQuizIdevice quizDevice = new EXEQuizIdevice(
-                    (HTMLElement)quizElements.elementAt(i), htmlC, context, 
-                    pageTinCanID, i);
-            quizDevice.setRegistrationUUID(registrationUUID);
-            quizDevice.setState(state);
-            mcqQuizzes.put(quizDevice.getID(), quizDevice);
-            numQuizzes++;
-        }
-        
-        return numQuizzes > 0;
-    }
-    
-    public Hashtable getMCQQuizzes() {
-        return mcqQuizzes;
+        return containerTinCanID + '/' + pageIdSection;
     }
 
     /**
@@ -220,6 +239,24 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
 
         return removed > 0;
     }
+    
+    
+    /**
+     * Call this method before the page is going to be unloaded : triggers idevices
+     * to save their values etc.
+     */
+    public void beforeUnload(HTMLComponent htmlC) {
+        if(pageIdevices == null) {
+            return;//first page has not yet actually loaded
+        }
+        
+        Enumeration idevices = pageIdevices.elements();
+        IdeviceJ2ME idevice;
+        while(idevices.hasMoreElements()) {
+            idevice = (IdeviceJ2ME)idevices.nextElement();
+            idevice.beforeUnload(htmlC);
+        }
+    }
 
     public boolean linkClicked(HTMLComponent htmlC, String url) {
         parsingError(600, "a", "src", url, "link click");
@@ -245,71 +282,130 @@ public class ContainerViewHTMLCallback extends DefaultHTMLCallback {
     }
     
     
-
+    protected boolean findIdevices(HTMLComponent htmlC) {
+        Vector ideviceEls = htmlC.getDOM().getDescendantsByClasses(IDEVICE_CSS_CLASSES, 
+            IDEVICE_TAG_IDS);
+        HTMLElement currentEl;
+        Enumeration ideviceCSSClasses;
+        String ideviceClassName;
+        String pageTinCanID = getPageTinCanID(htmlC);
+        boolean modified = false;
+        
+        boolean ideviceFound;
+        for(int i = 0; i < ideviceEls.size(); i++) {
+            currentEl = (HTMLElement)ideviceEls.elementAt(i);
+            ideviceFound = false;
+            ideviceCSSClasses = ContainerViewHTMLCallback.ideviceClasses.keys();
+            while(ideviceCSSClasses.hasMoreElements() && !ideviceFound) {
+                ideviceClassName = (String)ideviceCSSClasses.nextElement();
+                if(currentEl.hasClass(ideviceClassName)) {
+                    IdeviceJ2ME idevice = null;
+                    try {
+                        idevice = (IdeviceJ2ME)((Class)ideviceClasses.get(ideviceClassName)).newInstance();
+                        idevice.setHtmlC(htmlC);
+                        idevice.setHtmlCallback(this);
+                        idevice.setIdeviceElement(currentEl);
+                        idevice.setPageTinCanId(pageTinCanID);
+                        idevice.setState(state);
+                        idevice.setRegistrationUUID(registrationUUID);
+                        modified = idevice.enhance() || modified;
+                        pageIdevices.put(idevice.getId(), idevice);
+                        ideviceFound = true;
+                    }catch(Exception e) {
+                        UstadMobileSystemImpl.l(UMLog.ERROR, i, 
+                            currentEl.getAttributeById(HTMLElement.ATTR_ID), e);
+                    }
+                }
+            }
+        }
+        
+        return modified;
+    }
+    
+    
     public void pageStatusChanged(HTMLComponent htmlC, int status, String url) {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 604, url+':'+status);
         if (status == STATUS_REQUESTED) {
             fixedPage = false;
+            domInvalid = false;
+            if(pageIdevices == null) {
+                pageIdevices= new Hashtable();
+            }else {
+                pageIdevices.clear();
+            }
         }else if (status == STATUS_DISPLAYED && fixedPage == false) {
             if(view != null) {
                 view.handlePageChange(url);
             }
             
             boolean modified = false;
-            mcqQuizzes = new Hashtable();
-
-            modified = findEXEMCQs(htmlC) || modified;
             modified = hideExtras(htmlC) || modified;
-            
-            Enumeration quizzesOnPage = mcqQuizzes.elements();
-            EXEQuizIdevice currentQuiz;
-            while(quizzesOnPage.hasMoreElements()) {
-                currentQuiz = (EXEQuizIdevice)quizzesOnPage.nextElement();
-                modified = currentQuiz.formatQuestionsAsTables() || modified;
-            }
-            currentQuiz = null;
-
+            modified = findIdevices(htmlC);
             if (modified) {
                 htmlC.refreshDOM();
             }
 
             fixedPage = true;
         }
-
+        
         super.pageStatusChanged(htmlC, status, url);
     }
 
     public void dataChanged(int type, int index, HTMLComponent htmlC, TextField textField, HTMLElement element) {
-        super.dataChanged(type, index, htmlC, textField, element); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {
-        boolean domChanged = false;
-        if (element != null && element.getTagId() == HTMLElement.TAG_INPUT) {
-            String inputType = element.getAttributeById(HTMLElement.ATTR_TYPE);
-            if (inputType.equalsIgnoreCase("radio")) {
-                String mcqName = element.getAttributeById(HTMLElement.ATTR_NAME);
-                if (mcqName == null || !mcqName.startsWith("option")) {
-                    return;//this is not an eXeLearning MCQ
-                }
-
-                //In eXeLearning the questionID comes immediately after the option in name
-                //e.g. "option20_67" MCQ ID = 20_67
-                String quizID = mcqName.substring(6, mcqName.indexOf('_', 6));
-                
-                if (mcqQuizzes.containsKey(quizID)) {
-                    EXEQuizIdevice quizDevice = (EXEQuizIdevice)mcqQuizzes.get(quizID);
-                    domChanged = quizDevice.handleSelectAnswer(element) || domChanged;
-                }
-
+        Enumeration idevices = pageIdevices.elements();
+        IdeviceJ2ME idevice;
+        while(idevices.hasMoreElements()) {
+            idevice = (IdeviceJ2ME)idevices.nextElement();
+            if(element.isDescendantOf(idevice.getIdeviceElement())) {
+                idevice.dataChanged(index, index, htmlC, textField, element);
             }
         }
         
-        if(domChanged) {
-            htmlC.refreshDOM();
+        super.dataChanged(type, index, htmlC, textField, element); 
+    }
+
+    public void actionPerformed(ActionEvent evt, HTMLComponent htmlC, HTMLElement element) {        
+        Enumeration idevices = pageIdevices.elements();
+        IdeviceJ2ME idevice;
+        while(idevices.hasMoreElements()) {
+            idevice = (IdeviceJ2ME)idevices.nextElement();
+            if(element.isDescendantOf(idevice.getIdeviceElement())) {
+                idevice.actionPerformed(evt, htmlC, element);
+            }
+        }
+        
+        if(domInvalid) {
+            refreshDOM(htmlC);
         }
 
         super.actionPerformed(evt, htmlC, element); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    /**
+     * Calculate the total score represented in the state object
+     * 
+     * @param state JSONObject with the state params from answering questions
+     * 
+     * @return the total score
+     */
+    public static double calcTotalScore(JSONObject state) {
+        double score = 0;
+        Enumeration keys = state.keys();
+        String key;
+        JSONObject currentObj;
+        while(keys.hasMoreElements()) {
+            key = (String)keys.nextElement();
+            try {
+                currentObj = state.optJSONObject(key);
+                if(currentObj != null && currentObj.has(XAPI_RESULT_SCOREKEY)) {
+                    score += currentObj.getDouble(XAPI_RESULT_SCOREKEY);
+                }
+            }catch(JSONException e) {
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 644, key, e);
+            }
+        }
+        
+        return score;
     }
 
 }

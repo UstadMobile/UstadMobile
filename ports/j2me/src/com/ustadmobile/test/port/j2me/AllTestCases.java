@@ -48,50 +48,38 @@ public class AllTestCases extends TestCase {
     public AllTestCases(){
         setName("All Test Cases");
     }
-
+    
     public Test suite() {
         
         try {
             TestUtils.getInstance().loadTestSettingsResource();
-            
-            //Testing..
-            //UstadMobileSystemImpl.getInstance().setActiveUser("testuser");
+
         }catch(Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e.toString());
         }
-        
-       
+         
         TestSuite allTestSuite = new TestSuite("AllTestSuite");
+        
+        allTestSuite.addTest(new TestScoreFeedbackIdevice());
         allTestSuite.addTest(new TestPageSplitter());
         allTestSuite.addTest(new TestHTTPResult());
         allTestSuite.addTest(new TestHTTPCacheDir());
 
         ///allTestSuite.addTest(new com.ustadmobile.test.core.TestUMTinCanUtils());
-        allTestSuite.addTest(new TestJ2MEEXEMCQ());
-        
-        //TODO: Uncomment me
-        //allTestSuite.addTest(new TestTinCanLogManagerJ2ME());
-        
+        allTestSuite.addTest(new TestJ2MEEXEMCQ());       
+        allTestSuite.addTest(new TestTinCanLogManagerJ2ME());        
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestLocalization());
         //allTestSuite.addTest(new com.ustadmobile.test.core.TestDownload());
-        allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());
-        
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestFileImpl());      
         allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());
-        allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());
-        
-        //allTestSuite.addTest(new com.ustadmobile.test.core.TestCacheAndStorageDir());
-        //allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());
+        allTestSuite.addTest(new com.ustadmobile.test.core.TestUMFileUtilFilename());        
         allTestSuite.addTest(new com.ustadmobile.test.core.TestCatalogController()); 
-        //allTestSuite.addTest(new TestReadMp3FromEPUB());
-        
-        
+        //allTestSuite.addTest(new TestReadMp3FromEPUB());        
 //        allTestSuite.addTest(new TestCatalogControllerAcquire());
 //        allTestSuite.addTest(new TestLoginRegisterUser());       
 //        allTestSuite.addTest(new TestTestUtils());         
-//
 //        allTestSuite.addTest(new TestDownload()); 
-//        
 //        allTestSuite.addTest(new TestReadMp3FromZip());
 //        allTestSuite.addTest(new TestContainerController()); 
 //        allTestSuite.addTest(new TestLogin());
@@ -99,10 +87,8 @@ public class AllTestCases extends TestCase {
 //        allTestSuite.addTest(new TestCatalogEntryInfo());
 //        allTestSuite.addTest(new TestCatalogView()); 
 //        allTestSuite.addTest(new TestUMFileResolveLink());
-//        
 //        //temporarily disabling download because too large
 //        //allTestSuite.addTest(new TestTransferJobList());
-//        
 //        allTestSuite.addTest(new TestUstadOCF());
 //        allTestSuite.addTest(new TestCatalogEntryInfo());
 //        allTestSuite.addTest(new TestPreferences());
@@ -129,9 +115,7 @@ public class AllTestCases extends TestCase {
 //        //allTestSuite.addTest(new TestJ2MECatalogView()); // already a core test
 //        allTestSuite.addTest(new TestHttpResult());
 //        allTestSuite.addTest(new TestEPUBRead());
-//        
-        
-        return allTestSuite;
 
+        return allTestSuite;
     }
 }

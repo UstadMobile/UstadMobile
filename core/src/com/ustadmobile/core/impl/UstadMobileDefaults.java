@@ -35,6 +35,11 @@ public class UstadMobileDefaults {
     public static final String DEFAULT_XAPI_SERVER = 
             "http://umcloud1.ustadmobile.com/umlrs/";
             
+    /**
+     * The statement relative location relative to endpoint
+     */
+    public static final String DEFAULT_XAPI_STATEMENTS_PATH = 
+            "/statements/";
     
     /**
      * The default OPDS server: this can be absolute or relative to the

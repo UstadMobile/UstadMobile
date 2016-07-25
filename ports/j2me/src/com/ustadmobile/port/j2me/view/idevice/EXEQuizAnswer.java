@@ -28,7 +28,7 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.port.j2me.view.exequizsupport;
+package com.ustadmobile.port.j2me.view.idevice;
 
 import com.sun.lwuit.html.HTMLCallback;
 import com.sun.lwuit.html.HTMLComponent;
@@ -67,9 +67,7 @@ public class EXEQuizAnswer implements PlayerListener{
     private HTMLElement feedbackElement;
     
     private HTMLElement feedbackElementParent;
-    
-    private HTMLComponent htmlC;
-    
+        
     private int feedbackElPosition;
     
     private boolean feedbackShowing = true;
@@ -84,11 +82,10 @@ public class EXEQuizAnswer implements PlayerListener{
      * @param answerEl the HTMLElement containing the answer itself (e.g. text and radio button)
      * @param formEl The form element containing the entire question form (used to find the feedback element)
      */
-    public EXEQuizAnswer(int answerIndex, EXEQuizQuestion question, HTMLElement answerEl, HTMLElement formEl, HTMLComponent htmlC) {
+    public EXEQuizAnswer(int answerIndex, EXEQuizQuestion question, HTMLElement answerEl, HTMLElement formEl) {
         this.answerIndex = answerIndex;
         this.question = question;
         this.answerElement = answerEl;
-        this.htmlC = htmlC;
         setupFromElement(answerEl, formEl);
     }
     
@@ -170,7 +167,7 @@ public class EXEQuizAnswer implements PlayerListener{
      * Show the feedback for this answer: this is done only after hideFeedback
      * by putting the element back into it's original parent
      */
-    public void showFeedback() {
+    public void showFeedback(HTMLComponent htmlC) {
         if(!feedbackShowing && feedbackElement != null) {
             feedbackElementParent.addChild(feedbackElement);
             feedbackShowing = true;
@@ -179,8 +176,8 @@ public class EXEQuizAnswer implements PlayerListener{
             Vector audioTags = feedbackElement.getDescendantsByTagId(HTMLElement.TAG_AUDIO);
             String branchType = feedbackElement.getAttribute("data-branch-type");
             
-            if(audioTags != null && audioTags.size() > 0 && htmlC.getHTMLCallback() != null) {
-                ContainerViewHTMLCallback htmlCB = (ContainerViewHTMLCallback)htmlC.getHTMLCallback();
+            if(audioTags != null && audioTags.size() > 0 && question.iDevice.getHtmlCallback() != null) {
+                ContainerViewHTMLCallback htmlCB = question.iDevice.getHtmlCallback();
                 HTMLElement audioEl = (HTMLElement)audioTags.elementAt(0);
                 PlayerListener pl = null;
                 if(branchType != null && branchType.equals("aftermedia")) {
@@ -192,7 +189,7 @@ public class EXEQuizAnswer implements PlayerListener{
                     htmlC, null, audioEl, pl);
                 */
             }else if(branchType != null && branchType.equals("immediate")) {
-                goRedirect();
+                goRedirect(htmlC);
             }
         }
     }
@@ -254,7 +251,7 @@ public class EXEQuizAnswer implements PlayerListener{
         try {
             stmt.put("object", question.getTinCanObject());
             stmt.put("actor", UMTinCanUtil.makeActorFromActiveUser(
-                    question.iDevice.context));
+                    question.iDevice.getContext()));
             stmt.put("verb", UMTinCanUtil.makeVerbObject(
                 "http://adlnet.gov/expapi/verbs/answered", "en-US", "answered"));
             JSONObject resultObj = new JSONObject();
@@ -283,7 +280,7 @@ public class EXEQuizAnswer implements PlayerListener{
             JSONArray parentArr = new JSONArray();
             JSONObject parentObj = new JSONObject();
             
-            parentObj.put("id", question.iDevice.pageTinCanID);
+            parentObj.put("id", question.iDevice.getPageTinCanId());
             parentArr.put(parentObj);
             contextActivities.put("parent", parentArr);
             context.put("contextActivities", contextActivities);
@@ -300,7 +297,7 @@ public class EXEQuizAnswer implements PlayerListener{
      * Send the associated HTML component to the redirect if there is a redirect
      * specified for this answer
      */
-    protected void goRedirect() {
+    protected void goRedirect(HTMLComponent htmlC) {
         String branchStr = feedbackElement.getAttribute("data-branch-href");
         if(branchStr != null){ 
             String newURL = UMFileUtil.resolveLink(htmlC.getPageURL(), 
@@ -320,8 +317,8 @@ public class EXEQuizAnswer implements PlayerListener{
      */
     public void playerUpdate(Player player, String event, Object eventData) {
         if(event.equals(PlayerListener.END_OF_MEDIA)) {
-            //redirect time
-            goRedirect();
+            //redirect time - disable temporarily
+            //goRedirect();
         }
     }
     

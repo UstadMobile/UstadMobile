@@ -3,7 +3,7 @@
 # Preprocess and run tests
 #
 
-export JAVA_HOME=/opt/jdk1.8.0_60/
+export JAVA_HOME=/opt/jdk1.8.0_65/
 
 export PATH=$JAVA_HOME/bin:$PATH
 

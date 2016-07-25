@@ -29,8 +29,6 @@
 
  */
 package com.ustadmobile.port.j2me.app;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.util.Hashtable;
 import javax.microedition.rms.*;
 
@@ -41,14 +39,12 @@ import javax.microedition.rms.*;
 public class RMSUtils {
     
     static String REC_STORE;
-    //static String REC_STORE="UstadMobileApp";
     
     public RMSUtils(String recordName) {
         REC_STORE = recordName;
     }
     
     private RecordStore rs = null;
-    
         
     public void openRMS(){
         try{
@@ -120,22 +116,10 @@ public class RMSUtils {
         }catch (Exception e){}
     }
     
-    public void insertBytes(byte[] recordBytes){
-        //byte[] recordBytes = record.getBytes();
-        
+    public void insertBytes(byte[] recordBytes){   
         try{
             rs.addRecord(recordBytes, 0, recordBytes.length);
         }catch(Exception e) {}
-        
-        /*
-        try{
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DataOutputStream dos = new DataOutputStream(baos);
-            dos.writeShort(recordBytes.length);
-            dos.write(recordBytes);
-            dos.write(recordBytes);
-            rs.addRecord(recordBytes, 0, recordBytes.length);
-        }catch (Exception e){}*/
     }
     
     public byte[] readBytes(){
@@ -147,13 +131,10 @@ public class RMSUtils {
                     records = new byte[rs.getRecordSize(i)];
                 }
                 length = rs.getRecord(i, records, 0);
-                //ht.put(String.valueOf(i),new String(records, 0, length));
             }
-            //return ht;
             return records;
         }catch (Exception e){}
         return null;
     }
     
-     
 }

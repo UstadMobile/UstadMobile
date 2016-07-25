@@ -463,7 +463,7 @@ public class UMFileUtil {
        }
     }
     
-    private static boolean isWhiteSpace(char c) {
+    public static final boolean isWhiteSpace(char c) {
         if(c == ' ' || c == '\n' || c == '\t' || c == '\r') {
             return true;
         }else {

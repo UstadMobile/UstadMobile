@@ -142,6 +142,11 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final int IDX_STATUS = 2;
     
+    /**
+     * Schedule delay: The time since the logMananger initiates tincan queue 
+     * and the time between its occurrence
+     */
+    public static long SCHEDULE_DELAY= 2*60*1000;
     
     
     /**

@@ -107,6 +107,28 @@ public class UMTinCanUtil {
     }
     
     /**
+     * Generate a JSONObject representing an Activity which is simply referenced
+     * by it's ID.  Using just the ID is a good idea when the activity is already
+     * known on the server end anyway.
+     * 
+     * @param id ID of the Activity object
+     * @return JSONObject representing the Activity
+     */
+    public static JSONObject makeActivityObjectById(String id) {
+        JSONObject obj = new JSONObject();
+        Object definitionVal = null;
+        try {
+            obj.put("id", id);
+            obj.put("objectType", "Activity");
+            obj.put("definition", definitionVal);
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 195, null, e);
+        }
+        
+        return obj;
+    }
+    
+    /**
      * TinCan generally wants values to be read as a language map e.g.
      * { 'en-US' : 'Cant spell color' } .  In the case of content in a given
      * language there is really only ever one value

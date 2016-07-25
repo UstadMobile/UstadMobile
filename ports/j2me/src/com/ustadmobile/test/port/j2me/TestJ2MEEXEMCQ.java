@@ -43,9 +43,9 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.j2me.view.ContainerViewHTMLCallback;
-import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizAnswer;
-import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizIdevice;
-import com.ustadmobile.port.j2me.view.exequizsupport.EXEQuizQuestion;
+import com.ustadmobile.port.j2me.view.idevice.EXEQuizAnswer;
+import com.ustadmobile.port.j2me.view.idevice.EXEQuizIdevice;
+import com.ustadmobile.port.j2me.view.idevice.EXEQuizQuestion;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,7 +91,8 @@ public class TestJ2MEEXEMCQ extends TestCase {
         
         assertEquals("Page status is ready", HTMLCallback.STATUS_COMPLETED,
             htmlC.getPageStatus());
-        Hashtable exeQuizzes = callback.getMCQQuizzes();
+        
+        Hashtable exeQuizzes = callback.getPageIdevices();
         assertTrue("Container view has found quizzes", exeQuizzes != null);
         String ideviceID = (String)exeQuizzes.keys().nextElement();
         EXEQuizIdevice idevice = (EXEQuizIdevice)exeQuizzes.get(ideviceID);

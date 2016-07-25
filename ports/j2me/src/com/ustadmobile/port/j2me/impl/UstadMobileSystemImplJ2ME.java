@@ -49,10 +49,12 @@ import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
@@ -187,7 +189,20 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc}
      */
     public boolean queueTinCanStatement(JSONObject stmt, Object context) {
-        l(UMLog.DEBUG, 538, "");        
+        l(UMLog.DEBUG, 538, null);
+
+        if(logManager == null) {
+            l(UMLog.DEBUG, 000, null);
+            return false;
+        }
+        
+        try {
+            if(stmt.has("id")){
+                stmt.put("id", UMTinCanUtil.generateUUID());
+            }
+        } catch (JSONException ex) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 639 , null, ex);
+        }
         try {
             return logManager.queueStatement(getActiveUser(context), stmt);
         } catch (IOException ex) {
@@ -196,9 +211,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         return false;
     }
-    
-    
-    
     
     /**
      * {@inheritDoc}
@@ -212,10 +224,28 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             l(UMLog.CRITICAL, 7, baseSystemDir, e);
         }
         
-        logSendTimer = new Timer();
-        logManager = new TinCanLogManagerJ2ME();
-        //Run the log sender every 2 mins
-        logSendTimer.scheduleAtFixedRate(logManager, (2*60*1000), (2*60*1000));
+        //logManager = new TinCanLogManagerJ2ME("");
+        /*Check if the log manager timer task is supposed to 
+        start. This might be set to false in some cases(eg: testing)
+        */
+        if (TinCanLogManagerJ2ME.AUTOSTART == true){
+            logSendTimer = new Timer();
+            /*Get the log directory. Generate if it doesn't exist*/
+            String tincanDir = UMFileUtil.joinPaths(new String[]{
+                findSystemBaseDir(), TinCanLogManagerJ2ME.LOG_FOLDER});
+            try {
+                makeDirectory(tincanDir);
+            } catch (IOException ex) {
+                l(UMLog.CRITICAL, 7, tincanDir, ex);
+            }
+           
+            String tincanEndpointURL = UstadMobileDefaults.DEFAULT_XAPI_SERVER;
+            logManager = new TinCanLogManagerJ2ME(tincanDir, tincanEndpointURL);
+            /*SCHEDULE the log manager*/
+            logSendTimer.scheduleAtFixedRate(logManager, SCHEDULE_DELAY,
+                                                SCHEDULE_DELAY);
+        }
+        
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
         boolean isRTL = getDirection() == UstadMobileConstants.DIR_RTL;
