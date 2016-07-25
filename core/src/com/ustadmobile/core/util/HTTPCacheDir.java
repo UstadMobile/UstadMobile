@@ -274,6 +274,9 @@ public class HTTPCacheDir {
      * @param filename Optional - can be null: A specific filename to use to 
      * save the entry in the cache.  When the same item might come from different
      * URLs this can be useful - e.g. OPDS catalogs by catalog id.
+     * @param headers Option headers to be sent with the request.  Headers should be kept lower case 
+     *  If cache-control no-cache is present any cached entry will not be used. If must-revalidate
+     *  is present and a cached entry is present it will be revalidated even if it's recent
      * @param resultBuf Optional: An Array of 1 HTTPResult that in case we do wind
      * up directly fetching the result from the network this will be referenced
      * to the HTTPResult object.
@@ -288,6 +291,8 @@ public class HTTPCacheDir {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         boolean isValid = false;
         String dataURL = null;
+        boolean noCache = false;
+        boolean mustRevalidate = false;
         
         if(url.startsWith("data:")) {
             dataURL = url;
@@ -303,12 +308,18 @@ public class HTTPCacheDir {
             entry = getEntryByFilename(filename);
         }
         
-        if (entry != null) {
+        if(headers != null && headers.containsKey("cache-control")) {
+            Hashtable cacheCtrl = UMFileUtil.parseParams((String)headers.get("cache-control"), ';');
+            noCache = cacheCtrl.containsKey("no-cache");
+            mustRevalidate = cacheCtrl.containsKey("must-revalidate");
+        }
+        
+        if (entry != null && !noCache) {
             try {
                 long timeNow = System.currentTimeMillis();
                 long entryExpires = entry.getLong(IDX_EXPIRES);
 
-                if (timeNow < entryExpires) {
+                if (timeNow < entryExpires && !mustRevalidate) {
                     //we can serve it direct from the cache - no validation needed
                     isValid = true;
                     impl.l(UMLog.DEBUG, 606, url);
@@ -353,8 +364,8 @@ public class HTTPCacheDir {
             impl.l(UMLog.ERROR, 162, url, e);
         }
         
-        //Looks like we are offline... use anything we have 
-        if(entry != null) {
+        //Looks like we are offline... use anything we have unless no-cache / must-revalidate are set
+        if(entry != null && !noCache && !mustRevalidate) {
             return UMFileUtil.joinPaths(new String[]{ dirName, entry.optString(
                 IDX_FILENAME)});
         }else {

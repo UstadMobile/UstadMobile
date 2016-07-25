@@ -141,10 +141,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
 
-    public void loadCatalog(final String url, int resourceMode) {
+    public void loadCatalog(final String url, int resourceMode, int flags) {
         isLoading = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        CatalogController.makeControllerForView(this, url, resourceMode, mFetchFlags, this);
+        CatalogController.makeControllerForView(this, url, resourceMode, flags, this);
     }
 
     /**
@@ -154,7 +154,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         String catalogURL = getArguments().getString(CatalogController.KEY_URL);
         int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
-        loadCatalog(catalogURL, resourceMode);
+        loadCatalog(catalogURL, resourceMode, mFetchFlags);
     }
 
 
@@ -467,7 +467,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void onRefresh() {
         if(!isLoading) {
-            loadCatalog();
+            loadCatalog(getArguments().getString(CatalogController.KEY_URL),
+                    getArguments().getInt(CatalogController.KEY_RESMOD, -1),
+                    CatalogController.CACHE_DISABLED);
         }
     }
 }

@@ -150,6 +150,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public static final int SORT_BY_TITLE = 128;
     
+    /**
+     * Flag indicates that the cache must be disabled: applies the cache-control
+     * header no-cache
+     */
+    public static final int CACHE_DISABLED = 256;
     
     public static final int ENTRY_ACQUISITION_STATUS = 0;
     
@@ -1050,6 +1055,13 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         impl.getLogger().l(UMLog.INFO, 307, url);
         
         Hashtable headers = makeAuthHeaders(httpUsername, httpPassword);
+        
+        //set headers as per flags
+        if((flags & CACHE_DISABLED) == CACHE_DISABLED) {
+            headers.put("cache-control", "no-cache");
+        }
+        
+        
         InputStream catalogIn = null;
         
         if(url.startsWith("opds:///")) {
