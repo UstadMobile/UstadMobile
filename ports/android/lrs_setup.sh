@@ -156,6 +156,7 @@ else
 fi
 
 
+mkdir LRSAndroid/service
 
 cp -r LRSCode/adl_lrs LRSAndroid/service/
 cp -r LRSCode/oauth2_provider LRSAndroid/service/
@@ -200,6 +201,22 @@ sed -i.bak "" ${URLS_FILE}
 
 
 
+#Set up Django 1.6.6 in virtualenv
+if [ "${NEW_BUILD}" == "True" ]; then
+    if [ -d "dj16" ]; then
+        rm -rf "dj16"
+    fi
+fi
+
+virtualenv --no-site-packages dj16
+cd dj16
+source bin/activate
+cd ..
+pip install django==1.6.1
+pip install django_endless_pagination south shortuuid django_extensions pytz bencode isodate pycrypto oauth2 django-jsonify jsonfield rfc3987 amqp requests
+
+
+
 cd LRSAndroid
 
 #Create version asset
@@ -223,6 +240,14 @@ cd ../service/
 echo "Setting up database for lrs.."
 echo "LRS Sync database: " > lrs_build_output.log
 python manage.py syncdb --noinput >> lrs_build_output.log
+if [ $? != 0 ];then
+	echo "Creating database failed."
+	exit 1;
+else
+	echo "Database created OK. Leaving Virtual environment.."
+fi
+
+deactivate
 
 cd ..
 echo "Building Python and LRS for Android.."
