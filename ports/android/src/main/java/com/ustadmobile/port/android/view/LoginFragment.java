@@ -85,6 +85,7 @@ public class LoginFragment extends Fragment {
                 advancedCheckbox.setText(loginActivity.mAdvancedLabel);
                 advancedCheckbox.setOnCheckedChangeListener(loginActivity);
                 ((TextView)viewGroup.findViewById(R.id.login_server_label)).setText(loginActivity.mServerLabel);
+                ((TextView)viewGroup.findViewById(R.id.login_version_label)).setText(loginActivity.mVersionLabel);
                 break;
             case LoginView.SECTION_REGISTER:
                 Spinner countrySpinner = (Spinner)viewGroup.findViewById(R.id.login_registercountry);

@@ -37,8 +37,10 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
+import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
@@ -568,6 +570,9 @@ public class LoginController extends UstadBaseController{
         view.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
         view.setAdvancedLabel(impl.getString(U.id.advanced));
         view.setServerLabel(impl.getString(U.id.server));
+        view.setVersionLabel(impl.getVersion(context) + " - " +
+            HTTPCacheDir.makeHTTPDate(impl.getBuildTime()));
+            
         
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,

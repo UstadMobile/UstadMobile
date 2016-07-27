@@ -97,6 +97,8 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
     protected String mRegisterRegcodeHint;
 
+    protected String mVersionLabel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -195,6 +197,11 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
     @Override
     public void setServerLabel(String serverLabel) {
         this.mServerLabel = serverLabel;
+    }
+
+    @Override
+    public void setVersionLabel(String versionLabel) {
+        mVersionLabel = versionLabel;
     }
 
     @Override

@@ -61,6 +61,8 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
     
     final private Button loginButton;
     
+    final private Label versionLabel;
+    
     private LoginController controller;
     
     private String loginHint;
@@ -87,6 +89,9 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         loginButton = new Button(loginCmd);
         loginButton.addActionListener(this);
         this.addComponent(loginButton);
+        
+        versionLabel = new Label();
+        this.addComponent(versionLabel);
         
         controller = LoginController.makeControllerForView(this);
         controller.setUIStrings();
@@ -126,6 +131,10 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         loginButton.setText(buttonText);
     }
 
+    public void setVersionLabel(String versionLabel) {
+        this.versionLabel.setText(versionLabel);
+    }
+    
     /*
     TODO: Below: to be brought up to speed with Android implementation 
     */
