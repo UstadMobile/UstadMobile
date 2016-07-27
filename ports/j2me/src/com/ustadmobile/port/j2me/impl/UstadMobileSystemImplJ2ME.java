@@ -87,6 +87,7 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
+import javax.microedition.midlet.MIDlet;
 import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -150,6 +151,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     private Hashtable extToMimeTypeTable;
     
+    private MIDlet midlet;
+    
     //#expand public static long BUILDSTAMP = %BUILDSTAMP%L;
     
     //#ifndef BUILDSTAMP
@@ -176,6 +179,15 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         extToMimeTypeTable.put("jpeg", "image/jpeg");
         extToMimeTypeTable.put("png", "image/png");
         extToMimeTypeTable.put("gif", "image/gif");
+    }
+    
+    /**
+     * Set the active midlet
+     * 
+     * @param midlet 
+     */
+    public void setMIDlet(MIDlet midlet) {
+        this.midlet = midlet;
     }
 
     /**
@@ -1234,8 +1246,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
         //not implemented on J2ME yet
     }
-    
-    
+
+    public long getBuildTime() {
+        return BUILDSTAMP;
+    }
+
+    public String getVersion(Object context) {
+        return midlet.getAppProperty("MIDlet-Version");
+    }
     
     
     /**

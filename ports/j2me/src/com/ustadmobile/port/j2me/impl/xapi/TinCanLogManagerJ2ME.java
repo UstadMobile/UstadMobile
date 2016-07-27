@@ -229,8 +229,10 @@ public class TinCanLogManagerJ2ME extends TimerTask{
         if (userid != null && userid.length() > 0){
             status = STATEMENT_VALID;
         }
+        
+        String stmtStr = stmt.toString();
         sb.append('u').append(':').append(userid).append(STATEMENT_START_PREFIX).append(
-                stmt.toString()).append(STATEMENT_END_SUFFIX).append(status);
+                stmtStr).append(STATEMENT_END_SUFFIX).append(status);
         impl.l(UMLog.DEBUG, 540, null);
         if (logOut == null){
             //closing any opened log file

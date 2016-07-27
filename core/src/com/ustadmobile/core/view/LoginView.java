@@ -156,4 +156,13 @@ public interface LoginView extends UstadView {
     
     public void setAdvancedSettingsVisible(boolean visible);
     
+    /**
+     * Footer label that appears at the bottom underneath login to show the
+     * version
+     * 
+     * @param versionLabel Version information to show in label
+     */
+    public void setVersionLabel(String versionLabel);
+    
+    
 }

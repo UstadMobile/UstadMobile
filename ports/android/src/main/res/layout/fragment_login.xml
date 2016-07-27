@@ -41,8 +41,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/login_footer"
-        android:id="@+id/textView" />
+        android:id="@+id/login_version_label" />
 
     <CheckBox
         android:layout_width="match_parent"

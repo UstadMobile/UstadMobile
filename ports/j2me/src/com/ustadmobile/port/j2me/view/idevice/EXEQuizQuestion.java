@@ -105,7 +105,7 @@ public class EXEQuizQuestion {
     
     public JSONObject getTinCanObject() {
         return UMTinCanUtil.makeActivityObjectById(UMFileUtil.joinPaths(new String[] {
-            iDevice.getPageTinCanId(), iDevice.getId(false), getID()}));
+            iDevice.getPageTinCanId(), getID()}));
     }
     
     /**

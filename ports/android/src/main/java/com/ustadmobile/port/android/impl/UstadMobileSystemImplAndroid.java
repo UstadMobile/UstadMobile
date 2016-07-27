@@ -34,6 +34,8 @@ package com.ustadmobile.port.android.impl;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.*;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -48,6 +50,7 @@ import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.toughra.ustadmobile.BuildConfig;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.ContainerController;
@@ -975,5 +978,23 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 }
             }
         }).start();
+    }
+
+    @Override
+    public long getBuildTime() {
+        return BuildConfig.TIMESTAMP;
+    }
+
+    @Override
+    public String getVersion(Object ctx) {
+        Context context = (Context)ctx;
+        String versionInfo = null;
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            versionInfo = 'v' + pInfo.versionName + " (#" + pInfo.versionCode + ')';
+        }catch(PackageManager.NameNotFoundException e) {
+            l(UMLog.ERROR, 90, null, e);
+        }
+        return versionInfo;
     }
 }
