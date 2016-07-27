@@ -213,7 +213,7 @@ cd dj16
 source bin/activate
 cd ..
 pip install django==1.6.1
-pip install django_endless_pagination south shortuuid django_extensions pytz bencode isodate pycrypto oauth2 django-jsonify jsonfield rfc3987 amqp requests
+pip install django_endless_pagination south shortuuid django_extensions pytz bencode isodate pycrypto oauth2 django-jsonify django-jsonfield rfc3987 amqp requests
 
 
 
