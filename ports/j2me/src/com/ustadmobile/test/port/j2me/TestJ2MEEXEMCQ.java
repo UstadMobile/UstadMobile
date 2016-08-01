@@ -38,7 +38,7 @@ import com.sun.lwuit.html.HTMLComponent;
 import com.sun.lwuit.html.HTMLElement;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.test.core.TestUtils;
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;

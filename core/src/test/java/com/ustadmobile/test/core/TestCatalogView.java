@@ -39,11 +39,10 @@ $endif$ */
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-import com.ustadmobile.core.util.TestConstants;
-import com.ustadmobile.core.util.TestUtils;
     import junit.framework.TestCase;
 /* $endif$ */
-
+import com.ustadmobile.core.util.TestConstants;
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.CatalogView;

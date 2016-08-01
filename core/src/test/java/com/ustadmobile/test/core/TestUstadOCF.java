@@ -39,10 +39,10 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-import com.ustadmobile.core.util.TestUtils;
     import junit.framework.TestCase;
 /* $endif$ */
 
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import java.io.IOException;

@@ -41,6 +41,7 @@ import java.io.OutputStream;
 import javax.microedition.io.Connection;
 import javax.microedition.io.Connector;
 import javax.microedition.io.HttpConnection;
+import com.ustadmobile.core.util.TestUtils;
 
 /**
  *
@@ -56,7 +57,7 @@ public class TestPageSplitter extends j2meunit.framework.TestCase{
     
     protected void setUp() throws Exception {
         super.setUp(); 
-        httpRoot = com.ustadmobile.test.core.TestUtils.getInstance().getHTTPRoot();
+        httpRoot = TestUtils.getInstance().getHTTPRoot();
     }
     
     public void runTest() throws Throwable{
