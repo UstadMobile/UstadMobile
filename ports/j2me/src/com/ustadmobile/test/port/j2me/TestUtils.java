@@ -30,13 +30,12 @@
  */
 package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.port.j2me.app.FileUtils;
-import com.ustadmobile.port.j2me.app.HTTPUtils;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
 import java.io.InputStream;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
 import org.xmlpull.v1.XmlPullParser;
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import java.io.IOException;
 import javax.microedition.io.file.FileConnection;
 
@@ -63,7 +62,7 @@ public class TestUtils {
                 "/com/ustadmobile/test/port/j2me/test-settings.xml");
         XmlPullParser xpp = UstadMobileAppController.parseXml(is);
         testSettings = new Hashtable();
-        String appDataURI = UstadMobileAppController.getAppDataDir();
+        String appDataURI = UstadMobileSystemImpl.getInstance().getSharedContentDir();
         testSettings.put("appDataURI", appDataURI);
         int evtType = 0;
         //skip over root element tag
@@ -84,8 +83,8 @@ public class TestUtils {
     
     public static void loadTestSettingsFile() throws Exception{
         //load from the file
-        String appDataURI = UstadMobileAppController.getAppDataDir();
-        String settingsDataURI = FileUtils.joinPath(appDataURI, "test-settings.xml");
+        String appDataURI = UstadMobileSystemImpl.getInstance().getSharedContentDir();
+        String settingsDataURI = UMFileUtil.joinPaths(new String[]{appDataURI, "test-settings.xml"});
         FileConnection fCon = (FileConnection)Connector.open(settingsDataURI,
             Connector.READ);
         InputStream is = fCon.openInputStream();

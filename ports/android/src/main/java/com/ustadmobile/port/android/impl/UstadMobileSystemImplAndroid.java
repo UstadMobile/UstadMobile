@@ -34,8 +34,11 @@ package com.ustadmobile.port.android.impl;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.*;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -47,6 +50,7 @@ import java.util.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import com.toughra.ustadmobile.BuildConfig;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.ContainerController;
@@ -60,24 +64,31 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.ClassManagementView;
 import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.impl.qr.AndroidQRCodeImage;
 import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
+import com.ustadmobile.port.android.view.AttendanceActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.CatalogActivity;
+import com.ustadmobile.port.android.view.ClassManagementActivity;
 import com.ustadmobile.port.android.view.ContainerActivity;
+import com.ustadmobile.port.android.view.EnrollStudentActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Xml;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
@@ -281,8 +292,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             androidClass = CatalogActivity.class;
         }else if(cls.equals(UserSettingsView.class)) {
             androidClass = UserSettingsActivity.class;
+        }else if(cls.equals(AttendanceView.class)) {
+            androidClass = AttendanceActivity.class;
         }else if(cls.equals(BasePointView.class)) {
             androidClass = BasePointActivity.class;
+        }else if(cls.equals(ClassManagementView.class)) {
+            androidClass = ClassManagementActivity.class;
+        }else if(cls.equals(EnrollStudentView.class)){
+            androidClass = EnrollStudentActivity.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);
@@ -304,7 +321,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
             }
         }
 
-
         ((Context)context).startActivity(startIntent);
     }
 
@@ -323,23 +339,64 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         }
     }
 
+
+
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
+        String systemBaseDir = getSystemBaseDir();
+
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(getSystemBaseDir(), getString(U.id.device), false, true, false));
+            dirList.add(new UMStorageDir(systemBaseDir, getString(U.id.device), false, true, false));
+
+            //Find external directories
+            String[] externalDirs = findRemovableStorage();
+            for(String extDir : externalDirs) {
+                dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
+                    UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(U.id.memory_card),
+                        true, true, false, false));
+            }
         }
 
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
-            String userBase = UMFileUtil.joinPaths(new String[]{getSystemBaseDir(), "user-"
+            String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
             dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
         }
+
+
+
 
         UMStorageDir[] retVal = new UMStorageDir[dirList.size()];
         dirList.toArray(retVal);
         return retVal;
     }
+
+    /**
+     * Method to accomplish the surprisingly tricky task of finding the external SD card (if this
+     * device has one)
+     *
+     * Approach borrowed from:
+     *  http://pietromaggi.com/2014/10/19/finding-the-sdcard-path-on-android-devices/
+     *
+     * Note: Approaches that use a mount based way of looking at things are returning paths that
+     * actually are not actually usable.  Therefor: use the approach based on environment variables.
+     *
+     * @return A HashSet of paths to any external memory cards mounted
+     */
+    public String[] findRemovableStorage() {
+        String secondaryStorage = System.getenv("SECONDARY_STORAGE");
+        if(secondaryStorage == null || secondaryStorage.length() == 0) {
+            secondaryStorage = System.getenv("EXTERNAL_SDCARD_STORAGE");
+        }
+
+        if(secondaryStorage != null) {
+            return secondaryStorage.split(":");
+        }else {
+            return new String[0];
+        }
+    }
+
 
     @Override
     public String getSharedContentDir() {
@@ -502,7 +559,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public boolean makeDirectory(String dirPath) throws IOException {
         File newDir = new File(dirPath);
-        return newDir.mkdirs();
+        return newDir.mkdir();
+    }
+
+    @Override
+    public boolean makeDirectoryRecursive(String dirURI) throws IOException {
+        return new File(dirURI).mkdirs();
     }
 
     @Override
@@ -672,26 +734,32 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
 
         conn.setRequestMethod(method);
 
-        if("POST".equals(method) && postParams != null && postParams.size() > 0) {
-            //we need to write the post params to the request
-            StringBuilder sb = new StringBuilder();
-            Enumeration e = postParams.keys();
-            boolean firstParam = true;
-            while(e.hasMoreElements()) {
-                String key = e.nextElement().toString();
-                String value = postParams.get(key).toString();
-                if(firstParam) {
-                    firstParam = false;
-                }else {
-                    sb.append('&');
+        if("POST".equals(method)) {
+            if(postBody == null && postParams != null && postParams.size() > 0) {
+                //we need to write the post params to the request
+                StringBuilder sb = new StringBuilder();
+                Enumeration e = postParams.keys();
+                boolean firstParam = true;
+                while(e.hasMoreElements()) {
+                    String key = e.nextElement().toString();
+                    String value = postParams.get(key).toString();
+                    if(firstParam) {
+                        firstParam = false;
+                    }else {
+                        sb.append('&');
+                    }
+                    sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
+                    sb.append(URLEncoder.encode(value, "UTF-8"));
                 }
-                sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
-                sb.append(URLEncoder.encode(value, "UTF-8"));
+
+                postBody = sb.toString().getBytes();
+            }else if(postBody == null) {
+                throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
             }
 
             conn.setDoOutput(true);
             OutputStream out = conn.getOutputStream();
-            out.write(sb.toString().getBytes());
+            out.write(postBody);
             out.flush();
             out.close();
         }
@@ -743,12 +811,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         return parser;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public QRCodeImage getQRCodeImage(InputStream in) {
-        return new AndroidQRCodeImage(in);
+    public XmlSerializer newXMLSerializer() {
+        return Xml.newSerializer();
     }
 
     @Override
@@ -775,16 +840,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
     @Override
     public ZipFileHandle openZip(String name) throws IOException{
         return new ZipFileHandleAndroid(name);
-    }
-
-    @Override
-    public int[] getScreenSize(Object context) {
-        Context ctx = (Context)context;
-        WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
-        DisplayMetrics dm = new DisplayMetrics();
-        wm.getDefaultDisplay().getMetrics(dm);
-
-        return new int[] { dm.widthPixels, dm.heightPixels};
     }
 
     /**
@@ -923,5 +978,23 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
                 }
             }
         }).start();
+    }
+
+    @Override
+    public long getBuildTime() {
+        return BuildConfig.TIMESTAMP;
+    }
+
+    @Override
+    public String getVersion(Object ctx) {
+        Context context = (Context)ctx;
+        String versionInfo = null;
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            versionInfo = 'v' + pInfo.versionName + " (#" + pInfo.versionCode + ')';
+        }catch(PackageManager.NameNotFoundException e) {
+            l(UMLog.ERROR, 90, null, e);
+        }
+        return versionInfo;
     }
 }

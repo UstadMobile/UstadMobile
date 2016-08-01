@@ -42,8 +42,10 @@ import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.port.j2me.view.CatalogOPDSContainer;
 import java.util.Hashtable;
 
 /**
@@ -60,7 +62,6 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     private BasePointController basePointController;
     
     private int[] tabTitles =  new int[]{U.id.downloaded_items, U.id.browse_feeds};
-    private String[] tabNames;
     
     /**
      * Form used for adding new feeds to the user's list
@@ -70,6 +71,12 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     private Command addFeedCmd;
     
     private Command removeFeedCmd;
+    
+    /**
+     * At this point J2ME does not support the class list tab: there are always two tabs (downloaded and feeds)
+     */
+    public static final int NUM_TABS = 2;
+    
     
     public BasePointViewJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
         super(args, context, backCommandEnabled);
@@ -85,9 +92,9 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
             tabs = new Tabs(Component.TOP);
             tabs.addTabsFocusListener(this);
             tabs.setChangeTabOnFocus(true);
-            opdsContainers = new CatalogOPDSContainer[BasePointController.NUM_TABS];
+            opdsContainers = new CatalogOPDSContainer[NUM_TABS];
             Hashtable opdsArgs;
-            for(int i = 0; i < BasePointController.NUM_TABS; i++) {
+            for(int i = 0; i < NUM_TABS; i++) {
                 opdsArgs = basePointController.getCatalogOPDSArguments(i);
                 opdsContainers[i] = new CatalogOPDSContainer(opdsArgs, 
                     getContext(), this);
@@ -108,9 +115,10 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     }
     
     public void actionPerformed(ActionEvent evt) {
-        if(evt.getCommand().getId() == CatalogOPDSContainer.CMDID_ADDFEED) {
+        int cmdId = evt.getCommand().getId();
+        if(cmdId == CatalogOPDSContainer.CMDID_ADDFEED) {
             basePointController.handleClickAddFeed();
-        }else if(evt.getCommand().getId() == CatalogOPDSContainer.CMDID_REMOVEFEED) {
+        }else if(cmdId == CatalogOPDSContainer.CMDID_REMOVEFEED) {
             basePointController.handleRemoveItemsFromUserFeed(
                 opdsContainers[BasePointController.INDEX_BROWSEFEEDS].getSelectedEntries());
         }
@@ -171,10 +179,13 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
         RadioButton btn = (RadioButton)cmpnt;
         int selectedIndex = getTabSelectedByTitle(btn.getText());
         setActiveUstadViewContainer(opdsContainers[selectedIndex]);
-        System.out.println("FocusGained Selected " + selectedIndex + " : " + cmpnt);
     }
 
     public void focusLost(Component cmpnt) {
+    }
+
+    public void setClassListVisible(boolean visible) {
+        //this is not supported on J2ME
     }
     
 }

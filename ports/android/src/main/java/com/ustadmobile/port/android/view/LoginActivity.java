@@ -97,6 +97,8 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
     protected String mRegisterRegcodeHint;
 
+    protected String mVersionLabel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,21 +121,6 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         tabLayout.setupWithViewPager(viewPager);
         mLoginController.setUIStrings();
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -210,6 +197,11 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
     @Override
     public void setServerLabel(String serverLabel) {
         this.mServerLabel = serverLabel;
+    }
+
+    @Override
+    public void setVersionLabel(String versionLabel) {
+        mVersionLabel = versionLabel;
     }
 
     @Override

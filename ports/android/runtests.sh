@@ -2,16 +2,22 @@
 #
 # Preprocess and run tests
 #
+# To update only the config (e.g. IP address of test server)
+# run ./runtests updateonly
 
 WORKINGDIR=$(pwd)
 cd ../../testres
 
 CTRLPORT=8065
+UPDATEONLY=$1
+SERVERPID=0
 
 IPADDR=$(/sbin/ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n 1)
 
-./runserver.sh -r $WORKINGDIR
-SERVERPID=$(cat DodgyHTTPD/dodgyhttpd.pid)
+if [ "$UPDATEONLY" != "updateonly" ]; then
+    ./runserver.sh -r $WORKINGDIR
+    SERVERPID=$(cat DodgyHTTPD/dodgyhttpd.pid)
+fi
 
 cd $WORKINGDIR
 
@@ -23,9 +29,8 @@ sed s/__TESTSERVERIP__/$IPADDR/g ../../core/test/com/ustadmobile/test/core/TestC
     > ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java
 
 
-./gradlew connectedAndroidTest
-
-echo "Kill $NODEPID node server" 
-
-kill $SERVERPID
-
+if [ "$UPDATEONLY" != "updateonly" ]; then
+    ./gradlew connectedAndroidTest
+    echo "Kill $NODEPID node server" 
+    kill $SERVERPID
+fi

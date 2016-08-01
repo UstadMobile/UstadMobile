@@ -44,9 +44,11 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     protected BasePointPagerAdapter mPagerAdapter;
 
     private int[] tabIconsIds = new int[]{R.drawable.ic_sd_card_black_24dp,
-            R.drawable.ic_public_black_24dp};
+            R.drawable.ic_public_black_24dp, R.drawable.ic_group_black_24dp};
 
     protected Dialog addFeedDialog;
+
+    protected boolean classListVisible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +66,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         viewPager.setAdapter(mPagerAdapter);
         TabLayout tabLayout = (TabLayout)findViewById(R.id.basepoint_tabs);
         tabLayout.setupWithViewPager(viewPager);
-        for(int i = 0; i < BasePointController.NUM_TABS; i++) {
+        for(int i = 0; i < mPagerAdapter.getCount(); i++) {
             tabLayout.getTabAt(i).setIcon(tabIconsIds[i]);
         }
     }
@@ -148,6 +150,11 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     }
 
+    @Override
+    public void setClassListVisible(boolean visible) {
+        this.classListVisible= visible;
+    }
+
 
     public static class AddFeedDialogFragment extends DialogFragment {
 
@@ -182,12 +189,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 
-        private int[] tabTitles = new int[]{U.id.downloaded_items, U.id.browse_feeds};
+        private int[] tabTitles = new int[]{U.id.downloaded_items, U.id.browse_feeds, U.id.classes};
 
-        private WeakHashMap<Integer, CatalogOPDSFragment> fragmentMap;
-
-
-
+        private WeakHashMap<Integer, Fragment> fragmentMap;
 
         public BasePointPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -197,15 +201,25 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         @Override
         public Fragment getItem(int position) {
-            CatalogOPDSFragment fragment = fragmentMap.get(position);
+            Fragment fragment = fragmentMap.get(position);
             if(fragment == null) {
-                Hashtable posArgs =
-                    BasePointActivity.this.mBasePointController.getCatalogOPDSArguments(position);
-                Bundle bundle = UMAndroidUtil.hashtableToBundle(posArgs);
-                if(position == BasePointController.INDEX_BROWSEFEEDS) {
-                    bundle.putInt(CatalogOPDSFragment.ARG_MENUID, R.menu.menu_basepoint_remotefeeds);
+                Bundle bundle = null;
+                switch(position) {
+                    case BasePointController.INDEX_BROWSEFEEDS:
+                    case BasePointController.INDEX_DOWNLOADEDENTRIES:
+                        Hashtable posArgs =
+                                BasePointActivity.this.mBasePointController.getCatalogOPDSArguments(position);
+                        bundle = UMAndroidUtil.hashtableToBundle(posArgs);
+                        if(position == BasePointController.INDEX_BROWSEFEEDS) {
+                            bundle.putInt(CatalogOPDSFragment.ARG_MENUID, R.menu.menu_basepoint_remotefeeds);
+                        }
+                        fragment = CatalogOPDSFragment.newInstance(bundle);
+                        break;
+                    case BasePointController.INDEX_CLASSES:
+                        bundle = new Bundle();
+                        fragment = ClassListFragment.newInstance(bundle);
+                        break;
                 }
-                fragment = CatalogOPDSFragment.newInstance(bundle);
                 fragmentMap.put(position, fragment);
             }
 
@@ -214,7 +228,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         @Override
         public int getCount() {
-            return 2;
+            return BasePointActivity.this.classListVisible ? 3 : 2;
         }
 
         @Override

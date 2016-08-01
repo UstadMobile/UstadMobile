@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Ustad Mobile</string>
     <string name="title_activity_login">Login</string>
-    <string name="login_footer">Copyright (C) 2014-2016 UstadMobile Inc.  V0.2.2.8 18/03/2016</string>
+    <string name="login_footer">Copyright (C) 2014-2016 UstadMobile Inc.  V0.2.4.4 21/07/2016</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -24,4 +24,6 @@
     <string name="female">Female</string>
     <string name="register">Register</string>
     <string name="title_activity_user_settings">UserSettingsActivity</string>
+    <string name="title_activity_class_management">ClassManagementActivity</string>
+    <string name="title_activity_enroll_student">EnrollStudentActivity</string>
 </resources>

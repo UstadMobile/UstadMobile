@@ -4,6 +4,18 @@
 
 echo "Hey there"
 
+argument=$1
+NEW_BUILD=""
+
+
+if [ "$argument" == "clean" ]; then
+    echo "You want to clean: I'm going to clean p4a and fetch and build everything from scratch now.."
+    NEW_BUILD="True"
+else
+    echo "Not going to build from scratch"
+fi
+
+
 #sudo pip install --upgrade buildozer
 BUILDOZER_PATH=`which buildozer`
 
@@ -96,7 +108,6 @@ echo "Updating core libs.."
 
 echo "Working from Android Project Dir: ${ANDROID_PROJECT_DIR}"
 
-NEW_BUILD=""
 
 if [ -d "LRSTEMP" ]; then 
     if [ -d "LRSTEMP/LRSCode" ]; then
@@ -145,6 +156,7 @@ else
 fi
 
 
+mkdir LRSAndroid/service
 
 cp -r LRSCode/adl_lrs LRSAndroid/service/
 cp -r LRSCode/oauth2_provider LRSAndroid/service/
@@ -189,7 +201,30 @@ sed -i.bak "" ${URLS_FILE}
 
 
 
+#Set up Django 1.6.6 in virtualenv
+if [ "${NEW_BUILD}" == "True" ]; then
+    if [ -d "dj16" ]; then
+        rm -rf "dj16"
+    fi
+fi
+
+virtualenv --no-site-packages dj16
+cd dj16
+source bin/activate
+cd ..
+pip install django==1.6.1
+pip install django_endless_pagination south shortuuid django_extensions pytz bencode isodate pycrypto oauth2 django-jsonify django-jsonfield rfc3987 amqp requests
+
+
+
 cd LRSAndroid
+
+#Create version asset
+> private.version
+DATE=`date +%Y%m%d%H%M`
+echo ${DATE} > private.version
+
+
 if [ -d "logs" ]; then
     echo ""
 else
@@ -205,12 +240,25 @@ cd ../service/
 echo "Setting up database for lrs.."
 echo "LRS Sync database: " > lrs_build_output.log
 python manage.py syncdb --noinput >> lrs_build_output.log
+if [ $? != 0 ];then
+	echo "Creating database failed."
+	exit 1;
+else
+	echo "Database created OK. Leaving Virtual environment.."
+fi
+
+deactivate
 
 cd ..
 echo "Building Python and LRS for Android.."
 echo "  (this might take some time)"
 echo "Android build #1 (without httplib2): " >> lrs_build_output.log
-buildozer -v android debug > lrs_build_output.log
+buildozer -v android debug >> lrs_build_output.log
+
+#Testing: Doesn't seem to work
+#echo "Android build #1 (without httplib2): " > lrs_build_output_arm64-v8a.log
+#buildozer --arch=arm64-v8a -v android debug >> lrs_build_output_arm64-v8a.log
+
 if [ $? != 0 ]; then  
     echo "Android LRS Build failed. Log file: lrs_build_output.log"; 
     exit 1;
@@ -227,8 +275,13 @@ fi
 cp -r httplib2 .buildozer/applibs/
 cp -r httplib2 .buildozer/android/app/_applibs/
 
-echo "Android build #2 (with httplib2" >> lrs_build_output.log
+echo "Android build #2 (with httplib2)" >> lrs_build_output.log
 buildozer -v android debug >> lrs_build_output.log
+
+#Testing: Doesn't seem to work
+#echo "Android build #2 (with httplib2)" >> lrs_build_output_arm64-v8a.log
+#buildozer --arch=arm64-v8a -v android debug >> lrs_build_output_arm64-v8a.log
+
 if [ $? != 0 ]; then  
     echo "Android LRS Build failed. Log file: lrs_build_output.log"; 
     exit 1;
@@ -256,11 +309,12 @@ fi
 
 
 #Obviously make sure you have android-19 or substitute with whatever
-android create project --path ./LRSGradle --activity LRSGradleActivity --package com.ustadmobile --target "android-10" --gradle --gradle-version '1.3.0'
+android create project --path ./LRSGradle --activity LRSGradleActivity --package com.ustadmobile --target "android-19" --gradle --gradle-version '1.3.0'
 
 #android create project --path ./LRSGradle --activity LRSGradleActivity --package com.ustadmobile --target "android-14" --gradle --gradle-version '1.3.0'
 
 cd LRSGradle/
+
 
 #Chage to: distributionUrl=http\://services.gradle.org/distributions/gradle-2.2.1-all.zip
 sed -e '/distributionUrl/ s/^#*/#/' -i.bak gradle/wrapper/gradle-wrapper.properties
@@ -302,12 +356,15 @@ ASSET_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/dja
 LIBS_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/libs"
 RES_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/res"
 
+
 cp -r ${SOURCE_SRC}/org ${DEST_JAVA_SRC}
 rm -rf ${DEST_JAVA_SRC}/com #Dont need it - Created from cli
 
 cp -r ${ASSET_SOURCE} ${DEST_SRC}/
 cp -r ${LIBS_SOURCE} ${DEST_SRC}/jniLibs
 cp -r ${DEST_SRC}/jniLibs/armeabi ${DEST_SRC}/jniLibs/armeabi-v7a
+#cp -r ${DEST_SRC}/jniLibs/armeabi ${DEST_SRC}/jniLibs/arm64-v8a #Added for the new and fancy 64 bit mobile processors #Update: Need 64 bit versions.. 
+#Solution make the app use it in 32bit mode.
 rm -rf ${DEST_SRC}/res/
 cp -r ${RES_SOURCE} ${DEST_SRC}/
 mkdir ${DEST_SRC}/aidl

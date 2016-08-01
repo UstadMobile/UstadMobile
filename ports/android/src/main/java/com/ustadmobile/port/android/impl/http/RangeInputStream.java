@@ -110,6 +110,19 @@ public class RangeInputStream extends FilterInputStream {
     }
 
     @Override
+    /**
+     * ===WORKAROUND===
+     *
+     * NanoHTTPD is using InputStream.available incorrectly: as if it provides the
+     * pending number of bytes in the stream.  As per the Java documentation it in
+     * fact is only supposed to reply with how many bytes it can deliver before
+     * blocking
+     */
+    public int available() throws IOException {
+        return (end +1)- pos;
+    }
+
+    @Override
     public synchronized void reset() throws IOException {
         if(resetPos != -1 && pos < resetInvalidate) {
             in.reset();

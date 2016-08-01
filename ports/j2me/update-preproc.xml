@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<!--
+
+ Preprocessor for test arch: see core/test/README.md
+
+ give me these properties: 
+ ustadmobile.platform - number code for platform
+ ustadmobile.core.dir - path to the core source
+ ustadmobile.port.testsrc - path to testing dir of port
+ ustadmobile.port.mainsrc - path to main source dir of port
+
+-->
+
+<project name="ustadmobilepreproc" default="umpreprocall" basedir=".">
+    <taskdef name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
+    
+    <property name="ustadmobile.platform" value="2"/>
+    <property name="ustadmobile.core.dir" value="../../core"/>
+    <property name="ustadmobile.port.testsrc" value="./src"/>
+    <property name="ustadmobile.port.mainsrc" value="./src"/>
+    <property name="ustadmobile.port.resdir" value="./src/res"/>
+
+    <target name="umpreprocall" depends="testpreproc,corepreproc">
+    </target>
+   
+    <target name="testpreproc">
+        <echo message="Preproc tests in from ${ustadmobile.core.dir}/src/test/java"/>
+        <delete dir="preproctmp"/>
+
+        <delete>
+            <fileset dir="${ustadmobile.port.testsrc}/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
+        </delete>
+        
+        <preprocess indir="${ustadmobile.core.dir}/src/test/java" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${ustadmobile.platform}"/>
+        </preprocess>
+
+        <copy todir="${ustadmobile.port.testsrc}">
+            <fileset dir="preproctmp" excludes="**/UMContextGetter.java"/>
+        </copy>
+    </target>
+
+
+    <target name="corepreproc">
+	<!-- Using failonerror=false not cooperating with nested fileset -->
+	<mkdir dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
+        <delete>
+            <fileset dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
+        </delete>
+
+        <delete failonerror="false">
+            <fileset dir="${ustadmobile.port.resdir}/locale"/>
+        </delete>
+        <mkdir dir="${ustadmobile.port.resdir}/locale"/>
+
+	<mkdir dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
+        <delete dir="preproctmp"/>
+        <preprocess indir="${ustadmobile.core.dir}/src/main/java/com/ustadmobile/core" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${ustadmobile.platform}"/>
+        </preprocess>
+        
+        
+        <copy todir="${ustadmobile.port.mainsrc}/com/ustadmobile/core">
+            <fileset dir="preproctmp"/>
+        </copy>
+        <delete dir="preproctmp"/>
+
+        <copy todir="${ustadmobile.port.resdir}/locale">
+            <fileset dir="${ustadmobile.core.dir}/src/main/assets/locale"/>
+        </copy>
+    </target>
+</project>
+

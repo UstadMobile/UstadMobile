@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.ustadmobile.port.android.view.ClassManagementActivity">
+
+    <include android:id="@+id/um_toolbar" layout="@layout/toolbar"/>
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|top">
+
+        <Button
+            android:id="@+id/class_management_attendance_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/class_management_exams_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+        <Button
+            android:id="@+id/class_management_reports_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+    </LinearLayout>
+
+    <!-- <android.support.design.widget.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/class_management_new_student_fab"
+        android:src="@drawable/ic_add_circle_outline_white_24dp"
+
+        app:borderWidth="2dp"
+        app:fabSize="normal"
+        app:rippleColor="@color/accent_material_dark"/>
+        -->
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.ustadmobile.port.android.view.StudentListView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/class_management_studentlist"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/class_management_new_student_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/ic_add_circle_outline_white_24dp" />
+
+    </FrameLayout>
+</LinearLayout>

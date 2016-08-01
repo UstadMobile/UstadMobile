@@ -9,12 +9,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
 
 /**
  * A simple Fragment that uses a WebView to show one part of a piece of content
@@ -25,12 +29,17 @@ public class ContainerPageFragment extends Fragment {
     /**
      * The argument key for the page number this fragment represents.
      */
-    public static final String ARG_PAGEURL = "page";
+    public static final String ARG_PAGE_BASE_URI = "baseuri";
 
-    /**
-     * The url of the page to be loaded
-     */
-    private String mPageURL;
+    public static final String ARG_PAGE_HREF = "href";
+
+    public static final String ARG_PAGE_QUERY = "query";
+
+    private String mBaseURI;
+
+    private String mHref;
+
+    private String mQuery;
 
     /**
      * The webView for the given URL
@@ -49,15 +58,20 @@ public class ContainerPageFragment extends Fragment {
     /**
      * Generates a new Fragment for a page fragment
      *
-     * @param mPageURL The URL
+     * @param baseURI The base URI of the page (normally where the EPUB OPF itself is) - e.g. http://localhost:1234/mount/EPUB.
+     *                 This must be a directory e.g. full url to load is baseURI/href
+     * @param href The HREF of the page itself as per it's entry in the OPF manifest
+     * @param query Query string to append to the URL (including the '?')
      *
      * @return A new instance of fragment ContainerPageFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ContainerPageFragment newInstance(String mPageURL) {
+    public static ContainerPageFragment newInstance(String baseURI, String href, String query) {
         ContainerPageFragment fragment = new ContainerPageFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PAGEURL, mPageURL);
+        args.putString(ARG_PAGE_BASE_URI, baseURI);
+        args.putString(ARG_PAGE_HREF, href);
+        args.putString(ARG_PAGE_QUERY, query);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,7 +84,9 @@ public class ContainerPageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            this.mPageURL = getArguments().getString(ARG_PAGEURL);
+            mBaseURI = getArguments().getString(ARG_PAGE_BASE_URI);
+            mHref = getArguments().getString(ARG_PAGE_HREF);
+            mQuery = getArguments().getString(ARG_PAGE_QUERY);
         }
         this.autoplayRunJavascript = ((ContainerActivity)getActivity()).getAutoplayRunJavascript();
     }
@@ -80,38 +96,68 @@ public class ContainerPageFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         if(viewGroup == null) {
-            viewGroup = (RelativeLayout)inflater.inflate(R.layout.fragment_container_page,
+            viewGroup = (RelativeLayout) inflater.inflate(R.layout.fragment_container_page,
                     container, false);
-            webView = (WebView)viewGroup.findViewById(R.id.fragment_container_page_webview);
-
-            //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
-            if(Build.VERSION.SDK_INT >= 17) {
-                webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
-            }
-
-            webView.getSettings().setJavaScriptEnabled(true);
-	        webView.getSettings().setDomStorageEnabled(true);
-            webView.loadUrl(mPageURL);
-            webView.setWebViewClient(new ContainerPageWebViewClient(webView));
+            webView = (WebView) viewGroup.findViewById(R.id.fragment_container_page_webview);
+        }else {
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 517, "Containerpage: recycled onCreateView");
         }
+
+        //Android after Version 17 (4.4) by default requires a gesture before any media playback happens
+        if(Build.VERSION.SDK_INT >= 17) {
+            webView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        }
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webView.loadUrl(getPageURL());
+        webView.setWebViewClient(new ContainerPageWebViewClient(webView));
+
         return viewGroup;
     }
 
     public void evaluateJavascript(String script) {
-        if(webView != null) {
+        if (webView != null) {
             webView.loadUrl(script);
         }
     }
 
-    public void setPageURL(String url) {
-        this.mPageURL = url;
+    private void loadURL() {
         if(webView != null) {
-            webView.loadUrl(url);
+            webView.loadUrl(getPageURL());
         }
     }
 
+    public void setPageHref(String href, boolean reload) {
+        mHref = href;
+        if(reload)
+            loadURL();
+    }
+
+    public String getPageHref() {
+        return mHref;
+    }
+
+    public void setBaseURI(String baseURI, boolean reload) {
+        mBaseURI = baseURI;
+        if(reload)
+            loadURL();
+    }
+
+    public String getBaseURI() {
+        return mBaseURI;
+    }
+
+    public void setQuery(String query, boolean reload) {
+        mQuery = query;
+        if(reload)
+            loadURL();
+    }
+
+
     public String getPageURL() {
-        return mPageURL;
+        return UMFileUtil.joinPaths(new String[] {mBaseURI, mHref}) + mQuery;
     }
 
     /**
@@ -121,8 +167,8 @@ public class ContainerPageFragment extends Fragment {
      * @param numPages
      */
     public void showPagePosition(int index, int numPages) {
-        Toast t = Toast.makeText(getContext(), index + "/" + numPages, Toast.LENGTH_SHORT);
-        t.show();
+        //Toast t = Toast.makeText(getContext(), index + "/" + numPages, Toast.LENGTH_SHORT);
+        //t.show();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -201,13 +247,6 @@ public class ContainerPageFragment extends Fragment {
             if(!this.isFirstPage) {
                 this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
             }
-        }
-    }
-
-    public class JsObject {
-        @JavascriptInterface
-        public void stateSaved(){
-
         }
     }
 

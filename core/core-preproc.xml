@@ -19,12 +19,14 @@
     </target>
    
     <target name="testpreproc">
+        <echo message="Preproc tests in from ${ustadmobile.core.dir}/src/test/java"/>
         <delete dir="preproctmp"/>
 
         <delete>
             <fileset dir="${ustadmobile.port.testsrc}/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
-        </delete>	
-        <preprocess indir="${ustadmobile.core.dir}/test/" outdir="preproctmp">
+        </delete>
+        
+        <preprocess indir="${ustadmobile.core.dir}/src/test/java" outdir="preproctmp">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <var name="umplatform" value="${ustadmobile.platform}"/>
         </preprocess>
@@ -49,7 +51,7 @@
 
 	<mkdir dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
         <delete dir="preproctmp"/>
-        <preprocess indir="${ustadmobile.core.dir}/src/com/ustadmobile/core" outdir="preproctmp">
+        <preprocess indir="${ustadmobile.core.dir}/src/main/java/com/ustadmobile/core" outdir="preproctmp">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <var name="umplatform" value="${ustadmobile.platform}"/>
         </preprocess>
@@ -61,7 +63,7 @@
         <delete dir="preproctmp"/>
 
         <copy todir="${ustadmobile.port.resdir}/locale">
-            <fileset dir="${ustadmobile.core.dir}/src/res/locale"/>
+            <fileset dir="${ustadmobile.core.dir}/src/main/assets/locale"/>
         </copy>
     </target>
 </project>

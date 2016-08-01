@@ -39,8 +39,6 @@ import com.sun.lwuit.plaf.UIManager;
 import com.ustadmobile.core.U;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
-import com.ustadmobile.port.j2me.app.DeviceRoots;
-import com.ustadmobile.port.j2me.app.FileUtils;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.microedition.io.Connector;
@@ -51,10 +49,12 @@ import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
@@ -64,7 +64,6 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
-import com.ustadmobile.port.j2me.impl.qr.J2MEQRCodeImage;
 import com.ustadmobile.port.j2me.impl.zip.ZipFileHandleJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
 import com.ustadmobile.port.j2me.util.WatchedInputStream;
@@ -88,12 +87,14 @@ import javax.microedition.io.Connection;
 import javax.microedition.io.HttpConnection;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.io.file.FileSystemRegistry;
-import jp.sourceforge.qrcode.data.QRCodeImage;
+import javax.microedition.midlet.MIDlet;
 import org.json.me.JSONObject;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.json.me.*;
+import org.kxml2.io.KXmlSerializer;
+import org.xmlpull.v1.XmlSerializer;
  
 /**
  *
@@ -150,6 +151,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     private Hashtable extToMimeTypeTable;
     
+    private MIDlet midlet;
+    
+    //#expand public static long BUILDSTAMP = %BUILDSTAMP%L;
+    
+    //#ifndef BUILDSTAMP
+    public static long BUILDSTAMP = 0;
+    //#endif
+    
     public String getImplementationName() {
         return "J2ME";
     }
@@ -171,6 +180,15 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         extToMimeTypeTable.put("png", "image/png");
         extToMimeTypeTable.put("gif", "image/gif");
     }
+    
+    /**
+     * Set the active midlet
+     * 
+     * @param midlet 
+     */
+    public void setMIDlet(MIDlet midlet) {
+        this.midlet = midlet;
+    }
 
     /**
      * {@inheritDoc}
@@ -183,22 +201,28 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc}
      */
     public boolean queueTinCanStatement(JSONObject stmt, Object context) {
-        l(UMLog.DEBUG, 538, "");
-        boolean result = true;
+        l(UMLog.DEBUG, 538, null);
+
+        if(logManager == null) {
+            l(UMLog.DEBUG, 000, null);
+            return false;
+        }
         
-        /*
         try {
-            
+            if(stmt.has("id")){
+                stmt.put("id", UMTinCanUtil.generateUUID());
+            }
+        } catch (JSONException ex) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 639 , null, ex);
+        }
+        try {
             return logManager.queueStatement(getActiveUser(context), stmt);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            UstadMobileSystemImpl.l(UMLog.ERROR, 174, null, ex);
         }
-        */
-        return result;
+        
+        return false;
     }
-    
-    
-    
     
     /**
      * {@inheritDoc}
@@ -212,14 +236,32 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             l(UMLog.CRITICAL, 7, baseSystemDir, e);
         }
         
-        logSendTimer = new Timer();
-        logManager = new TinCanLogManagerJ2ME();
-        logSendTimer.scheduleAtFixedRate(logManager, (5*60*1000), (5*60*1000));
+        //logManager = new TinCanLogManagerJ2ME("");
+        /*Check if the log manager timer task is supposed to 
+        start. This might be set to false in some cases(eg: testing)
+        */
+        if (TinCanLogManagerJ2ME.AUTOSTART == true){
+            logSendTimer = new Timer();
+            /*Get the log directory. Generate if it doesn't exist*/
+            String tincanDir = UMFileUtil.joinPaths(new String[]{
+                findSystemBaseDir(), TinCanLogManagerJ2ME.LOG_FOLDER});
+            try {
+                makeDirectory(tincanDir);
+            } catch (IOException ex) {
+                l(UMLog.CRITICAL, 7, tincanDir, ex);
+            }
+           
+            String tincanEndpointURL = UstadMobileDefaults.DEFAULT_XAPI_SERVER;
+            logManager = new TinCanLogManagerJ2ME(tincanDir, tincanEndpointURL);
+            /*SCHEDULE the log manager*/
+            logSendTimer.scheduleAtFixedRate(logManager, SCHEDULE_DELAY,
+                                                SCHEDULE_DELAY);
+        }
+        
         downloadService = new DownloadServiceJ2ME();
         downloadService.load();
         boolean isRTL = getDirection() == UstadMobileConstants.DIR_RTL;
         UIManager.getInstance().getLookAndFeel().setRTL(isRTL);
-        int x = 42;
     }
     
     public static UstadMobileSystemImplJ2ME getInstanceJ2ME() {
@@ -278,9 +320,9 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public void setActiveUser(String username, Object context) {
         AppPref.addSetting("CURRENTUSER", username);
-        UserPref.setActiveUser(username);
         
         if(username != null) {
+            UserPref.setActiveUser(username);
             String userBaseDir = UMFileUtil.joinPaths(new String[] {baseSystemDir,
             username});
             try {
@@ -325,6 +367,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             
             for(int i = 0; i < potentialCacheDirs.size(); i++) {
                 currentDir = (String)potentialCacheDirs.elementAt(i);
+                currentDir = UMFileUtil.ensurePathHasPrefix("file:///", currentDir);
                 if(UMIOUtils.canWriteChildFile(currentDir)) {
                     baseSystemDir = UMFileUtil.joinPaths(new String[] {
                         currentDir, CONTENT_DIR_NAME});
@@ -380,6 +423,25 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         boolean sdCardAvailable = false;
         
         String sdcardURI = System.getProperty(SYSTEMPROP_SDCARD);
+        l(UMLog.DEBUG, 592, sdcardURI);
+        
+        /* In case this device does not support the standard system property
+         * to indicate the external memory card it might be listed in the roots.
+         *
+         * We will simply take the first root that is not used for the 
+         */
+        if(sdcardURI == null) {
+            Enumeration rootList = FileSystemRegistry.listRoots();
+            String cRoot;
+            while(rootList.hasMoreElements() && sdcardURI == null) {
+                cRoot = UMFileUtil.ensurePathHasPrefix("file:///", 
+                    rootList.nextElement().toString());
+                if(!baseSystemDir.startsWith(cRoot)) {
+                    sdcardURI = cRoot;
+                }
+            }
+        }
+        
         if(sdcardURI != null) {
             hasSDCard = true;
             try {
@@ -420,91 +482,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
      * {@inheritDoc} 
      */
     public String getSharedContentDir(){ 
-        if(sharedContentDir != null) {
-            return sharedContentDir;
-        } else {
-            Vector systemFsRoots = new Vector();
-            String dirURI = System.getProperty(SYSTEMPROP_SDCARD);
-            
-            if(dirURI != null) {
-                l(UMLog.DEBUG, 587, SYSTEMPROP_SDCARD + '=' + dirURI);
-                systemFsRoots.addElement(dirURI);
-            }
-
-            dirURI = System.getProperty(SYSTEMPROP_PHOTODIR);
-            if(dirURI != null) {
-                l(UMLog.DEBUG, 587, SYSTEMPROP_PHOTODIR + '=' + dirURI);
-                systemFsRoots.addElement(dirURI);
-            }
-            
-            DeviceRoots dt = FileUtils.getBestRoot();
-            if(dt != null && dt.path != null) {
-                systemFsRoots.addElement(dt.path);
-            }
-            
-            if(systemFsRoots.size() > 0) {
-                boolean canUse = false;
-                String currentDir = null;
-                boolean exists = false;
-                boolean isDir = false;
-                boolean canWrite = false;
-                
-                for(int i = 0; i < systemFsRoots.size(); i++) {
-                    FileConnection fc = null;
-                    currentDir = (String)systemFsRoots.elementAt(i);
-                    canUse = false;
-                    canWrite = false;
-                    
-                    try {
-                        fc = (FileConnection)Connector.open(currentDir);
-                        exists = fc.exists();
-                        String childFileUri = UMFileUtil.joinPaths(new String[] {
-                            currentDir, "umfiletest.txt"});
-                        if(exists) {
-                            writeStringToFile("OK", childFileUri, "UTF-8");
-                            canWrite = true;
-                            canUse = true;
-                        }
-                    }catch(Exception e) {
-                        l(UMLog.ERROR, 151, (String)systemFsRoots.elementAt(i), e);
-                    }finally {
-                        J2MEIOUtils.closeConnection(fc);
-                    }
-                    
-                    if(canUse) {
-                        l(UMLog.VERBOSE, 417, currentDir);
-                        sharedContentDir = UMFileUtil.joinPaths(new String[]{ 
-                            currentDir, CONTENT_DIR_NAME});
-                        return sharedContentDir;
-                    }else {
-                        l(UMLog.VERBOSE, 419, currentDir + "exists:" + exists
-                            + " dir:" + isDir + " write:" + canWrite);
-                    }
-                }
-            } else {
-                //This will be in something like ustadmobileContent
-                //appData is different
-                try{
-                    dt = FileUtils.getBestRoot();
-                    sharedContentDir = FileUtils.joinPath(dt.path, 
-                            FileUtils.USTAD_CONTENT_DIR);
-
-                    //Check if it is created. If it isnt, create it.       
-                    if(FileUtils.createFileOrDir(sharedContentDir, 
-                            Connector.READ_WRITE, true)){
-                        return sharedContentDir;
-                    }
-
-                    //Return null if it doens't exist.
-                    if (!FileUtils.checkDir(sharedContentDir)){
-                        return null;
-                    }
-                }catch (Exception e){}
-            }
-        }
-        
-        l(UMLog.VERBOSE, 421, sharedContentDir);
-        return null;
+        return findSystemBaseDir();
     }
     
     public String getUserContentDirectory(String username){
@@ -541,9 +519,11 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public long fileLastModified(String fileURI) {
         long result = -1;
         FileConnection con = null;
+        
         try {
             con = (FileConnection)Connector.open(fileURI);
             result = con.lastModified();
+            l(UMLog.DEBUG, 570, fileURI + " :  " + result);
         }catch(Exception e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 136, fileURI, e);
         }finally {
@@ -713,6 +693,37 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return result;
     }
     
+    public boolean makeDirectoryRecursive(String dirURI) throws IOException{
+        return makeDirectoryRecursive(dirURI, null);
+    }
+    
+    public boolean makeDirectoryRecursive(String dirURI, Vector roots) throws IOException {
+        l(UMLog.INFO, 372, dirURI);
+        boolean created = false;
+        try {
+            if(roots == null) {
+                roots = new Vector();
+                UMUtil.addEnumerationToVector(FileSystemRegistry.listRoots(),
+                    roots);
+            }
+            
+            if(roots.contains(dirURI)) {
+                created = true;
+            }else if(dirURI.equals("file:///")) {
+                created =  true;
+            }else {
+                if(makeDirectoryRecursive(UMFileUtil.getParentFilename(dirURI), roots)) {
+                    return makeDirectory(dirURI);
+                }
+            }
+        }catch(IOException e) {
+            l(UMLog.ERROR, 186, dirURI, e);
+            throw e;
+        }
+        
+        return created;
+    }
+    
     
     
     public boolean makeDirectory(String dirURI) throws IOException{
@@ -839,11 +850,8 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             // Setup HTTP Request to GET/POST
             if(type.equals("POST")){
                 httpConn.setRequestProperty("User-Agent",
-                    "Profile/MIDP-1.0 Confirguration/CLDC-1.0");
+                    "Profile/MIDP-2.0 Configuration/CLDC-1.0");
                 httpConn.setRequestProperty("Accept_Language","en-US");
-                //Content-Type is must to pass parameters in POST Request
-                httpConn.setRequestProperty("Content-Type", 
-                        "application/x-www-form-urlencoded");
             }
             
             //Add Parameters
@@ -881,35 +889,29 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 }
             }
             
+            /*
+             * Important trivia on J2ME HTTP Post requests: J2ME will only use
+             * Transfer-Encoding chunked which marks the length within the post
+             * body itself - and therefor Content-Length headers must NOT be added.
+             *
+             * J2ME emulator will silently remove Content-Length headers but not
+             * Content-length - even though HTTP headers are supposed to be case
+             * insensitive
+             */
             if(type.equals("POST")){
-                if(params == null && postBody != null){
-                    //Content-Length to be set
-                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(postBody.length));
-                    httpConn.setRequestProperty("Content-length", 
-                            String.valueOf(postBody.length));
-                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
-                    //httpConn.setRequestProperty(url, type);
-                    l(UMLog.DEBUG, 800, "openingOutputStream");
-                    os = httpConn.openOutputStream();
-                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
-                    os.write(postBody);
-                    l(UMLog.DEBUG, 800, "flushing..");
-                    os.flush();
-                    l(UMLog.DEBUG, 800, "flushed.");
-                }else{
-                    //Content-Length to be set
-                    l(UMLog.DEBUG, 800, "setting content length " + String.valueOf(params.getBytes().length));
-                    httpConn.setRequestProperty("Content-length", 
-                            String.valueOf(params.getBytes().length));
-                    l(UMLog.DEBUG, 800, "setting property url to type " + type);
-                    //httpConn.setRequestProperty(url, type);
-                    l(UMLog.DEBUG, 800, "openingOutputStream");
-                    os = httpConn.openOutputStream();
-                    l(UMLog.DEBUG, 800, "writing params-getBytes()");
-                    os.write(params.getBytes());
-                    //os.flush();
+                byte[] toSend;
+                if(params == null && postBody != null) {
+                    toSend = postBody;
+                }else {
+                    toSend = params.getBytes(UstadMobileConstants.UTF8);
+                    httpConn.setRequestProperty("Content-Type", 
+                        "application/x-www-form-urlencoded");
                 }
                 
+                os = httpConn.openOutputStream();
+                os.write(toSend);
+                os.flush();
+                l(UMLog.DEBUG, 582, "" + toSend.length);
             } 
             
             // Read Response from the Server
@@ -918,8 +920,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             
             UMIOUtils.readFully(is, bout, 1024);
             
-            byte[] response = null;
-            response = bout.toByteArray();
+            byte[] response = bout.toByteArray();
             Hashtable responseHeaders = new Hashtable();
             String headerKey;
             String headerVal;
@@ -956,6 +957,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return parser;
     }
 
+    public XmlSerializer newXMLSerializer() {
+        return new KXmlSerializer();
+    }
+    
     public String getUserPref(String key, Object context) {
         String value = UserPref.getSetting(key);
         l(UMLog.DEBUG, 555, key + '=' + value);
@@ -1002,8 +1007,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
             try {
                 in = openZip.openInputStream(url.substring(
                     OPENZIP_PROTO.length()));
-                bout = new ByteArrayOutputStream();
-                UMIOUtils.readFully(in, bout, 1024);
+                if(in != null) {
+                    bout = new ByteArrayOutputStream();
+                    UMIOUtils.readFully(in, bout, 1024);
+                }else {
+                    ioe = new IOException("Zip entry not found: " + url);
+                }
             }catch(IOException e) {
                 getLogger().l(UMLog.INFO, 320, url, e);
                 ioe = e;
@@ -1187,7 +1196,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     public int[] getFileDownloadStatus(long downloadID, Object context) {
-        //TODO: implement this
         return downloadService.getStatus(downloadID);
     }
 
@@ -1197,17 +1205,6 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
         downloadService.unregisterDownloadCompleteReceiver(receiver);
-    }
-
-    //This is just a placeholder so it compiles - we dont support OMR on J2ME just yet
-    public QRCodeImage getQRCodeImage(InputStream in) {
-        try {
-            return new J2MEQRCodeImage(Image.createImage(in));
-        }catch(IOException e) {
-            
-        }
-        
-        return null;
     }
 
     /**
@@ -1249,8 +1246,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
         //not implemented on J2ME yet
     }
-    
-    
+
+    public long getBuildTime() {
+        return BUILDSTAMP;
+    }
+
+    public String getVersion(Object context) {
+        return midlet.getAppProperty("MIDlet-Version");
+    }
     
     
     /**

@@ -1,0 +1,15 @@
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.json:json:20160212";
+    compile "net.sf.kxml:kxml2:2.3.0";
+    compile files('../../core/lib/qrcode.jar');
+    compile project(":core")
+}

@@ -4,17 +4,24 @@
     android:orientation="vertical"
     tools:context="com.ustadmobile.port.android.view.CatalogOPDSFragment">
 
-    <ScrollView
+
+
+    <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/fragment_catalog_scrollview">
+        android:id="@+id/fragment_catalog_swiperefreshview">
 
-        <LinearLayout
-            android:id="@+id/fragment_catalog_container"
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"></LinearLayout>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/fragment_catalog_scrollview">
 
+                <LinearLayout
+                    android:id="@+id/fragment_catalog_container"
+                    android:orientation="vertical"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"></LinearLayout>
 
-    </ScrollView>
+        </ScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </RelativeLayout>

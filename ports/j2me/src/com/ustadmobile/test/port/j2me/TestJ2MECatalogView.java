@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.test.port.j2me;
 
-import com.ustadmobile.port.j2me.app.controller.UstadMobileAppController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;

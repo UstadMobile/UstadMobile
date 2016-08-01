@@ -5,12 +5,18 @@
 # Files for the Dalvik VM
 *.dex
 
+# Android studio IML file
+*.iml
+
 # Java class files
 *.class
 
 # Generated files
 bin/
 gen/
+
+#Android studio files
+*.iml
 
 # Gradle files
 .gradle/
@@ -79,6 +85,9 @@ ports/j2me/src/com/ustadmobile/core/impl/*
 #QRCode that gets checked out into the source directory
 ports/j2me/src/jp
 
+#localization files copied into the j2me directory
+ports/j2me/src/res/locale
+
 #Testing node server files
 testres/node-qunit-server/node_modules
 
@@ -108,3 +117,7 @@ ports/android/buildozer
 *.bak
 *~
 
+#any keystore files
+*.ks
+.nb-gradle/
+/core/.nb-gradle/

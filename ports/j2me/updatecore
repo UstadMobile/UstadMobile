@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ant -lib ../../core/lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar -f preproc.xml
+ant -lib ./lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar -f update-preproc.xml
 
 if [ "$?" == "0" ]; then
     echo "Success"
@@ -22,6 +22,13 @@ fi
 #go back to base directory
 cd ../..
 pwd
+
+# Temporarily; remove QRCode from J2ME lib to save space
 cp -rv lib/checkout/qrcode/src/jp src/
 
+# Attendance functionalities are not supported in J2ME
+#rm -r src/com/ustadmobile/core/omr
+#rm src/com/ustadmobile/test/core/TestOMR.java
+
+#rm src/com/ustadmobile/core/controller/AttendanceController.java
 

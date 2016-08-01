@@ -16,6 +16,7 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.util.PythonServiceManager;
 
@@ -56,6 +57,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
         if(getContext() != null && getContext().getClass().equals(SplashScreenActivity.class)){
                 System.out.println("Splash screen started this!");
                 PythonServiceManager psm = new PythonServiceManager();
@@ -128,11 +130,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     }
 
     public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {
-        if(controller.handleClickAppMenuItem(item.getItemId())) {
-            return true;
-        }else {
-            return false;
-        }
+        return UstadBaseController.handleClickAppMenuItem(item.getItemId(), getContext());
     }
 
     protected Toolbar getUMToolbar() {
@@ -195,6 +193,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
                 UstadMobileSystemImpl.getInstance().go(BasePointView.class,
                         BasePointController.makeDefaultBasePointArgs(this), this);
                 return true;
+
+        }
+
+        if(handleClickAppMenuItem(item, baseController)) {
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
