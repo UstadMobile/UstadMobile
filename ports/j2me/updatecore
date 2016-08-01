@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ant -lib ../../core/lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar -f update-preproc.xml
+ant -lib ./lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar -f update-preproc.xml
 
 if [ "$?" == "0" ]; then
     echo "Success"

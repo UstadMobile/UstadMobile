@@ -293,9 +293,6 @@ NetBeans.  See README for instructions on building from source.
 	    <!-- Prebop preprocessor -->
             <url url="http://www.ustadmobile.com/build-dep/com.objfac.ant.preprocess_0.9.1.zip"/>
 	
-	    <!-- JSON-J2ME -->
-	    <!-- <url url="http://www.ustadmobile.com/build-dep/json-me.jar"/> -->
-
         </get>
         
         <unzip dest="${lib.dir}">
