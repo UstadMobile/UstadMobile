@@ -10,6 +10,12 @@ file for details.
 The platform consisits of a main cross platform 'core' and an
 implementation of the UI and platform specific function in ports.
 
+Most of the code lives in Gradle projects:
+core : Contains core models and logic
+ports/sharedse: Contains implementation for "Full Fat" Non-Micro implementations: e.g. Android, J2SE, iOS via J2ObjC
+ports/android: Contains Android implementation
+ports/j2me: This is an ant project: Contains J2ME Implementation
+
 To build and run tests: See the README file in ports/<platform name>
 
 

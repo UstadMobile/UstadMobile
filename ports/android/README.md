@@ -1,23 +1,13 @@
 Ustad Mobile for Android
 
-The Android version uses an ant task to copy the core source into
-it's directory.  This is to aid debugging: Android studio does not
-respect breakpoints in JARs even when the sources are known to it.
+Gradle is used to include the core package of controllers
+(shared even with J2ME) and sharedse which contains some
+system methods for "standard" edition platforms.
 
 Packages are therefor split up as follows:
-com.ustadmobile.core : Everything here except for 
-com.ustadmobile.impl.UstadMobileSystemImplFactory and
-com.ustadmobile.view.ViewFactory will be copied from the core
-directory (../../core).  Any other files there will be deleted
-when the build process runs.
-
-Test packages are split up the same way.  In the testing dir
-anything under ustadmobile.test.core will be deleted and 
-replaced by the preprocessed files from the core directory.
-
-Update core library
-
-./updatecore
+com.ustadmobile.core : Core logic shared with J2ME
+com.ustadmobile.port.sharedse : Logic shared amongst "Full fat" SE platforms (Android, J2ObjC target, J2SE)
+com.ustadmobile.port.android : Android specific implementation
 
 Run tests:
 
