@@ -121,3 +121,8 @@ ports/android/buildozer
 *.ks
 .nb-gradle/
 /core/.nb-gradle/
+
+# iOS Generated Sources
+ports/ios/Generated
+ports/ios/lib
+
