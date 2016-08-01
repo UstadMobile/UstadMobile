@@ -47,7 +47,7 @@
 	<!-- Using failonerror=false not cooperating with nested fileset -->
 	<mkdir dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
         <delete>
-            <fileset dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
+            <fileset dir="${ustadmobile.port.mainsrc}/com/ustadmobile/core"/>
         </delete>
 
         <delete failonerror="false">
@@ -64,7 +64,7 @@
         
         
         <copy todir="${ustadmobile.port.mainsrc}/com/ustadmobile/core">
-            <fileset dir="preproctmp" excludes="**/UstadMobileSystemImplFactory.java **/ViewFactory.java"/>
+            <fileset dir="preproctmp"/>
         </copy>
         <delete dir="preproctmp"/>
 

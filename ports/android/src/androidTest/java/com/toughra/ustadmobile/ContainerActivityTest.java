@@ -12,7 +12,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.view.ContainerActivity;
-import com.ustadmobile.test.core.TestUtils;
 
 /**
  * Created by mike on 9/23/15.

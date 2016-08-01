@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.test.core;
 
+import com.ustadmobile.core.util.TestConstants;
 import com.ustadmobile.core.util.UMTinCanUtil;
 
 

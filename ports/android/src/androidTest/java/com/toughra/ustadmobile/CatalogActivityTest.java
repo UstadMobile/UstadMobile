@@ -10,8 +10,8 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.view.CatalogActivity;
-import com.ustadmobile.test.core.TestConstants;
-import com.ustadmobile.test.core.TestUtils;
+import com.ustadmobile.core.util.TestConstants;
+import com.ustadmobile.core.util.TestUtils;
 
 import java.util.Locale;
 

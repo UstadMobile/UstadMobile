@@ -200,6 +200,16 @@ public abstract class UstadMobileSystemImpl {
     public static final int RESUME_MAX_CHOICES = 5;
     
     /**
+     * The factory class that is used to create a new implementation : this MUST
+     * be set before the first call to getInstance
+     */
+    public static Class systemImplFactoryClass;
+    
+    public static void setSystemImplFactoryClass(Class factoryClass) {
+        systemImplFactoryClass  = factoryClass;
+    }
+        
+    /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
      * 
@@ -207,7 +217,12 @@ public abstract class UstadMobileSystemImpl {
      */
     public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
-            mainInstance = UstadMobileSystemImplFactory.createUstadSystemImpl();
+            try {
+                mainInstance = ((UstadMobileSystemImplFactory)systemImplFactoryClass.newInstance()).makeUstadSystemImpl();
+            }catch(Exception e) {
+                System.err.println("Exception creating SystemImpl!");
+                e.printStackTrace();
+            }
         }
         
         return mainInstance;

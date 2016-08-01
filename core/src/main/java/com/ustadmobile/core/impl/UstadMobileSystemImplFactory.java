@@ -34,13 +34,11 @@ package com.ustadmobile.core.impl;
  *
  * @author mike
  */
-public class UstadMobileSystemImplFactory {
+public abstract class UstadMobileSystemImplFactory {
     
     /**
      * @return 
      */
-    public static UstadMobileSystemImpl createUstadSystemImpl() {
-        throw new RuntimeException("Error 42");
-    }
+    public abstract UstadMobileSystemImpl makeUstadSystemImpl();
     
 }

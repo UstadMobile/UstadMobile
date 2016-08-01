@@ -13,6 +13,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplFactoryJ2ME;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class UstadMobileJ2MERun extends MIDlet {
 
     public void startApp() {
         Display.init(this);
+        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryJ2ME.class);
         
         UstadMobileSystemImplJ2ME impl = 
                 (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance();

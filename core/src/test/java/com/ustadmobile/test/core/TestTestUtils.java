@@ -31,6 +31,7 @@
 package com.ustadmobile.test.core;
 
 
+import com.ustadmobile.core.util.TestUtils;
 import java.io.IOException;
 
 /* $if umplatform == 2  $

@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.ustadmobile.port.android.view.LoginActivity;
-import com.ustadmobile.test.core.TestUtils;
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.test.port.android.UMAndroidTestUtil;
 
 import java.util.Hashtable;

@@ -13,6 +13,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.test.port.j2me.UstadMobileAppController;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
+import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplFactoryJ2ME;
 import com.ustadmobile.test.core.TestConstants;
 import com.ustadmobile.test.core.UMContextGetter;
 import j2meunit.framework.AssertionFailedError;
@@ -41,6 +42,8 @@ public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
     
     //Start the tests:
     public void startApp(){
+        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryJ2ME.class);
+        
         String testServerURL = 
             "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
         lcduiDisplay = 

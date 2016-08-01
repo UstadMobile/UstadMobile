@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.test.core;
 
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.omr.OMRRecognizer;

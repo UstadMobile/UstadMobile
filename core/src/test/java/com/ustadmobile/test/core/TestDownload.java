@@ -31,6 +31,7 @@
 package com.ustadmobile.test.core;
 
 
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
