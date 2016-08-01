@@ -119,3 +119,5 @@ ports/android/buildozer
 
 #any keystore files
 *.ks
+.nb-gradle/
+/core/.nb-gradle/

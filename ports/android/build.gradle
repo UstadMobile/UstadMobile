@@ -47,7 +47,7 @@ repositories {
 dependencies {
     androidTestCompile 'junit:junit:4.12'
     compile files('../../core/lib/qrcode.jar')
-    //compile files('../../core/dist/UstadMobileCore.jar')
+    compile project(":sharedse")
     compile project(':lrs')
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:cardview-v7:23.1.1'
