@@ -31,6 +31,7 @@
 package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.util.TestConstants;
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 
 
@@ -51,12 +52,13 @@ public class TestUMTinCanUtils extends TestCase{
     
     
     public void testUMTinCanUtils() throws Exception{
+        TestUtils utils = new TestUtils();
         JSONObject testActor = UMTinCanUtil.makeActorFromUserAccount(
-            TestConstants.LOGIN_USER, TestConstants.XAPI_SERVER);
+            utils.getTestProperty(TestUtils.PROP_TESTUSER), TestConstants.XAPI_SERVER);
         JSONObject testAcct =testActor.getJSONObject("account");
         String testAcctStr = testAcct.toString();
         assertEquals("Correctly set name on account", testAcct.getString("name"), 
-                TestConstants.LOGIN_USER);
+                utils.getTestProperty(TestUtils.PROP_TESTUSER));
         assertEquals("Correctly set homepage", testAcct.getString("homePage"),
             TestConstants.XAPI_SERVER);
         

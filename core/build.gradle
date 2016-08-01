@@ -1,10 +1,12 @@
 apply plugin: 'java'
 
+apply from: "testsettings.gradle"
 sourceCompatibility = 1.7
 
 repositories {
     mavenCentral()
 }
+
 
 dependencies {
     compile "org.json:json:20160212";
@@ -13,3 +15,9 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
+test {
+    systemProperty "ustadmobile.testserver", project.ext.testServer
+    systemProperty "ustadmobile.testport", project.ext.testServerPort
+    systemProperty "ustadmobile.testuser", project.ext.testUser
+    systemProperty "ustadmobile.testauth", project.ext.testUserAuth
+}

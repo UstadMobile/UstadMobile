@@ -33,11 +33,12 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-import com.ustadmobile.core.util.TestConstants;
     import junit.framework.TestCase;
 /* $endif$ */
 
+import com.ustadmobile.core.util.TestConstants;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.util.TestUtils;
 import java.io.IOException;
 
 /** 
@@ -56,8 +57,10 @@ public class TestLogin extends TestCase{
     }
 
     public void testLogin() throws IOException{
+        TestUtils utils = new TestUtils();
         int loginOKResult = LoginController.authenticate(
-                TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                utils.getTestProperty(TestUtils.PROP_TESTUSER), 
+                utils.getTestProperty(TestUtils.PROP_TESTAUTH),
                 TestConstants.LOGIN_URL);
         assertEquals("Login OK returns 200", 200, loginOKResult);
     }

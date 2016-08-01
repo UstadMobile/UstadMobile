@@ -35,6 +35,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMIOUtils;
 import java.io.IOException;
 
@@ -76,6 +77,7 @@ public class TestCacheAndStorageDir extends TestCase{
     
     public void testCacheDir()  {
         Object context = UMContextGetter.getContext(this);
+        TestUtils utils = new TestUtils();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.init(context);
         String cacheDir = impl.getCacheDir(CatalogController.SHARED_RESOURCE, 
@@ -83,7 +85,7 @@ public class TestCacheAndStorageDir extends TestCase{
         impl.l(UMLog.DEBUG, 595, cacheDir);
         assertTrue("Can make files in cache dir", 
                 UMIOUtils.canWriteChildFile(cacheDir));
-        impl.setActiveUser(TestConstants.LOGIN_USER, context);
+        impl.setActiveUser(utils.getTestProperty(TestUtils.PROP_TESTUSER), context);
         cacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE, context);
         impl.l(UMLog.DEBUG, 597, cacheDir);
         assertTrue("User cache dir is created",

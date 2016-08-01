@@ -90,9 +90,11 @@ public class TestCatalogController extends TestCase{
     
     public void testCatalogController() throws IOException, XmlPullParserException {
         final Object context = UMContextGetter.getContext(this);
+        final TestUtils testUtils = new TestUtils();
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.INFO, 311, null);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.setActiveUser(TestConstants.LOGIN_USER, context);
+        impl.setActiveUser(testUtils.getTestProperty(TestUtils.PROP_TESTUSER), 
+            context);
         
         
         final Hashtable loadedVals = new Hashtable();
@@ -102,7 +104,8 @@ public class TestCatalogController extends TestCase{
                 try {
                     CatalogController loadCtrl = CatalogController.makeControllerByURL(
                         opdsURL, CatalogController.USER_RESOURCE, 
-                        TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTUSER), 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTAUTH), 
                         CatalogController.CACHE_ENABLED, context);
                     loadedVals.put("controller1", loadCtrl);
                 }catch(Exception e) {
@@ -147,7 +150,8 @@ public class TestCatalogController extends TestCase{
                 try {
                     CatalogController loadCtrl = CatalogController.makeControllerByURL(
                         acquireOPDSURL, CatalogController.USER_RESOURCE, 
-                        TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTUSER), 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTAUTH), 
                         CatalogController.CACHE_ENABLED, context);
                     loadedVals.put("controller2", loadCtrl);
                 }catch(Exception e) {
@@ -162,7 +166,8 @@ public class TestCatalogController extends TestCase{
         UstadJSOPDSFeed feed = controller.getModel().opdsFeed;
         CatalogController.AcquireRequest request = new CatalogController.AcquireRequest(
             feed.entries, "/some/dir/notused", 
-            TestConstants.LOGIN_USER, TestConstants.LOGIN_PASS, 
+            testUtils.getTestProperty(TestUtils.PROP_TESTUSER), 
+            testUtils.getTestProperty(TestUtils.PROP_TESTAUTH), 
             CatalogController.SHARED_RESOURCE, context, controller);
         
         // test filtering of acquisition links
