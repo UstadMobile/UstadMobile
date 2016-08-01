@@ -34,6 +34,7 @@ package com.ustadmobile.test.core;
 import com.ustadmobile.core.util.TestConstants;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMFileUtil;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -72,6 +73,7 @@ public class TestFileImpl extends TestCase {
         UstadMobileSystemImpl.l(UMLog.DEBUG, 600, "testFileImpl Asking for context");
 
         Object context = UMContextGetter.getContext(this);
+        TestUtils utils = new TestUtils();
         
         UstadMobileSystemImpl.l(UMLog.DEBUG, 600, "testFileImpl got context");
         
@@ -81,7 +83,7 @@ public class TestFileImpl extends TestCase {
         
         assertTrue("Shared content dir exists", impl.dirExists(sharedContentDir));
         
-        impl.setActiveUser(TestConstants.LOGIN_USER, context);
+        impl.setActiveUser(utils.getTestProperty(TestUtils.PROP_TESTUSER), context);
         
         assertTrue("User directory exists when active user is set",
                 impl.dirExists(impl.getUserContentDirectory(impl.getActiveUser(context))));

@@ -16,7 +16,10 @@ ports/sharedse: Contains implementation for "Full Fat" Non-Micro implementations
 ports/android: Contains Android implementation
 ports/j2me: This is an ant project: Contains J2ME Implementation
 
-To build and run tests: See the README file in ports/<platform name>
+To build and run tests: 
+
+1. Copy core/testsettings.gradle.example to core/testsettings.gradle
+2. See the README file in ports/<platform name>
 
 
 

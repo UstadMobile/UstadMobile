@@ -43,6 +43,7 @@ import com.ustadmobile.core.util.TestConstants;
 /* $endif$ */
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMUtil;
 
 /**
@@ -65,7 +66,9 @@ public class TestPreferences extends TestCase {
     public void testPreferences() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Object context = UMContextGetter.getContext(this);
-        impl.setActiveUser(TestConstants.LOGIN_USER, context);
+        TestUtils utils = new TestUtils();
+        
+        impl.setActiveUser(utils.getTestProperty(TestUtils.PROP_TESTUSER), context);
         
         String[] testKeys = new String[]{"TestKey1", "TestKey2", "TestKey3"};
         String[] testValues = new String[]{"answeris42", "questionis6x7", "beacat"};
@@ -86,13 +89,13 @@ public class TestPreferences extends TestCase {
         keyIndex = UMUtil.getIndexInArray(testKeys[2], prefKeys);
         assertTrue("App pref set key is in list of keys", keyIndex != -1);
         
-        impl.setActiveUser(TestConstants.LOGIN_USER + "other",context);
+        impl.setActiveUser(utils.getTestProperty(TestUtils.PROP_TESTUSER) + "other",context);
         assertEquals("After changing user preference no longer present", null, 
             impl.getUserPref(testKeys[0], context));
         assertEquals("Can retrieve set app value after new user logged in", 
                 testValues[2], impl.getAppPref(testKeys[2], context));
         
-        impl.setActiveUser(TestConstants.LOGIN_USER, context);
+        impl.setActiveUser(utils.getTestProperty(TestUtils.PROP_TESTUSER), context);
         assertEquals("After logging in value is present", testValues[0],
                 impl.getUserPref(testKeys[0], context));
 

@@ -30,6 +30,14 @@ public class TestUtils {
     
     private int serverPort = -1;
     
+    public static final String PROP_TESTSERVER = "ustadmobile.testserver";
+    
+    public static final String PROP_TESTPORT = "ustadmobile.testport";
+    
+    public static final String PROP_TESTUSER = "ustadmobile.testuser";
+    
+    public static final String PROP_TESTAUTH = "ustadmobile.testauth";
+    
     public TestUtils() {
         
     }
@@ -43,6 +51,11 @@ public class TestUtils {
         return mainInstance;
     }
     
+    public String getTestProperty(String propName) {
+        return System.getProperty(propName);
+    }
+    
+    
     public int getHTTPPort() {
         return serverPort;
     }
@@ -55,8 +68,8 @@ public class TestUtils {
      * @return true if set OK, false otherwise
      */
     public boolean setLimits(int speedLimit, int forceErrorAfter) {
-        String setParamsURL = "http://" + TestConstants.TEST_SERVER + ":"
-                + TestConstants.TEST_CONTROL_PORT + "/?action=setparams&port=" + serverPort
+        String setParamsURL = "http://" + System.getProperty(PROP_TESTSERVER) + ":"
+                + System.getProperty(PROP_TESTPORT) + "/?action=setparams&port=" + serverPort
                 + "&speedlimit=" + speedLimit + "&forceerrorafter=" + forceErrorAfter;
         boolean setValues = false;
         try {
@@ -77,8 +90,8 @@ public class TestUtils {
     public String getHTTPRoot() {
         Exception ex = null;
                 
-        String startServerURL = "http://" + TestConstants.TEST_SERVER + ":"
-                    + TestConstants.TEST_CONTROL_PORT + "/?action=newserver";
+        String startServerURL = "http://" + System.getProperty(PROP_TESTSERVER) + ":"
+                    + System.getProperty(PROP_TESTPORT) + "/?action=newserver";
         if(httpRootDir == null) {
             try {
                 HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(startServerURL,
@@ -86,7 +99,7 @@ public class TestUtils {
                 String serverSays = new String(result.getResponse(), "UTF-8");
                 JSONObject response = new JSONObject(serverSays);
                 serverPort = response.getInt("port");
-                httpRootDir = "http://" + TestConstants.TEST_SERVER + ":" + serverPort + "/";
+                httpRootDir = "http://" + System.getProperty(PROP_TESTSERVER) + ":" + serverPort + "/";
             }catch(IOException e) {
                 System.err.println("Test exception creating new test port");
                 e.printStackTrace();
@@ -134,8 +147,8 @@ public class TestUtils {
         
         
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(
-                "http://" + TestConstants.TEST_SERVER + ":"
-                    + TestConstants.TEST_CONTROL_PORT + "/", 
+                "http://" + System.getProperty(PROP_TESTSERVER) + ":"
+                    + System.getProperty(PROP_TESTPORT) + "/", 
                 headers, postParams, "POST");
         if(result.getStatus() != 200) {
             throw new IOException("Error sending results to server: status: " 
