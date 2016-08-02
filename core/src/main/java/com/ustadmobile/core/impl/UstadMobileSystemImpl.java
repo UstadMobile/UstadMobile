@@ -31,13 +31,10 @@
 
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UserSettingsController;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.tincan.Registration;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
@@ -46,7 +43,6 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.LoginView;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -314,7 +310,7 @@ public abstract class UstadMobileSystemImpl {
                 context);
             messages = MessagesHashtable.load(localeIn);
             getLogger().l(UMLog.VERBOSE, 423, locale);
-            String localeDir = messages.get(U.id.dir);
+            String localeDir = messages.get(MessageIDConstants.dir);
             direction = localeDir != null && localeDir.equals("rtl") ? 
                 UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
             success = true;
@@ -386,7 +382,7 @@ public abstract class UstadMobileSystemImpl {
      * Get a string for use in the UI
      * 
      * @param msgCode
-     * @see U
+     * @see MessageIDConstants
      * @return String if found in current locale, otherwise null
      */
     public String getString(int msgCode) {

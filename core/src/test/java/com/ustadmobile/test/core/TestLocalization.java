@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
@@ -87,7 +87,7 @@ public class TestLocalization extends TestCase{
         assertNotNull("Loaded hashtable", mht);
         in.close();
         assertEquals("Loaded first message correct", "Login", 
-                mht.get(U.id.login));
+                mht.get(MessageIDConstants.login));
     }
     
     public void runTest() throws IOException {

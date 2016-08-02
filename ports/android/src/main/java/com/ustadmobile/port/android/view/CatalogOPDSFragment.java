@@ -37,7 +37,6 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -50,7 +49,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
@@ -170,8 +169,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                     refreshLayout.setRefreshing(false);
                     if (controller == null) {
                         String errMsg = LocaleUtil.formatMessage(
-                                impl.getString(U.id.course_catalog_load_error), "Catalog controller");
-                        impl.getAppView(getActivity()).showAlertDialog(impl.getString(U.id.error),
+                                impl.getString(MessageIDConstants.course_catalog_load_error), "Catalog controller");
+                        impl.getAppView(getActivity()).showAlertDialog(impl.getString(MessageIDConstants.error),
                                 errMsg);
                     } else {
                         setupFromCatalogController((CatalogController) controller);

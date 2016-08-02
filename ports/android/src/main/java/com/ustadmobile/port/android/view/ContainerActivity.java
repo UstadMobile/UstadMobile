@@ -27,7 +27,7 @@ import android.widget.RelativeLayout;
 
 import com.joanzapata.pdfview.PDFView;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
@@ -241,8 +241,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                     setupFromController((ContainerController) controller);
                 } else {
                     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                    impl.getAppView(ctx).showAlertDialog(impl.getString(U.id.error),
-                            impl.getString(U.id.could_not_open_file));
+                    impl.getAppView(ctx).showAlertDialog(impl.getString(MessageIDConstants.error),
+                            impl.getString(MessageIDConstants.could_not_open_file));
                 }
             }
         });
@@ -398,7 +398,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             String message = "what a terrible failure: " + exc.toString();
             exc.printStackTrace();
-            impl.getAppView(this).showAlertDialog(impl.getString(U.id.error), message);
+            impl.getAppView(this).showAlertDialog(impl.getString(MessageIDConstants.error), message);
         }
 
         if(navDocument != null) {

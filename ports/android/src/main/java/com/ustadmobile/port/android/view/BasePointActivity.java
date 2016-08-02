@@ -1,38 +1,30 @@
 package com.ustadmobile.port.android.view;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TableLayout;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
@@ -189,7 +181,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 
-        private int[] tabTitles = new int[]{U.id.downloaded_items, U.id.browse_feeds, U.id.classes};
+        private int[] tabTitles = new int[]{MessageIDConstants.downloaded_items, MessageIDConstants.browse_feeds, MessageIDConstants.classes};
 
         private WeakHashMap<Integer, Fragment> fragmentMap;
 

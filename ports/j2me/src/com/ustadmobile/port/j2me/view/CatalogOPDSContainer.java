@@ -44,7 +44,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
@@ -141,7 +141,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     public void loadCatalog(String url, int resourceMode) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        //impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.loading));
+        //impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.loading));
         CatalogController.makeControllerForView(this, url, resourceMode, 
                 fetchFlags, this);
     }
@@ -154,9 +154,9 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
                     setController((CatalogController)controller);
                 }else {
                     String errMsg = LocaleUtil.formatMessage(
-                        impl.getString(U.id.course_catalog_load_error),
+                        impl.getString(MessageIDConstants.course_catalog_load_error),
                         "Catalog controller");
-                    impl.getAppView(getContext()).showAlertDialog(impl.getString(U.id.error),
+                    impl.getAppView(getContext()).showAlertDialog(impl.getString(MessageIDConstants.error),
                         errMsg);
                 }
             }
@@ -202,7 +202,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         addComponent(spaceLabel);        
         
         if (acquisition){
-            Command downloadAll = new Command(impl.getString(U.id.download_all), CMD_DOWNLOAD_ALL);
+            Command downloadAll = new Command(impl.getString(MessageIDConstants.download_all), CMD_DOWNLOAD_ALL);
             Button downloadAllButton = new Button(downloadAll);
             this.addComponent(downloadAllButton); 
         }
@@ -238,7 +238,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
                     new UstadJSOPDSEntry[]{selectedButton.getEntry()});
             }else {
                 UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                    UstadMobileSystemImpl.getInstance().getString(U.id.nothing_selected),
+                    UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.nothing_selected),
                     AppView.LENGTH_LONG);
             }
         }else if(cmdId == CMD_REFRESH) {
@@ -393,9 +393,9 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         super.onCreateMenuCommands(cmdVector);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
-        cmdVector.addElement(new Command(impl.getString(U.id.delete), 
+        cmdVector.addElement(new Command(impl.getString(MessageIDConstants.delete), 
                 CMD_DELETE_ENTRY));
-        cmdVector.addElement(new Command(impl.getString(U.id.refresh),
+        cmdVector.addElement(new Command(impl.getString(MessageIDConstants.refresh),
             CMD_REFRESH));
         
         int i;

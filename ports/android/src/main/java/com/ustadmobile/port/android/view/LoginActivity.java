@@ -36,11 +36,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -49,7 +46,7 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -273,7 +270,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
         private WeakHashMap<Integer, LoginFragment> fragmentMap;
 
-        private int[] tabTitles = new int[] {U.id.login, U.id.register};
+        private int[] tabTitles = new int[] {MessageIDConstants.login, MessageIDConstants.register};
 
         public LoginPagerAdapter(FragmentManager fm) {
             super(fm);

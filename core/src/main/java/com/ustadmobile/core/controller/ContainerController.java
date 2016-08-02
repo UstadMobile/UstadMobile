@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -612,7 +612,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public void handleClickResumableRegistrationMenuItem() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(supportsResumableRegistrations()) {
-            impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.loading));
+            impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.loading));
             getResumableRegistrations(this);
         }else {
             UstadMobileSystemImpl.getInstance().getAppView(getContext()).showAlertDialog(

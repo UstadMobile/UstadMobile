@@ -52,7 +52,7 @@ import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.util.UMTinCanUtil;
@@ -194,12 +194,12 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         containerURI = (String)args.get(ContainerController.ARG_CONTAINERURI);
         mimeType = (String)args.get(ContainerController.ARG_MIMETYPE);
         
-        cmdBack = new Command(impl.getString(U.id.back), CMDBACK_ID);
-        cmdForward = new Command(impl.getString(U.id.next), CMDFORWARD_ID);
+        cmdBack = new Command(impl.getString(MessageIDConstants.back), CMDBACK_ID);
+        cmdForward = new Command(impl.getString(MessageIDConstants.next), CMDFORWARD_ID);
         cmdBackToCatalog = new Command("Exit course", CMDBACK_TO_CATALOG_ID);
         cmdTOC = new Command("Contents", CMD_TO_TOC_ID);
         cmdOpen = new Command("Open", CMD_TOC_OPEN_ID);
-        cmdTOCHide = new Command(impl.getString(U.id.back), CMD_TOC_HIDE);
+        cmdTOCHide = new Command(impl.getString(MessageIDConstants.back), CMD_TOC_HIDE);
         
         mainViewCommands = new Command[]{cmdForward, cmdBack, cmdBackToCatalog, cmdTOC};
         tocCommands = new Command[]{cmdTOCHide, cmdOpen};
@@ -233,7 +233,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             UstadMobileSystemImpl.l(UMLog.ERROR, 175, containerURI);
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             //TODO: localize this string
-            impl.getAppView(getContext()).showAlertDialog(impl.getString(U.id.error), 
+            impl.getAppView(getContext()).showAlertDialog(impl.getString(MessageIDConstants.error), 
                 "Could not open container");
         }
     }
@@ -454,7 +454,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
     public void showTOC() {
         //Change me to not run this on the main thread
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.loading));
+        impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.loading));
         requestHandler.schedule(new LoadNavDocTask(), 50);
     }
     

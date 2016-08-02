@@ -37,9 +37,6 @@ import android.content.*;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -51,15 +48,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.toughra.ustadmobile.BuildConfig;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.*;
-import com.ustadmobile.core.tincan.Registration;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.tincan.TinCanStatement;
-import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
@@ -73,7 +67,6 @@ import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.impl.qr.AndroidQRCodeImage;
 import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
@@ -86,18 +79,13 @@ import com.ustadmobile.port.android.view.LoginActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 
 import android.os.Build;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Xml;
-import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
-
-import jp.sourceforge.qrcode.data.QRCodeImage;
 
 
 /**
@@ -347,13 +335,13 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         String systemBaseDir = getSystemBaseDir();
 
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(systemBaseDir, getString(U.id.device), false, true, false));
+            dirList.add(new UMStorageDir(systemBaseDir, getString(MessageIDConstants.device), false, true, false));
 
             //Find external directories
             String[] externalDirs = findRemovableStorage();
             for(String extDir : externalDirs) {
                 dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
-                    UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(U.id.memory_card),
+                    UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(MessageIDConstants.memory_card),
                         true, true, false, false));
             }
         }
@@ -361,7 +349,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImpl{
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
             String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
-            dirList.add(new UMStorageDir(userBase, getString(U.id.device), false, true, true));
+            dirList.add(new UMStorageDir(userBase, getString(MessageIDConstants.device), false, true, true));
         }
 
 

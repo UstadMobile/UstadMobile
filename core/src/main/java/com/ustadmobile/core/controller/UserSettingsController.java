@@ -30,12 +30,11 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.UserSettingItem;
 import com.ustadmobile.core.view.UserSettingsView;
-import java.util.Hashtable;
 
 /**
  * Used for the user to change/save settings.
@@ -64,7 +63,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         String retVal = null;
         if(langCode.equals("")) {
             //this is the system default language
-            return UstadMobileSystemImpl.getInstance().getString(U.id.lang_sys);
+            return UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.lang_sys);
         }
         
         for(int i = 0; i < UstadMobileConstants.SUPPORTED_LOCALES.length; i++) {
@@ -88,7 +87,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
     
     public void setUIStrings() {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        settingsView.setSettingsTitle(impl.getString(U.id.settings));
+        settingsView.setSettingsTitle(impl.getString(MessageIDConstants.settings));
         setViewSettingsList();
         
         int numLangs = UstadMobileConstants.SUPPORTED_LOCALES.length + 1;
@@ -97,7 +96,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         
         //default system locale
         languageCodes[0] = "";
-        languageNames[0] = impl.getString(U.id.lang_sys);
+        languageNames[0] = impl.getString(MessageIDConstants.lang_sys);
         
         for(int i = 1; i < numLangs; i++) {
             languageCodes[i] = UstadMobileConstants.SUPPORTED_LOCALES[i-1][UstadMobileConstants.LOCALE_CODE];
@@ -118,7 +117,7 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         String userLangSetting = impl.getUserPref(PREFKEY_LANG, "", 
                 settingsView.getContext());
         String selectedLang = getLocaleNameByCode(userLangSetting);
-        items[SETTING_LANG] = new UserSettingItem(impl.getString(U.id.language), 
+        items[SETTING_LANG] = new UserSettingItem(impl.getString(MessageIDConstants.language),
             selectedLang);
         
         settingsView.setSettingsList(items);

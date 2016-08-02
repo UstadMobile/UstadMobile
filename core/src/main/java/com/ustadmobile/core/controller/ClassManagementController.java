@@ -3,7 +3,7 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.AttendanceClass;
@@ -85,9 +85,9 @@ public class ClassManagementController extends UstadBaseController{
      
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        classView.setAttendanceLabel(impl.getString(U.id.attendance));
-        classView.setReportsLabel(impl.getString(U.id.reports));
-        classView.setExamsLabel(impl.getString(U.id.exams));
+        classView.setAttendanceLabel(impl.getString(MessageIDConstants.attendance));
+        classView.setReportsLabel(impl.getString(MessageIDConstants.reports));
+        classView.setExamsLabel(impl.getString(MessageIDConstants.exams));
         classView.setClassName(mClass.name);
     }
     

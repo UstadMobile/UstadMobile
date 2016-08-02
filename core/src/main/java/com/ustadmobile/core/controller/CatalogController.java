@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -50,12 +50,8 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
-import com.ustadmobile.core.view.AttendanceView;
-import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.core.view.LoginView;
-import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -680,10 +676,10 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void handleClickDownloadAll() {
         selectedEntries = getModel().opdsFeed.entries;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        view.showConfirmDialog(impl.getString(U.id.download_q), 
-            LocaleUtil.formatMessage(impl.getString(U.id.download_all_q), 
+        view.showConfirmDialog(impl.getString(MessageIDConstants.download_q),
+            LocaleUtil.formatMessage(impl.getString(MessageIDConstants.download_all_q),
                 String.valueOf(selectedEntries.length)),
-                impl.getString(U.id.ok), impl.getString(U.id.cancel), 
+                impl.getString(MessageIDConstants.ok), impl.getString(MessageIDConstants.cancel),
                 CMD_DOWNLOADENTRY);
     }
     
@@ -706,10 +702,10 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void handleClickDeleteEntries(UstadJSOPDSEntry[] entries) {
         selectedEntries = entries;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        this.view.showConfirmDialog(impl.getString(U.id.delete_q), 
-            LocaleUtil.formatMessage(impl.getString(U.id.delete_x_entries_from_device), 
-                String.valueOf(entries.length)), impl.getString(U.id.delete), 
-                impl.getString(U.id.cancel), CMD_DELETEENTRY);
+        this.view.showConfirmDialog(impl.getString(MessageIDConstants.delete_q),
+            LocaleUtil.formatMessage(impl.getString(MessageIDConstants.delete_x_entries_from_device),
+                String.valueOf(entries.length)), impl.getString(MessageIDConstants.delete),
+                impl.getString(MessageIDConstants.cancel), CMD_DELETEENTRY);
     }
     
     public void handleConfirmDeleteEntries() {
@@ -767,7 +763,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         getContext());
             }else if(isInProgress(entry.id)){
                 UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                        impl.getString(U.id.download_in_progress), AppView.LENGTH_LONG);
+                        impl.getString(MessageIDConstants.download_in_progress), AppView.LENGTH_LONG);
             }else{
                 this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
             }
@@ -798,7 +794,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             storageChoices[i] = availableStorageDirs[i].getName();
         }
         UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog(
-            UstadMobileSystemImpl.getInstance().getString(U.id.save_to), 
+            UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.save_to),
             storageChoices, CMD_SELECT_STORAGE_DIR, this);
     }
 
@@ -869,9 +865,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             impl.getActiveUser(getContext()), impl.getActiveUserAuth(getContext()), 
             -1, getContext(), this);
         
-        String[] choices = new String[]{impl.getString(U.id.all_users), 
-            impl.getString(U.id.only_me), impl.getString(U.id.cancel)};
-        impl.getAppView(getContext()).showChoiceDialog(impl.getString(U.id.download_for),
+        String[] choices = new String[]{impl.getString(MessageIDConstants.all_users),
+            impl.getString(MessageIDConstants.only_me), impl.getString(MessageIDConstants.cancel)};
+        impl.getAppView(getContext()).showChoiceDialog(impl.getString(MessageIDConstants.download_for),
             choices, CMD_SELECT_SHARED_OR_USERONLY, this);
     }
     
@@ -1604,7 +1600,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             try {
                 looseContainerFeed.serialize(impl.openFileOutputStream(looseContainerFile, 0));
             }catch(IOException e) {
-                //impl.getAppView().showNotification(impl.getString(U.id.error)
+                //impl.getAppView().showNotification(impl.getString(MessageIDConstants.error)
                 //    + " : 159", AppView.LENGTH_LONG);
                 impl.l(UMLog.ERROR, 159, looseContainerFile, e);
             }

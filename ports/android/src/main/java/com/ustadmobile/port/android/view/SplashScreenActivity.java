@@ -31,28 +31,13 @@
 
 package com.ustadmobile.port.android.view;
 
-import android.content.Intent;
-import android.os.Environment;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 
-import com.ustadmobile.core.U;
-import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.omr.OMRRecognizer;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.core.util.UMUtil;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import jp.sourceforge.qrcode.QRCodeDecoder;
-import jp.sourceforge.qrcode.data.QRCodeImage;
 
 
 public class SplashScreenActivity extends UstadBaseActivity {
@@ -65,7 +50,7 @@ public class SplashScreenActivity extends UstadBaseActivity {
 
 
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        //impl.getAppView(getContext()).showProgressDialog(impl.getString(U.id.processing));
+        //impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.processing));
 
         impl.handleActivityStart(this); //Doesn't really do anything..
         //impl.startUI(this); // Let UstadBaseActivity handle this.

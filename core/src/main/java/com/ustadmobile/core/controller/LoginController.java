@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -40,10 +40,8 @@ import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -370,7 +368,7 @@ public class LoginController extends UstadBaseController{
                 }catch(Exception e) {
                     UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
                     UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
-                        UstadMobileSystemImpl.getInstance().getString(U.id.err_registering_new_user)
+                        UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.err_registering_new_user)
                         + e.toString(), AppView.LENGTH_LONG);
                     e.printStackTrace();
                 }
@@ -378,7 +376,7 @@ public class LoginController extends UstadBaseController{
             }
         };
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.getAppView(ctx).showProgressDialog(impl.getString(U.id.registering));
+        impl.getAppView(ctx).showProgressDialog(impl.getString(MessageIDConstants.registering));
         registerThread.start();
     }
     
@@ -448,11 +446,11 @@ public class LoginController extends UstadBaseController{
                 impl.getAppView(context).dismissProgressDialog();
 
                 if(result == 401 | result == 403) {
-                    impl.getAppView(context).showAlertDialog(impl.getString(U.id.error), 
-                        impl.getString(U.id.wrong_user_pass_combo));
+                    impl.getAppView(context).showAlertDialog(impl.getString(MessageIDConstants.error),
+                        impl.getString(MessageIDConstants.wrong_user_pass_combo));
                 }else if(result != 200) {
                     UstadMobileSystemImpl.getInstance().getAppView(context).showAlertDialog(
-                        impl.getString(U.id.error), impl.getString(U.id.login_network_error));
+                        impl.getString(MessageIDConstants.error), impl.getString(MessageIDConstants.login_network_error));
                 }else {
                     UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
                     UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
@@ -517,7 +515,7 @@ public class LoginController extends UstadBaseController{
             }
         };
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 302, null);
-        impl.getAppView(context).showProgressDialog(impl.getString(U.id.authenticating));
+        impl.getAppView(context).showProgressDialog(impl.getString(MessageIDConstants.authenticating));
         loginThread.start();
     }
     
@@ -552,24 +550,24 @@ public class LoginController extends UstadBaseController{
 
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        view.setTitle(impl.getString(U.id.login));
-        view.setButtonText(impl.getString(U.id.login));
-        view.setUsernameHint(impl.getString(U.id.username));
-        view.setPasswordHint(impl.getString(U.id.password));
-        view.setRegisterButtonText(impl.getString(U.id.register));
-        view.setRegisterNameHint(impl.getString(U.id.name));
-        view.setRegisterPhoneNumberHint(impl.getString(U.id.phone_number));
-        view.setRegisterGenderMaleLabel(impl.getString(U.id.male));
-        view.setRegisterGenderFemaleLabel(impl.getString(U.id.female));
-        String optSffx = " (" + impl.getString(U.id.optional) + ")";
-        view.setRegisterUsernameHint(impl.getString(U.id.username) +optSffx);
-        view.setRegisterPasswordHint(impl.getString(U.id.password) + optSffx);
-        view.setRegisterEmailHint(impl.getString(U.id.email) + optSffx);
-        view.setRegisterRegcodeHint(impl.getString(U.id.regcode) + optSffx);
+        view.setTitle(impl.getString(MessageIDConstants.login));
+        view.setButtonText(impl.getString(MessageIDConstants.login));
+        view.setUsernameHint(impl.getString(MessageIDConstants.username));
+        view.setPasswordHint(impl.getString(MessageIDConstants.password));
+        view.setRegisterButtonText(impl.getString(MessageIDConstants.register));
+        view.setRegisterNameHint(impl.getString(MessageIDConstants.name));
+        view.setRegisterPhoneNumberHint(impl.getString(MessageIDConstants.phone_number));
+        view.setRegisterGenderMaleLabel(impl.getString(MessageIDConstants.male));
+        view.setRegisterGenderFemaleLabel(impl.getString(MessageIDConstants.female));
+        String optSffx = " (" + impl.getString(MessageIDConstants.optional) + ")";
+        view.setRegisterUsernameHint(impl.getString(MessageIDConstants.username) +optSffx);
+        view.setRegisterPasswordHint(impl.getString(MessageIDConstants.password) + optSffx);
+        view.setRegisterEmailHint(impl.getString(MessageIDConstants.email) + optSffx);
+        view.setRegisterRegcodeHint(impl.getString(MessageIDConstants.regcode) + optSffx);
         
         view.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
-        view.setAdvancedLabel(impl.getString(U.id.advanced));
-        view.setServerLabel(impl.getString(U.id.server));
+        view.setAdvancedLabel(impl.getString(MessageIDConstants.advanced));
+        view.setServerLabel(impl.getString(MessageIDConstants.server));
         view.setVersionLabel(impl.getVersion(context) + " - " +
             HTTPCacheDir.makeHTTPDate(impl.getBuildTime()));
             

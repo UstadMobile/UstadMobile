@@ -13,7 +13,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
@@ -56,8 +56,8 @@ public class BasePointFeedForm extends Form implements SelectionListener, Action
             titleTextField = new TextField();
             addComponent(titleTextField);
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            addCommand(new Command(impl.getString(U.id.ok), CMDID_OK));
-            addCommand(new Command(impl.getString(U.id.cancel), CMDID_CANCEL));
+            addCommand(new Command(impl.getString(MessageIDConstants.ok), CMDID_OK));
+            addCommand(new Command(impl.getString(MessageIDConstants.cancel), CMDID_CANCEL));
             addCommandListener(this);
         }
         

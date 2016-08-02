@@ -36,7 +36,7 @@ import com.sun.lwuit.Image;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.plaf.UIManager;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
 import java.io.IOException;
@@ -408,13 +408,13 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         if(incSharedStorage) {
             storageDirs.addElement(new UMStorageDir(baseSystemDir, 
-                getString(U.id.phone_memory), false, true, false));
+                getString(MessageIDConstants.phone_memory), false, true, false));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(0).toString());
         }
         
         if(incUserStorage) {
             storageDirs.addElement(new UMStorageDir(UMFileUtil.joinPaths(
-                new String[]{baseSystemDir, username}), getString(U.id.phone_memory), 
+                new String[]{baseSystemDir, username}), getString(MessageIDConstants.phone_memory), 
                 false, true, true));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
         }
@@ -457,7 +457,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 CONTENT_DIR_NAME});
             if(incSharedStorage) {
                 storageDirs.addElement(new UMStorageDir(sdcardBaseDir, 
-                    getString(U.id.memory_card), true, sdCardAvailable, false));
+                    getString(MessageIDConstants.memory_card), true, sdCardAvailable, false));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
             
@@ -465,7 +465,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 String userSDDir = UMFileUtil.joinPaths(
                     new String[] {sdcardBaseDir, username});
                 storageDirs.addElement(new UMStorageDir(userSDDir, 
-                    getString(U.id.memory_card), true, sdCardAvailable, true));
+                    getString(MessageIDConstants.memory_card), true, sdCardAvailable, true));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
         }

@@ -30,9 +30,8 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UserSettingsView;
 import java.util.Hashtable;
@@ -63,8 +62,8 @@ public abstract class UstadBaseController implements UstadController {
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
         CMD_ABOUT, CMD_SETTINGS, CMD_LOGOUT};
     
-    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{U.id.home, 
-        U.id.about, U.id.settings, U.id.logout};
+    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageIDConstants.home,
+        MessageIDConstants.about, MessageIDConstants.settings, MessageIDConstants.logout};
     
     /**
      * Create a new controller with the given context

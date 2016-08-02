@@ -40,7 +40,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BorderLayout;
-import com.ustadmobile.core.U;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -61,7 +61,7 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     
     private BasePointController basePointController;
     
-    private int[] tabTitles =  new int[]{U.id.downloaded_items, U.id.browse_feeds};
+    private int[] tabTitles =  new int[]{MessageIDConstants.downloaded_items, MessageIDConstants.browse_feeds};
     
     /**
      * Form used for adding new feeds to the user's list

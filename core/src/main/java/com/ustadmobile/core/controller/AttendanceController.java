@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.U;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
