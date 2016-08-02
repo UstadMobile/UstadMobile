@@ -59,8 +59,6 @@ preproctmp
 ports/android/src/androidTest/java/com/ustadmobile/test/core/*
 !ports/android/src/androidTest/java/com/ustadmobile/test/core/UMContextGetter.java
 
-core/test/com/ustadmobile/test/core/TestConstants.java
-
 #Files copied into the main Android project to force
 #Android studio to cooperate debugging them
 
@@ -99,10 +97,6 @@ testres/DodgyHTTPD
 
 #Project properties
 ustadmobilemicro-build.properties
-
-#any TestConstants
-TestConstants.java
-ports/j2me/src/com/ustadmobile/app/tests/TestConstants.java
 
 #Ignore Core Tests copied to port
 ports/j2me/src/com/ustadmobile/test/core/*.java
