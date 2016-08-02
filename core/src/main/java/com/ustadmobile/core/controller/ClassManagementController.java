@@ -11,7 +11,6 @@ import com.ustadmobile.core.model.AttendanceClassStudent;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.ClassManagementView;
-import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -154,10 +153,12 @@ public class ClassManagementController extends UstadBaseController{
     }
     
     public void handleShowEnrollForm(){
+        /* Disabled: do nothing 
         Hashtable args = new Hashtable();
         args.put(AttendanceController.KEY_CLASSID, mClass.id);
         UstadMobileSystemImpl.getInstance().go(EnrollStudentView.class, args, 
                 context);
+        */
     }
         
     public void handleClickAttendanceButton() {
