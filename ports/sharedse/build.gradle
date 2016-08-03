@@ -12,4 +12,7 @@ dependencies {
     compile "net.sf.kxml:kxml2:2.3.0";
     compile files('../../core/lib/qrcode.jar');
     compile project(":core")
+    //might be useful to share unit tests
+    // see https://softnoise.wordpress.com/2014/09/07/gradle-sub-project-test-dependencies-in-multi-project-builds/
+    //testCompile project(":core").sourceSets.test.output
 }
