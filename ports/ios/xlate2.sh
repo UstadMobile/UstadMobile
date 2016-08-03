@@ -1,9 +1,11 @@
 #/bin/bash
 
 JAVA_SRC_DIR=../../core/src/main/java
+IMPL_SHAREDSE_DIR=../sharedse/src/main/java
 QR_SRC_DIR=lib/checkout/qrcode/src
 
 JAVA_SRC_FILES=$(find $JAVA_SRC_DIR -iname "*.java")
+IMPL_SHAREDSE_FILES=$(find $IMPL_SHAREDSE_DIR -name "*.java") 
 QR_SRC_FILES=$(find $QR_SRC_DIR -iname "*.java")
 
 mkdir -p lib/checkout
@@ -23,4 +25,5 @@ pwd
 
 ~/j2objc/current/j2objc -d Generated/ \
    -sourcepath $JAVA_SRC_DIR:$QR_SRC_DIR \
-   --no-package-directories $JAVA_SRC_FILES $QR_SRC_FILES
+   --no-package-directories $JAVA_SRC_FILES \
+   $IMPL_SHAREDSE_FILES $QR_SRC_FILES

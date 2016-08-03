@@ -1,0 +1,521 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AD77D0531D523A8A00A2F95A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0521D523A8A00A2F95A /* main.m */; };
+		AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0551D523A8A00A2F95A /* AppDelegate.m */; };
+		AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0581D523A8A00A2F95A /* ViewController.m */; };
+		AD77D05C1D523A8A00A2F95A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05A1D523A8A00A2F95A /* Main.storyboard */; };
+		AD77D05E1D523A8A00A2F95A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05D1D523A8A00A2F95A /* Assets.xcassets */; };
+		AD77D0611D523A8A00A2F95A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */; };
+		AD77D06C1D523A8A00A2F95A /* UstadMobileIOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D06B1D523A8A00A2F95A /* UstadMobileIOSTests.m */; };
+		AD77D0771D523A8A00A2F95A /* UstadMobileIOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0761D523A8A00A2F95A /* UstadMobileIOSUITests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AD77D0681D523A8A00A2F95A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AD77D0461D523A8A00A2F95A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD77D04D1D523A8A00A2F95A;
+			remoteInfo = UstadMobileIOS;
+		};
+		AD77D0731D523A8A00A2F95A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AD77D0461D523A8A00A2F95A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AD77D04D1D523A8A00A2F95A;
+			remoteInfo = UstadMobileIOS;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UstadMobileIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD77D0521D523A8A00A2F95A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		AD77D0541D523A8A00A2F95A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		AD77D0551D523A8A00A2F95A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		AD77D0571D523A8A00A2F95A /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		AD77D0581D523A8A00A2F95A /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		AD77D05B1D523A8A00A2F95A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		AD77D05D1D523A8A00A2F95A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AD77D0601D523A8A00A2F95A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		AD77D0621D523A8A00A2F95A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AD77D0671D523A8A00A2F95A /* UstadMobileIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UstadMobileIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD77D06B1D523A8A00A2F95A /* UstadMobileIOSTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UstadMobileIOSTests.m; sourceTree = "<group>"; };
+		AD77D06D1D523A8A00A2F95A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AD77D0721D523A8A00A2F95A /* UstadMobileIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UstadMobileIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD77D0761D523A8A00A2F95A /* UstadMobileIOSUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UstadMobileIOSUITests.m; sourceTree = "<group>"; };
+		AD77D0781D523A8A00A2F95A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AD77D04B1D523A8A00A2F95A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD77D0641D523A8A00A2F95A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD77D06F1D523A8A00A2F95A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AD77D0451D523A8A00A2F95A = {
+			isa = PBXGroup;
+			children = (
+				AD77D0501D523A8A00A2F95A /* UstadMobileIOS */,
+				AD77D06A1D523A8A00A2F95A /* UstadMobileIOSTests */,
+				AD77D0751D523A8A00A2F95A /* UstadMobileIOSUITests */,
+				AD77D04F1D523A8A00A2F95A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AD77D04F1D523A8A00A2F95A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */,
+				AD77D0671D523A8A00A2F95A /* UstadMobileIOSTests.xctest */,
+				AD77D0721D523A8A00A2F95A /* UstadMobileIOSUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AD77D0501D523A8A00A2F95A /* UstadMobileIOS */ = {
+			isa = PBXGroup;
+			children = (
+				AD77D0541D523A8A00A2F95A /* AppDelegate.h */,
+				AD77D0551D523A8A00A2F95A /* AppDelegate.m */,
+				AD77D0571D523A8A00A2F95A /* ViewController.h */,
+				AD77D0581D523A8A00A2F95A /* ViewController.m */,
+				AD77D05A1D523A8A00A2F95A /* Main.storyboard */,
+				AD77D05D1D523A8A00A2F95A /* Assets.xcassets */,
+				AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */,
+				AD77D0621D523A8A00A2F95A /* Info.plist */,
+				AD77D0511D523A8A00A2F95A /* Supporting Files */,
+			);
+			path = UstadMobileIOS;
+			sourceTree = "<group>";
+		};
+		AD77D0511D523A8A00A2F95A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				AD77D0521D523A8A00A2F95A /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		AD77D06A1D523A8A00A2F95A /* UstadMobileIOSTests */ = {
+			isa = PBXGroup;
+			children = (
+				AD77D06B1D523A8A00A2F95A /* UstadMobileIOSTests.m */,
+				AD77D06D1D523A8A00A2F95A /* Info.plist */,
+			);
+			path = UstadMobileIOSTests;
+			sourceTree = "<group>";
+		};
+		AD77D0751D523A8A00A2F95A /* UstadMobileIOSUITests */ = {
+			isa = PBXGroup;
+			children = (
+				AD77D0761D523A8A00A2F95A /* UstadMobileIOSUITests.m */,
+				AD77D0781D523A8A00A2F95A /* Info.plist */,
+			);
+			path = UstadMobileIOSUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AD77D04D1D523A8A00A2F95A /* UstadMobileIOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AD77D07B1D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOS" */;
+			buildPhases = (
+				AD77D04A1D523A8A00A2F95A /* Sources */,
+				AD77D04B1D523A8A00A2F95A /* Frameworks */,
+				AD77D04C1D523A8A00A2F95A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = UstadMobileIOS;
+			productName = UstadMobileIOS;
+			productReference = AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AD77D0661D523A8A00A2F95A /* UstadMobileIOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AD77D07E1D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSTests" */;
+			buildPhases = (
+				AD77D0631D523A8A00A2F95A /* Sources */,
+				AD77D0641D523A8A00A2F95A /* Frameworks */,
+				AD77D0651D523A8A00A2F95A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AD77D0691D523A8A00A2F95A /* PBXTargetDependency */,
+			);
+			name = UstadMobileIOSTests;
+			productName = UstadMobileIOSTests;
+			productReference = AD77D0671D523A8A00A2F95A /* UstadMobileIOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AD77D0711D523A8A00A2F95A /* UstadMobileIOSUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AD77D0811D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSUITests" */;
+			buildPhases = (
+				AD77D06E1D523A8A00A2F95A /* Sources */,
+				AD77D06F1D523A8A00A2F95A /* Frameworks */,
+				AD77D0701D523A8A00A2F95A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AD77D0741D523A8A00A2F95A /* PBXTargetDependency */,
+			);
+			name = UstadMobileIOSUITests;
+			productName = UstadMobileIOSUITests;
+			productReference = AD77D0721D523A8A00A2F95A /* UstadMobileIOSUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AD77D0461D523A8A00A2F95A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = "UstadMobile FZ-LLC";
+				TargetAttributes = {
+					AD77D04D1D523A8A00A2F95A = {
+						CreatedOnToolsVersion = 7.3;
+					};
+					AD77D0661D523A8A00A2F95A = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = AD77D04D1D523A8A00A2F95A;
+					};
+					AD77D0711D523A8A00A2F95A = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = AD77D04D1D523A8A00A2F95A;
+					};
+				};
+			};
+			buildConfigurationList = AD77D0491D523A8A00A2F95A /* Build configuration list for PBXProject "UstadMobileIOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AD77D0451D523A8A00A2F95A;
+			productRefGroup = AD77D04F1D523A8A00A2F95A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AD77D04D1D523A8A00A2F95A /* UstadMobileIOS */,
+				AD77D0661D523A8A00A2F95A /* UstadMobileIOSTests */,
+				AD77D0711D523A8A00A2F95A /* UstadMobileIOSUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AD77D04C1D523A8A00A2F95A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD77D0611D523A8A00A2F95A /* LaunchScreen.storyboard in Resources */,
+				AD77D05E1D523A8A00A2F95A /* Assets.xcassets in Resources */,
+				AD77D05C1D523A8A00A2F95A /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD77D0651D523A8A00A2F95A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD77D0701D523A8A00A2F95A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AD77D04A1D523A8A00A2F95A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */,
+				AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */,
+				AD77D0531D523A8A00A2F95A /* main.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD77D0631D523A8A00A2F95A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD77D06C1D523A8A00A2F95A /* UstadMobileIOSTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD77D06E1D523A8A00A2F95A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD77D0771D523A8A00A2F95A /* UstadMobileIOSUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AD77D0691D523A8A00A2F95A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AD77D04D1D523A8A00A2F95A /* UstadMobileIOS */;
+			targetProxy = AD77D0681D523A8A00A2F95A /* PBXContainerItemProxy */;
+		};
+		AD77D0741D523A8A00A2F95A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AD77D04D1D523A8A00A2F95A /* UstadMobileIOS */;
+			targetProxy = AD77D0731D523A8A00A2F95A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		AD77D05A1D523A8A00A2F95A /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AD77D05B1D523A8A00A2F95A /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				AD77D0601D523A8A00A2F95A /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		AD77D0791D523A8A00A2F95A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AD77D07A1D523A8A00A2F95A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AD77D07C1D523A8A00A2F95A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		AD77D07D1D523A8A00A2F95A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		AD77D07F1D523A8A00A2F95A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = UstadMobileIOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UstadMobileIOS.app/UstadMobileIOS";
+			};
+			name = Debug;
+		};
+		AD77D0801D523A8A00A2F95A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = UstadMobileIOSTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOSTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UstadMobileIOS.app/UstadMobileIOS";
+			};
+			name = Release;
+		};
+		AD77D0821D523A8A00A2F95A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = UstadMobileIOSUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOSUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = UstadMobileIOS;
+			};
+			name = Debug;
+		};
+		AD77D0831D523A8A00A2F95A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = UstadMobileIOSUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOSUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = UstadMobileIOS;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AD77D0491D523A8A00A2F95A /* Build configuration list for PBXProject "UstadMobileIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD77D0791D523A8A00A2F95A /* Debug */,
+				AD77D07A1D523A8A00A2F95A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AD77D07B1D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD77D07C1D523A8A00A2F95A /* Debug */,
+				AD77D07D1D523A8A00A2F95A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		AD77D07E1D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD77D07F1D523A8A00A2F95A /* Debug */,
+				AD77D0801D523A8A00A2F95A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		AD77D0811D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD77D0821D523A8A00A2F95A /* Debug */,
+				AD77D0831D523A8A00A2F95A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AD77D0461D523A8A00A2F95A /* Project object */;
+}
