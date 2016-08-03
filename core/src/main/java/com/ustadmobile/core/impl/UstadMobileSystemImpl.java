@@ -568,7 +568,9 @@ public abstract class UstadMobileSystemImpl {
      * 
      * @param resURI the path to the resource; e.g. locale/en.properties
      */
-    public abstract InputStream openResourceInputStream(String resURI, Object context) throws IOException;
+    public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
+        return getClass().getResourceAsStream("/res/" + resURI);
+    }
     
     /**
      * Write the given string to the given file URI.  Create the file if it does 
