@@ -416,9 +416,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
+				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
+				OTHER_LDFLAGS = "-ljre_emul";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include ${PROJECT_DIR}/Generated";
 			};
 			name = Debug;
 		};
@@ -427,9 +431,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
+				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
+				OTHER_LDFLAGS = "-ljre_emul";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include ${PROJECT_DIR}/Generated";
 			};
 			name = Release;
 		};
@@ -498,6 +506,7 @@
 				AD77D07D1D523A8A00A2F95A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		AD77D07E1D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSTests" */ = {
 			isa = XCConfigurationList;
@@ -506,6 +515,7 @@
 				AD77D0801D523A8A00A2F95A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		AD77D0811D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSUITests" */ = {
 			isa = XCConfigurationList;
@@ -514,6 +524,7 @@
 				AD77D0831D523A8A00A2F95A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

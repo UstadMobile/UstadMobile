@@ -23,7 +23,7 @@ fi
 cd ../..
 pwd
 
-~/j2objc/current/j2objc -d Generated/ \
+~/j2objc/current/j2objc -d UstadMobileIOS/Generated/ \
    -sourcepath $JAVA_SRC_DIR:$QR_SRC_DIR \
    --no-package-directories $JAVA_SRC_FILES \
    $IMPL_SHAREDSE_FILES $QR_SRC_FILES

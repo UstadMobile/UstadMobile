@@ -120,7 +120,7 @@ ports/android/buildozer
 /core/.nb-gradle/
 
 # iOS Generated Sources
-ports/ios/Generated
+ports/ios/UstadMobileIOS/Generated
 ports/ios/lib
 
 # Created by https://www.gitignore.io/api/xcode,objective-c
