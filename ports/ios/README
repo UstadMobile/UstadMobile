@@ -17,8 +17,12 @@ logic from Java into Objective C.
 
 Running ./xlate.sh runs j2objc and puts the generated sources in 
 ports/ios/UstadMobileIOS/Generated .  This directory is added as
-a User Header Search Path in XCode (instead of using DERIVED_FILES_DIR
-as per http://j2objc.org/docs/Xcode-Build-Rules.html ).  This way there's
-no need to go manually through adding all Java files to XCode.
+a User Header Search Path in XCode as per:
+
+http://j2objc.org/docs/Xcode-Build-Rules.html ).  This way there's
+
+Instead of using DERIVED_FILES we add the directory by right clicking
+Selecting Generated, Add Files on the project ; uncheck Copy Items, 
+and Select Create Groups for any Added Folders.
 
 
