@@ -438,6 +438,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return new FileInputStream(fileURI);
     }
 
+    
+    /** 
+     * Use Android assets instead 
+     */
     @Override
     public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
         return ((Context)context).getAssets().open(resURI);
