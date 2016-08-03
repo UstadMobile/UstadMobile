@@ -48,6 +48,7 @@ repositories {
 dependencies {
     androidTestCompile 'junit:junit:4.12'
     compile files('../../core/lib/qrcode.jar')
+    compile project(":core")
     compile project(":sharedse")
     compile project(':lrs')
     compile 'com.android.support:appcompat-v7:23.1.1'
