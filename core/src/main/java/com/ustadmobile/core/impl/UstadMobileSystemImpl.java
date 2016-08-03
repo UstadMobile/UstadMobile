@@ -201,8 +201,20 @@ public abstract class UstadMobileSystemImpl {
      */
     public static Class systemImplFactoryClass;
     
+    public static UstadMobileSystemImplFactory systemImplFactory;
+    
     public static void setSystemImplFactoryClass(Class factoryClass) {
         systemImplFactoryClass  = factoryClass;
+    }
+    
+    /**
+     * This method can be used to directly set the System Implementation Factory.
+     * If set there's no need to set the systemImplFactoryClass itself.
+     * 
+     * @param factory 
+     */
+    public static void setSystemImplFactory(UstadMobileSystemImplFactory factory) {
+        systemImplFactory = factory;
     }
         
     /**
@@ -213,12 +225,16 @@ public abstract class UstadMobileSystemImpl {
      */
     public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
-            try {
-                mainInstance = ((UstadMobileSystemImplFactory)systemImplFactoryClass.newInstance()).makeUstadSystemImpl();
-            }catch(Exception e) {
-                System.err.println("Exception creating SystemImpl!");
-                e.printStackTrace();
+            if(systemImplFactory == null) {
+                try {
+                    systemImplFactory = (UstadMobileSystemImplFactory)systemImplFactoryClass.newInstance();
+                }catch(Exception e) {
+                    System.err.println("Exception creating SystemImpl!");
+                    e.printStackTrace();
+                }
             }
+            
+            mainInstance = systemImplFactory.makeUstadSystemImpl();
         }
         
         return mainInstance;
