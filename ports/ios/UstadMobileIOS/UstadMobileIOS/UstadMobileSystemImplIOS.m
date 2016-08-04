@@ -37,6 +37,14 @@
     return [[JavaIoFileInputStream alloc]initWithNSString:resPath];
 }
 
+- (NSString *)getSharedContentDir {
+    NSString *dirPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    return dirPath;
+}
 
+- (NSString *)getSystemBaseDir {
+    NSString *dirPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    return dirPath;
+}
 
 @end
