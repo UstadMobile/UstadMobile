@@ -215,3 +215,8 @@ iOSInjectionProject/
 
 ### Objective-C Patch ###
 *.xcscmblueprint
+
+.DS_Store
+
+# Shared resources added to the XCodeProject
+ports/ios/UstadMobileIOS/res
