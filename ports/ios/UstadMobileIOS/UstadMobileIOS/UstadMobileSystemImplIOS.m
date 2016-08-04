@@ -9,8 +9,24 @@
 #import "UstadMobileSystemImplIOS.h"
 #import "java/io/InputStream.h"
 #import "java/io/FileInputStream.h"
+#import "UMLogIOS.h"
+
+@interface UstadMobileSystemImplIOS()
+@property UMLogIOS *umLogIOS;
+@end
+
 
 @implementation UstadMobileSystemImplIOS
+
+-(id)init {
+    self.umLogIOS = [[UMLogIOS alloc]init];
+    [super init];
+    return self;
+}
+
+- (ComUstadmobileCoreImplUMLog *)getLogger {
+    return self.umLogIOS;
+}
 
 - (JavaIoInputStream *)openResourceInputStreamWithNSString:(NSString *)resURI
                                                     withId:(id)context {
@@ -20,5 +36,7 @@
     NSString *resPath = [[NSBundle mainBundle] pathForResource:fileName ofType:nil inDirectory:dirPath];
     return [[JavaIoFileInputStream alloc]initWithNSString:resPath];
 }
+
+
 
 @end

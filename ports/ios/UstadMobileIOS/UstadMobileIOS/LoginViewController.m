@@ -23,8 +23,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    UstadMobileSystemImplFactoryIOS *iosFactory = [[UstadMobileSystemImplFactoryIOS alloc]init];
-    [ComUstadmobileCoreImplUstadMobileSystemImpl setSystemImplFactoryWithComUstadmobileCoreImplUstadMobileSystemImplFactory:iosFactory];
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     JavaIoInputStream *is = [impl openResourceInputStreamWithNSString:@"/res/locale/en.properties" withId:self.obj];
     self.obj = [[NSObject alloc]init];

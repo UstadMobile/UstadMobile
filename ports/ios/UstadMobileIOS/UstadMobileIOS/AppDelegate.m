@@ -7,6 +7,9 @@
 //
 
 #import "AppDelegate.h"
+#import "UstadMobileSystemImpl.h"
+#import "UstadMobileSystemImplIOS.h"
+#import "UstadMobileSystemImplFactoryIOS.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +20,10 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    UstadMobileSystemImplFactoryIOS *iosFactory = [[UstadMobileSystemImplFactoryIOS alloc]init];
+    [ComUstadmobileCoreImplUstadMobileSystemImpl setSystemImplFactoryWithComUstadmobileCoreImplUstadMobileSystemImplFactory:iosFactory];
+    ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+    [impl init__WithId:self];
     return YES;
 }
 

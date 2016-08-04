@@ -124,6 +124,7 @@
 		AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */; };
 		AD7745D11D52586200A56306 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745D01D52586200A56306 /* LoginViewController.m */; };
 		AD7745E11D526FD600A56306 /* res in Resources */ = {isa = PBXBuildFile; fileRef = AD7745E01D526FD600A56306 /* res */; };
+		AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745E61D539DFE00A56306 /* UMLogIOS.m */; };
 		AD77D0531D523A8A00A2F95A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0521D523A8A00A2F95A /* main.m */; };
 		AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0551D523A8A00A2F95A /* AppDelegate.m */; };
 		AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0581D523A8A00A2F95A /* ViewController.m */; };
@@ -385,6 +386,8 @@
 		AD7745CF1D52586200A56306 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		AD7745D01D52586200A56306 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		AD7745E01D526FD600A56306 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
+		AD7745E51D539DFE00A56306 /* UMLogIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLogIOS.h; sourceTree = "<group>"; };
+		AD7745E61D539DFE00A56306 /* UMLogIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMLogIOS.m; sourceTree = "<group>"; };
 		AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UstadMobileIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD77D0521D523A8A00A2F95A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		AD77D0541D523A8A00A2F95A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -701,6 +704,8 @@
 				AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */,
 				AD7745CF1D52586200A56306 /* LoginViewController.h */,
 				AD7745D01D52586200A56306 /* LoginViewController.m */,
+				AD7745E51D539DFE00A56306 /* UMLogIOS.h */,
+				AD7745E61D539DFE00A56306 /* UMLogIOS.m */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -914,6 +919,7 @@
 				AD46A8B41D52537E00C63A29 /* MessageIDConstants.m in Sources */,
 				AD46A8B71D52537E00C63A29 /* OMRRecognitionThread.m in Sources */,
 				AD46A8831D52537E00C63A29 /* AsyncLoadableController.m in Sources */,
+				AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */,
 				AD46A8E61D52537E00C63A29 /* UstadMobileSystemImpl.m in Sources */,
 				AD46A8CF1D52537E00C63A29 /* UMDownloadCompleteReceiver.m in Sources */,
 				AD46A8901D52537E00C63A29 /* CatalogController.m in Sources */,
