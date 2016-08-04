@@ -7,12 +7,23 @@
 //
 
 #import "UMLogIOS.h"
+#import "java/lang/Exception.h"
 
 @implementation UMLogIOS
 
 - (void)lWithInt:(jint)level
          withInt:(jint)code
     withNSString:(NSString *)message {
+    
+    [self lWithInt:level withInt:code withNSString:message withJavaLangException:nil];
+    
+}
+
+- (void)lWithInt:(jint)level
+         withInt:(jint)code
+    withNSString:(NSString *)message
+withJavaLangException:(JavaLangException *)exception {
+    
     NSMutableString *output = [[NSMutableString alloc]init];
     switch(level) {
         case ComUstadmobileCoreImplUMLog_INFO:
@@ -37,14 +48,13 @@
         [output appendString:message];
     }
     [output appendString:@" "];
-    NSLog(output);
-}
-
-- (void)lWithInt:(jint)level
-         withInt:(jint)code
-    withNSString:(NSString *)message
-withJavaLangException:(JavaLangException *)exception {
     
+    if(exception) {
+        [output appendString:[exception description]];
+    }
+    
+    NSLog(output);
+
 }
 
 
