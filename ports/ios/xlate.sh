@@ -27,3 +27,14 @@ pwd
    -sourcepath $JAVA_SRC_DIR:$QR_SRC_DIR:$IMPL_SHAREDSE_DIR \
    --no-package-directories $JAVA_SRC_FILES \
    $IMPL_SHAREDSE_FILES $QR_SRC_FILES
+
+#Copy resources (e.g. locale)
+if [ -e UstadMobileIOS/res ]; then
+    rm -r UstadMobileIOS/res/*
+else 
+	mkdir UstadMobileIOS/res
+fi
+
+cp -rv ../../core/src/main/assets/* UstadMobileIOS/res
+
+

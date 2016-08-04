@@ -11,5 +11,6 @@
 
 
 @interface UstadMobileSystemImplIOS : ComUstadmobilePortSharedseImplUstadMobileSystemImplSE
-
+- (JavaIoInputStream *)openResourceInputStreamWithNSString:(NSString *)resURI
+                                                    withId:(id)context;
 @end
