@@ -14,9 +14,11 @@
 #include "java/io/InputStream.h"
 #include "UstadMobileSystemImpl.h"
 #include "UstadMobileSystemImplFactoryIOS.h"
+#include "LoginController.h"
 
 @interface LoginViewController ()
 @property (nonatomic) NSObject *obj;
+@property ComUstadmobileCoreControllerLoginController *loginController;
 @end
 
 @implementation LoginViewController
@@ -24,7 +26,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
-    JavaIoInputStream *is = [impl openResourceInputStreamWithNSString:@"/res/locale/en.properties" withId:self.obj];
+    JavaIoInputStream *is = [impl openResourceInputStreamWithNSString:@"locale/en.properties" withId:self.obj];
     self.obj = [[NSObject alloc]init];
     NSString *filePath = [[NSBundle mainBundle] pathForResource:@"en.properties" ofType:nil];
     //JavaIoInputStream *is = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] openResourceInputStreamWithNSString:@"locale/en.properties" withId:self.obj];

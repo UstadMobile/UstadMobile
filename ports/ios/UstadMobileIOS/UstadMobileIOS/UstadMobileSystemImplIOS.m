@@ -54,6 +54,7 @@ static NSString *_defaultsKeyActiveUserAuth;
                                                     withId:(id)context {
     NSRange slashResult = [resURI rangeOfString:@"/" options:NSBackwardsSearch];
     NSString *dirPath = [resURI substringWithRange:NSMakeRange(0, slashResult.location)];
+    dirPath = [@"/res/" stringByAppendingString:dirPath];
     NSString *fileName = [resURI substringFromIndex:(slashResult.location+1)];
     NSString *resPath = [[NSBundle mainBundle] pathForResource:fileName ofType:nil inDirectory:dirPath];
     return [[JavaIoFileInputStream alloc]initWithNSString:resPath];

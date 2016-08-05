@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #include "UstadMobileSystemImpl.h"
+#include "MessageIDConstants.h"
 
 @interface UstadMobileIOSTests : XCTestCase
 @property ComUstadmobileCoreImplUstadMobileSystemImpl *impl;
@@ -50,6 +51,12 @@
     jboolean userLoaded = [self.impl loadActiveUserInfoWithId:context];
     XCTAssertTrue(userLoaded);
     
+}
+
+- (void)testmplCanInit {
+    [self.impl init__WithId:self];
+    NSString *loginText = [self.impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_login];
+    XCTAssertNotNil(loginText);
 }
 
 - (void)testExample {
