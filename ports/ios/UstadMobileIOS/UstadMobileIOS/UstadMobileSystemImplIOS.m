@@ -151,5 +151,14 @@ static NSString *_defaultsKeyActiveUserAuth;
     self.activeUserAuth = [self.userDefaults objectForKey:_defaultsKeyActiveUserAuth];
     return true;
 }
+- (jlong)getBuildTime {
+    return 0;
+}
+
+- (NSString *)getVersionWithId:(id)context {
+    // can't call an abstract method
+    return [NSString stringWithFormat:@"Version %@",[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+}
+
 
 @end
