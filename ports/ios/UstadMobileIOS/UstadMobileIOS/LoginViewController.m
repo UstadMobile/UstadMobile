@@ -117,7 +117,11 @@
 }
 
 - (IBAction)loginButtonClicked:(UIButton *)sender {
-    [self.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:self.xAPIServerURL];
+    NSString *username = self.usernameTextField.text;
+    NSString *password = self.passwordTextField.text;
+    NSString *serverURL = self.xAPIServerURL;
+    
+    [self.loginController handleClickLoginWithNSString:username withNSString:password withNSString:serverURL];
 }
 
 /*
@@ -129,12 +133,4 @@
     // Pass the selected object to the new view controller.
 }
 */
-
-- (void)dealloc {
-    [_passwordTextField release];
-    [_loginButton release];
-    [_usernameTextField release];
-    [super dealloc];
-}
-
 @end

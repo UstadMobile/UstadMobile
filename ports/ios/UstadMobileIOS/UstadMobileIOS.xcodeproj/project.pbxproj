@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; };
+		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A87E1D52537E00C63A29 /* Activity.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79D1D52537D00C63A29 /* Activity.m */; };
 		AD46A87F1D52537E00C63A29 /* AlignmentPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79F1D52537D00C63A29 /* AlignmentPattern.m */; };
 		AD46A8801D52537E00C63A29 /* AlignmentPatternNotFoundException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A7A11D52537D00C63A29 /* AlignmentPatternNotFoundException.m */; };
@@ -121,15 +121,15 @@
 		AD46A8EC1D52537E00C63A29 /* VersionInformationException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8791D52537E00C63A29 /* VersionInformationException.m */; };
 		AD46A8ED1D52537E00C63A29 /* ZipEntryHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A87B1D52537E00C63A29 /* ZipEntryHandle.m */; };
 		AD46A8EE1D52537E00C63A29 /* ZipFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A87D1D52537E00C63A29 /* ZipFileHandle.m */; };
-		AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */; };
-		AD5D3DB11D572D640063E9C0 /* UstadBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD5D3DB01D572D640063E9C0 /* UstadBaseViewController.m */; };
-		AD5D3DB41D5750B40063E9C0 /* AppViewIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD5D3DB31D5750B40063E9C0 /* AppViewIOS.m */; };
-		AD7745D11D52586200A56306 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745D01D52586200A56306 /* LoginViewController.m */; };
+		AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD5D3DB11D572D640063E9C0 /* UstadBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD5D3DB01D572D640063E9C0 /* UstadBaseViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD5D3DB41D5750B40063E9C0 /* AppViewIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD5D3DB31D5750B40063E9C0 /* AppViewIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD7745D11D52586200A56306 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745D01D52586200A56306 /* LoginViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD7745E11D526FD600A56306 /* res in Resources */ = {isa = PBXBuildFile; fileRef = AD7745E01D526FD600A56306 /* res */; };
-		AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745E61D539DFE00A56306 /* UMLogIOS.m */; };
-		AD77D0531D523A8A00A2F95A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0521D523A8A00A2F95A /* main.m */; };
-		AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0551D523A8A00A2F95A /* AppDelegate.m */; };
-		AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0581D523A8A00A2F95A /* ViewController.m */; };
+		AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745E61D539DFE00A56306 /* UMLogIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD77D0531D523A8A00A2F95A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0521D523A8A00A2F95A /* main.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0551D523A8A00A2F95A /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0581D523A8A00A2F95A /* ViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD77D05C1D523A8A00A2F95A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05A1D523A8A00A2F95A /* Main.storyboard */; };
 		AD77D05E1D523A8A00A2F95A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05D1D523A8A00A2F95A /* Assets.xcassets */; };
 		AD77D0611D523A8A00A2F95A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */; };

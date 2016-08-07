@@ -7,8 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import "AppView.h"
 
-@interface AppViewIOS : NSObject
+@interface AppViewIOS : NSObject <ComUstadmobileCoreViewAppView>
+-(id)initWithViewController:(UIViewController *)viewController;
 
 @end

@@ -25,4 +25,13 @@ Instead of using DERIVED_FILES we add the directory by right clicking
 Selecting Generated, Add Files on the project ; uncheck Copy Items, 
 and Select Create Groups for any Added Folders.
 
+Memory Management:
+
+As per http://j2objc.org/docs/Memory-Management.html recommendations
+we use J2OBCJ's built in memory management for transpiled classes
+and use ARC for hand written Objective C.  ARC must be disabled for
+the project by default and then the -fobjc-arc compiler flag is used
+for each hand written file (set in project settings, build phases,
+compile sources)
+
 

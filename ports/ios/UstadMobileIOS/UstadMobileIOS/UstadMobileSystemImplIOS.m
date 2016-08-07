@@ -10,6 +10,7 @@
 #import "java/io/InputStream.h"
 #import "java/io/FileInputStream.h"
 #import "UMLogIOS.h"
+#import "AppViewIOS.h"
 
 static NSString *_defaultsKeyAppPrefs;
 static NSString *_defaultsKeyUserPrefix;
@@ -25,6 +26,9 @@ static NSString *_defaultsKeyActiveUserAuth;
 @property NSUserDefaults *userDefaults;
 @property NSString *activeUser;
 @property NSString *activeUserAuth;
+
+//Link UIViewControllers to their associated appView
+@property NSMapTable *appViewTable;
 @end
 
 
@@ -40,9 +44,10 @@ static NSString *_defaultsKeyActiveUserAuth;
 }
 
 -(id)init {
+    self = [super init];
     self.umLogIOS = [[UMLogIOS alloc]init];
-    [super init];
     self.userDefaults = [NSUserDefaults standardUserDefaults];
+    self.appViewTable = [NSMapTable weakToWeakObjectsMapTable];
     return self;
 }
 
@@ -156,8 +161,17 @@ static NSString *_defaultsKeyActiveUserAuth;
 }
 
 - (NSString *)getVersionWithId:(id)context {
-    // can't call an abstract method
     return [NSString stringWithFormat:@"Version %@",[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
+}
+
+- (id<ComUstadmobileCoreViewAppView>)getAppViewWithId:(id)context {
+    AppViewIOS *appView = [self.appViewTable objectForKey:context];
+    if(!appView) {
+        appView = [[AppViewIOS alloc]initWithViewController:context];
+        [self.appViewTable setObject:appView forKey:context];
+    }
+    
+    return appView;
 }
 
 
