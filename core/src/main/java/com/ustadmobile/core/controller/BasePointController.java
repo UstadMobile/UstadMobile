@@ -55,17 +55,9 @@ public class BasePointController extends UstadBaseController{
     /**
      * Indicates the tab for class management
      */
-    public static final int INDEX_CLASSES = 2;
-    
-    public static final int OPDS_FEEDS_INDEX_URL = 0;
-    
-    public static final int OPDS_FEEDS_INDEX_TITLE = 1;
-    
-    public static final int OPDS_SELECTPROMPT = 0;
-    
-    public static final int OPDS_CUSTOM = 1;
+    public static final int INDEX_CLASSES = 1;
 
-    public static final int NUM_CATALOG_TABS = 2;
+    public static final int NUM_CATALOG_TABS = 1;
 
     private Hashtable args;
     
@@ -84,10 +76,7 @@ public class BasePointController extends UstadBaseController{
     public static Hashtable makeDefaultBasePointArgs(Object context) {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] basePointURLs = new String[] {
-            CatalogController.OPDS_PROTO_DEVICE, 
-            CatalogController.OPDS_PROTO_USER_FEEDLIST
-        };
+        String[] basePointURLs = new String[] {CatalogController.OPDS_PROTO_DEVICE};
         
         String iPrefix;
         for(int i = 0; i < BasePointController.NUM_CATALOG_TABS; i++) {
@@ -101,6 +90,12 @@ public class BasePointController extends UstadBaseController{
                 new Integer(CatalogController.CACHE_ENABLED));
             args.put(iPrefix + CatalogController.KEY_RESMOD, 
                 new Integer(CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE));
+
+            //by default show the browse button on the first tab only
+            if(i == 0) {
+                args.put(iPrefix + CatalogController.KEY_BROWSE_BUTTON_URL,
+                        CatalogController.OPDS_PROTO_USER_FEEDLIST);
+            }
         }
         
         Integer downloadedEntriesFlags = new Integer(
@@ -147,146 +142,7 @@ public class BasePointController extends UstadBaseController{
     public void setUIStrings() {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    public void handleClickAddFeed() {
-        basePointView.showAddFeedDialog();
-    }
-    
-    public void handleFeedPresetSelected(int index) {
-        if(index > OPDS_CUSTOM) {
-            String[] selectedPreset = UstadMobileConstants.OPDS_FEEDS_PRESETS[index];
-            basePointView.setAddFeedDialogTitle(selectedPreset[OPDS_FEEDS_INDEX_TITLE]);
-            basePointView.setAddFeedDialogURL(selectedPreset[OPDS_FEEDS_INDEX_URL]);
-        }
-    }
-    
-    /**
-     * Return a one dimensional string array for the prepopulated OPDS_FEEDS_PRESETS
-     * of common OPDS sources
-     * 
-     * @param column
-     * @return 
-     */
-    public String[] getFeedList(int column) {
-        String[] retVal = new String[UstadMobileConstants.OPDS_FEEDS_PRESETS.length];
-        for(int i = 0; i < retVal.length; i++) {
-            retVal[i] = UstadMobileConstants.OPDS_FEEDS_PRESETS[i][column];
-        }
-        
-        return retVal;
-    }
-    
-    public static void addFeedToUserFeedList(String url, String title, String authUser, String authPass, Object context) {
-        try {
-            JSONArray arr = BasePointController.getUserFeedListArray(context);
-            JSONObject newFeed = new JSONObject();
-            newFeed.put("url", url);
-            newFeed.put("title", title);
-            newFeed.put("httpu", authUser);
-            newFeed.put("httpp", authPass);
-            arr.put(newFeed);
-            BasePointController.setUserFeedListArray(arr, context);
-        }catch(JSONException e) {
-            
-        }
-    }
-    
-    public static JSONArray getUserFeedListArray(Object context) {
-        JSONArray retVal = null;
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        try {
-            String currentJSON = impl.getUserPref(
-                CatalogController.PREFKEY_USERFEEDLIST, null, context);
-            if(currentJSON != null) {
-                retVal = new JSONArray(currentJSON);
-            }else {
-                retVal = getDefaultUserFeedList(context);
-            }
-        }catch(JSONException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 148, null, e);
-        }
-        
-        return retVal;
-    }
-    
-    /**
-     * Generates the default user feed list by resolving the DEFAULT_OPDS_SERVER
-     * relative to the current xAPI server
-     * 
-     * @param context
-     * @return 
-     */
-    public static JSONArray getDefaultUserFeedList(Object context) {
-        JSONArray retVal = null;
-        String xAPIServer = UstadMobileSystemImpl.getInstance().getAppPref(
-                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
-        try {
-            retVal = new JSONArray();
-            JSONObject serverFeed = new JSONObject();
-            serverFeed.put("title", "Ustad Mobile");
-            serverFeed.put("url", UMFileUtil.resolveLink(xAPIServer, 
-                UstadMobileDefaults.DEFAULT_OPDS_SERVER));
-            serverFeed.put("auth", ":appuser:");
-            retVal.put(serverFeed);
-        }catch(JSONException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 164, xAPIServer, e);
-        }
-        
-        return retVal;
-    }
-    
-    public static void setUserFeedListArray(JSONArray arr, Object context) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        try {
-            impl.setUserPref(CatalogController.PREFKEY_USERFEEDLIST, 
-                arr.toString(), context);
-        }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 146, null, e);
-        }
-    }
-    
-    public void handleAddFeed(String url, String title) {
-        BasePointController.addFeedToUserFeedList(url, title, null, null, context);
-        basePointView.refreshCatalog(INDEX_BROWSEFEEDS);
-    }
-    
-    public void handleRemoveItemsFromUserFeed(UstadJSOPDSEntry[] entriesToRemove) {
-        if(entriesToRemove.length == 0) {
-            return;//nothing to do here
-        }
-        
-        String userPrefix = CatalogController.getUserFeedListIdPrefix(context);
-        JSONArray userFeedList = BasePointController.getUserFeedListArray(context);
-        JSONArray newUserFeedList = new JSONArray();
-        try {
-            boolean removeItem;
-            String currentID;
-            int j;
-            
-            for(int i = 0; i < userFeedList.length(); i++) {
-                removeItem = false;
-                currentID = userPrefix + i;
-                
-                for(j = 0; j < entriesToRemove.length && !removeItem; j++) {
-                    if(entriesToRemove[j].id.equals(currentID)) {
-                        removeItem = true;
-                        break;
-                    }
-                }
-                
-                if(!removeItem) {
-                    newUserFeedList.put(userFeedList.get(i));
-                }
-            }
-        }catch(JSONException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 144, null, e);
-        }
-        
-        BasePointController.setUserFeedListArray(newUserFeedList, context);
-        
-        basePointView.refreshCatalog(INDEX_BROWSEFEEDS);
-    }
+
 
     /**
      * Determines if the current user is a teacher (e.g. would see

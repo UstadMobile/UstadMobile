@@ -125,5 +125,40 @@ public interface CatalogView extends UstadView{
      * @param entries Array of entries to be marked as selected
      */
     public void setSelectedEntries(UstadJSOPDSEntry[] entries);
-    
+
+    /**
+     * Show the dialog for adding a new feed
+     */
+    public void showAddFeedDialog();
+
+    public void setAddFeedDialogURL(String url);
+
+    public String getAddFeedDialogURL();
+
+    public String getAddFeedDialogTitle();
+
+    public void setAddFeedDialogTitle(String title);
+
+    public void refresh();
+
+    /**
+     * Sets whether or not to show a browse button leading to another catalog etc. on this view.
+     * This would normally be fixed at the bottom; not part of any scrolling
+     *
+     * @param buttonVisible true to make it visible; false otherwise
+     */
+    public void setBrowseButtonVisible(boolean buttonVisible);
+
+    /**
+     * Sets the label for the browse button
+     *
+     * @param browseButtonLabel Text label for the browse button
+     */
+    public void setBrowseButtonLabel(String browseButtonLabel);
+
+    public void setDeleteOptionAvailable(boolean deleteOptionAvailable);
+
+    public void setAddOptionAvailable(boolean addOptionAvailable);
+
+
 }

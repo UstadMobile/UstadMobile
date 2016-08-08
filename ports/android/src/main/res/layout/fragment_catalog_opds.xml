@@ -9,6 +9,7 @@
     <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/fragment_catalog_browsebutton"
         android:id="@+id/fragment_catalog_swiperefreshview">
 
         <ScrollView
@@ -24,4 +25,14 @@
 
         </ScrollView>
     </android.support.v4.widget.SwipeRefreshLayout>
+
+    <Button
+        android:background="@color/accent"
+        android:textColor="@color/primary_text"
+        android:drawableLeft="@drawable/ic_local_library_white_24dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/fragment_catalog_browsebutton"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </RelativeLayout>

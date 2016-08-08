@@ -102,7 +102,7 @@ public class UstadMobileConstants {
     public static final String[][] OPDS_FEEDS_PRESETS = new String[][]{
         {"", "Select a feed"},
         {"", "Custom Feed"},
-        {"http://ustadmobile.com/opds/", "UstadMobile"},
+        {"http://umcloud1.ustadmobile.com/opds/", "UstadMobile"},
         {"http://m.gutenberg.org/ebooks/?format=opds", "Project Gutenberg"},
         {"http://atoll-digital-library.org/opds/", "Atoll Digital Library"}
     };
