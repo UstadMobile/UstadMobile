@@ -80,6 +80,9 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:id="@+id/login_registerbutton"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:background="@color/accent"
+        android:textColor="@color/primary_text"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         />
