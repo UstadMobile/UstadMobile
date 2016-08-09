@@ -9,6 +9,8 @@
 #import "UstadMobileSystemImplFactoryIOS.h"
 #import "UstadMobileSystemImpl.h"
 #import "UstadMobileSystemImplIOS.h"
+#import "UMLogIOS.h"
+
 
 @implementation UstadMobileSystemImplFactoryIOS
 - (ComUstadmobileCoreImplUstadMobileSystemImpl *)makeUstadSystemImpl {

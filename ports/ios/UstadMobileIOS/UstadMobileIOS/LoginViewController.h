@@ -7,7 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "LoginView.h"
+#import "UstadBaseViewController.h"
 
-@interface LoginViewController : UIViewController
+@interface LoginViewController : UstadBaseViewController <ComUstadmobileCoreViewLoginView>
 
 @end

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; };
+		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A87E1D52537E00C63A29 /* Activity.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79D1D52537D00C63A29 /* Activity.m */; };
 		AD46A87F1D52537E00C63A29 /* AlignmentPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79F1D52537D00C63A29 /* AlignmentPattern.m */; };
 		AD46A8801D52537E00C63A29 /* AlignmentPatternNotFoundException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A7A11D52537D00C63A29 /* AlignmentPatternNotFoundException.m */; };
@@ -121,12 +121,15 @@
 		AD46A8EC1D52537E00C63A29 /* VersionInformationException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8791D52537E00C63A29 /* VersionInformationException.m */; };
 		AD46A8ED1D52537E00C63A29 /* ZipEntryHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A87B1D52537E00C63A29 /* ZipEntryHandle.m */; };
 		AD46A8EE1D52537E00C63A29 /* ZipFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A87D1D52537E00C63A29 /* ZipFileHandle.m */; };
-		AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */; };
-		AD7745D11D52586200A56306 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745D01D52586200A56306 /* LoginViewController.m */; };
+		AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD5D3DB11D572D640063E9C0 /* UstadBaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD5D3DB01D572D640063E9C0 /* UstadBaseViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD5D3DB41D5750B40063E9C0 /* AppViewIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD5D3DB31D5750B40063E9C0 /* AppViewIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD7745D11D52586200A56306 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745D01D52586200A56306 /* LoginViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD7745E11D526FD600A56306 /* res in Resources */ = {isa = PBXBuildFile; fileRef = AD7745E01D526FD600A56306 /* res */; };
-		AD77D0531D523A8A00A2F95A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0521D523A8A00A2F95A /* main.m */; };
-		AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0551D523A8A00A2F95A /* AppDelegate.m */; };
-		AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0581D523A8A00A2F95A /* ViewController.m */; };
+		AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745E61D539DFE00A56306 /* UMLogIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD77D0531D523A8A00A2F95A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0521D523A8A00A2F95A /* main.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0551D523A8A00A2F95A /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0581D523A8A00A2F95A /* ViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD77D05C1D523A8A00A2F95A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05A1D523A8A00A2F95A /* Main.storyboard */; };
 		AD77D05E1D523A8A00A2F95A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05D1D523A8A00A2F95A /* Assets.xcassets */; };
 		AD77D0611D523A8A00A2F95A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */; };
@@ -382,9 +385,15 @@
 		AD46A87D1D52537E00C63A29 /* ZipFileHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZipFileHandle.m; sourceTree = "<group>"; };
 		AD46A8F21D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileSystemImplFactoryIOS.h; sourceTree = "<group>"; };
 		AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadMobileSystemImplFactoryIOS.m; sourceTree = "<group>"; };
+		AD5D3DAF1D572D640063E9C0 /* UstadBaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadBaseViewController.h; sourceTree = "<group>"; };
+		AD5D3DB01D572D640063E9C0 /* UstadBaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadBaseViewController.m; sourceTree = "<group>"; };
+		AD5D3DB21D5750B40063E9C0 /* AppViewIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppViewIOS.h; sourceTree = "<group>"; };
+		AD5D3DB31D5750B40063E9C0 /* AppViewIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppViewIOS.m; sourceTree = "<group>"; };
 		AD7745CF1D52586200A56306 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		AD7745D01D52586200A56306 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		AD7745E01D526FD600A56306 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
+		AD7745E51D539DFE00A56306 /* UMLogIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLogIOS.h; sourceTree = "<group>"; };
+		AD7745E61D539DFE00A56306 /* UMLogIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMLogIOS.m; sourceTree = "<group>"; };
 		AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UstadMobileIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD77D0521D523A8A00A2F95A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		AD77D0541D523A8A00A2F95A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -688,6 +697,8 @@
 			children = (
 				AD77D0541D523A8A00A2F95A /* AppDelegate.h */,
 				AD77D0551D523A8A00A2F95A /* AppDelegate.m */,
+				AD5D3DB21D5750B40063E9C0 /* AppViewIOS.h */,
+				AD5D3DB31D5750B40063E9C0 /* AppViewIOS.m */,
 				AD77D0571D523A8A00A2F95A /* ViewController.h */,
 				AD77D0581D523A8A00A2F95A /* ViewController.m */,
 				AD77D05A1D523A8A00A2F95A /* Main.storyboard */,
@@ -701,6 +712,10 @@
 				AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */,
 				AD7745CF1D52586200A56306 /* LoginViewController.h */,
 				AD7745D01D52586200A56306 /* LoginViewController.m */,
+				AD5D3DAF1D572D640063E9C0 /* UstadBaseViewController.h */,
+				AD5D3DB01D572D640063E9C0 /* UstadBaseViewController.m */,
+				AD7745E51D539DFE00A56306 /* UMLogIOS.h */,
+				AD7745E61D539DFE00A56306 /* UMLogIOS.m */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -862,6 +877,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD5D3DB11D572D640063E9C0 /* UstadBaseViewController.m in Sources */,
 				AD46A8DB1D52537E00C63A29 /* UserSettingsView.m in Sources */,
 				AD46A89B1D52537E00C63A29 /* ContainerView.m in Sources */,
 				AD46A8881D52537E00C63A29 /* AttendanceSheetImage.m in Sources */,
@@ -914,6 +930,7 @@
 				AD46A8B41D52537E00C63A29 /* MessageIDConstants.m in Sources */,
 				AD46A8B71D52537E00C63A29 /* OMRRecognitionThread.m in Sources */,
 				AD46A8831D52537E00C63A29 /* AsyncLoadableController.m in Sources */,
+				AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */,
 				AD46A8E61D52537E00C63A29 /* UstadMobileSystemImpl.m in Sources */,
 				AD46A8CF1D52537E00C63A29 /* UMDownloadCompleteReceiver.m in Sources */,
 				AD46A8901D52537E00C63A29 /* CatalogController.m in Sources */,
@@ -928,6 +945,7 @@
 				AD46A8B11D52537E00C63A29 /* LogicalSeed.m in Sources */,
 				AD46A8921D52537E00C63A29 /* CatalogLastAccessTimeComparer.m in Sources */,
 				AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */,
+				AD5D3DB41D5750B40063E9C0 /* AppViewIOS.m in Sources */,
 				AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */,
 				AD46A8B21D52537E00C63A29 /* LoginController.m in Sources */,
 				AD46A8EA1D52537E00C63A29 /* UstadOCFRootFile.m in Sources */,
@@ -1073,10 +1091,13 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-ljre_emul";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 			};
 			name = Debug;
 		};
@@ -1112,9 +1133,12 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-ljre_emul";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
