@@ -14,20 +14,20 @@ import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.SelectionListener;
 import com.sun.lwuit.layouts.BoxLayout;
 import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 /**
  *
  * @author mike
  */
-public class BasePointFeedForm extends Form implements SelectionListener, ActionListener {
+public class CatalogAddFeedForm extends Form implements SelectionListener, ActionListener {
     
     TextField urlTextField;
     
     TextField titleTextField;
     
-    BasePointViewJ2ME basePointView;
+    CatalogOPDSContainer opdsContainer;
     
     ComboBox presetComboBox;
     
@@ -36,16 +36,16 @@ public class BasePointFeedForm extends Form implements SelectionListener, Action
     public static final int CMDID_CANCEL = 2;
     
     
-    public BasePointFeedForm(String title, BasePointViewJ2ME basePointView) {
+    public CatalogAddFeedForm(String title, CatalogOPDSContainer opdsContainer) {
         super(title);
-        this.basePointView = basePointView;
+        this.opdsContainer = opdsContainer;
     }
     
     public void initComponent() {
         if(urlTextField == null) {
             presetComboBox = new ComboBox(
-                basePointView.getBasePointController().getFeedList(
-                BasePointController.OPDS_FEEDS_INDEX_TITLE));
+                opdsContainer.getController().getFeedList(
+                CatalogController.OPDS_FEEDS_INDEX_TITLE));
             presetComboBox.addSelectionListener(this);
             addComponent(presetComboBox);
             
@@ -65,11 +65,11 @@ public class BasePointFeedForm extends Form implements SelectionListener, Action
     }
 
     public void selectionChanged(int oldSelected, int newSelected) {
-        basePointView.getBasePointController().handleFeedPresetSelected(newSelected);
+        opdsContainer.getController().handleFeedPresetSelected(newSelected);
     }
 
     public void actionPerformed(ActionEvent ae) {
-        basePointView.dismissFeedDialog(ae.getCommand().getId());
+        opdsContainer.dismissFeedDialog(ae.getCommand().getId());
     }
     
     

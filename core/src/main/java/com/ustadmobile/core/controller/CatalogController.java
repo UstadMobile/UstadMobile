@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;

@@ -30,29 +30,22 @@
  */
 package com.ustadmobile.port.j2me.view;
 
-import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
-import com.sun.lwuit.Form;
 import com.sun.lwuit.RadioButton;
 import com.sun.lwuit.Tabs;
-import com.sun.lwuit.TextField;
-import com.sun.lwuit.events.ActionEvent;
-import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BorderLayout;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
-import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.port.j2me.view.CatalogOPDSContainer;
 import java.util.Hashtable;
 
 /**
  *
  * @author mike
  */
-public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointView, FocusListener, ActionListener{
+public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointView, FocusListener {
 
     //private Tabs tabs;
     private Tabs tabs;
@@ -61,21 +54,13 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     
     private BasePointController basePointController;
     
-    private int[] tabTitles =  new int[]{MessageIDConstants.downloaded_items, MessageIDConstants.browse_feeds};
-    
+    private int[] tabTitles =  new int[]{MessageIDConstants.my_resources, 
+        MessageIDConstants.browse_feeds};
+        
     /**
-     * Form used for adding new feeds to the user's list
+     * At this point J2ME does not support the class list tab: is one tab - just my resources
      */
-    private BasePointFeedForm feedForm;
-    
-    private Command addFeedCmd;
-    
-    private Command removeFeedCmd;
-    
-    /**
-     * At this point J2ME does not support the class list tab: there are always two tabs (downloaded and feeds)
-     */
-    public static final int NUM_TABS = 2;
+    public static final int NUM_TABS = 1;
     
     
     public BasePointViewJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
@@ -100,27 +85,10 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
                     getContext(), this);
                 tabs.addTab(impl.getString(tabTitles[i]), opdsContainers[i]);
             }
-            addFeedCmd = new Command("+ Feed", 
-                CatalogOPDSContainer.CMDID_ADDFEED);
-            removeFeedCmd = new Command("- Feed", 
-                CatalogOPDSContainer.CMDID_REMOVEFEED);
-            opdsContainers[BasePointController.INDEX_BROWSEFEEDS].setExtraCommands(
-                new Command[]{addFeedCmd, removeFeedCmd});
             
             setActiveUstadViewContainer(opdsContainers[0]);
             setLayout(new BorderLayout());
             addComponent(BorderLayout.CENTER, tabs);
-            addCommandListener(this);
-        }
-    }
-    
-    public void actionPerformed(ActionEvent evt) {
-        int cmdId = evt.getCommand().getId();
-        if(cmdId == CatalogOPDSContainer.CMDID_ADDFEED) {
-            basePointController.handleClickAddFeed();
-        }else if(cmdId == CatalogOPDSContainer.CMDID_REMOVEFEED) {
-            basePointController.handleRemoveItemsFromUserFeed(
-                opdsContainers[BasePointController.INDEX_BROWSEFEEDS].getSelectedEntries());
         }
     }
     
@@ -135,46 +103,6 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     }
     
 
-    public void showAddFeedDialog() {
-        feedForm = new BasePointFeedForm("Add Feed", this);
-        feedForm.show();
-    }
-    
-    BasePointController getBasePointController() {
-        return basePointController;
-    }
-
-    public void setAddFeedDialogURL(String url) {
-        feedForm.urlTextField.setText(url);
-    }
-
-    public String getAddFeedDialogURL() {
-        return feedForm.urlTextField.getText();
-    }
-
-    public String getAddFeedDialogTitle() {
-        return feedForm.titleTextField.getText();
-    }
-
-    public void setAddFeedDialogTitle(String title) {
-        feedForm.titleTextField.setText(title);
-    }
-
-    public void refreshCatalog(int column) {
-        opdsContainers[column].loadCatalog();
-    }
-    
-    void dismissFeedDialog(int cmdId) {
-        if(cmdId == BasePointFeedForm.CMDID_OK) {
-            String feedURL = getAddFeedDialogURL();
-            String title = getAddFeedDialogTitle();
-            basePointController.handleAddFeed(feedURL, title);
-        }
-        
-        this.show();
-        feedForm = null;
-    }
-
     public void focusGained(Component cmpnt) {
         RadioButton btn = (RadioButton)cmpnt;
         int selectedIndex = getTabSelectedByTitle(btn.getText());
@@ -187,5 +115,10 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     public void setClassListVisible(boolean visible) {
         //this is not supported on J2ME
     }
+    
+    public void refreshCatalog(int column) {
+        opdsContainers[column].loadCatalog();
+    }
+    
     
 }

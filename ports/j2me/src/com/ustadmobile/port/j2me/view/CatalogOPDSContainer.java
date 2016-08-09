@@ -36,7 +36,6 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Display;
-import com.sun.lwuit.Graphics;
 import com.sun.lwuit.Image;
 import com.sun.lwuit.Label;
 import com.sun.lwuit.TextArea;
@@ -48,7 +47,6 @@ import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -85,9 +83,11 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     final private int CMD_DELETE_ENTRY = 4;
     
-    public static final int CMDID_ADDFEED = 5;
+    public static final int CMDID_ADD = 5;
     
     public static final int CMDID_REMOVEFEED = 6;
+    
+    public static final int CMDID_BROWSEBUTTON = 7;
     
     private int confirmDialogCmdId = 0;
 
@@ -113,27 +113,50 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     private int resMode;
     private int fetchFlags;
     
+    private String browseButtonURL;
+    
     boolean acquisition = false;
         
     private Command[] extraCommands;
+        
+    private Command browseCommand;
+    
+    /**
+     * Form used for adding new feeds to the user's list
+     */
+    private CatalogAddFeedForm feedForm;
+    
+    private boolean browseButtonVisible;
+    
+    private boolean addOptionAvailable;
+    
+    private boolean deleteOptionAvailable;
+
     
     public CatalogOPDSContainer(Hashtable args, Object context, UstadViewFormJ2ME ustadForm) {
         super(args, context, ustadForm);
-        
-        Label spaceLabel = new Label(" ");
-        addComponent(spaceLabel);
-        
-        //Set Layout of the form.
-        BoxLayout boxLayout = new BoxLayout(BoxLayout.Y_AXIS);
-        setLayout(boxLayout);
-        
         entryIdToButtons = new Hashtable();
         statusesToUpdate = new Hashtable();
         catalogURL = (String)args.get(CatalogController.KEY_URL);
         resMode = ((Integer)args.get(CatalogController.KEY_RESMOD)).intValue();
         fetchFlags = ((Integer)args.get(CatalogController.KEY_FLAGS)).intValue();
-        loadCatalog();
+        if(args.containsKey(CatalogController.KEY_BROWSE_BUTTON_URL)) {
+            browseButtonURL = (String)args.get(CatalogController.KEY_BROWSE_BUTTON_URL);
+        }
+        
     }
+    
+    protected void initComponent() { 
+        super.initComponent();
+        if(browseCommand == null) {
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            browseCommand = new Command(impl.getString(MessageIDConstants.browse_feeds),
+                CMDID_BROWSEBUTTON);
+            setLayout(new BoxLayout(BoxLayout.Y_AXIS));        
+            loadCatalog();
+        }
+    }
+    
     
     public void loadCatalog() {
         loadCatalog(catalogURL, resMode);
@@ -143,7 +166,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         //impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.loading));
         CatalogController.makeControllerForView(this, url, resourceMode, 
-                fetchFlags, this);
+                fetchFlags, browseButtonURL, this);
     }
     
     public void controllerReady(final UstadController controller, final int flags) {
@@ -204,7 +227,7 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         if (acquisition){
             Command downloadAll = new Command(impl.getString(MessageIDConstants.download_all), CMD_DOWNLOAD_ALL);
             Button downloadAllButton = new Button(downloadAll);
-            this.addComponent(downloadAllButton); 
+            addComponent(downloadAllButton); 
         }
         repaint();
         
@@ -225,24 +248,38 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         Object component = evt.getComponent();
         if(component != null && component instanceof OPDSItemButton) {
             this.controller.handleClickEntry(((OPDSItemButton)component).getEntry());
-        }else if(cmdId == CMD_CONFIRM_OK || cmdId == CMD_CONFIRM_CANCEL) {
-            confirmDialog.setVisible(false);
-            confirmDialog.dispose();
-            confirmDialog = null;
-            this.controller.handleConfirmDialogClick(cmdId == CMD_CONFIRM_OK, 
-                this.confirmDialogCmdId);
-        }else if(cmdId == CMD_DELETE_ENTRY) {
-            OPDSItemButton selectedButton = getFocusedButton();
-            if(selectedButton != null) {
-                this.controller.handleClickDeleteEntries(
-                    new UstadJSOPDSEntry[]{selectedButton.getEntry()});
-            }else {
-                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                    UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.nothing_selected),
-                    AppView.LENGTH_LONG);
-            }
-        }else if(cmdId == CMD_REFRESH) {
-            refresh();
+        }
+        
+        switch(cmdId) {
+            case CMD_CONFIRM_OK:
+            case CMD_CONFIRM_CANCEL:
+                confirmDialog.setVisible(false);
+                confirmDialog.dispose();
+                confirmDialog = null;
+                this.controller.handleConfirmDialogClick(cmdId == CMD_CONFIRM_OK, 
+                    this.confirmDialogCmdId);
+                break;
+            case CMD_DELETE_ENTRY:
+                OPDSItemButton selectedButton = getFocusedButton();
+                if(selectedButton != null) {
+                    
+                    this.controller.handleClickDeleteEntries(
+                        new UstadJSOPDSEntry[]{selectedButton.getEntry()});
+                }else {
+                    UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
+                        UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.nothing_selected),
+                        AppView.LENGTH_LONG);
+                }
+                break;
+            case CMD_REFRESH:
+                refresh();
+                break;
+            case CMDID_ADD:
+                controller.handleClickAdd();
+                break;
+            case CMDID_BROWSEBUTTON:
+                controller.handleClickBrowseButton();
+                break;
         }
     }
     
@@ -392,9 +429,20 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     public void onCreateMenuCommands(Vector cmdVector) {
         super.onCreateMenuCommands(cmdVector);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(browseButtonVisible) {
+            cmdVector.insertElementAt(browseCommand, 0);
+        }
         
-        cmdVector.addElement(new Command(impl.getString(MessageIDConstants.delete), 
+        if(deleteOptionAvailable) {
+            cmdVector.addElement(new Command(impl.getString(MessageIDConstants.delete), 
                 CMD_DELETE_ENTRY));
+        }
+        
+        if(addOptionAvailable) {
+            cmdVector.addElement(new Command(impl.getString(MessageIDConstants.add_library),
+                CMDID_ADD));
+        }
+        
         cmdVector.addElement(new Command(impl.getString(MessageIDConstants.refresh),
             CMD_REFRESH));
         
@@ -463,6 +511,61 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     public void refresh() {
         loadCatalog();
     }
+
+    public void showAddFeedDialog() {
+        feedForm = new CatalogAddFeedForm(
+            UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.add_library), 
+            this);
+        feedForm.show();
+    }
+    
+    public void setAddFeedDialogURL(String url) {
+        feedForm.urlTextField.setText(url);
+    }
+
+    public String getAddFeedDialogURL() {
+        return feedForm.urlTextField.getText();
+    }
+
+    public String getAddFeedDialogTitle() {
+        return feedForm.titleTextField.getText();
+    }
+
+    public void setAddFeedDialogTitle(String title) {
+        feedForm.titleTextField.setText(title);
+    }
+
+    
+    void dismissFeedDialog(int cmdId) {
+        if(cmdId == CatalogAddFeedForm.CMDID_OK) {
+            String feedURL = getAddFeedDialogURL();
+            String title = getAddFeedDialogTitle();
+            controller.handleAddFeed(feedURL, title);
+        }
+        getUstadForm().show();
+        feedForm = null;
+    }
+
+    public void setBrowseButtonVisible(boolean buttonVisible) {
+        browseButtonVisible = buttonVisible;
+        getUstadForm().invalidateMenuCommands();
+    }
+
+    public void setBrowseButtonLabel(String browseButtonLabel) {
+        
+    }
+
+    public void setDeleteOptionAvailable(boolean deleteOptionAvailable) {
+        this.deleteOptionAvailable = deleteOptionAvailable;
+        getUstadForm().invalidateMenuCommands();
+    }
+
+    public void setAddOptionAvailable(boolean addOptionAvailable) {
+        this.addOptionAvailable = addOptionAvailable;
+        getUstadForm().invalidateMenuCommands();
+    }
+    
+    
     
 
 }
