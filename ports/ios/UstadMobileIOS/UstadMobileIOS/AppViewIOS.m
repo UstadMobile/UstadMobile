@@ -14,8 +14,12 @@
 
 @interface AppViewIOS()
 @property UIViewController *uiViewController;
+
+//used to popup text alerts
 @property UIAlertController *alertController;
-@property UIActivityIndicatorView *activityIndicatorView;
+
+//used to show progress spinner for loading etc
+@property UIAlertController *progressAlertController;
 @end
 
 @implementation AppViewIOS
@@ -29,34 +33,39 @@
 - (void)showProgressDialogWithNSString:(NSString *) title {
     [self dismissProgressDialog];
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.activityIndicatorView = [[UIActivityIndicatorView alloc]initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-        [self.activityIndicatorView setHidesWhenStopped:YES];
+        self.progressAlertController = [UIAlertController alertControllerWithTitle:nil
+                                                                         message:[title stringByAppendingString:@"\n\n"]
+                                                                  preferredStyle:UIAlertControllerStyleAlert];
+        UIActivityIndicatorView* indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        indicator.color = [UIColor blackColor];
+        indicator.translatesAutoresizingMaskIntoConstraints=NO;
+        [self.progressAlertController.view addSubview:indicator];
+        NSDictionary * views = @{@"pending" : self.progressAlertController.view, @"indicator" : indicator};
         
-        //This needs centered
-        //CGRect viewBounds = self.uiViewController.view.bounds;
-        
-        self.activityIndicatorView.frame = CGRectMake(0.0, 0.0, 40.0, 40.0);
-        [self.uiViewController.view addSubview:self.activityIndicatorView];
-        //might need something like this
-        // http://stackoverflow.com/questions/10399156/uinavigationcontroller-toolbar-adding-status-text-with-uiactivityindicatorview
-        
-        [self.activityIndicatorView startAnimating];
+        NSArray * constraintsVertical = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[indicator]-(20)-|" options:0 metrics:nil views:views];
+        NSArray * constraintsHorizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[indicator]|" options:0 metrics:nil views:views];
+        NSArray * constraints = [constraintsVertical arrayByAddingObjectsFromArray:constraintsHorizontal];
+        [self.progressAlertController.view addConstraints:constraints];
+        [indicator setUserInteractionEnabled:NO];
+        [indicator startAnimating];
+        [self.uiViewController presentViewController:self.progressAlertController animated:YES completion:nil];
     });
 }
 
 - (jboolean)dismissProgressDialog {
-    if(self.activityIndicatorView) {
-        if([NSThread isMainThread]) {
-            [self.activityIndicatorView stopAnimating];
-            self.activityIndicatorView = nil;
+    if([NSThread isMainThread]) {
+        if(self.progressAlertController) {
+            [self.uiViewController dismissViewControllerAnimated:YES completion:nil];
+            self.progressAlertController = nil;
+            return true;
         }else {
-            [self performSelectorOnMainThread:@selector(dismissProgressDialog) withObject:self waitUntilDone:YES];
+            return false;
         }
-        
-        return true;
     }else {
-        return false;
+        [self performSelectorOnMainThread:@selector(dismissProgressDialog) withObject:self waitUntilDone:YES];
     }
+    return false;
+    
 }
 
 - (void)showAlertDialogWithNSString:(NSString *)title

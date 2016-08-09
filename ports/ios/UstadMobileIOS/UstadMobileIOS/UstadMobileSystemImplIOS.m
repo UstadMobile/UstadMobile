@@ -47,7 +47,7 @@ static NSString *_defaultsKeyActiveUserAuth;
     self = [super init];
     self.umLogIOS = [[UMLogIOS alloc]init];
     self.userDefaults = [NSUserDefaults standardUserDefaults];
-    self.appViewTable = [NSMapTable weakToWeakObjectsMapTable];
+    self.appViewTable = [NSMapTable weakToStrongObjectsMapTable];
     return self;
 }
 
