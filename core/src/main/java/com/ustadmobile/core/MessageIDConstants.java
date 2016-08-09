@@ -135,7 +135,7 @@ public class MessageIDConstants {
 
 
 
-    public static final int downloaded_items = 48;
+    public static final int my_resources = 48;
 
     public static final int browse_feeds = 49;
 
@@ -154,6 +154,18 @@ public class MessageIDConstants {
     public static final int regcode = 56;
 
     public static final int home = 57;
+
+    public static final int my_libraries = 58;
+
+    public static final int add_library = 59;
+
+    public static final int select_library = 60;
+
+    public static final int add = 61;
+
+    public static final int library_title = 62;
+
+    public static final int library_url = 63;
 
     public static final int attendance = 100;
 

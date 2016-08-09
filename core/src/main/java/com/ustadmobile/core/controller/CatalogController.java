@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
@@ -253,6 +254,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static final String KEY_HTTPPPASS = "httpp";
     
     public static final String KEY_FLAGS = "flags";
+
+    public static final String KEY_BROWSE_BUTTON_URL = "browesbtnu";
             
     /**
      * A url that provides a list of the of the contents that have been downloaded
@@ -287,8 +290,21 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     //Hashtable indexed entry id -> download ID (Long object)
     private Hashtable downloadingEntries;
     
-    private Thread thumbnailLoadThread;    
-    
+    private Thread thumbnailLoadThread;
+
+    //True if this is a user's own catalog feed that they can add/remove from - false otherwise
+    private boolean isUserCatalogFeed = false;
+
+    public static final int OPDS_SELECTPROMPT = 0;
+
+    public static final int OPDS_CUSTOM = 1;
+
+    public static final int OPDS_FEEDS_INDEX_URL = 0;
+
+    public static final int OPDS_FEEDS_INDEX_TITLE = 1;
+
+    private String browseButtonURL;
+
     public CatalogController(Object context) {
         super(context);
         downloadingEntries = new Hashtable();
@@ -350,7 +366,27 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void setResourceMode(int resourceMode) {
         this.resourceMode = resourceMode;
     }
-    
+
+    /**
+     * Catalog can have a browse button at the bottom: e.g. when the user is on the donwloaded
+     * items page the browse button can take them to their feed list or a preset catalog URL directly
+     *
+     * @return The OPDS URL for the browse button; null if there is none (default)
+     */
+    public String getBrowseButtonURL() {
+        return browseButtonURL;
+    }
+
+    /**
+     * Catalog can have a browse button at the bottom: e.g. when the user is on the donwloaded
+     * items page the browse button can take them to their feed list or a preset catalog URL directly
+     *
+     * @param browseButtonURL OPDS URL for the browse button: null for none (default)
+     */
+    public void setBrowseButtonURL(String browseButtonURL) {
+        this.browseButtonURL = browseButtonURL;
+    }
+
     //shows the view
     /**
      * @deprecated 
@@ -366,7 +402,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         CatalogView cView = (CatalogView)view;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         cView.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
-        
+        cView.setBrowseButtonLabel(impl.getString(MessageIDConstants.browse_feeds));
+        if(model != null && model.opdsFeed != null && model.opdsFeed.isAcquisitionFeed()) {
+            cView.setDeleteOptionAvailable(true);
+        }
+
         setStandardAppMenuOptions();
     }
     
@@ -424,15 +464,16 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * 
      * @param view The view we are attaching with
      * @param url as per makeControllerByURL
-     * @param resourceMode as per makeControllerByURL 
+     * @param resourceMode as per makeControllerByURL
      * @param flags as per makeControllerByURL
+     * @param browseButtonURL URL where the browse button should point to: null for no button
      * 
      * @see CatalogController#makeControllerByURL(java.lang.String, int, java.lang.String, java.lang.String, int, java.lang.Object) 
      * 
      * @throws IOException
      * @throws XmlPullParserException 
      */
-    public static void makeControllerForView(final CatalogView view, final String url, final int resourceMode, final int flags, final ControllerReadyListener listener) {
+    public static void makeControllerForView(final CatalogView view, final String url, final int resourceMode, final int flags, String browseButtonURL, final ControllerReadyListener listener) {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
@@ -441,6 +482,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         args.put(KEY_URL, url);
         args.put(KEY_RESMOD, new Integer(resourceMode));
         args.put(KEY_FLAGS, new Integer(flags));
+
         
         String activeUser = impl.getActiveUser(ctx);
         String activeAuth = impl.getActiveUserAuth(ctx);
@@ -450,6 +492,16 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
         
         CatalogController controller = new CatalogController(ctx);
+        if(browseButtonURL != null) {
+            args.put(KEY_BROWSE_BUTTON_URL, browseButtonURL);
+        }
+        view.setBrowseButtonVisible(browseButtonURL != null);
+
+        if(url.equals(OPDS_PROTO_USER_FEEDLIST)) {
+            view.setAddOptionAvailable(true);
+            view.setDeleteOptionAvailable(true);
+        }
+
         new LoadControllerThread(args, controller, listener, view).start();
     }
 
@@ -460,6 +512,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             args.get(KEY_HTTPUSER) != null ? (String)args.get(KEY_HTTPUSER) : null, 
             args.get(KEY_HTTPPPASS) != null ? (String)args.get(KEY_HTTPPPASS) : null, 
             ((Integer)args.get(KEY_FLAGS)).intValue(), ctx);
+
+        if(args.containsKey(KEY_BROWSE_BUTTON_URL)) {
+            newController.setBrowseButtonURL((String)args.get(KEY_BROWSE_BUTTON_URL));
+        }
+
         newController.initEntryStatusCheck();
         return newController;
     }
@@ -584,8 +641,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String feedID =  getUserFeedListIdPrefix(context);
         UstadJSOPDSFeed usersFeeds = new UstadJSOPDSFeed(OPDS_PROTO_USER_FEEDLIST,
-                "My Feeds",feedID);
-        JSONArray arr = BasePointController.getUserFeedListArray(context);
+                impl.getString(MessageIDConstants.my_libraries),feedID);
+        JSONArray arr = CatalogController.getUserFeedListArray(context);
         try {
             JSONObject currentFeed;
             UstadJSOPDSEntry newEntry;
@@ -709,11 +766,16 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     }
     
     public void handleConfirmDeleteEntries() {
-        for(int i = 0; i < selectedEntries.length; i++) {
-            CatalogController.removeEntry(selectedEntries[i].id, 
-                USER_RESOURCE | SHARED_RESOURCE, getContext());
-            this.view.setEntryStatus(selectedEntries[i].id, STATUS_NOT_ACQUIRED);
+        if(isUserFeedList()) {
+            handleRemoveItemsFromUserFeed(selectedEntries);
+        }else {
+            for(int i = 0; i < selectedEntries.length; i++) {
+                CatalogController.removeEntry(selectedEntries[i].id,
+                        USER_RESOURCE | SHARED_RESOURCE, getContext());
+                this.view.setEntryStatus(selectedEntries[i].id, STATUS_NOT_ACQUIRED);
+            }
         }
+
         this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
     }
     
@@ -730,26 +792,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             //we are loading another opds catalog
             Vector entryLinks = entry.getLinks(null, UstadJSOPDSItem.TYPE_ATOMFEED, 
                 true, true);
-                        
+
             if(entryLinks.size() > 0) {
                 String[] firstLink = (String[])entryLinks.elementAt(0);
-                final String url = UMFileUtil.resolveLink(entry.parentFeed.href, 
-                    firstLink[UstadJSOPDSItem.ATTR_HREF]);
-                
-                Hashtable args = new Hashtable();
-                args.put(KEY_URL, url);
-                
-                if(impl.getActiveUser(getContext()) != null) {
-                    args.put(KEY_HTTPUSER, impl.getActiveUser(getContext()));
-                    args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(getContext()));
-                }
-                
-                args.put(KEY_RESMOD, new Integer(getResourceMode()));
-                args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
-                
-                
-                UstadMobileSystemImpl.getInstance().go(CatalogView.class, args, 
-                        getContext());
+                handleCatalogSelected(UMFileUtil.resolveLink(entry.parentFeed.href,
+                        firstLink[UstadJSOPDSItem.ATTR_HREF]));
             }
         }else {
             CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
@@ -768,6 +815,27 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
             }
         }
+    }
+
+    protected void handleCatalogSelected(String url) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Hashtable args = new Hashtable();
+        args.put(KEY_URL, url);
+
+        if(impl.getActiveUser(getContext()) != null) {
+            args.put(KEY_HTTPUSER, impl.getActiveUser(getContext()));
+            args.put(KEY_HTTPPPASS, impl.getActiveUserAuth(getContext()));
+        }
+
+        args.put(KEY_RESMOD, new Integer(getResourceMode()));
+        args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
+
+        UstadMobileSystemImpl.getInstance().go(CatalogView.class, args,
+                getContext());
+    }
+
+    public void handleClickBrowseButton() {
+        handleCatalogSelected(browseButtonURL);
     }
     
     /**
@@ -2279,7 +2347,156 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static int getAcquisitionStatusByEntryID(String entryID, String user) {
         return -1;
     }
-    
-    
-    
+
+
+
+    public void handleClickAdd() {
+        view.showAddFeedDialog();
+    }
+
+    public void handleFeedPresetSelected(int index) {
+        if(index > OPDS_CUSTOM) {
+            String[] selectedPreset = UstadMobileConstants.OPDS_FEEDS_PRESETS[index];
+            view.setAddFeedDialogTitle(selectedPreset[OPDS_FEEDS_INDEX_TITLE]);
+            view.setAddFeedDialogURL(selectedPreset[OPDS_FEEDS_INDEX_URL]);
+        }
+    }
+
+    /**
+     * Return a one dimensional string array for the prepopulated OPDS_FEEDS_PRESETS
+     * of common OPDS sources
+     *
+     * @param column
+     * @return
+     */
+    public String[] getFeedList(int column) {
+        String[] retVal = new String[UstadMobileConstants.OPDS_FEEDS_PRESETS.length];
+        for(int i = 0; i < retVal.length; i++) {
+            retVal[i] = UstadMobileConstants.OPDS_FEEDS_PRESETS[i][column];
+        }
+
+        return retVal;
+    }
+
+    public static void addFeedToUserFeedList(String url, String title, String authUser, String authPass, Object context) {
+        try {
+            JSONArray arr = CatalogController.getUserFeedListArray(context);
+            JSONObject newFeed = new JSONObject();
+            newFeed.put("url", url);
+            newFeed.put("title", title);
+            newFeed.put("httpu", authUser);
+            newFeed.put("httpp", authPass);
+            arr.put(newFeed);
+            CatalogController.setUserFeedListArray(arr, context);
+        }catch(JSONException e) {
+
+        }
+    }
+
+    public static JSONArray getUserFeedListArray(Object context) {
+        JSONArray retVal = null;
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        try {
+            String currentJSON = impl.getUserPref(
+                    CatalogController.PREFKEY_USERFEEDLIST, null, context);
+            if(currentJSON != null) {
+                retVal = new JSONArray(currentJSON);
+            }else {
+                retVal = getDefaultUserFeedList(context);
+            }
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 148, null, e);
+        }
+
+        return retVal;
+    }
+
+    /**
+     * Generates the default user feed list by resolving the DEFAULT_OPDS_SERVER
+     * relative to the current xAPI server
+     *
+     * @param context
+     * @return
+     */
+    public static JSONArray getDefaultUserFeedList(Object context) {
+        JSONArray retVal = null;
+        String xAPIServer = UstadMobileSystemImpl.getInstance().getAppPref(
+                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+        try {
+            retVal = new JSONArray();
+            JSONObject serverFeed = new JSONObject();
+            serverFeed.put("title", "Ustad Mobile");
+            serverFeed.put("url", UMFileUtil.resolveLink(xAPIServer,
+                    UstadMobileDefaults.DEFAULT_OPDS_SERVER));
+            serverFeed.put("auth", ":appuser:");
+            retVal.put(serverFeed);
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 164, xAPIServer, e);
+        }
+
+        return retVal;
+    }
+
+    public static void setUserFeedListArray(JSONArray arr, Object context) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        try {
+            impl.setUserPref(CatalogController.PREFKEY_USERFEEDLIST,
+                    arr.toString(), context);
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 146, null, e);
+        }
+    }
+
+    public void handleAddFeed(String url, String title) {
+        CatalogController.addFeedToUserFeedList(url, title, null, null, context);
+        view.refresh();
+    }
+
+    public boolean isUserFeedList() {
+        if(model != null && model.opdsFeed != null) {
+            return model.opdsFeed.href != null && model.opdsFeed.href.equals(OPDS_PROTO_USER_FEEDLIST);
+        }else {
+            return false;
+        }
+    }
+
+    public void handleRemoveItemsFromUserFeed(UstadJSOPDSEntry[] entriesToRemove) {
+        if(entriesToRemove.length == 0) {
+            return;//nothing to do here
+        }
+
+        String userPrefix = CatalogController.getUserFeedListIdPrefix(context);
+        JSONArray userFeedList = CatalogController.getUserFeedListArray(context);
+        JSONArray newUserFeedList = new JSONArray();
+        try {
+            boolean removeItem;
+            String currentID;
+            int j;
+
+            for(int i = 0; i < userFeedList.length(); i++) {
+                removeItem = false;
+                currentID = userPrefix + i;
+
+                for(j = 0; j < entriesToRemove.length && !removeItem; j++) {
+                    if(entriesToRemove[j].id.equals(currentID)) {
+                        removeItem = true;
+                        break;
+                    }
+                }
+
+                if(!removeItem) {
+                    newUserFeedList.put(userFeedList.get(i));
+                }
+            }
+        }catch(JSONException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 144, null, e);
+        }
+
+        CatalogController.setUserFeedListArray(newUserFeedList, context);
+
+        view.refresh();
+    }
+
+
 }

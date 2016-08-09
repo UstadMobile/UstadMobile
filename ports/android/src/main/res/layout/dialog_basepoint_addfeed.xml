@@ -13,12 +13,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:id="@+id/basepoint_addfeed_url" />
+        android:id="@+id/basepoint_addfeed_title" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:singleLine="true"
-        android:id="@+id/basepoint_addfeed_title" />
+        android:id="@+id/basepoint_addfeed_url" />
+
+
 
 </LinearLayout>

@@ -100,9 +100,10 @@ public class UstadMobileConstants {
     public static final int MICRO_ED_PAGESPLIT_TEXTLEN = 750;
     
     public static final String[][] OPDS_FEEDS_PRESETS = new String[][]{
-        {"", "Select a feed"},
-        {"", "Custom Feed"},
-        {"http://ustadmobile.com/opds/", "UstadMobile"},
+        {"", "Select a Library"},
+        {"", "Custom OPDS Feed"},
+        {"http://umcloud1.ustadmobile.com/opds/", "UstadMobile"},
+        {"http://umcloud1.ustadmobile.com/opds/public/course/?id=http%3A%2F%2Fwww.ustadmobile.com%2Fum-tincan%2Fcourse%2F2260", "Teacher Development Programme Nigera"},
         {"http://m.gutenberg.org/ebooks/?format=opds", "Project Gutenberg"},
         {"http://atoll-digital-library.org/opds/", "Atoll Digital Library"}
     };

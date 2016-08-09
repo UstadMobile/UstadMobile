@@ -33,10 +33,14 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Message;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -45,11 +49,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
@@ -72,7 +82,7 @@ import java.util.WeakHashMap;
  * Use newInstance to create a new Fragment and use the FragmentManager in the normal way
  *
  */
-public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener, SwipeRefreshLayout.OnRefreshListener {
+public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener, SwipeRefreshLayout.OnRefreshListener, DialogInterface.OnClickListener, AdapterView.OnItemSelectedListener{
 
     private View rootContainer;
 
@@ -82,11 +92,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private UstadJSOPDSEntry[] mSelectedEntries;
 
-    private int mMenuID = -1;
-
     private int mFetchFlags;
-
-    public static final String ARG_MENUID = "frag-menuid";
 
     private boolean hasDisplayed = false;
 
@@ -94,6 +100,17 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     //Trackers whether or not there is a loading operation (e.g. refresh) going on
     private boolean isLoading = false;
+
+    protected Dialog addFeedDialog;
+
+    private boolean mDeleteOptionAvailable;
+
+    private boolean mAddOptionAvailable;
+
+    private static final int MENUCMDID_ADD = 1200;
+
+    private static final int MENUCMDID_DELETE = 1201;
+
 
     /**
      * Use this factory method to create a new instance of
@@ -127,13 +144,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
 
-        mMenuID = getArguments().getInt(ARG_MENUID, -1);
         mFetchFlags = getArguments().getInt(CatalogController.KEY_FLAGS,
                 CatalogController.CACHE_ENABLED);
         mSwipeRefreshLayout = (SwipeRefreshLayout)rootContainer.findViewById(
                 R.id.fragment_catalog_swiperefreshview);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setRefreshing(true);
+        rootContainer.findViewById(R.id.fragment_catalog_browsebutton).setOnClickListener(this);
         loadCatalog();
 
         return rootContainer;
@@ -143,7 +160,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public void loadCatalog(final String url, int resourceMode, int flags) {
         isLoading = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        CatalogController.makeControllerForView(this, url, resourceMode, flags, this);
+
+        CatalogController.makeControllerForView(this, url, resourceMode, flags,
+                getArguments().getString(CatalogController.KEY_BROWSE_BUTTON_URL, null), this);
     }
 
     /**
@@ -268,21 +287,49 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(mMenuID != -1) {
-            inflater.inflate(mMenuID, menu);
-        }else if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
+        if(mAddOptionAvailable) {
+            MenuItem item = menu.add(Menu.NONE, MENUCMDID_ADD,0, "");
+            item.setIcon(R.drawable.ic_add_circle_outline_white_24dp);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
+
+        if(mDeleteOptionAvailable) {
+            MenuItem item = menu.add(Menu.NONE, MENUCMDID_DELETE, 1, "");
+            item.setIcon(R.drawable.ic_remove_circle_outline_white_24dp);
+            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
+
+        super.onCreateOptionsMenu(menu, inflater);
+
+        /*
+        if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
             boolean isAcquisitionFeed = mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
             if(isAcquisitionFeed) {
                 inflater.inflate(R.menu.menu_opds_acquireopts, menu);
             }else {
                 inflater.inflate(R.menu.menu_opds_navopts, menu);
             }
-        }
+        }*/
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        /*
         switch(item.getItemId()) {
+
+            case R.id.action_basepoint_removefeed:
+                CatalogOPDSFragment opdsFragment = (CatalogOPDSFragment)mPagerAdapter.getItem(
+                        BasePointController.INDEX_BROWSEFEEDS);
+                mBasePointController.handleRemoveItemsFromUserFeed(
+                        opdsFragment.getSelectedEntries());
+                opdsFragment.setSelectedEntries(new UstadJSOPDSEntry[0]);
+                return true;
+        }
+        */
+        switch(item.getItemId()) {
+            case MENUCMDID_ADD:
+                mCatalogController.handleClickAdd();
+                return true;
             case R.id.action_opds_acquire:
                 if(getSelectedEntries().length > 0) {
                     mCatalogController.handleClickDownloadEntries(getSelectedEntries());
@@ -291,8 +338,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 }
 
                 return true;
-
-            case R.id.action_opds_deleteitem:
+            case MENUCMDID_DELETE:
                 if(getSelectedEntries().length > 0) {
                     mCatalogController.handleClickDeleteEntries(getSelectedEntries());
                 }
@@ -355,6 +401,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             }else {
                 mCatalogController.handleClickEntry(card.getEntry());
             }
+        }else if(view.getId() == R.id.fragment_catalog_browsebutton) {
+            mCatalogController.handleClickBrowseButton();
         }
     }
 
@@ -460,6 +508,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
     }
 
+    @Override
+    public void refresh() {
+        this.onRefresh();
+    }
+
     /**
      * Handle when the user selects to refresh
      */
@@ -471,4 +524,127 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                     CatalogController.CACHE_DISABLED);
         }
     }
+
+    @Override
+    public void setBrowseButtonVisible(boolean buttonVisible) {
+        this.rootContainer.findViewById(R.id.fragment_catalog_browsebutton).setVisibility(
+                buttonVisible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setBrowseButtonLabel(String browseButtonLabel) {
+        ((Button)this.rootContainer.findViewById(R.id.fragment_catalog_browsebutton)).setText(browseButtonLabel);
+    }
+
+    @Override
+    public void setDeleteOptionAvailable(boolean deleteOptionAvailable) {
+        this.mDeleteOptionAvailable = deleteOptionAvailable;
+        getActivity().invalidateOptionsMenu();
+    }
+
+    @Override
+    public void setAddOptionAvailable(boolean addOptionAvailable) {
+        this.mAddOptionAvailable = addOptionAvailable;
+        getActivity().invalidateOptionsMenu();
+    }
+
+    @Override
+    public void showAddFeedDialog() {
+        AddFeedDialogFragment dialogFragment = new AddFeedDialogFragment();
+        dialogFragment.show(getActivity().getSupportFragmentManager(), "AddFeedDialog");
+    }
+
+    @Override
+    public void setAddFeedDialogURL(String url) {
+        ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_url)).setText(url);
+    }
+
+    @Override
+    public String getAddFeedDialogURL() {
+        return ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_url)).getText().toString();
+    }
+
+    @Override
+    public String getAddFeedDialogTitle() {
+        return ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).getText().toString();
+    }
+
+    @Override
+    public void setAddFeedDialogTitle(String title) {
+        ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).setText(title);
+    }
+
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
+        mCatalogController.handleFeedPresetSelected(index);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+        //do nothing
+    }
+
+    /**
+     * Handle when the user has clicked a button on the dialog: to either add the feed or
+     * to cancel
+     *
+     * @param dialogInterface
+     * @param id
+     */
+    //@Override
+    public void onClick(DialogInterface dialogInterface, int id) {
+        if(id == DialogInterface.BUTTON_POSITIVE) {
+            mCatalogController.handleAddFeed(getAddFeedDialogURL(), getAddFeedDialogTitle());
+        }else if(id == DialogInterface.BUTTON_NEGATIVE) {
+            //cancel it
+
+        }
+        dialogInterface.dismiss();
+        addFeedDialog = null;
+    }
+
+    public static class AddFeedDialogFragment extends DialogFragment {
+
+
+        private Dialog dialog;
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            builder.setTitle(impl.getString(MessageIDConstants.add_library));
+            View dialogView =inflater.inflate(R.layout.dialog_basepoint_addfeed, null);
+            builder.setView(dialogView);
+            Fragment frag = getActivity().getSupportFragmentManager().findFragmentByTag(CatalogActivity.FRAGMENT_CATALOG_TAG);
+            if(frag != null && frag instanceof CatalogOPDSFragment) {
+                CatalogOPDSFragment catFrag = (CatalogOPDSFragment)frag;
+                builder.setNegativeButton(impl.getString(MessageIDConstants.cancel), catFrag);
+                builder.setPositiveButton(impl.getString(MessageIDConstants.add), catFrag);
+                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_title)).setHint(impl.getString(MessageIDConstants.library_title));
+                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_url)).setHint(impl.getString(MessageIDConstants.library_url));
+                //TODO: Fix me
+                String[] presetTitles = catFrag.mCatalogController.getFeedList(
+                        CatalogController.OPDS_FEEDS_INDEX_TITLE);
+                ArrayAdapter<String> adapter= new ArrayAdapter<>(getContext(),
+                        R.layout.item_basepoint_dialog_spinneritem, presetTitles);
+                Spinner presetsSpinner = ((Spinner)dialogView.findViewById(
+                        R.id.basepoint_addfeed_src_spinner));
+                presetsSpinner.setAdapter(adapter);
+                dialog = builder.create();
+                catFrag.addFeedDialog = dialog;
+                presetsSpinner.setOnItemSelectedListener(catFrag);
+            }else {
+                throw new IllegalArgumentException("");
+            }
+
+
+
+            return dialog;
+        }
+
+
+    }
+
 }
