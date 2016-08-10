@@ -13,4 +13,5 @@
 @property (retain, nonatomic) IBOutlet UITextField *passwordTextField;
 @property (retain, nonatomic) IBOutlet UIButton *loginButton;
 - (IBAction)loginButtonClicked:(UIButton *)sender;
+- (void)setXAPIServerURLWithNSString:(NSString *) xAPIServerURL;
 @end

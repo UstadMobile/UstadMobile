@@ -11,7 +11,6 @@
 #import "LoginViewLoginTabViewController.h"
 
 @interface LoginViewTabBarController ()
-@property NSString *xAPIServerURL;
 @property LoginViewLoginTabViewController *loginTab;
 @end
 
@@ -42,6 +41,10 @@
     self.direction = dir;
 }
 
+- (void)setUIStrings {
+    //right now there's no non tab components here with localizable ui strings
+}
+
 - (void)setAppMenuCommandsWithNSStringArray:(IOSObjectArray *)labels
                                withIntArray:(IOSIntArray *)ids {
     //not implemented yet...
@@ -56,65 +59,12 @@
     
 }
 
-- (void)setUsernameHintWithNSString:(NSString *)loginHint {
-    self.loginTab.usernameTextField.placeholder = loginHint;
-}
-
-- (void)setPasswordHintWithNSString:(NSString *)passwordHint {
-    self.loginTab.passwordTextField.placeholder = passwordHint;
-}
-
-- (void)setButtonTextWithNSString:(NSString *)buttonText {
-    [self.loginTab.loginButton setTitle:buttonText forState:UIControlStateNormal];
-}
-
-- (void)setRegisterPhoneNumberHintWithNSString:(NSString *)phoneNumberHint {
-    
-}
-
-- (void)setRegisterNameHintWithNSString:(NSString *)nameHint {
-    
-}
-
-- (void)setRegisterUsernameHintWithNSString:(NSString *)usernameHint {
-    
-}
-
-- (void)setRegisterPasswordHintWithNSString:(NSString *)passwordHint {
-    
-}
-
-- (void)setRegisterEmailHintWithNSString:(NSString *)registerEmailHint {
-    
-}
-
-- (void)setRegisterRegcodeHintWithNSString:(NSString *)registerRegcodHint {
-    
-}
-
-- (void)setRegisterGenderMaleLabelWithNSString:(NSString *)maleLabel {
-    
-}
-
-- (void)setRegisterGenderFemaleLabelWithNSString:(NSString *)femaleLabel {
-    
-}
-
-- (void)setRegisterButtonTextWithNSString:(NSString *)registerButtonText {
-    
-}
-
-- (void)setServerLabelWithNSString:(NSString *)serverLabel {
-    
-}
 
 - (void)setXAPIServerURLWithNSString:(NSString *)xAPIServerURL {
-    self.xAPIServerURL = xAPIServerURL;
+    LoginViewLoginTabViewController *loginTab = (LoginViewLoginTabViewController *)self.viewControllers[0];
+    [loginTab setXAPIServerURLWithNSString:xAPIServerURL];
 }
 
-- (void)setAdvancedLabelWithNSString:(NSString *)advancedLabel {
-    
-}
 
 - (void)setAdvancedSettingsVisibleWithBoolean:(jboolean)visible {
     

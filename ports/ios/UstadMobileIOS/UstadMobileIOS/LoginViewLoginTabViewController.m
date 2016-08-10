@@ -14,15 +14,25 @@
 #include "java/io/InputStream.h"
 #include "UstadMobileSystemImpl.h"
 #include "LoginController.h"
+#include "MessageIDConstants.h"
+#include "LoginViewTabBarController.h"
 
 @interface LoginViewLoginTabViewController ()
+@property NSString *xAPIServerURL;
 @end
 
 @implementation LoginViewLoginTabViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    [self setUIStrings];
+}
+
+-(void)setUIStrings {
+    ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+    self.usernameTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_username];
+    self.passwordTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_password];
+    [self.loginButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_login] forState:UIControlStateNormal];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -30,76 +40,11 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)setControllerWithComUstadmobileCoreControllerLoginController:(ComUstadmobileCoreControllerLoginController *)loginController{
-    
-}
 
-- (void)setTitleWithNSString:(NSString *)title {
-    
-}
 
-- (void)setUsernameHintWithNSString:(NSString *)loginHint {
-    self.usernameTextField.placeholder = loginHint;
-}
-
-- (void)setPasswordHintWithNSString:(NSString *)passwordHint {
-    self.passwordTextField.placeholder = passwordHint;
-}
-
-- (void)setButtonTextWithNSString:(NSString *)buttonText {
-    [self.loginButton setTitle:buttonText forState:UIControlStateNormal];
-}
-
-- (void)setRegisterPhoneNumberHintWithNSString:(NSString *)phoneNumberHint {
-    
-}
-
-- (void)setRegisterNameHintWithNSString:(NSString *)nameHint {
-    
-}
-
-- (void)setRegisterUsernameHintWithNSString:(NSString *)usernameHint {
-    
-}
-
-- (void)setRegisterPasswordHintWithNSString:(NSString *)passwordHint {
-    
-}
-
-- (void)setRegisterEmailHintWithNSString:(NSString *)registerEmailHint {
-    
-}
-
-- (void)setRegisterRegcodeHintWithNSString:(NSString *)registerRegcodHint {
-    
-}
-
-- (void)setRegisterGenderMaleLabelWithNSString:(NSString *)maleLabel {
-    
-}
-
-- (void)setRegisterGenderFemaleLabelWithNSString:(NSString *)femaleLabel {
-    
-}
-
-- (void)setRegisterButtonTextWithNSString:(NSString *)registerButtonText {
-    
-}
-
-- (void)setServerLabelWithNSString:(NSString *)serverLabel {
-    
-}
 
 - (void)setXAPIServerURLWithNSString:(NSString *)xAPIServerURL {
-    //self.xAPIServerURL = xAPIServerURL;
-}
-
-- (void)setAdvancedLabelWithNSString:(NSString *)advancedLabel {
-    
-}
-
-- (void)setAdvancedSettingsVisibleWithBoolean:(jboolean)visible {
-    
+    self.xAPIServerURL = xAPIServerURL;
 }
 
 - (void)setVersionLabelWithNSString:(NSString *)versionLabel {
@@ -107,11 +52,10 @@
 }
 
 - (IBAction)loginButtonClicked:(UIButton *)sender {
-    NSString *username = self.usernameTextField.text;
-    NSString *password = self.passwordTextField.text;
-    //NSString *serverURL = self.xAPIServerURL;
+    UIViewController *uiCtrl = self.parentViewController;
+    LoginViewTabBarController *loginView = (LoginViewTabBarController *)uiCtrl;
+    [loginView.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:self.xAPIServerURL];
     
-    //[self.loginController handleClickLoginWithNSString:username withNSString:password //withNSString:serverURL];
 }
 
 /*
