@@ -36,7 +36,6 @@ public class ClassManagementActivity extends UstadBaseActivity implements ClassM
 
     }
 
-
     @Override
     public void setClassName(String className) {
         setTitle(className);

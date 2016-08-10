@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.RadioButton;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -31,6 +33,8 @@ public class LoginFragment extends Fragment {
     public static final String ARG_POSITIONID = "POSITION";
 
     private int positionID = 0;
+
+    private ViewGroup mRootViewGroup;
 
     /**
      * Mapping of positions to IDs of the layout resources.  Positions (tabs) as defined in
@@ -68,54 +72,79 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        ViewGroup viewGroup = (ViewGroup)inflater.inflate(layoutIDs[positionID], container, false);
-
+        mRootViewGroup = (ViewGroup)inflater.inflate(layoutIDs[positionID], container, false);
         LoginActivity loginActivity = (LoginActivity)getActivity();
 
 
         switch(this.positionID) {
             case LoginView.SECTION_LOGIN:
-                Button loginButton = (Button)viewGroup.findViewById(R.id.login_button);
-                loginButton.setText(loginActivity.mButtonText);
+                Button loginButton = (Button)mRootViewGroup.findViewById(R.id.login_button);
                 loginButton.setOnClickListener(loginActivity);
-                ((TextView)viewGroup.findViewById(R.id.login_username)).setHint(loginActivity.mUsernameHint);
-                ((TextView)viewGroup.findViewById(R.id.login_password)).setHint(loginActivity.mPasswordHint);
-                ((EditText)viewGroup.findViewById(R.id.login_xapi_server)).setText(loginActivity.mXAPIServer);
-                CheckBox advancedCheckbox =(CheckBox) viewGroup.findViewById(R.id.login_advanced_checkbox);
-                advancedCheckbox.setText(loginActivity.mAdvancedLabel);
+                CheckBox advancedCheckbox =(CheckBox) mRootViewGroup.findViewById(R.id.login_advanced_checkbox);
                 advancedCheckbox.setOnCheckedChangeListener(loginActivity);
-                ((TextView)viewGroup.findViewById(R.id.login_server_label)).setText(loginActivity.mServerLabel);
-                ((TextView)viewGroup.findViewById(R.id.login_version_label)).setText(loginActivity.mVersionLabel);
+                ((EditText)mRootViewGroup.findViewById(R.id.login_xapi_server)).setText(loginActivity.mXAPIServer);
                 break;
             case LoginView.SECTION_REGISTER:
-                Spinner countrySpinner = (Spinner)viewGroup.findViewById(R.id.login_registercountry);
+                Spinner countrySpinner = (Spinner)mRootViewGroup.findViewById(R.id.login_registercountry);
                 ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(getActivity(),
                     R.layout.login_register_countrytextview, UstadMobileConstants.COUNTRYNAMES);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 countrySpinner.setAdapter(adapter);
-                Button registerButton = (Button)viewGroup.findViewById(R.id.login_registerbutton);
+                Button registerButton = (Button)mRootViewGroup.findViewById(R.id.login_registerbutton);
                 registerButton.setOnClickListener(loginActivity);
-                registerButton.setText(loginActivity.mRegisterButtonText);
-                setTextViewHint(viewGroup, R.id.login_registername, loginActivity.mRegisterNameHint);
-                ((TextView)viewGroup.findViewById(R.id.login_registerphonenum)).setHint(
-                        loginActivity.mRegisterPhoneNumberHint);
-                ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_male)).setText(
-                        loginActivity.mRegisterGenderMaleLabel);
-                ((RadioButton)viewGroup.findViewById(R.id.login_register_radio_female)).setText(
-                        loginActivity.mRegisterGenderFemaleLable);
-                setTextViewHint(viewGroup, R.id.login_registerusername,
-                        loginActivity.mRegisterUsernameHint);
-                setTextViewHint(viewGroup, R.id.login_registerpassword,
-                        loginActivity.mRegisterPasswordHint);
-                setTextViewHint(viewGroup, R.id.login_registeremail, loginActivity.mRegisterEmailHint);
-                setTextViewHint(viewGroup, R.id.login_registerregcode, loginActivity.mRegisterRegcodeHint);
-
                 lookupCountry(countrySpinner, getActivity());
                 break;
         }
 
-        return viewGroup;
+        setUIStrings();
+
+        return mRootViewGroup;
     }
+
+    public void setUIStrings() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        switch(this.positionID) {
+            case LoginView.SECTION_LOGIN:
+                Button loginButton = (Button)mRootViewGroup.findViewById(R.id.login_button);
+                loginButton.setText(impl.getString(MessageIDConstants.login));
+                ((TextView)mRootViewGroup.findViewById(R.id.login_username)).setHint(
+                        impl.getString(MessageIDConstants.username));
+                ((TextView)mRootViewGroup.findViewById(R.id.login_password)).setHint(
+                        impl.getString(MessageIDConstants.password));
+
+                CheckBox advancedCheckbox =(CheckBox) mRootViewGroup.findViewById(R.id.login_advanced_checkbox);
+                advancedCheckbox.setText(impl.getString(MessageIDConstants.advanced));
+                ((TextView)mRootViewGroup.findViewById(R.id.login_server_label)).setText(
+                        impl.getString(MessageIDConstants.server));
+                break;
+            case LoginView.SECTION_REGISTER:
+                Button registerButton = (Button)mRootViewGroup.findViewById(R.id.login_registerbutton);
+                registerButton.setText(impl.getString(MessageIDConstants.register));
+                setTextViewHint(mRootViewGroup, R.id.login_registername,
+                        impl.getString(MessageIDConstants.name));
+                ((TextView)mRootViewGroup.findViewById(R.id.login_registerphonenum)).setHint(
+                        impl.getString(MessageIDConstants.phone_number));
+                ((RadioButton)mRootViewGroup.findViewById(R.id.login_register_radio_male)).setText(
+                        impl.getString(MessageIDConstants.male));
+                ((RadioButton)mRootViewGroup.findViewById(R.id.login_register_radio_female)).setText(
+                        impl.getString(MessageIDConstants.female));
+
+                String optSffx = " (" + impl.getString(MessageIDConstants.optional) + ")";
+                setTextViewHint(mRootViewGroup, R.id.login_registerusername,
+                        impl.getString(MessageIDConstants.username) + optSffx);
+                setTextViewHint(mRootViewGroup, R.id.login_registerpassword,
+                        impl.getString(MessageIDConstants.password) + optSffx);
+                setTextViewHint(mRootViewGroup, R.id.login_registeremail,
+                        impl.getString(MessageIDConstants.email) + optSffx);
+                setTextViewHint(mRootViewGroup, R.id.login_registerregcode,
+                        impl.getString(MessageIDConstants.regcode) + optSffx);
+
+
+                break;
+        }
+
+    }
+
 
     public void lookupCountry(final Spinner countrySpinner, final Activity activity) {
         final Context ctx = getActivity();

@@ -131,4 +131,8 @@ public class UstadViewContainerJ2ME extends Container implements UstadView, Acti
         return null;
     }
     
+    public void setUIStrings() {
+        //by default - do nothing
+    }
+    
 }

@@ -64,35 +64,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
  
     protected String mTitle;
 
-    protected String mUsernameHint;
-
-    protected String mPasswordHint;
-
-    protected String mButtonText;
-
-    protected String mRegisterPhoneNumberHint;
-
-    protected String mRegisterNameHint;
-
-    protected String mRegisterGenderMaleLabel;
-
-    protected String mRegisterGenderFemaleLable;
-
-    protected String mRegisterButtonText;
-
-    protected String mAdvancedLabel;
-
-    protected String mServerLabel;
-
     protected String mXAPIServer;
-
-    protected String mRegisterUsernameHint;
-
-    protected String mRegisterPasswordHint;
-
-    protected String mRegisterEmailHint;
-
-    protected String mRegisterRegcodeHint;
 
     protected String mVersionLabel;
 
@@ -132,68 +104,8 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
     }
 
     @Override
-    public void setUsernameHint(String loginHint) {
-        mUsernameHint = loginHint;
-    }
+    public void setUIStrings() {
 
-    @Override
-    public void setPasswordHint(String passwordHint) {
-        mPasswordHint = passwordHint;
-    }
-
-    @Override
-    public void setButtonText(String buttonText) {
-        mButtonText = buttonText;
-    }
-
-    @Override
-    public void setRegisterPhoneNumberHint(String phoneNumberHint) {
-        mRegisterPhoneNumberHint = phoneNumberHint;
-    }
-
-    @Override
-    public void setRegisterNameHint(String nameHint) {
-        mRegisterNameHint = nameHint;
-    }
-
-    @Override
-    public void setRegisterUsernameHint(String usernameHint) {
-        mRegisterUsernameHint = usernameHint;
-    }
-
-    @Override
-    public void setRegisterPasswordHint(String passwordHint) {
-        mRegisterPasswordHint = passwordHint;
-    }
-
-    @Override
-    public void setRegisterEmailHint(String registerEmailHint) {
-        mRegisterEmailHint = registerEmailHint;
-    }
-
-    @Override
-    public void setRegisterRegcodeHint(String registerRegcodeHint) {
-        mRegisterRegcodeHint = registerRegcodeHint;
-    }
-
-    @Override
-    public void setRegisterGenderMaleLabel(String maleLabel) {
-        mRegisterGenderMaleLabel = maleLabel;
-    }
-
-    @Override
-    public void setRegisterGenderFemaleLabel(String femaleLabel) {
-        mRegisterGenderFemaleLable = femaleLabel;
-    }
-
-    @Override
-    public void setRegisterButtonText(String registerButtonText) {
-        mRegisterButtonText = registerButtonText;
-    }
-
-    @Override
-    public void setServerLabel(String serverLabel) {
-        this.mServerLabel = serverLabel;
     }
 
     @Override
@@ -208,11 +120,6 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         if(xAPITextView != null) {
             ((EditText)xAPITextView).setText(xAPIServerURL);
         }
-    }
-
-    @Override
-    public void setAdvancedLabel(String advancedLabel) {
-        this.mAdvancedLabel = advancedLabel;
     }
 
     @Override
