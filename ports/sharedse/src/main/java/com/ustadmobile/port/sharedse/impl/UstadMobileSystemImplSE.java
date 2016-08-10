@@ -86,17 +86,22 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             }
 
             conn.setDoOutput(true);
-            OutputStream out = conn.getOutputStream();
-            out.write(postBody);
-            out.flush();
-            out.close();
+            OutputStream postOut = conn.getOutputStream();
+            postOut.write(postBody);
+            postOut.flush();
+            postOut.close();
         }
 
         conn.connect();
 
         int contentLen = conn.getContentLength();
         int statusCode = conn.getResponseCode();
-        InputStream in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
+        if(statusCode < 0) {
+            //connection will not throw an exception when failed on J2OBJC: Will provide a statusCode < 0
+            throw new IOException("HTTP Status < 0");
+        }
+        
+        InputStream connIn = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
         byte[] buf = new byte[1024];
         int bytesRead = 0;
         int bytesReadTotal = 0;
@@ -105,12 +110,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         if(!method.equalsIgnoreCase("HEAD")) {
-            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
+            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = connIn.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
                 bout.write(buf, 0, bytesRead);
             }
         }
 
-        in.close();
+        connIn.close();
 
         Hashtable responseHeaders = new Hashtable();
         Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
