@@ -1,44 +1,52 @@
 //
-//  LoginViewController.m
+//  LoginTabBarController.m
 //  UstadMobileIOS
 //
-//  Created by Mike Dawson on 03/08/16.
+//  Created by Mike Dawson on 10/08/16.
 //  Copyright © 2016 UstadMobile FZ-LLC. All rights reserved.
 //
 
-#import "LoginViewController.h"
-#include "IOSClass.h"
-#include "IOSObjectArray.h"
-#include "IOSPrimitiveArray.h"
-#include "J2ObjC_source.h"
-#include "java/io/InputStream.h"
-#include "UstadMobileSystemImpl.h"
-#include "UstadMobileSystemImplFactoryIOS.h"
-#include "LoginController.h"
+#import "LoginViewTabBarController.h"
+#import <UIKit/UIKit.h>
+#import "LoginViewLoginTabViewController.h"
 
-@interface LoginViewController ()
-//@property (nonatomic) NSObject *obj;
+@interface LoginViewTabBarController ()
 @property NSString *xAPIServerURL;
-@property ComUstadmobileCoreControllerLoginController *loginController;
-@property (retain, nonatomic) IBOutlet UITextField *usernameTextField;
-@property (retain, nonatomic) IBOutlet UITextField *passwordTextField;
-@property (retain, nonatomic) IBOutlet UIButton *loginButton;
-- (IBAction)loginButtonClicked:(UIButton *)sender;
-
+@property LoginViewLoginTabViewController *loginTab;
 @end
 
-@implementation LoginViewController
+@implementation LoginViewTabBarController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.loginController = [ComUstadmobileCoreControllerLoginController makeControllerForViewWithComUstadmobileCoreViewLoginView:self];
     [self.loginController setUIStrings];
+    self.loginTab = self.viewControllers[0];
+    // Do any additional setup after loading the view.
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+- (id)getContext {
+    return self;
+}
+
+- (jint)getDirection {
+    return self.direction;
+}
+
+- (void)setDirectionWithInt:(jint)dir {
+    self.direction = dir;
+}
+
+- (void)setAppMenuCommandsWithNSStringArray:(IOSObjectArray *)labels
+                               withIntArray:(IOSIntArray *)ids {
+    //not implemented yet...
+}
+
 
 - (void)setControllerWithComUstadmobileCoreControllerLoginController:(ComUstadmobileCoreControllerLoginController *)loginController{
     
@@ -49,15 +57,15 @@
 }
 
 - (void)setUsernameHintWithNSString:(NSString *)loginHint {
-    self.usernameTextField.placeholder = loginHint;
+    self.loginTab.usernameTextField.placeholder = loginHint;
 }
 
 - (void)setPasswordHintWithNSString:(NSString *)passwordHint {
-    self.passwordTextField.placeholder = passwordHint;
+    self.loginTab.passwordTextField.placeholder = passwordHint;
 }
 
 - (void)setButtonTextWithNSString:(NSString *)buttonText {
-    [self.loginButton setTitle:buttonText forState:UIControlStateNormal];
+    [self.loginTab.loginButton setTitle:buttonText forState:UIControlStateNormal];
 }
 
 - (void)setRegisterPhoneNumberHintWithNSString:(NSString *)phoneNumberHint {
@@ -115,15 +123,6 @@
 - (void)setVersionLabelWithNSString:(NSString *)versionLabel {
     
 }
-
-- (IBAction)loginButtonClicked:(UIButton *)sender {
-    NSString *username = self.usernameTextField.text;
-    NSString *password = self.passwordTextField.text;
-    NSString *serverURL = self.xAPIServerURL;
-    
-    [self.loginController handleClickLoginWithNSString:username withNSString:password withNSString:serverURL];
-}
-
 /*
 #pragma mark - Navigation
 
@@ -133,4 +132,5 @@
     // Pass the selected object to the new view controller.
 }
 */
+
 @end
