@@ -156,7 +156,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         return rootContainer;
     }
 
-
     public void loadCatalog(final String url, int resourceMode, int flags) {
         isLoading = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();

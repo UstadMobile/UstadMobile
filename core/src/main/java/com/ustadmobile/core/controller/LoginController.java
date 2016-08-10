@@ -550,28 +550,8 @@ public class LoginController extends UstadBaseController{
 
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        view.setTitle(impl.getString(MessageIDConstants.login));
-        view.setButtonText(impl.getString(MessageIDConstants.login));
-        view.setUsernameHint(impl.getString(MessageIDConstants.username));
-        view.setPasswordHint(impl.getString(MessageIDConstants.password));
-        view.setRegisterButtonText(impl.getString(MessageIDConstants.register));
-        view.setRegisterNameHint(impl.getString(MessageIDConstants.name));
-        view.setRegisterPhoneNumberHint(impl.getString(MessageIDConstants.phone_number));
-        view.setRegisterGenderMaleLabel(impl.getString(MessageIDConstants.male));
-        view.setRegisterGenderFemaleLabel(impl.getString(MessageIDConstants.female));
-        String optSffx = " (" + impl.getString(MessageIDConstants.optional) + ")";
-        view.setRegisterUsernameHint(impl.getString(MessageIDConstants.username) +optSffx);
-        view.setRegisterPasswordHint(impl.getString(MessageIDConstants.password) + optSffx);
-        view.setRegisterEmailHint(impl.getString(MessageIDConstants.email) + optSffx);
-        view.setRegisterRegcodeHint(impl.getString(MessageIDConstants.regcode) + optSffx);
-        
-        view.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
-        view.setAdvancedLabel(impl.getString(MessageIDConstants.advanced));
-        view.setServerLabel(impl.getString(MessageIDConstants.server));
         view.setVersionLabel(impl.getVersion(context) + " - " +
-            HTTPCacheDir.makeHTTPDate(impl.getBuildTime()));
-            
-        
+                HTTPCacheDir.makeHTTPDate(impl.getBuildTime()));
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);

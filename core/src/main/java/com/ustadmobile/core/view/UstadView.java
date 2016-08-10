@@ -68,5 +68,10 @@ public interface UstadView {
      * @param ids 
      */
     public void setAppMenuCommands(String[] labels, int[] ids);
+
+    /**
+     * Tells the view to refresh UI Strings : e.g. when the locale has been changed.
+     */
+    public void setUIStrings();
     
 }

@@ -34,6 +34,7 @@ import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BoxLayout;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -55,13 +56,13 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
 
     private int CMD_LOGIN = 0;
     
-    final private TextField usernameField; 
+    private TextField usernameField; 
     
-    final private TextField passwordField;
+    private TextField passwordField;
     
-    final private Button loginButton;
+    private Button loginButton;
     
-    final private Label versionLabel;
+    private Label versionLabel;
     
     private LoginController controller;
     
@@ -73,34 +74,49 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
     
     public LoginViewJ2ME(Hashtable args, Object context) {
         super(args, context);
-        
-        setLayout(new BoxLayout(BoxLayout.Y_AXIS));
-        
-        usernameField = new TextField();
-        addComponent(usernameField);
-        
-        passwordField = new TextField();
-        addComponent(passwordField);
-        
-        Label spaceLabel = new Label(" ");
-        addComponent(spaceLabel);
-        
-        Command loginCmd = new Command("", CMD_LOGIN);
-        loginButton = new Button(loginCmd);
-        loginButton.addActionListener(this);
-        this.addComponent(loginButton);
-        
-        versionLabel = new Label();
-        this.addComponent(versionLabel);
-        
-        controller = LoginController.makeControllerForView(this);
-        controller.setUIStrings();
     }
+    
+    public void initComponent() {
+        if(usernameField == null) {
+            setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        
+            usernameField = new TextField();
+            addComponent(usernameField);
+
+            passwordField = new TextField();
+            addComponent(passwordField);
+
+            Label spaceLabel = new Label(" ");
+            addComponent(spaceLabel);
+
+
+            Command loginCmd = new Command(UstadMobileSystemImpl.getInstance().getString(
+                MessageIDConstants.login), CMD_LOGIN);
+            loginButton = new Button(loginCmd);
+            loginButton.addActionListener(this);
+            this.addComponent(loginButton);
+
+            versionLabel = new Label();
+            this.addComponent(versionLabel);
+
+            controller = LoginController.makeControllerForView(this);
+            controller.setUIStrings();
+            setUIStrings();
+        }
+    }
+    
+    
     
     public void show() {
         UstadMobileSystemImpl.getInstance();
         UstadMobileSystemImplJ2ME.getInstanceJ2ME().handleFormShow(this);
         super.show();
+    }
+    
+    public void setUIStrings() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        loginButton.setText(impl.getString(MessageIDConstants.login));
+        setTitle(impl.getString(MessageIDConstants.login));
     }
     
     public void setController(LoginController controller) {
@@ -120,17 +136,6 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         return this.isVisible();
     }
 
-    public void setUsernameHint(String loginHint) {
-        
-    }
-
-    public void setPasswordHint(String passwordHint) {
-    }
-
-    public void setButtonText(String buttonText) {
-        loginButton.setText(buttonText);
-    }
-
     public void setVersionLabel(String versionLabel) {
         this.versionLabel.setText(versionLabel);
     }
@@ -139,47 +144,7 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
     TODO: Below: to be brought up to speed with Android implementation 
     */
     
-    
-    public void setRegisterPhoneNumberHint(String phoneNumberHint) {
-    }
-
-    public void setRegisterNameHint(String nameHint) {
-    }
-
-    public void setRegisterGenderMaleLabel(String maleLabel) {
-    }
-
-    public void setRegisterGenderFemaleLabel(String femaleLabel) {
-    }
-
-    public void setRegisterButtonText(String registerButtonText) {
-    }
-
-    public void setRegisterUsernameHint(String usernameHint) {
-        
-    }
-
-    public void setRegisterPasswordHint(String passwordHint) {
-        
-    }
-
-    public void setRegisterEmailHint(String registerEmailHint) {
-        
-    }
-
-    public void setRegisterRegcodeHint(String registerRegcodHint) {
-        
-    }
-
-    public void setServerLabel(String serverLabel) {
-        
-    }
-
     public void setXAPIServerURL(String xAPIServerURL) {
-        
-    }
-
-    public void setAdvancedLabel(String advancedLabel) {
         
     }
 
@@ -187,7 +152,4 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         
     }
 
-   
-    
-    
 }

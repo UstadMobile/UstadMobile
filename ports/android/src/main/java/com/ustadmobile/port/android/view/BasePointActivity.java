@@ -51,26 +51,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     }
 
 
-    /*
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
-            case R.id.action_basepoint_addfeed:
-                mBasePointController.handleClickAddFeed();
-                return true;
-            case R.id.action_basepoint_removefeed:
-                CatalogOPDSFragment opdsFragment = (CatalogOPDSFragment)mPagerAdapter.getItem(
-                        BasePointController.INDEX_BROWSEFEEDS);
-                mBasePointController.handleRemoveItemsFromUserFeed(
-                        opdsFragment.getSelectedEntries());
-                opdsFragment.setSelectedEntries(new UstadJSOPDSEntry[0]);
-                return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-    */
-
 
 
 
@@ -84,10 +64,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     public void setClassListVisible(boolean visible) {
         this.classListVisible= visible;
     }
-
-
-
-
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 

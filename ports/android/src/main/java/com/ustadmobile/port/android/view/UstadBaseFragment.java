@@ -47,6 +47,10 @@ public class UstadBaseFragment  extends Fragment{
         }
     }
 
+    public void setUIStrings() {
+
+    }
+
     public void setAppMenuCommands(String[] labels, int[] ids) {
         if(getActivity() instanceof UstadBaseActivity) {
             ((UstadBaseActivity)getActivity()).setAppMenuCommands(labels, ids);

@@ -244,6 +244,10 @@ public class UstadViewFormJ2ME extends Form {
         }
     }
     
+    public void setUIStrings() {
+        //placeholder
+    }
+    
     
     
 }

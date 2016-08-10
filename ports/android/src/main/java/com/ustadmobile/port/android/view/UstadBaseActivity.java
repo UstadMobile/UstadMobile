@@ -89,6 +89,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         setDirection(UstadMobileSystemImpl.getInstance().getDirection());
     }
 
+    public void setUIStrings() {
+
+    }
+
     public void setDirection(int dir) {
         if(dir != mUIDirection) {
             UMAndroidUtil.setDirectionIfSupported(findViewById(android.R.id.content),

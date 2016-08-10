@@ -59,4 +59,5 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
             return new AttendanceRowModel[0];
         }
     }
+
 }
