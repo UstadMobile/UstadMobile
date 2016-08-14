@@ -11,6 +11,7 @@
 #import "java/io/FileInputStream.h"
 #import "UMLogIOS.h"
 #import "AppViewIOS.h"
+#import "java/lang/System.h"
 
 static NSString *_defaultsKeyAppPrefs;
 static NSString *_defaultsKeyUserPrefix;
@@ -45,9 +46,11 @@ static NSString *_defaultsKeyActiveUserAuth;
 
 -(id)init {
     self = [super init];
+    //[JavaLangSystem setPropertyWithNSString:@"http.keepAlive" withNSString:@"false"];
     self.umLogIOS = [[UMLogIOS alloc]init];
     self.userDefaults = [NSUserDefaults standardUserDefaults];
     self.appViewTable = [NSMapTable weakToStrongObjectsMapTable];
+    
     return self;
 }
 

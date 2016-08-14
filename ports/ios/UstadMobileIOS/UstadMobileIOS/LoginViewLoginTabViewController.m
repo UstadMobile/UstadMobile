@@ -52,9 +52,7 @@
 }
 
 - (IBAction)loginButtonClicked:(UIButton *)sender {
-    UIViewController *uiCtrl = self.parentViewController;
-    LoginViewTabBarController *loginView = (LoginViewTabBarController *)uiCtrl;
-    [loginView.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:self.xAPIServerURL];
+    [self.loginViewController.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:self.loginViewController.xapiServer];
     
 }
 

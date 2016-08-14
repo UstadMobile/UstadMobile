@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AD065F9B1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m in Sources */ = {isa = PBXBuildFile; fileRef = AD065F9A1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD065F9E1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m in Sources */ = {isa = PBXBuildFile; fileRef = AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD08D4611D5B33A1003CB878 /* LoginViewTabBarController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD08D4601D5B33A1003CB878 /* LoginViewTabBarController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD08D4641D5B4C96003CB878 /* LoginViewRegisterTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -157,6 +159,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		AD065F991D5CF6AE00AFF7AF /* LoginViewTabBarController2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewTabBarController2.h; sourceTree = "<group>"; };
+		AD065F9A1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewTabBarController2.m; sourceTree = "<group>"; };
+		AD065F9C1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginTabBarControllerSegue.h; sourceTree = "<group>"; };
+		AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginTabBarControllerSegue.m; sourceTree = "<group>"; };
 		AD08D45F1D5B33A1003CB878 /* LoginViewTabBarController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewTabBarController.h; sourceTree = "<group>"; };
 		AD08D4601D5B33A1003CB878 /* LoginViewTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewTabBarController.m; sourceTree = "<group>"; };
 		AD08D4621D5B4C96003CB878 /* LoginViewRegisterTabViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewRegisterTabViewController.h; sourceTree = "<group>"; };
@@ -726,6 +732,10 @@
 				AD08D4601D5B33A1003CB878 /* LoginViewTabBarController.m */,
 				AD08D4621D5B4C96003CB878 /* LoginViewRegisterTabViewController.h */,
 				AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */,
+				AD065F991D5CF6AE00AFF7AF /* LoginViewTabBarController2.h */,
+				AD065F9A1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m */,
+				AD065F9C1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.h */,
+				AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -902,6 +912,7 @@
 				AD46A8D91D52537E00C63A29 /* UserSettingsController.m in Sources */,
 				AD46A89D1D52537E00C63A29 /* ControllerReadyListener.m in Sources */,
 				AD46A8811D52537E00C63A29 /* AppView.m in Sources */,
+				AD065F9E1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m in Sources */,
 				AD46A8D11D52537E00C63A29 /* UMIOUtils.m in Sources */,
 				AD46A8D81D52537E00C63A29 /* UserSettingItem.m in Sources */,
 				AD46A8E71D52537E00C63A29 /* UstadMobileSystemImplFactory.m in Sources */,
@@ -962,6 +973,7 @@
 				AD46A8EA1D52537E00C63A29 /* UstadOCFRootFile.m in Sources */,
 				AD46A8A61D52537E00C63A29 /* FinderPattern.m in Sources */,
 				AD46A8CB1D52537E00C63A29 /* TinCanResultListener.m in Sources */,
+				AD065F9B1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m in Sources */,
 				AD46A8D61D52537E00C63A29 /* UMUUID.m in Sources */,
 				AD46A8B81D52537E00C63A29 /* OMRRecognizer.m in Sources */,
 				AD46A8A91D52537E00C63A29 /* HTTPCacheDir.m in Sources */,

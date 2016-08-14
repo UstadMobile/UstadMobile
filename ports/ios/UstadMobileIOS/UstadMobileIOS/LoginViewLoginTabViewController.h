@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "LoginViewTabBarController2.h"
 
 @interface LoginViewLoginTabViewController : UIViewController
 @property (retain, nonatomic) IBOutlet UITextField *usernameTextField;
@@ -14,4 +15,5 @@
 @property (retain, nonatomic) IBOutlet UIButton *loginButton;
 - (IBAction)loginButtonClicked:(UIButton *)sender;
 - (void)setXAPIServerURLWithNSString:(NSString *) xAPIServerURL;
+@property LoginViewTabBarController2 *loginViewController;
 @end

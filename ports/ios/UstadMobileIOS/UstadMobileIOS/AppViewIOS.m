@@ -70,6 +70,7 @@
 
 - (void)showAlertDialogWithNSString:(NSString *)title
                        withNSString:(NSString *)text {
+    
     dispatch_async(dispatch_get_main_queue(), ^{
         self.alertController = [UIAlertController alertControllerWithTitle:title message:text preferredStyle:UIAlertControllerStyleAlert];
         NSString *okStr = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] getStringWithInt:ComUstadmobileCoreMessageIDConstants_ok];
@@ -82,6 +83,7 @@
 }
 
 - (void)dismissAlertDialog {
+    
     if(self.alertController) {
         if([NSThread isMainThread]) {
             [self.alertController dismissViewControllerAnimated:YES completion:nil];
@@ -90,6 +92,7 @@
             [self performSelectorOnMainThread:@selector(dismissAlertDialog) withObject:self waitUntilDone:YES];
         }
     }
+    
 }
 
 - (void)showNotificationWithNSString:(NSString *)text
