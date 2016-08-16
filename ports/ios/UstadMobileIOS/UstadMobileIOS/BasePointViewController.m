@@ -1,32 +1,41 @@
 //
-//  LoginTabBarController.m
+//  BasePointViewController.m
 //  UstadMobileIOS
 //
-//  Created by Mike Dawson on 10/08/16.
+//  Created by Mike Dawson on 16/08/16.
 //  Copyright © 2016 UstadMobile FZ-LLC. All rights reserved.
 //
 
-#import "LoginViewTabBarController.h"
-#import <UIKit/UIKit.h>
-#import "LoginViewLoginTabViewController.h"
+#import "BasePointViewController.h"
+#import "java/util/Hashtable.h"
 
-@interface LoginViewTabBarController ()
-@property LoginViewLoginTabViewController *loginTab;
+@interface BasePointViewController ()
+@property JavaUtilHashtable *args;
+@property jint direction;
 @end
 
-@implementation LoginViewTabBarController
+@implementation BasePointViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.loginController = [ComUstadmobileCoreControllerLoginController makeControllerForViewWithComUstadmobileCoreViewLoginView:self];
-    [self.loginController setUIStrings];
-    self.loginTab = self.viewControllers[0];
     // Do any additional setup after loading the view.
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(void) setArgsWithHashtable:(JavaUtilHashtable *)args {
+    self.args = args;
+}
+
+- (void)refreshCatalogWithInt:(jint)column;{
+    
+}
+
+- (void)setClassListVisibleWithBoolean:(jboolean)visible {
+    //class list is not implemented in iOS
 }
 
 - (id)getContext {
@@ -51,28 +60,6 @@
 }
 
 
-- (void)setControllerWithComUstadmobileCoreControllerLoginController:(ComUstadmobileCoreControllerLoginController *)loginController{
-    
-}
-
-- (void)setTitleWithNSString:(NSString *)title {
-    
-}
-
-
-- (void)setXAPIServerURLWithNSString:(NSString *)xAPIServerURL {
-    LoginViewLoginTabViewController *loginTab = (LoginViewLoginTabViewController *)self.viewControllers[0];
-    [loginTab setXAPIServerURLWithNSString:xAPIServerURL];
-}
-
-
-- (void)setAdvancedSettingsVisibleWithBoolean:(jboolean)visible {
-    
-}
-
-- (void)setVersionLabelWithNSString:(NSString *)versionLabel {
-    
-}
 /*
 #pragma mark - Navigation
 

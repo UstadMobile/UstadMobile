@@ -12,6 +12,11 @@
 #import "UMLogIOS.h"
 #import "AppViewIOS.h"
 #import "java/lang/System.h"
+#import "UstadViewControllerWithArgs.h"
+#import "CatalogView.h"
+#import "BasePointView.h"
+#include "IOSClass.h"
+
 
 static NSString *_defaultsKeyAppPrefs;
 static NSString *_defaultsKeyUserPrefix;
@@ -177,5 +182,34 @@ static NSString *_defaultsKeyActiveUserAuth;
     return appView;
 }
 
+- (void)goWithIOSClass:(IOSClass *)cls
+ withJavaUtilHashtable:(JavaUtilHashtable *)args
+                withId:(id)context {
+    
+    UIViewController *nextVC = nil;
+    UIViewController *currentVC = (UIViewController *)context;
+    //NSString *nextVCClassName = [cls isEqual:ComUstadmobileCoreViewCatalogView_class_()];
+    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    if ([cls isEqual:ComUstadmobileCoreViewCatalogView_class_()]) {
+        
+    }else if([cls isEqual:ComUstadmobileCoreViewBasePointView_class_()]) {
+        nextVC = [sb instantiateViewControllerWithIdentifier:@"BasePointViewController"];
+    }
+    
+    if(nextVC != nil && [nextVC conformsToProtocol:@protocol(UstadViewControllerWithArgs)]) {
+        UIViewController<UstadViewControllerWithArgs> *nextVCWithArgs = (UIViewController<UstadViewControllerWithArgs> *)nextVC;
+        [nextVCWithArgs setArgsWithHashtable:args];
+    }
+    
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if(nextVC) {
+            UINavigationController *navCtrl = (UINavigationController *)currentVC.parentViewController;
+            [navCtrl pushViewController:nextVC animated:YES];
+        }
+    });
+    
+    
+}
 
 @end

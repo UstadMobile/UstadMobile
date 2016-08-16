@@ -15,7 +15,6 @@
 #include "UstadMobileSystemImpl.h"
 #include "LoginController.h"
 #include "MessageIDConstants.h"
-#include "LoginViewTabBarController.h"
 
 @interface LoginViewLoginTabViewController ()
 @property NSString *xAPIServerURL;
