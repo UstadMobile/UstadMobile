@@ -8,7 +8,7 @@
 //
 //  The arguments getter/setter sets the arguments that were given by
 //  the core controller that this view probably needs to make it's controller
-//  analogous to the arguments passed with intent on Android
+
 //
 //  Created by Mike Dawson on 16/08/16.
 //  Copyright © 2016 UstadMobile FZ-LLC. All rights reserved.

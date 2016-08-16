@@ -8,14 +8,19 @@
 
 #import "BasePointViewController.h"
 #import "java/util/Hashtable.h"
+#import "BasePointController.h"
+#import "CatalogViewController.h"
 
 @interface BasePointViewController ()
+@property ComUstadmobileCoreControllerBasePointController *basePointController;
 @end
 
 @implementation BasePointViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    NSString *dummy = @"trump";
     // Do any additional setup after loading the view.
 }
 
@@ -28,6 +33,14 @@
     
 }
 
+-(ComUstadmobileCoreControllerBasePointController *)getBasePointController {
+    if(self.basePointController == nil) {
+        self.basePointController = [ComUstadmobileCoreControllerBasePointController makeControllerForViewWithComUstadmobileCoreViewBasePointView:self withJavaUtilHashtable:[self getArguments]];
+    }
+    
+    return self.basePointController;
+}
+
 - (void)setClassListVisibleWithBoolean:(jboolean)visible {
     //class list is not implemented in iOS
 }
@@ -38,14 +51,16 @@
 }
 
 
-/*
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    UIViewController *nextVC = segue.destinationViewController;
+    if([nextVC isKindOfClass:[CatalogViewController class]]) {
+        JavaUtilHashtable *catArgs = [[self getBasePointController] getCatalogOPDSArgumentsWithInt:0];
+        CatalogViewController *catVC = (CatalogViewController *)nextVC;
+        [catVC setArgumentsWithHashtable:catArgs];
+    }
 }
-*/
 
 @end

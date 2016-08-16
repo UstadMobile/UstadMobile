@@ -11,6 +11,6 @@
 #import "UstadBaseUIViewController.h"
 
 
-@interface CatalogViewController : UstadBaseUIViewController<ComUstadmobileCoreViewCatalogView>
+@interface CatalogViewController : UstadBaseUIViewController<ComUstadmobileCoreViewCatalogView, UITableViewDelegate, UITableViewDataSource>
 
 @end
