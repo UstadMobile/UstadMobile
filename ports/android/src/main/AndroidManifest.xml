@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.toughra.ustadmobile"
-    android:versionCode="79"
-    android:versionName="0.2.4.10">
+    android:versionCode="80"
+    android:versionName="0.2.4.11">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -49,6 +49,11 @@
             android:name="com.ustadmobile.port.android.impl.http.HTTPService"
             android:enabled="true"
             android:exported="true" />
+
+	    <!--
+	    <service android:name="org.kivy.android.PythonService"
+             android:process=":PythonService"/>
+        -->
 
         <activity
             android:name="com.ustadmobile.port.android.view.ContainerActivity"

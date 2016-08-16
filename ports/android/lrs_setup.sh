@@ -3,6 +3,7 @@
 ###Assumes you have python for android installed###
 
 echo "Hey there"
+echo "Make Sure Android SDK/NDK and ant path are correct in the umbuildozer.txt file..\n"
 
 argument=$1
 NEW_BUILD=""
@@ -103,8 +104,8 @@ ant -f build.xml getlibs
 #ant -f antenna-build.xml getlibs
 cd ${ANDROID_PROJECT_DIR}
 
-echo "Updating core libs.."
-./updatecore
+echo "Updating core libs..(NO LONGER NEEDED)"
+#./updatecore
 
 echo "Working from Android Project Dir: ${ANDROID_PROJECT_DIR}"
 
@@ -250,10 +251,15 @@ fi
 deactivate
 
 cd ..
+
+echo "Copying umbuildozer.spec to buildozer.spec"
+cp ../../umbuildozer.spec buildozer.spec
+
+
 echo "Building Python and LRS for Android.."
 echo "  (this might take some time)"
 echo "Android build #1 (without httplib2): " >> lrs_build_output.log
-buildozer -v android debug >> lrs_build_output.log
+buildozer -v android_new debug >> lrs_build_output.log
 
 #Testing: Doesn't seem to work
 #echo "Android build #1 (without httplib2): " > lrs_build_output_arm64-v8a.log
@@ -275,8 +281,14 @@ fi
 cp -r httplib2 .buildozer/applibs/
 cp -r httplib2 .buildozer/android/app/_applibs/
 
+#Remove wsgiref in blacklist.txt
+sed -i.bak -e 's/wsgiref/\#wsgiref/' ./.buildozer/android/platform/build/dists/djangolrs/blacklist.txt
+sed -i.bak -e 's/unittest/\#unittest/' ./.buildozer/android/platform/build/dists/djangolrs/blacklist.txt
+sed -i.bak -e 's/lib-dynload\/\_sqlite3.so/\#lib-dynload\/\_sqlite3.so/' ./.buildozer/android/platform/build/dists/djangolrs/blacklist.txt
+sed -i.bak -e 's/sqlite3\//\#sqlite3\//' ./.buildozer/android/platform/build/dists/djangolrs/blacklist.txt
+
 echo "Android build #2 (with httplib2)" >> lrs_build_output.log
-buildozer -v android debug >> lrs_build_output.log
+buildozer -v android_new debug >> lrs_build_output.log
 
 #Testing: Doesn't seem to work
 #echo "Android build #2 (with httplib2)" >> lrs_build_output_arm64-v8a.log
@@ -350,19 +362,40 @@ echo "Copying sources and assets.."
 
 DEST_SRC="LRSGradle/src/main/"
 DEST_JAVA_SRC="LRSGradle/src/main/java"
-SOURCE_SRC="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/src"
+DJANGOLRS="LRSAndroid/.buildozer/android/platform/build/dists/djangolrs/"
+#DJANGOLRS_SRC="LRSAndroid/.buildozer/android/platform/python-for-android-master/pythonforandroid/bootstraps/pygame/build/"
+DJANGOLRS_SRC=`echo ${DJANGOLRS}`
+#SOURCE_SRC="LRSAndroid/.buildozer/android/platform/python-for-android-master/dist/djangolrs/src"
+SOURCE_SRC=$DJANGOLRS_SRC/src
+#ORA_SRC="LRSAndroid/.buildozer/android/platform/python-for-android-master/pythonforandroid/bootstraps/pygame/build/src/org/renpy/android/"
+#ORA_DST=${DEST_JAVA_SRC}/org/renpy/android
 
-ASSET_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/assets/"
-LIBS_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/libs"
-RES_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android/dist/djangolrs/res"
+
+ASSET_SOURCE=$DJANGOLRS/assets/
+LIBS_SOURCE=$DJANGOLRS/libs
+RES_SOURCE=$DJANGOLRS/res
+
+#ASSET_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android-master/dist/djangolrs/assets/"
+#LIBS_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android-master/dist/djangolrs/libs"
+#RES_SOURCE="LRSAndroid/.buildozer/android/platform/python-for-android-master/dist/djangolrs/res"
 
 
 cp -r ${SOURCE_SRC}/org ${DEST_JAVA_SRC}
 rm -rf ${DEST_JAVA_SRC}/com #Dont need it - Created from cli
 
+#Copy missing files
+#cp ${ORA_SRC}/Action.java ${ORA_DST}
+#cp ${ORA_SRC}/Configuration.java ${ORA_DST}
+#cp ${ORA_SRC}/Project.java ${ORA_DST}
+#cp ${ORA_SRC}/SDLSurfaceView.java ${ORA_DST}
+
+
+
 cp -r ${ASSET_SOURCE} ${DEST_SRC}/
 cp -r ${LIBS_SOURCE} ${DEST_SRC}/jniLibs
 cp -r ${DEST_SRC}/jniLibs/armeabi ${DEST_SRC}/jniLibs/armeabi-v7a
+#Added the other way round too
+cp -r ${DEST_SRC}/jniLibs/armeabi-v7a ${DEST_SRC}/jniLibs/armeabi
 #cp -r ${DEST_SRC}/jniLibs/armeabi ${DEST_SRC}/jniLibs/arm64-v8a #Added for the new and fancy 64 bit mobile processors #Update: Need 64 bit versions.. 
 #Solution make the app use it in 32bit mode.
 rm -rf ${DEST_SRC}/res/
@@ -381,8 +414,8 @@ rm -rf ${DEST_SRC}../androidTest/ #Dont need it
 cd ${ANDROID_PROJECT_DIR}/
 
 #Add settings.gradle and include
-
-echo "include ':lrs'" > settings.gradle
+#Update: already included AND more included in settings.gradle like sharedse and core
+#echo "include ':lrs'" > settings.gradle
 
 #Change build.gradle and add module lrs
 #compile project(':lrs')
@@ -396,6 +429,9 @@ cp -r "LRSTEMP/LRSGradle" lrs
 #sed -i.bak "" lrs/src/main/AndroidManifest.xml #Comment intent
 #Actually just copy it from somewhere.
 cp LRSTEMP/${LRS_ANDROIDMANIFEST} lrs/src/main/AndroidManifest.xml
+sed -i.bak -e 's/renpy/kivy/' lrs/src/main/AndroidManifest.xml
+sed -i.bak -e 's/\@string\/iconName/DjandroLRS/' lrs/src/main/AndroidManifest.xml
+#NOT DISABLING FOR NOW. TODO: CHECK THIS
 
 
 #To make sure it builds ok on Android Studio. Create Test file. So just do this.
@@ -405,8 +441,12 @@ cp ./src/androidTest/java/com/ustadmobile/test/core/TestConstants.java.sample ./
 
 #Make the service a normal background service. The app will control and restart when back to it.
 #This is just like whatsapp.
-PYTHONSERVICE="./lrs/src/main/java/org/renpy/android/PythonService.java"
+PYTHONSERVICE="./lrs/src/main/java/org/kivy/android/PythonService.java" #TODO: CHECK. Changed from renpy to kivy
 sed -i.bak -e 's/startForeground/\/\/startForeground/' ${PYTHONSERVICE}
+sed -i.bak -e 's/stopSelf/\/\/stopSelf/' ${PYTHONSERVICE}
+
+#Get rid of SDL's (Python For android and Kivy building, running component)'s icon 
+rm -rf LRSTEMP/LRSAndroid/.buildozer/android/platform/build/dists/djangolrs/res/drawable-*
 
 #build itt
 ./gradlew assembleDebug

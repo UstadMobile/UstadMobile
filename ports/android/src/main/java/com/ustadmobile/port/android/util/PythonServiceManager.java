@@ -35,15 +35,19 @@ import android.content.Context;
 //import org.renpy.android.AudioThread;
 import org.kamranzafar.jtar.TarEntry;
 import org.kamranzafar.jtar.TarInputStream;
-import org.renpy.android.Action;
+//import org.renpy.android.Action;
 //import org.renpy.android.AssetExtract;
-import org.renpy.android.Configuration;
-import org.renpy.android.Hardware;
-import org.renpy.android.Project;
-import org.renpy.android.PythonActivity;
-import org.renpy.android.PythonService;
-import org.renpy.android.ResourceManager;
-import org.renpy.android.SDLSurfaceView;
+//import org.renpy.android.Configuration;
+//import org.renpy.android.Hardware;
+//import org.renpy.android.Project;
+//import org.renpy.android.PythonActivity;
+
+//import org.renpy.android.PythonService;
+import org.kivy.android.PythonService;
+//import org.renpy.android.ResourceManager;
+//import org.renpy.android.SDLSurfaceView;
+
+import org.kivy.android.PythonUtil;
 
 import java.io.*;
 
@@ -77,13 +81,13 @@ public class PythonServiceManager {
     private static String TAG = "Python";
 
     // The SDLSurfaceView we contain.
-    public static SDLSurfaceView mView = null;
+    //public static SDLSurfaceView mView = null;
     public static ApplicationInfo mInfo = null;
 
     // Did we launch our thread?
     private boolean mLaunchedThread = false;
 
-    private ResourceManager resourceManager;
+    //private ResourceManager resourceManager;
 
     // The path to the directory contaning our external storage.
     private File externalStorage;
@@ -124,21 +128,36 @@ public class PythonServiceManager {
                 //unpackData("public", externalStorage);
                 unpackData("private", finalContext.getFilesDir());
 
-                System.loadLibrary("sdl");
-                System.loadLibrary("sdl_image");
-                System.loadLibrary("sdl_ttf");
-                System.loadLibrary("sdl_mixer");
+                System.loadLibrary("SDL2");
+                System.loadLibrary("SDL2_image");
+                System.loadLibrary("SDL2_ttf");
+                System.loadLibrary("SDL2_mixer");
                 System.loadLibrary("python2.7");
-                System.loadLibrary("application");
-                System.loadLibrary("sdl_main");
+                //System.loadLibrary("application");
+                System.loadLibrary("main");
 
-                System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_io.so");
-                System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/unicodedata.so");
+                //System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_io.so");
+                //System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/unicodedata.so");
+                try {
+                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_io.so");
+                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/unicodedata.so");
+                } catch(UnsatisfiedLinkError e) {
+                    Log.v(TAG, "Failed to load _io.so or unicodedata.so...but that's okay.");
+                }
+
+                try {
+                    // System.loadLibrary("ctypes");
+                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_ctypes.so");
+                } catch(UnsatisfiedLinkError e) {
+                    Log.v(TAG, "Unsatisfied linker when loading ctypes");
+                }
+
 
                 try {
                     System.loadLibrary("sqlite3");
-                    System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_sqlite3.so");
+                        System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_sqlite3.so");
                 } catch(UnsatisfiedLinkError e) {
+                    Log.v(TAG, "Failed to load Sqlite3. Continuing..");
                 }
 
                 try {
@@ -146,13 +165,15 @@ public class PythonServiceManager {
                     System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_imagingft.so");
                     System.load(finalContext.getFilesDir() + "/lib/python2.7/lib-dynload/_imagingmath.so");
                 } catch(UnsatisfiedLinkError e) {
+                    Log.v(TAG, "Couldn't load imaging libraries .. continuing..");
                 }
 
+                Log.v(TAG, "Libraries load Finished. Starting Python Service..");
                 start_service("UstadMobile", "UstadMobile is running",
                         "/storage/emulated/0/com.toughra.ustadmobile/lrs-djandro.log");
 
                 if(context != null && context.getClass().equals(SplashScreenActivity.class)){
-                    System.out.println("Splash screen started this!");
+                    System.out.println("startThisOnThread: Splash screen started this! Starting UI..");
                     UstadMobileSystemImpl.getInstance().startUI(context);
                 }
 
@@ -182,6 +203,8 @@ public class PythonServiceManager {
         serviceIntent.putExtra("serviceTitle", serviceTitle);
         serviceIntent.putExtra("serviceDescription", serviceDescription);
         serviceIntent.putExtra("pythonServiceArgument", pythonServiceArgument);
+        serviceIntent.putExtra("serviceEntrypoint","service/main.pyo");
+        serviceIntent.putExtra("pythonName","LRSDj");
         this.context.startService(serviceIntent);
     }
 
