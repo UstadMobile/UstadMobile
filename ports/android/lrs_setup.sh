@@ -3,7 +3,7 @@
 ###Assumes you have python for android installed###
 
 echo "Hey there"
-echo "Make Sure Android SDK/NDK and ant path are correct in the umbuildozer.txt file..\n"
+#echo "Make Sure Android SDK/NDK and ant path are correct in the umbuildozer.txt file..\n"
 
 argument=$1
 NEW_BUILD=""
@@ -16,6 +16,56 @@ else
     echo "Not going to build from scratch"
 fi
 
+SDK_PATH1=`echo $ANDROID_SDK`
+SDK_PATH2=`echo $ANDROIDSDK`
+NDK_PATH1=`echo $ANDROID_NDK`
+NDK_PATH2=`echo $ANDROIDNDK`
+NDK_VER=`echo $ANDROIDNDKVER`
+
+if [ "$SDK_PATH1" == "" ] && [ "$SDK_PATH2" == "" ] ; then
+   echo "Android SDK Path not set in ANDROIDSDK or ANDROID_SDK environment variables"
+   echo "Please set these before running again. Exiting."
+   exit 1
+fi
+
+if [ "$SDK_PATH1" != "" ] ; then
+   SDK_PATH=`echo ${SDK_PATH1}`
+fi
+if [ "$SDK_PATH2" != "" ] ; then
+   SDK_PATH=`echo ${SDK_PATH2}`
+fi
+
+if [ "$NDK_PATH1" == "" ] && [ "$NDK_PATH2" == "" ] ; then
+   echo "Android NDK Path not set in ANDROIDNDK or ANDROID_NDK environment variables"
+   echo "Please set these before running again. Exiting."
+   exit 1
+fi
+
+if [ "$NDK_PATH1" != "" ] ; then
+   NDK_PATH=`echo ${NDK_PATH1}`
+fi
+if [ "$NDK_PATH2" != "" ] ; then
+   NDK_PATH=`echo ${NDK_PATH2}`
+fi
+
+if [ "$NDK_VER" == "" ] ; then
+   echo "Android NDK Path not set in ANDROIDNDKVER environment variable"
+   echo "Please set this before running again. Exiting."
+   exit 1
+fi
+
+if [[ "$NDK_VER" == r* ]]; then
+   #var1=${var1#?}
+   NDK_VER=${NDK_VER#?}
+fi
+echo "NDK_VER: "
+echo $NDK_VER
+echo "SDK_PATH:"
+echo $SDK_PATH
+echo "NDK_PATH:"
+echo $NDK_PATH
+
+#exit 1
 
 #sudo pip install --upgrade buildozer
 BUILDOZER_PATH=`which buildozer`
@@ -128,6 +178,7 @@ else
 fi
 
 if [ "${NEW_BUILD}" == "True" ]; then 
+    echo "Cleaning.. (Please wait)"
     if [ -d "LRSTEMP" ]; then
         rm -rf "LRSTEMP"
     fi
@@ -156,6 +207,13 @@ else
     cd ../
 fi
 
+echo "Copying spec template to folder"
+cp LRSAndroid/buildozer.spec.template LRSAndroid/buildozer.spec
+
+echo "Updating buildozer file with correct Android paths and variables.."
+sed -i.bak -e "s/NDK_VER/${NDK_VER//\//\\/}/" LRSAndroid/buildozer.spec
+sed -i.bak -e "s/SDK_PATH/${SDK_PATH//\//\\/}/" LRSAndroid/buildozer.spec
+sed -i.bak -e "s/NDK_PATH/${NDK_PATH//\//\\/}/" LRSAndroid/buildozer.spec
 
 mkdir LRSAndroid/service
 
@@ -252,9 +310,8 @@ deactivate
 
 cd ..
 
-echo "Copying umbuildozer.spec to buildozer.spec"
-cp ../../umbuildozer.spec buildozer.spec
-
+#echo "Copying umbuildozer.spec to buildozer.spec"
+#cp ../../umbuildozer.spec buildozer.spec
 
 echo "Building Python and LRS for Android.."
 echo "  (this might take some time)"
