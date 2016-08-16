@@ -10,8 +10,6 @@
 #import "java/util/Hashtable.h"
 
 @interface BasePointViewController ()
-@property JavaUtilHashtable *args;
-@property jint direction;
 @end
 
 @implementation BasePointViewController
@@ -26,32 +24,12 @@
     // Dispose of any resources that can be recreated.
 }
 
--(void) setArgsWithHashtable:(JavaUtilHashtable *)args {
-    self.args = args;
-}
-
 - (void)refreshCatalogWithInt:(jint)column;{
     
 }
 
 - (void)setClassListVisibleWithBoolean:(jboolean)visible {
     //class list is not implemented in iOS
-}
-
-- (id)getContext {
-    return self;
-}
-
-- (jint)getDirection {
-    return self.direction;
-}
-
-- (void)setDirectionWithInt:(jint)dir {
-    self.direction = dir;
-}
-
-- (void)setUIStrings {
-    //right now there's no non tab components here with localizable ui strings
 }
 
 - (void)setAppMenuCommandsWithNSStringArray:(IOSObjectArray *)labels

@@ -7,8 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "UstadView.h"
+#import "UstadBaseUIViewController.h"
+#import "BasePointView.h"
 
-@interface UstadBaseViewController : UIViewController <ComUstadmobileCoreViewUstadView>
-@property jint direction;
+@interface UstadBaseViewController : UstadBaseUIViewController <ComUstadmobileCoreViewBasePointView>
 @end

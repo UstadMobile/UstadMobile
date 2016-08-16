@@ -8,9 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "LoginView.h"
+#import "UstadBaseUIViewController.h"
 
-
-@interface LoginViewTabBarController2 : UIViewController <ComUstadmobileCoreViewLoginView>
+@interface LoginViewTabBarController2 : UstadBaseUIViewController <ComUstadmobileCoreViewLoginView>
 
 @property (nonatomic, strong) UIViewController *currentViewController;
 @property (nonatomic, weak) IBOutlet UIView *placeholderView;

@@ -35,27 +35,6 @@
 }
 
 
-- (id)getContext {
-    return self;
-}
-
-- (jint)getDirection {
-    return self.direction;
-}
-
-- (void)setDirectionWithInt:(jint)dir {
-    self.direction = dir;
-}
-
-- (void)setUIStrings {
-    //right now there's no non tab components here with localizable ui strings
-}
-
-- (void)setAppMenuCommandsWithNSStringArray:(IOSObjectArray *)labels
-                               withIntArray:(IOSIntArray *)ids {
-    //not implemented yet...
-}
-
 
 - (void)setControllerWithComUstadmobileCoreControllerLoginController:(ComUstadmobileCoreControllerLoginController *)loginController{
     

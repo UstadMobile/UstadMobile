@@ -10,8 +10,10 @@
 		AD065F9B1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m in Sources */ = {isa = PBXBuildFile; fileRef = AD065F9A1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD065F9E1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m in Sources */ = {isa = PBXBuildFile; fileRef = AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD08D4641D5B4C96003CB878 /* LoginViewRegisterTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
-		AD12B4211D631228005D6D5D /* LoginViewLoginTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */; };
-		AD12B4241D631E42005D6D5D /* BasePointViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4231D631E42005D6D5D /* BasePointViewController.m */; };
+		AD12B4211D631228005D6D5D /* LoginViewLoginTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD12B4241D631E42005D6D5D /* BasePointViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4231D631E42005D6D5D /* BasePointViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD12B4271D6325B6005D6D5D /* CatalogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4261D6325B6005D6D5D /* CatalogViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD12B42A1D6327DC005D6D5D /* UstadBaseUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A87E1D52537E00C63A29 /* Activity.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79D1D52537D00C63A29 /* Activity.m */; };
 		AD46A87F1D52537E00C63A29 /* AlignmentPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79F1D52537D00C63A29 /* AlignmentPattern.m */; };
@@ -165,11 +167,14 @@
 		AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginTabBarControllerSegue.m; sourceTree = "<group>"; };
 		AD08D4621D5B4C96003CB878 /* LoginViewRegisterTabViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewRegisterTabViewController.h; sourceTree = "<group>"; };
 		AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewRegisterTabViewController.m; sourceTree = "<group>"; };
-		AD12B41E1D60B49C005D6D5D /* UstadViewControllerWithArgs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadViewControllerWithArgs.h; sourceTree = "<group>"; };
 		AD12B41F1D631228005D6D5D /* LoginViewLoginTabViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewLoginTabViewController.h; sourceTree = "<group>"; };
 		AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewLoginTabViewController.m; sourceTree = "<group>"; };
 		AD12B4221D631E42005D6D5D /* BasePointViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasePointViewController.h; sourceTree = "<group>"; };
 		AD12B4231D631E42005D6D5D /* BasePointViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BasePointViewController.m; sourceTree = "<group>"; };
+		AD12B4251D6325B6005D6D5D /* CatalogViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CatalogViewController.h; sourceTree = "<group>"; };
+		AD12B4261D6325B6005D6D5D /* CatalogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CatalogViewController.m; sourceTree = "<group>"; };
+		AD12B4281D6327DC005D6D5D /* UstadBaseUIViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadBaseUIViewController.h; sourceTree = "<group>"; };
+		AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadBaseUIViewController.m; sourceTree = "<group>"; };
 		AD46A6421D524FC600C63A29 /* UstadMobileSystemImplIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileSystemImplIOS.h; sourceTree = "<group>"; };
 		AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadMobileSystemImplIOS.m; sourceTree = "<group>"; };
 		AD46A79C1D52537D00C63A29 /* Activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Activity.h; sourceTree = "<group>"; };
@@ -735,9 +740,12 @@
 				AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */,
 				AD46A6421D524FC600C63A29 /* UstadMobileSystemImplIOS.h */,
 				AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */,
-				AD12B41E1D60B49C005D6D5D /* UstadViewControllerWithArgs.h */,
 				AD77D0571D523A8A00A2F95A /* ViewController.h */,
 				AD77D0581D523A8A00A2F95A /* ViewController.m */,
+				AD12B4251D6325B6005D6D5D /* CatalogViewController.h */,
+				AD12B4261D6325B6005D6D5D /* CatalogViewController.m */,
+				AD12B4281D6327DC005D6D5D /* UstadBaseUIViewController.h */,
+				AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -914,6 +922,7 @@
 				AD46A8D91D52537E00C63A29 /* UserSettingsController.m in Sources */,
 				AD46A89D1D52537E00C63A29 /* ControllerReadyListener.m in Sources */,
 				AD46A8811D52537E00C63A29 /* AppView.m in Sources */,
+				AD12B42A1D6327DC005D6D5D /* UstadBaseUIViewController.m in Sources */,
 				AD065F9E1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m in Sources */,
 				AD46A8D11D52537E00C63A29 /* UMIOUtils.m in Sources */,
 				AD46A8D81D52537E00C63A29 /* UserSettingItem.m in Sources */,
@@ -957,6 +966,7 @@
 				AD46A8831D52537E00C63A29 /* AsyncLoadableController.m in Sources */,
 				AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */,
 				AD46A8E61D52537E00C63A29 /* UstadMobileSystemImpl.m in Sources */,
+				AD12B4271D6325B6005D6D5D /* CatalogViewController.m in Sources */,
 				AD46A8CF1D52537E00C63A29 /* UMDownloadCompleteReceiver.m in Sources */,
 				AD46A8901D52537E00C63A29 /* CatalogController.m in Sources */,
 				AD46A8871D52537E00C63A29 /* AttendanceRowModel.m in Sources */,

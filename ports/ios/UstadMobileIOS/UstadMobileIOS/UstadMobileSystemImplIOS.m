@@ -12,7 +12,7 @@
 #import "UMLogIOS.h"
 #import "AppViewIOS.h"
 #import "java/lang/System.h"
-#import "UstadViewControllerWithArgs.h"
+#import "UstadBaseUIViewController.h"
 #import "CatalogView.h"
 #import "BasePointView.h"
 #include "IOSClass.h"
@@ -196,11 +196,10 @@ static NSString *_defaultsKeyActiveUserAuth;
         nextVC = [sb instantiateViewControllerWithIdentifier:@"BasePointViewController"];
     }
     
-    if(nextVC != nil && [nextVC conformsToProtocol:@protocol(UstadViewControllerWithArgs)]) {
-        UIViewController<UstadViewControllerWithArgs> *nextVCWithArgs = (UIViewController<UstadViewControllerWithArgs> *)nextVC;
-        [nextVCWithArgs setArgsWithHashtable:args];
+    if(nextVC != nil && [nextVC isKindOfClass:[UstadBaseUIViewController class]]) {
+        UstadBaseUIViewController *baseVC = (UstadBaseUIViewController *)nextVC;
+        [baseVC setArgumentsWithHashtable:args];
     }
-    
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if(nextVC) {

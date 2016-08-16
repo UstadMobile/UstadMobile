@@ -1,5 +1,5 @@
 //
-//  BasePointViewController.h
+//  CatalogViewController.h
 //  UstadMobileIOS
 //
 //  Created by Mike Dawson on 16/08/16.
@@ -7,9 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "BasePointView.h"
+#import "CatalogView.h"
 #import "UstadBaseUIViewController.h"
 
-@interface BasePointViewController : UstadBaseUIViewController<ComUstadmobileCoreViewBasePointView>
+
+@interface CatalogViewController : UstadBaseUIViewController<ComUstadmobileCoreViewCatalogView>
 
 @end

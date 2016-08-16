@@ -1,18 +1,18 @@
 //
-//  UstadBaseViewController.m
+//  CatalogViewController.m
 //  UstadMobileIOS
 //
-//  Created by Mike Dawson on 07/08/16.
+//  Created by Mike Dawson on 16/08/16.
 //  Copyright © 2016 UstadMobile FZ-LLC. All rights reserved.
 //
 
-#import "UstadBaseViewController.h"
+#import "CatalogViewController.h"
 
-@interface UstadBaseViewController ()
+@interface CatalogViewController ()
 
 @end
 
-@implementation UstadBaseViewController
+@implementation CatalogViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -24,13 +24,10 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)refreshCatalogWithInt:(jint)column {
-    //not implemented yet
+-(void)refresh {
+    
 }
 
-- (void)setClassListVisibleWithBoolean:(jboolean)visible {
-    //class list is not present on iOS
-}
 
 /*
 #pragma mark - Navigation
