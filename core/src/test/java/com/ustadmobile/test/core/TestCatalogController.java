@@ -102,11 +102,18 @@ public class TestCatalogController extends TestCase{
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    CatalogController loadCtrl = CatalogController.makeControllerByURL(
-                        opdsURL, CatalogController.USER_RESOURCE, 
-                        testUtils.getTestProperty(TestUtils.PROP_TESTUSER), 
-                        testUtils.getTestProperty(TestUtils.PROP_TESTAUTH), 
-                        CatalogController.CACHE_ENABLED, context);
+                    Hashtable ctrlArgs = new Hashtable();
+                    ctrlArgs.put(CatalogController.KEY_URL, opdsURL);
+                    ctrlArgs.put(CatalogController.KEY_RESMOD, 
+                        new Integer(CatalogController.USER_RESOURCE));
+                    ctrlArgs.put(CatalogController.KEY_HTTPUSER, 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTUSER));
+                    ctrlArgs.put(CatalogController.KEY_HTTPPPASS, 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTAUTH));
+                    ctrlArgs.put(CatalogController.KEY_FLAGS, new Integer(CatalogController.CACHE_ENABLED));
+                    
+                    CatalogController loadCtrl = CatalogController.makeControllerByArgsTable(
+                        ctrlArgs, context);
                     loadedVals.put("controller1", loadCtrl);
                 }catch(Exception e) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 183, opdsURL, e);
@@ -148,11 +155,18 @@ public class TestCatalogController extends TestCase{
         new Thread(new Runnable() {
             public void run() {
                 try {
-                    CatalogController loadCtrl = CatalogController.makeControllerByURL(
-                        acquireOPDSURL, CatalogController.USER_RESOURCE, 
-                        testUtils.getTestProperty(TestUtils.PROP_TESTUSER), 
-                        testUtils.getTestProperty(TestUtils.PROP_TESTAUTH), 
-                        CatalogController.CACHE_ENABLED, context);
+                    Hashtable ctrlArgs = new Hashtable();
+                    ctrlArgs.put(CatalogController.KEY_URL, acquireOPDSURL);
+                    ctrlArgs.put(CatalogController.KEY_RESMOD, 
+                        new Integer(CatalogController.USER_RESOURCE));
+                    ctrlArgs.put(CatalogController.KEY_HTTPUSER, 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTUSER));
+                    ctrlArgs.put(CatalogController.KEY_HTTPPPASS, 
+                        testUtils.getTestProperty(TestUtils.PROP_TESTAUTH));
+                    ctrlArgs.put(CatalogController.KEY_FLAGS, new Integer(CatalogController.CACHE_ENABLED));
+                    
+                    CatalogController loadCtrl = CatalogController.makeControllerByArgsTable(
+                        ctrlArgs, context);
                     loadedVals.put("controller2", loadCtrl);
                 }catch(Exception e) {
                     UstadMobileSystemImpl.l(UMLog.ERROR, 183, opdsURL, e);

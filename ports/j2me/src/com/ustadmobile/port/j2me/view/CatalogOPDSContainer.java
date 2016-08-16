@@ -159,15 +159,18 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     
     
     public void loadCatalog() {
-        loadCatalog(catalogURL, resMode);
+        //loadCatalog(catalogURL, resMode);
+        CatalogController.makeControllerForView(this, getArgs(), this);
     }
     
+    /*
     public void loadCatalog(String url, int resourceMode) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         //impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.loading));
         CatalogController.makeControllerForView(this, url, resourceMode, 
                 fetchFlags, browseButtonURL, this);
     }
+    */
     
     public void controllerReady(final UstadController controller, final int flags) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
