@@ -15,6 +15,7 @@
 @property (retain, nonatomic) IBOutlet UIButton *browseButton;
 @property NSArray *dummyData;
 @property ComUstadmobileCoreControllerCatalogController *catalogController;
+- (IBAction)browseButtonClicked:(UIButton *)sender;
 @end
 
 @implementation CatalogViewController
@@ -27,13 +28,7 @@
 }
 
 -(void)loadCatalog {
-    
-    id obj = [[self getArguments] getWithId:ComUstadmobileCoreControllerCatalogController_KEY_RESMOD];
-    NSString *url = (NSString *)[[self getArguments] getWithId:ComUstadmobileCoreControllerCatalogController_KEY_URL];
-    
-    //NSInteger *resourceMode = (NSInteger *)[[self getArguments] getWithId:ComUstadmobileCoreControllerCatalogController_KEY_RESMOD];
-    
-   // [ComUstadmobileCoreControllerCatalogController makeControllerForViewWithComUstadmobileCoreViewCatalogView:self withNSString:url withInt:<#(jint)#> withInt:<#(jint)#> withNSString:<#(NSString *)#> withComUstadmobileCoreControllerControllerReadyListener:<#(id<ComUstadmobileCoreControllerControllerReadyListener>)#>
+    [ComUstadmobileCoreControllerCatalogController makeControllerForViewWithComUstadmobileCoreViewCatalogView:self withJavaUtilHashtable:[self getArguments] withComUstadmobileCoreControllerControllerReadyListener:self];
 }
 
 -(void)controllerReadyWithComUstadmobileCoreControllerUstadController:(id<ComUstadmobileCoreControllerUstadController>)controller withInt:(jint)flags {
@@ -164,4 +159,7 @@
     return cell;
 }
 
+- (IBAction)browseButtonClicked:(UIButton *)sender {
+    [self.catalogController handleClickBrowseButton];
+}
 @end

@@ -76,7 +76,7 @@
         <!--Catalog View Controller-->
         <scene sceneID="HQH-oJ-IqI">
             <objects>
-                <viewController id="fAY-0c-ng0" customClass="CatalogViewController" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="CatalogViewController" id="fAY-0c-ng0" customClass="CatalogViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="lWv-Ks-TGM"/>
                         <viewControllerLayoutGuide type="bottom" id="oDx-We-xjS"/>
@@ -96,6 +96,9 @@
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUe-Qi-Bpf">
                                 <rect key="frame" x="277" y="550" width="46" height="30"/>
                                 <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="browseButtonClicked:" destination="fAY-0c-ng0" eventType="touchUpInside" id="EQh-wh-11g"/>
+                                </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

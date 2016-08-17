@@ -15,7 +15,8 @@
 #import "UstadBaseUIViewController.h"
 #import "CatalogView.h"
 #import "BasePointView.h"
-#include "IOSClass.h"
+#include "J2ObjC_source.h"
+
 
 
 static NSString *_defaultsKeyAppPrefs;
@@ -83,6 +84,13 @@ static NSString *_defaultsKeyActiveUserAuth;
     return dirPath;
 }
 
+- (NSString *)getUserContentDirectoryWithNSString:(NSString *)username {
+    // can't call an abstract method
+    NSString *sysDir = [self getSystemBaseDir];
+    NSString *userPathComp = [@"user-" stringByAppendingString:username];
+    return [NSString pathWithComponents:[NSArray arrayWithObjects:sysDir, userPathComp, nil]];
+}
+
 - (NSString *)getPrefFromDict:(NSString *)dictionaryKey
                   withPrefKey:(NSString *)prefKey {
     NSDictionary *dict = [self.userDefaults dictionaryForKey:dictionaryKey];
@@ -138,6 +146,12 @@ static NSString *_defaultsKeyActiveUserAuth;
     [self.userDefaults synchronize];
 }
 
+- (IOSObjectArray *)getAppPrefKeyListWithId:(id)context {
+    NSDictionary *appPrefDict = [self.userDefaults dictionaryForKey:_defaultsKeyAppPrefs];
+    IOSObjectArray *arr = [IOSObjectArray arrayWithNSArray:[appPrefDict allKeys] type:NSString_class_()];
+    return arr;
+}
+
 -(void)setActiveUserWithNSString:(NSString *)username withId:(id)context {
     self.activeUser = username;
     [self.userDefaults setObject:username forKey:_defaultsKeyActiveUser];
@@ -191,10 +205,17 @@ static NSString *_defaultsKeyActiveUserAuth;
     //NSString *nextVCClassName = [cls isEqual:ComUstadmobileCoreViewCatalogView_class_()];
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     if ([cls isEqual:ComUstadmobileCoreViewCatalogView_class_()]) {
-        
+        nextVC = [sb instantiateViewControllerWithIdentifier:@"CatalogViewController"];
     }else if([cls isEqual:ComUstadmobileCoreViewBasePointView_class_()]) {
         nextVC = [sb instantiateViewControllerWithIdentifier:@"BasePointViewController"];
     }
+    
+    UIViewController *parentVC = currentVC.parentViewController;
+    while(!([parentVC isKindOfClass:[UINavigationController class]]) && parentVC != nil) {
+        parentVC = parentVC.parentViewController;
+    }
+    
+    
     
     if(nextVC != nil && [nextVC isKindOfClass:[UstadBaseUIViewController class]]) {
         UstadBaseUIViewController *baseVC = (UstadBaseUIViewController *)nextVC;
@@ -203,7 +224,7 @@ static NSString *_defaultsKeyActiveUserAuth;
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if(nextVC) {
-            UINavigationController *navCtrl = (UINavigationController *)currentVC.parentViewController;
+            UINavigationController *navCtrl = (UINavigationController *)parentVC;
             [navCtrl pushViewController:nextVC animated:YES];
         }
     });
