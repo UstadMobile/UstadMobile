@@ -72,7 +72,9 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -156,6 +158,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         return rootContainer;
     }
 
+    /*
     public void loadCatalog(final String url, int resourceMode, int flags) {
         isLoading = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -163,15 +166,27 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         CatalogController.makeControllerForView(this, url, resourceMode, flags,
                 getArguments().getString(CatalogController.KEY_BROWSE_BUTTON_URL, null), this);
     }
+    */
 
     /**
      * Load the catalog from the arguments given
      */
+    public void loadCatalog(Hashtable args) {
+        //String catalogURL = getArguments().getString(CatalogController.KEY_URL);
+        //int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
+        CatalogController.makeControllerForView(this, UMAndroidUtil.bundleToHashtable(getArguments()),
+                this);
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " +
+                getArguments().getString(CatalogController.KEY_URL) +
+                getArguments().getInt(CatalogController.KEY_RESMOD, -1));
+        //loadCatalog(catalogURL, resourceMode, mFetchFlags);
+        //CatalogController.makeControllerForView(this, url, resourceMode, flags,
+        //        getArguments().getString(CatalogController.KEY_BROWSE_BUTTON_URL, null), this);
+
+    }
+
     public void loadCatalog() {
-        String catalogURL = getArguments().getString(CatalogController.KEY_URL);
-        int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
-        UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " + catalogURL + resourceMode);
-        loadCatalog(catalogURL, resourceMode, mFetchFlags);
+        loadCatalog(UMAndroidUtil.bundleToHashtable(getArguments()));
     }
 
 
@@ -518,9 +533,14 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void onRefresh() {
         if(!isLoading) {
-            loadCatalog(getArguments().getString(CatalogController.KEY_URL),
-                    getArguments().getInt(CatalogController.KEY_RESMOD, -1),
-                    CatalogController.CACHE_DISABLED);
+            Hashtable args = UMAndroidUtil.bundleToHashtable(getArguments());
+            int flagArg = args.containsKey(CatalogController.KEY_FLAGS) ? (Integer)args.get(CatalogController.KEY_FLAGS) : 0;
+            flagArg = flagArg | CatalogController.CACHE_DISABLED;
+            args.put(CatalogController.KEY_FLAGS, flagArg);
+            //loadCatalog(getArguments().getString(CatalogController.KEY_URL),
+            //        getArguments().getInt(CatalogController.KEY_RESMOD, -1),
+            //        CatalogController.CACHE_DISABLED);
+            loadCatalog(args);
         }
     }
 

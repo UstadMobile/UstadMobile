@@ -2,7 +2,8 @@ package com.ustadmobile.test.port.android;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import org.renpy.android.PythonService;
+//import org.renpy.android.PythonService;
+import org.kivy.android.PythonService;
 
 /**
  * Created by varuna on 19/02/16.

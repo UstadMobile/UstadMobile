@@ -436,19 +436,21 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @param httpPassword:or the HTTP password to use for authentication
      * @return 
      */
-    public static CatalogController makeControllerByURL(String url, int resourceMode, String httpUser, String httpPassword, int flags, Object context) throws IOException, XmlPullParserException{
-        UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByURL(url, resourceMode, 
-            httpUser, httpPassword, flags, context);
-        
+    public static CatalogController makeControllerByArgsTable(Hashtable args, Object context) throws IOException, XmlPullParserException{
+        UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByArgsTable(args, context);
+
+        int flags = args.contains(KEY_FLAGS) ? ((Integer)args.get(KEY_FLAGS)).intValue() : 0;
+
         if((flags & SORT_ASC) == SORT_ASC || (flags & SORT_DESC) == SORT_DESC) {
             if((flags & SORT_BY_LASTACCESSED) == SORT_BY_LASTACCESSED) {
                 opdsFeed.sortEntries(new 
                     CatalogLastAccessTimeComparer(flags, context));
             }
         }
-        
-        CatalogController result = new CatalogController(
-            new CatalogModel(opdsFeed), context);
+
+        int resourceMode = args.contains(KEY_RESMOD) ? ((Integer)args.get(KEY_RESMOD)).intValue() : SHARED_RESOURCE;
+
+        CatalogController result = new CatalogController(new CatalogModel(opdsFeed), context);
         result.setResourceMode(resourceMode);
         
         return result;
@@ -463,40 +465,19 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * thread.
      * 
      * @param view The view we are attaching with
-     * @param url as per makeControllerByURL
-     * @param resourceMode as per makeControllerByURL
-     * @param flags as per makeControllerByURL
-     * @param browseButtonURL URL where the browse button should point to: null for no button
-     * 
-     * @see CatalogController#makeControllerByURL(java.lang.String, int, java.lang.String, java.lang.String, int, java.lang.Object) 
+     * @param args Hashtable with KEY_ arguments set including URL, resource mode, http authentication parameters etc.
+     *
+     * @see CatalogController#makeControllerByArgsTable(Hashtable, Object)
      * 
      * @throws IOException
      * @throws XmlPullParserException 
      */
-    public static void makeControllerForView(final CatalogView view, final String url, final int resourceMode, final int flags, String browseButtonURL, final ControllerReadyListener listener) {
-        Hashtable args = new Hashtable();
+    public static void makeControllerForView(final CatalogView view, Hashtable args, final ControllerReadyListener listener) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        
-        Object ctx = view.getContext();
-        
-        args.put(KEY_URL, url);
-        args.put(KEY_RESMOD, new Integer(resourceMode));
-        args.put(KEY_FLAGS, new Integer(flags));
+        CatalogController controller = new CatalogController(view.getContext());
+        view.setBrowseButtonVisible(args.containsKey(KEY_BROWSE_BUTTON_URL));
 
-        
-        String activeUser = impl.getActiveUser(ctx);
-        String activeAuth = impl.getActiveUserAuth(ctx);
-        if(activeUser != null && activeAuth != null) {
-            args.put(KEY_HTTPUSER, activeUser);
-            args.put(KEY_HTTPPPASS, activeAuth);
-        }
-        
-        CatalogController controller = new CatalogController(ctx);
-        if(browseButtonURL != null) {
-            args.put(KEY_BROWSE_BUTTON_URL, browseButtonURL);
-        }
-        view.setBrowseButtonVisible(browseButtonURL != null);
-
+        String url = (String)args.get(KEY_URL);
         if(url.equals(OPDS_PROTO_USER_FEEDLIST)) {
             view.setAddOptionAvailable(true);
             view.setDeleteOptionAvailable(true);
@@ -507,11 +488,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
 
     
     public UstadController loadController(Hashtable args, Object ctx) throws Exception {
-        CatalogController newController = makeControllerByURL((String)args.get(KEY_URL), 
-            ((Integer)args.get(KEY_RESMOD)).intValue(), 
-            args.get(KEY_HTTPUSER) != null ? (String)args.get(KEY_HTTPUSER) : null, 
-            args.get(KEY_HTTPPPASS) != null ? (String)args.get(KEY_HTTPPPASS) : null, 
-            ((Integer)args.get(KEY_FLAGS)).intValue(), ctx);
+        CatalogController newController = makeControllerByArgsTable(args, ctx);
 
         if(args.containsKey(KEY_BROWSE_BUTTON_URL)) {
             newController.setBrowseButtonURL((String)args.get(KEY_BROWSE_BUTTON_URL));
@@ -582,16 +559,21 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * 
      * @return CatalogController representing the default catalog for the active user
      */
+    /*
     public static CatalogController makeUserCatalog(UstadMobileSystemImpl impl, Object context) throws IOException, XmlPullParserException{
         String opdsServerURL = impl.getUserPref("opds_server_primary", 
             UstadMobileDefaults.DEFAULT_OPDS_SERVER, context);
-        
+
+
+
         String activeUser = impl.getActiveUser(context);
         String activeUserAuth = impl.getActiveUserAuth(context);
+
         return CatalogController.makeControllerByURL(opdsServerURL, 
             USER_RESOURCE, activeUser, activeUserAuth, CACHE_ENABLED, context);
         
     }
+    */
     
     public static Hashtable makeUserCatalogArgs(Object context) {
         Hashtable args = new Hashtable();
@@ -1096,9 +1078,29 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
         return headers;
     }
-    
-    
-    
+
+    /**
+     * Get an OPDS catalog using the Arguments Hashtable containing the url, resourceMode,
+     * http username, http password, and flags as per getCatalogByURL
+     *
+     *
+     * @see CatalogController#getCatalogByURL(String, int, String, String, int, Object)
+     * @param args Hashtable with arguments as per KEY_ constants
+     * @param context System context object
+     * @return UstadJSOPDSFeed as per getCatalogByURL
+     *
+     * @throws IOException
+     * @throws XmlPullParserException
+     */
+    public static UstadJSOPDSFeed getCatalogByArgsTable(Hashtable args, Object context) throws IOException, XmlPullParserException{
+        String httpUsername = args.contains(KEY_HTTPUSER) ? (String)args.get(KEY_HTTPUSER) : null;
+        String httpPassword = args.contains(KEY_HTTPPPASS) ? (String)args.get(KEY_HTTPPPASS) : null;
+        int flags = args.contains(KEY_FLAGS) ? ((Integer)args.get(KEY_FLAGS)).intValue() : 0;
+
+        return getCatalogByURL((String)args.get(KEY_URL), ((Integer)args.get(KEY_RESMOD)).intValue(),
+                httpUsername, httpPassword, flags, context);
+    }
+
     /**
      * Get an OPDS catalog by URL
      * 
