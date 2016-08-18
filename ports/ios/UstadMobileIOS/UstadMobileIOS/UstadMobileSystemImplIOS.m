@@ -15,6 +15,7 @@
 #import "UstadBaseUIViewController.h"
 #import "CatalogView.h"
 #import "BasePointView.h"
+#import <MobileCoreServices/MobileCoreServices.h>
 #include "J2ObjC_source.h"
 
 
@@ -228,8 +229,17 @@ static NSString *_defaultsKeyActiveUserAuth;
             [navCtrl pushViewController:nextVC animated:YES];
         }
     });
-    
-    
 }
+
+- (NSString *)getExtensionFromMimeTypeWithNSString:(NSString *)mimeType {
+    //CFStringRef cfMimeType = (CFStringRef)@"image/png";
+    CFStringRef cfMimeType = (__bridge CFStringRef)mimeType;
+    CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, cfMimeType, NULL);
+    CFStringRef ext = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassFilenameExtension);
+    return (__bridge NSString*)ext;
+}
+
+
+
 
 @end
