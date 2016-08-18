@@ -232,7 +232,6 @@ static NSString *_defaultsKeyActiveUserAuth;
 }
 
 - (NSString *)getExtensionFromMimeTypeWithNSString:(NSString *)mimeType {
-    //CFStringRef cfMimeType = (CFStringRef)@"image/png";
     CFStringRef cfMimeType = (__bridge CFStringRef)mimeType;
     CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, cfMimeType, NULL);
     CFStringRef ext = UTTypeCopyPreferredTagWithClass(uti, kUTTagClassFilenameExtension);
