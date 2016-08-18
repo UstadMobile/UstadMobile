@@ -634,6 +634,12 @@ public class HTTPCacheDir {
             filename = CatalogController.sanitizeIDForFilename(url);
         }
         
+        String contentType = result.getHeaderValue("content-type");
+        int sepIndex = contentType.indexOf(';');
+        if(sepIndex != -1) {
+            contentType = contentType.substring(0, sepIndex);
+        }
+        
         String extension = '.' + impl.getExtensionFromMimeType(
             result.getHeaderValue("content-type"));
         if(filename  == null && (extension != null && !filename.endsWith(extension))) {
