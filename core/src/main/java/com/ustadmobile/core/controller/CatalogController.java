@@ -551,30 +551,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
     }
     
-    
-    /**
-     * Make a CatalogController for the user's default OPDS catalog
-     * 
-     * @param impl system implementation to be used
-     * 
-     * @return CatalogController representing the default catalog for the active user
-     */
-    /*
-    public static CatalogController makeUserCatalog(UstadMobileSystemImpl impl, Object context) throws IOException, XmlPullParserException{
-        String opdsServerURL = impl.getUserPref("opds_server_primary", 
-            UstadMobileDefaults.DEFAULT_OPDS_SERVER, context);
-
-
-
-        String activeUser = impl.getActiveUser(context);
-        String activeUserAuth = impl.getActiveUserAuth(context);
-
-        return CatalogController.makeControllerByURL(opdsServerURL, 
-            USER_RESOURCE, activeUser, activeUserAuth, CACHE_ENABLED, context);
-        
-    }
-    */
-    
     public static Hashtable makeUserCatalogArgs(Object context) {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -1093,8 +1069,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @throws XmlPullParserException
      */
     public static UstadJSOPDSFeed getCatalogByArgsTable(Hashtable args, Object context) throws IOException, XmlPullParserException{
-        String httpUsername = args.contains(KEY_HTTPUSER) ? (String)args.get(KEY_HTTPUSER) : null;
-        String httpPassword = args.contains(KEY_HTTPPPASS) ? (String)args.get(KEY_HTTPPPASS) : null;
+        String httpUsername = args.containsKey(KEY_HTTPUSER) ? (String)args.get(KEY_HTTPUSER) : null;
+        String httpPassword = args.containsKey(KEY_HTTPPPASS) ? (String)args.get(KEY_HTTPPPASS) : null;
         int flags = args.contains(KEY_FLAGS) ? ((Integer)args.get(KEY_FLAGS)).intValue() : 0;
 
         return getCatalogByURL((String)args.get(KEY_URL), ((Integer)args.get(KEY_RESMOD)).intValue(),
