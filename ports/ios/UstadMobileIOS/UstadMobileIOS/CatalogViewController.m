@@ -10,12 +10,16 @@
 #import "UstadMobileSystemImpl.h"
 #import "MessageIDConstants.h"
 #import "CatalogController.h"
+#import "CatalogModel.h"
+#import "UstadJSOPDSFeed.h"
+#import "UstadJSOPDSEntry.h"
 
 @interface CatalogViewController ()
 @property (retain, nonatomic) IBOutlet UIButton *browseButton;
 @property NSArray *dummyData;
 @property ComUstadmobileCoreControllerCatalogController *catalogController;
 - (IBAction)browseButtonClicked:(UIButton *)sender;
+@property (retain, nonatomic) IBOutlet UITableView *catalogTableView;
 @end
 
 @implementation CatalogViewController
@@ -33,6 +37,15 @@
 
 -(void)controllerReadyWithComUstadmobileCoreControllerUstadController:(id<ComUstadmobileCoreControllerUstadController>)controller withInt:(jint)flags {
     self.catalogController = (ComUstadmobileCoreControllerCatalogController *)controller;
+    NSString *title = [self.catalogController getModel]->opdsFeed_->title_;
+    if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+        [self.navigationItem setTitle:title];
+    }else if(self.parentViewController != nil){
+        [self.parentViewController.navigationItem setTitle:title];
+    }
+    
+    [self.catalogTableView reloadData];
+    //[self setTitle:title];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -121,7 +134,11 @@
 }
 
 - (void)setBrowseButtonVisibleWithBoolean:(jboolean)buttonVisible {
-    
+    if(!buttonVisible) {
+        [self.browseButton setHidden:YES];
+    }else {
+        [self.browseButton setHidden:NO];
+    }
 }
 
 
@@ -145,7 +162,11 @@
 */
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return [self.dummyData count];
+    if(self.catalogController != nil) {
+        return [self.catalogController getModel]->opdsFeed_->entries_->size_;
+    }else {
+        return 0;
+    }
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -155,8 +176,17 @@
     if(cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
     }
-    cell.textLabel.text = [self.dummyData objectAtIndex:indexPath.row];
+    
+    ComUstadmobileCoreOpdsUstadJSOPDSItem *item = IOSObjectArray_Get([self.catalogController getModel]->opdsFeed_->entries_, (jint)indexPath.row);
+    
+    cell.textLabel.text = item->title_;
     return cell;
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+    ComUstadmobileCoreOpdsUstadJSOPDSEntry *item = IOSObjectArray_Get([self.catalogController getModel]->opdsFeed_->entries_, (jint)indexPath.row);
+    [self.catalogController handleClickEntryWithComUstadmobileCoreOpdsUstadJSOPDSEntry:item];
 }
 
 - (IBAction)browseButtonClicked:(UIButton *)sender {

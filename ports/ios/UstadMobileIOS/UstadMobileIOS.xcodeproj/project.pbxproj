@@ -14,6 +14,8 @@
 		AD12B4241D631E42005D6D5D /* BasePointViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4231D631E42005D6D5D /* BasePointViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD12B4271D6325B6005D6D5D /* CatalogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4261D6325B6005D6D5D /* CatalogViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD12B42A1D6327DC005D6D5D /* UstadBaseUIViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD12B42C1D65C3E0005D6D5D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD12B42B1D65C3E0005D6D5D /* Security.framework */; };
+		AD12B4301D65C4A8005D6D5D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AD12B42F1D65C4A8005D6D5D /* libz.tbd */; };
 		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A87E1D52537E00C63A29 /* Activity.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79D1D52537D00C63A29 /* Activity.m */; };
 		AD46A87F1D52537E00C63A29 /* AlignmentPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79F1D52537D00C63A29 /* AlignmentPattern.m */; };
@@ -174,6 +176,9 @@
 		AD12B4261D6325B6005D6D5D /* CatalogViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CatalogViewController.m; sourceTree = "<group>"; };
 		AD12B4281D6327DC005D6D5D /* UstadBaseUIViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadBaseUIViewController.h; sourceTree = "<group>"; };
 		AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadBaseUIViewController.m; sourceTree = "<group>"; };
+		AD12B42B1D65C3E0005D6D5D /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		AD12B42D1D65C42D005D6D5D /* libz.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.dylib; path = ../../../../../../../usr/lib/libz.1.dylib; sourceTree = "<group>"; };
+		AD12B42F1D65C4A8005D6D5D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		AD46A6421D524FC600C63A29 /* UstadMobileSystemImplIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileSystemImplIOS.h; sourceTree = "<group>"; };
 		AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadMobileSystemImplIOS.m; sourceTree = "<group>"; };
 		AD46A79C1D52537D00C63A29 /* Activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Activity.h; sourceTree = "<group>"; };
@@ -432,6 +437,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD12B4301D65C4A8005D6D5D /* libz.tbd in Frameworks */,
+				AD12B42C1D65C3E0005D6D5D /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -688,6 +695,9 @@
 		AD77D0451D523A8A00A2F95A = {
 			isa = PBXGroup;
 			children = (
+				AD12B42F1D65C4A8005D6D5D /* libz.tbd */,
+				AD12B42D1D65C42D005D6D5D /* libz.1.dylib */,
+				AD12B42B1D65C3E0005D6D5D /* Security.framework */,
 				AD7745E01D526FD600A56306 /* res */,
 				AD46A79B1D52537D00C63A29 /* Generated */,
 				AD77D0501D523A8A00A2F95A /* UstadMobileIOS */,
@@ -1182,7 +1192,10 @@
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
-				OTHER_LDFLAGS = "-ljre_emul";
+				OTHER_LDFLAGS = (
+					"-ljre_emul",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
@@ -1198,7 +1211,10 @@
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
-				OTHER_LDFLAGS = "-ljre_emul";
+				OTHER_LDFLAGS = (
+					"-ljre_emul",
+					"-ObjC",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";

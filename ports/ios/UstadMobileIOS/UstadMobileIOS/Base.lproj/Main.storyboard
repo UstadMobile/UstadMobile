@@ -105,6 +105,7 @@
                     </view>
                     <connections>
                         <outlet property="browseButton" destination="PUe-Qi-Bpf" id="uFS-75-bPY"/>
+                        <outlet property="catalogTableView" destination="qoR-6r-zbi" id="UGW-Zd-8zz"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BJ8-eu-B6T" userLabel="First Responder" sceneMemberID="firstResponder"/>
