@@ -19,11 +19,20 @@ Running ./xlate.sh runs j2objc and puts the generated sources in
 ports/ios/UstadMobileIOS/Generated .  This directory is added as
 a User Header Search Path in XCode as per:
 
-http://j2objc.org/docs/Xcode-Build-Rules.html ).  This way there's
+http://j2objc.org/docs/Xcode-Build-Rules.html ).  
 
 Instead of using DERIVED_FILES we add the directory by right clicking
 Selecting Generated, Add Files on the project ; uncheck Copy Items, 
 and Select Create Groups for any Added Folders.
+
+XCode Project Settings:
+
+In the project in Build Settings "Other Linker Flags" -ObjC must be 
+added (otherwise XMLPullParsing Factory at least won't work).
+
+In Build Phases under Link Binary With Libraries add libz.tbd and
+Security.framework (supports Zip and SSL respectively).
+
 
 Memory Management:
 
