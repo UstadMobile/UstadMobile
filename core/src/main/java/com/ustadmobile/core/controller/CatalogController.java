@@ -439,7 +439,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static CatalogController makeControllerByArgsTable(Hashtable args, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByArgsTable(args, context);
 
-        int flags = args.contains(KEY_FLAGS) ? ((Integer)args.get(KEY_FLAGS)).intValue() : 0;
+        int flags = args.containsKey(KEY_FLAGS) ? ((Integer)args.get(KEY_FLAGS)).intValue() : 0;
 
         if((flags & SORT_ASC) == SORT_ASC || (flags & SORT_DESC) == SORT_DESC) {
             if((flags & SORT_BY_LASTACCESSED) == SORT_BY_LASTACCESSED) {
@@ -448,7 +448,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             }
         }
 
-        int resourceMode = args.contains(KEY_RESMOD) ? ((Integer)args.get(KEY_RESMOD)).intValue() : SHARED_RESOURCE;
+        int resourceMode = args.containsKey(KEY_RESMOD) ? ((Integer)args.get(KEY_RESMOD)).intValue() : SHARED_RESOURCE;
 
         CatalogController result = new CatalogController(new CatalogModel(opdsFeed), context);
         result.setResourceMode(resourceMode);
@@ -1071,7 +1071,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public static UstadJSOPDSFeed getCatalogByArgsTable(Hashtable args, Object context) throws IOException, XmlPullParserException{
         String httpUsername = args.containsKey(KEY_HTTPUSER) ? (String)args.get(KEY_HTTPUSER) : null;
         String httpPassword = args.containsKey(KEY_HTTPPPASS) ? (String)args.get(KEY_HTTPPPASS) : null;
-        int flags = args.contains(KEY_FLAGS) ? ((Integer)args.get(KEY_FLAGS)).intValue() : 0;
+        int flags = args.containsKey(KEY_FLAGS) ? ((Integer)args.get(KEY_FLAGS)).intValue() : 0;
 
         return getCatalogByURL((String)args.get(KEY_URL), ((Integer)args.get(KEY_RESMOD)).intValue(),
                 httpUsername, httpPassword, flags, context);

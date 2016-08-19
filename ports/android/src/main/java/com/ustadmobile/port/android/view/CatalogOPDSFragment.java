@@ -158,33 +158,19 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         return rootContainer;
     }
 
-    /*
-    public void loadCatalog(final String url, int resourceMode, int flags) {
-        isLoading = true;
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        CatalogController.makeControllerForView(this, url, resourceMode, flags,
-                getArguments().getString(CatalogController.KEY_BROWSE_BUTTON_URL, null), this);
-    }
-    */
-
     /**
      * Load the catalog from the arguments given
      */
     public void loadCatalog(Hashtable args) {
-        //String catalogURL = getArguments().getString(CatalogController.KEY_URL);
-        //int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
-        CatalogController.makeControllerForView(this, UMAndroidUtil.bundleToHashtable(getArguments()),
-                this);
+        CatalogController.makeControllerForView(this, args, this);
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " +
-                getArguments().getString(CatalogController.KEY_URL) +
-                getArguments().getInt(CatalogController.KEY_RESMOD, -1));
-        //loadCatalog(catalogURL, resourceMode, mFetchFlags);
-        //CatalogController.makeControllerForView(this, url, resourceMode, flags,
-        //        getArguments().getString(CatalogController.KEY_BROWSE_BUTTON_URL, null), this);
-
+                args.get(CatalogController.KEY_URL) +
+                args.get(CatalogController.KEY_RESMOD));
     }
 
+    /**
+     * Load the catalog with the default arguments that we got when the fragment was created
+     */
     public void loadCatalog() {
         loadCatalog(UMAndroidUtil.bundleToHashtable(getArguments()));
     }
@@ -315,31 +301,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         super.onCreateOptionsMenu(menu, inflater);
 
-        /*
-        if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
-            boolean isAcquisitionFeed = mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
-            if(isAcquisitionFeed) {
-                inflater.inflate(R.menu.menu_opds_acquireopts, menu);
-            }else {
-                inflater.inflate(R.menu.menu_opds_navopts, menu);
-            }
-        }*/
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        /*
-        switch(item.getItemId()) {
-
-            case R.id.action_basepoint_removefeed:
-                CatalogOPDSFragment opdsFragment = (CatalogOPDSFragment)mPagerAdapter.getItem(
-                        BasePointController.INDEX_BROWSEFEEDS);
-                mBasePointController.handleRemoveItemsFromUserFeed(
-                        opdsFragment.getSelectedEntries());
-                opdsFragment.setSelectedEntries(new UstadJSOPDSEntry[0]);
-                return true;
-        }
-        */
         switch(item.getItemId()) {
             case MENUCMDID_ADD:
                 mCatalogController.handleClickAdd();
@@ -537,9 +502,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             int flagArg = args.containsKey(CatalogController.KEY_FLAGS) ? (Integer)args.get(CatalogController.KEY_FLAGS) : 0;
             flagArg = flagArg | CatalogController.CACHE_DISABLED;
             args.put(CatalogController.KEY_FLAGS, flagArg);
-            //loadCatalog(getArguments().getString(CatalogController.KEY_URL),
-            //        getArguments().getInt(CatalogController.KEY_RESMOD, -1),
-            //        CatalogController.CACHE_DISABLED);
             loadCatalog(args);
         }
     }
