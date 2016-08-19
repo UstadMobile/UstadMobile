@@ -139,6 +139,14 @@ public interface CatalogView extends UstadView{
 
     public void setAddFeedDialogTitle(String title);
 
+    /**
+     * Sets whether or not the URL and Title text fields are visible - they should be shown only
+     * when the user has selected Custom OPDS from the presets drop down
+     *
+     * @param visible
+     */
+    public void setAddFeedDialogTextFieldsVisible(boolean visible);
+
     public void refresh();
 
     /**

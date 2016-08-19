@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -116,6 +117,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
+        if(Build.VERSION.SDK_INT >= 21) {
+            umToolbar.setElevation(10);
+        }
     }
 
 

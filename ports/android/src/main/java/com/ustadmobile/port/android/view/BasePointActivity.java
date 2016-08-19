@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -23,8 +24,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     protected BasePointPagerAdapter mPagerAdapter;
 
-    private int[] tabIconsIds = new int[]{R.drawable.ic_book_black_24dp,
-            R.drawable.ic_group_black_24dp};
+    private int[] tabIconsIds = new int[]{R.drawable.selector_tab_resources,
+            R.drawable.selector_tab_classes};
 
 
     protected boolean classListVisible;
@@ -45,6 +46,10 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         viewPager.setAdapter(mPagerAdapter);
         TabLayout tabLayout = (TabLayout)findViewById(R.id.basepoint_tabs);
         tabLayout.setupWithViewPager(viewPager);
+        if(Build.VERSION.SDK_INT >= 21) {
+            tabLayout.setElevation(10);
+        }
+
         for(int i = 0; i < mPagerAdapter.getCount(); i++) {
             tabLayout.getTabAt(i).setIcon(tabIconsIds[i]);
         }

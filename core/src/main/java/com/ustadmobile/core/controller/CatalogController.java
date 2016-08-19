@@ -2333,10 +2333,14 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     }
 
     public void handleFeedPresetSelected(int index) {
+        view.setAddFeedDialogTextFieldsVisible(index == OPDS_CUSTOM);
         if(index > OPDS_CUSTOM) {
             String[] selectedPreset = UstadMobileConstants.OPDS_FEEDS_PRESETS[index];
             view.setAddFeedDialogTitle(selectedPreset[OPDS_FEEDS_INDEX_TITLE]);
             view.setAddFeedDialogURL(selectedPreset[OPDS_FEEDS_INDEX_URL]);
+        }else if(index == OPDS_CUSTOM) {
+            view.setAddFeedDialogTitle("");
+            view.setAddFeedDialogURL("");
         }
     }
 

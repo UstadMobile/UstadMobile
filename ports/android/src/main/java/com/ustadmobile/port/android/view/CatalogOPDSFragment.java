@@ -563,6 +563,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).setText(title);
     }
 
+    @Override
+    public void setAddFeedDialogTextFieldsVisible(boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        addFeedDialog.findViewById(R.id.basepoint_addfeed_title).setVisibility(visibility);
+        addFeedDialog.findViewById(R.id.basepoint_addfeed_url).setVisibility(visibility);
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
