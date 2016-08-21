@@ -13,6 +13,7 @@
 #import "CatalogModel.h"
 #import "UstadJSOPDSFeed.h"
 #import "UstadJSOPDSEntry.h"
+#import "CatalogViewControllerEntryTableViewCell.h"
 
 @interface CatalogViewController ()
 @property (retain, nonatomic) IBOutlet UIButton *browseButton;
@@ -170,16 +171,14 @@
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *simpleTableIdentifier = @"SimpleTableCell";
+    static NSString *simpleTableIdentifier = @"CatalogEntryCell";
     
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
-    if(cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
-    }
     
+    CatalogViewControllerEntryTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
     ComUstadmobileCoreOpdsUstadJSOPDSItem *item = IOSObjectArray_Get([self.catalogController getModel]->opdsFeed_->entries_, (jint)indexPath.row);
     
-    cell.textLabel.text = item->title_;
+    cell.titleLabel.text = item->title_;
+    [cell.progressView setHidden:YES];
     return cell;
 }
 
