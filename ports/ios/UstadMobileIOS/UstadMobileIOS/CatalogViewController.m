@@ -21,6 +21,8 @@
 @property ComUstadmobileCoreControllerCatalogController *catalogController;
 - (IBAction)browseButtonClicked:(UIButton *)sender;
 @property (retain, nonatomic) IBOutlet UITableView *catalogTableView;
+@property NSMapTable *idToCellMapTable;
+
 @end
 
 @implementation CatalogViewController
@@ -28,7 +30,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    self.dummyData = [NSArray arrayWithObjects:@"Trumponomics", @"Bankruptcy 101", nil];
+    self.idToCellMapTable = [NSMapTable strongToWeakObjectsMapTable];
     [self loadCatalog];
 }
 
@@ -77,7 +79,16 @@
                          withNSString:(NSString *)positiveChoice
                          withNSString:(NSString *)negativeChoice
                               withInt:(jint)commandId {
-    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *positiveAction= [UIAlertAction actionWithTitle:positiveChoice style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        [self.catalogController handleConfirmDialogClickWithBoolean:true withInt:commandId];
+    }];
+    [alertController addAction:positiveAction];
+    UIAlertAction *negativeAction = [UIAlertAction actionWithTitle:negativeChoice style:(UIAlertActionStyleCancel) handler:^(UIAlertAction *action) {
+        [self.catalogController handleConfirmDialogClickWithBoolean:false withInt:commandId];
+    }];
+    [alertController addAction:negativeAction];
+    [self presentViewController:alertController animated:YES completion:nil];
 }
 
 - (void)setEntryStatusWithNSString:(NSString *)entryId
@@ -176,6 +187,16 @@
     
     CatalogViewControllerEntryTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
     ComUstadmobileCoreOpdsUstadJSOPDSItem *item = IOSObjectArray_Get([self.catalogController getModel]->opdsFeed_->entries_, (jint)indexPath.row);
+    
+    //check if this is a recycled cell
+    NSDictionary *idToCellDict = [self.idToCellMapTable dictionaryRepresentation];
+    for(NSString *entryId in idToCellDict) {
+        if([idToCellDict objectForKey:entryId] == cell) {
+            [self.idToCellMapTable removeObjectForKey:entryId];
+        }
+    }
+    
+    [self.idToCellMapTable setObject:cell forKey:item->id__];
     
     cell.titleLabel.text = item->title_;
     [cell.progressView setHidden:YES];

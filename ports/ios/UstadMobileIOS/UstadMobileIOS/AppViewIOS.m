@@ -11,6 +11,8 @@
 #import "UIKit/UIKit.h"
 #import "UstadMobileSystemImpl.h"
 #import "MessageIDConstants.h"
+#import "AppViewChoiceListener.h"
+
 
 @interface AppViewIOS()
 @property UIViewController *uiViewController;
@@ -20,6 +22,10 @@
 
 //used to show progress spinner for loading etc
 @property UIAlertController *progressAlertController;
+
+//Used for choice alerts
+@property UIAlertController *choiceAlertController;
+
 @end
 
 @implementation AppViewIOS
@@ -104,7 +110,17 @@
                    withNSStringArray:(IOSObjectArray *)choices
                              withInt:(jint)commandId
 withComUstadmobileCoreViewAppViewChoiceListener:(id<ComUstadmobileCoreViewAppViewChoiceListener>)listener {
-    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.progressAlertController = [UIAlertController alertControllerWithTitle:title message:@"" preferredStyle:UIAlertControllerStyleAlert];
+        for (NSInteger i = 0; i < choices.length; i++) {
+            UIAlertAction *action = [UIAlertAction actionWithTitle:[choices objectAtIndex:i] style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+                [listener appViewChoiceSelectedWithInt:commandId withInt:(jint)i];
+            }];
+            [self.progressAlertController addAction:action];
+        }
+        
+        [self.uiViewController presentViewController:self.progressAlertController animated:YES completion:nil];
+    });
 }
 
 - (void)dismissChoiceDialog {
