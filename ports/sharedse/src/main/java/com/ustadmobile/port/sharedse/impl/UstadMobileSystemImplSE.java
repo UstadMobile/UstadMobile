@@ -8,6 +8,7 @@ package com.ustadmobile.port.sharedse.impl;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -43,6 +45,7 @@ import java.util.Locale;
  */
 public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
+    private XmlPullParserFactory xmlPullParserFactory;
 
     /**
      * @inheritDoc
@@ -327,5 +330,20 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
         XmlPullParser parser = factory.newPullParser();
         return parser;
+    }
+
+    public XmlSerializer newXMLSerializer() {
+        XmlSerializer serializer = null;
+        try {
+            if(xmlPullParserFactory == null) {
+                xmlPullParserFactory = XmlPullParserFactory.newInstance();
+            }
+
+            serializer = xmlPullParserFactory.newSerializer();
+        }catch(XmlPullParserException e) {
+            l(UMLog.ERROR, 92, null, e);
+        }
+
+        return serializer;
     }
 }
