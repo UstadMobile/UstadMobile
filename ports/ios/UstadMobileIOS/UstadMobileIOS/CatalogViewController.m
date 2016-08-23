@@ -40,15 +40,16 @@
 
 -(void)controllerReadyWithComUstadmobileCoreControllerUstadController:(id<ComUstadmobileCoreControllerUstadController>)controller withInt:(jint)flags {
     self.catalogController = (ComUstadmobileCoreControllerCatalogController *)controller;
-    NSString *title = [self.catalogController getModel]->opdsFeed_->title_;
-    if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
-        [self.navigationItem setTitle:title];
-    }else if(self.parentViewController != nil){
-        [self.parentViewController.navigationItem setTitle:title];
-    }
-    
-    [self.catalogTableView reloadData];
-    //[self setTitle:title];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *title = [self.catalogController getModel]->opdsFeed_->title_;
+        if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+            [self.navigationItem setTitle:title];
+        }else if(self.parentViewController != nil){
+            [self.parentViewController.navigationItem setTitle:title];
+        }
+        
+        [self.catalogTableView reloadData];
+    });
 }
 
 - (void)didReceiveMemoryWarning {
