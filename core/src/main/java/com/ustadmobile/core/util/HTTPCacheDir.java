@@ -342,7 +342,7 @@ public class HTTPCacheDir {
 
         }else if(fallback != null) {
             if(fallback.hasCachedURL(url) || (filename != null && fallback.hasCachedFilename(filename))) {
-                return fallback.get(url, filename, headers, resultBuf, fallback);
+                return fallback.get(url, filename, headers, resultBuf, null);
             }
         }
         
