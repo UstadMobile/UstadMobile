@@ -122,7 +122,7 @@
                                 </connections>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUe-Qi-Bpf">
-                                <rect key="frame" x="277" y="550" width="46" height="30"/>
+                                <rect key="frame" x="0.0" y="550" width="600" height="30"/>
                                 <state key="normal" title="Button"/>
                                 <connections>
                                     <action selector="browseButtonClicked:" destination="fAY-0c-ng0" eventType="touchUpInside" id="EQh-wh-11g"/>
@@ -179,7 +179,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gY4-8x-eGE">
-                                <rect key="frame" x="96" y="65" width="46" height="33"/>
+                                <rect key="frame" x="96" y="65" width="69" height="33"/>
                                 <state key="normal" title="VC1"/>
                                 <connections>
                                     <segue destination="BYZ-38-t0r" kind="custom" identifier="LoginViewLoginTabSegue" customClass="LoginTabBarControllerSegue" id="kU9-8l-gDv"/>
@@ -189,7 +189,7 @@
                                 <rect key="frame" x="0.0" y="97" width="600" height="547"/>
                             </containerView>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xin-3J-MB1">
-                                <rect key="frame" x="305" y="64" width="46" height="34"/>
+                                <rect key="frame" x="305" y="64" width="83" height="34"/>
                                 <state key="normal" title="Button"/>
                                 <connections>
                                     <segue destination="Myq-1M-Tvb" kind="custom" identifier="LoginViewRegisterTabSegue" customClass="LoginTabBarControllerSegue" id="3v3-fW-MWb"/>
@@ -200,7 +200,9 @@
                     </view>
                     <navigationItem key="navigationItem" title="Login" id="MqE-Cz-sGZ"/>
                     <connections>
+                        <outlet property="loginTabButton" destination="gY4-8x-eGE" id="hbi-M0-WfI"/>
                         <outlet property="placeholderView" destination="ADU-aY-C5r" id="uil-Kz-mq0"/>
+                        <outlet property="registerTabButton" destination="xin-3J-MB1" id="Ysz-Pq-lKp"/>
                         <outletCollection property="tabBarButtons" destination="gY4-8x-eGE" id="24V-M2-Uya"/>
                         <outletCollection property="tabBarButtons" destination="xin-3J-MB1" id="U4R-PA-Shg"/>
                     </connections>

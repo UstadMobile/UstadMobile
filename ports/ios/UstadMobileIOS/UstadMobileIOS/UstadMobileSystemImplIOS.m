@@ -37,6 +37,9 @@ static NSString *_defaultsKeyActiveUserAuth;
 
 //Link UIViewControllers to their associated appView
 @property NSMapTable *appViewTable;
+
+//URL Session configuration for background downloading
+@property NSURLSession *urlSession;
 @end
 
 
@@ -58,6 +61,9 @@ static NSString *_defaultsKeyActiveUserAuth;
     self.userDefaults = [NSUserDefaults standardUserDefaults];
     self.appViewTable = [NSMapTable weakToStrongObjectsMapTable];
     
+    NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"com.ustadmobile.ios"];
+    
+    self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:nil];
     return self;
 }
 
@@ -203,7 +209,6 @@ static NSString *_defaultsKeyActiveUserAuth;
     
     UIViewController *nextVC = nil;
     UIViewController *currentVC = (UIViewController *)context;
-    //NSString *nextVCClassName = [cls isEqual:ComUstadmobileCoreViewCatalogView_class_()];
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"Main" bundle:nil];
     if ([cls isEqual:ComUstadmobileCoreViewCatalogView_class_()]) {
         nextVC = [sb instantiateViewControllerWithIdentifier:@"CatalogViewController"];
@@ -238,6 +243,39 @@ static NSString *_defaultsKeyActiveUserAuth;
     return (__bridge NSString*)ext;
 }
 
+- (NSString *)getUMProfileName {
+    return @"iOS";
+}
+
+
+- (NSString *)queueFileDownloadWithNSString:(NSString *)url
+                               withNSString:(NSString *)fileURI
+                      withJavaUtilHashtable:(JavaUtilHashtable *)headers
+                                     withId:(id)context {
+    url = [url stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
+    NSURLSessionTask *sessionTask = [self.urlSession downloadTaskWithURL:[NSURL URLWithString:url]];
+    [sessionTask resume];
+    return [NSString stringWithFormat:@"%@", @(sessionTask.taskIdentifier)];
+}
+
+- (IOSIntArray *)getFileDownloadStatusWithNSString:(NSString *)downloadID
+                                            withId:(id)context {
+    // can't call an abstract method
+    [self doesNotRecognizeSelector:_cmd];
+    return 0;
+}
+
+- (void)registerDownloadCompleteReceiverWithComUstadmobileCoreImplUMDownloadCompleteReceiver:(id<ComUstadmobileCoreImplUMDownloadCompleteReceiver>)receiver
+                                                                                      withId:(id)context {
+    // can't call an abstract method
+    [self doesNotRecognizeSelector:_cmd];
+}
+
+- (void)unregisterDownloadCompleteReceiverWithComUstadmobileCoreImplUMDownloadCompleteReceiver:(id<ComUstadmobileCoreImplUMDownloadCompleteReceiver>)receiver
+                                                                                        withId:(id)context {
+    // can't call an abstract method
+    [self doesNotRecognizeSelector:_cmd];
+}
 
 
 

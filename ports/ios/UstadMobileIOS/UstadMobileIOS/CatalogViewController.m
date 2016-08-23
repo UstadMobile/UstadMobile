@@ -31,6 +31,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.idToCellMapTable = [NSMapTable strongToWeakObjectsMapTable];
+    ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+    [self.browseButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_browse_feeds] forState:UIControlStateNormal];
     [self loadCatalog];
 }
 
@@ -58,7 +60,7 @@
 }
 
 -(void) setBrowseButtonLabelWithNSString:(NSString *)browseButtonLabel {
-    [self.browseButton.titleLabel setText:browseButtonLabel];
+    [self.browseButton setTitle:browseButtonLabel forState:UIControlStateNormal];
 }
 
 

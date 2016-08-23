@@ -9,9 +9,13 @@
 #import "LoginViewTabBarController2.h"
 #import "LoginViewLoginTabViewController.h"
 #import "LoginController.h"
+#import "UstadMobileSystemImpl.h"
+#import "MessageIDConstants.h"
 
 @interface LoginViewTabBarController2 ()
 @property jint direction;
+@property (retain, nonatomic) IBOutlet UIButton *registerTabButton;
+@property (retain, nonatomic) IBOutlet UIButton *loginTabButton;
 @end
 
 @implementation LoginViewTabBarController2
@@ -26,8 +30,15 @@
                                   sender: self.tabBarButtons[0]];
         
     }
-    
+    [self setUIStrings];
 }
+
+-(void)setUIStrings {
+    ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+    [self.loginTabButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_login] forState:UIControlStateNormal];
+    [self.registerTabButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_register] forState:UIControlStateNormal];
+}
+
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -92,5 +103,4 @@
     }
     
 }
-
 @end

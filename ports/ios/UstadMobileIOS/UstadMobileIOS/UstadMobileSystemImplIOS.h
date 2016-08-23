@@ -10,7 +10,7 @@
 #import "UstadMobileSystemImplSE.h"
 
 
-@interface UstadMobileSystemImplIOS : ComUstadmobilePortSharedseImplUstadMobileSystemImplSE
+@interface UstadMobileSystemImplIOS : ComUstadmobilePortSharedseImplUstadMobileSystemImplSE<NSURLSessionDelegate>
 //- (JavaIoInputStream *)openResourceInputStreamWithNSString:(NSString *)resURI
 //                                                    withId:(id)context;
 @end
