@@ -379,7 +379,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public long queueFileDownload(String url, String destFileURI, Hashtable headers, Object context) {
+    public String queueFileDownload(String url, String destFileURI, Hashtable headers, Object context) {
         Context aContext = (Context)context;
         DownloadManager mgr = (DownloadManager)aContext.getSystemService(Context.DOWNLOAD_SERVICE);
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
@@ -388,17 +388,17 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         String destStr = destFile.getAbsolutePath();
         request.setDestinationUri(Uri.fromFile(destFile));
 
-        return mgr.enqueue(request);
+        return String.valueOf(mgr.enqueue(request));
     }
 
     @Override
-    public int[] getFileDownloadStatus(long downloadID, Object context) {
+    public int[] getFileDownloadStatus(String downloadID, Object context) {
         //TODO: surround with try catch - sometimes this can go wrong with android SQL errors: in which case return null
         Context ctx = (Context)context;
         DownloadManager mgr = (DownloadManager)ctx.getSystemService(
                 Context.DOWNLOAD_SERVICE);
         DownloadManager.Query query = new DownloadManager.Query();
-        query.setFilterById(downloadID);
+        query.setFilterById(Long.valueOf(downloadID));
 
         Cursor cursor = mgr.query(query);
         cursor.moveToFirst();
@@ -420,7 +420,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         BroadcastReceiver completeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                long downloadID =intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L);
+                String downloadID = String.valueOf(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L));
                 receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(downloadID,
                         getFileDownloadStatus(downloadID, context)));
             }

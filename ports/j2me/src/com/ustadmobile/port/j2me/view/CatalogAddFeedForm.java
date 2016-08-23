@@ -51,10 +51,8 @@ public class CatalogAddFeedForm extends Form implements SelectionListener, Actio
             
             setLayout(new BoxLayout(BoxLayout.Y_AXIS));
             urlTextField = new TextField();
-            addComponent(urlTextField);
             
             titleTextField = new TextField();
-            addComponent(titleTextField);
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             addCommand(new Command(impl.getString(MessageIDConstants.ok), CMDID_OK));
             addCommand(new Command(impl.getString(MessageIDConstants.cancel), CMDID_CANCEL));
@@ -62,6 +60,18 @@ public class CatalogAddFeedForm extends Form implements SelectionListener, Actio
         }
         
         
+    }
+    
+    public void setTextFieldsVisible(boolean visible) {
+        if(visible && !contains(urlTextField)) {
+            addComponent(urlTextField);
+            addComponent(titleTextField);
+        }
+        
+        if(!visible && contains(urlTextField)) {
+            removeComponent(urlTextField);
+            removeComponent(titleTextField);
+        }
     }
 
     public void selectionChanged(int oldSelected, int newSelected) {

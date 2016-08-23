@@ -40,6 +40,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
@@ -79,6 +80,7 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
 
     public void setOPDSEntry(UstadJSOPDSEntry entry) {
         this.entry = entry;
+        ((TextView)findViewById(R.id.opdsitem_title_text)).setText(entry.title);
     }
 
     public UstadJSOPDSEntry getEntry() {

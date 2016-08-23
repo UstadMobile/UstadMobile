@@ -1190,12 +1190,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         return true;
     }
 
-    public long queueFileDownload(String url, String fileURI, Hashtable headers, Object context) {
+    public String queueFileDownload(String url, String fileURI, Hashtable headers, Object context) {
         return downloadService.enqueue(
             new DownloadServiceJ2ME.DownloadRequest(url, fileURI, headers, "GET"));
     }
 
-    public int[] getFileDownloadStatus(long downloadID, Object context) {
+    public int[] getFileDownloadStatus(String downloadID, Object context) {
         return downloadService.getStatus(downloadID);
     }
 

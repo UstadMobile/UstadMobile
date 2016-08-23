@@ -538,6 +538,12 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         feedForm.titleTextField.setText(title);
     }
 
+    public void setAddFeedDialogTextFieldsVisible(boolean visible) {
+        feedForm.setTextFieldsVisible(visible);
+    }
+    
+    
+
     
     void dismissFeedDialog(int cmdId) {
         if(cmdId == CatalogAddFeedForm.CMDID_OK) {

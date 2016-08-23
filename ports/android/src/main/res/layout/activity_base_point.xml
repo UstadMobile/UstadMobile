@@ -9,10 +9,20 @@
     <include android:id="@+id/um_toolbar" layout="@layout/toolbar"/>
 
     <android.support.design.widget.TabLayout
+        style="@style/AppTabLayout"
         android:layout_width="match_parent"
         android:id="@+id/basepoint_tabs"
         android:layout_height="wrap_content"
         app:tabMode="scrollable" />
+
+    <!--
+    This could be used to render a shadow on legacy devices
+    <View
+        android:id="@+id/toolbar_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="@drawable/toolbar_shadow" />
+    -->
 
     <android.support.v4.view.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"

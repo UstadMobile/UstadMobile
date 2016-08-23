@@ -6,25 +6,35 @@
 
 
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+
+    <FrameLayout
         android:layout_above="@+id/fragment_catalog_browsebutton"
-        android:id="@+id/fragment_catalog_swiperefreshview">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <ScrollView
+        <android.support.v4.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/fragment_catalog_swiperefreshview">
+
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/fragment_catalog_recyclerview"
+                android:scrollbars="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
+
+        <android.support.design.widget.FloatingActionButton
+            android:visibility="gone"
+            android:id="@+id/fragment_catalog_addbutton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/fragment_catalog_scrollview">
-
-                <LinearLayout
-                    android:id="@+id/fragment_catalog_container"
-                    android:orientation="vertical"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"></LinearLayout>
-
-        </ScrollView>
-    </android.support.v4.widget.SwipeRefreshLayout>
+            android:layout_gravity="end|bottom"
+            android:layout_margin="@dimen/fab_margin"
+            android:src="@drawable/ic_add_white_24dp" />
+    </FrameLayout>
 
     <Button
         android:background="@color/accent"

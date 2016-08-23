@@ -31,6 +31,7 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.os.Build;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -78,11 +79,15 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         mLoginController = LoginController.makeControllerForView(this);
         setBaseController(mLoginController);
 
-        setTitle("Login");
+        setTitle(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.login));
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
+        if(Build.VERSION.SDK_INT >= 21) {
+            findViewById(R.id.login_sliding_tabs).setElevation(10);
+            toolbar.setElevation(10);
+        }
 
         ViewPager viewPager = (ViewPager)findViewById(R.id.login_pager);
         viewPager.setAdapter(new LoginPagerAdapter(getSupportFragmentManager()));

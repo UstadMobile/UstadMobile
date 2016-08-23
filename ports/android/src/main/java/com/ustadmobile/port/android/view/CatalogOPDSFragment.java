@@ -39,10 +39,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -74,8 +77,11 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -112,6 +118,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     private static final int MENUCMDID_ADD = 1200;
 
     private static final int MENUCMDID_DELETE = 1201;
+
+    private RecyclerView mRecyclerView;
+
+    private RecyclerView.Adapter mRecyclerAdapter;
+
+    private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
 
     /**
@@ -153,38 +165,31 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setRefreshing(true);
         rootContainer.findViewById(R.id.fragment_catalog_browsebutton).setOnClickListener(this);
+
+        mRecyclerView = (RecyclerView)rootContainer.findViewById(R.id.fragment_catalog_recyclerview);
+        mRecyclerLayoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
+
+        rootContainer.findViewById(R.id.fragment_catalog_addbutton).setOnClickListener(this);
+
         loadCatalog();
 
         return rootContainer;
     }
 
-    /*
-    public void loadCatalog(final String url, int resourceMode, int flags) {
-        isLoading = true;
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        CatalogController.makeControllerForView(this, url, resourceMode, flags,
-                getArguments().getString(CatalogController.KEY_BROWSE_BUTTON_URL, null), this);
-    }
-    */
-
     /**
      * Load the catalog from the arguments given
      */
     public void loadCatalog(Hashtable args) {
-        //String catalogURL = getArguments().getString(CatalogController.KEY_URL);
-        //int resourceMode = getArguments().getInt(CatalogController.KEY_RESMOD, -1);
-        CatalogController.makeControllerForView(this, UMAndroidUtil.bundleToHashtable(getArguments()),
-                this);
+        CatalogController.makeControllerForView(this, args, this);
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "createView: " +
-                getArguments().getString(CatalogController.KEY_URL) +
-                getArguments().getInt(CatalogController.KEY_RESMOD, -1));
-        //loadCatalog(catalogURL, resourceMode, mFetchFlags);
-        //CatalogController.makeControllerForView(this, url, resourceMode, flags,
-        //        getArguments().getString(CatalogController.KEY_BROWSE_BUTTON_URL, null), this);
-
+                args.get(CatalogController.KEY_URL) +
+                args.get(CatalogController.KEY_RESMOD));
     }
 
+    /**
+     * Load the catalog with the default arguments that we got when the fragment was created
+     */
     public void loadCatalog() {
         loadCatalog(UMAndroidUtil.bundleToHashtable(getArguments()));
     }
@@ -195,64 +200,35 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         final SwipeRefreshLayout refreshLayout = mSwipeRefreshLayout;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         isLoading = false;
-        if(getActivity() != null) {//in case user left activity when loading was going on
+        mCatalogController = (CatalogController)controller;
+        mRecyclerAdapter = new OPDSRecyclerAdapter(mCatalogController);
+
+        //in case user left activity when loading was going on
+        if(getActivity() != null) {
             getActivity().runOnUiThread(new Runnable() {
-                @Override
                 public void run() {
                     refreshLayout.setRefreshing(false);
-                    if (controller == null) {
-                        String errMsg = LocaleUtil.formatMessage(
-                                impl.getString(MessageIDConstants.course_catalog_load_error), "Catalog controller");
-                        impl.getAppView(getActivity()).showAlertDialog(impl.getString(MessageIDConstants.error),
-                                errMsg);
-                    } else {
-                        setupFromCatalogController((CatalogController) controller);
-                    }
+
                 }
             });
         }
-    }
 
-    public void setupFromCatalogController(CatalogController controller) {
-        mCatalogController = controller;
-        setBaseController(controller);
-
-        CatalogModel model = controller.getModel();
-        UstadJSOPDSFeed feed = model.opdsFeed;
-        getActivity().setTitle(feed.title);
-        controller.setUIStrings();
-
-        LayoutInflater inflater = getLayoutInflater(null);
-        LinearLayout linearLayout = (LinearLayout)this.rootContainer.findViewById(
-                R.id.fragment_catalog_container);
-        linearLayout.removeAllViews();
-
-        int entryStatus = -1;
-        for(int i = 0; i < feed.entries.length; i++) {
-            OPDSEntryCard cardView  = (OPDSEntryCard) inflater.inflate(
-                    R.layout.fragment_opds_item, null);
-            cardView.setOPDSEntry(feed.entries[i]);
-            cardView.setOnClickListener(this);
-            cardView.setOnLongClickListener(this);
-            ((TextView)cardView.findViewById(R.id.opdsitem_title_text)).setText(
-                    feed.entries[i].title);
-            linearLayout.addView(cardView);
-
-            //check the acquisition status
-            entryStatus = controller.getEntryAcquisitionStatus(feed.entries[i].id);
-            if(entryStatus != -1) {
-                cardView.setOPDSEntryOverlay(entryStatus);
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                if (controller == null) {
+                    String errMsg = LocaleUtil.formatMessage(
+                            impl.getString(MessageIDConstants.course_catalog_load_error), "Catalog controller");
+                    impl.getAppView(getActivity()).showAlertDialog(impl.getString(MessageIDConstants.error),
+                            errMsg);
+                } else {
+                    getActivity().setTitle(mCatalogController.getModel().opdsFeed.title);
+                    mCatalogController.setUIStrings();
+                    mRecyclerView.setAdapter(mRecyclerAdapter);
+                    getActivity().supportInvalidateOptionsMenu();
+                    mCatalogController.loadThumbnails();
+                }
             }
-
-            if(entryStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
-                cardView.setProgressBarVisible(true);
-            }
-
-            idToCardMap.put(feed.entries[i].id, cardView);
-        }
-        mSwipeRefreshLayout.setRefreshing(false);
-        getActivity().supportInvalidateOptionsMenu();
-        mCatalogController.loadThumbnails();
+        });
     }
 
     @Override
@@ -301,45 +277,18 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(mAddOptionAvailable) {
-            MenuItem item = menu.add(Menu.NONE, MENUCMDID_ADD,0, "");
-            item.setIcon(R.drawable.ic_add_circle_outline_white_24dp);
-            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        }
-
         if(mDeleteOptionAvailable) {
             MenuItem item = menu.add(Menu.NONE, MENUCMDID_DELETE, 1, "");
-            item.setIcon(R.drawable.ic_remove_circle_outline_white_24dp);
+            item.setIcon(R.drawable.ic_delete_white_24dp);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
 
         super.onCreateOptionsMenu(menu, inflater);
 
-        /*
-        if(mCatalogController != null && mCatalogController.getModel().opdsFeed != null) {
-            boolean isAcquisitionFeed = mCatalogController.getModel().opdsFeed.isAcquisitionFeed();
-            if(isAcquisitionFeed) {
-                inflater.inflate(R.menu.menu_opds_acquireopts, menu);
-            }else {
-                inflater.inflate(R.menu.menu_opds_navopts, menu);
-            }
-        }*/
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        /*
-        switch(item.getItemId()) {
-
-            case R.id.action_basepoint_removefeed:
-                CatalogOPDSFragment opdsFragment = (CatalogOPDSFragment)mPagerAdapter.getItem(
-                        BasePointController.INDEX_BROWSEFEEDS);
-                mBasePointController.handleRemoveItemsFromUserFeed(
-                        opdsFragment.getSelectedEntries());
-                opdsFragment.setSelectedEntries(new UstadJSOPDSEntry[0]);
-                return true;
-        }
-        */
         switch(item.getItemId()) {
             case MENUCMDID_ADD:
                 mCatalogController.handleClickAdd();
@@ -415,8 +364,16 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             }else {
                 mCatalogController.handleClickEntry(card.getEntry());
             }
-        }else if(view.getId() == R.id.fragment_catalog_browsebutton) {
-            mCatalogController.handleClickBrowseButton();
+            return;
+        }
+
+        switch(view.getId()) {
+            case R.id.fragment_catalog_browsebutton:
+                mCatalogController.handleClickBrowseButton();
+                break;
+            case R.id.fragment_catalog_addbutton:
+                mCatalogController.handleClickAdd();
+                break;
         }
     }
 
@@ -427,7 +384,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             toggleEntrySelected(card);
             return true;
         }
-
         return false;
     }
 
@@ -454,7 +410,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public void setEntryStatus(final String entryId, final int status) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                idToCardMap.get(entryId).setOPDSEntryOverlay(status);
+                if(idToCardMap.containsKey(entryId)) {
+                    idToCardMap.get(entryId).setOPDSEntryOverlay(status);
+                }
             }
         });
     }
@@ -469,7 +427,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 //TODO: idToCardMap should not be null when this is called... this should only be called after cards are made...
-                if(idToCardMap != null && idToCardMap.get(entryId) != null) {
+                if(idToCardMap != null && idToCardMap.containsKey(entryId)) {
                     idToCardMap.get(entryId).setThumbnail(bitmap);
                 }
             }
@@ -485,7 +443,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public void setDownloadEntryProgressVisible(final String entryId, final boolean visible) {
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                idToCardMap.get(entryId).setProgressBarVisible(visible);
+                if(idToCardMap.containsKey(entryId)) {
+                    idToCardMap.get(entryId).setProgressBarVisible(visible);
+                }
             }
         });
     }
@@ -495,7 +455,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 int progressPercent = Math.round(((float)loaded/(float)total) * OPDSEntryCard.PROGRESS_ENTRY_MAX);
-                idToCardMap.get(entryId).setDownloadProgressBarProgress(progressPercent);
+                if(idToCardMap.containsKey(entryId)) {
+                    idToCardMap.get(entryId).setDownloadProgressBarProgress(progressPercent);
+                }
             }
         });
     }
@@ -508,6 +470,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
         this.mSelectedEntries = entries;
+
         UstadJSOPDSFeed thisFeed = mCatalogController.getModel().opdsFeed;
         for(int i = 0; i < thisFeed.entries.length; i++) {
             boolean isSelected = false;
@@ -518,8 +481,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 }
             }
 
-            idToCardMap.get(thisFeed.entries[i].id).setSelected(isSelected);
+            if(idToCardMap.containsKey(thisFeed.entries[i].id)) {
+                idToCardMap.get(thisFeed.entries[i].id).setSelected(isSelected);
+            }
         }
+
     }
 
     @Override
@@ -537,9 +503,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             int flagArg = args.containsKey(CatalogController.KEY_FLAGS) ? (Integer)args.get(CatalogController.KEY_FLAGS) : 0;
             flagArg = flagArg | CatalogController.CACHE_DISABLED;
             args.put(CatalogController.KEY_FLAGS, flagArg);
-            //loadCatalog(getArguments().getString(CatalogController.KEY_URL),
-            //        getArguments().getInt(CatalogController.KEY_RESMOD, -1),
-            //        CatalogController.CACHE_DISABLED);
             loadCatalog(args);
         }
     }
@@ -562,9 +525,16 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void setAddOptionAvailable(boolean addOptionAvailable) {
+    public void setAddOptionAvailable(final boolean addOptionAvailable) {
         this.mAddOptionAvailable = addOptionAvailable;
-        getActivity().invalidateOptionsMenu();
+        getActivity().runOnUiThread( new Runnable() {
+            public void run() {
+                rootContainer.findViewById(R.id.fragment_catalog_addbutton).setVisibility(
+                        addOptionAvailable ? View.VISIBLE : View.GONE);
+            }
+        });
+
+        //getActivity().invalidateOptionsMenu();
     }
 
     @Override
@@ -593,6 +563,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).setText(title);
     }
 
+    @Override
+    public void setAddFeedDialogTextFieldsVisible(boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        addFeedDialog.findViewById(R.id.basepoint_addfeed_title).setVisibility(visibility);
+        addFeedDialog.findViewById(R.id.basepoint_addfeed_url).setVisibility(visibility);
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
@@ -623,8 +599,72 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         addFeedDialog = null;
     }
 
-    public static class AddFeedDialogFragment extends DialogFragment {
 
+    public class OPDSRecyclerAdapter extends RecyclerView.Adapter<OPDSRecyclerAdapter.ViewHolder> {
+
+        private CatalogController controller;
+
+        private UstadJSOPDSFeed feed;
+
+        public OPDSRecyclerAdapter(CatalogController controller) {
+            this.controller = controller;
+            this.feed = controller.getModel().opdsFeed;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public OPDSEntryCard mEntryCard;
+
+            public ViewHolder(OPDSEntryCard entryCard) {
+                super(entryCard);
+                mEntryCard = entryCard;
+            }
+        }
+
+        @Override
+        public OPDSRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            OPDSEntryCard cardView  = (OPDSEntryCard) LayoutInflater.from(parent.getContext()).inflate(
+                    R.layout.fragment_opds_item, null);
+            return new ViewHolder(cardView);
+        }
+
+        @Override
+        public void onBindViewHolder(OPDSRecyclerAdapter.ViewHolder holder, int position) {
+            holder.mEntryCard.setOPDSEntry(feed.entries[position]);
+            holder.mEntryCard.setOnClickListener(CatalogOPDSFragment.this);
+            holder.mEntryCard.setOnLongClickListener(CatalogOPDSFragment.this);
+
+            //check the acquisition status
+            int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);
+            if(entryStatus != -1) {
+                holder.mEntryCard.setOPDSEntryOverlay(entryStatus);
+            }
+
+            if(entryStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
+                holder.mEntryCard.setProgressBarVisible(true);
+            }
+
+            //Make sure if this entry is being recycled the idToCardMap won't get confused
+            if(idToCardMap.containsValue(holder.mEntryCard)) {
+                Iterator<Map.Entry<String, OPDSEntryCard>> iterator = idToCardMap.entrySet().iterator();
+                Map.Entry<String, OPDSEntryCard> entry;
+                while(iterator.hasNext()) {
+                    entry = iterator.next();
+                    if(entry.getValue().equals(holder.mEntryCard)) {
+                        iterator.remove();
+                    }
+                }
+            }
+
+            idToCardMap.put(feed.entries[position].id, holder.mEntryCard);
+        }
+
+        public int getItemCount() {
+            return feed != null ? feed.entries.length : 0;
+        }
+    }
+
+
+    public static class AddFeedDialogFragment extends DialogFragment {
 
         private Dialog dialog;
 
@@ -657,8 +697,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             }else {
                 throw new IllegalArgumentException("");
             }
-
-
 
             return dialog;
         }

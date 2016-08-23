@@ -46,7 +46,7 @@ public class CatalogEntryInfo {
 
     public String mimeType;
     
-    public long downloadID = -1;
+    public String downloadID = "";
     
     public static final int ACQUISITION_STATUS_ACQUIRED = 0;
     
@@ -71,7 +71,7 @@ public class CatalogEntryInfo {
         sb.append(URLTextUtil.urlEncodeUTF8(fileURI)).append(':');
         sb.append(mimeType);
         if(acquisitionStatus == ACQUISITION_STATUS_INPROGRESS) {
-            sb.append(':').append(downloadID).append(':').append(
+            sb.append(':').append(URLTextUtil.urlEncodeUTF8(downloadID)).append(':').append(
                     downloadTotalSize);
         }
         return sb.toString();
@@ -88,8 +88,8 @@ public class CatalogEntryInfo {
         entryInfo.srcURLs = urls;
         entryInfo.fileURI = URLTextUtil.urlDecodeUTF8(strComps[2]);
         entryInfo.mimeType = strComps[3];
-        entryInfo.downloadID = strComps.length >= 5 ? Long.parseLong(strComps[4])
-                : -1;
+        entryInfo.downloadID = strComps.length >= 5 ? URLTextUtil.urlDecodeUTF8(strComps[4])
+                : "";
         entryInfo.downloadTotalSize = strComps.length >= 6 ? Integer.parseInt(strComps[5])
                 : -1;
         return entryInfo;
