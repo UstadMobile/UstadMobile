@@ -637,9 +637,9 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String[] listDirectory(String dirURI) throws IOException;
     
-    public abstract long queueFileDownload(String url, String fileURI, Hashtable headers, Object context);
+    public abstract String queueFileDownload(String url, String fileURI, Hashtable headers, Object context);
     
-    public abstract int[] getFileDownloadStatus(long downloadID, Object context);
+    public abstract int[] getFileDownloadStatus(String downloadID, Object context);
     
     public abstract void registerDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context);
     

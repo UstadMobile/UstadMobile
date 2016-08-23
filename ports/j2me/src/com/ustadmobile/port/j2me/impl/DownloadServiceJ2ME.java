@@ -99,7 +99,7 @@ public class DownloadServiceJ2ME implements Runnable {
      * @param request Download request to run
      * @return An ID uniquely identifying that download
      */
-    public long enqueue(DownloadRequest request) {
+    public String enqueue(DownloadRequest request) {
         long nextId = Long.parseLong((String)statusTracker.get(KEY_NEXTID));
         statusTracker.put(KEY_NEXTID, String.valueOf(nextId + 1));
         
@@ -120,7 +120,7 @@ public class DownloadServiceJ2ME implements Runnable {
         
         //start the serviceThread if it's not running.  This has no effect if it is already going
         start();
-        return nextId;
+        return String.valueOf(nextId);
     }
     
     /**
@@ -134,7 +134,7 @@ public class DownloadServiceJ2ME implements Runnable {
      * @see UstadMobileSystemImpl#IDX_BYTES_TOTAL
      * @see UstadMobileSystemImpl#IDX_STATUS
      */
-    public int[] getStatus(long downloadID) {
+    public int[] getStatus(String downloadID) {
         String fieldName = downloadID + POSTFIX_STATUS;
         if(statusTracker.containsKey(fieldName)) {
             int dlStatus = ((Integer)statusTracker.get(fieldName)).intValue();
@@ -295,6 +295,7 @@ public class DownloadServiceJ2ME implements Runnable {
             JSONArray queue = getQueue();
             if(queue.length() > 0) {
                 long downloadID = queue.optLong(0, -1);
+                String downloadIDStr = String.valueOf(downloadID);
                 String statusTrackerID = downloadID + POSTFIX_STATUS;
                 statusTracker.put(statusTrackerID, 
                         new Integer(UstadMobileSystemImpl.DLSTATUS_RUNNING));
@@ -307,7 +308,7 @@ public class DownloadServiceJ2ME implements Runnable {
                     //todo: remove info about this download from the hashtable.
                     //tell receivers about that news..
                     UMDownloadCompleteEvent evt = 
-                        new UMDownloadCompleteEvent(downloadID, getStatus(downloadID));
+                        new UMDownloadCompleteEvent(downloadIDStr, getStatus(downloadIDStr));
                     for(int i = 0; i < downloadStatusReceivers.size(); i++) {
                         ((UMDownloadCompleteReceiver)downloadStatusReceivers.elementAt(i)).downloadStatusUpdated(evt);
                     }

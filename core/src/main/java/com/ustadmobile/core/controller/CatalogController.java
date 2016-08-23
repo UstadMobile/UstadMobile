@@ -429,12 +429,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     
     /**
      * Construct a CatalogController for the OPDS feed at the given URL
-     * 
-     * @param url the URL of the OPDS feed
-     * @param resourceMode: SHARED_RESOURCE to keep in shared cache: USER_RESOURCE to keep in user cache
-     * @param httpUser: the HTTP username to use for authentication
-     * @param httpPassword:or the HTTP password to use for authentication
-     * @return 
+     *
+     * @param args Hashtable containing catalog controller standard args as per KEY_ flags
+     * @param context System context object
+     *
+     * @return
      */
     public static CatalogController makeControllerByArgsTable(Hashtable args, Object context) throws IOException, XmlPullParserException{
         UstadJSOPDSFeed opdsFeed = CatalogController.getCatalogByArgsTable(args, context);
@@ -1869,14 +1868,13 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 435, itemURL + "->" + 
                 info.fileURI);
-            long downloadID = impl.queueFileDownload(itemURL, info.fileURI, 
+            String downloadID = impl.queueFileDownload(itemURL, info.fileURI,
                 authHeaders, request.getContext());
             info.downloadID = downloadID;
             setEntryInfo(entries[i].id, info, resourceMode, request.getContext());
             
             if(request.getController() != null) {
-                request.getController().registerDownloadingEntry(entries[i].id, 
-                        new Long(downloadID));
+                request.getController().registerDownloadingEntry(entries[i].id, downloadID);
             }
         }
     }
@@ -1993,7 +1991,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
     }
     
-    public void registerDownloadingEntry(String entryID, Long downloadID) {
+    public void registerDownloadingEntry(String entryID, String downloadID) {
         downloadingEntries.put(entryID, downloadID);
         if(view != null) {
             view.setDownloadEntryProgressVisible(entryID, true);
@@ -2026,8 +2024,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                             case UstadMobileSystemImpl.DLSTATUS_RUNNING:
                             case UstadMobileSystemImpl.DLSTATUS_PENDING:
                             case UstadMobileSystemImpl.DLSTATUS_PAUSED:
-                                registerDownloadingEntry(feed.entries[i].id, 
-                                    new Long(info.downloadID));
+                                registerDownloadingEntry(feed.entries[i].id, info.downloadID);
                         }
                     }else {
                         //perhaps the system is not tracking the download anymore and it's actually complete
@@ -2084,11 +2081,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void downloadStatusUpdated(UMDownloadCompleteEvent evt) {
         Enumeration downloadEntryKeys = downloadingEntries.keys();
         String entryID;
-        Long downloadID;
+        String downloadID;
         while(downloadEntryKeys.hasMoreElements()) {
             entryID = (String)downloadEntryKeys.nextElement();
-            downloadID = (Long)downloadingEntries.get(entryID);
-            if(downloadID.longValue() == evt.getDownloadID()) {
+            downloadID = (String)downloadingEntries.get(entryID);
+            if(downloadID.equals(evt.getDownloadID())) {
                 //this means our download has completed - update status and such
                 unregisterDownloadingEntry(entryID);
                 registerItemAcquisitionCompleted(entryID);
@@ -2120,12 +2117,12 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             //here we actually go and set the progress bars...
             Enumeration entries = CatalogController.this.downloadingEntries.keys();
             String entryID;
-            Long downloadID;
+            String downloadID;
             while(entries.hasMoreElements()) {
                 entryID = (String)entries.nextElement();
-                downloadID = (Long)CatalogController.this.downloadingEntries.get(entryID);
+                downloadID = (String)CatalogController.this.downloadingEntries.get(entryID);
                 int[] downloadStatus = UstadMobileSystemImpl.getInstance().getFileDownloadStatus(
-                    downloadID.longValue(), CatalogController.this.getContext());
+                    downloadID, CatalogController.this.getContext());
                 if(CatalogController.this.view != null) {
                     CatalogController.this.view.updateDownloadEntryProgress(entryID, 
                         downloadStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], 
