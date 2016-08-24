@@ -17,6 +17,7 @@
 		AD12B42C1D65C3E0005D6D5D /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AD12B42B1D65C3E0005D6D5D /* Security.framework */; };
 		AD12B4301D65C4A8005D6D5D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AD12B42F1D65C4A8005D6D5D /* libz.tbd */; };
 		AD1BE6621D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AD1BE6611D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD1BE6651D6D968700373721 /* UstadMobileDownloadInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = AD1BE6641D6D968700373721 /* UstadMobileDownloadInfo.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A87E1D52537E00C63A29 /* Activity.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79D1D52537D00C63A29 /* Activity.m */; };
 		AD46A87F1D52537E00C63A29 /* AlignmentPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A79F1D52537D00C63A29 /* AlignmentPattern.m */; };
@@ -182,6 +183,8 @@
 		AD12B42F1D65C4A8005D6D5D /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		AD1BE6601D69DED200373721 /* CatalogViewControllerEntryTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CatalogViewControllerEntryTableViewCell.h; sourceTree = "<group>"; };
 		AD1BE6611D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CatalogViewControllerEntryTableViewCell.m; sourceTree = "<group>"; };
+		AD1BE6631D6D968700373721 /* UstadMobileDownloadInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileDownloadInfo.h; sourceTree = "<group>"; };
+		AD1BE6641D6D968700373721 /* UstadMobileDownloadInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadMobileDownloadInfo.m; sourceTree = "<group>"; };
 		AD46A6421D524FC600C63A29 /* UstadMobileSystemImplIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileSystemImplIOS.h; sourceTree = "<group>"; };
 		AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadMobileSystemImplIOS.m; sourceTree = "<group>"; };
 		AD46A79C1D52537D00C63A29 /* Activity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Activity.h; sourceTree = "<group>"; };
@@ -756,6 +759,8 @@
 				AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */,
 				AD1BE6601D69DED200373721 /* CatalogViewControllerEntryTableViewCell.h */,
 				AD1BE6611D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m */,
+				AD1BE6631D6D968700373721 /* UstadMobileDownloadInfo.h */,
+				AD1BE6641D6D968700373721 /* UstadMobileDownloadInfo.m */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -853,6 +858,11 @@
 				TargetAttributes = {
 					AD77D04D1D523A8A00A2F95A = {
 						CreatedOnToolsVersion = 7.3;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 					AD77D0661D523A8A00A2F95A = {
 						CreatedOnToolsVersion = 7.3;
@@ -940,6 +950,7 @@
 				AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */,
 				AD46A8BA1D52537E00C63A29 /* Point.m in Sources */,
 				AD46A8951D52537E00C63A29 /* ClassListController.m in Sources */,
+				AD1BE6651D6D968700373721 /* UstadMobileDownloadInfo.m in Sources */,
 				AD46A8C01D52537E00C63A29 /* QRCodeSymbol.m in Sources */,
 				AD46A8B61D52537E00C63A29 /* OMRImageSource.m in Sources */,
 				AD46A8AD1D52537E00C63A29 /* InvalidVersionInfoException.m in Sources */,

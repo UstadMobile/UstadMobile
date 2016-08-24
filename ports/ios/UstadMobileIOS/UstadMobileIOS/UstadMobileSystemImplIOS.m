@@ -16,6 +16,10 @@
 #import "CatalogView.h"
 #import "BasePointView.h"
 #import <MobileCoreServices/MobileCoreServices.h>
+#import "UstadMobileDownloadInfo.h"
+#import "UMDownloadCompleteEvent.h"
+#import "UMDownloadCompleteReceiver.h"
+
 #include "J2ObjC_source.h"
 
 
@@ -40,6 +44,11 @@ static NSString *_defaultsKeyActiveUserAuth;
 
 //URL Session configuration for background downloading
 @property NSURLSession *urlSession;
+
+@property NSMapTable *downloadInfoTable;
+
+@property NSMutableArray *downloadCompleteListeners;
+
 @end
 
 
@@ -62,8 +71,10 @@ static NSString *_defaultsKeyActiveUserAuth;
     self.appViewTable = [NSMapTable weakToStrongObjectsMapTable];
     
     NSURLSessionConfiguration *sessionConfig = [NSURLSessionConfiguration backgroundSessionConfigurationWithIdentifier:@"com.ustadmobile.ios"];
-    
+    sessionConfig.HTTPMaximumConnectionsPerHost = 5;
     self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:nil];
+    self.downloadInfoTable = [NSMapTable strongToStrongObjectsMapTable];
+    self.downloadCompleteListeners = [[NSMutableArray alloc]init];
     return self;
 }
 
@@ -253,30 +264,87 @@ static NSString *_defaultsKeyActiveUserAuth;
                       withJavaUtilHashtable:(JavaUtilHashtable *)headers
                                      withId:(id)context {
     url = [url stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
-    NSURLSessionTask *sessionTask = [self.urlSession downloadTaskWithURL:[NSURL URLWithString:url]];
-    [sessionTask resume];
-    return [NSString stringWithFormat:@"%@", @(sessionTask.taskIdentifier)];
+    UstadMobileDownloadInfo *downloadInfo = [[UstadMobileDownloadInfo alloc] initWithDestURI:fileURI];
+    downloadInfo.downloadTask = [self.urlSession downloadTaskWithURL:[NSURL URLWithString:url]];
+    [self.downloadInfoTable setObject:downloadInfo forKey:[NSNumber numberWithUnsignedLong:downloadInfo.downloadTask.taskIdentifier]];
+    [downloadInfo.downloadTask resume];
+    return [NSString stringWithFormat:@"%@", @(downloadInfo.downloadTask.taskIdentifier)];
 }
 
 - (IOSIntArray *)getFileDownloadStatusWithNSString:(NSString *)downloadID
                                             withId:(id)context {
-    // can't call an abstract method
-    [self doesNotRecognizeSelector:_cmd];
-    return 0;
+    NSNumberFormatter *formatter = [[NSNumberFormatter alloc]init];
+    formatter.numberStyle = NSNumberFormatterDecimalStyle;
+    NSNumber *downloadIdNum = [formatter numberFromString:downloadID];
+    
+    UstadMobileDownloadInfo *info = [self.downloadInfoTable objectForKey:downloadIdNum];
+    IOSIntArray *result;
+    if(info != nil) {
+        result = [IOSIntArray arrayWithLength:3];
+        *IOSIntArray_GetRef(result, ComUstadmobileCoreImplUstadMobileSystemImpl_IDX_DOWNLOADED_SO_FAR) = (int)info.totalBytesWritten;
+        if(info.totalBytesExpected != NSURLSessionTransferSizeUnknown) {
+            *IOSIntArray_GetRef(result, ComUstadmobileCoreImplUstadMobileSystemImpl_IDX_BYTES_TOTAL) = (int)info.totalBytesExpected;
+        }else {
+            *IOSIntArray_GetRef(result, ComUstadmobileCoreImplUstadMobileSystemImpl_IDX_BYTES_TOTAL) = -1;
+        }
+        
+        *IOSIntArray_GetRef(result, ComUstadmobileCoreImplUstadMobileSystemImpl_IDX_STATUS) = ComUstadmobileCoreImplUstadMobileSystemImpl_DLSTATUS_RUNNING;
+    }else {
+        result = [IOSIntArray arrayWithInts:(jint[]){0, -1, 0} count:3];
+    }
+    
+    return result;
 }
 
 - (void)registerDownloadCompleteReceiverWithComUstadmobileCoreImplUMDownloadCompleteReceiver:(id<ComUstadmobileCoreImplUMDownloadCompleteReceiver>)receiver
                                                                                       withId:(id)context {
-    // can't call an abstract method
-    [self doesNotRecognizeSelector:_cmd];
+    [self.downloadCompleteListeners addObject:receiver];
 }
 
 - (void)unregisterDownloadCompleteReceiverWithComUstadmobileCoreImplUMDownloadCompleteReceiver:(id<ComUstadmobileCoreImplUMDownloadCompleteReceiver>)receiver
                                                                                         withId:(id)context {
-    // can't call an abstract method
-    [self doesNotRecognizeSelector:_cmd];
+    [self.downloadCompleteListeners removeObject:receiver];
 }
 
+- (void)URLSessionDidFinishEventsForBackgroundURLSession:(NSURLSession *)session {
+    
+}
+
+-(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didFinishDownloadingToURL:(NSURL *)location{
+    NSNumber *taskId = [NSNumber numberWithUnsignedLong:downloadTask.taskIdentifier];
+    UstadMobileDownloadInfo *info = [self.downloadInfoTable objectForKey:taskId];
+    if(info != nil) {
+        //move me to the destination file
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        NSURL *destURL = [NSURL fileURLWithPath:info.destinationURI];
+        BOOL success = [fileManager copyItemAtURL:location toURL:destURL error:nil];
+        IOSIntArray *statusArr = [IOSIntArray arrayWithInts:(jint[]){(jint)downloadTask.countOfBytesReceived,
+            (jint)downloadTask.countOfBytesExpectedToReceive, ComUstadmobileCoreImplUstadMobileSystemImpl_DLSTATUS_SUCCESSFUL
+        } count:3];
+        ComUstadmobileCoreImplUMDownloadCompleteEvent *evt = [[ComUstadmobileCoreImplUMDownloadCompleteEvent alloc]initWithNSString:[NSString stringWithFormat:@"%@", taskId] withIntArray:statusArr];
+        for(id listener in self.downloadCompleteListeners) {
+            [listener downloadStatusUpdatedWithComUstadmobileCoreImplUMDownloadCompleteEvent:evt];
+        }
+    }
+}
+
+
+-(void)URLSession:(NSURLSession *)session downloadTask:(nonnull NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
+    NSNumber *taskId = [NSNumber numberWithUnsignedLong:downloadTask.taskIdentifier];
+    UstadMobileDownloadInfo *downloadInfo = [self.downloadInfoTable objectForKey:taskId];
+    if(downloadInfo != nil) {
+        downloadInfo.totalBytesExpected = totalBytesExpectedToWrite;
+        downloadInfo.totalBytesWritten = totalBytesWritten;
+    }
+    
+    
+    if(totalBytesExpectedToWrite == NSURLSessionTransferSizeUnknown) {
+        NSLog(@"Transfer size not yet known");
+    }else {
+        NSLog([NSString stringWithFormat:@"Downloaded %d / %d", (int)totalBytesWritten, (int)totalBytesExpectedToWrite]);
+    }
+    
+}
 
 
 @end

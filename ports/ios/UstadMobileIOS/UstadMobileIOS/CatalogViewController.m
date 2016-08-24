@@ -111,13 +111,28 @@
 
 - (void)setDownloadEntryProgressVisibleWithNSString:(NSString *)entryId
                                         withBoolean:(jboolean)visible {
-    
+    CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
+    if(cell != nil) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [cell.progressView setHidden:!visible];
+        });
+    }
 }
 
 - (void)updateDownloadEntryProgressWithNSString:(NSString *)entryId
                                         withInt:(jint)loaded
                                         withInt:(jint)total {
-    
+    CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
+    NSLog([NSString stringWithFormat:@"updateDownloadEntryProgress: %d / %d", loaded, total]);
+    if(cell != nil) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(total > 0) {
+                [cell.progressView setProgress:(float)loaded/(float)total];
+            }else {
+                [cell.progressView setProgress:0];
+            }
+        });
+    }
 }
 
 - (IOSObjectArray *)getSelectedEntries {
