@@ -131,7 +131,12 @@ static NSString *_defaultsKeyActiveUserAuth;
         mutableDict = [[NSMutableDictionary alloc]init];
     }
     
-    [mutableDict setObject:prefVal forKey:prefKey];
+    if(prefVal != nil) {
+        [mutableDict setObject:prefVal forKey:prefKey];
+    }else {
+        [mutableDict removeObjectForKey:prefKey];
+    }
+    
     [self.userDefaults setObject:[mutableDict copy] forKey:dictionaryKey];
     if(autoSync) {
         [self.userDefaults synchronize];
