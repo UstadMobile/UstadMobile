@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.impl.zip;
+package com.ustadmobile.port.sharedse.impl.zip;
 
 import com.ustadmobile.core.impl.ZipEntryHandle;
 import java.util.zip.ZipEntry;
@@ -6,11 +6,11 @@ import java.util.zip.ZipEntry;
 /**
  * Created by mike on 8/29/15.
  */
-public class ZipEntryHandleAndroid implements ZipEntryHandle {
+public class ZipEntryHandleSharedSE implements ZipEntryHandle {
 
     private ZipEntry entry;
 
-    public ZipEntryHandleAndroid(ZipEntry entry) {
+    public ZipEntryHandleSharedSE(ZipEntry entry) {
         this.entry = entry;
     }
 
