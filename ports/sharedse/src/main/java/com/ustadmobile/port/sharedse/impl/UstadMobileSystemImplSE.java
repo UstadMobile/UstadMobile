@@ -16,6 +16,8 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.CatalogView;
 
+import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.port.sharedse.impl.zip.*;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -346,4 +348,13 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
         return serializer;
     }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public ZipFileHandle openZip(String name) throws IOException{
+        return new ZipFileHandleSharedSE(name);
+    }
+
 }

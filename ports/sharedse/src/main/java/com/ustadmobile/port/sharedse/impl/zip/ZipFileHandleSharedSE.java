@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.impl.zip;
+package com.ustadmobile.port.sharedse.impl.zip;
 
 import com.ustadmobile.core.impl.ZipEntryHandle;
 import com.ustadmobile.core.impl.ZipFileHandle;
@@ -11,11 +11,11 @@ import java.util.zip.ZipFile;
 /**
  * Created by mike on 8/29/15.
  */
-public class ZipFileHandleAndroid implements ZipFileHandle {
+public class ZipFileHandleSharedSE implements ZipFileHandle {
 
     private ZipFile zipFile;
 
-    public ZipFileHandleAndroid(String name) throws IOException {
+    public ZipFileHandleSharedSE(String name) throws IOException {
         zipFile = new ZipFile(name);
     }
 
@@ -27,7 +27,7 @@ public class ZipFileHandleAndroid implements ZipFileHandle {
 
     @Override
     public ZipEntryHandle getEntry(String name) throws IOException {
-        return new ZipEntryHandleAndroid(zipFile.getEntry(name));
+        return new ZipEntryHandleSharedSE(zipFile.getEntry(name));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ZipFileHandleAndroid implements ZipFileHandle {
         private Enumeration enumeration;
 
         private ZipFileHandleEntriesEnumeration() {
-            enumeration = ZipFileHandleAndroid.this.zipFile.entries();
+            enumeration = ZipFileHandleSharedSE.this.zipFile.entries();
         }
 
         @Override

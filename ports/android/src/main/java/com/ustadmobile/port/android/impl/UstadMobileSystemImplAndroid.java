@@ -48,13 +48,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.toughra.ustadmobile.BuildConfig;
-import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.tincan.TinCanStatement;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AppView;
@@ -67,7 +64,6 @@ import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.impl.zip.ZipFileHandleAndroid;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
@@ -590,14 +586,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return logger;
     }
 
-
-    /**
-     * @inheritDoc
-     */
-    @Override
-    public ZipFileHandle openZip(String name) throws IOException{
-        return new ZipFileHandleAndroid(name);
-    }
 
     /**
      * Running on Android we will take the "full fat" version of any files... eg. files without
