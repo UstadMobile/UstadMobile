@@ -19,6 +19,7 @@
 #import "UstadMobileDownloadInfo.h"
 #import "UMDownloadCompleteEvent.h"
 #import "UMDownloadCompleteReceiver.h"
+#import "EmbeddedHTTPD.h"
 
 #include "J2ObjC_source.h"
 
@@ -49,6 +50,8 @@ static NSString *_defaultsKeyActiveUserAuth;
 
 @property NSMutableArray *downloadCompleteListeners;
 
+@property ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD *httpd;
+
 @end
 
 
@@ -75,8 +78,13 @@ static NSString *_defaultsKeyActiveUserAuth;
     self.urlSession = [NSURLSession sessionWithConfiguration:sessionConfig delegate:self delegateQueue:nil];
     self.downloadInfoTable = [NSMapTable strongToStrongObjectsMapTable];
     self.downloadCompleteListeners = [[NSMutableArray alloc]init];
+    self.httpd = [[ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD alloc]initWithInt:8071];
+    [self.httpd start];
     return self;
 }
+
+
+
 
 - (ComUstadmobileCoreImplUMLog *)getLogger {
     return self.umLogIOS;

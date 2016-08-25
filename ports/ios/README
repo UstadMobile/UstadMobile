@@ -9,6 +9,14 @@ Setup:
 
 3. Open the XCode project UstadMobileIOS
 
+4. Add a breakpoint in xcode to avoid stopping in SIGUSR2 sent by the internal 
+ HTTP server.
+ 
+ Go to breakpoints (click symbol on left panel), Click Debug, Breakpoints,
+ Create Symbolic breakpoint.  In Symbol Enter UIApplicationMain, leave module
+ and condition blank.  Under action select "Debugger Command", enter
+ "process handle SIGUSR2 -n true -p true -s false" and check Automatically 
+ continue after evaluating actions.
 
 Project Info:
 
