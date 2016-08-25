@@ -11,7 +11,7 @@ repositories {
 dependencies {
     compile "org.json:json:20160212";
     compile "net.sf.kxml:kxml2:2.3.0";
-    compile 'com.nanohttpd:nanohttpd:2.1.1'
+    compile 'org.nanohttpd:nanohttpd:2.3.1'
     compile files('../../core/lib/qrcode.jar');
     compile project(":core")
     //might be useful to share unit tests

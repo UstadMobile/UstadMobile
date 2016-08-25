@@ -138,13 +138,13 @@ public class EmbeddedHTTPD extends NanoHTTPD {
 
             //check that a sub path is contained; if not return 404
             if(nextSlash == -1) {
-                return new  Response(Response.Status.NOT_FOUND, "text/html",
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/html",
                         "Invalid: only zip is mentioned, not path within:" + uri);
             }
             String zipMountPath = uri.substring(PREFIX_MOUNT.length(), nextSlash);
 
             if(!mountedEPUBs.containsKey(zipMountPath)) {
-                return new Response(Response.Status.NOT_FOUND, "text/html",
+                return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/html",
                         "Invalid: that zip is not mounted: " + uri);
             }
 
@@ -164,7 +164,8 @@ public class EmbeddedHTTPD extends NanoHTTPD {
 
                     ifNoneMatchHeader = session.getHeaders().get("if-none-match");
                     if(ifNoneMatchHeader != null && ifNoneMatchHeader.equals(etag)) {
-                        Response r = new Response(Response.Status.NOT_MODIFIED, getMimeType(uri), "");
+                        Response r = newFixedLengthResponse(Response.Status.NOT_MODIFIED, getMimeType(uri),
+                                null);
                         r.addHeader("ETag", etag);
                         r.addHeader("Connection", "close");
                         return r;
@@ -194,31 +195,32 @@ public class EmbeddedHTTPD extends NanoHTTPD {
                     if(range != null) {
                         if(range[0] != -1) {
                             retInputStream = new RangeInputStream(retInputStream, range[0], range[1]);
-                            Response r = new Response(Response.Status.PARTIAL_CONTENT, getMimeType(uri),
-                                    retInputStream);
+                            int contentLength = (range[1]+1) - range[0];
+                            Response r = newFixedLengthResponse(Response.Status.PARTIAL_CONTENT, getMimeType(uri),
+                                retInputStream, contentLength);
+
                             r.addHeader("ETag", etag);
 
                             /*
                              * range request is inclusive: e.g. range 0-1 length is 2 bytes as per
                              * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html 14.35.1 Byte Ranges
                              */
-                            r.addHeader("Content-Length", String.valueOf((range[1]+1) - range[0]));
+                            r.addHeader("Content-Length", String.valueOf(contentLength));
                             r.addHeader("Content-Range", "bytes " + range[0] + '-' + range[1] +
                                 '/' + totalLength);
                             r.addHeader( "Accept-Ranges", "bytes");
                             r.addHeader("Connection", "close");
                             return r;
                         }else {
-                            return new Response(Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
+                            return newFixedLengthResponse(Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
                                     "Range request not satisfiable");
                         }
-
                     }else {
                         //Workaround : NanoHTTPD is using the InputStream.available method incorrectly
                         // see RangeInputStream.available
                         retInputStream = new RangeInputStream(retInputStream, 0, totalLength);
-                        Response r = new Response(Response.Status.OK, getMimeType(uri),
-                                retInputStream);
+                        Response r = newFixedLengthResponse(Response.Status.OK, getMimeType(uri),
+                                retInputStream, totalLength);
 
                         r.addHeader("ETag", etag);
                         r.addHeader("Content-Length", String.valueOf(totalLength));
@@ -229,25 +231,17 @@ public class EmbeddedHTTPD extends NanoHTTPD {
 
 
                 }else {
-                    return new Response(Response.Status.NOT_FOUND, "text/plain", "Not found within zip: "
-                        + pathInZip);
+                    return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain",
+                            "Not found within zip: " + pathInZip);
                 }
             }catch(IOException e) {
-                return new Response(Response.Status.INTERNAL_ERROR, "text/plain", "Exception: "
-                    + e.toString());
+                return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain",
+                        "Exception : " + e.toString());
             }
 
         }
 
-
-        String msg = "<html><body><h1>Hello server</h1>\n";
-        Map<String, String> parms = session.getParms();
-        if (parms.get("username") == null) {
-            msg += "<form action='?' method='get'>\n  <p>Your name: <input type='text' name='username'></p>\n" + "</form>\n";
-        } else {
-            msg += "<p>Hello, " + parms.get("username") + "!</p>";
-        }
-        return new Response(msg);
+        return newFixedLengthResponse(Response.Status.OK, "text/plain", "Server running");
     }
 
     /**
