@@ -15,6 +15,7 @@
 #import "UstadBaseUIViewController.h"
 #import "CatalogView.h"
 #import "BasePointView.h"
+#import "ContainerView.h"
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "UstadMobileDownloadInfo.h"
 #import "UMDownloadCompleteEvent.h"
@@ -238,6 +239,8 @@ static NSString *_defaultsKeyActiveUserAuth;
         nextVC = [sb instantiateViewControllerWithIdentifier:@"CatalogViewController"];
     }else if([cls isEqual:ComUstadmobileCoreViewBasePointView_class_()]) {
         nextVC = [sb instantiateViewControllerWithIdentifier:@"BasePointViewController"];
+    }else if([cls isEqual:ComUstadmobileCoreViewContainerView_class_()]) {
+        nextVC = [sb instantiateViewControllerWithIdentifier:@"ContainerViewController"];
     }
     
     UIViewController *parentVC = currentVC.parentViewController;
