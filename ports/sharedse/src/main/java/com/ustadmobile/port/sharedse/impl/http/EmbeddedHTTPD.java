@@ -1,7 +1,6 @@
-package com.ustadmobile.port.android.impl.http;
+package com.ustadmobile.port.sharedse.impl.http;
 
 
-import android.util.Log;
 
 import com.ustadmobile.core.util.UMFileUtil;
 
@@ -133,7 +132,6 @@ public class EmbeddedHTTPD extends NanoHTTPD {
         int range[];
         String ifNoneMatchHeader;
         InputStream retInputStream;
-        Log.i("HTTPD", uri);
 
         if(uri.startsWith(PREFIX_MOUNT)) {
             int nextSlash = uri.indexOf('/', PREFIX_MOUNT.length() + 1);
