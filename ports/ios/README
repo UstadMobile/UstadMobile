@@ -18,6 +18,8 @@ Setup:
  "process handle SIGUSR2 -n true -p true -s false" and check Automatically 
  continue after evaluating actions.
 
+ See http://stackoverflow.com/questions/10431579/permanently-configuring-lldb-in-xcode-4-3-2-not-to-stop-on-signals/10456557#10456557
+
 Project Info:
 
 The project is based on using j2objc ( http://j2objc.org ) to translate core
