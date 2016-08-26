@@ -21,6 +21,7 @@
 #import "UMDownloadCompleteEvent.h"
 #import "UMDownloadCompleteReceiver.h"
 #import "EmbeddedHTTPD.h"
+#import "UstadViewControllerWithArgs.h"
 
 #include "J2ObjC_source.h"
 
@@ -250,8 +251,8 @@ static NSString *_defaultsKeyActiveUserAuth;
     
     
     
-    if(nextVC != nil && [nextVC isKindOfClass:[UstadBaseUIViewController class]]) {
-        UstadBaseUIViewController *baseVC = (UstadBaseUIViewController *)nextVC;
+    if(nextVC != nil && [nextVC conformsToProtocol:@protocol(UstadViewControllerWithArgs)]) {
+        id<UstadViewControllerWithArgs> baseVC = (id<UstadViewControllerWithArgs>)nextVC;
         [baseVC setArgumentsWithHashtable:args];
     }
     
@@ -272,6 +273,10 @@ static NSString *_defaultsKeyActiveUserAuth;
 
 - (NSString *)getUMProfileName {
     return @"iOS";
+}
+
+-(ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD *)getHTTPD {
+    return self.httpd;
 }
 
 

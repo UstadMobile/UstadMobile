@@ -10,8 +10,8 @@
 #import "CatalogView.h"
 #import "UstadBaseUIViewController.h"
 #import "ControllerReadyListener.h"
+#import "UstadViewControllerWithArgs.h"
 
-
-@interface CatalogViewController : UstadBaseUIViewController<ComUstadmobileCoreViewCatalogView, UITableViewDelegate, UITableViewDataSource, ComUstadmobileCoreControllerControllerReadyListener>
+@interface CatalogViewController : UstadBaseUIViewController<ComUstadmobileCoreViewCatalogView, UITableViewDelegate, UITableViewDataSource, ComUstadmobileCoreControllerControllerReadyListener, UstadViewControllerWithArgs>
 
 @end

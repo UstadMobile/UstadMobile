@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "UstadViewControllerWithArgs.h"
 
-@interface ContainerViewController : UIPageViewController<UIPageViewControllerDataSource>
+@interface ContainerViewController : UIPageViewController<UIPageViewControllerDataSource, UstadViewControllerWithArgs>
 
 @end

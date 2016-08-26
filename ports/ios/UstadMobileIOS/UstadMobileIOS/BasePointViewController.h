@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "BasePointView.h"
 #import "UstadBaseUIViewController.h"
+#import "UstadViewControllerWithArgs.h"
 
-@interface BasePointViewController : UstadBaseUIViewController<ComUstadmobileCoreViewBasePointView>
+@interface BasePointViewController : UstadBaseUIViewController<ComUstadmobileCoreViewBasePointView, UstadViewControllerWithArgs>
 
 @end

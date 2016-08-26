@@ -420,6 +420,7 @@
 		AD0DAAED1D6F29AD005FAFDD /* ContainerPageContentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContainerPageContentViewController.m; sourceTree = "<group>"; };
 		AD0DAAEF1D6F3191005FAFDD /* ContainerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContainerViewController.h; sourceTree = "<group>"; };
 		AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContainerViewController.m; sourceTree = "<group>"; };
+		AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadViewControllerWithArgs.h; sourceTree = "<group>"; };
 		AD12B41F1D631228005D6D5D /* LoginViewLoginTabViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewLoginTabViewController.h; sourceTree = "<group>"; };
 		AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewLoginTabViewController.m; sourceTree = "<group>"; };
 		AD12B4221D631E42005D6D5D /* BasePointViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasePointViewController.h; sourceTree = "<group>"; };
@@ -801,6 +802,7 @@
 				AD0DAAED1D6F29AD005FAFDD /* ContainerPageContentViewController.m */,
 				AD0DAAEF1D6F3191005FAFDD /* ContainerViewController.h */,
 				AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */,
+				AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";

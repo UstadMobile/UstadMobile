@@ -8,9 +8,10 @@
 
 #import <Foundation/Foundation.h>
 #import "UstadMobileSystemImplSE.h"
-
+#import "EmbeddedHTTPD.h"
 
 @interface UstadMobileSystemImplIOS : ComUstadmobilePortSharedseImplUstadMobileSystemImplSE<NSURLSessionDelegate>
-//- (JavaIoInputStream *)openResourceInputStreamWithNSString:(NSString *)resURI
-//                                                    withId:(id)context;
+
+-(ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD *)getHTTPD;
+
 @end
