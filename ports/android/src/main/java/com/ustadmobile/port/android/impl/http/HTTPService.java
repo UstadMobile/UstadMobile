@@ -108,12 +108,8 @@ public class HTTPService extends Service {
     public String mountZIP(String zipPath, String mountName) {
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
                 + this + "httpd server = " + httpd);
-        if(mountName == null) {
-            mountName = UMFileUtil.getFilename(zipPath) + '-' +
-                    new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        }
 
-        httpd.mountZip(mountName, zipPath);
+        mountName = httpd.mountZip(zipPath, mountName);
 
         String extension = UMFileUtil.getExtension(zipPath);
         if(extension != null && extension.endsWith("epub")) {

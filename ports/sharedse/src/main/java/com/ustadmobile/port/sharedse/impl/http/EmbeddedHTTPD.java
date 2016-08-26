@@ -2,13 +2,19 @@ package com.ustadmobile.port.sharedse.impl.http;
 
 
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -258,8 +264,21 @@ public class EmbeddedHTTPD extends NanoHTTPD {
      * @param mountPath The path to use after /mount .
      * @param zipPath The local filesystem path to the zip file (e.g. /path/to/file.epub)
      */
-    public void mountZip(String mountPath, String zipPath) {
+    public String mountZip(String zipPath, String mountPath) {
+        if(mountPath == null) {
+            mountPath= UMFileUtil.getFilename(zipPath) + '-' +
+                    new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        }
+
         mountedEPUBs.put(mountPath, new MountedZip(mountPath, zipPath));
+        try {
+            return URLEncoder.encode(mountPath, "UTF-8");
+        }catch(UnsupportedEncodingException e) {
+            //this will only ever happen if UTF-8 is unsupported by the system - which is never going to happen
+            UstadMobileSystemImpl.l(UMLog.CRITICAL, 20, null, e);
+        }
+
+        return null;
     }
 
     /**
