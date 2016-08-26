@@ -1,5 +1,6 @@
 #/bin/bash
 
+J2OBJC_DIR=~/local/j2objc
 JAVA_SRC_DIR=../../core/src/main/java
 IMPL_SHAREDSE_DIR=../sharedse/src/main/java
 QR_SRC_DIR=lib/checkout/qrcode/src
@@ -36,7 +37,7 @@ cd ../..
 
 pwd
 
-~/j2objc/current/j2objc -d UstadMobileIOS/Generated/ \
+$J2OBJC_DIR/j2objc -d UstadMobileIOS/Generated/ \
    -sourcepath $JAVA_SRC_DIR:$QR_SRC_DIR:$IMPL_SHAREDSE_DIR:$NANO_HTTPD_SRC_DIR \
    --no-package-directories $JAVA_SRC_FILES \
    $IMPL_SHAREDSE_FILES $QR_SRC_FILES $NANO_HTTPD_FILES
