@@ -729,11 +729,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             for(int i = 0; i < selectedEntries.length; i++) {
                 CatalogController.removeEntry(selectedEntries[i].id,
                         USER_RESOURCE | SHARED_RESOURCE, getContext());
-                this.view.setEntryStatus(selectedEntries[i].id, STATUS_NOT_ACQUIRED);
             }
         }
 
-        this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
+        //TODO: Enable a refresh here that does not force no-cache
+        view.refresh();
     }
     
     /**

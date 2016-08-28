@@ -1,4 +1,4 @@
-var _mediaElements = document.getElementsByTagName("audio");
+var _mediaElements = document.querySelectorAll("audio[data-autoplay]");
 for(var _i = 0; _i < _mediaElements.length; _i++) {
     if(_mediaElements[_i].paused === true && _mediaElements[_i].currentTime === 0 && _mediaElements[_i].readyState >= 2) {
         try {

@@ -182,6 +182,7 @@ public class UstadJSOPF {
                         if(extension != null && defaultMimeTypes.containsKey(extension)){
                             defMimeType = (String)defaultMimeTypes.get(extension);
                         }
+
                         if(extension == null || defMimeType == null ||
                                 !itemMime.equals(defMimeType)){
                             result.mimeExceptions.put(filename, itemMime);
