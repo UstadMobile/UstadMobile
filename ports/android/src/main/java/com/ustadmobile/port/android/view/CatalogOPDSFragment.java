@@ -223,6 +223,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 } else {
                     getActivity().setTitle(mCatalogController.getModel().opdsFeed.title);
                     mCatalogController.setUIStrings();
+                    setSelectedEntries(new UstadJSOPDSEntry[0]);
                     mRecyclerView.setAdapter(mRecyclerAdapter);
                     getActivity().supportInvalidateOptionsMenu();
                     mCatalogController.loadThumbnails();
