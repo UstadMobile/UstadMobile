@@ -154,6 +154,8 @@ public class ContainerViewPageSplitter {
         String dontSplitTag = null;
         int dontSplitDepth = -1;
         
+        boolean inDontCountSection = false;//used to avoid counting style and script tags
+        
         do {
             lineNum = xpp.getLineNumber();
             colNum = xpp.getColumnNumber();
@@ -164,6 +166,10 @@ public class ContainerViewPageSplitter {
                     break;
                     
                 case XmlPullParser.START_TAG:
+                    if(xpp.getName().equals("script") || xpp.getName().equals("style")) {
+                        inDontCountSection = true;
+                    }
+                    
                     if(!inRange && (lineNum > startlineNum || lineNum == startlineNum && colNum > startColNum)) {
                         inRange = true;
 
@@ -183,19 +189,20 @@ public class ContainerViewPageSplitter {
                         int width, height;
                         String strVal = xpp.getAttributeValue(null, "width");
                         if(strVal != null) {
-                            width = Integer.parseInt(strVal);
+                            width = Math.min(Integer.parseInt(strVal), Display.getInstance().getDisplayWidth());
                         }else {
                             width = Display.getInstance().getDisplayWidth();
                         }
                         strVal = xpp.getAttributeValue(null, "height");
 
                         if(strVal != null) {
-                            height = Integer.parseInt(strVal);
+                            height = Math.min(Integer.parseInt(strVal), Display.getInstance().getDisplayHeight());
                         }else{
                             height = Display.getInstance().getDisplayHeight();
                         }
 
-                        byteCount += width * height * 4;
+                        //Temporary change: causing too many splits
+                        //byteCount += width * height * 4;
                     }
 
 
@@ -204,6 +211,10 @@ public class ContainerViewPageSplitter {
                     break;
                 
                 case XmlPullParser.END_TAG:
+                    if(xpp.getName().equals("script") || xpp.getName().equals("style")) {
+                        inDontCountSection = false;
+                    }
+                    
                     if(dontSplitTag != null && xpp.getDepth() == dontSplitDepth && xpp.getName().equals(dontSplitTag)) {
                         //that's the end of the don't split section
                         dontSplitTag = null;
@@ -225,7 +236,7 @@ public class ContainerViewPageSplitter {
                     break;
             }
             
-            if(inRange && evtType == XmlPullParser.TEXT) {
+            if(!inDontCountSection && inRange && evtType == XmlPullParser.TEXT) {
                 int textLen = xpp.getText().length();
                 lenCount += textLen;
                 byteCount += textLen * BYTES_PER_CHAR;
