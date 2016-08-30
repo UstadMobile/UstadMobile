@@ -96,6 +96,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
         //mountedEPUBs = new HashMap<>();
         id = idCounter;
         idCounter++;
+
+        //TODO: Setup 404 handling
     }
 
     @Override
