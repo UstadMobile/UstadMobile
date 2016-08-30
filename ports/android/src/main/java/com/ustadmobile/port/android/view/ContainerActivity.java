@@ -194,6 +194,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         public void onServiceConnected(ComponentName className, IBinder service) {
             HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
             mHttpService = binder.getService();
+            onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__", mHttpService.getAssetsBaseURL());
             ContainerActivity.this.initContent();
         }
 
@@ -205,7 +206,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     public void initContent() {
         mMountedPath = mHttpService.mountZIP(ContainerActivity.this.mContainerURI, mSavedMountPoint);
-        mBaseURL = mHttpService.getZipMountURL() + mMountedPath;
+        mBaseURL = UMFileUtil.joinPaths(new String[]{mHttpService.getBaseURL(), mMountedPath});
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
         UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + "on " + mBaseURL + " type "
                 + mMimeType);

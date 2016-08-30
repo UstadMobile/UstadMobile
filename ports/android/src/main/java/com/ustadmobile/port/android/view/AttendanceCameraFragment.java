@@ -111,6 +111,10 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
         }
         Camera.Parameters params = c.getParameters();
         mCamPreviewSize = params.getPreviewSize();
+
+        //tell the rectangle overlay about the camera image size (flipped)
+        mRectangleView.setPreviewImgSize(mCamPreviewSize.height, mCamPreviewSize.width);
+
         mPreviewFrameBuffer = new byte[mCamPreviewSize.width * mCamPreviewSize.height];
         mOMRImageSource = new RotatedNV21OMRImageSource(mCamPreviewSize.width, mCamPreviewSize.height);
 

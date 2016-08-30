@@ -324,7 +324,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         
         HTTPResult res = UstadMobileSystemImpl.getInstance().readURLToString(
             containerXMLURI, null);
-        
+
         XmlPullParser xpp = impl.newPullParser();
         xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
         ocf = UstadOCF.loadFromXML(xpp);
