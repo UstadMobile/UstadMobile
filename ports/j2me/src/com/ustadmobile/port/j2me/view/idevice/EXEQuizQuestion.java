@@ -239,7 +239,12 @@ public class EXEQuizQuestion {
         HTMLElement feedbackEl = selectedAnswer.getFeedbackElement();
         
         if(scrollToFeedback && htmlC != null) {
-            htmlC.scrollToElement(feedbackEl, true);
+            try {
+                htmlC.scrollToElement(feedbackEl, true);
+            }catch(Exception e) {
+                //can happen if HTML Component doesn't feel fully loaded
+                UstadMobileSystemImpl.l(UMLog.WARN, 202, this.id);
+            }
         }
         
         return true;

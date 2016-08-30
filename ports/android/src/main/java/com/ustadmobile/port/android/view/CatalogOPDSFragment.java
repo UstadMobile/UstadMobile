@@ -223,6 +223,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 } else {
                     getActivity().setTitle(mCatalogController.getModel().opdsFeed.title);
                     mCatalogController.setUIStrings();
+                    setSelectedEntries(new UstadJSOPDSEntry[0]);
                     mRecyclerView.setAdapter(mRecyclerAdapter);
                     getActivity().supportInvalidateOptionsMenu();
                     mCatalogController.loadThumbnails();
@@ -277,7 +278,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(mDeleteOptionAvailable) {
+        if(mDeleteOptionAvailable && mSelectedEntries.length > 0) {
             MenuItem item = menu.add(Menu.NONE, MENUCMDID_DELETE, 1, "");
             item.setIcon(R.drawable.ic_delete_white_24dp);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -469,6 +470,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
+        if((entries.length == 0 && mSelectedEntries.length > 0) || (entries.length > 0 && mSelectedEntries.length ==0)) {
+            getActivity().supportInvalidateOptionsMenu();
+        }
+
         this.mSelectedEntries = entries;
 
         UstadJSOPDSFeed thisFeed = mCatalogController.getModel().opdsFeed;

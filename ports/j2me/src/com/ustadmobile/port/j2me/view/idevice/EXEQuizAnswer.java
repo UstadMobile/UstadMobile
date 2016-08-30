@@ -188,6 +188,7 @@ public class EXEQuizAnswer implements PlayerListener{
                 htmlCB.mediaPlayRequested(HTMLCallback.MEDIA_AUDIO, HTMLCallback.MEDIA_PLAY, 
                     htmlC, null, audioEl, pl);
                 */
+                goRedirect(htmlC);
             }else if(branchType != null && branchType.equals("immediate")) {
                 goRedirect(htmlC);
             }

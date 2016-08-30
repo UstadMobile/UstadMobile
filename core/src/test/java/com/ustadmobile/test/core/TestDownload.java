@@ -67,7 +67,7 @@ public class TestDownload extends TestCase implements  UMDownloadCompleteReceive
     
     private int[] downloadFinishedStatus = null;
     
-    private long downloadID;
+    private String downloadID;
     
     private String httpRoot = null;
     
