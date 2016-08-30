@@ -24,6 +24,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import fi.iki.elonen.*;
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -36,7 +37,7 @@ import fi.iki.elonen.*;
  *
  * Created by mike on 8/14/15.
  */
-public class EmbeddedHTTPD extends NanoHTTPD {
+public class EmbeddedHTTPD extends RouterNanoHTTPD {
 
     private HashMap<String, MountedZip> mountedEPUBs;
 

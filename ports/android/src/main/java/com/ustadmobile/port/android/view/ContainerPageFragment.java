@@ -244,9 +244,16 @@ public class ContainerPageFragment extends Fragment {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            if(!this.isFirstPage) {
+
+            if(ContainerPageFragment.this.getUserVisibleHint()) {
                 this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
             }
+
+            /*
+            if(!this.isFirstPage) {
+
+            }
+            */
         }
     }
 
