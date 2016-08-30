@@ -164,4 +164,13 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
 
     }
 
+    /**
+     * Returns the local URL in the form of http://127.0.0.1;PORT/
+     *
+     * @return Local URL as above
+     */
+    public String getLocalURL() {
+        return "http://127.0.0.1:" + getListeningPort() + "/";
+    }
+
 }
