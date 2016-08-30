@@ -35,6 +35,8 @@ public class HTTPService extends Service {
 
     private int id;
 
+    private String assetsPath;
+
     public HTTPService() {
         id = idcount;
         idcount++;
@@ -49,6 +51,9 @@ public class HTTPService extends Service {
     public void onCreate() {
         Log.i(UstadMobileSystemImplAndroid.TAG, "Create HTTP Service " + this);
         httpd = new EmbeddedHTTPD(DEFAULT_PORT);
+        assetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
+        httpd.addRoute(assetsPath +"(.)+",
+                AndroidAssetsHandler.class, this);
 
         try {
             httpd.start();
@@ -90,6 +95,11 @@ public class HTTPService extends Service {
     public String getBaseURL() {
         return "http://127.0.0.1:" + DEFAULT_PORT  + "/";
     }
+
+    public String getAssetsBaseURL() {
+        return UMFileUtil.joinPaths(new String[]{getBaseURL(), assetsPath});
+    }
+
 
     /**
      * Mount a Zip File to the http server.  Optionally specify a preferred mount point (useful if
