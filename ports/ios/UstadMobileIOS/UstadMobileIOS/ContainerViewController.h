@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "UstadViewControllerWithArgs.h"
+#import "ControllerReadyListener.h"
+#import "ContainerView.h"
 
-@interface ContainerViewController : UIPageViewController<UIPageViewControllerDataSource, UstadViewControllerWithArgs>
+@interface ContainerViewController : UIPageViewController<UIPageViewControllerDataSource, UstadViewControllerWithArgs, ComUstadmobileCoreControllerControllerReadyListener, ComUstadmobileCoreViewContainerView>
 
 @end
