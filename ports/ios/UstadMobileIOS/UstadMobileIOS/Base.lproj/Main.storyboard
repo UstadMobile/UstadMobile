@@ -18,6 +18,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground" translatesAutoresizingMaskIntoConstraints="NO" id="ByL-bB-o7j">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                            </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lZ1-59-weG">
                                 <rect key="frame" x="29" y="279" width="551" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -40,15 +43,18 @@
                             <constraint firstItem="w02-bH-0gz" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="1KO-gL-uGv"/>
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="4mN-zb-uui"/>
                             <constraint firstItem="w02-bH-0gz" firstAttribute="top" secondItem="lZ1-59-weG" secondAttribute="bottom" constant="19" id="9gJ-GY-Jer"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="ByL-bB-o7j" secondAttribute="bottom" id="BL3-zG-dch"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="FFd-Un-AkP"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="w02-bH-0gz" secondAttribute="bottom" constant="242" id="GPJ-lv-baD"/>
+                            <constraint firstItem="ByL-bB-o7j" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="KPM-01-0P7"/>
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="X6p-Ka-NAi"/>
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="aHa-CO-fk1"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="as5-wd-2l8"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="top" secondItem="P7P-Ra-vtU" secondAttribute="bottom" constant="8" id="azF-Jr-gyp"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="hBQ-fO-4Hc"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ByL-bB-o7j" secondAttribute="trailing" constant="-20" id="hYZ-z7-2dT"/>
                             <constraint firstItem="w02-bH-0gz" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="kdx-xm-tq5"/>
-                            <constraint firstItem="P7P-Ra-vtU" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="221" id="zcD-2X-zYl"/>
+                            <constraint firstItem="ByL-bB-o7j" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" id="umX-We-AxV"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Login" id="224-Jw-dIE"/>
@@ -309,4 +315,7 @@
             <point key="canvasLocation" x="67" y="1040"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="LoginBackground" width="664" height="768"/>
+    </resources>
 </document>
