@@ -18,9 +18,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="O9u-wt-GIg">
-                                <rect key="frame" x="-11" y="-45" width="628" height="657"/>
-                            </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lZ1-59-weG">
                                 <rect key="frame" x="29" y="279" width="551" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -45,7 +42,7 @@
                                 </constraints>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="w02-bH-0gz" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="1KO-gL-uGv"/>
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="4mN-zb-uui"/>
@@ -260,6 +257,9 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="O9u-wt-GIg">
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                            </imageView>
                             <containerView opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ADU-aY-C5r">
                                 <rect key="frame" x="0.0" y="105" width="600" height="547"/>
                             </containerView>
@@ -281,7 +281,11 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="gY4-8x-eGE" firstAttribute="width" secondItem="xin-3J-MB1" secondAttribute="width" id="Baf-OK-QVM"/>
+                            <constraint firstItem="O9u-wt-GIg" firstAttribute="leading" secondItem="ytm-Zh-6wA" secondAttribute="leadingMargin" constant="-20" id="C8u-Dy-qYc"/>
                             <constraint firstItem="gY4-8x-eGE" firstAttribute="leading" secondItem="ytm-Zh-6wA" secondAttribute="leadingMargin" id="JU9-8E-2AP"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="O9u-wt-GIg" secondAttribute="trailing" constant="-20" id="KNw-ho-Yq6"/>
+                            <constraint firstItem="i1n-It-wrh" firstAttribute="top" secondItem="O9u-wt-GIg" secondAttribute="bottom" id="UrB-1Z-ZQO"/>
+                            <constraint firstItem="O9u-wt-GIg" firstAttribute="top" secondItem="ytm-Zh-6wA" secondAttribute="topMargin" id="YvH-Pi-8oS"/>
                             <constraint firstItem="xin-3J-MB1" firstAttribute="trailing" secondItem="ytm-Zh-6wA" secondAttribute="trailingMargin" id="aN5-MY-MYT"/>
                             <constraint firstItem="ADU-aY-C5r" firstAttribute="leading" secondItem="ytm-Zh-6wA" secondAttribute="leadingMargin" id="eT5-xf-0iG"/>
                             <constraint firstAttribute="trailingMargin" secondItem="ADU-aY-C5r" secondAttribute="trailing" id="h1Y-Gr-FC8"/>
