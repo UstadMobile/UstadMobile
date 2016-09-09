@@ -92,7 +92,7 @@
         [self.catalogController handleConfirmDialogClickWithBoolean:false withInt:commandId];
     }];
     [alertController addAction:negativeAction];
-    [self presentViewController:alertController animated:YES completion:nil];
+    [self presentViewController:alertController animated:NO completion:nil];
 }
 
 - (void)setEntryStatusWithNSString:(NSString *)entryId

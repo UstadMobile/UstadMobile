@@ -54,14 +54,14 @@
         [self.progressAlertController.view addConstraints:constraints];
         [indicator setUserInteractionEnabled:NO];
         [indicator startAnimating];
-        [self.uiViewController presentViewController:self.progressAlertController animated:YES completion:nil];
+        [self.uiViewController presentViewController:self.progressAlertController animated:NO completion:nil];
     });
 }
 
 - (jboolean)dismissProgressDialog {
     if([NSThread isMainThread]) {
         if(self.progressAlertController) {
-            [self.uiViewController dismissViewControllerAnimated:YES completion:nil];
+            [self.uiViewController dismissViewControllerAnimated:NO completion:nil];
             self.progressAlertController = nil;
             return true;
         }else {
@@ -83,7 +83,7 @@
         UIAlertAction *defaultAction = [UIAlertAction actionWithTitle:okStr style:UIAlertActionStyleDefault
                                                               handler:^(UIAlertAction * action) {}];
         [self.alertController addAction:defaultAction];
-        [self.uiViewController presentViewController:self.alertController animated:YES completion:nil];
+        [self.uiViewController presentViewController:self.alertController animated:NO completion:nil];
     });
     
 }
@@ -92,7 +92,7 @@
     
     if(self.alertController) {
         if([NSThread isMainThread]) {
-            [self.alertController dismissViewControllerAnimated:YES completion:nil];
+            [self.alertController dismissViewControllerAnimated:NO completion:nil];
             self.alertController = nil;
         }else {
             [self performSelectorOnMainThread:@selector(dismissAlertDialog) withObject:self waitUntilDone:YES];
@@ -119,7 +119,7 @@ withComUstadmobileCoreViewAppViewChoiceListener:(id<ComUstadmobileCoreViewAppVie
             [self.progressAlertController addAction:action];
         }
         
-        [self.uiViewController presentViewController:self.progressAlertController animated:YES completion:nil];
+        [self.uiViewController presentViewController:self.progressAlertController animated:NO completion:nil];
     });
 }
 
