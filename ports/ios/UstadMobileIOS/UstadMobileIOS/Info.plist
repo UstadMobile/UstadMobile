@@ -46,7 +46,7 @@
 				<true/>
 			</dict>
 			
-			<key>127.0.0.1</key>
+			<key>www.ustadmobile.com</key>
 			<dict>
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<true/>

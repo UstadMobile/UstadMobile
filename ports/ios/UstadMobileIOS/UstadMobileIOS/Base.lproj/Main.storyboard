@@ -18,8 +18,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground" translatesAutoresizingMaskIntoConstraints="NO" id="ByL-bB-o7j">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="O9u-wt-GIg">
+                                <rect key="frame" x="-11" y="-45" width="628" height="657"/>
                             </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lZ1-59-weG">
                                 <rect key="frame" x="29" y="279" width="551" height="30"/>
@@ -37,24 +37,29 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no"/>
                             </textField>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="Sph-7h-TFt">
+                                <rect key="frame" x="180" y="20" width="200" height="200"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="160" id="14o-3h-8ss"/>
+                                    <constraint firstAttribute="width" constant="160" id="uWd-9w-0GP"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="w02-bH-0gz" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="1KO-gL-uGv"/>
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="4mN-zb-uui"/>
                             <constraint firstItem="w02-bH-0gz" firstAttribute="top" secondItem="lZ1-59-weG" secondAttribute="bottom" constant="19" id="9gJ-GY-Jer"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="ByL-bB-o7j" secondAttribute="bottom" id="BL3-zG-dch"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="FFd-Un-AkP"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="w02-bH-0gz" secondAttribute="bottom" constant="242" id="GPJ-lv-baD"/>
-                            <constraint firstItem="ByL-bB-o7j" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="KPM-01-0P7"/>
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="X6p-Ka-NAi"/>
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="aHa-CO-fk1"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="as5-wd-2l8"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="top" secondItem="P7P-Ra-vtU" secondAttribute="bottom" constant="8" id="azF-Jr-gyp"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="hBQ-fO-4Hc"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="ByL-bB-o7j" secondAttribute="trailing" constant="-20" id="hYZ-z7-2dT"/>
+                            <constraint firstItem="Sph-7h-TFt" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="3" id="i9Q-Ez-gf0"/>
                             <constraint firstItem="w02-bH-0gz" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="kdx-xm-tq5"/>
-                            <constraint firstItem="ByL-bB-o7j" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" id="umX-We-AxV"/>
+                            <constraint firstItem="Sph-7h-TFt" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zM7-I3-4hh"/>
                         </constraints>
                     </view>
                     <tabBarItem key="tabBarItem" title="Login" id="224-Jw-dIE"/>
@@ -316,6 +321,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LoginBackground" width="664" height="768"/>
+        <image name="LoginBackground2" width="1080" height="1700"/>
+        <image name="logo" width="1024" height="1024"/>
     </resources>
 </document>

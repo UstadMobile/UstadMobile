@@ -367,5 +367,13 @@ static NSString *_defaultsKeyActiveUserAuth;
     
 }
 
+- (NSString *)getBasePointDefaultCatalogURL {
+    return @"http://www.ustadmobile.com/files/sapienza/opds/root.opds";
+}
+
+- (NSString *)getBasePointBrowseURL {
+    return nil;
+}
+
 
 @end

@@ -451,7 +451,7 @@
 		AD7745E01D526FD600A56306 /* res */ = {isa = PBXFileReference; lastKnownFileType = folder; path = res; sourceTree = "<group>"; };
 		AD7745E51D539DFE00A56306 /* UMLogIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UMLogIOS.h; sourceTree = "<group>"; };
 		AD7745E61D539DFE00A56306 /* UMLogIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UMLogIOS.m; sourceTree = "<group>"; };
-		AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UstadMobileIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD77D04E1D523A8A00A2F95A /* Sapienza.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sapienza.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD77D0521D523A8A00A2F95A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		AD77D0541D523A8A00A2F95A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		AD77D0551D523A8A00A2F95A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -763,7 +763,7 @@
 		AD77D04F1D523A8A00A2F95A /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */,
+				AD77D04E1D523A8A00A2F95A /* Sapienza.app */,
 				AD77D0671D523A8A00A2F95A /* UstadMobileIOSTests.xctest */,
 				AD77D0721D523A8A00A2F95A /* UstadMobileIOSUITests.xctest */,
 			);
@@ -780,6 +780,14 @@
 				AD77D05D1D523A8A00A2F95A /* Assets.xcassets */,
 				AD12B4221D631E42005D6D5D /* BasePointViewController.h */,
 				AD12B4231D631E42005D6D5D /* BasePointViewController.m */,
+				AD12B4251D6325B6005D6D5D /* CatalogViewController.h */,
+				AD12B4261D6325B6005D6D5D /* CatalogViewController.m */,
+				AD1BE6601D69DED200373721 /* CatalogViewControllerEntryTableViewCell.h */,
+				AD1BE6611D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m */,
+				AD0DAAEC1D6F29AD005FAFDD /* ContainerPageContentViewController.h */,
+				AD0DAAED1D6F29AD005FAFDD /* ContainerPageContentViewController.m */,
+				AD0DAAEF1D6F3191005FAFDD /* ContainerViewController.h */,
+				AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */,
 				AD77D0621D523A8A00A2F95A /* Info.plist */,
 				AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */,
 				AD065F9C1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.h */,
@@ -794,25 +802,17 @@
 				AD77D0511D523A8A00A2F95A /* Supporting Files */,
 				AD7745E51D539DFE00A56306 /* UMLogIOS.h */,
 				AD7745E61D539DFE00A56306 /* UMLogIOS.m */,
+				AD12B4281D6327DC005D6D5D /* UstadBaseUIViewController.h */,
+				AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */,
+				AD1BE6631D6D968700373721 /* UstadMobileDownloadInfo.h */,
+				AD1BE6641D6D968700373721 /* UstadMobileDownloadInfo.m */,
 				AD46A8F21D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.h */,
 				AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */,
 				AD46A6421D524FC600C63A29 /* UstadMobileSystemImplIOS.h */,
 				AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */,
+				AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */,
 				AD77D0571D523A8A00A2F95A /* ViewController.h */,
 				AD77D0581D523A8A00A2F95A /* ViewController.m */,
-				AD12B4251D6325B6005D6D5D /* CatalogViewController.h */,
-				AD12B4261D6325B6005D6D5D /* CatalogViewController.m */,
-				AD12B4281D6327DC005D6D5D /* UstadBaseUIViewController.h */,
-				AD12B4291D6327DC005D6D5D /* UstadBaseUIViewController.m */,
-				AD1BE6601D69DED200373721 /* CatalogViewControllerEntryTableViewCell.h */,
-				AD1BE6611D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m */,
-				AD1BE6631D6D968700373721 /* UstadMobileDownloadInfo.h */,
-				AD1BE6641D6D968700373721 /* UstadMobileDownloadInfo.m */,
-				AD0DAAEC1D6F29AD005FAFDD /* ContainerPageContentViewController.h */,
-				AD0DAAED1D6F29AD005FAFDD /* ContainerPageContentViewController.m */,
-				AD0DAAEF1D6F3191005FAFDD /* ContainerViewController.h */,
-				AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */,
-				AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -860,7 +860,7 @@
 			);
 			name = UstadMobileIOS;
 			productName = UstadMobileIOS;
-			productReference = AD77D04E1D523A8A00A2F95A /* UstadMobileIOS.app */;
+			productReference = AD77D04E1D523A8A00A2F95A /* Sapienza.app */;
 			productType = "com.apple.product-type.application";
 		};
 		AD77D0661D523A8A00A2F95A /* UstadMobileIOSTests */ = {
@@ -1265,7 +1265,7 @@
 		AD77D07C1D523A8A00A2F95A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
@@ -1276,7 +1276,7 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Sapienza;
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 			};
 			name = Debug;
@@ -1284,7 +1284,7 @@
 		AD77D07D1D523A8A00A2F95A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				CLANG_ENABLE_OBJC_ARC = NO;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
@@ -1295,7 +1295,7 @@
 					"-ObjC",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Sapienza;
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 			};
 			name = Release;

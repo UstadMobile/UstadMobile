@@ -52,6 +52,7 @@
         
         [self.catalogTableView reloadData];
     });
+    [self.catalogController loadThumbnails];
 }
 
 - (void)didReceiveMemoryWarning {
