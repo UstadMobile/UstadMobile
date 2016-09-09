@@ -637,7 +637,7 @@ public class HTTPCacheDir {
         String contentType = result.getHeaderValue("content-type");
         int sepIndex = contentType.indexOf(';');
         if(sepIndex != -1) {
-            contentType = contentType.substring(0, sepIndex);
+            contentType = contentType.substring(0, sepIndex).trim();
         }
         
         String extension = '.' + impl.getExtensionFromMimeType(contentType);
