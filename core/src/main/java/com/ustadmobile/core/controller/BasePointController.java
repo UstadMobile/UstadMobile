@@ -76,7 +76,7 @@ public class BasePointController extends UstadBaseController{
     public static Hashtable makeDefaultBasePointArgs(Object context) {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] basePointURLs = new String[] {CatalogController.OPDS_PROTO_DEVICE};
+        String[] basePointURLs = new String[] {impl.getBasePointDefaultCatalogURL()};
         
         String iPrefix;
         for(int i = 0; i < BasePointController.NUM_CATALOG_TABS; i++) {
@@ -92,9 +92,9 @@ public class BasePointController extends UstadBaseController{
                 new Integer(CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE));
 
             //by default show the browse button on the first tab only
-            if(i == 0) {
+            if(i == 0 && impl.getBasePointBrowseURL() != null) {
                 args.put(iPrefix + CatalogController.KEY_BROWSE_BUTTON_URL,
-                        CatalogController.OPDS_PROTO_USER_FEEDLIST);
+                        impl.getBasePointBrowseURL());
             }
         }
         

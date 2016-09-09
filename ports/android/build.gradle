@@ -43,6 +43,9 @@ android {
 
 repositories {
     mavenCentral()
+    maven {
+        url "http://devserver2.ustadmobile.com/repo-mvn"
+    }
 }
 
 dependencies {
