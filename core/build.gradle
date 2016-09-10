@@ -7,6 +7,20 @@ repositories {
     mavenCentral()
 }
 
+task initAppConfig(type: Copy) {
+    def buildConfigFile = new File("src/main/java/com/ustadmobile/core/impl/AppConfig.java")
+    if(!buildConfigFile.exists()) {
+        from "AppConfig.java.default"
+        into "src/main/java/com/ustadmobile/core/impl/"
+        rename { String fileName ->
+            fileName.replace("AppConfig.java.default", "AppConfig.java")
+        }
+    }
+
+}
+
+logger.info("Setting dependsOn")
+//compileJava.dependsOn checkBuildConfig
 
 dependencies {
     compile "org.json:json:20160212";
