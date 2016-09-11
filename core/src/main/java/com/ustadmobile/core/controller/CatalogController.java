@@ -31,6 +31,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -303,6 +304,14 @@ public class CatalogController extends UstadBaseController implements AppViewCho
 
     public static final int OPDS_FEEDS_INDEX_TITLE = 1;
 
+    /**
+     * Constant representing the link type for background images in course listings - this is a
+     * non-standard link and requires AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS to be set to true
+     *
+     * Constant value: "http://www.ustadmobile.com/catalog/image/background"
+     */
+    public static final String OPDS_ENTRY_BACKGROUND_LINKREL = "http://www.ustadmobile.com/catalog/image/background";
+
     private String browseButtonURL;
 
     public CatalogController(Object context) {
@@ -516,39 +525,61 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public void run() {
         UstadJSOPDSFeed feed = model.opdsFeed;
-        String[] thumbnailLinks;
+        String[] imageLinks;
         HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
             resourceMode, context);
             
-        String thumbnailFile;
+        String imageURI;
+        Vector bgVector;
         
         for(int i = 0; i < feed.entries.length && !isDestroyed(); i++) {
-            thumbnailLinks = feed.entries[i].getThumbnailLink(false);
-            thumbnailFile = null;
-            if(thumbnailLinks != null) {
-                String thumbnailURI = UMFileUtil.resolveLink(
-                        feed.href, thumbnailLinks[UstadJSOPDSEntry.LINK_HREF]);
-                if(thumbnailURI.startsWith("file://")) {
-                    thumbnailFile = thumbnailURI;//this is already on disk...
-                }else {
-                    try {
-                        thumbnailFile = cache.get(thumbnailURI);
-                    }catch(Exception e) {
-                        UstadMobileSystemImpl.l(UMLog.ERROR, 132, 
-                            feed.entries[i].title + ": " + feed.entries[i].id, e);
-                    }
-                }
+            imageLinks = feed.entries[i].getThumbnailLink(false);
+            imageURI = null;
+
+            if(imageLinks != null) {
+                imageURI = getEntryImageAsset(cache, imageLinks, feed.entries[i]);
                 
                 if(isDestroyed()) {
                     return;
                 }
                 
-                if(thumbnailFile != null) {
-                    view.setEntrythumbnail(feed.entries[i].id, thumbnailFile);
+                if(imageURI != null) {
+                    view.setEntrythumbnail(feed.entries[i].id, imageURI);
+                }
+            }
+
+            if(AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
+                bgVector = feed.entries[i].getLinks(OPDS_ENTRY_BACKGROUND_LINKREL, null);
+                if(bgVector.size() > 0 && !isDestroyed() && view != null) {
+                    imageURI = getEntryImageAsset(cache, (String[])bgVector.elementAt(0), feed.entries[i]);
+                    view.setEntryBackground(feed.entries[i].id, imageURI);
                 }
             }
         }
     }
+
+    /**
+     *
+     * @param cache
+     * @param imageLinks
+     */
+    private String getEntryImageAsset(HTTPCacheDir cache, String[] imageLinks, UstadJSOPDSEntry entry) {
+        String imageURI = UMFileUtil.resolveLink(
+                entry.parentFeed.href, imageLinks[UstadJSOPDSEntry.LINK_HREF]);
+        String imageFile = null;
+        if(imageURI.startsWith("file://")) {
+            imageFile = imageURI;//this is already on disk...
+        }else {
+            try {
+                imageFile = cache.get(imageURI);
+            }catch(Exception e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 132, entry.title + ": " + entry.id, e);
+            }
+        }
+
+        return imageFile;
+    }
+
     
     public static Hashtable makeUserCatalogArgs(Object context) {
         Hashtable args = new Hashtable();

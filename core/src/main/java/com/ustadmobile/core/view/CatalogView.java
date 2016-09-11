@@ -87,7 +87,16 @@ public interface CatalogView extends UstadView{
      * @param iconFileURI A file with an icon image
      */
     public void setEntrythumbnail(String entryId, String iconFileURI);
-    
+
+    /**
+     * Set the background for the given catalog entry.  This is not found in standard OPDS
+     * catalogs and only effective when enabled using AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS = true
+     *
+     * @param entryId The entry ID for the image to set background on
+     * @param backgroundFileURI URI of a file downloaded (in a cache directory) to use as the background
+     */
+    public void setEntryBackground(String entryId, String backgroundFileURI);
+
     /**
      * Update the download all progress bar at the bottom
      * 

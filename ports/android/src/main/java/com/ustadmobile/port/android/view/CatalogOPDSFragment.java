@@ -436,6 +436,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
+    public void setEntryBackground(String entryId, String backgroundFileURI) {
+        //TODO: Implement setting entry background on Android
+    }
+
+    @Override
     public void updateDownloadAllProgress(int loaded, int total) {
 
     }
