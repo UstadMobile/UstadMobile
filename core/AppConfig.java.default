@@ -1,6 +1,25 @@
 
-//Hello World
+package com.ustadmobile.core.impl;
+
+import com.ustadmobile.core.controller.CatalogController;
 
 public class AppConfig {
+
+    /**
+     * If enabled will use the http://www.ustadmobile.com/opds/opds-item-background to set the background of
+     * a catalog item
+     */
+    public static final boolean OPDS_ITEM_ENABLE_BACKGROUNDS = true;
+
+    /**
+     * The catalog URL that will be loaded after the user logs in
+     */
+    public static final String BASEPOINT_CATALOG_URL = CatalogController.OPDS_PROTO_DEVICE;
+
+    /**
+     * If not null there will be a large button at the bottom for browsing (e.g. to download items)
+     */
+    public static final String BASEPOINT_BROWSEBUTTON_URL = CatalogController.OPDS_PROTO_USER_FEEDLIST;
+
 
 }
