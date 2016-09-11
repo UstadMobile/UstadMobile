@@ -23,6 +23,7 @@
 @property (retain, nonatomic) IBOutlet UITableView *catalogTableView;
 @property NSMapTable *idToCellMapTable;
 @property NSMapTable *idToThumbnailTable;
+@property NSMapTable *idToBackgroundTable;
 
 @end
 
@@ -33,6 +34,8 @@
     // Do any additional setup after loading the view.
     self.idToCellMapTable = [NSMapTable strongToWeakObjectsMapTable];
     self.idToThumbnailTable = [NSMapTable strongToStrongObjectsMapTable];
+    self.idToBackgroundTable = [NSMapTable strongToStrongObjectsMapTable];
+    
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     [self.browseButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_browse_feeds] forState:UIControlStateNormal];
     [self loadCatalog];
@@ -109,14 +112,29 @@
     [self updateEntryThumbnail:entryId];
 }
 
+- (void)setEntryBackgroundWithNSString:(NSString *)entryId
+                          withNSString:(NSString *)backgroundFileURI {
+    [self.idToBackgroundTable setObject:backgroundFileURI forKey:entryId];
+    [self updateEntryBackground:entryId];
+}
+
+
 -(void)updateEntryThumbnail:(NSString *)entryId {
     CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
     NSString *iconFileURI = [self.idToThumbnailTable objectForKey:entryId];
     if(cell != nil && iconFileURI != nil) {
-        UIImage *image = [UIImage imageWithContentsOfFile:iconFileURI];
-        [cell.thumbnailImageView setImage:image];
+        [cell.thumbnailImageView setImage:[UIImage imageWithContentsOfFile:iconFileURI]];
     }
 }
+
+-(void)updateEntryBackground:(NSString *)entryId {
+    NSString *bgURI = [self.idToBackgroundTable objectForKey:entryId];
+    CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
+    if(cell != nil && bgURI != nil) {
+        [cell.backgroundImageView setImage:[UIImage imageWithContentsOfFile:bgURI]];
+    }
+}
+
 
 - (void)updateDownloadAllProgressWithInt:(jint)loaded
                                  withInt:(jint)total {
@@ -233,6 +251,7 @@
     cell.titleLabel.text = item->title_;
     [cell.progressView setHidden:YES];
     [self updateEntryThumbnail:item->id__];
+    [self updateEntryBackground:item->id__];
     return cell;
 }
 

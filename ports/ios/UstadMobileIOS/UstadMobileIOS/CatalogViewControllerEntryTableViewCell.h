@@ -13,5 +13,6 @@
 @property (nonatomic, weak) IBOutlet UILabel *titleLabel;
 @property (nonatomic, weak) IBOutlet UIProgressView *progressView;
 @property (retain, nonatomic) IBOutlet UIImageView *thumbnailImageView;
+@property (retain, nonatomic) IBOutlet UIImageView *backgroundImageView;
 
 @end

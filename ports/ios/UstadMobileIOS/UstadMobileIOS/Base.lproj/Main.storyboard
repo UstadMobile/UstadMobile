@@ -132,7 +132,10 @@
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="80"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" tag="101" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="thu-VF-d4u">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cCC-w8-eHr">
+                                                    <rect key="frame" x="0.0" y="-7" width="600" height="96"/>
+                                                </imageView>
+                                                <imageView userInteractionEnabled="NO" tag="101" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="thu-VF-d4u">
                                                     <rect key="frame" x="2" y="0.0" width="74" height="77"/>
                                                 </imageView>
                                                 <progressView opaque="NO" tag="102" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="bAc-ws-ukM">
@@ -145,8 +148,18 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstItem="cCC-w8-eHr" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" constant="-15" id="0BY-fL-ZqB"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="thu-VF-d4u" secondAttribute="bottom" id="AGJ-ue-vjz"/>
+                                                <constraint firstItem="thu-VF-d4u" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" id="Eft-yR-oxp"/>
+                                                <constraint firstItem="thu-VF-d4u" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" id="SBx-H7-aiv"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="cCC-w8-eHr" secondAttribute="trailing" constant="-8" id="ZXK-JY-Zeq"/>
+                                                <constraint firstItem="cCC-w8-eHr" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" constant="-8" id="a8k-e3-Gyq"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="cCC-w8-eHr" secondAttribute="bottom" constant="-5" id="pnS-P2-mtk"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                         <connections>
+                                            <outlet property="backgroundImageView" destination="cCC-w8-eHr" id="wOA-7M-DKw"/>
                                             <outlet property="progressView" destination="bAc-ws-ukM" id="2uX-1r-ffQ"/>
                                             <outlet property="thumbnailImageView" destination="thu-VF-d4u" id="vDY-aK-5oQ"/>
                                             <outlet property="titleLabel" destination="Ixm-Fj-cPv" id="i3W-fd-XeF"/>

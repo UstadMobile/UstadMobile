@@ -154,6 +154,7 @@
 		AD77D0611D523A8A00A2F95A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */; };
 		AD77D06C1D523A8A00A2F95A /* UstadMobileIOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D06B1D523A8A00A2F95A /* UstadMobileIOSTests.m */; };
 		AD77D0771D523A8A00A2F95A /* UstadMobileIOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0761D523A8A00A2F95A /* UstadMobileIOSUITests.m */; };
+		AD88C1B11D859DAE00D3F406 /* AppConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = AD88C1B01D859DAE00D3F406 /* AppConfig.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -467,6 +468,8 @@
 		AD77D0721D523A8A00A2F95A /* UstadMobileIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UstadMobileIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD77D0761D523A8A00A2F95A /* UstadMobileIOSUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UstadMobileIOSUITests.m; sourceTree = "<group>"; };
 		AD77D0781D523A8A00A2F95A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AD88C1AF1D859DAE00D3F406 /* AppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppConfig.h; sourceTree = "<group>"; };
+		AD88C1B01D859DAE00D3F406 /* AppConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppConfig.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -505,6 +508,8 @@
 				AD0DAAF71D761129005FAFDD /* AlignmentPattern.m */,
 				AD0DAAF81D761129005FAFDD /* AlignmentPatternNotFoundException.h */,
 				AD0DAAF91D761129005FAFDD /* AlignmentPatternNotFoundException.m */,
+				AD88C1AF1D859DAE00D3F406 /* AppConfig.h */,
+				AD88C1B01D859DAE00D3F406 /* AppConfig.m */,
 				AD0DAAFA1D761129005FAFDD /* AppView.h */,
 				AD0DAAFB1D761129005FAFDD /* AppView.m */,
 				AD0DAAFC1D761129005FAFDD /* AppViewChoiceListener.h */,
@@ -531,10 +536,10 @@
 				AD0DAB111D761129005FAFDD /* BasePointController.m */,
 				AD0DAB121D761129005FAFDD /* BasePointView.h */,
 				AD0DAB131D761129005FAFDD /* BasePointView.m */,
-				AD0DAB141D761129005FAFDD /* BCH15_5.h */,
-				AD0DAB151D761129005FAFDD /* BCH15_5.m */,
 				AD0DAB161D761129005FAFDD /* BCH_15_5.h */,
 				AD0DAB171D761129005FAFDD /* BCH_15_5.m */,
+				AD0DAB141D761129005FAFDD /* BCH15_5.h */,
+				AD0DAB151D761129005FAFDD /* BCH15_5.m */,
 				AD0DAB181D761129005FAFDD /* CatalogController.h */,
 				AD0DAB191D761129005FAFDD /* CatalogController.m */,
 				AD0DAB1A1D761129005FAFDD /* CatalogEntryInfo.h */,
@@ -1092,6 +1097,7 @@
 				AD065F9B1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m in Sources */,
 				AD0DAC571D76112A005FAFDD /* UstadOCF.m in Sources */,
 				AD0DAC231D761129005FAFDD /* OMRRecognizer.m in Sources */,
+				AD88C1B11D859DAE00D3F406 /* AppConfig.m in Sources */,
 				AD0DAC181D761129005FAFDD /* LoadControllerThread.m in Sources */,
 				AD0DABFF1D761129005FAFDD /* ClassManagementController.m in Sources */,
 				AD0DAC211D761129005FAFDD /* OMRImageSource.m in Sources */,
