@@ -148,6 +148,7 @@
                                         </tableViewCellContentView>
                                         <connections>
                                             <outlet property="progressView" destination="bAc-ws-ukM" id="2uX-1r-ffQ"/>
+                                            <outlet property="thumbnailImageView" destination="thu-VF-d4u" id="vDY-aK-5oQ"/>
                                             <outlet property="titleLabel" destination="Ixm-Fj-cPv" id="i3W-fd-XeF"/>
                                         </connections>
                                     </tableViewCell>

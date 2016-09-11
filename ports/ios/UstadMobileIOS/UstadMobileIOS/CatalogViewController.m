@@ -22,6 +22,7 @@
 - (IBAction)browseButtonClicked:(UIButton *)sender;
 @property (retain, nonatomic) IBOutlet UITableView *catalogTableView;
 @property NSMapTable *idToCellMapTable;
+@property NSMapTable *idToThumbnailTable;
 
 @end
 
@@ -31,6 +32,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.idToCellMapTable = [NSMapTable strongToWeakObjectsMapTable];
+    self.idToThumbnailTable = [NSMapTable strongToStrongObjectsMapTable];
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     [self.browseButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_browse_feeds] forState:UIControlStateNormal];
     [self loadCatalog];
@@ -103,6 +105,17 @@
 - (void)setEntrythumbnailWithNSString:(NSString *)entryId
                          withNSString:(NSString *)iconFileURI {
     
+    [self.idToThumbnailTable setObject:iconFileURI forKey:entryId];
+    [self updateEntryThumbnail:entryId];
+}
+
+-(void)updateEntryThumbnail:(NSString *)entryId {
+    CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
+    NSString *iconFileURI = [self.idToThumbnailTable objectForKey:entryId];
+    if(cell != nil && iconFileURI != nil) {
+        UIImage *image = [UIImage imageWithContentsOfFile:iconFileURI];
+        [cell.thumbnailImageView setImage:image];
+    }
 }
 
 - (void)updateDownloadAllProgressWithInt:(jint)loaded
@@ -219,6 +232,7 @@
     
     cell.titleLabel.text = item->title_;
     [cell.progressView setHidden:YES];
+    [self updateEntryThumbnail:item->id__];
     return cell;
 }
 

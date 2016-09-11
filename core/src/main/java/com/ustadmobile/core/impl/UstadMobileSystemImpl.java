@@ -1057,14 +1057,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getVersion(Object context);
 
-    public String getBasePointDefaultCatalogURL() {
-        return CatalogController.OPDS_PROTO_DEVICE;
-    }
 
-    public String getBasePointBrowseURL() {
-        return CatalogController.OPDS_PROTO_USER_FEEDLIST;
-    }
-    
     
 }
 

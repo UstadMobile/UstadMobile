@@ -220,3 +220,7 @@ iOSInjectionProject/
 
 # Shared resources added to the XCodeProject
 ports/ios/UstadMobileIOS/res
+
+## Build specific AppConfig
+core/src/main/java/com/ustadmobile/core/impl/AppConfig.java
+
