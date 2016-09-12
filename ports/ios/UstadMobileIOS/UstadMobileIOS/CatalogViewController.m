@@ -14,6 +14,7 @@
 #import "UstadJSOPDSFeed.h"
 #import "UstadJSOPDSEntry.h"
 #import "CatalogViewControllerEntryTableViewCell.h"
+#import "java/lang/Integer.h"
 
 @interface CatalogViewController ()
 @property (retain, nonatomic) IBOutlet UIButton *browseButton;
@@ -24,6 +25,10 @@
 @property NSMapTable *idToCellMapTable;
 @property NSMapTable *idToThumbnailTable;
 @property NSMapTable *idToBackgroundTable;
+
+@property UIRefreshControl *refreshControl;
+
+@property BOOL loadInProgress;
 
 @end
 
@@ -38,16 +43,29 @@
     
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     [self.browseButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_browse_feeds] forState:UIControlStateNormal];
+    self.refreshControl =[[UIRefreshControl alloc] init];
+    [self.refreshControl addTarget:self action:@selector(refreshWithUIRefreshControl:) forControlEvents:UIControlEventValueChanged];
+    [self.catalogTableView addSubview:self.refreshControl];
     [self loadCatalog];
 }
 
 -(void)loadCatalog {
-    [ComUstadmobileCoreControllerCatalogController makeControllerForViewWithComUstadmobileCoreViewCatalogView:self withJavaUtilHashtable:[self getArguments] withComUstadmobileCoreControllerControllerReadyListener:self];
+    [self loadCatalogWithArguments:[self getArguments]];
+}
+
+-(void)loadCatalogWithArguments:(JavaUtilHashtable *)args {
+    self.loadInProgress = YES;
+    [ComUstadmobileCoreControllerCatalogController makeControllerForViewWithComUstadmobileCoreViewCatalogView:self withJavaUtilHashtable:args withComUstadmobileCoreControllerControllerReadyListener:self];
 }
 
 -(void)controllerReadyWithComUstadmobileCoreControllerUstadController:(id<ComUstadmobileCoreControllerUstadController>)controller withInt:(jint)flags {
     self.catalogController = (ComUstadmobileCoreControllerCatalogController *)controller;
     dispatch_async(dispatch_get_main_queue(), ^{
+        self.loadInProgress = NO;
+        if(self.refreshControl.refreshing) {
+            [self.refreshControl endRefreshing];
+        }
+        
         NSString *title = [self.catalogController getModel]->opdsFeed_->title_;
         if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
             [self.navigationItem setTitle:title];
@@ -69,7 +87,19 @@
     [self.browseButton setTitle:browseButtonLabel forState:UIControlStateNormal];
 }
 
-
+-(void)refreshWithUIRefreshControl:(UIRefreshControl *)refreshControl {
+    if(!self.loadInProgress) {
+        JavaUtilHashtable *newArgs = (JavaUtilHashtable *)[[self getArguments] clone];
+        JavaLangInteger *flagArgs = [[JavaLangInteger alloc]initWithInt:0];
+        if([newArgs containsKeyWithId:ComUstadmobileCoreControllerCatalogController_KEY_FLAGS]) {
+            flagArgs =[newArgs getWithId:ComUstadmobileCoreControllerCatalogController_KEY_FLAGS];
+        }
+        flagArgs = [[JavaLangInteger alloc]initWithInt:([flagArgs intValue] | ComUstadmobileCoreControllerCatalogController_CACHE_DISABLED)];
+        [newArgs putWithId:ComUstadmobileCoreControllerCatalogController_KEY_FLAGS withId:flagArgs];
+        
+        [self loadCatalogWithArguments:newArgs];
+    }
+}
 
 -(void)refresh {
     

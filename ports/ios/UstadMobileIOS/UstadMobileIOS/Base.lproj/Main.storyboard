@@ -246,8 +246,8 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="GNi-fJ-4nc" firstAttribute="top" secondItem="snz-ZU-9PN" secondAttribute="bottom" id="30b-Nb-gLz"/>
-                            <constraint firstItem="snz-ZU-9PN" firstAttribute="leading" secondItem="P64-U0-Z8F" secondAttribute="leadingMargin" id="8jA-DC-tdd"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="snz-ZU-9PN" secondAttribute="trailing" id="Cpx-hs-F10"/>
+                            <constraint firstItem="snz-ZU-9PN" firstAttribute="leading" secondItem="P64-U0-Z8F" secondAttribute="leadingMargin" constant="-16" id="8jA-DC-tdd"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="snz-ZU-9PN" secondAttribute="trailing" constant="-16" id="Cpx-hs-F10"/>
                             <constraint firstItem="snz-ZU-9PN" firstAttribute="top" secondItem="DGe-VW-w97" secondAttribute="bottom" id="ech-M2-7ua"/>
                         </constraints>
                     </view>
