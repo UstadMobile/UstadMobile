@@ -162,6 +162,7 @@
     CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
     if(cell != nil && bgURI != nil) {
         [cell.backgroundImageView setImage:[UIImage imageWithContentsOfFile:bgURI]];
+        [cell.titleLabel setTextColor:[UIColor whiteColor]];
     }
 }
 
