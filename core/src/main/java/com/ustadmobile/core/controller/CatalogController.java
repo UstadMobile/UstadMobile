@@ -2037,14 +2037,20 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * 
      */
     private synchronized void initEntryStatusCheck() {
+        //TODO: For every entry marked as acquired : Make sure that the entry is still on disk
+
         CatalogEntryInfo info;
         UstadJSOPDSFeed feed = getModel().opdsFeed;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         for(int i = 0; i< feed.entries.length; i++) {
             info = getEntryInfo(feed.entries[i].id, determineSearchMode(), getContext());
-            if(info != null){
-                if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
+            if(info == null) {
+                continue;//nothing known or to check here
+            }
+
+            switch(info.acquisitionStatus) {
+                case CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS:
                     int[] fileDownloadStatus = impl.getFileDownloadStatus(info.downloadID, getContext());
                     if(fileDownloadStatus != null) {
                         int downloadStatus = fileDownloadStatus[UstadMobileSystemImpl.IDX_STATUS];
@@ -2059,14 +2065,25 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         }
                     }else {
                         //perhaps the system is not tracking the download anymore and it's actually complete
-                        int downloadedSize = 
-                            (int)UstadMobileSystemImpl.getInstance().fileSize(info.fileURI);
-                        if(downloadedSize != -1 && downloadedSize == info.downloadTotalSize) 
+                        int downloadedSize =
+                                (int)UstadMobileSystemImpl.getInstance().fileSize(info.fileURI);
+                        if(downloadedSize != -1 && downloadedSize == info.downloadTotalSize)
                             //this download has in fact completed
                             registerItemAcquisitionCompleted(feed.entries[i].id);
                     }
-                }
+                    break;
+
+                case CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED:
+                    try {
+                        if(!impl.fileExists(info.fileURI)) {
+                            setEntryInfo(feed.entries[i].id, null, resourceMode, context);
+                        }
+                    }catch(IOException e) {
+                        impl.l(UMLog.ERROR, 87, feed.entries[i].id, e);
+                    }
+                    break;
             }
+
         }
     }
     
