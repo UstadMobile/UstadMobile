@@ -60,7 +60,5 @@ dependencies {
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.joanzapata.pdfview:android-pdfview:1.0.4@aar'
 
-    //compile "com.ustadmobile.nanolrs:nanolrs-core:0.1.6"
-    compile "com.ustadmobile.nanolrs:nanolrs-android:0.1.7"
-    //compile "com.ustadmobile.nanolrs:nanolrs-ormlite:0.1.6"
+    compile "com.ustadmobile.nanolrs:nanolrs-android:0.1.8"
 }

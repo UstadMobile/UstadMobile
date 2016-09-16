@@ -199,7 +199,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
 
         XapiStatementsForwardingEndpoint.putAndQueueStatement(context, stmtObj,
-            getActiveUser(context), getActiveUserAuth(context), xapiServer);
+                xapiServer, getActiveUser(context), getActiveUserAuth(context));
 
         l(UMLog.INFO, 304, null);
 

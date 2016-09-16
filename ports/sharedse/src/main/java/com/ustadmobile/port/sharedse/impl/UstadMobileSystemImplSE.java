@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import com.ustadmobile.core.impl.ZipFileHandle;
@@ -32,6 +33,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -338,5 +341,22 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     public ZipFileHandle openZip(String name) throws IOException{
         return new ZipFileHandleSharedSE(name);
     }
+
+    /**
+     * @{inheritDoc}
+     */
+    public String hashAuth(Object context, String auth) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(auth.getBytes());
+            byte[] digest = md.digest();
+            return new String(Base64Coder.encode(digest));
+        }catch(NoSuchAlgorithmException e) {
+            l(UMLog.ERROR, 86, null, e);
+        }
+
+        return null;
+    }
+
 
 }
