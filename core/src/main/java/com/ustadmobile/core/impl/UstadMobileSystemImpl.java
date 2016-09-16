@@ -1057,6 +1057,16 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String getVersion(Object context);
 
+    /**
+     * Perform a one way hash of an authentication parameter
+     *
+     * @param context System context
+     * @param auth Authentication secret to be hashed
+     * @return The authentication secret hashed
+     */
+    public abstract String hashAuth(Object context, String auth);
+
+
 
     
 }

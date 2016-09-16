@@ -20,6 +20,11 @@ public class AppConfig {
      * If not null there will be a large button at the bottom for browsing (e.g. to download items)
      */
     public static final String BASEPOINT_BROWSEBUTTON_URL = CatalogController.OPDS_PROTO_USER_FEEDLIST;
+    
+    /**
+     * Set whether or not the title bar should appear on the Login View
+     */
+    public static final boolean LOGIN_TITLEBAR_VISIBLE = true;
 
 
 }
