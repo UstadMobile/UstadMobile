@@ -92,6 +92,11 @@ public abstract class UstadJSOPDSItem {
     public String summary;
     public Vector authors;    
     public String publisher;
+    
+    public String bgColor;
+    
+    public String textColor;
+    
     /**
     * Atom/XML feed mime type constant
     * 

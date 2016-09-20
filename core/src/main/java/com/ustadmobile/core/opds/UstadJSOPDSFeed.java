@@ -53,6 +53,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public static final String NS_OPDS = "http://opds-spec.org/2010/catalog";
     
+    public static final String NS_UMOPDSSTYLE = "http://www.ustadmobile.com/ns/xml/opdsstyle";
     
     public UstadJSOPDSEntry[] entries;
     
@@ -135,7 +136,14 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                     currentItem.publisher = xpp.getText();
                 }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
                     currentItem.publisher = xpp.getText();
-                }else if(name.equals("author")){
+                }else if(currentItem == resultFeed && name.equals("umopdsstyle:bgcolor")) {
+                    currentItem.bgColor = xpp.getText();
+                }else if(currentItem == resultFeed && name.equals("umopdsstyle:textcolor")) {
+                    currentItem.textColor = xpp.getText();
+                }
+                
+                
+                else if(name.equals("author")){
                     
                     UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
                     do
