@@ -136,9 +136,9 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                     currentItem.publisher = xpp.getText();
                 }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
                     currentItem.publisher = xpp.getText();
-                }else if(currentItem == resultFeed && name.equals("umopdsstyle:bgcolor")) {
+                }else if(currentItem == resultFeed && name.equals("umopdsstyle:bgcolor") && xpp.next() == XmlPullParser.TEXT) {
                     currentItem.bgColor = xpp.getText();
-                }else if(currentItem == resultFeed && name.equals("umopdsstyle:textcolor")) {
+                }else if(currentItem == resultFeed && name.equals("umopdsstyle:textcolor") && xpp.next() == XmlPullParser.TEXT) {
                     currentItem.textColor = xpp.getText();
                 }
                 
