@@ -63,6 +63,7 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
+import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerFactoryAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
@@ -73,6 +74,9 @@ import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.EnrollStudentActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.nanolrs.core.endpoints.*;
+import com.ustadmobile.nanolrs.core.model.*;
 
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
@@ -144,7 +148,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         downloadCompleteReceivers = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
-
+        PersistenceManager.setPersistenceManagerFactory(new PersistenceManagerFactoryAndroid());
     }
 
     /**
@@ -187,7 +191,21 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
 
     @Override
-    public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {
+    public boolean queueTinCanStatement(final JSONObject stmtObj, final Object context) {
+
+        //String xapiServer = "http://umcloud1.ustadmobile.com/umlrs/";
+        String xapiServer = getAppPref(
+                UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+
+        XapiStatementsForwardingEndpoint.putAndQueueStatement(context, stmtObj,
+                xapiServer, getActiveUser(context), getActiveUserAuth(context));
+
+        l(UMLog.INFO, 304, null);
+
+
+        /*
+
         if(sendStatementsTimer == null) {
             sendStatementsTimer = new Timer();
         }
@@ -239,7 +257,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }, 100);
 
 
-
+        */
         return true;
     }
 
