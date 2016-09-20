@@ -153,6 +153,9 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
+                                                <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Red-1n-Zz8">
+                                                    <rect key="frame" x="82" y="78" width="433" height="2"/>
+                                                </progressView>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <constraints>
@@ -168,6 +171,7 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <connections>
                                             <outlet property="backgroundImageView" destination="cCC-w8-eHr" id="wOA-7M-DKw"/>
+                                            <outlet property="lessonProgressView" destination="Red-1n-Zz8" id="sqG-dE-oMw"/>
                                             <outlet property="progressView" destination="bAc-ws-ukM" id="2uX-1r-ffQ"/>
                                             <outlet property="thumbnailImageView" destination="thu-VF-d4u" id="vDY-aK-5oQ"/>
                                             <outlet property="titleLabel" destination="Ixm-Fj-cPv" id="i3W-fd-XeF"/>

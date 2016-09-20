@@ -174,6 +174,7 @@
     NSString *iconFileURI = [self.idToThumbnailTable objectForKey:entryId];
     if(cell != nil && iconFileURI != nil) {
         [cell.thumbnailImageView setImage:[UIImage imageWithContentsOfFile:iconFileURI]];
+        [cell.lessonProgressView setHidden:NO];
     }
 }
 
@@ -305,6 +306,7 @@
     
     cell.titleLabel.text = item->title_;
     [cell.progressView setHidden:YES];
+    [cell.lessonProgressView setHidden:YES];
     [self updateEntryThumbnail:item->id__];
     [self updateEntryBackground:item->id__];
     return cell;
