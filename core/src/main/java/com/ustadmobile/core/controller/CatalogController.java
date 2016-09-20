@@ -501,7 +501,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         if(args.containsKey(KEY_BROWSE_BUTTON_URL)) {
             newController.setBrowseButtonURL((String)args.get(KEY_BROWSE_BUTTON_URL));
         }
-
+        
         newController.initEntryStatusCheck();
         return newController;
     }
