@@ -123,7 +123,9 @@
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qoR-6r-zbi">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="524"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <color key="separatorColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <color key="sectionIndexBackgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="CatalogEntryCell" rowHeight="81" id="qeD-nZ-nxB" customClass="CatalogViewControllerEntryTableViewCell">
                                         <rect key="frame" x="0.0" y="28" width="600" height="81"/>
@@ -152,6 +154,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             <constraints>
                                                 <constraint firstItem="cCC-w8-eHr" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" constant="-15" id="0BY-fL-ZqB"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="thu-VF-d4u" secondAttribute="bottom" id="AGJ-ue-vjz"/>
@@ -162,6 +165,7 @@
                                                 <constraint firstAttribute="bottomMargin" secondItem="cCC-w8-eHr" secondAttribute="bottom" constant="-5" id="pnS-P2-mtk"/>
                                             </constraints>
                                         </tableViewCellContentView>
+                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <connections>
                                             <outlet property="backgroundImageView" destination="cCC-w8-eHr" id="wOA-7M-DKw"/>
                                             <outlet property="progressView" destination="bAc-ws-ukM" id="2uX-1r-ffQ"/>
@@ -176,7 +180,7 @@
                                 </connections>
                             </tableView>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="PUe-Qi-Bpf" firstAttribute="centerX" secondItem="top-Wy-2Bv" secondAttribute="centerX" id="0ko-s3-1tj"/>
                             <constraint firstAttribute="trailingMargin" secondItem="qoR-6r-zbi" secondAttribute="trailing" id="Glz-oz-VvO"/>

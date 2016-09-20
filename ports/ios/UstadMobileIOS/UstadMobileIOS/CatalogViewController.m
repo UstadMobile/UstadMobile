@@ -16,6 +16,9 @@
 #import "CatalogViewControllerEntryTableViewCell.h"
 #import "java/lang/Integer.h"
 
+
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0];
+
 @interface CatalogViewController ()
 @property (retain, nonatomic) IBOutlet UIButton *browseButton;
 @property NSArray *dummyData;
@@ -25,6 +28,8 @@
 @property NSMapTable *idToCellMapTable;
 @property NSMapTable *idToThumbnailTable;
 @property NSMapTable *idToBackgroundTable;
+@property UIColor *catalogTextColor;
+@property UIColor *catalogBgColor;
 
 @property UIRefreshControl *refreshControl;
 
@@ -66,12 +71,27 @@
             [self.refreshControl endRefreshing];
         }
         
-        NSString *title = [self.catalogController getModel]->opdsFeed_->title_;
+        ComUstadmobileCoreOpdsUstadJSOPDSFeed *feed = [self.catalogController getModel]->opdsFeed_;
+        
+        NSString *title = feed->title_;
         if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
             [self.navigationItem setTitle:title];
         }else if(self.parentViewController != nil){
             [self.parentViewController.navigationItem setTitle:title];
         }
+        
+        jint bgColor = [feed getBgColor];
+        if(bgColor >= 0) {
+            self.catalogBgColor =UIColorFromRGB(bgColor);
+            [self.view setBackgroundColor:self.catalogBgColor];
+        }
+        
+        jint textColor = [feed getTextColor];
+        if(textColor >= 0) {
+            self.catalogTextColor = UIColorFromRGB(textColor);
+        }
+        
+        
         
         [self.catalogTableView reloadData];
     });
@@ -278,6 +298,10 @@
     }
     
     [self.idToCellMapTable setObject:cell forKey:item->id__];
+    
+    if(self.catalogTextColor != nil) {
+        [cell.titleLabel setTextColor:self.catalogTextColor];
+    }
     
     cell.titleLabel.text = item->title_;
     [cell.progressView setHidden:YES];
