@@ -19,8 +19,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    NSString *dummy = @"trump";
+    UINavigationController *navCtrl = (UINavigationController *)self.parentViewController;
+    [navCtrl setNavigationBarHidden:NO];
     // Do any additional setup after loading the view.
 }
 

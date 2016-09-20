@@ -20,6 +20,8 @@
     [super viewDidLoad];
     
     // Do any additional setup after loading the view.
+    self.webView.mediaPlaybackRequiresUserAction = NO;
+    self.webView.allowsInlineMediaPlayback = YES;
     [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.viewURL]]];
 }
 

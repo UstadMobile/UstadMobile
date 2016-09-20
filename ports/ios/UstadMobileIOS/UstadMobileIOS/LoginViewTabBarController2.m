@@ -11,6 +11,7 @@
 #import "LoginController.h"
 #import "UstadMobileSystemImpl.h"
 #import "MessageIDConstants.h"
+#import "AppConfig.h"
 
 @interface LoginViewTabBarController2 ()
 @property jint direction;
@@ -25,6 +26,12 @@
     // Do any additional setup after loading the view.
     self.loginController = [ComUstadmobileCoreControllerLoginController makeControllerForViewWithComUstadmobileCoreViewLoginView:self];
     [self.loginController setUIStrings];
+    
+    if(!ComUstadmobileCoreImplAppConfig_LOGIN_TITLEBAR_VISIBLE) {
+        UINavigationController *navController = (UINavigationController *)self.parentViewController;
+        [navController setNavigationBarHidden:YES];
+    }
+    
     if([self.tabBarButtons count]) {
         [self performSegueWithIdentifier: @"LoginViewLoginTabSegue"
                                   sender: self.tabBarButtons[0]];
