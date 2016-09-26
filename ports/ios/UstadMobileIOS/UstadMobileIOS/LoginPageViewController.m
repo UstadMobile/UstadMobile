@@ -7,16 +7,23 @@
 //
 
 #import "LoginPageViewController.h"
+#import "UstadUIViewControllerHelper.h"
 
 @interface LoginPageViewController ()
 @property NSMapTable *pageTable;
 @property NSArray *storyboardIdsByPageIndex;
+@property UstadUIViewControllerHelper *ustadVcHelper;
 @end
 
 @implementation LoginPageViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.ustadVcHelper = [[UstadUIViewControllerHelper alloc]initWithViewController:self];
+    
+    self.loginController = [ComUstadmobileCoreControllerLoginController makeControllerForViewWithComUstadmobileCoreViewLoginView:self];
+    [self.loginController setUIStrings];
+    
     self.storyboardIdsByPageIndex = @[@"loginViewLoginPage", @"loginViewRegisterPage"];
     self.pageTable = [NSMapTable strongToStrongObjectsMapTable];
     self.dataSource = self;
@@ -29,6 +36,39 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+//Start Ustad View core methods (delegated to ViewController Helper)
+-(void)setArgumentsWithHashtable:(JavaUtilHashtable *)arguments {
+    [self.ustadVcHelper setArgumentsWithHashtable:arguments];
+}
+
+-(JavaUtilHashtable *)getArguments {
+    return [self.ustadVcHelper getArguments];
+}
+
+
+- (id)getContext {
+    return [self.ustadVcHelper getContext];
+}
+
+- (jint)getDirection {
+    return [self.ustadVcHelper getDirection];
+}
+
+- (void)setDirectionWithInt:(jint)dir {
+    [self.ustadVcHelper setDirectionWithInt:dir];
+}
+
+- (void)setAppMenuCommandsWithNSStringArray:(IOSObjectArray *)labels
+                               withIntArray:(IOSIntArray *)ids {
+    //not implemented yet...
+}
+
+- (void)setUIStrings {
+    //right now there's no non tab components here with localizable ui strings
+}
+
+
 
 
 -(LoginPageContentViewController *)viewControllerAtIndex:(NSUInteger)index {
@@ -45,6 +85,26 @@
     
     return viewController;
 }
+
+
+- (void)setTitleWithNSString:(NSString *)title {
+    
+}
+
+- (void)setXAPIServerURLWithNSString:(NSString *)xAPIServerURL {
+    self.xapiServer = xAPIServerURL;
+}
+
+- (void)setAdvancedSettingsVisibleWithBoolean:(jboolean)visible {
+    
+}
+
+- (void)setVersionLabelWithNSString:(NSString *)versionLabel {
+    
+}
+
+
+
 /*
 #pragma mark - Navigation
 
@@ -73,6 +133,10 @@
     }else {
         return [self viewControllerAtIndex:(index + 1)];
     }
+}
+
+- (void)setControllerWithComUstadmobileCoreControllerLoginController:(ComUstadmobileCoreControllerLoginController *)loginController{
+ //not really used
 }
 
 @end

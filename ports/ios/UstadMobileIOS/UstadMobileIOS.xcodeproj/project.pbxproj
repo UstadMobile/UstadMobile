@@ -157,6 +157,7 @@
 		AD88C1B11D859DAE00D3F406 /* AppConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = AD88C1B01D859DAE00D3F406 /* AppConfig.m */; };
 		ADC3A2511D98168F00BDD24F /* LoginPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		ADC3A2541D9817FF00BDD24F /* LoginPageContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		ADC3A2571D993DC500BDD24F /* UstadUIViewControllerHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -476,6 +477,8 @@
 		ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginPageViewController.m; sourceTree = "<group>"; };
 		ADC3A2521D9817FF00BDD24F /* LoginPageContentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginPageContentViewController.h; sourceTree = "<group>"; };
 		ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginPageContentViewController.m; sourceTree = "<group>"; };
+		ADC3A2551D993DC500BDD24F /* UstadUIViewControllerHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadUIViewControllerHelper.h; sourceTree = "<group>"; };
+		ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadUIViewControllerHelper.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -828,6 +831,8 @@
 				ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */,
 				ADC3A2521D9817FF00BDD24F /* LoginPageContentViewController.h */,
 				ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */,
+				ADC3A2551D993DC500BDD24F /* UstadUIViewControllerHelper.h */,
+				ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -1028,6 +1033,7 @@
 				AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */,
 				AD0DAC301D761129005FAFDD /* RouterNanoHTTPD.m in Sources */,
 				AD0DAC2A1D761129005FAFDD /* QRCodeImageReader.m in Sources */,
+				ADC3A2571D993DC500BDD24F /* UstadUIViewControllerHelper.m in Sources */,
 				AD0DAC241D761129005FAFDD /* PerspectiveTransform.m in Sources */,
 				AD0DAC311D761129005FAFDD /* RsDecode.m in Sources */,
 				AD1BE6651D6D968700373721 /* UstadMobileDownloadInfo.m in Sources */,

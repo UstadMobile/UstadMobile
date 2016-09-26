@@ -15,6 +15,7 @@
 #include "UstadMobileSystemImpl.h"
 #include "LoginController.h"
 #include "MessageIDConstants.h"
+#import "LoginPageViewController.h"
 
 @interface LoginViewLoginTabViewController ()
 @property NSString *xAPIServerURL;
@@ -51,7 +52,11 @@
 }
 
 - (IBAction)loginButtonClicked:(UIButton *)sender {
-    [self.loginViewController.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:self.loginViewController.xapiServer];
+    LoginPageViewController *loginViewController = (LoginPageViewController *)self.parentViewController;
+    
+    NSString *xapiServer = loginViewController.xapiServer;
+    
+    [loginViewController.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:xapiServer];
     
 }
 
