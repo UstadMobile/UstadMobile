@@ -8,6 +8,7 @@
 
 #import "LoginPageViewController.h"
 #import "UstadUIViewControllerHelper.h"
+#import "AppConfig.h"
 
 @interface LoginPageViewController ()
 @property NSMapTable *pageTable;
@@ -22,14 +23,24 @@
     self.ustadVcHelper = [[UstadUIViewControllerHelper alloc]initWithViewController:self];
     
     self.loginController = [ComUstadmobileCoreControllerLoginController makeControllerForViewWithComUstadmobileCoreViewLoginView:self];
+    
     [self.loginController setUIStrings];
     
     self.storyboardIdsByPageIndex = @[@"loginViewLoginPage", @"loginViewRegisterPage"];
     self.pageTable = [NSMapTable strongToStrongObjectsMapTable];
     self.dataSource = self;
-    LoginPageContentViewController *startingController = [self viewControllerAtIndex:0];
-    NSArray *viewControllers = @[startingController];
-    [self setViewControllers:viewControllers direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:nil];
+    [self showViewControllerAtIndex:0 animation:NO];
+}
+
+-(void)checkTitleBarVisibility {
+    
+}
+
+-(void)viewWillAppear:(BOOL)animated {
+    if(!ComUstadmobileCoreImplAppConfig_LOGIN_TITLEBAR_VISIBLE) {
+        UINavigationController *navController = (UINavigationController *)self.parentViewController;
+        [navController setNavigationBarHidden:YES];
+    }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -84,6 +95,11 @@
     }
     
     return viewController;
+}
+-(void)showViewControllerAtIndex:(NSUInteger)index animation:(BOOL)animated {
+    UIViewController *viewController = [self viewControllerAtIndex:index];
+    NSArray *viewControllers = @[viewController];
+    [self setViewControllers:viewControllers direction:UIPageViewControllerNavigationDirectionForward animated:animated completion:nil];
 }
 
 

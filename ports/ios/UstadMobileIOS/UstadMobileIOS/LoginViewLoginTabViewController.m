@@ -19,6 +19,8 @@
 
 @interface LoginViewLoginTabViewController ()
 @property NSString *xAPIServerURL;
+@property (retain, nonatomic) IBOutlet UIButton *registerButton;
+- (IBAction)registerButtonClicked:(UIButton *)sender;
 @end
 
 @implementation LoginViewLoginTabViewController
@@ -69,4 +71,8 @@
     // Pass the selected object to the new view controller.
 }
 */
+- (IBAction)registerButtonClicked:(UIButton *)sender {
+    LoginPageViewController *loginPageViewController = (LoginPageViewController *)self.parentViewController;
+    [loginPageViewController showViewControllerAtIndex:1 animation:YES];
+}
 @end

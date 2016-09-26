@@ -71,6 +71,7 @@
             [self.refreshControl endRefreshing];
         }
         
+        
         ComUstadmobileCoreOpdsUstadJSOPDSFeed *feed = [self.catalogController getModel]->opdsFeed_;
         
         NSString *title = feed->title_;
@@ -91,9 +92,13 @@
             self.catalogTextColor = UIColorFromRGB(textColor);
         }
         
+        [self.catalogTableView setDataSource:self];
+        [self.catalogTableView setDelegate:self];
+        //[self.view layoutSubviews];
+        //[self.catalogTableView layoutIfNeeded];
+        [self.catalogTableView layoutSubviews];
         
-        
-        [self.catalogTableView reloadData];
+        //[self.catalogTableView reloadData];
     });
     [self.catalogController loadThumbnails];
 }
@@ -276,11 +281,14 @@
 */
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    NSInteger count;
     if(self.catalogController != nil) {
-        return [self.catalogController getModel]->opdsFeed_->entries_->size_;
+        count = [self.catalogController getModel]->opdsFeed_->entries_->size_;
     }else {
-        return 0;
+        count = 1;
     }
+    
+    return count;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {

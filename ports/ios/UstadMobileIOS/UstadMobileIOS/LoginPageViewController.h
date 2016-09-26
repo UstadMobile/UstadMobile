@@ -14,9 +14,13 @@
 
 #define LOGINPAGEVIEWCONTROLLER_INDEX_LOGIN 1
 #define LOGINPAGEVIEWCONTROLLER_INDEX_REGISTER 2
-#define LOGINPAGEVIEWCONTROLLER_NUMPAGES 3
+#define LOGINPAGEVIEWCONTROLLER_NUMPAGES 2
 
 @interface LoginPageViewController : UIPageViewController<UIPageViewControllerDataSource,ComUstadmobileCoreViewLoginView, UstadViewControllerWithArgs>
 @property NSString *xapiServer;
 @property ComUstadmobileCoreControllerLoginController *loginController;
+
+-(void)showViewControllerAtIndex:(NSUInteger)index animation:(BOOL)animated;
+
+
 @end

@@ -20,6 +20,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="WnK-fW-0yR"/>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lZ1-59-weG">
                                 <frame key="frameInset" minX="29" minY="279" width="551" height="30"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -43,6 +44,14 @@
                                     <constraint firstAttribute="width" constant="160" id="uWd-9w-0GP"/>
                                 </constraints>
                             </imageView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="bF9-Iq-jui">
+                                <frame key="frameInset" minX="29" minY="436" width="318" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Register"/>
+                                <connections>
+                                    <action selector="registerButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="14o-BW-Pok"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -55,8 +64,12 @@
                             <constraint firstItem="P7P-Ra-vtU" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="aHa-CO-fk1"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="as5-wd-2l8"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="top" secondItem="P7P-Ra-vtU" secondAttribute="bottom" constant="8" id="azF-Jr-gyp"/>
+                            <constraint firstItem="WnK-fW-0yR" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="bmV-Fj-Hzt"/>
                             <constraint firstItem="lZ1-59-weG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="hBQ-fO-4Hc"/>
+                            <constraint firstItem="WnK-fW-0yR" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="i0k-EU-P9x"/>
                             <constraint firstItem="Sph-7h-TFt" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="3" id="i9Q-Ez-gf0"/>
+                            <constraint firstAttribute="trailing" secondItem="WnK-fW-0yR" secondAttribute="trailing" id="jge-KN-TE8"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="WnK-fW-0yR" secondAttribute="bottom" id="kIf-xV-Tgg"/>
                             <constraint firstItem="w02-bH-0gz" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="kdx-xm-tq5"/>
                             <constraint firstItem="Sph-7h-TFt" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zM7-I3-4hh"/>
                         </constraints>
@@ -65,11 +78,12 @@
                     <connections>
                         <outlet property="loginButton" destination="w02-bH-0gz" id="lUc-yY-ivQ"/>
                         <outlet property="passwordTextField" destination="lZ1-59-weG" id="0CD-BH-yFi"/>
+                        <outlet property="registerButton" destination="bF9-Iq-jui" id="Cj0-NJ-naD"/>
                         <outlet property="usernameTextField" destination="P7P-Ra-vtU" id="nza-6I-8QR"/>
                     </connections>
                 </viewController>
             </objects>
-            <point key="canvasLocation" x="1380" y="1039"/>
+            <point key="canvasLocation" x="1380" y="1038.5307346326838"/>
         </scene>
         <!--Base Point View Controller-->
         <scene sceneID="Xtk-xx-czC">
@@ -115,15 +129,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUe-Qi-Bpf">
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUe-Qi-Bpf">
                                 <frame key="frameInset" minX="170" minY="544" width="231" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <connections>
                                     <action selector="browseButtonClicked:" destination="fAY-0c-ng0" eventType="touchUpInside" id="EQh-wh-11g"/>
                                 </connections>
                             </button>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qoR-6r-zbi">
-                                <frame key="frameInset" width="600" height="524"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qoR-6r-zbi">
+                                <frame key="frameInset" width="600" height="553"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="separatorColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="sectionIndexBackgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -182,22 +198,9 @@
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
-                                <connections>
-                                    <outlet property="dataSource" destination="fAY-0c-ng0" id="sNG-U1-fjL"/>
-                                    <outlet property="delegate" destination="fAY-0c-ng0" id="qe0-tg-5sH"/>
-                                </connections>
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="PUe-Qi-Bpf" firstAttribute="centerX" secondItem="top-Wy-2Bv" secondAttribute="centerX" id="0ko-s3-1tj"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="qoR-6r-zbi" secondAttribute="trailing" id="Glz-oz-VvO"/>
-                            <constraint firstItem="PUe-Qi-Bpf" firstAttribute="leading" secondItem="top-Wy-2Bv" secondAttribute="leadingMargin" id="U2x-e5-oIG"/>
-                            <constraint firstItem="oDx-We-xjS" firstAttribute="top" secondItem="PUe-Qi-Bpf" secondAttribute="bottom" id="dCt-BR-cZg"/>
-                            <constraint firstItem="qoR-6r-zbi" firstAttribute="leading" secondItem="top-Wy-2Bv" secondAttribute="leadingMargin" id="en4-uV-NVf"/>
-                            <constraint firstItem="qoR-6r-zbi" firstAttribute="top" secondItem="lWv-Ks-TGM" secondAttribute="bottom" id="mzj-lt-UJa"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="PUe-Qi-Bpf" secondAttribute="trailing" id="yT5-z5-1am"/>
-                        </constraints>
                     </view>
                     <connections>
                         <outlet property="browseButton" destination="PUe-Qi-Bpf" id="uFS-75-bPY"/>
@@ -206,7 +209,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BJ8-eu-B6T" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="66" y="2450"/>
+            <point key="canvasLocation" x="65.599999999999994" y="2449.4752623688159"/>
         </scene>
         <!--Login View Register Tab View Controller-->
         <scene sceneID="ep8-5N-Hgt">
@@ -306,6 +309,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="LoginBackground2" width="1080" height="1700"/>
         <image name="logo" width="1024" height="1024"/>
     </resources>
 </document>
