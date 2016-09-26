@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "LoginPageContentViewController.h"
 
-@interface LoginViewRegisterTabViewController : UIViewController
+@interface LoginViewRegisterTabViewController : LoginPageContentViewController
 
 @end

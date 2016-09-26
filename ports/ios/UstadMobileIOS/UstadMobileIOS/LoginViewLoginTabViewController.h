@@ -8,8 +8,9 @@
 
 #import <UIKit/UIKit.h>
 #import "LoginViewTabBarController2.h"
+#import "LoginPageContentViewController.h"
 
-@interface LoginViewLoginTabViewController : UIViewController
+@interface LoginViewLoginTabViewController : LoginPageContentViewController
 @property (retain, nonatomic) IBOutlet UITextField *usernameTextField;
 @property (retain, nonatomic) IBOutlet UITextField *passwordTextField;
 @property (retain, nonatomic) IBOutlet UIButton *loginButton;

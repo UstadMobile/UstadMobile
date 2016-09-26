@@ -155,6 +155,8 @@
 		AD77D06C1D523A8A00A2F95A /* UstadMobileIOSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D06B1D523A8A00A2F95A /* UstadMobileIOSTests.m */; };
 		AD77D0771D523A8A00A2F95A /* UstadMobileIOSUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0761D523A8A00A2F95A /* UstadMobileIOSUITests.m */; };
 		AD88C1B11D859DAE00D3F406 /* AppConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = AD88C1B01D859DAE00D3F406 /* AppConfig.m */; };
+		ADC3A2511D98168F00BDD24F /* LoginPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		ADC3A2541D9817FF00BDD24F /* LoginPageContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -470,6 +472,10 @@
 		AD77D0781D523A8A00A2F95A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AD88C1AF1D859DAE00D3F406 /* AppConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppConfig.h; sourceTree = "<group>"; };
 		AD88C1B01D859DAE00D3F406 /* AppConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppConfig.m; sourceTree = "<group>"; };
+		ADC3A24F1D98168F00BDD24F /* LoginPageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginPageViewController.h; sourceTree = "<group>"; };
+		ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginPageViewController.m; sourceTree = "<group>"; };
+		ADC3A2521D9817FF00BDD24F /* LoginPageContentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginPageContentViewController.h; sourceTree = "<group>"; };
+		ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginPageContentViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -818,6 +824,10 @@
 				AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */,
 				AD77D0571D523A8A00A2F95A /* ViewController.h */,
 				AD77D0581D523A8A00A2F95A /* ViewController.m */,
+				ADC3A24F1D98168F00BDD24F /* LoginPageViewController.h */,
+				ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */,
+				ADC3A2521D9817FF00BDD24F /* LoginPageContentViewController.h */,
+				ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -1100,6 +1110,7 @@
 				AD88C1B11D859DAE00D3F406 /* AppConfig.m in Sources */,
 				AD0DAC181D761129005FAFDD /* LoadControllerThread.m in Sources */,
 				AD0DABFF1D761129005FAFDD /* ClassManagementController.m in Sources */,
+				ADC3A2541D9817FF00BDD24F /* LoginPageContentViewController.m in Sources */,
 				AD0DAC211D761129005FAFDD /* OMRImageSource.m in Sources */,
 				AD0DAC4A1D761129005FAFDD /* UstadBaseController.m in Sources */,
 				AD0DAC461D761129005FAFDD /* UserSettingItem.m in Sources */,
@@ -1124,6 +1135,7 @@
 				AD0DAC1A1D761129005FAFDD /* LogicalSeed.m in Sources */,
 				AD0DAC021D761129005FAFDD /* ContainerController.m in Sources */,
 				AD12B4211D631228005D6D5D /* LoginViewLoginTabViewController.m in Sources */,
+				ADC3A2511D98168F00BDD24F /* LoginPageViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
