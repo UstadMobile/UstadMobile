@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AD065F9B1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m in Sources */ = {isa = PBXBuildFile; fileRef = AD065F9A1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
-		AD065F9E1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m in Sources */ = {isa = PBXBuildFile; fileRef = AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD08D4641D5B4C96003CB878 /* LoginViewRegisterTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD0DAAEE1D6F29AD005FAFDD /* ContainerPageContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0DAAED1D6F29AD005FAFDD /* ContainerPageContentViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD0DAAF11D6F3191005FAFDD /* ContainerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -148,7 +146,6 @@
 		AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD7745E61D539DFE00A56306 /* UMLogIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD77D0531D523A8A00A2F95A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0521D523A8A00A2F95A /* main.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0551D523A8A00A2F95A /* AppDelegate.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
-		AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD77D0581D523A8A00A2F95A /* ViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD77D05C1D523A8A00A2F95A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05A1D523A8A00A2F95A /* Main.storyboard */; };
 		AD77D05E1D523A8A00A2F95A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05D1D523A8A00A2F95A /* Assets.xcassets */; };
 		AD77D0611D523A8A00A2F95A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */; };
@@ -178,10 +175,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		AD065F991D5CF6AE00AFF7AF /* LoginViewTabBarController2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewTabBarController2.h; sourceTree = "<group>"; };
-		AD065F9A1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewTabBarController2.m; sourceTree = "<group>"; };
-		AD065F9C1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginTabBarControllerSegue.h; sourceTree = "<group>"; };
-		AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginTabBarControllerSegue.m; sourceTree = "<group>"; };
 		AD08D4621D5B4C96003CB878 /* LoginViewRegisterTabViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewRegisterTabViewController.h; sourceTree = "<group>"; };
 		AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewRegisterTabViewController.m; sourceTree = "<group>"; };
 		AD0DAAEC1D6F29AD005FAFDD /* ContainerPageContentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContainerPageContentViewController.h; sourceTree = "<group>"; };
@@ -459,8 +452,6 @@
 		AD77D0521D523A8A00A2F95A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		AD77D0541D523A8A00A2F95A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		AD77D0551D523A8A00A2F95A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		AD77D0571D523A8A00A2F95A /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		AD77D0581D523A8A00A2F95A /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		AD77D05B1D523A8A00A2F95A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AD77D05D1D523A8A00A2F95A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AD77D0601D523A8A00A2F95A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -804,14 +795,14 @@
 				AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */,
 				AD77D0621D523A8A00A2F95A /* Info.plist */,
 				AD77D05F1D523A8A00A2F95A /* LaunchScreen.storyboard */,
-				AD065F9C1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.h */,
-				AD065F9D1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m */,
+				ADC3A2521D9817FF00BDD24F /* LoginPageContentViewController.h */,
+				ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */,
+				ADC3A24F1D98168F00BDD24F /* LoginPageViewController.h */,
+				ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */,
 				AD12B41F1D631228005D6D5D /* LoginViewLoginTabViewController.h */,
 				AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */,
 				AD08D4621D5B4C96003CB878 /* LoginViewRegisterTabViewController.h */,
 				AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */,
-				AD065F991D5CF6AE00AFF7AF /* LoginViewTabBarController2.h */,
-				AD065F9A1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m */,
 				AD77D05A1D523A8A00A2F95A /* Main.storyboard */,
 				AD77D0511D523A8A00A2F95A /* Supporting Files */,
 				AD7745E51D539DFE00A56306 /* UMLogIOS.h */,
@@ -824,15 +815,9 @@
 				AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */,
 				AD46A6421D524FC600C63A29 /* UstadMobileSystemImplIOS.h */,
 				AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */,
-				AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */,
-				AD77D0571D523A8A00A2F95A /* ViewController.h */,
-				AD77D0581D523A8A00A2F95A /* ViewController.m */,
-				ADC3A24F1D98168F00BDD24F /* LoginPageViewController.h */,
-				ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */,
-				ADC3A2521D9817FF00BDD24F /* LoginPageContentViewController.h */,
-				ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */,
 				ADC3A2551D993DC500BDD24F /* UstadUIViewControllerHelper.h */,
 				ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */,
+				AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */,
 			);
 			path = UstadMobileIOS;
 			sourceTree = "<group>";
@@ -1024,7 +1009,6 @@
 				AD0DAC101D761129005FAFDD /* FinderPatternNotFoundException.m in Sources */,
 				AD0DAC171D761129005FAFDD /* Line.m in Sources */,
 				AD0DAC0D1D761129005FAFDD /* EPUBNavDocument.m in Sources */,
-				AD065F9E1D5CF7EA00AFF7AF /* LoginTabBarControllerSegue.m in Sources */,
 				AD0DABF01D761129005FAFDD /* AttendanceSheetImage.m in Sources */,
 				AD0DAC5E1D76112A005FAFDD /* ZipFileHandleSharedSE.m in Sources */,
 				AD0DAC1B1D761129005FAFDD /* LoginController.m in Sources */,
@@ -1104,13 +1088,11 @@
 				AD0DAC1C1D761129005FAFDD /* LoginView.m in Sources */,
 				AD0DAC421D761129005FAFDD /* UMTinCanUtil.m in Sources */,
 				AD0DAC4D1D761129005FAFDD /* UstadJSOPDSEntry.m in Sources */,
-				AD77D0591D523A8A00A2F95A /* ViewController.m in Sources */,
 				AD0DAC431D761129005FAFDD /* UMUtil.m in Sources */,
 				AD0DAC3F1D761129005FAFDD /* UMIOUtils.m in Sources */,
 				AD0DAC1D1D761129005FAFDD /* MessageIDConstants.m in Sources */,
 				AD0DABF31D761129005FAFDD /* Base64Coder.m in Sources */,
 				AD0DAC371D761129005FAFDD /* TestUtils.m in Sources */,
-				AD065F9B1D5CF6AE00AFF7AF /* LoginViewTabBarController2.m in Sources */,
 				AD0DAC571D76112A005FAFDD /* UstadOCF.m in Sources */,
 				AD0DAC231D761129005FAFDD /* OMRRecognizer.m in Sources */,
 				AD88C1B11D859DAE00D3F406 /* AppConfig.m in Sources */,

@@ -10,6 +10,7 @@
         <!--Login-->
         <scene sceneID="tne-QT-ifu">
             <objects>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <viewController storyboardIdentifier="loginViewLoginPage" id="BYZ-38-t0r" customClass="LoginViewLoginTabViewController" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
@@ -67,9 +68,8 @@
                         <outlet property="usernameTextField" destination="P7P-Ra-vtU" id="nza-6I-8QR"/>
                     </connections>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1606" y="1045"/>
+            <point key="canvasLocation" x="1380" y="1039"/>
         </scene>
         <!--Base Point View Controller-->
         <scene sceneID="Xtk-xx-czC">
@@ -101,7 +101,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fN2-c5-nnS" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="129" y="1857"/>
+            <point key="canvasLocation" x="66" y="1716"/>
         </scene>
         <!--Catalog View Controller-->
         <scene sceneID="HQH-oJ-IqI">
@@ -206,7 +206,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BJ8-eu-B6T" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="129" y="2599"/>
+            <point key="canvasLocation" x="66" y="2450"/>
         </scene>
         <!--Login View Register Tab View Controller-->
         <scene sceneID="ep8-5N-Hgt">
@@ -233,7 +233,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="KOY-xF-Kxa" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="884" y="1862"/>
+            <point key="canvasLocation" x="2017" y="1039"/>
         </scene>
         <!--Container View Controller-->
         <scene sceneID="tiX-BZ-WqO">
@@ -241,7 +241,7 @@
                 <pageViewController storyboardIdentifier="ContainerViewController" autoresizesArchivedViewToFullSize="NO" transitionStyle="scroll" navigationOrientation="horizontal" spineLocation="none" id="baI-Ep-xiB" customClass="ContainerViewController" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZCj-nA-ury" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1609" y="1843"/>
+            <point key="canvasLocation" x="1049" y="1724"/>
         </scene>
         <!--Container Page Content View Controller-->
         <scene sceneID="HmZ-72-nYe">
@@ -274,7 +274,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9GV-DY-FnR" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1609" y="2583"/>
+            <point key="canvasLocation" x="1049" y="2457"/>
         </scene>
         <!--Login Page View Controller-->
         <scene sceneID="DlV-5f-TIT">
@@ -284,67 +284,7 @@
                 </pageViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ei5-Fs-eRJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="891" y="380"/>
-        </scene>
-        <!--Login-->
-        <scene sceneID="Of1-Wi-eDH">
-            <objects>
-                <viewController storyboardIdentifier="LoginViewController" id="ITh-zc-ADZ" customClass="LoginViewTabBarController2" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="81S-s1-UC1"/>
-                        <viewControllerLayoutGuide type="bottom" id="i1n-It-wrh"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="ytm-Zh-6wA">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="O9u-wt-GIg">
-                                <frame key="frameInset" width="600" height="600"/>
-                            </imageView>
-                            <containerView opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ADU-aY-C5r">
-                                <frame key="frameInset" minY="105" width="600" height="547"/>
-                            </containerView>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xin-3J-MB1">
-                                <frame key="frameInset" minX="497" minY="65" width="83" height="34"/>
-                                <state key="normal" title="Button"/>
-                                <connections>
-                                    <segue destination="Myq-1M-Tvb" kind="custom" identifier="LoginViewRegisterTabSegue" customClass="LoginTabBarControllerSegue" id="3v3-fW-MWb"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gY4-8x-eGE">
-                                <frame key="frameInset" minY="65" width="127" height="33"/>
-                                <state key="normal" title="VC1"/>
-                                <connections>
-                                    <segue destination="BYZ-38-t0r" kind="custom" identifier="LoginViewLoginTabSegue" customClass="LoginTabBarControllerSegue" id="kU9-8l-gDv"/>
-                                </connections>
-                            </button>
-                        </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <constraints>
-                            <constraint firstItem="gY4-8x-eGE" firstAttribute="width" secondItem="xin-3J-MB1" secondAttribute="width" id="Baf-OK-QVM"/>
-                            <constraint firstItem="O9u-wt-GIg" firstAttribute="leading" secondItem="ytm-Zh-6wA" secondAttribute="leadingMargin" constant="-20" id="C8u-Dy-qYc"/>
-                            <constraint firstItem="gY4-8x-eGE" firstAttribute="leading" secondItem="ytm-Zh-6wA" secondAttribute="leadingMargin" id="JU9-8E-2AP"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="O9u-wt-GIg" secondAttribute="trailing" constant="-20" id="KNw-ho-Yq6"/>
-                            <constraint firstItem="i1n-It-wrh" firstAttribute="top" secondItem="O9u-wt-GIg" secondAttribute="bottom" id="UrB-1Z-ZQO"/>
-                            <constraint firstItem="O9u-wt-GIg" firstAttribute="top" secondItem="ytm-Zh-6wA" secondAttribute="topMargin" id="YvH-Pi-8oS"/>
-                            <constraint firstItem="xin-3J-MB1" firstAttribute="trailing" secondItem="ytm-Zh-6wA" secondAttribute="trailingMargin" id="aN5-MY-MYT"/>
-                            <constraint firstItem="ADU-aY-C5r" firstAttribute="leading" secondItem="ytm-Zh-6wA" secondAttribute="leadingMargin" id="eT5-xf-0iG"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="ADU-aY-C5r" secondAttribute="trailing" id="h1Y-Gr-FC8"/>
-                            <constraint firstAttribute="bottomMargin" secondItem="ADU-aY-C5r" secondAttribute="bottom" id="ngT-f3-g6Z"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Login" id="MqE-Cz-sGZ"/>
-                    <connections>
-                        <outlet property="loginTabButton" destination="gY4-8x-eGE" id="hbi-M0-WfI"/>
-                        <outlet property="placeholderView" destination="ADU-aY-C5r" id="uil-Kz-mq0"/>
-                        <outlet property="registerTabButton" destination="xin-3J-MB1" id="Ysz-Pq-lKp"/>
-                        <outletCollection property="tabBarButtons" destination="gY4-8x-eGE" id="24V-M2-Uya"/>
-                        <outletCollection property="tabBarButtons" destination="xin-3J-MB1" id="U4R-PA-Shg"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="uQK-Df-Cog" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="879" y="1040"/>
+            <point key="canvasLocation" x="742" y="1039"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="91p-7h-cfI">
@@ -366,7 +306,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LoginBackground2" width="1080" height="1700"/>
         <image name="logo" width="1024" height="1024"/>
     </resources>
 </document>

@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "LoginViewTabBarController2.h"
 #import "LoginPageContentViewController.h"
 
 @interface LoginViewLoginTabViewController : LoginPageContentViewController
@@ -16,5 +15,4 @@
 @property (retain, nonatomic) IBOutlet UIButton *loginButton;
 - (IBAction)loginButtonClicked:(UIButton *)sender;
 - (void)setXAPIServerURLWithNSString:(NSString *) xAPIServerURL;
-@property LoginViewTabBarController2 *loginViewController;
 @end
