@@ -29,7 +29,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="2iC-I0-ez1">
-                                <frame key="frameInset" minX="16" minY="293" width="343" height="156"/>
+                                <frame key="frameInset" minX="16" minY="293" width="343" height="198"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P7P-Ra-vtU">
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
@@ -55,6 +55,9 @@
                                         <connections>
                                             <action selector="registerButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="14o-BW-Pok"/>
                                         </connections>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uMh-GA-qel">
+                                        <state key="normal" title="Forgot Password?"/>
                                     </button>
                                 </subviews>
                             </stackView>
