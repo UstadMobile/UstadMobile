@@ -55,7 +55,7 @@ import java.util.Hashtable;
 
 
 /**
- * 
+ * w
  * @author varuna
  */
 public class LoginController extends UstadBaseController{
@@ -270,6 +270,9 @@ public class LoginController extends UstadBaseController{
         HTTPResult registrationResult = UstadMobileSystemImpl.getInstance().makeRequest(url, 
             headers, userInfoParams, "POST");
         if(registrationResult.getStatus() != 200) {
+            String serverResponse = new String(registrationResult.getResponse());
+            UstadMobileSystemImpl.l(UMLog.ERROR, 83, registrationResult.getStatus() + ';' +
+                    serverResponse);
             throw new IOException("Registration error: code " 
                     + registrationResult.getStatus());
         }
