@@ -276,9 +276,7 @@ public class LoginController extends UstadBaseController{
             String errorMessage = "General error: try again later";
             if(registrationResult.getStatus() >= 400 && registrationResult.getStatus() < 500) {
                 //there may be useful info for the user - e.g. username taken etc
-                try {
-
-                }
+                
             }
 
 
