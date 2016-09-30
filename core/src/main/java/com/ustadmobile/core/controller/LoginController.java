@@ -273,6 +273,15 @@ public class LoginController extends UstadBaseController{
             String serverResponse = new String(registrationResult.getResponse());
             UstadMobileSystemImpl.l(UMLog.ERROR, 83, registrationResult.getStatus() + ';' +
                     serverResponse);
+            String errorMessage = "General error: try again later";
+            if(registrationResult.getStatus() >= 400 && registrationResult.getStatus() < 500) {
+                //there may be useful info for the user - e.g. username taken etc
+                try {
+
+                }
+            }
+
+
             throw new IOException("Registration error: code " 
                     + registrationResult.getStatus());
         }
@@ -371,6 +380,7 @@ public class LoginController extends UstadBaseController{
                     JSONObject obj = new JSONObject(serverResponse);
                     String newUsername = obj.getString("username");
                     String newPassword = obj.getString("password");
+                    UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
                     thisCtrl.handleUserLoginAuthComplete(newUsername, newPassword);
                 }catch(Exception e) {
                     UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
