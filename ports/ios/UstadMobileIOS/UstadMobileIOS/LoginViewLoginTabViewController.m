@@ -32,7 +32,7 @@
 
 -(void)setUIStrings {
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
-    self.usernameTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_username];
+    self.usernameTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_email];
     self.passwordTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_password];
     [self.loginButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_login] forState:UIControlStateNormal];
 }
