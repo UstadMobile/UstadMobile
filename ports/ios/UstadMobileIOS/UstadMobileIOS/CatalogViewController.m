@@ -53,6 +53,22 @@
     self.refreshControl =[[UIRefreshControl alloc] init];
     [self.refreshControl addTarget:self action:@selector(refreshWithUIRefreshControl:) forControlEvents:UIControlEventValueChanged];
     [self.catalogTableView addSubview:self.refreshControl];
+    
+    //Set a color for the title bar
+    UIColor *navBarColor = nil;
+    if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+        //catalog view
+        UINavigationController *navController = (UINavigationController *)self.parentViewController;
+        navBarColor = [UIColor colorWithRed:0.325 green:0.73 blue:0.894 alpha:1];
+        [navController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+        //navController.navigationBar.translucent = NO;
+        [navController.navigationBar setBarTintColor:navBarColor];
+        //[navController.navigationBar setTintColor:[UIColor whiteColor]];
+        //[navController.navigationBar.topItem setTitle:@""];
+    }else {
+        //nested within base point view
+    }
+    
     [self loadCatalog];
 }
 
@@ -181,7 +197,6 @@
     NSString *iconFileURI = [self.idToThumbnailTable objectForKey:entryId];
     if(cell != nil && iconFileURI != nil) {
         [cell.thumbnailImageView setImage:[UIImage imageWithContentsOfFile:iconFileURI]];
-        [cell.lessonProgressView setHidden:NO];
     }
 }
 
@@ -191,6 +206,7 @@
     if(cell != nil && bgURI != nil) {
         [cell.backgroundImageView setImage:[UIImage imageWithContentsOfFile:bgURI]];
         [cell.titleLabel setTextColor:[UIColor whiteColor]];
+        [cell.rightProgressIcon setHidden:YES];
     }
 }
 
@@ -316,9 +332,13 @@
     
     cell.titleLabel.text = item->title_;
     [cell.progressView setHidden:YES];
-    [cell.lessonProgressView setHidden:YES];
     [self updateEntryThumbnail:item->id__];
     [self updateEntryBackground:item->id__];
+    
+    if(indexPath.row >= 2) {
+        [cell.rightProgressIcon setImage:[UIImage imageNamed:@"phases-progress-icon-empty"]];
+    }
+    
     return cell;
 }
 

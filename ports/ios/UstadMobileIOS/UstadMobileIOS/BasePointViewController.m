@@ -22,10 +22,21 @@
     [super viewDidLoad];
     UINavigationController *navCtrl = (UINavigationController *)self.parentViewController;
     [navCtrl setNavigationBarHidden:NO];
+    [navCtrl.view layoutIfNeeded];
+    [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -60)
+                                                         forBarMetrics:UIBarMetricsDefault];
+
     [self.catalogContainerView setTranslatesAutoresizingMaskIntoConstraints:YES];
     // Do any additional setup after loading the view.
 }
 
+
+-(void)viewWillAppear:(BOOL)animated {
+    UINavigationController *navCtrl = (UINavigationController *)self.parentViewController;
+    [navCtrl.navigationBar setBarTintColor:[UIColor colorWithRed:(247.0f/255.0f) green:(247.0f/255.0f) blue:(247.0f/255.0f) alpha:1]];
+    [navCtrl.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor blackColor]}];
+
+}
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.

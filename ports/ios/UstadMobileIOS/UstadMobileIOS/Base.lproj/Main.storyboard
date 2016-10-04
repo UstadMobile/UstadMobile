@@ -150,7 +150,7 @@
                                         <rect key="frame" x="0.0" y="28" width="375" height="81"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="qeD-nZ-nxB" id="ecu-VU-9MV">
-                                            <frame key="frameInset" width="375" height="80"/>
+                                            <frame key="frameInset" width="375" height="81"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cCC-w8-eHr">
@@ -167,6 +167,13 @@
                                                     <frame key="frameInset" minX="82" minY="70" width="503" height="2"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 </progressView>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="phases-progress-icon" translatesAutoresizingMaskIntoConstraints="NO" id="SxK-RD-wHg">
+                                                    <frame key="frameInset" minX="300" width="74" height="74"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="74" id="Ard-n1-yJX"/>
+                                                        <constraint firstAttribute="width" constant="74" id="aKC-UW-wRN"/>
+                                                    </constraints>
+                                                </imageView>
                                                 <label opaque="NO" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Title:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ixm-Fj-cPv">
                                                     <frame key="frameInset" minX="82" minY="8" width="510" height="21"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -174,10 +181,6 @@
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Red-1n-Zz8">
-                                                    <frame key="frameInset" minX="82" minY="78" width="433" height="2"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                </progressView>
                                             </subviews>
                                             <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                             <constraints>
@@ -187,14 +190,15 @@
                                                 <constraint firstItem="thu-VF-d4u" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" id="SBx-H7-aiv"/>
                                                 <constraint firstAttribute="trailingMargin" secondItem="cCC-w8-eHr" secondAttribute="trailing" constant="-8" id="ZXK-JY-Zeq"/>
                                                 <constraint firstItem="cCC-w8-eHr" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" constant="-8" id="a8k-e3-Gyq"/>
+                                                <constraint firstAttribute="trailing" secondItem="SxK-RD-wHg" secondAttribute="trailing" constant="8" id="pYj-me-il3"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="cCC-w8-eHr" secondAttribute="bottom" constant="-5" id="pnS-P2-mtk"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                         <connections>
                                             <outlet property="backgroundImageView" destination="cCC-w8-eHr" id="wOA-7M-DKw"/>
-                                            <outlet property="lessonProgressView" destination="Red-1n-Zz8" id="sqG-dE-oMw"/>
                                             <outlet property="progressView" destination="bAc-ws-ukM" id="2uX-1r-ffQ"/>
+                                            <outlet property="rightProgressIcon" destination="SxK-RD-wHg" id="vgW-Fo-P2d"/>
                                             <outlet property="thumbnailImageView" destination="thu-VF-d4u" id="vDY-aK-5oQ"/>
                                             <outlet property="titleLabel" destination="Ixm-Fj-cPv" id="i3W-fd-XeF"/>
                                         </connections>
@@ -205,7 +209,7 @@
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="qoR-6r-zbi" firstAttribute="leading" secondItem="top-Wy-2Bv" secondAttribute="leadingMargin" constant="-16" id="L7e-fu-pJt"/>
-                            <constraint firstItem="qoR-6r-zbi" firstAttribute="top" secondItem="lWv-Ks-TGM" secondAttribute="bottom" constant="36" id="iKS-Vt-kLl"/>
+                            <constraint firstItem="qoR-6r-zbi" firstAttribute="top" secondItem="lWv-Ks-TGM" secondAttribute="bottom" constant="46" id="iKS-Vt-kLl"/>
                             <constraint firstAttribute="trailingMargin" secondItem="qoR-6r-zbi" secondAttribute="trailing" constant="-16" id="iNi-ZX-FG3"/>
                         </constraints>
                     </view>
@@ -387,5 +391,6 @@
     <resources>
         <image name="LoginBackground2" width="1080" height="1700"/>
         <image name="logo" width="1024" height="1024"/>
+        <image name="phases-progress-icon" width="640" height="640"/>
     </resources>
 </document>
