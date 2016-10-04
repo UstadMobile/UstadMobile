@@ -99,7 +99,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ydm-JP-sTe">
-                                <frame key="frameInset" minY="56" width="375" height="572"/>
+                                <frame key="frameInset" width="375" height="572"/>
                                 <connections>
                                     <segue destination="fAY-0c-ng0" kind="embed" id="d4l-FH-tgh"/>
                                 </connections>
@@ -140,9 +140,8 @@
                                     <action selector="browseButtonClicked:" destination="fAY-0c-ng0" eventType="touchUpInside" id="EQh-wh-11g"/>
                                 </connections>
                             </button>
-                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qoR-6r-zbi">
-                                <frame key="frameInset" width="375" height="553"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qoR-6r-zbi">
+                                <frame key="frameInset" minY="56" width="375" height="553"/>
                                 <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="separatorColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="sectionIndexBackgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -204,6 +203,11 @@
                             </tableView>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="qoR-6r-zbi" firstAttribute="leading" secondItem="top-Wy-2Bv" secondAttribute="leadingMargin" constant="-16" id="L7e-fu-pJt"/>
+                            <constraint firstItem="qoR-6r-zbi" firstAttribute="top" secondItem="lWv-Ks-TGM" secondAttribute="bottom" constant="36" id="iKS-Vt-kLl"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="qoR-6r-zbi" secondAttribute="trailing" constant="-16" id="iNi-ZX-FG3"/>
+                        </constraints>
                     </view>
                     <connections>
                         <outlet property="browseButton" destination="PUe-Qi-Bpf" id="uFS-75-bPY"/>

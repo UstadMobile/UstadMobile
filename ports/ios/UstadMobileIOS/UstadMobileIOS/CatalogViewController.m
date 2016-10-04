@@ -46,6 +46,8 @@
     self.idToThumbnailTable = [NSMapTable strongToStrongObjectsMapTable];
     self.idToBackgroundTable = [NSMapTable strongToStrongObjectsMapTable];
     
+    [self.catalogTableView setTranslatesAutoresizingMaskIntoConstraints:YES];
+    
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     [self.browseButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_browse_feeds] forState:UIControlStateNormal];
     self.refreshControl =[[UIRefreshControl alloc] init];
