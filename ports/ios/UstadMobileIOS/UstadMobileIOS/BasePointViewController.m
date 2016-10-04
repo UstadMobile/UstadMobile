@@ -13,6 +13,7 @@
 
 @interface BasePointViewController ()
 @property ComUstadmobileCoreControllerBasePointController *basePointController;
+@property (retain, nonatomic) IBOutlet UIView *catalogContainerView;
 @end
 
 @implementation BasePointViewController
@@ -21,6 +22,7 @@
     [super viewDidLoad];
     UINavigationController *navCtrl = (UINavigationController *)self.parentViewController;
     [navCtrl setNavigationBarHidden:NO];
+    [self.catalogContainerView setTranslatesAutoresizingMaskIntoConstraints:YES];
     // Do any additional setup after loading the view.
 }
 
