@@ -26,7 +26,7 @@
     
     [self.loginController setUIStrings];
     
-    self.storyboardIdsByPageIndex = @[@"loginViewLoginPage", @"loginViewRegisterPage"];
+    self.storyboardIdsByPageIndex = @[@"loginViewLoginPage", @"loginViewRegisterPage", @"loginViewForgotPasswordPage"];
     self.pageTable = [NSMapTable strongToStrongObjectsMapTable];
     self.dataSource = self;
     [self showViewControllerAtIndex:0 animation:NO];
@@ -84,7 +84,7 @@
 
 -(LoginPageContentViewController *)viewControllerAtIndex:(NSUInteger)index {
     LoginPageContentViewController *viewController = nil;
-    if(index <= 2) {
+    if(index < 3) {
         NSString *indexStr = [NSString stringWithFormat:@"%i", (int)index];
         viewController = [self.pageTable objectForKey:indexStr];
         if(viewController == nil) {

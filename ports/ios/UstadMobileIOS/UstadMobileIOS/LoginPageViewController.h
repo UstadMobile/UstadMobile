@@ -14,7 +14,7 @@
 
 #define LOGINPAGEVIEWCONTROLLER_INDEX_LOGIN 1
 #define LOGINPAGEVIEWCONTROLLER_INDEX_REGISTER 2
-#define LOGINPAGEVIEWCONTROLLER_NUMPAGES 2
+#define LOGINPAGEVIEWCONTROLLER_NUMPAGES 3
 
 @interface LoginPageViewController : UIPageViewController<UIPageViewControllerDataSource,ComUstadmobileCoreViewLoginView, UstadViewControllerWithArgs>
 @property NSString *xapiServer;

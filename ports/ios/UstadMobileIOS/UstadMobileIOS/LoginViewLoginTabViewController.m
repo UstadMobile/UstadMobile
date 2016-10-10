@@ -21,6 +21,8 @@
 @property NSString *xAPIServerURL;
 @property (retain, nonatomic) IBOutlet UIButton *registerButton;
 - (IBAction)registerButtonClicked:(UIButton *)sender;
+- (IBAction)forgotPasswordButtonClicked:(UIButton *)sender;
+
 @end
 
 @implementation LoginViewLoginTabViewController
@@ -75,4 +77,10 @@
     LoginPageViewController *loginPageViewController = (LoginPageViewController *)self.parentViewController;
     [loginPageViewController showViewControllerAtIndex:1 animation:YES];
 }
+
+- (IBAction)forgotPasswordButtonClicked:(UIButton *)sender {
+    LoginPageViewController *loginViewCtrl = (LoginPageViewController *)self.parentViewController;
+    [loginViewCtrl showViewControllerAtIndex:2 animation:YES];
+}
+
 @end

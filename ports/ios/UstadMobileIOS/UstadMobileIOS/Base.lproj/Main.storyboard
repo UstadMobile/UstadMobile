@@ -16,7 +16,7 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="WnK-fW-0yR"/>
@@ -28,7 +28,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="2iC-I0-ez1">
-                                <frame key="frameInset" minX="16" minY="293" width="288" height="198"/>
+                                <frame key="frameInset" minX="16" minY="293" width="343" height="198"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P7P-Ra-vtU">
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
@@ -57,6 +57,9 @@
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uMh-GA-qel">
                                         <state key="normal" title="Forgot Password?"/>
+                                        <connections>
+                                            <action selector="forgotPasswordButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="f0e-5a-3Ub"/>
+                                        </connections>
                                     </button>
                                 </subviews>
                             </stackView>
@@ -95,7 +98,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Rjz-me-aKl"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="b4g-h4-Hqn">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ydm-JP-sTe">
@@ -140,8 +143,7 @@
                                     <action selector="browseButtonClicked:" destination="fAY-0c-ng0" eventType="touchUpInside" id="EQh-wh-11g"/>
                                 </connections>
                             </button>
-                            <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Ei7-sl-egj">
-                                <frame key="frameInset" width="375" height="572"/>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Ei7-sl-egj">
                                 <subviews>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="81" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="qoR-6r-zbi">
                                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
@@ -236,7 +238,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Haq-zG-XTZ"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="jXP-ey-8jk">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="KNx-63-ydA">
@@ -251,7 +253,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="LtX-G3-w5l">
-                                <frame key="frameInset" minX="16" minY="232" width="288" height="282"/>
+                                <frame key="frameInset" minX="16" minY="232" width="343" height="282"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ecf-cL-WDu">
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
@@ -323,6 +325,70 @@
             </objects>
             <point key="canvasLocation" x="2016.8" y="1038.5307346326838"/>
         </scene>
+        <!--Login View Forgot Password View Controller-->
+        <scene sceneID="jtn-Iy-vni">
+            <objects>
+                <viewController storyboardIdentifier="loginViewForgotPasswordPage" id="hND-Ke-t64" customClass="LoginViewForgotPasswordViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="7MP-cK-akH"/>
+                        <viewControllerLayoutGuide type="bottom" id="Ewf-Tr-PTb"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="yGF-GX-Eil">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="Ghy-8c-yAe"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="uVl-LR-1PM">
+                                <frame key="frameInset" minX="93" minY="20" width="160" height="160"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="160" id="EVi-0t-D8w"/>
+                                    <constraint firstAttribute="width" constant="160" id="aTm-wo-RUQ"/>
+                                </constraints>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="uWt-3o-ttU">
+                                <frame key="frameInset" minX="16" minY="221" width="343" height="106"/>
+                                <subviews>
+                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="woJ-Jq-hQ2">
+                                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
+                                        <nil key="textColor"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="o4f-wJ-dCw">
+                                        <color key="backgroundColor" red="0.29411764709999999" green="0.73333333329999995" blue="0.92156862750000001" alpha="1" colorSpace="calibratedRGB"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                                        <state key="normal" title="Reset Password"/>
+                                    </button>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ypc-MC-btC">
+                                        <state key="normal" title="Back"/>
+                                        <connections>
+                                            <action selector="forgotPasswordBackButtonClicked:" destination="hND-Ke-t64" eventType="touchUpInside" id="zc1-xr-yxO"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="Ghy-8c-yAe" firstAttribute="top" secondItem="yGF-GX-Eil" secondAttribute="top" id="9GQ-bQ-xT4"/>
+                            <constraint firstAttribute="trailing" secondItem="Ghy-8c-yAe" secondAttribute="trailing" id="KZs-go-7aa"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="uWt-3o-ttU" secondAttribute="trailing" id="gVl-dN-DTU"/>
+                            <constraint firstItem="Ghy-8c-yAe" firstAttribute="leading" secondItem="yGF-GX-Eil" secondAttribute="leading" id="jVf-dg-YzZ"/>
+                            <constraint firstItem="uWt-3o-ttU" firstAttribute="centerY" secondItem="yGF-GX-Eil" secondAttribute="centerY" id="nXn-yU-Wbn"/>
+                            <constraint firstItem="Ewf-Tr-PTb" firstAttribute="top" secondItem="Ghy-8c-yAe" secondAttribute="bottom" id="pRT-Mj-cB7"/>
+                            <constraint firstItem="uVl-LR-1PM" firstAttribute="top" secondItem="7MP-cK-akH" secondAttribute="bottom" id="rYA-EI-BIN"/>
+                            <constraint firstItem="uVl-LR-1PM" firstAttribute="centerX" secondItem="yGF-GX-Eil" secondAttribute="centerX" id="swV-Og-BOw"/>
+                            <constraint firstItem="uWt-3o-ttU" firstAttribute="leading" secondItem="yGF-GX-Eil" secondAttribute="leadingMargin" id="tou-I8-TKF"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="forgotPasswordBackButton" destination="ypc-MC-btC" id="bbx-t5-bRq"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="NIf-Fw-7oJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2714.4000000000001" y="1039.4302848575712"/>
+        </scene>
         <!--Container View Controller-->
         <scene sceneID="tiX-BZ-WqO">
             <objects>
@@ -340,7 +406,7 @@
                         <viewControllerLayoutGuide type="bottom" id="GNi-fJ-4nc"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="P64-U0-Z8F">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <webView contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="snz-ZU-9PN">

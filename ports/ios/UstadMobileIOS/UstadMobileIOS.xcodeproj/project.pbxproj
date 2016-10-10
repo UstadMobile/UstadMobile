@@ -155,6 +155,7 @@
 		ADC3A2511D98168F00BDD24F /* LoginPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		ADC3A2541D9817FF00BDD24F /* LoginPageContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		ADC3A2571D993DC500BDD24F /* UstadUIViewControllerHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		ADD2C9621DABC957004D621E /* LoginViewForgotPasswordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD2C9611DABC957004D621E /* LoginViewForgotPasswordViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -470,6 +471,8 @@
 		ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginPageContentViewController.m; sourceTree = "<group>"; };
 		ADC3A2551D993DC500BDD24F /* UstadUIViewControllerHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadUIViewControllerHelper.h; sourceTree = "<group>"; };
 		ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadUIViewControllerHelper.m; sourceTree = "<group>"; };
+		ADD2C9601DABC957004D621E /* LoginViewForgotPasswordViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewForgotPasswordViewController.h; sourceTree = "<group>"; };
+		ADD2C9611DABC957004D621E /* LoginViewForgotPasswordViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewForgotPasswordViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -799,6 +802,8 @@
 				ADC3A2531D9817FF00BDD24F /* LoginPageContentViewController.m */,
 				ADC3A24F1D98168F00BDD24F /* LoginPageViewController.h */,
 				ADC3A2501D98168F00BDD24F /* LoginPageViewController.m */,
+				ADD2C9601DABC957004D621E /* LoginViewForgotPasswordViewController.h */,
+				ADD2C9611DABC957004D621E /* LoginViewForgotPasswordViewController.m */,
 				AD12B41F1D631228005D6D5D /* LoginViewLoginTabViewController.h */,
 				AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */,
 				AD08D4621D5B4C96003CB878 /* LoginViewRegisterTabViewController.h */,
@@ -1094,6 +1099,7 @@
 				AD0DABF31D761129005FAFDD /* Base64Coder.m in Sources */,
 				AD0DAC371D761129005FAFDD /* TestUtils.m in Sources */,
 				AD0DAC571D76112A005FAFDD /* UstadOCF.m in Sources */,
+				ADD2C9621DABC957004D621E /* LoginViewForgotPasswordViewController.m in Sources */,
 				AD0DAC231D761129005FAFDD /* OMRRecognizer.m in Sources */,
 				AD88C1B11D859DAE00D3F406 /* AppConfig.m in Sources */,
 				AD0DAC181D761129005FAFDD /* LoadControllerThread.m in Sources */,
