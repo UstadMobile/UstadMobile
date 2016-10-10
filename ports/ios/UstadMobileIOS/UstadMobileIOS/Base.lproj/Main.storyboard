@@ -101,8 +101,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <containerView opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ydm-JP-sTe">
-                                <frame key="frameInset" width="375" height="572"/>
+                            <containerView opaque="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ydm-JP-sTe">
+                                <frame key="frameInset" width="375" height="667"/>
                                 <connections>
                                     <segue destination="fAY-0c-ng0" kind="embed" id="d4l-FH-tgh"/>
                                 </connections>
@@ -113,6 +113,7 @@
                             <constraint firstItem="ydm-JP-sTe" firstAttribute="leading" secondItem="b4g-h4-Hqn" secondAttribute="leading" id="8XP-Fy-DzP"/>
                             <constraint firstAttribute="trailing" secondItem="ydm-JP-sTe" secondAttribute="trailing" id="Lm9-Bn-x1V"/>
                             <constraint firstItem="ydm-JP-sTe" firstAttribute="top" secondItem="vDY-an-bxF" secondAttribute="bottom" constant="36" id="OVX-yk-FTq"/>
+                            <constraint firstItem="Rjz-me-aKl" firstAttribute="top" secondItem="ydm-JP-sTe" secondAttribute="bottom" id="tI5-3f-r4Y"/>
                         </constraints>
                     </view>
                     <connections>
@@ -132,7 +133,7 @@
                         <viewControllerLayoutGuide type="bottom" id="oDx-We-xjS"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="top-Wy-2Bv">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="572"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PUe-Qi-Bpf">
