@@ -14,6 +14,7 @@
 #import "UstadJSOPDSFeed.h"
 #import "UstadJSOPDSEntry.h"
 #import "CatalogViewControllerEntryTableViewCell.h"
+#import "AppView.h"
 #import "java/lang/Integer.h"
 
 
@@ -55,6 +56,7 @@
     [self.catalogTableView addSubview:self.refreshControl];
     
     //Set a color for the title bar
+    /*
     UIColor *navBarColor = nil;
     if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
         //catalog view
@@ -65,11 +67,17 @@
         [navController.navigationBar setBarTintColor:navBarColor];
         //[navController.navigationBar setTintColor:[UIColor whiteColor]];
         //[navController.navigationBar.topItem setTitle:@""];
-    }else {
-        //nested within base point view
     }
+     */
+    
     
     [self loadCatalog];
+}
+
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self setNavigationBarBackgroundColor];
 }
 
 -(void)loadCatalog {
@@ -89,34 +97,36 @@
             [self.refreshControl endRefreshing];
         }
         
-        
-        ComUstadmobileCoreOpdsUstadJSOPDSFeed *feed = [self.catalogController getModel]->opdsFeed_;
-        
-        NSString *title = feed->title_;
-        if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
-            [self.navigationItem setTitle:title];
-        }else if(self.parentViewController != nil){
-            [self.parentViewController.navigationItem setTitle:title];
+        if(self.catalogController != nil) {
+            ComUstadmobileCoreOpdsUstadJSOPDSFeed *feed = [self.catalogController getModel]->opdsFeed_;
+            
+            NSString *title = feed->title_;
+            if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+                [self.navigationItem setTitle:title];
+            }else if(self.parentViewController != nil){
+                [self.parentViewController.navigationItem setTitle:title];
+            }
+            
+            jint bgColor = [feed getBgColor];
+            if(bgColor >= 0) {
+                self.catalogBgColor =UIColorFromRGB(bgColor);
+                [self.view setBackgroundColor:self.catalogBgColor];
+            }
+            
+            jint textColor = [feed getTextColor];
+            if(textColor >= 0) {
+                self.catalogTextColor = UIColorFromRGB(textColor);
+            }
+            
+            [self.catalogTableView setDataSource:self];
+            [self.catalogTableView setDelegate:self];
+            [self.catalogTableView layoutSubviews];
+        }else {
+            ComUstadmobileCoreImplUstadMobileSystemImpl *impl =[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+            [[impl getAppViewWithId:self] showAlertDialogWithNSString:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_error] withNSString:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_error_loading_catalog]];
         }
         
-        jint bgColor = [feed getBgColor];
-        if(bgColor >= 0) {
-            self.catalogBgColor =UIColorFromRGB(bgColor);
-            [self.view setBackgroundColor:self.catalogBgColor];
-        }
         
-        jint textColor = [feed getTextColor];
-        if(textColor >= 0) {
-            self.catalogTextColor = UIColorFromRGB(textColor);
-        }
-        
-        [self.catalogTableView setDataSource:self];
-        [self.catalogTableView setDelegate:self];
-        //[self.view layoutSubviews];
-        //[self.catalogTableView layoutIfNeeded];
-        [self.catalogTableView layoutSubviews];
-        
-        //[self.catalogTableView reloadData];
     });
     [self.catalogController loadThumbnails];
 }

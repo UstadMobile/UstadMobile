@@ -63,6 +63,33 @@
     //right now there's no non tab components here with localizable ui strings
 }
 
+-(UINavigationController *)findParentNavigationController {
+    UINavigationController *found = nil;
+    UIViewController *currentVC = self;
+    
+    while((currentVC = currentVC.parentViewController) != nil) {
+        if([currentVC isKindOfClass:[UINavigationController class]]) {
+            return (UINavigationController *)currentVC;
+        }
+    }
+    
+    return nil;
+}
+
+-(void)setNavigationBarBackgroundColor {
+    UINavigationController *navController = [self findParentNavigationController];
+    if(navController != nil) {
+        //catalog view
+        UIColor *navBarColor = [UIColor colorWithRed:0.325 green:0.73 blue:0.894 alpha:1];
+        [navController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+        //navController.navigationBar.translucent = NO;
+        [navController.navigationBar setBarTintColor:navBarColor];
+        //[navController.navigationBar setTintColor:[UIColor whiteColor]];
+        //[navController.navigationBar.topItem setTitle:@""];
+    }
+}
+
+
 
 
 /*

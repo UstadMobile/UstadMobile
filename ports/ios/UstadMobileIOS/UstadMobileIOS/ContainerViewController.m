@@ -13,6 +13,8 @@
 #import "UstadMobileSystemImplIOS.h"
 #import "ContainerController.h"
 #import "UstadJSOPF.h"
+#import "AppView.h"
+#import "MessageIDConstants.h"
 
 
 @interface ContainerViewController ()
@@ -56,17 +58,23 @@
 -(void)controllerReadyWithComUstadmobileCoreControllerUstadController:(id<ComUstadmobileCoreControllerUstadController>)controller withInt:(jint)flags {
     self.containerController = (ComUstadmobileCoreControllerContainerController *)controller;
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *title = [self.containerController getActiveOPF]->title_;
-        if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
-            [self.navigationItem setTitle:title];
+        if(controller != nil) {
+            NSString *title = [self.containerController getActiveOPF]->title_;
+            if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+                [self.navigationItem setTitle:title];
+            }
+            
+            self.linearSpineURLs = [self.containerController getSpineURLsWithBoolean:false];
+            self.dataSource = self;
+            
+            ContainerPageContentViewController *startingController = [self viewControllerAtIndex:0];
+            NSArray *viewControllers = @[startingController];
+            [self setViewControllers:viewControllers direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:nil];
+        }else {
+            ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+            [[impl getAppViewWithId:self] showAlertDialogWithNSString:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_error] withNSString:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_error_opening_file]];
         }
         
-        self.linearSpineURLs = [self.containerController getSpineURLsWithBoolean:false];
-        self.dataSource = self;
-        
-        ContainerPageContentViewController *startingController = [self viewControllerAtIndex:0];
-        NSArray *viewControllers = @[startingController];
-        [self setViewControllers:viewControllers direction:UIPageViewControllerNavigationDirectionForward animated:NO completion:nil];
     });
 }
 
