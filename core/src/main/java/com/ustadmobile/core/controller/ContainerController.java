@@ -94,6 +94,8 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     private String registrationUUID;
     
     private TinCanXML tinCanXMLSummary;
+
+    private String currentPageTitle;
     
     public static final String PREFKEY_PREFIX_LASTOPENED = "laxs-";
         
@@ -763,7 +765,12 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         this.registrationUUID = registrationUUID;
     }
 
-    
+    public void handlePageTitleUpdated(String pageTitle) {
+        this.currentPageTitle = pageTitle;
+        if(containerView != null) {
+            containerView.setPageTitle(pageTitle);
+        }
+    }
     
     
 }

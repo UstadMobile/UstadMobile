@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -114,6 +115,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
      * Navigation items in the order in which they appear in the drawer on the left
      */
     private EPUBNavItem[] drawerNavItems;
+
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -387,6 +389,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                     frag.evaluateJavascript(onpageSelectedJS);
                     frag.showPagePosition(pos+1, numPages);
                     updateTOCSelection(frag.getPageHref());
+                    String pageTitle = frag.getPageTitle();
+                    if(pageTitle != null) {
+                        setTitle(frag.getPageTitle());
+                    }
                 }
 
                 @Override
@@ -431,6 +437,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         return success;
     }
 
+    @Override
+    public void setPageTitle(String pageTitle) {
+        setTitle(pageTitle);
+    }
+
     public String getAutoplayRunJavascript() {
         return onpageSelectedJS;
     }
@@ -455,6 +466,12 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     public void onStop() {
         super.onStop();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+    }
+
+    public void handlePageTitleUpdated(int index, String title) {
+        if(mPager.getCurrentItem() == index && mContainerController != null) {
+            mContainerController.handlePageTitleUpdated(title);
+        }
     }
 
     @Override
@@ -513,6 +530,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     @Override
     public void setContainerTitle(String title) {
+        ((Button)findViewById(R.id.container_tocdrawer_upbutton)).setText(title);
         setTitle(title);
     }
 
@@ -572,7 +590,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                 return existingFrag;
             }else {
                 ContainerPageFragment frag =
-                        ContainerPageFragment.newInstance(baseURI, hrefList[position], query);
+                        ContainerPageFragment.newInstance(baseURI, hrefList[position], query, position);
 
                 this.pagesMap.put(Integer.valueOf(position), frag);
                 return frag;
