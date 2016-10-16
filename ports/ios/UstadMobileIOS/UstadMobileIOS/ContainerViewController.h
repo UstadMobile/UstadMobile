@@ -11,6 +11,8 @@
 #import "ControllerReadyListener.h"
 #import "ContainerView.h"
 
-@interface ContainerViewController : UIPageViewController<UIPageViewControllerDataSource, UstadViewControllerWithArgs, ComUstadmobileCoreControllerControllerReadyListener, ComUstadmobileCoreViewContainerView>
+@interface ContainerViewController : UIPageViewController<UIPageViewControllerDataSource, UstadViewControllerWithArgs, ComUstadmobileCoreControllerControllerReadyListener, ComUstadmobileCoreViewContainerView, UIPageViewControllerDelegate>
+
+-(void)handlePageTitleUpdated:(NSUInteger)index withTitle:(NSString *)title;
 
 @end

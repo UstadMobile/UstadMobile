@@ -24,6 +24,8 @@
 @property jint direction;
 @property ComUstadmobileCoreControllerContainerController *containerController;
 @property NSString *mountedPath;
+@property NSUInteger currentIndex;
+
 @end
 
 @implementation ContainerViewController
@@ -32,7 +34,20 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.containerURI = (NSString *)[self.arguments getWithId:ComUstadmobileCoreControllerContainerController_ARG_CONTAINERURI];
+    
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_keyboard_arrow_left_white_48pt"] style:UIBarButtonItemStylePlain target:self action:@selector(checkBack)];
+    
     [self initContent];
+}
+
+-(void)checkBack {
+    ContainerPageContentViewController *contentVC = [self viewControllerAtIndex:self.currentIndex];
+    if(contentVC != nil && contentVC.webView != nil && [contentVC.webView canGoBack]) {
+        [contentVC.webView goBack];
+    }else {
+        UINavigationController *navVC = (UINavigationController *)self.parentViewController;
+        [navVC popViewControllerAnimated:YES];
+    }
 }
 
 -(void)setArgumentsWithHashtable:(JavaUtilHashtable *)arguments {
@@ -40,6 +55,7 @@
 }
 
 -(void)initContent {
+    self.currentIndex = 0;
     UstadMobileSystemImplIOS *impl = (UstadMobileSystemImplIOS *)[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD *httpd = [impl getHTTPD];
     
@@ -50,6 +66,7 @@
     }
     
     NSString *mountURI = [[httpd getLocalURL] stringByAppendingString:mountAppend];
+    
     [self.arguments putWithId:ComUstadmobileCoreControllerContainerController_ARG_OPENPATH withId:mountURI];
     [ComUstadmobileCoreControllerContainerController makeControllerForViewWithComUstadmobileCoreViewContainerView:self withJavaUtilHashtable:self.arguments withComUstadmobileCoreControllerControllerReadyListener:self];
     
@@ -136,6 +153,17 @@
     return pageViewController;
 }
 
+-(void)handlePageTitleUpdated:(NSUInteger)index withTitle:(NSString *)title {
+    if(index == self.currentIndex && self.containerController != nil) {
+        [self.containerController handlePageTitleUpdatedWithNSString:title];
+    }
+}
+
+-(void)setPageTitleWithNSString:(NSString *)pageTitle {
+    if(self.containerController != nil) {
+        self.navigationItem.title = pageTitle;
+    }
+}
 
 /*
 #pragma mark - Navigation
@@ -181,5 +209,13 @@
     return 0;
 }
 
+-(void)pageViewController:(UIPageViewController *)pageViewController willTransitionToViewControllers:(NSArray<UIViewController *> *)pendingViewControllers {
+    
+}
+
+-(void)pageViewController:(UIPageViewController *)pageViewController didFinishAnimating:(BOOL)finished previousViewControllers:(NSArray<UIViewController *> *)previousViewControllers transitionCompleted:(BOOL)completed {
+    ContainerPageContentViewController *contentVC = (ContainerPageContentViewController *)pageViewController;
+    self.currentIndex = contentVC.pageIndex;
+}
 
 @end
