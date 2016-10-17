@@ -25,7 +25,7 @@
 @property ComUstadmobileCoreControllerContainerController *containerController;
 @property NSString *mountedPath;
 @property NSUInteger currentIndex;
-
+@property NSMapTable *containerPagesMap;
 @end
 
 @implementation ContainerViewController
@@ -36,6 +36,8 @@
     self.containerURI = (NSString *)[self.arguments getWithId:ComUstadmobileCoreControllerContainerController_ARG_CONTAINERURI];
     
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_keyboard_arrow_left_white_48pt"] style:UIBarButtonItemStylePlain target:self action:@selector(checkBack)];
+    
+    self.containerPagesMap = [NSMapTable strongToWeakObjectsMapTable];
     
     [self initContent];
 }
@@ -147,9 +149,15 @@
 
 
 -(ContainerPageContentViewController *)viewControllerAtIndex:(NSUInteger)index {
-    ContainerPageContentViewController *pageViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"ContainerPageContentViewController"];
-    pageViewController.viewURL = IOSObjectArray_Get(self.linearSpineURLs,(jint)index);
-    pageViewController.pageIndex = index;
+    NSString *indexStr = [NSString stringWithFormat:@"%i", (int)index];
+    ContainerPageContentViewController *pageViewController = [self.containerPagesMap objectForKey:indexStr];
+    if(pageViewController == nil) {
+        pageViewController = [self.storyboard instantiateViewControllerWithIdentifier:@"ContainerPageContentViewController"];
+        pageViewController.viewURL = IOSObjectArray_Get(self.linearSpineURLs,(jint)index);
+        pageViewController.pageIndex = index;
+        [self.containerPagesMap setObject:pageViewController forKey:indexStr];
+    }
+    
     return pageViewController;
 }
 
