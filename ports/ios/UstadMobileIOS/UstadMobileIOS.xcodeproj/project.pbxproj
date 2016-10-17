@@ -920,6 +920,7 @@
 				TargetAttributes = {
 					AD77D04D1D523A8A00A2F95A = {
 						CreatedOnToolsVersion = 7.3;
+						DevelopmentTeam = J334XM5GH2;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -1281,6 +1282,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				CLANG_ENABLE_OBJC_ARC = NO;
+				DEVELOPMENT_TEAM = J334XM5GH2;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1300,6 +1302,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
 				CLANG_ENABLE_OBJC_ARC = NO;
+				DEVELOPMENT_TEAM = J334XM5GH2;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

@@ -155,7 +155,7 @@
                                                 <rect key="frame" x="0.0" y="28" width="375" height="100"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="qeD-nZ-nxB" id="ecu-VU-9MV">
-                                                    <frame key="frameInset" width="375" height="99"/>
+                                                    <frame key="frameInset" width="375" height="100"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
                                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cCC-w8-eHr">
@@ -168,10 +168,6 @@
                                                                 <constraint firstAttribute="width" constant="74" id="Dca-HO-MFD"/>
                                                             </constraints>
                                                         </imageView>
-                                                        <progressView opaque="NO" tag="102" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="bAc-ws-ukM">
-                                                            <frame key="frameInset" minX="82" minY="70" width="503" height="2"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                        </progressView>
                                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="phases-progress-icon" translatesAutoresizingMaskIntoConstraints="NO" id="SxK-RD-wHg">
                                                             <frame key="frameInset" minX="300" width="74" height="74"/>
                                                             <constraints>
@@ -186,16 +182,24 @@
                                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
+                                                        <progressView opaque="NO" tag="102" contentMode="scaleToFill" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="bAc-ws-ukM">
+                                                            <frame key="frameInset" minX="79" minY="72" width="224" height="2"/>
+                                                            <constraints>
+                                                                <constraint firstAttribute="width" constant="224" id="UwI-Tz-FgC"/>
+                                                            </constraints>
+                                                        </progressView>
                                                     </subviews>
                                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
                                                         <constraint firstItem="cCC-w8-eHr" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" constant="-15" id="0BY-fL-ZqB"/>
                                                         <constraint firstAttribute="bottomMargin" secondItem="thu-VF-d4u" secondAttribute="bottom" id="AGJ-ue-vjz"/>
+                                                        <constraint firstItem="bAc-ws-ukM" firstAttribute="centerX" secondItem="ecu-VU-9MV" secondAttribute="centerX" id="APd-zT-c8P"/>
                                                         <constraint firstItem="thu-VF-d4u" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" id="Eft-yR-oxp"/>
                                                         <constraint firstAttribute="trailingMargin" secondItem="SxK-RD-wHg" secondAttribute="trailing" constant="-7" id="QKq-0X-1wf"/>
                                                         <constraint firstItem="thu-VF-d4u" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" id="SBx-H7-aiv"/>
                                                         <constraint firstAttribute="trailingMargin" secondItem="cCC-w8-eHr" secondAttribute="trailing" constant="-8" id="ZXK-JY-Zeq"/>
                                                         <constraint firstItem="cCC-w8-eHr" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" constant="-8" id="a8k-e3-Gyq"/>
+                                                        <constraint firstAttribute="bottomMargin" secondItem="bAc-ws-ukM" secondAttribute="bottom" constant="18" id="jrP-hd-GCc"/>
                                                         <constraint firstAttribute="bottomMargin" secondItem="cCC-w8-eHr" secondAttribute="bottom" constant="-5" id="pnS-P2-mtk"/>
                                                     </constraints>
                                                 </tableViewCellContentView>
@@ -228,7 +232,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BJ8-eu-B6T" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="64.6875" y="2448.5915492957747"/>
+            <point key="canvasLocation" x="63.200000000000003" y="2447.226386806597"/>
         </scene>
         <!--Login View Register Tab View Controller-->
         <scene sceneID="ep8-5N-Hgt">
