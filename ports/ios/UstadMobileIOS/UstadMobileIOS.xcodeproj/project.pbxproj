@@ -1291,7 +1291,7 @@
 					"-ljre_emul",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS2;
 				PRODUCT_NAME = Sapienza;
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 			};
@@ -1311,7 +1311,7 @@
 					"-ljre_emul",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS2;
 				PRODUCT_NAME = Sapienza;
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 			};
