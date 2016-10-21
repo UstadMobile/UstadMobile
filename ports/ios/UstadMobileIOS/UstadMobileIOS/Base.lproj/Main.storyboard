@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1004" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="QpC-1U-RS6">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="QpC-1U-RS6">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
@@ -16,7 +16,7 @@
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="WnK-fW-0yR"/>
@@ -28,7 +28,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="2iC-I0-ez1">
-                                <frame key="frameInset" minX="16" minY="293" width="343" height="198"/>
+                                <frame key="frameInset" minX="16" minY="293" width="374" height="198"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="P7P-Ra-vtU">
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
@@ -98,7 +98,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Rjz-me-aKl"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="b4g-h4-Hqn">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ydm-JP-sTe">
@@ -112,7 +112,7 @@
                         <constraints>
                             <constraint firstItem="ydm-JP-sTe" firstAttribute="leading" secondItem="b4g-h4-Hqn" secondAttribute="leading" id="8XP-Fy-DzP"/>
                             <constraint firstAttribute="trailing" secondItem="ydm-JP-sTe" secondAttribute="trailing" id="Lm9-Bn-x1V"/>
-                            <constraint firstItem="ydm-JP-sTe" firstAttribute="top" secondItem="vDY-an-bxF" secondAttribute="bottom" constant="36" id="OVX-yk-FTq"/>
+                            <constraint firstItem="ydm-JP-sTe" firstAttribute="top" secondItem="vDY-an-bxF" secondAttribute="bottom" id="OVX-yk-FTq"/>
                             <constraint firstItem="Rjz-me-aKl" firstAttribute="top" secondItem="ydm-JP-sTe" secondAttribute="bottom" id="tI5-3f-r4Y"/>
                         </constraints>
                     </view>
@@ -155,7 +155,7 @@
                                                 <rect key="frame" x="0.0" y="28" width="375" height="100"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="qeD-nZ-nxB" id="ecu-VU-9MV">
-                                                    <frame key="frameInset" width="375" height="100"/>
+                                                    <frame key="frameInset" width="375" height="99.666666666666671"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
                                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cCC-w8-eHr">
@@ -243,7 +243,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Haq-zG-XTZ"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="jXP-ey-8jk">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="KNx-63-ydA">
@@ -258,7 +258,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="12" translatesAutoresizingMaskIntoConstraints="NO" id="LtX-G3-w5l">
-                                <frame key="frameInset" minX="16" minY="232" width="343" height="282"/>
+                                <frame key="frameInset" minX="16" minY="232" width="374" height="282"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="ecf-cL-WDu">
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
@@ -339,7 +339,7 @@
                         <viewControllerLayoutGuide type="bottom" id="Ewf-Tr-PTb"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="yGF-GX-Eil">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="Ghy-8c-yAe"/>
@@ -351,7 +351,7 @@
                                 </constraints>
                             </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="uWt-3o-ttU">
-                                <frame key="frameInset" minX="16" minY="221" width="343" height="106"/>
+                                <frame key="frameInset" minX="16" minY="221" width="374" height="106"/>
                                 <subviews>
                                     <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="woJ-Jq-hQ2">
                                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.5" colorSpace="calibratedRGB"/>
@@ -411,7 +411,7 @@
                         <viewControllerLayoutGuide type="bottom" id="GNi-fJ-4nc"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="P64-U0-Z8F">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <webView contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="snz-ZU-9PN">

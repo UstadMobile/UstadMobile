@@ -38,7 +38,6 @@
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_keyboard_arrow_left_white_48pt"] style:UIBarButtonItemStylePlain target:self action:@selector(checkBack)];
     
     self.containerPagesMap = [NSMapTable strongToWeakObjectsMapTable];
-    
     [self initContent];
 }
 

@@ -26,7 +26,12 @@
     [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -60)
                                                          forBarMetrics:UIBarMetricsDefault];
 
-    [self.catalogContainerView setTranslatesAutoresizingMaskIntoConstraints:YES];
+    /*
+     Sometimes [self.catalogContainerView setTranslatesAutoresizingMaskIntoConstraints:YES]
+     seemed to be needed to stop insane behavior when using auto constraints: now with 
+     standard constraints to fill width/height it does not seem to be needed and prevents
+     the view filling the whole screen on iphone 6plus etc.
+     */
     // Do any additional setup after loading the view.
 }
 
