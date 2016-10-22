@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.1'
+        classpath 'com.android.tools.build:gradle:2.2.2'
     }
 }
 
@@ -53,12 +53,11 @@ dependencies {
     compile files('../../core/lib/qrcode.jar')
     compile project(":core")
     compile project(":sharedse")
-    compile project(':lrs')
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:cardview-v7:24.2.1'
     compile 'com.android.support:design:24.2.1'
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.joanzapata.pdfview:android-pdfview:1.0.4@aar'
 
-    compile "com.ustadmobile.nanolrs:nanolrs-android:0.1.8"
+    compile "com.ustadmobile.nanolrs:nanolrs-android:0.1.22"
 }

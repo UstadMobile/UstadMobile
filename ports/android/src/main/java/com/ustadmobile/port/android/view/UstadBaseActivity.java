@@ -25,10 +25,6 @@ import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.util.PythonServiceManager;
-
-//import org.renpy.android.PythonService;
-import org.kivy.android.PythonService;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -53,48 +49,16 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     private XapiStatementForwardingService mNanoLrsService;
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = null;
-        manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        System.out.println("Services running:");
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            System.out.println(service.service.getClassName());
-            
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
-
         //bind to the LRS forwarding service
         Intent lrsForwardIntent = new Intent(this, XapiStatementForwardingService.class);
         bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);
 
-
-        //If started by Splash Screen:
-        if(getContext() != null && getContext().getClass().equals(SplashScreenActivity.class)){
-            System.out.println("onCreate: Splash screen started this!");
-            PythonServiceManager psm = new PythonServiceManager();
-            psm.startThisOnThread(UstadBaseActivity.this);
-            System.out.println("ServiceCheck: Started (SplashScreen)");
-        }
-        //Else: All others: Check if LRS Service is running..
-        else if (isMyServiceRunning(PythonService.class)) { // if service is running:
-            System.out.println("ServiceCheck: Already running.");
-            if(getContext() != null && getContext().getClass().equals(SplashScreenActivity.class)){
-                System.out.println("Splash screen started this!");
-                UstadMobileSystemImpl.getInstance().startUI(getContext());
-            }
-        }else{ //if not running, start it.
-            System.out.println("ServiceCheck: Not running! Starting..");
-            PythonServiceManager psm = new PythonServiceManager();
-            psm.startThisOnThread(UstadBaseActivity.this);
-            System.out.println("ServiceCheck: Started (Not SplashScreen).");
-        }
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         super.onCreate(savedInstanceState);
     }

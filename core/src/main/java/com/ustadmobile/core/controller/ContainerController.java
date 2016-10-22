@@ -427,10 +427,12 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public String getXAPIQuery() {
         String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
         String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+
+        //TODO: Change this hardcoded setting to something that is set properly
         return "?actor=" +
             URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
             "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
-            "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT) +
+            "&endpoint=" + URLTextUtil.urlEncodeUTF8("http://127.0.0.1:8001/xapi/") +
             "&registration=" + registrationUUID;
     }
     

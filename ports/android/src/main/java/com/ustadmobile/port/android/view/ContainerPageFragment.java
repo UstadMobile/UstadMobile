@@ -120,7 +120,7 @@ public class ContainerPageFragment extends Fragment {
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.loadUrl(getPageURL());
         webView.setWebViewClient(new ContainerPageWebViewClient(webView));
         webView.setWebChromeClient(new ContainerPageViewWebChromeClient());

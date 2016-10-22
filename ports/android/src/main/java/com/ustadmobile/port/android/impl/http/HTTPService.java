@@ -9,6 +9,7 @@ import android.util.Log;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -55,6 +56,8 @@ public class HTTPService extends Service {
         httpd.addRoute(assetsPath +"(.)+",
                 AndroidAssetsHandler.class, this);
 
+        NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, this, "/xapi/");
+
         try {
             httpd.start();
             Log.i(UstadMobileSystemImplAndroid.TAG, "Started HTTP server");
@@ -98,6 +101,16 @@ public class HTTPService extends Service {
 
     public String getAssetsBaseURL() {
         return UMFileUtil.joinPaths(new String[]{getBaseURL(), assetsPath});
+    }
+
+
+    /**
+     * Get the EmbeddedHTTPD instance
+     *
+     * @return
+     */
+    public EmbeddedHTTPD getHttpd() {
+        return httpd;
     }
 
 

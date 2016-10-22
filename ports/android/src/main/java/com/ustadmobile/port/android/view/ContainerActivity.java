@@ -196,6 +196,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         public void onServiceConnected(ComponentName className, IBinder service) {
             HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
             mHttpService = binder.getService();
+
             onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__", mHttpService.getAssetsBaseURL());
             ContainerActivity.this.initContent();
         }
