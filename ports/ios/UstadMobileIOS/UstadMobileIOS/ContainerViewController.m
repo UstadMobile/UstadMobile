@@ -15,7 +15,7 @@
 #import "UstadJSOPF.h"
 #import "AppView.h"
 #import "MessageIDConstants.h"
-
+#import <AVFoundation/AVFoundation.h>
 
 @interface ContainerViewController ()
 @property JavaUtilHashtable *arguments;
@@ -33,12 +33,35 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    //Setup audio session: When user is in content : we stop other background sounds
+    NSError *error;
+    BOOL succeeded = [[AVAudioSession sharedInstance]
+                      setCategory:AVAudioSessionCategoryPlayback
+                      error:&error];
+    if(!succeeded) {
+        NSLog(@"Error setting audio to playback %@", error);
+    }
+    
     self.containerURI = (NSString *)[self.arguments getWithId:ComUstadmobileCoreControllerContainerController_ARG_CONTAINERURI];
     
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"ic_keyboard_arrow_left_white_48pt"] style:UIBarButtonItemStylePlain target:self action:@selector(checkBack)];
     
     self.containerPagesMap = [NSMapTable strongToWeakObjectsMapTable];
     [self initContent];
+}
+
+-(void)viewDidDisappear:(BOOL)animated {
+    UstadMobileSystemImplIOS *impl = (UstadMobileSystemImplIOS *)[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+    [[impl getHTTPD] unmountZipWithNSString:self.mountedPath];
+    
+    NSError *err2;
+    BOOL succeeded = [[AVAudioSession sharedInstance]
+                      setCategory:AVAudioSessionCategorySoloAmbient
+                      error:&err2];
+    if(!succeeded) {
+        NSLog(@"Error setting audio to solo ambient %@", err2);
+    }
 }
 
 -(void)checkBack {
@@ -94,11 +117,6 @@
         }
         
     });
-}
-
-- (void)viewDidDisappear:(BOOL)animated {
-    UstadMobileSystemImplIOS *impl = (UstadMobileSystemImplIOS *)[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
-    [[impl getHTTPD] unmountZipWithNSString:self.mountedPath];
 }
 
 - (void)setControllerWithComUstadmobileCoreControllerContainerController:(ComUstadmobileCoreControllerContainerController *)controller;{
