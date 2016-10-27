@@ -154,35 +154,34 @@
                                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="CatalogEntryCell" rowHeight="100" id="qeD-nZ-nxB" customClass="CatalogViewControllerEntryTableViewCell">
                                                 <rect key="frame" x="0.0" y="28" width="375" height="100"/>
                                                 <autoresizingMask key="autoresizingMask"/>
-                                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" tableViewCell="qeD-nZ-nxB" id="ecu-VU-9MV">
+                                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="qeD-nZ-nxB" id="ecu-VU-9MV">
                                                     <frame key="frameInset" width="375" height="99.666666666666671"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
-                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cCC-w8-eHr">
+                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cCC-w8-eHr">
                                                             <frame key="frameInset" minY="-7" width="375" height="96"/>
                                                         </imageView>
-                                                        <imageView userInteractionEnabled="NO" tag="101" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="thu-VF-d4u">
+                                                        <imageView userInteractionEnabled="NO" tag="101" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="thu-VF-d4u">
                                                             <frame key="frameInset" minX="2" width="74" height="74"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="height" constant="74" id="3cw-V2-OdA"/>
                                                                 <constraint firstAttribute="width" constant="74" id="Dca-HO-MFD"/>
                                                             </constraints>
                                                         </imageView>
-                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="phases-progress-icon" translatesAutoresizingMaskIntoConstraints="NO" id="SxK-RD-wHg">
+                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" image="phases-progress-icon" translatesAutoresizingMaskIntoConstraints="NO" id="SxK-RD-wHg">
                                                             <frame key="frameInset" minX="300" width="74" height="74"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="height" constant="74" id="Ard-n1-yJX"/>
                                                                 <constraint firstAttribute="width" constant="74" id="aKC-UW-wRN"/>
                                                             </constraints>
                                                         </imageView>
-                                                        <label opaque="NO" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Title:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ixm-Fj-cPv">
+                                                        <label opaque="NO" userInteractionEnabled="NO" tag="100" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Title:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ixm-Fj-cPv">
                                                             <frame key="frameInset" minX="82" minY="8" width="510" height="21"/>
-                                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                                            <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                             <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
-                                                        <progressView opaque="NO" tag="102" contentMode="scaleToFill" verticalHuggingPriority="750" ambiguous="YES" misplaced="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="bAc-ws-ukM">
+                                                        <progressView opaque="NO" tag="102" contentMode="scaleToFill" verticalHuggingPriority="750" misplaced="YES" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="bAc-ws-ukM">
                                                             <frame key="frameInset" minX="79" minY="72" width="224" height="2"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" constant="224" id="UwI-Tz-FgC"/>
@@ -192,9 +191,10 @@
                                                     <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <constraints>
                                                         <constraint firstItem="cCC-w8-eHr" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" constant="-15" id="0BY-fL-ZqB"/>
-                                                        <constraint firstAttribute="bottomMargin" secondItem="thu-VF-d4u" secondAttribute="bottom" id="AGJ-ue-vjz"/>
                                                         <constraint firstItem="bAc-ws-ukM" firstAttribute="centerX" secondItem="ecu-VU-9MV" secondAttribute="centerX" id="APd-zT-c8P"/>
                                                         <constraint firstItem="thu-VF-d4u" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" id="Eft-yR-oxp"/>
+                                                        <constraint firstItem="Ixm-Fj-cPv" firstAttribute="leading" secondItem="thu-VF-d4u" secondAttribute="trailing" constant="6" id="GxW-fU-p5N"/>
+                                                        <constraint firstItem="Ixm-Fj-cPv" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" id="OHq-un-S0p"/>
                                                         <constraint firstAttribute="trailingMargin" secondItem="SxK-RD-wHg" secondAttribute="trailing" constant="-7" id="QKq-0X-1wf"/>
                                                         <constraint firstItem="thu-VF-d4u" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" id="SBx-H7-aiv"/>
                                                         <constraint firstAttribute="trailingMargin" secondItem="cCC-w8-eHr" secondAttribute="trailing" constant="-8" id="ZXK-JY-Zeq"/>
@@ -422,9 +422,9 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="GNi-fJ-4nc" firstAttribute="top" secondItem="snz-ZU-9PN" secondAttribute="bottom" id="30b-Nb-gLz"/>
-                            <constraint firstItem="snz-ZU-9PN" firstAttribute="leading" secondItem="P64-U0-Z8F" secondAttribute="leadingMargin" constant="-16" id="8jA-DC-tdd"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="snz-ZU-9PN" secondAttribute="trailing" constant="-16" id="Cpx-hs-F10"/>
+                            <constraint firstAttribute="trailing" secondItem="snz-ZU-9PN" secondAttribute="trailing" id="3EZ-0w-794"/>
                             <constraint firstItem="snz-ZU-9PN" firstAttribute="top" secondItem="DGe-VW-w97" secondAttribute="bottom" id="ech-M2-7ua"/>
+                            <constraint firstItem="snz-ZU-9PN" firstAttribute="leading" secondItem="P64-U0-Z8F" secondAttribute="leading" id="tEB-AG-e9y"/>
                         </constraints>
                     </view>
                     <connections>

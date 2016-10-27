@@ -28,7 +28,7 @@
 
     /*
      Sometimes [self.catalogContainerView setTranslatesAutoresizingMaskIntoConstraints:YES]
-     seemed to be needed to stop insane behavior when using auto constraints: now with 
+     seemed to be needed to stop insane behavior when using auto constraints: now with
      standard constraints to fill width/height it does not seem to be needed and prevents
      the view filling the whole screen on iphone 6plus etc.
      */
