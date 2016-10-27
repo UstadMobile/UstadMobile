@@ -246,9 +246,8 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="KNx-63-ydA">
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="LoginBackground2" translatesAutoresizingMaskIntoConstraints="NO" id="KNx-63-ydA">
                                 <frame key="frameInset" width="375" height="667"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="f8Y-hN-6hi">
                                 <frame key="frameInset" minX="93" minY="20" width="160" height="160"/>
@@ -311,8 +310,12 @@
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="LtX-G3-w5l" secondAttribute="trailing" id="1Ii-bn-4ww"/>
                             <constraint firstItem="LtX-G3-w5l" firstAttribute="leading" secondItem="jXP-ey-8jk" secondAttribute="leadingMargin" id="7e0-U9-xJ3"/>
+                            <constraint firstAttribute="trailing" secondItem="KNx-63-ydA" secondAttribute="trailing" id="81A-kj-LOF"/>
                             <constraint firstItem="f8Y-hN-6hi" firstAttribute="centerX" secondItem="jXP-ey-8jk" secondAttribute="centerX" id="8kC-9k-pWu"/>
+                            <constraint firstItem="Haq-zG-XTZ" firstAttribute="top" secondItem="KNx-63-ydA" secondAttribute="bottom" id="LKh-1b-8Ca"/>
                             <constraint firstItem="LtX-G3-w5l" firstAttribute="centerY" secondItem="jXP-ey-8jk" secondAttribute="centerY" id="RfH-Ym-f0h"/>
+                            <constraint firstItem="KNx-63-ydA" firstAttribute="top" secondItem="jXP-ey-8jk" secondAttribute="topMargin" id="SUZ-Ll-nPF"/>
+                            <constraint firstItem="KNx-63-ydA" firstAttribute="leading" secondItem="jXP-ey-8jk" secondAttribute="leading" id="fcA-DP-8Va"/>
                             <constraint firstItem="f8Y-hN-6hi" firstAttribute="top" secondItem="cM3-Bx-u06" secondAttribute="bottom" id="mw1-Ie-BoT"/>
                         </constraints>
                     </view>
