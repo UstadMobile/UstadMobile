@@ -329,10 +329,7 @@ public class AttendanceController extends UstadBaseController{
     }
 
     public void handleGoBack(){
-        Hashtable args = new Hashtable();
-        args.put(AttendanceController.KEY_CLASSID, theClass.id);
-        UstadMobileSystemImpl.getInstance().go(AttendanceView.class, args,
-                context);
+        view.goBack();
     }
     
     public void handleClickSubmitResults() {

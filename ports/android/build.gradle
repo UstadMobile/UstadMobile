@@ -30,14 +30,11 @@ android {
             // proguardFile getDefaultProguardFile('proguard-android.txt')
         }
     }
+
     defaultConfig {
         minSdkVersion 14
         multiDexEnabled true
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
-        //Look at 32bit versions only - in order to run the application in 32bit on 64 bit processors
-        ndk {
-            abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
-        }
     }
 
 }

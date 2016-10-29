@@ -17,7 +17,6 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:id="@+id/login_username"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:inputType="textNoSuggestions" />
@@ -25,7 +24,6 @@
     <EditText
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/login_password"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -34,11 +32,9 @@
     <Button
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Login"
         android:id="@+id/login_button"
-        android:background="@color/accent"
-        android:textColor="@color/primary_text"
+        style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         />
