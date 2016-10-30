@@ -33,7 +33,7 @@ android {
 
     defaultConfig {
         minSdkVersion 14
-        multiDexEnabled true
+        //multiDexEnabled true
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
     }
 

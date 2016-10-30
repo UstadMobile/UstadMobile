@@ -289,7 +289,7 @@ public class AttendanceController extends UstadBaseController{
         boolean[][] colMarks;
         for(int i = 0; i < offsetsX.length; i++) {
             colMarks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
-                sheet.getGrayscaleThreshold(), 0.5f, offsetsX[i],
+                0.25f, offsetsX[i],
                 AttendanceSheetImage.DEFAULT_OMR_OFFSET_Y,
                 AttendanceSheetImage.DEFAULT_OM_DISTANCE_X, OM_HEIGHT/2, 
                 AttendanceSheetImage.DEFAULT_OM_DISTANCE_Y, 
