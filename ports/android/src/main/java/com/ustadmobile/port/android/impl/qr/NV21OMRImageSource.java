@@ -32,8 +32,8 @@ public class NV21OMRImageSource implements OMRImageSource {
 
 
     @Override
-    public void getGrayscaleImage(int[][] buf, int x, int y, int width, int height, short[] minMaxBuf) {
-
+    public void getGrayscaleImage(int[][] buf, int x, int y, int width, int height, int[] minMaxBuf) {
+        throw new RuntimeException("NV21OMRImageSource getGrayscaleImage not implemented");
     }
 
     @Override

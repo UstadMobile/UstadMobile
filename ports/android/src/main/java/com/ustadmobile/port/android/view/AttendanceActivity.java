@@ -36,6 +36,10 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         }
     }
 
+    @Override
+    public void goBack() {
+        getSupportFragmentManager().popBackStack();
+    }
 
     @Override
     public void showTakePicture() {
@@ -49,7 +53,7 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         this.mAttendanceResults = results;
         Fragment resultsFrag = AttendanceConfirmFragment.newInstance();
         getSupportFragmentManager().beginTransaction().replace(R.id.attendance_fragment_container,
-                resultsFrag, TAG_RESULTSFRAG).commit();
+                resultsFrag, TAG_RESULTSFRAG).addToBackStack(TAG_CAMERAFRAG).commit();
     }
 
     protected AttendanceRowModel[] getAttendanceResults() {

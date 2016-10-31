@@ -27,7 +27,8 @@ public interface OMRImageSource {
     public static final int MINMAX_BUF_MAX = 1;
     
     /**
-     * Puts the grayscale image into the given buffer
+     * Puts the grayscale image into the buffer - each pixel is 32bit aRGB pixel that will have
+     * the same R, G and B values with full opacity
      * 
      * @param buf
      * @param x
@@ -37,8 +38,8 @@ public interface OMRImageSource {
      * @@param minMaxBuffer a Buffer that will contain the minimum (e.g. darkest) and maximum (e.g. brightest) value found
      * @return 
      */
-    public void getGrayscaleImage(int[][] buf, int x, int y, int width, int height, short[] minMaxBuffer);
-    
+    public void getGrayscaleImage(int[][] buf, int x, int y, int width, int height, int[] minMaxBuffer);
+
     /**
      * Returns the width of the image
      * 

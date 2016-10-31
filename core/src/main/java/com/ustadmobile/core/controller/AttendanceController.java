@@ -289,7 +289,7 @@ public class AttendanceController extends UstadBaseController{
         boolean[][] colMarks;
         for(int i = 0; i < offsetsX.length; i++) {
             colMarks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
-                sheet.getGrayscaleThreshold(), 0.5f, offsetsX[i],
+                0.25f, offsetsX[i],
                 AttendanceSheetImage.DEFAULT_OMR_OFFSET_Y,
                 AttendanceSheetImage.DEFAULT_OM_DISTANCE_X, OM_HEIGHT/2, 
                 AttendanceSheetImage.DEFAULT_OM_DISTANCE_Y, 
@@ -329,76 +329,48 @@ public class AttendanceController extends UstadBaseController{
     }
 
     public void handleGoBack(){
-        Hashtable args = new Hashtable();
-        args.put(AttendanceController.KEY_CLASSID, theClass.id);
-        UstadMobileSystemImpl.getInstance().go(AttendanceView.class, args,
-                context);
+        view.goBack();
     }
     
     public void handleClickSubmitResults() {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        //send to local LRS.
-        String xAPIServer = LoginController.LLRS_XAPI_ENDPOINT;
-        JSONArray stmtArr = new JSONArray();
-        String registrationUUID = UMTinCanUtil.generateUUID();
-        
-        JSONObject teacherStmt = makeAttendendedStmt(
-            theClass.id, theClass.name,
-            impl.getActiveUser(getContext()), xAPIServer, 
-            "http://activitystrea.ms/schema/1.0/host", "hosted", registrationUUID, 
-            null);
-        stmtArr.put(teacherStmt);
-        
-        JSONObject studentStmt;
-        JSONObject instructorActor = UMTinCanUtil.makeActorFromActiveUser(getContext());
-        
-        for(int i = 0; i < attendanceResult.length; i++) {
-            int attendanceStatus = attendanceResult[i].attendanceStatus;
-            if(attendanceStatus >= 0) {
-                studentStmt = makeAttendendedStmt(theClass.id, 
-                    theClass.name, attendanceResult[i].userId, 
-                    xAPIServer, VERB_IDS[attendanceStatus], VERB_DISPLAYS[attendanceStatus], 
-                    registrationUUID, instructorActor);
-                stmtArr.put(studentStmt);
-            }
-            
-        }
-        sendToXAPIServer(stmtArr, xAPIServer, impl.getActiveUser(getContext()), 
-            impl.getActiveUserAuth(getContext()));
-    }
-    
-    public void handleResultsSubmitted() {
-        
-    }
-    
-    public void sendToXAPIServer(final JSONArray stmtArr, final String xapiServer, final String username, final String pasword) {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        final String stmtURL = UMFileUtil.joinPaths(new String[] {
-            xapiServer, "statements"});
-        final String stmtStr = stmtArr.toString();
-        final Hashtable headers = LoginController.makeAuthHeaders(username, 
-            pasword);
-        headers.put("X-Experience-API-Version", "1.0.1");
-        final Object ctx = getContext();
-        
-        Thread sendThread = new Thread(new Runnable() {
+        Thread saveThread = new Thread(new Runnable() {
             public void run() {
-                try {
-                    impl.makeRequest(stmtURL, headers, null, "POST", 
-                        stmtArr.toString().getBytes("UTF-8"));
-                    impl.getAppView(ctx).dismissProgressDialog();
-                    view.finish();
-                }catch(IOException e) {
-                    impl.getAppView(ctx).dismissProgressDialog();
-                    impl.getAppView(ctx).showAlertDialog("Error", "Error sending result - please try again");
-                    e.printStackTrace();
+                final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                String xAPIServer = impl.getAppPref(
+                        UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                        UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                String registrationUUID = UMTinCanUtil.generateUUID();
+
+                JSONObject teacherStmt = makeAttendendedStmt(
+                        theClass.id, theClass.name,
+                        impl.getActiveUser(getContext()), xAPIServer,
+                        "http://activitystrea.ms/schema/1.0/host", "hosted", registrationUUID,
+                        null);
+                UstadMobileSystemImpl.getInstance().queueTinCanStatement(teacherStmt, context);
+
+
+                JSONObject studentStmt;
+                JSONObject instructorActor = UMTinCanUtil.makeActorFromActiveUser(getContext());
+
+                for(int i = 0; i < attendanceResult.length; i++) {
+                    int attendanceStatus = attendanceResult[i].attendanceStatus;
+                    if(attendanceStatus >= 0) {
+                        studentStmt = makeAttendendedStmt(theClass.id,
+                                theClass.name, attendanceResult[i].userId,
+                                xAPIServer, VERB_IDS[attendanceStatus], VERB_DISPLAYS[attendanceStatus],
+                                registrationUUID, instructorActor);
+                        UstadMobileSystemImpl.getInstance().queueTinCanStatement(studentStmt, context);
+                    }
+
                 }
-                
+                impl.getAppView(context).dismissProgressDialog();
+                view.finish();
             }
         });
-        impl.getAppView(getContext()).showProgressDialog("Sending...");
-        sendThread.start();
+        UstadMobileSystemImpl.getInstance().getAppView(getContext()).showProgressDialog("Saving...");
+        saveThread.start();
     }
+
     
     
     public JSONObject makeAttendendedStmt(String classID, String className, String username, String xapiServer, String verbID, String verbDisplay, String registrationUUID, JSONObject instructor) {

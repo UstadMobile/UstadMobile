@@ -1,56 +1,41 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.ustadmobile.port.android.view.AttendanceConfirmFragment">
 
-    <!--
-    <ScrollView
-        android:id="@+id/attendance_confirm_scrollview"
-        android:layout_above="@+id/attendance_confirm_button"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
-
-        <ListView android:layout_width="match_parent" android:layout_height="fill_parent"
-            android:id="@+id/attendance_confirm_list"/>
-    </ScrollView>
-    -->
-    <ListView android:layout_width="match_parent" android:layout_height="fill_parent"
-        android:layout_above="@+id/attendance_confirm_button"
-        android:id="@+id/attendance_confirm_list"/>
-
-    <Button
-        android:text="Confirm"
-        android:id="@+id/attendance_confirm_button"
-        android:layout_width="wrap_content"
-        android:drawableTop="@drawable/check"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/attendance_tryagain_button"
-        android:layout_toStartOf="@+id/attendance_tryagain_button"
-        android:layout_marginRight="38dp"
-        android:layout_marginEnd="38dp" />
-
-    <Button
-        android:text="Again"
-        android:id="@+id/attendance_tryagain_button"
-        android:drawableTop="@drawable/cross"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginRight="54dp"
-        android:layout_marginEnd="54dp" />
-
-
-
-    <!--<Button
-        android:text="Again"
-        android:layout_alignParentBottom="true"
-        android:id="@+id/attendance_tryagain_button"
+    <ListView
+        android:id="@+id/attendance_confirm_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />-->
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/attendance_confirm_buttonarea" />
 
+    <LinearLayout
+        android:id="@+id/attendance_confirm_buttonarea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/attendance_confirm_button"
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_done_white_24dp"
+            android:drawableStart="@drawable/ic_done_white_24dp"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:text="Confirm" />
+
+        <Button
+            android:id="@+id/attendance_tryagain_button"
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_autorenew_black_24dp"
+            android:drawableStart="@drawable/ic_autorenew_black_24dp"
+            android:text="Try Again" />
+    </LinearLayout>
 
 </RelativeLayout>

@@ -55,7 +55,7 @@ import java.util.Hashtable;
 
 
 /**
- * 
+ * w
  * @author varuna
  */
 public class LoginController extends UstadBaseController{
@@ -83,6 +83,10 @@ public class LoginController extends UstadBaseController{
     public static final String LLRS_LOGIN_URL = LLRS_URL + "umapi/login/";
 
     public static final String LLRS_XAPI_ENDPOINT = LLRS_URL + "xAPI/";
+
+    //Hashed user authentication to cache in case they login next time when offline
+    public static final String PREFKEY_AUTHCACHE_PREFIX = "um-authcache-";
+
 
     public LoginController(Object context) {
         super(context);
@@ -266,6 +270,16 @@ public class LoginController extends UstadBaseController{
         HTTPResult registrationResult = UstadMobileSystemImpl.getInstance().makeRequest(url, 
             headers, userInfoParams, "POST");
         if(registrationResult.getStatus() != 200) {
+            String serverResponse = new String(registrationResult.getResponse());
+            UstadMobileSystemImpl.l(UMLog.ERROR, 83, registrationResult.getStatus() + ';' +
+                    serverResponse);
+            String errorMessage = "General error: try again later";
+            if(registrationResult.getStatus() >= 400 && registrationResult.getStatus() < 500) {
+                //there may be useful info for the user - e.g. username taken etc
+                
+            }
+
+
             throw new IOException("Registration error: code " 
                     + registrationResult.getStatus());
         }
@@ -364,6 +378,7 @@ public class LoginController extends UstadBaseController{
                     JSONObject obj = new JSONObject(serverResponse);
                     String newUsername = obj.getString("username");
                     String newPassword = obj.getString("password");
+                    UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
                     thisCtrl.handleUserLoginAuthComplete(newUsername, newPassword);
                 }catch(Exception e) {
                     UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
@@ -430,25 +445,48 @@ public class LoginController extends UstadBaseController{
                 String role = null;
                 String teacherClassList = null;
                 IOException ioe = null;
+                boolean authPassed = false;
 
                 try {
-                    if (localLRS){
-                        result = LoginController.authenticateLLRS(username, password,
-                                serverURL);
-                    }else {
-                        result = LoginController.authenticate(username, password,
-                                serverURL);
-                    }
+                    result = LoginController.authenticate(username, password,
+                            serverURL);
                 }catch(IOException e) {
                     ioe = e;
                 }
-                
+
+                if(result == 200) {
+                    authPassed = true;
+                    //encrypt and cache the authentication result
+                    String authHashed = impl.hashAuth(getContext(), password);
+                    impl.setAppPref(PREFKEY_AUTHCACHE_PREFIX + username, authHashed, getContext());
+                    if(localLRS) {
+                        //Temporarily - tell the Python LRS about this account
+                        try {
+                            LoginController.authenticateLLRS(username, password, serverURL);
+                        } catch (IOException e) {
+                            impl.l(UMLog.ERROR, 85, null, e);
+                        }
+                    }
+                }
+
+                if(result == 0 || result >= 500) {
+                    //check the cache
+                    String storedAuth = impl.getAppPref(PREFKEY_AUTHCACHE_PREFIX + username, getContext());
+                    String authHashed = impl.hashAuth(getContext(), password);
+                    if(storedAuth != null && authHashed != null && storedAuth.equals(authHashed)) {
+                        //authentication was stored and this matches what we know from before
+                        authPassed = true;
+                    }
+                }
+
                 impl.getAppView(context).dismissProgressDialog();
+
+
 
                 if(result == 401 | result == 403) {
                     impl.getAppView(context).showAlertDialog(impl.getString(MessageIDConstants.error),
                         impl.getString(MessageIDConstants.wrong_user_pass_combo));
-                }else if(result != 200) {
+                }else if(!authPassed) {
                     UstadMobileSystemImpl.getInstance().getAppView(context).showAlertDialog(
                         impl.getString(MessageIDConstants.error), impl.getString(MessageIDConstants.login_network_error));
                 }else {
