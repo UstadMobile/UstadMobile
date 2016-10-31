@@ -15,9 +15,14 @@
 #include "UstadMobileSystemImpl.h"
 #include "LoginController.h"
 #include "MessageIDConstants.h"
+#import "LoginPageViewController.h"
 
 @interface LoginViewLoginTabViewController ()
 @property NSString *xAPIServerURL;
+@property (retain, nonatomic) IBOutlet UIButton *registerButton;
+- (IBAction)registerButtonClicked:(UIButton *)sender;
+- (IBAction)forgotPasswordButtonClicked:(UIButton *)sender;
+
 @end
 
 @implementation LoginViewLoginTabViewController
@@ -29,7 +34,7 @@
 
 -(void)setUIStrings {
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
-    self.usernameTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_username];
+    self.usernameTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_email];
     self.passwordTextField.placeholder = [impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_password];
     [self.loginButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_login] forState:UIControlStateNormal];
 }
@@ -51,7 +56,11 @@
 }
 
 - (IBAction)loginButtonClicked:(UIButton *)sender {
-    [self.loginViewController.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:self.loginViewController.xapiServer];
+    LoginPageViewController *loginViewController = (LoginPageViewController *)self.parentViewController;
+    
+    NSString *xapiServer = loginViewController.xapiServer;
+    
+    [loginViewController.loginController handleClickLoginWithNSString:self.usernameTextField.text withNSString:self.passwordTextField.text withNSString:xapiServer];
     
 }
 
@@ -64,4 +73,14 @@
     // Pass the selected object to the new view controller.
 }
 */
+- (IBAction)registerButtonClicked:(UIButton *)sender {
+    LoginPageViewController *loginPageViewController = (LoginPageViewController *)self.parentViewController;
+    [loginPageViewController showViewControllerAtIndex:1 animation:YES];
+}
+
+- (IBAction)forgotPasswordButtonClicked:(UIButton *)sender {
+    LoginPageViewController *loginViewCtrl = (LoginPageViewController *)self.parentViewController;
+    [loginViewCtrl showViewControllerAtIndex:2 animation:YES];
+}
+
 @end

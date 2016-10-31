@@ -15,6 +15,10 @@
 //sets the main arguments for this view
 -(void)setArgumentsWithHashtable:(JavaUtilHashtable *)arguments;
 
+//sets the navigation bar title background color
+-(void)setNavigationBarBackgroundColor;
+
+
 //gets the main arguments for this view
 -(JavaUtilHashtable *)getArguments;
 @end

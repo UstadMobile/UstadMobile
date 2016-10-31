@@ -10,6 +10,7 @@
 #import "UstadMobileSystemImpl.h"
 #import "UstadMobileSystemImplIOS.h"
 #import "UstadMobileSystemImplFactoryIOS.h"
+#include "signal.h"
 
 @interface AppDelegate ()
 
@@ -20,6 +21,7 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    signal(SIGPIPE, SIG_IGN);
     UstadMobileSystemImplFactoryIOS *iosFactory = [[UstadMobileSystemImplFactoryIOS alloc]init];
     [ComUstadmobileCoreImplUstadMobileSystemImpl setSystemImplFactoryWithComUstadmobileCoreImplUstadMobileSystemImplFactory:iosFactory];
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];

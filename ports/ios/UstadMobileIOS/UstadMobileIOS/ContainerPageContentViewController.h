@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ContainerView.h"
 
-@interface ContainerPageContentViewController : UIViewController<ComUstadmobileCoreViewContainerView>
+@interface ContainerPageContentViewController : UIViewController<UIWebViewDelegate>
 @property (retain, nonatomic) IBOutlet UIWebView *webView;
 @property NSString *viewURL;
 @property NSUInteger pageIndex;

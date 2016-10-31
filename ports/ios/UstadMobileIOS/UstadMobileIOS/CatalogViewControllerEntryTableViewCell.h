@@ -14,5 +14,6 @@
 @property (nonatomic, weak) IBOutlet UIProgressView *progressView;
 @property (retain, nonatomic) IBOutlet UIImageView *thumbnailImageView;
 @property (retain, nonatomic) IBOutlet UIImageView *backgroundImageView;
+@property (retain, nonatomic) IBOutlet UIImageView *rightProgressIcon;
 
 @end

@@ -10,6 +10,7 @@
 #import "java/util/Hashtable.h"
 #import "EmbeddedHTTPD.h"
 #import "ControllerReadyListener.h"
+#import "ContainerViewController.h"
 
 @interface ContainerPageContentViewController ()
 @end
@@ -20,7 +21,11 @@
     [super viewDidLoad];
     
     // Do any additional setup after loading the view.
+    self.webView.mediaPlaybackRequiresUserAction = NO;
+    self.webView.allowsInlineMediaPlayback = YES;
+    [self.webView setDelegate:self];
     [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:self.viewURL]]];
+    
 }
 
 
@@ -42,5 +47,21 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+-(void)webViewDidFinishLoad:(UIWebView *)webView {
+    NSString *title = [self.webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    ContainerViewController *containerVC = (ContainerViewController *)self.parentViewController;
+    if(title != nil && containerVC != nil) {
+        [containerVC handlePageTitleUpdated:self.pageIndex withTitle:title];
+    }                                            
+}
+
+-(void)webViewDidStartLoad:(UIWebView *)webView {
+    
+}
+
+-(void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    
+}
 
 @end

@@ -14,7 +14,11 @@
 #import "UstadJSOPDSFeed.h"
 #import "UstadJSOPDSEntry.h"
 #import "CatalogViewControllerEntryTableViewCell.h"
+#import "AppView.h"
 #import "java/lang/Integer.h"
+
+
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0];
 
 @interface CatalogViewController ()
 @property (retain, nonatomic) IBOutlet UIButton *browseButton;
@@ -25,6 +29,8 @@
 @property NSMapTable *idToCellMapTable;
 @property NSMapTable *idToThumbnailTable;
 @property NSMapTable *idToBackgroundTable;
+@property UIColor *catalogTextColor;
+@property UIColor *catalogBgColor;
 
 @property UIRefreshControl *refreshControl;
 
@@ -41,12 +47,37 @@
     self.idToThumbnailTable = [NSMapTable strongToStrongObjectsMapTable];
     self.idToBackgroundTable = [NSMapTable strongToStrongObjectsMapTable];
     
+    //[self.catalogTableView setTranslatesAutoresizingMaskIntoConstraints:YES];
+    
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     [self.browseButton setTitle:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_browse_feeds] forState:UIControlStateNormal];
     self.refreshControl =[[UIRefreshControl alloc] init];
     [self.refreshControl addTarget:self action:@selector(refreshWithUIRefreshControl:) forControlEvents:UIControlEventValueChanged];
     [self.catalogTableView addSubview:self.refreshControl];
+    
+    //Set a color for the title bar
+    /*
+    UIColor *navBarColor = nil;
+    if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+        //catalog view
+        UINavigationController *navController = (UINavigationController *)self.parentViewController;
+        navBarColor = [UIColor colorWithRed:0.325 green:0.73 blue:0.894 alpha:1];
+        [navController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+        //navController.navigationBar.translucent = NO;
+        [navController.navigationBar setBarTintColor:navBarColor];
+        //[navController.navigationBar setTintColor:[UIColor whiteColor]];
+        //[navController.navigationBar.topItem setTitle:@""];
+    }
+     */
+    
+    
     [self loadCatalog];
+}
+
+
+-(void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self setNavigationBarBackgroundColor];
 }
 
 -(void)loadCatalog {
@@ -66,14 +97,36 @@
             [self.refreshControl endRefreshing];
         }
         
-        NSString *title = [self.catalogController getModel]->opdsFeed_->title_;
-        if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
-            [self.navigationItem setTitle:title];
-        }else if(self.parentViewController != nil){
-            [self.parentViewController.navigationItem setTitle:title];
+        if(self.catalogController != nil) {
+            ComUstadmobileCoreOpdsUstadJSOPDSFeed *feed = [self.catalogController getModel]->opdsFeed_;
+            
+            NSString *title = feed->title_;
+            if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+                [self.navigationItem setTitle:title];
+            }else if(self.parentViewController != nil){
+                [self.parentViewController.navigationItem setTitle:title];
+            }
+            
+            jint bgColor = [feed getBgColor];
+            if(bgColor >= 0) {
+                self.catalogBgColor =UIColorFromRGB(bgColor);
+                [self.view setBackgroundColor:self.catalogBgColor];
+            }
+            
+            jint textColor = [feed getTextColor];
+            if(textColor >= 0) {
+                self.catalogTextColor = UIColorFromRGB(textColor);
+            }
+            
+            [self.catalogTableView setDataSource:self];
+            [self.catalogTableView setDelegate:self];
+            [self.catalogTableView layoutSubviews];
+        }else {
+            ComUstadmobileCoreImplUstadMobileSystemImpl *impl =[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
+            [[impl getAppViewWithId:self] showAlertDialogWithNSString:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_error] withNSString:[impl getStringWithInt:ComUstadmobileCoreMessageIDConstants_error_loading_catalog]];
         }
         
-        [self.catalogTableView reloadData];
+        
     });
     [self.catalogController loadThumbnails];
 }
@@ -163,6 +216,7 @@
     if(cell != nil && bgURI != nil) {
         [cell.backgroundImageView setImage:[UIImage imageWithContentsOfFile:bgURI]];
         [cell.titleLabel setTextColor:[UIColor whiteColor]];
+        [cell.rightProgressIcon setHidden:YES];
     }
 }
 
@@ -255,11 +309,14 @@
 */
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    NSInteger count;
     if(self.catalogController != nil) {
-        return [self.catalogController getModel]->opdsFeed_->entries_->size_;
+        count = [self.catalogController getModel]->opdsFeed_->entries_->size_;
     }else {
-        return 0;
+        count = 1;
     }
+    
+    return count;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -279,10 +336,19 @@
     
     [self.idToCellMapTable setObject:cell forKey:item->id__];
     
+    if(self.catalogTextColor != nil) {
+        [cell.titleLabel setTextColor:self.catalogTextColor];
+    }
+    
     cell.titleLabel.text = item->title_;
     [cell.progressView setHidden:YES];
     [self updateEntryThumbnail:item->id__];
     [self updateEntryBackground:item->id__];
+    
+    if(indexPath.row >= 2) {
+        [cell.rightProgressIcon setImage:[UIImage imageNamed:@"phases-progress-icon-empty"]];
+    }
+    
     return cell;
 }
 
