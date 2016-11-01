@@ -174,6 +174,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     }
 
+    /**
+     * Resolve a File URI to an actual absolute path.  As these are stable on Android and file
+     * paths do not change when the app is upgraded / re-installed etc. this can simply return
+     * the fileUri as is
+     *
+     * @param fileUri
+     * @return
+     */
+    public String resolveFileUriToPath(String fileUri) {
+        return fileUri;
+    }
+
     @Override
     public boolean loadActiveUserInfo(Object context) {
         SharedPreferences appPrefs = getAppSharedPreferences((Context)context);

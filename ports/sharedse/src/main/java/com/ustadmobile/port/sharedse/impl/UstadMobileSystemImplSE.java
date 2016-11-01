@@ -52,6 +52,18 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     private XmlPullParserFactory xmlPullParserFactory;
 
+
+    /**
+     * Some platforms (iOS) don't keep the same absolute file paths: On iOS when the app is updated
+     * it's directory will change.  Therefor on iOS the file uri used by the logic will not be
+     * an absolute path but will only include the path relative to the app's own directory
+     *
+     * @param fileUri
+     *
+     * @return
+     */
+    public abstract String resolveFileUriToPath(String fileUri);
+
     /**
      * @inheritDoc
      */
@@ -240,82 +252,82 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     @Override
     public long fileLastModified(String fileURI) {
-        return new File(fileURI).lastModified();
+        return new File(resolveFileUriToPath(fileURI)).lastModified();
     }
 
     @Override
     public OutputStream openFileOutputStream(String fileURI, int flags) throws IOException {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        return new FileOutputStream(fileURI, (flags & FILE_APPEND) == FILE_APPEND);
+        return new FileOutputStream(resolveFileUriToPath(fileURI), (flags & FILE_APPEND) == FILE_APPEND);
     }
 
     @Override
     public InputStream openFileInputStream(String fileURI) throws IOException {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        return new FileInputStream(fileURI);
+        return new FileInputStream(resolveFileUriToPath(fileURI));
     }
 
 
     @Override
     public boolean fileExists(String fileURI) throws IOException {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        return new File(fileURI).exists();
+        return new File(resolveFileUriToPath(fileURI)).exists();
     }
 
     @Override
     public boolean dirExists(String dirURI) throws IOException {
         dirURI = UMFileUtil.stripPrefixIfPresent("file://", dirURI);
-        File dir = new File(dirURI);
+        File dir = new File(resolveFileUriToPath(dirURI));
         return dir.exists() && dir.isDirectory();
     }
 
     @Override
     public boolean removeFile(String fileURI)  {
         fileURI = UMFileUtil.stripPrefixIfPresent("file://", fileURI);
-        File f = new File(fileURI);
+        File f = new File(resolveFileUriToPath(fileURI));
         return f.delete();
     }
 
     @Override
     public String[] listDirectory(String dirURI) throws IOException {
         dirURI = UMFileUtil.stripPrefixIfPresent("file://", dirURI);
-        File dir = new File(dirURI);
+        File dir = new File(resolveFileUriToPath(dirURI));
         return dir.list();
     }
 
 
     @Override
     public boolean renameFile(String path1, String path2) {
-        File file1 = new File(path1);
-        File file2 = new File(path2);
+        File file1 = new File(resolveFileUriToPath(path1));
+        File file2 = new File(resolveFileUriToPath(path2));
         return file1.renameTo(file2);
     }
 
     @Override
     public long fileSize(String path) {
-        File file = new File(path);
+        File file = new File(resolveFileUriToPath(path));
         return file.length();
     }
 
     @Override
     public long fileAvailableSize(String fileURI) throws IOException {
-        return new File(fileURI).getFreeSpace();
+        return new File(resolveFileUriToPath(fileURI)).getFreeSpace();
     }
 
     @Override
     public boolean makeDirectory(String dirPath) throws IOException {
-        File newDir = new File(dirPath);
+        File newDir = new File(resolveFileUriToPath(dirPath));
         return newDir.mkdir();
     }
 
     @Override
     public boolean makeDirectoryRecursive(String dirURI) throws IOException {
-        return new File(dirURI).mkdirs();
+        return new File(resolveFileUriToPath(dirURI)).mkdirs();
     }
 
     @Override
     public boolean removeRecursively(String path) {
-        return removeRecursively(new File(path));
+        return removeRecursively(new File(resolveFileUriToPath(path)));
     }
 
     public boolean removeRecursively(File f) {
@@ -357,7 +369,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
      */
     @Override
     public ZipFileHandle openZip(String name) throws IOException{
-        return new ZipFileHandleSharedSE(name);
+        return new ZipFileHandleSharedSE(resolveFileUriToPath(name));
     }
 
     /**
