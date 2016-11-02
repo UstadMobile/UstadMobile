@@ -85,7 +85,9 @@ static NSString *_defaultsKeyActiveUserAuth;
     return self;
 }
 
-
+- (NSString *)resolveFileUriToPathWithNSString:(NSString *)fileUri {
+    return fileUri;
+}
 
 
 - (ComUstadmobileCoreImplUMLog *)getLogger {
