@@ -59,6 +59,8 @@ static NSString *_defaultsKeyActiveUserAuth;
 
 @implementation UstadMobileSystemImplIOS
 
+NSString *PROTOCOL_UM_IOS_FILEURI = @"umiosappdir:///";
+
 +(void)initialize {
     if(self == [UstadMobileSystemImplIOS class]) {
         _defaultsKeyAppPrefs = @"umapp-prefs";
@@ -86,6 +88,12 @@ static NSString *_defaultsKeyActiveUserAuth;
 }
 
 - (NSString *)resolveFileUriToPathWithNSString:(NSString *)fileUri {
+    if([fileUri hasPrefix:PROTOCOL_UM_IOS_FILEURI]) {
+        NSString *dirPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        NSString *fileUriPathComp = [fileUri substringFromIndex:[PROTOCOL_UM_IOS_FILEURI length]];
+        return [dirPath stringByAppendingPathComponent:fileUriPathComp];
+    }
+    
     return fileUri;
 }
 
@@ -105,13 +113,11 @@ static NSString *_defaultsKeyActiveUserAuth;
 }
 
 - (NSString *)getSharedContentDir {
-    NSString *dirPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    return dirPath;
+    return PROTOCOL_UM_IOS_FILEURI;
 }
 
 - (NSString *)getSystemBaseDir {
-    NSString *dirPath = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    return dirPath;
+    return PROTOCOL_UM_IOS_FILEURI;
 }
 
 - (NSString *)getUserContentDirectoryWithNSString:(NSString *)username {

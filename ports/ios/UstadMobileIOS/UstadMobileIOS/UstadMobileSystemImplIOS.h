@@ -14,4 +14,6 @@
 
 -(ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD *)getHTTPD;
 
+extern NSString *PROTOCOL_UM_IOS_FILEURI;
+
 @end
