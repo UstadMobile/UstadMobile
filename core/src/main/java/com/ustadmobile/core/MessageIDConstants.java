@@ -167,6 +167,10 @@ public class MessageIDConstants {
 
     public static final int library_url = 63;
 
+    public static final int enter_phone_num = 64;
+
+    public static final int enter_name = 65;
+
     public static final int attendance = 100;
 
     public static final int processing = 101;

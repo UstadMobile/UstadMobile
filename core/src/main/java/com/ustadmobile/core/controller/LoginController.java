@@ -342,7 +342,22 @@ public class LoginController extends UstadBaseController{
         final String xAPIServer = (String)userInfoParams.get(
             UstadMobileSystemImpl.PREFKEY_XAPISERVER);
         updateXAPIServer(xAPIServer);
-        
+
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        if(!userInfoParams.containsKey(LoginController.REGISTER_PHONENUM) || userInfoParams.get(LoginController.REGISTER_PHONENUM).equals("")) {
+            impl.getAppView(getContext()).showAlertDialog(impl.getString(MessageIDConstants.error),
+                    impl.getString(MessageIDConstants.enter_phone_num));
+            return;
+        }
+
+        if(!userInfoParams.containsKey(LoginController.REGISTER_NAME) || userInfoParams.get(LoginController.REGISTER_NAME).equals("")) {
+            impl.getAppView(getContext()).showAlertDialog(impl.getString(MessageIDConstants.error),
+                    impl.getString(MessageIDConstants.enter_name));
+            return;
+        }
+
         final LoginController thisCtrl = this;
         final Object ctx = context;
         Thread registerThread = new Thread() {
@@ -390,7 +405,6 @@ public class LoginController extends UstadBaseController{
                 
             }
         };
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         impl.getAppView(ctx).showProgressDialog(impl.getString(MessageIDConstants.registering));
         registerThread.start();
     }
