@@ -83,7 +83,8 @@
     UstadMobileSystemImplIOS *impl = (UstadMobileSystemImplIOS *)[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD *httpd = [impl getHTTPD];
     
-    self.mountedPath = [httpd mountZipWithNSString:self.containerURI withNSString:nil withJavaUtilHashMap:nil];
+    NSString *zipPath = [impl resolveFileUriToPathWithNSString:self.containerURI];
+    self.mountedPath = [httpd mountZipWithNSString:zipPath withNSString:nil withJavaUtilHashMap:nil];
     NSString *mountAppend = self.mountedPath;
     if([[mountAppend substringToIndex:1] isEqualToString:@"/"]) {
         mountAppend = [mountAppend substringFromIndex:1];

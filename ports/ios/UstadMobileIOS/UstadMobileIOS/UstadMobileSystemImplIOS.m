@@ -345,7 +345,7 @@ NSString *PROTOCOL_UM_IOS_FILEURI = @"umiosappdir:///";
     if(info != nil) {
         //move me to the destination file
         NSFileManager *fileManager = [NSFileManager defaultManager];
-        NSURL *destURL = [NSURL fileURLWithPath:info.destinationURI];
+        NSURL *destURL = [NSURL fileURLWithPath:[self resolveFileUriToPathWithNSString:info.destinationURI]];
         BOOL success = [fileManager copyItemAtURL:location toURL:destURL error:nil];
         IOSIntArray *statusArr = [IOSIntArray arrayWithInts:(jint[]){(jint)downloadTask.countOfBytesReceived,
             (jint)downloadTask.countOfBytesExpectedToReceive, ComUstadmobileCoreImplUstadMobileSystemImpl_DLSTATUS_SUCCESSFUL

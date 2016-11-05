@@ -206,7 +206,8 @@
     CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
     NSString *iconFileURI = [self.idToThumbnailTable objectForKey:entryId];
     if(cell != nil && iconFileURI != nil) {
-        [cell.thumbnailImageView setImage:[UIImage imageWithContentsOfFile:iconFileURI]];
+        NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:iconFileURI];
+        [cell.thumbnailImageView setImage:[UIImage imageWithContentsOfFile:filePath]];
     }
 }
 
@@ -214,7 +215,8 @@
     NSString *bgURI = [self.idToBackgroundTable objectForKey:entryId];
     CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
     if(cell != nil && bgURI != nil) {
-        [cell.backgroundImageView setImage:[UIImage imageWithContentsOfFile:bgURI]];
+        NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:bgURI];
+        [cell.backgroundImageView setImage:[UIImage imageWithContentsOfFile:filePath]];
         [cell.titleLabel setTextColor:[UIColor whiteColor]];
         [cell.rightProgressIcon setHidden:YES];
     }

@@ -287,6 +287,17 @@ public abstract class UstadMobileSystemImpl {
         }
     }
     
+    /**
+     * Some platforms (iOS) don't keep the same absolute file paths: On iOS when the app is updated
+     * it's directory will change.  Therefor on iOS the file uri used by the logic will not be
+     * an absolute path but will only include the path relative to the app's own directory
+     *
+     * @param fileUri
+     *
+     * @return
+     */
+    public abstract String resolveFileUriToPath(String fileUri);
+    
     public void checkCacheDir(Object context) throws IOException{
         boolean sharedDirOK = false;
         String sharedContentDir = mainInstance.getSharedContentDir();
