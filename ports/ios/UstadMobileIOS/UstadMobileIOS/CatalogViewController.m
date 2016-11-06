@@ -31,8 +31,11 @@
 @property NSMapTable *idToBackgroundTable;
 @property UIColor *catalogTextColor;
 @property UIColor *catalogBgColor;
-
+@property UILongPressGestureRecognizer *longPressGestureRecognizer;
 @property UIRefreshControl *refreshControl;
+@property UIAlertController *actionSheetAlertController;
+
+@property ComUstadmobileCoreOpdsUstadJSOPDSEntry *entrySelectedByLongPress;
 
 @property BOOL loadInProgress;
 
@@ -70,7 +73,9 @@
     }
      */
     
-    
+    self.longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
+    self.longPressGestureRecognizer.minimumPressDuration = 2.0;
+    [self.catalogTableView addGestureRecognizer:self.longPressGestureRecognizer];
     [self loadCatalog];
 }
 
@@ -299,6 +304,29 @@
     
 }
 
+-(void)handleLongPress:(UILongPressGestureRecognizer *)recognizer {
+    if (recognizer.state == UIGestureRecognizerStateEnded) {
+        CGPoint point = [recognizer locationInView:self.catalogTableView];
+        NSIndexPath *indexPath = [self.catalogTableView indexPathForRowAtPoint:point];
+        if(indexPath != nil) {
+            self.entrySelectedByLongPress = IOSObjectArray_Get([self.catalogController getModel]->opdsFeed_->entries_, (jint)indexPath.row);
+            self.actionSheetAlertController = [UIAlertController alertControllerWithTitle:self.entrySelectedByLongPress->title_ message:nil preferredStyle:UIAlertControllerStyleActionSheet];
+            
+            [self.actionSheetAlertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+                [self dismissViewControllerAnimated:NO completion:nil];
+            }]];
+            
+            [self.actionSheetAlertController addAction:[UIAlertAction actionWithTitle:@"Delete" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+                [self dismissViewControllerAnimated:NO completion:nil];
+                
+                IOSObjectArray *entryArr = [IOSObjectArray arrayWithObjects:(id[]){self.entrySelectedByLongPress} count:1 type:ComUstadmobileCoreOpdsUstadJSOPDSEntry_class_()];
+                [self.catalogController handleClickDeleteEntriesWithComUstadmobileCoreOpdsUstadJSOPDSEntryArray:entryArr];
+            }]];
+            
+            [self presentViewController:self.actionSheetAlertController animated:NO completion:nil];
+        }
+    }
+}
 
 /*
 #pragma mark - Navigation
