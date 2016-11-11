@@ -14,6 +14,7 @@
 #import "UstadJSOPDSFeed.h"
 #import "UstadJSOPDSEntry.h"
 #import "CatalogViewControllerEntryTableViewCell.h"
+#import "CatalogEntryInfo.h"
 #import "AppView.h"
 #import "java/lang/Integer.h"
 
@@ -29,6 +30,7 @@
 @property NSMapTable *idToCellMapTable;
 @property NSMapTable *idToThumbnailTable;
 @property NSMapTable *idToBackgroundTable;
+@property NSMapTable *idToStatusIconTable;
 @property UIColor *catalogTextColor;
 @property UIColor *catalogBgColor;
 @property UILongPressGestureRecognizer *longPressGestureRecognizer;
@@ -49,6 +51,7 @@
     self.idToCellMapTable = [NSMapTable strongToWeakObjectsMapTable];
     self.idToThumbnailTable = [NSMapTable strongToStrongObjectsMapTable];
     self.idToBackgroundTable = [NSMapTable strongToStrongObjectsMapTable];
+    self.idToStatusIconTable = [NSMapTable strongToStrongObjectsMapTable];
     
     //[self.catalogTableView setTranslatesAutoresizingMaskIntoConstraints:YES];
     
@@ -190,7 +193,32 @@
 
 - (void)setEntryStatusWithNSString:(NSString *)entryId
                            withInt:(jint)status {
+    NSString *imgName = nil;
+    if(status == ComUstadmobileCoreControllerCatalogEntryInfo_ACQUISITION_STATUS_ACQUIRED) {
+        imgName = @"ic_check_white_18pt";
+    }
     
+    if(imgName != nil) {
+        [self.idToStatusIconTable setObject:imgName forKey:entryId];
+    }else {
+        [self.idToStatusIconTable removeObjectForKey:entryId];
+    }
+    
+    [self updateEntryStatusIcon:entryId];
+}
+
+-(void)updateEntryStatusIcon:(NSString *)entryId {
+    CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
+    NSString *iconName = [self.idToStatusIconTable objectForKey:entryId];
+    if(cell != nil) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if(iconName != nil) {
+                [cell.statusIcon setImage:[UIImage imageNamed:iconName]];
+            }else {
+                [cell.statusIcon setImage:nil];
+            }
+        });
+    }
 }
 
 - (void)setEntrythumbnailWithNSString:(NSString *)entryId
@@ -374,6 +402,7 @@
     [cell.progressView setHidden:YES];
     [self updateEntryThumbnail:item->id__];
     [self updateEntryBackground:item->id__];
+    [self updateEntryStatusIcon:item->id__];
     
     if(indexPath.row >= 2) {
         [cell.rightProgressIcon setImage:[UIImage imageNamed:@"phases-progress-icon-empty"]];
