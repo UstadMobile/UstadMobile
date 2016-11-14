@@ -50,7 +50,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     private XapiStatementForwardingService mNanoLrsService;
 
-    private int syncStatus = UstadView.STATUS_SYNCED;
+    private int syncStatus = UstadMobileConstants.STATUS_SYNCED;
 
     private String displayName;
 
@@ -129,7 +129,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         }
 
         MenuItem statusItem = menu.add(Menu.NONE, Menu.NONE, 1, "Status");
-        if(syncStatus == UstadView.STATUS_SYNCED) {
+        if(syncStatus == UstadMobileConstants.STATUS_SYNCED) {
             statusItem.setIcon(R.drawable.ic_done_black_18dp);
         }else {
             statusItem.setIcon(R.drawable.ic_autorenew_black_18dp);

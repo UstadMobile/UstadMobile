@@ -33,6 +33,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.TinCanQueueEvent;
 import com.ustadmobile.core.impl.TinCanQueueListener;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UserSettingsView;
@@ -251,7 +252,7 @@ public abstract class UstadBaseController implements UstadController, TinCanQueu
     public void statusUpdated(TinCanQueueEvent event) {
         if(view != null) {
             view.setAppStatus(event.getQueueSize() == 0 ?
-                    UstadView.STATUS_SYNCED : UstadView.STATUS_SYNC_IN_PROGRESS);
+                    UstadMobileConstants.STATUS_SYNCED : UstadMobileConstants.STATUS_SYNC_IN_PROGRESS);
         }
     }
 

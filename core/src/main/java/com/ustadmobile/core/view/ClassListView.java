@@ -12,4 +12,7 @@ public interface ClassListView extends UstadView{
      */
     public void setClassList(String[] classList);
 
+    void setClassStatus(int index, int statusCode, String statusMessage);
+
+
 }

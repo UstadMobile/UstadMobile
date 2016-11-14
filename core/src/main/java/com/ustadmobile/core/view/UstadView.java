@@ -36,10 +36,6 @@ package com.ustadmobile.core.view;
  */
 public interface UstadView {
 
-    public static final int STATUS_SYNCED = 0;
-
-    public static final int STATUS_SYNC_IN_PROGRESS = 1;
-    
     /**
      * Return the system specific context for this view (e.g. Activity on Android
      * etc)
