@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -49,8 +50,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     private XapiStatementForwardingService mNanoLrsService;
 
+    private int syncStatus = UstadView.STATUS_SYNCED;
 
-
+    private String displayName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,9 +124,20 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
+        if(displayName != null) {
+            MenuItem displayNameItem = menu.add(Menu.NONE, Menu.NONE, 0, displayName);
+        }
+
+        MenuItem statusItem = menu.add(Menu.NONE, Menu.NONE, 1, "Status");
+        if(syncStatus == UstadView.STATUS_SYNCED) {
+            statusItem.setIcon(R.drawable.ic_done_black_18dp);
+        }else {
+            statusItem.setIcon(R.drawable.ic_autorenew_black_18dp);
+        }
+
         if(appMenuCommands != null && appMenuLabels != null) {
             for(int i = 0; i < appMenuLabels.length; i++) {
-                menu.add(Menu.NONE, appMenuCommands[i], i, appMenuLabels[i]);
+                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
             }
             return true;
         }else {
@@ -208,6 +221,16 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    public void setAppStatus(int status)  {
+        this.syncStatus = status;
+        supportInvalidateOptionsMenu();
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+        supportInvalidateOptionsMenu();
+    }
 
 
 }

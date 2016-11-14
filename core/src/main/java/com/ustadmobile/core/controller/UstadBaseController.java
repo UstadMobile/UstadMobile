@@ -31,6 +31,8 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.impl.TinCanQueueEvent;
+import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UserSettingsView;
@@ -43,7 +45,7 @@ import java.util.Hashtable;
  * 
  * @author mike
  */
-public abstract class UstadBaseController implements UstadController {
+public abstract class UstadBaseController implements UstadController, TinCanQueueListener {
 
     private UstadView view;
     
@@ -64,14 +66,32 @@ public abstract class UstadBaseController implements UstadController {
     
     public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageIDConstants.home,
         MessageIDConstants.about, MessageIDConstants.settings, MessageIDConstants.logout};
+
+
+    private boolean statusEventListeningEnabled = true;
     
     /**
      * Create a new controller with the given context
      * 
      * @param context System dependent context object
+     * @param statusEventListeningEnabled Whether or not to register for status event updates and pass to the view
+     */
+    public UstadBaseController(Object context, boolean statusEventListeningEnabled) {
+        this.context = context;
+        this.statusEventListeningEnabled = statusEventListeningEnabled;
+
+        if(statusEventListeningEnabled) {
+            UstadMobileSystemImpl.getInstance().addTinCanQueueStatusListener(this);
+        }
+    }
+
+    /**
+     * Create a new controller with the given context
+     *
+     * @param context System dependent context objec
      */
     public UstadBaseController(Object context) {
-        this.context = context;
+        this(context, true);
     }
     
     /**
@@ -105,7 +125,8 @@ public abstract class UstadBaseController implements UstadController {
      * locale is changed
      */
     public abstract void setUIStrings();
-    
+
+
     /**
      * This should be called by the view when it is paused: e.g. when the user
      * leaves the view
@@ -128,6 +149,9 @@ public abstract class UstadBaseController implements UstadController {
      */
     public void handleViewDestroy() {
         setDestroyed(true);
+        if(statusEventListeningEnabled) {
+            UstadMobileSystemImpl.getInstance().removeTinCanQueueListener(this);
+        }
     }
     
     /**
@@ -202,6 +226,33 @@ public abstract class UstadBaseController implements UstadController {
         fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
     }
-    
-    
+
+
+    /**
+     * Check if status event listening is enabled.  If true this controller will register itself
+     * to receive status events and pass them on to the view; if false it won't
+     *
+     * @return Status events enabled : true/false
+     */
+    public boolean isStatusEventListeningEnabled() {
+        return statusEventListeningEnabled;
+    }
+
+    /**
+     * Set whether status event listening is enabled. If true this controller will register itself
+     * to receive status events and pass them on to the view; if false it won't
+     *
+     * @param statusEventListeningEnabled status events enabled: true/false
+     */
+    public void setStatusEventListeningEnabled(boolean statusEventListeningEnabled) {
+        this.statusEventListeningEnabled = statusEventListeningEnabled;
+    }
+
+    public void statusUpdated(TinCanQueueEvent event) {
+        if(view != null) {
+            view.setAppStatus(event.getQueueSize() == 0 ?
+                    UstadView.STATUS_SYNCED : UstadView.STATUS_SYNC_IN_PROGRESS);
+        }
+    }
+
 }

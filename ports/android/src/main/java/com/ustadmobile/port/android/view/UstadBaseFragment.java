@@ -57,6 +57,13 @@ public class UstadBaseFragment  extends Fragment{
         }
     }
 
+    public void setAppStatus(int status)  {
+        //not implemented yet
+    }
+
+    public void setDisplayName(String displayName) {
+        //not implemented yet
+    }
 
 
 

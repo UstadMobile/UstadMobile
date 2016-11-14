@@ -133,6 +133,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private Timer sendStatementsTimer;
 
     /**
+     * Map of TinCanQueueListeners to the XapiQueueStatusListeners used by NanoLRS
+     */
+    private HashMap<TinCanQueueListener, XapiQueueStatusListener> queueStatusListeners;
+
+    /**
      * Some mime types that the Android OS does not know about but we do...
      * Mapped: Mime type -> extension
      */
@@ -146,6 +151,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         activityToHttpServiceMap = new HashMap<>();
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
+        queueStatusListeners = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
         PersistenceManager.setPersistenceManagerFactory(new PersistenceManagerFactoryAndroid());
@@ -203,62 +209,28 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         l(UMLog.INFO, 304, null);
 
-
-        /*
-
-        if(sendStatementsTimer == null) {
-            sendStatementsTimer = new Timer();
-        }
-
-        sendStatementsTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                HttpURLConnection conn = null;
-                OutputStream out = null;
-                int responseCode = 0;
-                String stmtId = null;
-
-                try {
-                    if(stmt.optString("id") == null || stmt.optString("id").length() == 0) {
-                        stmt.put("id", UMTinCanUtil.generateUUID());
-                    }
-                    stmtId = stmt.getString("id");
-
-                    String stmtEndpoint = LoginController.LLRS_XAPI_ENDPOINT +"statements?statementId="
-                            + URLEncoder.encode(stmtId, "UTF-8");
-
-                    URL url = new URL(stmtEndpoint);
-                    conn = (HttpURLConnection)url.openConnection();
-                    conn.setRequestProperty("X-Experience-API-Version", "1.0.1");
-                    conn.setRequestProperty("Authorization", LoginController.encodeBasicAuth(
-                            getActiveUser(context), getActiveUserAuth(context)));
-
-                    conn.setRequestMethod("PUT");
-                    conn.setDoOutput(true);
-                    out = conn.getOutputStream();
-                    out.write(stmt.toString().getBytes("UTF-8"));
-                    out.flush();
-                    out.close();
-
-
-                    conn.connect();
-                    responseCode = conn.getResponseCode();
-                    UstadMobileSystemImpl.l(UMLog.INFO, 377, " send stmt: " + stmtId + ": server responds: "
-                            + responseCode);
-                }catch(Exception e) {
-                    l(UMLog.ERROR, 191, stmtId, e);
-                }finally {
-                    UMIOUtils.closeOutputStream(out);
-                    if(conn != null) {
-                        conn.disconnect();
-                    }
-                }
-            }
-        }, 100);
-
-
-        */
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
+        queueStatusListeners.put(listener, new XapiQueueStatusListener() {
+            @Override
+            public void queueStatusUpdated(XapiQueueStatusEvent event) {
+                listener.statusUpdated(new TinCanQueueEvent(event.getStatementsRemaining()));
+            }
+        });
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void removeTinCanQueueListener(TinCanQueueListener listener) {
+        queueStatusListeners.remove(listener);
     }
 
     /**

@@ -440,7 +440,22 @@ public abstract class UstadMobileSystemImpl {
      * @return true if successfully queued, false otherwise
      */
     public abstract boolean queueTinCanStatement(JSONObject stmt, Object context);
-    
+
+
+    /**
+     * Add a listener to be notified when the tincan queue is updated (items added/sent)
+     * @param listener Listener to add
+     */
+    public abstract void addTinCanQueueStatusListener(TinCanQueueListener listener);
+
+    /**
+     * Remove a listener from the list to be notified when tincan queue is updated
+     *
+     * @param listener
+     */
+    public abstract void removeTinCanQueueListener(TinCanQueueListener listener);
+
+
     /**
      * Gets the cache directory for the platform for either user specific
      * cache contents / shared cache contents

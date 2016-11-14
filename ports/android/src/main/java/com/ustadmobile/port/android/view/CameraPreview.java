@@ -23,10 +23,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private Camera mCamera;
     private Camera.PreviewCallback mPreviewCallback;
     private PreviewStartedCallback mPreviewStartCallback;
-    private Object mAutoFocusMoveCallback;
 
 
     private boolean mPreviewActive = false;
+
 
 
     public CameraPreview(Context context, PreviewStartedCallback previewStartCallback) {
@@ -48,11 +48,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mPreviewCallback = previewCallback;
     }
 
-    public void setAutoFocusMoveCallback(Object moveCallback) {
-        mAutoFocusMoveCallback = moveCallback;
-    }
-
-
     public void setCamera(Camera camera) {
         mCamera = camera;
         previewIfReady();
@@ -65,14 +60,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void previewIfReady() {
+        boolean focusMoveCallbackStarted = false;
         if(!mPreviewActive && mCamera != null && mHolder != null) {
             //good to go now
             if(mPreviewCallback != null) {
                 mCamera.setPreviewCallback(mPreviewCallback);
-            }
-
-            if(mAutoFocusMoveCallback != null && Build.VERSION.SDK_INT >= 16) {
-                mCamera.setAutoFocusMoveCallback((Camera.AutoFocusMoveCallback)mAutoFocusMoveCallback);
             }
 
             try {
@@ -93,9 +85,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void stopAndRelease() {
         if (mCamera != null){
             mCamera.setPreviewCallback(null);
-            if(mAutoFocusMoveCallback != null && Build.VERSION.SDK_INT >= 16) {
-                mCamera.setAutoFocusMoveCallback(null);
-            }
             mCamera.stopPreview();
             mCamera.release();        // release the camera for other applications
             mCamera = null;
@@ -136,11 +125,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             if(mPreviewCallback != null) {
                 mCamera.setPreviewCallback(mPreviewCallback);
             }
-
-            if(mAutoFocusMoveCallback != null && Build.VERSION.SDK_INT >= 16) {
-                mCamera.setAutoFocusMoveCallback((Camera.AutoFocusMoveCallback)mAutoFocusMoveCallback);
-            }
-
             mCamera.getParameters().setPreviewFormat(ImageFormat.NV21);
 
             mCamera.startPreview();

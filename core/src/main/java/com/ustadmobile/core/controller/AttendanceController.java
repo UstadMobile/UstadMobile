@@ -272,7 +272,9 @@ public class AttendanceController extends UstadBaseController{
         this.view = (AttendanceView)view;
     }
     
-    
+    public void handleSetFocusWaitEnabled(boolean focusWaitEnabled) {
+
+    }
     
     public void handleClickSnap() {
         view.showTakePicture();
@@ -340,6 +342,7 @@ public class AttendanceController extends UstadBaseController{
                         UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                         UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
                 String registrationUUID = UMTinCanUtil.generateUUID();
+
 
                 JSONObject teacherStmt = makeAttendendedStmt(
                         theClass.id, theClass.name,
