@@ -920,7 +920,7 @@
 				TargetAttributes = {
 					AD77D04D1D523A8A00A2F95A = {
 						CreatedOnToolsVersion = 7.3;
-						DevelopmentTeam = J334XM5GH2;
+						DevelopmentTeam = 7BKAL38G9V;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -1280,9 +1280,9 @@
 		AD77D07C1D523A8A00A2F95A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				DEVELOPMENT_TEAM = J334XM5GH2;
+				DEVELOPMENT_TEAM = 7BKAL38G9V;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1291,7 +1291,7 @@
 					"-ljre_emul",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.umios;
 				PRODUCT_NAME = Sapienza;
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 			};
@@ -1300,9 +1300,9 @@
 		AD77D07D1D523A8A00A2F95A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-1";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_ARC = NO;
-				DEVELOPMENT_TEAM = J334XM5GH2;
+				DEVELOPMENT_TEAM = 7BKAL38G9V;
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -1311,7 +1311,7 @@
 					"-ljre_emul",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.UstadMobileIOS2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.umios;
 				PRODUCT_NAME = Sapienza;
 				USER_HEADER_SEARCH_PATHS = "${HOME}/local/j2objc/include";
 			};
