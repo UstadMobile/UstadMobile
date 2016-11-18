@@ -135,7 +135,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     /**
      * Map of TinCanQueueListeners to the XapiQueueStatusListeners used by NanoLRS
      */
-    private HashMap<TinCanQueueListener, XapiQueueStatusListener> queueStatusListeners;
+    private HashMap<TinCanQueueListener, XapiStatementsForwardingListener> queueStatusListeners;
 
     /**
      * Some mime types that the Android OS does not know about but we do...
@@ -217,12 +217,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      */
     @Override
     public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
-        queueStatusListeners.put(listener, new XapiQueueStatusListener() {
+        /*
+        queueStatusListeners.put(listener, new XapiStatementsForwardingListener() {
             @Override
             public void queueStatusUpdated(XapiQueueStatusEvent event) {
                 listener.statusUpdated(new TinCanQueueEvent(event.getStatementsRemaining()));
             }
         });
+        */
     }
 
     /**

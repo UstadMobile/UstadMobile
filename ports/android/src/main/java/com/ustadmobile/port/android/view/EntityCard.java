@@ -1,8 +1,10 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -13,6 +15,13 @@ import com.ustadmobile.core.model.ListableEntity;
  */
 
 public class EntityCard extends CardView {
+
+    //Icon IDs that match with AttendanceController.STATUS_
+    private static final int[] STATUS_ID_DRAWABLES = {
+            R.drawable.ic_priority_high_black_18dp,
+            R.drawable.ic_sync_black_18dp,
+            R.drawable.ic_done_black_18dp
+    };
 
     private ListableEntity entity;
 
@@ -41,6 +50,14 @@ public class EntityCard extends CardView {
         ((TextView)findViewById(R.id.entity_item_title_text)).setText(title);
     }
 
+    public void setStatusText(String statusText) {
+        ((TextView)findViewById(R.id.entity_item_status_text)).setText(statusText);
+    }
+
+    public void setStatusIcon(int iconId) {
+        ((ImageView)findViewById(R.id.entity_item_status_icon)).setImageDrawable(
+                ContextCompat.getDrawable(getContext(), STATUS_ID_DRAWABLES[iconId]));
+    }
 
 
 

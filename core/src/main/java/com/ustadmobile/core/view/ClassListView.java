@@ -1,5 +1,7 @@
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.model.AttendanceClass;
+
 /**
  * Created by varuna on 20/02/16.
  */
@@ -10,9 +12,9 @@ public interface ClassListView extends UstadView{
      *
      * @param classList
      */
-    public void setClassList(String[] classList);
+    public void setClassList(final AttendanceClass[] classList);
 
-    void setClassStatus(int index, int statusCode, String statusMessage);
+    //void setClassStatus(String classId, int statusCode, String statusMessage);
 
 
 }

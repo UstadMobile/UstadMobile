@@ -9,14 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ustadmobile.core.model.AttendanceClassEntity;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.view.ClassListView;
-import android.widget.ListView;
-import android.widget.ArrayAdapter;
 import com.ustadmobile.core.controller.ClassListController;
 import android.widget.AdapterView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ClassListFragment extends UstadBaseFragment implements ClassListView, View.OnClickListener, AdapterView.OnItemClickListener{
+public class ClassListFragment extends UstadBaseFragment implements ClassListView, View.OnClickListener, AdapterView.OnItemClickListener, ControllerReadyListener{
 
     private RecyclerView mRecyclerView;
 
@@ -32,9 +33,11 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
 
     private RecyclerView.LayoutManager mLayoutManager;
 
-    private List<AttendanceClassEntity> mClassListEntities;
+    private List<AttendanceClass> mClassListEntities;
 
     private ClassListController mController;
+
+
 
     public ClassListFragment() {
         // Required empty public constructor
@@ -49,9 +52,29 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mController = ClassListController.makeControllerForView(this);
+        ClassListController.makeControllerForView(this, UMAndroidUtil.bundleToHashtable(getArguments()),
+            this);
+    }
+
+    @Override
+    public void controllerReady(UstadController controller, int flags) {
+        this.mController = (ClassListController)controller;
         setBaseController(mController);
     }
+
+
+    @Override
+    public void setClassList(final AttendanceClass[] classList) {
+        getActivity().runOnUiThread(new Runnable() {
+            public void run() {
+                mClassListEntities = new ArrayList<>();
+                for(int i = 0; i  < classList.length; i++) {
+                    mClassListEntities.add(classList[i]);
+                }
+            }
+        });
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,25 +85,12 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
         mRecyclerView = (RecyclerView)rootView.findViewById(R.id.fragment_class_list_recyclerview);
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        //setClassList has already been called
         mAdapter = new EntityCardAdapter(mClassListEntities);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnEntityClickListener(this);
-
         return rootView;
-    }
-
-
-    @Override
-    public void setClassList(String[] classList) {
-        mClassListEntities = new ArrayList<>();
-        for(int i = 0; i  < classList.length; i++) {
-            mClassListEntities.add(new AttendanceClassEntity(classList[i]));
-        }
-    }
-
-    @Override
-    public void setClassStatus(int index, int statusCode, String statusMessage) {
-
     }
 
     @Override

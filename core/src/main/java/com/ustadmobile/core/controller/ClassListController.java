@@ -6,12 +6,14 @@ import com.ustadmobile.core.view.ClassListView;
 import com.ustadmobile.core.controller.AttendanceController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassManagementView;
+
+import java.util.Calendar;
 import java.util.Hashtable;
 
 /**
  * Created by varuna on 20/02/16.
  */
-public class ClassListController extends UstadBaseController{
+public class ClassListController extends UstadBaseController implements AsyncLoadableController{
 
     private AttendanceClass[] attendanceClasses;
 
@@ -19,26 +21,33 @@ public class ClassListController extends UstadBaseController{
 
     public ClassListController(Object context) {
         super(context);
-        attendanceClasses = AttendanceController.loadTeacherClassListFromPrefs(context);
+        loadClasses();
     }
 
+    protected void loadClasses(){
+        attendanceClasses = AttendanceController.loadTeacherClassListFromPrefs(context);
+        for(int i = 0; i < attendanceClasses.length; i++) {
+            attendanceClasses[i].syncStatus = AttendanceController.getAttendanceStatusByClassId(context, attendanceClasses[i].id);
+        }
+    }
 
+    @Override
+    public UstadController loadController(Hashtable args, Object context) throws Exception {
+        ClassListController controller = new ClassListController(context);
+        return controller;
+    }
+
+    public static void makeControllerForView(ClassListView view, Hashtable args, ControllerReadyListener listener) {
+        ClassListController ctrl = new ClassListController(view.getContext());
+        ctrl.setView(view);
+        listener.controllerReady(ctrl, 0);
+    }
     public void setView(UstadView view) {
         super.setView(view);
         classListView = (ClassListView)view;
-        String[] classNames = new String[attendanceClasses.length];
-        for(int i = 0; i < classNames.length; i++){
-            classNames[i] = attendanceClasses[i].name;
-        }
-        classListView.setClassList(classNames);
+        classListView.setClassList(attendanceClasses);
     }
 
-    public static ClassListController makeControllerForView(ClassListView view) {
-        ClassListController ctrl = new ClassListController(view.getContext());
-        ctrl.setView(view);
-
-        return ctrl;
-    }
 
     public void setUIStrings() {
         
@@ -51,4 +60,6 @@ public class ClassListController extends UstadBaseController{
         UstadMobileSystemImpl.getInstance().go(ClassManagementView.class, args, 
                 context);
     }
+
+
 }

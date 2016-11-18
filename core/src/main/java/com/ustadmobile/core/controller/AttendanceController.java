@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -42,8 +43,17 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
+import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementManager;
+import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementProxy;
+import com.ustadmobile.nanolrs.core.model.XapiStatementProxy;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.List;
+
 import jp.sourceforge.qrcode.util.DebugCanvas;
 
 /* $if umplatform == 2  $
@@ -58,6 +68,26 @@ import jp.sourceforge.qrcode.util.DebugCanvas;
  * @author mike
  */
 public class AttendanceController extends UstadBaseController{
+
+    /**
+     * Attendance for the given class has not yet been taken today
+     */
+    public static final int STATUS_ATTENDANCE_NOT_TAKEN = 0;
+
+    /**
+     * Attendance for the given class has been taken but not yet
+     * sent to the server
+     */
+    public static final int STATUS_ATTENDANCE_TAKEN = 1;
+
+    /**
+     * Attendance for the given class has been sent successfully to the server
+     */
+    public static final int STATUS_ATTENDANCE_SENT = 2;
+
+    public static final int[] ATTENDANCE_MESSAGES = new int[] {
+            MessageIDConstants.not_taken, MessageIDConstants.sending, MessageIDConstants.sent
+    };
 
     //areas in which optical marks are to be found on the paper
     
@@ -189,6 +219,40 @@ public class AttendanceController extends UstadBaseController{
 
         return teacherClasses;
     }
+
+    /**
+     *
+     * @param context
+     * @param classId
+     * @return
+     */
+    public static int getAttendanceStatusByClassId(Object context, String classId) {
+        //Determine the status
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+
+        long timeMidnight = cal.getTimeInMillis();
+
+        List<? extends XapiStatementProxy> statementList = XapiStatementsEndpoint.getStatements(context, null, null, null,
+                "http://activitystrea.ms/schema/1.0/host", UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId,
+                null, false, false, timeMidnight, -1, 0);
+
+        if(statementList.isEmpty()) {
+            return STATUS_ATTENDANCE_NOT_TAKEN;
+        }
+
+        boolean statementsPending = false;
+        XapiForwardingStatementManager manager = PersistenceManager.getInstance().getForwardingStatementManager();
+        for(int i = 0; i < statementList.size(); i++) {
+            if(manager.findStatusByXapiStatement(context, statementList.get(i)) != XapiForwardingStatementProxy.STATUS_SENT)
+                return STATUS_ATTENDANCE_TAKEN;
+        }
+
+        return STATUS_ATTENDANCE_SENT;
+    }
+
     
     
     public static AttendanceClassStudent[] loadClassStudentListFromNet(final String classID, final Object context) {

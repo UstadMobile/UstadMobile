@@ -181,4 +181,10 @@ public class MessageIDConstants {
 
     public static final int reports = 104;
 
+    public static final int not_taken = 105;
+
+    public static final int sending = 106;
+
+    public static final int sent = 107;
+
 }

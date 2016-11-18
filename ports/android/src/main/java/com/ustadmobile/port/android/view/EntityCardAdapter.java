@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.model.ListableEntity;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.WeakHashMap;
 
 /**
  * Created by mike on 14/11/16.
@@ -19,6 +21,8 @@ public class EntityCardAdapter extends RecyclerView.Adapter<EntityCardAdapter.Vi
     private List<? extends ListableEntity> mEntityList;
 
     private View.OnClickListener mOnClickListener;
+
+    private WeakHashMap<String, EntityCard> idToCardMap;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public EntityCard mEntityCard;
@@ -31,6 +35,7 @@ public class EntityCardAdapter extends RecyclerView.Adapter<EntityCardAdapter.Vi
 
     public EntityCardAdapter(List<? extends ListableEntity> entityList) {
         this.mEntityList = entityList;
+        idToCardMap = new WeakHashMap<>();
     }
 
 
@@ -43,10 +48,28 @@ public class EntityCardAdapter extends RecyclerView.Adapter<EntityCardAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
+        //check if this is associated with another id
+        Iterator<String> idIterator = idToCardMap.keySet().iterator();
+        ListableEntity entity = mEntityList.get(position);
+
+        String idVal;
+        while(idIterator.hasNext()) {
+            idVal = idIterator.next();
+            if(idVal.equals(entity.getId()))
+                idIterator.remove();
+        }
+
         //set title here
-        holder.mEntityCard.setEntity(mEntityList.get(position));
+        idToCardMap.put(entity.getId(), holder.mEntityCard);
+        holder.mEntityCard.setEntity(entity);
         holder.mEntityCard.setTitle(mEntityList.get(position).getTitle());
+        holder.mEntityCard.setStatusText(entity.getStatusText());
+        holder.mEntityCard.setStatusIcon(entity.getStatusIconCode());
         holder.mEntityCard.setOnClickListener(this);
+    }
+
+    public EntityCard getCardByEntityId(String id) {
+        return idToCardMap.get(id);
     }
 
     @Override
