@@ -17,6 +17,8 @@ import com.ustadmobile.core.controller.ClassListController;
 import android.widget.AdapterView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEvent;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -98,6 +100,20 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
         if(view instanceof EntityCard) {
             int position = mClassListEntities.indexOf(((EntityCard)view).getEntity());
             mController.handleClassSelected(position);
+        }
+    }
+
+    @Override
+    public void setClassStatus(String classId, int statusCode, String statusMessage) {
+        final EntityCard card = mAdapter.getCardByEntityId(classId);
+        if(card != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                public void run() {
+                    AttendanceClass cls = (AttendanceClass)card.getEntity();
+                    card.setStatusText(cls.getStatusText());
+                    card.setStatusIcon(cls.getStatusIconCode());
+                }
+            });
         }
     }
 

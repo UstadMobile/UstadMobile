@@ -29,8 +29,18 @@ public class UstadBaseFragment  extends Fragment{
         }
 
         mUILocale = new String(sysLocale);
+        if(baseController != null)
+            baseController.handleViewResume();
     }
 
+    @Override
+    public void onDestroy() {
+        if(baseController != null)
+            baseController.handleViewDestroy();
+        super.onDestroy();
+    }
+
+    //TODO: add stop, pause handling here
 
     public int getDirection() {
         if(getActivity() instanceof UstadBaseActivity) {

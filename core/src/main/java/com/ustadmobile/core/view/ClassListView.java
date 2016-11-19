@@ -12,9 +12,9 @@ public interface ClassListView extends UstadView{
      *
      * @param classList
      */
-    public void setClassList(final AttendanceClass[] classList);
+    void setClassList(final AttendanceClass[] classList);
 
-    //void setClassStatus(String classId, int statusCode, String statusMessage);
+    void setClassStatus(String classId, int statusCode, String statusMessage);
 
 
 }

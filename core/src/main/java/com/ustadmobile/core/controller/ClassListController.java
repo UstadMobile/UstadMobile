@@ -1,11 +1,16 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.model.AttendanceClass;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ClassListView;
 import com.ustadmobile.core.controller.AttendanceController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ClassManagementView;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEvent;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
+import com.ustadmobile.nanolrs.core.model.XapiStatementProxy;
 
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -13,7 +18,7 @@ import java.util.Hashtable;
 /**
  * Created by varuna on 20/02/16.
  */
-public class ClassListController extends UstadBaseController implements AsyncLoadableController{
+public class ClassListController extends UstadBaseController implements AsyncLoadableController, XapiStatementsForwardingListener{
 
     private AttendanceClass[] attendanceClasses;
 
@@ -22,6 +27,7 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
     public ClassListController(Object context) {
         super(context);
         loadClasses();
+        XapiStatementsForwardingEndpoint.addQueueStatusListener(this);
     }
 
     protected void loadClasses(){
@@ -61,5 +67,42 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
                 context);
     }
 
+    @Override
+    public void handleViewDestroy() {
+        XapiStatementsForwardingEndpoint.removeQueueStatusListener(this);
+        super.handleViewDestroy();
+    }
+
+    @Override
+    public void queueStatusUpdated(XapiStatementsForwardingEvent event) {
+
+    }
+
+    @Override
+    public void queueStatementSent(XapiStatementsForwardingEvent event) {
+        updateViewAttendanceStatus(event, AttendanceController.STATUS_ATTENDANCE_SENT);
+    }
+
+
+
+    @Override
+    public void statementQueued(XapiStatementsForwardingEvent event) {
+        updateViewAttendanceStatus(event, AttendanceController.STATUS_ATTENDANCE_TAKEN);
+    }
+
+
+    protected void updateViewAttendanceStatus(XapiStatementsForwardingEvent event, int statusId) {
+        XapiStatementProxy stmt = event.getStatement();
+        if(stmt.getVerb().getId().equals(AttendanceController.XAPI_VERB_TEACHER_HOSTED)) {
+            String activityId = stmt.getActivity().getActivityId();
+            for(int i = 0; i < attendanceClasses.length; i++) {
+                if(activityId.equals(UstadMobileConstants.PREFIX_ATTENDANCE_URL + attendanceClasses[i].id)) {
+                    attendanceClasses[i].syncStatus = statusId;
+                    classListView.setClassStatus(attendanceClasses[i].id, statusId,
+                            attendanceClasses[i].getStatusText());
+                }
+            }
+        }
+    }
 
 }

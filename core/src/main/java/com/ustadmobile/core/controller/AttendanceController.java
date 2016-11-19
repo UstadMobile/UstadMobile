@@ -67,7 +67,7 @@ import jp.sourceforge.qrcode.util.DebugCanvas;
  *
  * @author mike
  */
-public class AttendanceController extends UstadBaseController{
+public class AttendanceController extends UstadBaseController {
 
     /**
      * Attendance for the given class has not yet been taken today
@@ -84,6 +84,10 @@ public class AttendanceController extends UstadBaseController{
      * Attendance for the given class has been sent successfully to the server
      */
     public static final int STATUS_ATTENDANCE_SENT = 2;
+
+    public static final String XAPI_VERB_TEACHER_HOSTED = "http://activitystrea.ms/schema/1.0/host";
+
+
 
     public static final int[] ATTENDANCE_MESSAGES = new int[] {
             MessageIDConstants.not_taken, MessageIDConstants.sending, MessageIDConstants.sent
@@ -236,7 +240,7 @@ public class AttendanceController extends UstadBaseController{
         long timeMidnight = cal.getTimeInMillis();
 
         List<? extends XapiStatementProxy> statementList = XapiStatementsEndpoint.getStatements(context, null, null, null,
-                "http://activitystrea.ms/schema/1.0/host", UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId,
+                XAPI_VERB_TEACHER_HOSTED, UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId,
                 null, false, false, timeMidnight, -1, 0);
 
         if(statementList.isEmpty()) {

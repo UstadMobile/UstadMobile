@@ -78,12 +78,6 @@ public class LoginController extends UstadBaseController{
     
     public static final String REGISTER_REGCODE = "regcode";
 
-    public static final String LLRS_URL = "http://localhost:8425/";
-
-    public static final String LLRS_LOGIN_URL = LLRS_URL + "umapi/login/";
-
-    public static final String LLRS_XAPI_ENDPOINT = LLRS_URL + "xAPI/";
-
     //Hashed user authentication to cache in case they login next time when offline
     public static final String PREFKEY_AUTHCACHE_PREFIX = "um-authcache-";
 
@@ -97,29 +91,6 @@ public class LoginController extends UstadBaseController{
         LoginController ctrl = new LoginController(view.getContext());
         ctrl.setView(view);
         return ctrl;
-    }
-
-    /**
-     * Try and login local lrs with the given username and password and
-     * master server url (llrs stands for local lrs)
-     *
-     * @param username Username to authenticate as
-     * @param password Password to authenticate with
-     * @param master server url xAPI statements endpoint to authenticate against
-     * @return HTTP OK 200 if OK, 403 for unauthorized
-     * @throws IOException if something goes wrong talking to server
-     */
-    public static int authenticateLLRS(String username, String password,
-                                        String url) throws IOException{
-        Hashtable parameters = new Hashtable();
-        parameters.put("username", username);
-        parameters.put("password", password);
-        parameters.put("url", url);
-
-        HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
-                LLRS_LOGIN_URL, null, parameters, "POST");
-        return authResult.getStatus();
-
     }
 
     public static String encodeBasicAuth(String username, String password) {
@@ -424,27 +395,13 @@ public class LoginController extends UstadBaseController{
 
 
     /**
-     * Handles what happens when in the app the login button is clicked.  By default will not
-     * expect to use a local LRS server
-     *
+     * Handles what happens when in the app the login button is clicked.
      * @param username
      * @param password
      * @param xAPIServer
      */
     public void handleClickLogin(final String username, final String password,
                                  final String xAPIServer) {
-        handleClickLogin(username, password, xAPIServer, false);
-    }
-
-    /**
-     * Handles what happens when in the app the login button is clicked.
-     * @param username
-     * @param password
-     * @param xAPIServer
-     * @param localLRS True if we should authenticate against a local LRS server: false otherwise
-     */
-    public void handleClickLogin(final String username, final String password,
-                                 final String xAPIServer, final boolean localLRS) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         updateXAPIServer(xAPIServer);
@@ -473,14 +430,6 @@ public class LoginController extends UstadBaseController{
                     //encrypt and cache the authentication result
                     String authHashed = impl.hashAuth(getContext(), password);
                     impl.setAppPref(PREFKEY_AUTHCACHE_PREFIX + username, authHashed, getContext());
-                    if(localLRS) {
-                        //Temporarily - tell the Python LRS about this account
-                        try {
-                            LoginController.authenticateLLRS(username, password, serverURL);
-                        } catch (IOException e) {
-                            impl.l(UMLog.ERROR, 85, null, e);
-                        }
-                    }
                 }
 
                 if(result == 0 || result >= 500) {
@@ -493,34 +442,32 @@ public class LoginController extends UstadBaseController{
                     }
                 }
 
-                impl.getAppView(context).dismissProgressDialog();
-
-
 
                 if(result == 401 | result == 403) {
+                    impl.getAppView(context).dismissProgressDialog();
                     impl.getAppView(context).showAlertDialog(impl.getString(MessageIDConstants.error),
                         impl.getString(MessageIDConstants.wrong_user_pass_combo));
                 }else if(!authPassed) {
+                    impl.getAppView(context).dismissProgressDialog();
                     UstadMobileSystemImpl.getInstance().getAppView(context).showAlertDialog(
                         impl.getString(MessageIDConstants.error), impl.getString(MessageIDConstants.login_network_error));
                 }else {
-                    UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
-                    UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
+                    impl.setActiveUser(username, context);
+                    impl.setActiveUserAuth(password, context);
 
+                    impl.getAppView(context).setProgressDialogTitle("Checking user role");
                     // try and find the role
                     //TODO
                     try {
                         role = LoginController.getRole(username, password,
                             UMFileUtil.resolveLink(
-                                UstadMobileDefaults.DEFAULT_XAPI_SERVER, 
-                                UstadMobileDefaults.DEFAULT_ROLE_ENDPOINT));
+                                xAPIServer, UstadMobileDefaults.DEFAULT_ROLE_ENDPOINT));
 
                         if(role != null && role.equals(UstadMobileConstants.ROLE_TEACHER)) {
-                            
+                            impl.getAppView(context).setProgressDialogTitle("Loading teacher classes");
                             teacherClassList = LoginController.getJSONArrayResult(
                                     username, password,
-                                    UMFileUtil.resolveLink(
-                                        UstadMobileDefaults.DEFAULT_XAPI_SERVER, 
+                                    UMFileUtil.resolveLink(xAPIServer,
                                         UstadMobileDefaults.DEFAULT_CLASSLIST_ENDPOINT));
                             if(teacherClassList != null) {
                                 impl.setUserPref("teacherclasslist",
@@ -535,7 +482,7 @@ public class LoginController extends UstadBaseController{
                                     JSONObject classObj = classArr.getJSONObject(i);
                                     String classID = classObj.getString("id");
                                     String classURL = UMFileUtil.resolveLink(
-                                        UstadMobileDefaults.DEFAULT_XAPI_SERVER,
+                                        xAPIServer,
                                         UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
                                             + classID;
                                     String studentListJSON =
@@ -560,7 +507,8 @@ public class LoginController extends UstadBaseController{
                         UstadMobileSystemImpl.getInstance().setUserPref("role", 
                             role, context);
                     }
-                    
+
+                    impl.getAppView(context).dismissProgressDialog();
                     UstadMobileSystemImpl.getInstance().go(BasePointView.class, 
                         BasePointController.makeDefaultBasePointArgs(context), context);
                 }
