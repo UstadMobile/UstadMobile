@@ -144,6 +144,10 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         return true;
     }
 
+    @Override
+    public boolean isHttpsSupported() {
+        return true;
+    }
 
     @Override
     public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {

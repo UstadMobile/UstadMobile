@@ -555,6 +555,8 @@ public class LoginController extends UstadBaseController{
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+        if(xAPIURL.equals(UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL))
+            xAPIURL = UstadMobileDefaults.DEFAULT_XAPI_SERVER;
         view.setXAPIServerURL(xAPIURL);
     }
 }

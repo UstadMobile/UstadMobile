@@ -431,7 +431,14 @@ public abstract class UstadMobileSystemImpl {
      * @return true if supported (eg. Android) false otherwise (e.g. J2ME)
      */
     public abstract boolean isJavascriptSupported();
-    
+
+    /**
+     * Answer whether or not this platform supports https
+     *
+     * @return True if the platform supports HTTPS , false otherwise (Temporarily - J2ME)
+     */
+    public abstract boolean isHttpsSupported();
+
     /**
      * Queue the given TinCan statement represented in the JSON object 
      * for transmission to the tin can server
