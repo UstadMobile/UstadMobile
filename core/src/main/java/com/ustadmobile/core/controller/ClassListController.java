@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.model.AttendanceClass;
+import com.ustadmobile.core.view.ClassManagementView2;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.ClassListView;
 import com.ustadmobile.core.controller.AttendanceController;
@@ -63,7 +64,8 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
         Hashtable args = new Hashtable();
         args.put(ClassManagementController.KEY_CLASSID, 
                 attendanceClasses[index].id);
-        UstadMobileSystemImpl.getInstance().go(ClassManagementView.class, args, 
+        args.put(ClassManagementController2.ARG_CLASS_NAME, attendanceClasses[index].getTitle());
+        UstadMobileSystemImpl.getInstance().go(ClassManagementView2.class, args,
                 context);
     }
 

@@ -90,6 +90,7 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
 
         //setClassList has already been called
         mAdapter = new EntityCardAdapter(mClassListEntities);
+        mAdapter.setEntityIconId(R.drawable.ic_people_black_48dp);
         mRecyclerView.setAdapter(mAdapter);
         mAdapter.setOnEntityClickListener(this);
         return rootView;

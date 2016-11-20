@@ -24,6 +24,12 @@ public class EntityCardAdapter extends RecyclerView.Adapter<EntityCardAdapter.Vi
 
     private WeakHashMap<String, EntityCard> idToCardMap;
 
+    private boolean statusVisible;
+
+    private boolean detailTextVisible;
+
+    private int entityIconId;
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public EntityCard mEntityCard;
 
@@ -36,13 +42,51 @@ public class EntityCardAdapter extends RecyclerView.Adapter<EntityCardAdapter.Vi
     public EntityCardAdapter(List<? extends ListableEntity> entityList) {
         this.mEntityList = entityList;
         idToCardMap = new WeakHashMap<>();
+        statusVisible = true;
+        entityIconId = R.drawable.ic_group_white_24dp;
     }
 
+    public boolean isStatusVisible() {
+        return statusVisible;
+    }
+
+    public void setStatusVisible(boolean statusVisible) {
+        this.statusVisible = statusVisible;
+        Iterator<EntityCard> iterator = idToCardMap.values().iterator();
+        while(iterator.hasNext()) {
+            iterator.next().setStatusVisible(statusVisible);
+        }
+    }
+
+    public boolean isDetailTextVisible() {
+        return detailTextVisible;
+    }
+
+    public void setDetailTextVisible(boolean detailTextVisible) {
+        this.detailTextVisible = detailTextVisible;
+        Iterator<EntityCard> iterator = idToCardMap.values().iterator();
+        while(iterator.hasNext()) {
+            iterator.next().setDetailTextVisible(detailTextVisible);
+        }
+    }
+
+    public int getEntityIconId() {
+        return entityIconId;
+    }
+
+    public void setEntityIconId(int entityIconId) {
+        this.entityIconId = entityIconId;
+        Iterator<EntityCard> iterator = idToCardMap.values().iterator();
+        while(iterator.hasNext()) {
+            iterator.next().setEntityIcon(entityIconId);
+        }
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         EntityCard entityCard = (EntityCard)LayoutInflater.from(parent.getContext()).inflate(R.layout.item_entitycard, parent, false);
         ViewHolder vh = new ViewHolder(entityCard);
+
         return vh;
     }
 
@@ -65,6 +109,9 @@ public class EntityCardAdapter extends RecyclerView.Adapter<EntityCardAdapter.Vi
         holder.mEntityCard.setTitle(mEntityList.get(position).getTitle());
         holder.mEntityCard.setStatusText(entity.getStatusText());
         holder.mEntityCard.setStatusIcon(entity.getStatusIconCode());
+        holder.mEntityCard.setDetailTextVisible(detailTextVisible);
+        holder.mEntityCard.setStatusVisible(statusVisible);
+        holder.mEntityCard.setEntityIcon(entityIconId);
         holder.mEntityCard.setOnClickListener(this);
     }
 

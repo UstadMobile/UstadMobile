@@ -9,7 +9,7 @@ package com.ustadmobile.core.model;
  *
  * @author mike
  */
-public class AttendanceClassStudent {
+public class AttendanceClassStudent implements ListableEntity {
     
     public String username;
     
@@ -26,5 +26,30 @@ public class AttendanceClassStudent {
     public String toString() {
         return this.full_name;
     }
-    
+
+
+    @Override
+    public String getTitle() {
+        return full_name;
+    }
+
+    @Override
+    public String getDetail() {
+        return "";
+    }
+
+    @Override
+    public String getId() {
+        return username;
+    }
+
+    @Override
+    public String getStatusText() {
+        return "";
+    }
+
+    @Override
+    public int getStatusIconCode() {
+        return 0;
+    }
 }

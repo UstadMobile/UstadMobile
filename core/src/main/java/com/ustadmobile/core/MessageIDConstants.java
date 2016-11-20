@@ -187,4 +187,8 @@ public class MessageIDConstants {
 
     public static final int sent = 107;
 
+    public static final int students = 108;
+
+    public static final int people = 109;
+
 }

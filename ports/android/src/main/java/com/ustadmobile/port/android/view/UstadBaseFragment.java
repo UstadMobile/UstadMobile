@@ -5,6 +5,9 @@ import android.support.v4.app.Fragment;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.util.Hashtable;
 
 /**
  * Created by mike on 10/15/15.
@@ -18,6 +21,25 @@ public class UstadBaseFragment  extends Fragment{
     protected void setBaseController(UstadBaseController baseController) {
         this.baseController = baseController;
     }
+
+    /**
+     * Make a new instance of a base fragment with a hastable for arguments
+     *
+     * @param args Hashtable arguments (normally used by the to be created view controller)
+     * @param type
+     * @param <T>
+     * @return
+     */
+    public static <T extends UstadBaseFragment> T newInstance(Hashtable args, Class<T> type) {
+        try {
+            UstadBaseFragment baseFrag = type.newInstance();
+            baseFrag.setArguments(UMAndroidUtil.hashtableToBundle(args));
+            return type.cast(baseFrag);
+        }catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Override
     public void onResume() {
@@ -74,6 +96,7 @@ public class UstadBaseFragment  extends Fragment{
     public void setDisplayName(String displayName) {
         //not implemented yet
     }
+
 
 
 

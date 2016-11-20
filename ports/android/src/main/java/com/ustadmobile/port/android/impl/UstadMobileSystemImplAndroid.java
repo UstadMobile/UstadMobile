@@ -59,6 +59,7 @@ import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ClassManagementView;
+import com.ustadmobile.core.view.ClassManagementView2;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
@@ -70,6 +71,7 @@ import com.ustadmobile.port.android.view.AttendanceActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.CatalogActivity;
 import com.ustadmobile.port.android.view.ClassManagementActivity;
+import com.ustadmobile.port.android.view.ClassManagementActivity2;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.EnrollStudentActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
@@ -276,6 +278,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             androidClass = ClassManagementActivity.class;
         }else if(cls.equals(EnrollStudentView.class)){
             androidClass = EnrollStudentActivity.class;
+        }else if(cls.equals(ClassManagementView2.class)) {
+            androidClass = ClassManagementActivity2.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);

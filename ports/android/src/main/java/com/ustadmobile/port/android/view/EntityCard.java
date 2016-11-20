@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -54,10 +55,27 @@ public class EntityCard extends CardView {
         ((TextView)findViewById(R.id.entity_item_status_text)).setText(statusText);
     }
 
+    public void setStatusVisible(boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        findViewById(R.id.entity_item_status_icon).setVisibility(visibility);
+        findViewById(R.id.entity_item_status_text).setVisibility(visibility);
+    }
+
+
     public void setStatusIcon(int iconId) {
         ((ImageView)findViewById(R.id.entity_item_status_icon)).setImageDrawable(
                 ContextCompat.getDrawable(getContext(), STATUS_ID_DRAWABLES[iconId]));
     }
+
+    public void setEntityIcon(int iconId) {
+        ((ImageView)findViewById(R.id.entity_item_icon)).setImageDrawable(
+                ContextCompat.getDrawable(getContext(), iconId));
+    }
+
+    public void setDetailTextVisible(boolean visible) {
+        findViewById(R.id.entity_item_detail_text).setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
 
 
 
