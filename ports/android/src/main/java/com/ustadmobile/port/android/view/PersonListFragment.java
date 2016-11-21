@@ -1,6 +1,9 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ControllerReadyListener;
@@ -33,6 +36,17 @@ public class PersonListFragment extends EntityListFragment implements PersonList
         mPersonListController = (PersonListController)controller;
         setEntityList(mPersonListController.getList());
     }
+
+    /*
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        floatingActionMenu.setVisibility(View.GONE);
+        return view;
+    }
+    */
+
     public void setEntityList(List<? extends ListableEntity> list)  {
         super.setEntityList(list);
         mAdapter.setDetailTextVisible(false);

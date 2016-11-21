@@ -1,4 +1,6 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.ustadmobile.port.android.view.EntityListFragment">
@@ -9,5 +11,24 @@
         android:id="@+id/entity_fragment_recyclerview"
         android:scrollbars="vertical"
         />
+
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom|right"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:paddingBottom="8dp"
+        android:paddingRight="8dp"
+        android:visibility="gone"
+        app:menu_fab_size="normal"
+        app:menu_backgroundColor="#66000000"
+        app:menu_icon="@drawable/ic_assignment_turned_in_white_24dp"
+        android:id="@+id/entity_fragment_floating_action_menu">
+
+
+    </com.github.clans.fab.FloatingActionMenu>
+
 
 </FrameLayout>

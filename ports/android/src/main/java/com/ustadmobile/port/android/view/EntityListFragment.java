@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.github.clans.fab.FloatingActionMenu;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.model.ListableEntity;
 
@@ -26,6 +27,8 @@ public class EntityListFragment extends UstadBaseFragment {
     protected RecyclerView mRecyclerView;
 
     protected RecyclerView.LayoutManager mLayoutManager;
+
+    protected FloatingActionMenu floatingActionMenu;
 
     private List<? extends ListableEntity> list;
 
@@ -48,6 +51,7 @@ public class EntityListFragment extends UstadBaseFragment {
         mRecyclerView = (RecyclerView)rootView.findViewById(R.id.entity_fragment_recyclerview);
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+        floatingActionMenu = (FloatingActionMenu)rootView.findViewById(R.id.entity_fragment_floating_action_menu);
         checkListUpdate();
         return rootView;
     }
@@ -67,5 +71,13 @@ public class EntityListFragment extends UstadBaseFragment {
         }
     }
 
+    /**
+     * Gets the floating action menu
+     *
+     * @return
+     */
+    protected FloatingActionMenu getFloatingActionMenu() {
+        return floatingActionMenu;
+    }
 
 }
