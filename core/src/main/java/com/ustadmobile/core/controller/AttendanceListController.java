@@ -25,6 +25,8 @@ import java.util.List;
 
 public class AttendanceListController extends EntityListController implements XapiStatementsForwardingListener{
 
+    public static final int MAX_ATTENDANCE_ITEMS = 40;
+
     public AttendanceListController(Object context) {
         super(context);
         XapiStatementsForwardingEndpoint.addQueueStatusListener(this);
@@ -51,7 +53,7 @@ public class AttendanceListController extends EntityListController implements Xa
         String attendanceActivityId = UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId;
         List<? extends XapiStatementProxy> classHostedStmts = XapiStatementsEndpoint.getStatements(context,
                 null, null, null, AttendanceController.XAPI_VERB_TEACHER_HOSTED,
-                attendanceActivityId, null, false, false, -1, -1, 0);
+                attendanceActivityId, null, false, false, -1, -1, MAX_ATTENDANCE_ITEMS);
 
         getList().clear();
         Iterator<? extends XapiStatementProxy> iterator = classHostedStmts.iterator();
@@ -77,8 +79,17 @@ public class AttendanceListController extends EntityListController implements Xa
     }
 
     public void handleClickSnapSheet() {
+        handleStartAttendanceEntry(AttendanceController.ENTRYMODE_SNAP_SHEET);
+    }
+
+    public void handleClickDirectEntry() {
+        handleStartAttendanceEntry(AttendanceController.ENTRYMODE_DIRECT_ENTRY);
+    }
+
+    private void handleStartAttendanceEntry(int mode) {
         Hashtable args = new Hashtable();
         args.put(AttendanceController.KEY_CLASSID, classId);
+        args.put(AttendanceController.ARG_ENTRYMODE, new Integer(mode));
         UstadMobileSystemImpl.getInstance().go(AttendanceView.class, args, context);
     }
 

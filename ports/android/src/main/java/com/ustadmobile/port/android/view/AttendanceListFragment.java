@@ -29,10 +29,6 @@ public class AttendanceListFragment extends EntityListFragment implements Attend
 
     private AttendanceListController mAttendanceListController;
 
-    public static final int ID_SNAPBUTTON = 1001;
-
-    public static final int ID_DIRECTENTRYBUTTON = 1002;
-
     private FloatingActionButton cameraButton;
 
     private FloatingActionButton directEntryButton;
@@ -72,6 +68,7 @@ public class AttendanceListFragment extends EntityListFragment implements Attend
                 R.drawable.ic_phone_android_white_18dp));
         directEntryButton.setLabelText("Direct Entry");
         directEntryButton.setButtonSize(FloatingActionButton.SIZE_MINI);
+        directEntryButton.setOnClickListener(this);
         fMenu.addMenuButton(directEntryButton, 1);
 
         return rootView;
@@ -95,6 +92,9 @@ public class AttendanceListFragment extends EntityListFragment implements Attend
         if(view == cameraButton) {
             floatingActionMenu.close(true);
             mAttendanceListController.handleClickSnapSheet();
+        }else if(view == directEntryButton) {
+            floatingActionMenu.close(true);
+            mAttendanceListController.handleClickDirectEntry();
         }
     }
 

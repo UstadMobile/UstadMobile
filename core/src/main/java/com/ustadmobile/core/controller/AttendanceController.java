@@ -120,6 +120,10 @@ public class AttendanceController extends UstadBaseController {
     public static final float OM_ROW_HEIGHT = 20.651441242f/AREA_HEIGHT;
     
     public static final int DEFAULT_GS_THRESHOLD = 128;
+
+    public static final int ENTRYMODE_SNAP_SHEET = 0;
+
+    public static final int ENTRYMODE_DIRECT_ENTRY = 1;
     
     
     /*
@@ -161,6 +165,8 @@ public class AttendanceController extends UstadBaseController {
      * Argument required for attendance class id
      */
     public static final String KEY_CLASSID = "classid";
+
+    public static final String ARG_ENTRYMODE = "mode";
     
 
     /**
@@ -185,6 +191,8 @@ public class AttendanceController extends UstadBaseController {
     public static final String[] VERB_DISPLAYS = new String[] {
         "Attended", "Late", "Absent - Excused", "Skipped"
     };
+
+    private int entryMode = ENTRYMODE_SNAP_SHEET;
     
     public AttendanceController(Object context, String classId) {
         super(context);
@@ -194,6 +202,11 @@ public class AttendanceController extends UstadBaseController {
     public static AttendanceController makeControllerForView(AttendanceView view, Hashtable args) {
         AttendanceController ctrl = new AttendanceController(view.getContext(), 
             (String)args.get(KEY_CLASSID));
+
+        if(args.containsKey(ARG_ENTRYMODE)) {
+            ctrl.setEntryMode((Integer)args.get(ARG_ENTRYMODE));
+        }
+
         ctrl.setView(view);
 
         return ctrl;
@@ -337,7 +350,13 @@ public class AttendanceController extends UstadBaseController {
      * the view should call this to get the workflow started
      */
     public void handleStartFlow() {
-        view.showTakePicture();
+        if(entryMode == ENTRYMODE_SNAP_SHEET) {
+            view.showTakePicture();
+        }else {
+            //TODO: Remove these hard coded values
+            boolean[][] marks = new boolean[66][4];
+            handleResultsDecoded(marks);
+        }
     }
     
     
@@ -487,7 +506,21 @@ public class AttendanceController extends UstadBaseController {
         return stmt;
     }
 
-    
-    
-    
+    /**
+     * The entry mode : direct or by sheet snap - as per ENTRYMODE_ constants
+     *
+     * @return The entry mode as per ENTRYMODE_ constants
+     */
+    public int getEntryMode() {
+        return entryMode;
+    }
+
+    /**
+     * Set the entry mode : direct or by sheet snap .  Must be done before calling handleStartFlow()
+     *
+     * @param entryMode The entry mode as per ENTRYMODE_ constants
+     */
+    public void setEntryMode(int entryMode) {
+        this.entryMode = entryMode;
+    }
 }
