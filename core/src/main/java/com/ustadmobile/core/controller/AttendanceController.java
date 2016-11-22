@@ -173,6 +173,14 @@ public class AttendanceController extends UstadBaseController {
         "http://www.ustadmobile.com/xapi/verb/absent-excused",
         "http://id.tincanapi.com/verb/skipped"
     };
+
+    public static final int VERB_IDS_ATTENDED = 0;
+
+    public static final int VERB_IDS_LATE = 1;
+
+    public static final int VERB_IDS_EXCUSED = 2;
+
+    public static final int VERB_IDS_ABSENT = 3;
     
     public static final String[] VERB_DISPLAYS = new String[] {
         "Attended", "Late", "Absent - Excused", "Skipped"

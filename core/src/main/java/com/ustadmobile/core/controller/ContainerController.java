@@ -36,6 +36,7 @@ import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.ContainerView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -648,7 +649,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
                     labelSb.append(cal.get(Calendar.MONTH)+1).append('/');
                     labelSb.append(cal.get(Calendar.YEAR)).append(" - ");
                     labelSb.append(cal.get(Calendar.HOUR_OF_DAY)).append(':');
-                    labelSb.append(pad0(cal.get(Calendar.MINUTE)));
+                    labelSb.append(UMUtil.pad0(cal.get(Calendar.MINUTE)));
                     
                     regIds.addElement(regId);
                     labels.addElement(labelSb.toString());
@@ -674,13 +675,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         }
     }
     
-    private String pad0(int i) {
-        if(i > 9) {
-            return String.valueOf(i);
-        }else {
-            return "0"+i;
-        }
-    }
+
 
     /**
      * Handle when the user has chosen a session to resume

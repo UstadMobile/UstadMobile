@@ -55,6 +55,10 @@ public class EntityCard extends CardView {
         ((TextView)findViewById(R.id.entity_item_status_text)).setText(statusText);
     }
 
+    public void setDetailText(String detailText) {
+        ((TextView)findViewById(R.id.entity_item_detail_text)).setText(detailText);
+    }
+
     public void setStatusVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.GONE;
         findViewById(R.id.entity_item_status_icon).setVisibility(visibility);

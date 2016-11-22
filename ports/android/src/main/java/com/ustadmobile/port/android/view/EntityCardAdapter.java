@@ -110,6 +110,7 @@ public class EntityCardAdapter extends RecyclerView.Adapter<EntityCardAdapter.Vi
         holder.mEntityCard.setStatusText(entity.getStatusText());
         holder.mEntityCard.setStatusIcon(entity.getStatusIconCode());
         holder.mEntityCard.setDetailTextVisible(detailTextVisible);
+        holder.mEntityCard.setDetailText(entity.getDetail());
         holder.mEntityCard.setStatusVisible(statusVisible);
         holder.mEntityCard.setEntityIcon(entityIconId);
         holder.mEntityCard.setOnClickListener(this);

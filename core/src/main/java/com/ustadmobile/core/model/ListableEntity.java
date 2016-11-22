@@ -20,6 +20,10 @@ public interface ListableEntity {
 
     String getStatusText();
 
+    /**
+     * Provide a status icon as per the STATUSICON_ codes
+     * @return
+     */
     int getStatusIconCode();
 
 
