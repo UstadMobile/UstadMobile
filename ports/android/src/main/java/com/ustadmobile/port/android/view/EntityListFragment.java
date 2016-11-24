@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,7 +31,10 @@ public class EntityListFragment extends UstadBaseFragment {
 
     protected FloatingActionMenu floatingActionMenu;
 
+    protected SwipeRefreshLayout refreshLayout;
+
     private List<? extends ListableEntity> list;
+
 
     public EntityListFragment() {
         // Required empty public constructor
@@ -52,6 +56,9 @@ public class EntityListFragment extends UstadBaseFragment {
         mLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
         floatingActionMenu = (FloatingActionMenu)rootView.findViewById(R.id.entity_fragment_floating_action_menu);
+        refreshLayout = (SwipeRefreshLayout)rootView.findViewById(R.id.entity_fragment_refreshlayout);
+        refreshLayout.setEnabled(false);
+
         checkListUpdate();
         return rootView;
     }

@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -56,7 +57,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     @Override
     public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method, byte[] postBody) throws IOException {
         URL url = new URL(httpURL);
-        HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection)openConnection(url);
 
         if(headers != null) {
             Enumeration e = headers.keys();
@@ -138,6 +139,15 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
         return result;
     }
+
+    /**
+     * Open the given connection and return the HttpURLConnection object using a proxy if required
+     *
+     * @param url
+     *
+     * @return
+     */
+    public abstract URLConnection openConnection(URL url) throws IOException;
 
     @Override
     public boolean isJavascriptSupported() {

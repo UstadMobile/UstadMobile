@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.os.Environment;
 
 import java.io.*;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.*;
 import java.net.HttpURLConnection;
@@ -84,6 +85,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Xml;
 import android.webkit.MimeTypeMap;
@@ -362,6 +364,24 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
 
+    public URLConnection openConnection(URL url) throws IOException{
+        return url.openConnection();
+        /*
+        String proxyString = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.HTTP_PROXY);
+        if (proxyString != null)
+        {
+            String proxyAddress = proxyString.split(":")[0];
+            int proxyPort = Integer.parseInt(proxyString.split(":")[1]);
+            Proxy p = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyAddress,proxyPort));
+            HttpHost proxy = new HttpHost(proxyAddress,proxyPort);
+            con = (HttpURLConnection) url.openConnection(p);
+        }
+        else
+        {
+            con = (HttpURLConnection) url.openConnection();
+        }
+        */
+    }
     
     /** 
      * Use Android assets instead 

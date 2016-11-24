@@ -481,17 +481,7 @@ public class LoginController extends UstadBaseController{
                                 for(int i = 0; i < classArr.length(); i++) {
                                     JSONObject classObj = classArr.getJSONObject(i);
                                     String classID = classObj.getString("id");
-                                    String classURL = UMFileUtil.resolveLink(
-                                        xAPIServer,
-                                        UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
-                                            + classID;
-                                    String studentListJSON =
-                                            LoginController.getJSONArrayResult(
-                                                    username, password, classURL);
-                                    if(studentListJSON != null) {
-                                        impl.setUserPref("studentlist."+classID,
-                                                studentListJSON, context);
-                                    }
+                                    loadClassListToPrefs(classID, xAPIServer, context);
                                 }
                             }catch(JSONException e) {
                                 //this should never happen - if it did... getTeacherClassList would have return null
@@ -517,6 +507,19 @@ public class LoginController extends UstadBaseController{
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 302, null);
         impl.getAppView(context).showProgressDialog(impl.getString(MessageIDConstants.authenticating));
         loginThread.start();
+    }
+
+    public static void loadClassListToPrefs(String classId, String xapiServer, Object context) throws IOException{
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String classURL = UMFileUtil.resolveLink(
+                xapiServer,
+                UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
+                + classId;
+        String studentListJSON = LoginController.getJSONArrayResult(impl.getActiveUser(context),
+                impl.getActiveUserAuth(context), classURL);
+        if(studentListJSON != null) {
+            impl.setUserPref("studentlist."+classId, studentListJSON, context);
+        }
     }
     
     /**
