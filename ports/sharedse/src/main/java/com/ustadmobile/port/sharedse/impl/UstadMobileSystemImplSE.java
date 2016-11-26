@@ -8,6 +8,7 @@ package com.ustadmobile.port.sharedse.impl;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -163,6 +164,14 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {
         //Placeholder for iOS usage
         return false;
+    }
+
+    public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
+        //TODO: remove this - it's not really used - do nothing
+    }
+
+    public void removeTinCanQueueListener(TinCanQueueListener listener) {
+        //TODO: remove this - it's not really used - do nothing
     }
 
     /**
