@@ -201,6 +201,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         isLoading = false;
         mCatalogController = (CatalogController)controller;
+        setBaseController(mCatalogController);
+
         mRecyclerAdapter = new OPDSRecyclerAdapter(mCatalogController);
 
         //in case user left activity when loading was going on

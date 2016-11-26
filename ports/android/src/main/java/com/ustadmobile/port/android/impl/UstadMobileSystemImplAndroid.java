@@ -42,6 +42,7 @@ import android.os.Bundle;
 import android.os.Environment;
 
 import java.io.*;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.*;
 import java.net.HttpURLConnection;
@@ -59,6 +60,7 @@ import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ClassManagementView;
+import com.ustadmobile.core.view.ClassManagementView2;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
@@ -70,6 +72,7 @@ import com.ustadmobile.port.android.view.AttendanceActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
 import com.ustadmobile.port.android.view.CatalogActivity;
 import com.ustadmobile.port.android.view.ClassManagementActivity;
+import com.ustadmobile.port.android.view.ClassManagementActivity2;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.EnrollStudentActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
@@ -82,6 +85,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 
 import android.os.Build;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Xml;
 import android.webkit.MimeTypeMap;
@@ -133,6 +137,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private Timer sendStatementsTimer;
 
     /**
+     * Map of TinCanQueueListeners to the XapiQueueStatusListeners used by NanoLRS
+     */
+    private HashMap<TinCanQueueListener, XapiStatementsForwardingListener> queueStatusListeners;
+
+    /**
      * Some mime types that the Android OS does not know about but we do...
      * Mapped: Mime type -> extension
      */
@@ -146,6 +155,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         activityToHttpServiceMap = new HashMap<>();
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
+        queueStatusListeners = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
         PersistenceManager.setPersistenceManagerFactory(new PersistenceManagerFactoryAndroid());
@@ -215,62 +225,30 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         l(UMLog.INFO, 304, null);
 
-
-        /*
-
-        if(sendStatementsTimer == null) {
-            sendStatementsTimer = new Timer();
-        }
-
-        sendStatementsTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                HttpURLConnection conn = null;
-                OutputStream out = null;
-                int responseCode = 0;
-                String stmtId = null;
-
-                try {
-                    if(stmt.optString("id") == null || stmt.optString("id").length() == 0) {
-                        stmt.put("id", UMTinCanUtil.generateUUID());
-                    }
-                    stmtId = stmt.getString("id");
-
-                    String stmtEndpoint = LoginController.LLRS_XAPI_ENDPOINT +"statements?statementId="
-                            + URLEncoder.encode(stmtId, "UTF-8");
-
-                    URL url = new URL(stmtEndpoint);
-                    conn = (HttpURLConnection)url.openConnection();
-                    conn.setRequestProperty("X-Experience-API-Version", "1.0.1");
-                    conn.setRequestProperty("Authorization", LoginController.encodeBasicAuth(
-                            getActiveUser(context), getActiveUserAuth(context)));
-
-                    conn.setRequestMethod("PUT");
-                    conn.setDoOutput(true);
-                    out = conn.getOutputStream();
-                    out.write(stmt.toString().getBytes("UTF-8"));
-                    out.flush();
-                    out.close();
-
-
-                    conn.connect();
-                    responseCode = conn.getResponseCode();
-                    UstadMobileSystemImpl.l(UMLog.INFO, 377, " send stmt: " + stmtId + ": server responds: "
-                            + responseCode);
-                }catch(Exception e) {
-                    l(UMLog.ERROR, 191, stmtId, e);
-                }finally {
-                    UMIOUtils.closeOutputStream(out);
-                    if(conn != null) {
-                        conn.disconnect();
-                    }
-                }
-            }
-        }, 100);
-
-
-        */
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
+        /*
+        queueStatusListeners.put(listener, new XapiStatementsForwardingListener() {
+            @Override
+            public void queueStatusUpdated(XapiQueueStatusEvent event) {
+                listener.statusUpdated(new TinCanQueueEvent(event.getStatementsRemaining()));
+            }
+        });
+        */
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public void removeTinCanQueueListener(TinCanQueueListener listener) {
+        queueStatusListeners.remove(listener);
     }
 
     /**
@@ -314,6 +292,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             androidClass = ClassManagementActivity.class;
         }else if(cls.equals(EnrollStudentView.class)){
             androidClass = EnrollStudentActivity.class;
+        }else if(cls.equals(ClassManagementView2.class)) {
+            androidClass = ClassManagementActivity2.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);
@@ -396,6 +376,24 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
 
+    public URLConnection openConnection(URL url) throws IOException{
+        return url.openConnection();
+        /*
+        String proxyString = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.HTTP_PROXY);
+        if (proxyString != null)
+        {
+            String proxyAddress = proxyString.split(":")[0];
+            int proxyPort = Integer.parseInt(proxyString.split(":")[1]);
+            Proxy p = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyAddress,proxyPort));
+            HttpHost proxy = new HttpHost(proxyAddress,proxyPort);
+            con = (HttpURLConnection) url.openConnection(p);
+        }
+        else
+        {
+            con = (HttpURLConnection) url.openConnection();
+        }
+        */
+    }
     
     /** 
      * Use Android assets instead 
@@ -646,114 +644,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public void getResumableRegistrations(final String activityId, final Object context, final TinCanResultListener listener)  {
-        new Thread(new Runnable() {
-            public void run() {
-                String stmtURL =  LoginController.LLRS_XAPI_ENDPOINT + "statements";
-                Hashtable headers = UMTinCanUtil.makeXAPIHeaders(context);
-
-                try {
-                    JSONObject actor = UMTinCanUtil.makeActorFromActiveUser(context);
-                    //Query local xAPI server
-                    String launchQueryBaseURL = stmtURL + "?"
-                            +"agent=" + URLEncoder.encode(actor.toString(), "UTF-8")
-                            +"&activity=" + URLEncoder.encode(activityId, "UTF-8");
-
-                    String launchQueryURL = launchQueryBaseURL +
-                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/launched", "UTF-8") +
-                            "&limit=" + RESUME_MAX_CHOICES;
-
-                    String[] invalidatingVerbs = new String[]{"http://adlnet.gov/expapi/verbs/completed",
-                            "http://adlnet.gov/expapi/verbs/terminated"};
-
-
-                    String completedQueryURL = launchQueryBaseURL +
-                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/completed", "UTF-8");
-                    String terminatedQueryURL = launchQueryBaseURL +
-                            "&verb=" +URLEncoder.encode("http://adlnet.gov/expapi/verbs/terminated", "UTF-8");
-
-                    HTTPResult launchResult = makeRequest(launchQueryURL, headers, null);
-                    String launchResponse = new String(launchResult.getResponse(), "UTF-8");
-                    TinCanStatement[] launchedStmts = UMTinCanUtil.getStatementsFromResult(launchResponse);
-
-                    //if null was returned then it means there was an error running
-                    if(launchedStmts == null) {
-                        listener.resultReady(null);
-                        return;
-                    }
-
-
-                    String currentReg;
-                    int x = 0;
-
-                    ArrayList<TinCanStatement> filteredStmts = new ArrayList<>();
-                    int j;
-                    String queryURL;
-                    HTTPResult queryResult;
-                    TinCanStatement[] queryStmts;
-
-                    long queryTimeCount = 0;
-                    long queryStartTime;
-                    for(int i = 0; i < launchedStmts.length && filteredStmts.size() < RESUME_MAX_CHOICES; i++) {
-                        currentReg = launchedStmts[i].getRegistrationUUID();
-                        if(currentReg == null) {
-                            continue;
-                        }
-
-                        boolean stmtComplete = false;
-
-                        for(j = 0; j < invalidatingVerbs.length && !stmtComplete; j++) {
-                            queryURL = launchQueryBaseURL + "&verb=" + URLEncoder.encode(
-                                invalidatingVerbs[j], "UTF-8") + "&registration=" + currentReg;
-
-                            queryStartTime = System.currentTimeMillis();
-                            queryResult = makeRequest(queryURL, headers, null);
-                            queryTimeCount += (System.currentTimeMillis() - queryStartTime);
-                            queryStmts = UMTinCanUtil.getStatementsFromResult(new String(
-                                    queryResult.getResponse(), "UTF-8"));
-                            if(queryStmts.length > 0) {
-                                stmtComplete = true;
-                            }
-                        }
-
-                        if(!stmtComplete) {
-                            //make sure there are actually statements here... not just something launched and never filled
-                            queryURL = launchQueryBaseURL + "&registration=" + currentReg + "&limit=3";
-                            queryStartTime = System.currentTimeMillis();
-                            queryResult = makeRequest(queryURL, headers, null);
-                            queryTimeCount += (System.currentTimeMillis() - queryStartTime);
-                            queryStmts  = UMTinCanUtil.getStatementsFromResult(new String(
-                                    queryResult.getResponse(), "UTF-8"));
-                            if(queryStmts.length > 2) {
-                                filteredStmts.add(launchedStmts[i]);
-                            }
-                        }
-                    }
-                    l(UMLog.INFO, 315, ""+queryTimeCount);
-
-                    /*
-                    JSONObject[] completedStmts = UMTinCanUtil.getStatementsFromResult(
-                            new String(makeRequest(completedQueryURL, headers, null).getResponse(), "UTF-8"));
-                    JSONObject[] terminatedStmts = UMTinCanUtil.getStatementsFromResult(
-                            new String(makeRequest(terminatedQueryURL, headers, null).getResponse(), "UTF-8"));
-
-                    String[] completedRegistrations = UMTinCanUtil.getDistinctRegistrations(completedStmts);
-                    String[] terminatedRegistrations = UMTinCanUtil.getDistinctRegistrations(terminatedStmts);
-
-
-                    JSONObject[] openStmts = UMTinCanUtil.filterByRegistration(completedRegistrations,
-                            false, launchedStmts);
-                    openStmts = UMTinCanUtil.filterByRegistration(terminatedRegistrations, false,
-                            openStmts);
-                    */
-                    TinCanStatement[] resultStmts = new TinCanStatement[filteredStmts.size()];
-                    filteredStmts.toArray(resultStmts);
-                    listener.resultReady(resultStmts);
-                }catch(Exception e) {
-                    listener.resultReady(null);
-
-                }
-            }
-        }).start();
+        //removed
+        listener.resultReady(null);
     }
 
     @Override

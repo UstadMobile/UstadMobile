@@ -6,6 +6,9 @@ sourceCompatibility = 1.7
 
 repositories {
     mavenCentral()
+    maven {
+        url "http://devserver2.ustadmobile.com/repo-mvn"
+    }
 }
 
 dependencies {

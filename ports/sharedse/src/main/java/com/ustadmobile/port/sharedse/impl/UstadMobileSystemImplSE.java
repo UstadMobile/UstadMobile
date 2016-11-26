@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -52,119 +53,113 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     private XmlPullParserFactory xmlPullParserFactory;
 
-
-    
-
     /**
      * @inheritDoc
      */
     @Override
     public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method, byte[] postBody) throws IOException {
-        Class cls2 = getClass();
-        if(cls2.equals(CatalogView.class)) {
-            System.out.println("well then");
-        }
-        
         URL url = new URL(httpURL);
-        HttpURLConnection conn = null;
-        HTTPResult result = null;
-        IOException ioe = null;
-        
-        try {
-            conn = (HttpURLConnection)url.openConnection();
-            conn.setConnectTimeout(15000);
-            if(headers != null) {
-                Enumeration e = headers.keys();
+        HttpURLConnection conn = (HttpURLConnection)openConnection(url);
+
+        if(headers != null) {
+            Enumeration e = headers.keys();
+            while(e.hasMoreElements()) {
+                String headerField = e.nextElement().toString();
+                String headerValue = headers.get(headerField).toString();
+                conn.setRequestProperty(headerField, headerValue);
+            }
+        }
+        //conn.setRequestProperty("Connection", "close");
+
+        conn.setRequestMethod(method);
+
+        if("POST".equals(method)) {
+            if(postBody == null && postParams != null && postParams.size() > 0) {
+                //we need to write the post params to the request
+                StringBuilder sb = new StringBuilder();
+                Enumeration e = postParams.keys();
+                boolean firstParam = true;
                 while(e.hasMoreElements()) {
-                    String headerField = e.nextElement().toString();
-                    String headerValue = headers.get(headerField).toString();
-                    conn.setRequestProperty(headerField, headerValue);
-                }
-            }
-            //conn.setRequestProperty("Connection", "close");
-
-            conn.setRequestMethod(method);
-
-            if("POST".equals(method)) {
-                if(postBody == null && postParams != null && postParams.size() > 0) {
-                    //we need to write the post params to the request
-                    StringBuilder sb = new StringBuilder();
-                    Enumeration e = postParams.keys();
-                    boolean firstParam = true;
-                    while(e.hasMoreElements()) {
-                        String key = e.nextElement().toString();
-                        String value = postParams.get(key).toString();
-                        if(firstParam) {
-                            firstParam = false;
-                        }else {
-                            sb.append('&');
-                        }
-                        sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
-                        sb.append(URLEncoder.encode(value, "UTF-8"));
+                    String key = e.nextElement().toString();
+                    String value = postParams.get(key).toString();
+                    if(firstParam) {
+                        firstParam = false;
+                    }else {
+                        sb.append('&');
                     }
-
-                    postBody = sb.toString().getBytes();
-                }else if(postBody == null) {
-                    throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
+                    sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
+                    sb.append(URLEncoder.encode(value, "UTF-8"));
                 }
 
-                conn.setDoOutput(true);
-                OutputStream postOut = conn.getOutputStream();
-                postOut.write(postBody);
-                postOut.flush();
-                postOut.close();
+                postBody = sb.toString().getBytes();
+            }else if(postBody == null) {
+                throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
             }
 
-            conn.connect();
+            conn.setDoOutput(true);
+            OutputStream out = conn.getOutputStream();
+            out.write(postBody);
+            out.flush();
+            out.close();
+        }
 
-            int statusCode = conn.getResponseCode();
-            if(statusCode > 0) {
-                InputStream connIn = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
-                byte[] buf = new byte[1024];
-                int bytesRead = 0;
+        conn.connect();
 
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                if(!method.equalsIgnoreCase("HEAD")) {
-                    while((bytesRead = connIn.read(buf)) != -1) {
-                        bout.write(buf, 0, bytesRead);
-                    }
-                }
+        int contentLen = conn.getContentLength();
+        int statusCode = conn.getResponseCode();
+        InputStream in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
+        byte[] buf = new byte[1024];
+        int bytesRead = 0;
+        int bytesReadTotal = 0;
 
-                connIn.close();
-
-                Hashtable responseHeaders = new Hashtable();
-                Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
-                while(headerIterator.hasNext()) {
-                    String header = headerIterator.next();
-                    if(header == null) {
-                        continue;//a null header is the response line not header; leave that alone...
-                    }
-
-                    String headerVal = conn.getHeaderField(header);
-                    responseHeaders.put(header.toLowerCase(), headerVal);
-                }
-
-                byte[] resultBytes = bout.toByteArray();
-                result = new HTTPResult(resultBytes, statusCode,
-                        responseHeaders);
-            }else {
-                ioe = new IOException("HTTP Status < 0");
-            }
-        }finally {
-            if(conn != null) {
-                conn.disconnect();
+        //do not read more bytes than is available in the stream
+        int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        if(!method.equalsIgnoreCase("HEAD")) {
+            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
+                bout.write(buf, 0, bytesRead);
             }
         }
 
-        UMIOUtils.throwIfNotNullIO(ioe);
+        in.close();
+
+        Hashtable responseHeaders = new Hashtable();
+        Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
+        while(headerIterator.hasNext()) {
+            String header = headerIterator.next();
+            if(header == null) {
+                continue;//a null header is the response line not header; leave that alone...
+            }
+
+            String headerVal = conn.getHeaderField(header);
+            responseHeaders.put(header.toLowerCase(), headerVal);
+        }
+
+        byte[] resultBytes = bout.toByteArray();
+        HTTPResult result = new HTTPResult(resultBytes, statusCode,
+                responseHeaders);
+
         return result;
     }
+
+    /**
+     * Open the given connection and return the HttpURLConnection object using a proxy if required
+     *
+     * @param url
+     *
+     * @return
+     */
+    public abstract URLConnection openConnection(URL url) throws IOException;
 
     @Override
     public boolean isJavascriptSupported() {
         return true;
     }
 
+    @Override
+    public boolean isHttpsSupported() {
+        return true;
+    }
 
     @Override
     public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {

@@ -150,7 +150,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         if(id == R.id.login_button) {
             String username = ((EditText)findViewById(R.id.login_username)).getText().toString();
             String password = ((EditText)findViewById(R.id.login_password)).getText().toString();
-            mLoginController.handleClickLogin(username, password, xAPIServer, true);
+            mLoginController.handleClickLogin(username, password, xAPIServer);
         }else if(id == R.id.login_registerbutton) {
             Hashtable userVals = new Hashtable();
             int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();

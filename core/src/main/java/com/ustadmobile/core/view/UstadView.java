@@ -35,7 +35,7 @@ package com.ustadmobile.core.view;
  * @author mike
  */
 public interface UstadView {
-    
+
     /**
      * Return the system specific context for this view (e.g. Activity on Android
      * etc)
@@ -73,5 +73,20 @@ public interface UstadView {
      * Tells the view to refresh UI Strings : e.g. when the locale has been changed.
      */
     public void setUIStrings();
-    
+
+    /**
+     * Set the status of the sync process to display to the user
+     *
+     * @param status
+     */
+    void setAppStatus(int status);
+
+    /**
+     * Set the user to display at present (e.g. Bob Jones)
+     *
+     * @param displayName
+     */
+    void setDisplayName(String displayName);
+
+
 }

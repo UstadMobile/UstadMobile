@@ -267,6 +267,20 @@ public class UMUtil {
             }
         }
     }
+
+    /**
+     * If i < 0  - return "0i", else return "i" - E.g. to dislpay 10:01 instead of 10:1
+     * @param i Numbr to format
+     * @return Number with leading 0 if it's less than 10
+     */
+    public static String pad0(int i) {
+        if(i > 9) {
+            return String.valueOf(i);
+        }else {
+            return "0"+i;
+        }
+    }
+
     
     /**
      * This method is here because Arrays.sort is not available in J2ME

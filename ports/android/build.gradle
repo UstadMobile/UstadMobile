@@ -11,6 +11,14 @@ buildscript {
 
 apply plugin: 'android'
 
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://devserver2.ustadmobile.com/repo-mvn"
+    }
+}
+
 android {
     compileSdkVersion 24
     buildToolsVersion '24.0.2'
@@ -39,15 +47,7 @@ android {
 
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        url "http://devserver2.ustadmobile.com/repo-mvn"
-    }
-}
-
 dependencies {
-    androidTestCompile 'junit:junit:4.12'
     compile files('../../core/lib/qrcode.jar')
     compile project(":core")
     compile project(":sharedse")
@@ -56,6 +56,8 @@ dependencies {
     compile 'com.android.support:design:24.2.1'
     compile 'com.android.support:support-v4:24.2.1'
     compile 'com.joanzapata.pdfview:android-pdfview:1.0.4@aar'
-
-    compile "com.ustadmobile.nanolrs:nanolrs-android:0.1.22"
+    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.28'
+    compile 'com.ustadmobile.nanolrs:nanolrs-android:0.1.32'
+    compile 'com.github.clans:fab:1.6.4'
+    androidTestCompile 'junit:junit:4.12'
 }
