@@ -9,6 +9,8 @@
 #import "UstadMobileSystemImplIOS.h"
 #import "java/io/InputStream.h"
 #import "java/io/FileInputStream.h"
+#import "java/net/URLConnection.h"
+#import "java/net/URL.h"
 #import "UMLogIOS.h"
 #import "AppViewIOS.h"
 #import "java/lang/System.h"
@@ -119,6 +121,11 @@ NSString *PROTOCOL_UM_IOS_FILEURI = @"umiosappdir:///";
 - (NSString *)getSystemBaseDir {
     return PROTOCOL_UM_IOS_FILEURI;
 }
+
+- (JavaNetURLConnection *)openConnectionWithJavaNetURL:(JavaNetURL *)url {
+    return [url openConnection];
+}
+
 
 - (NSString *)getUserContentDirectoryWithNSString:(NSString *)username {
     // can't call an abstract method

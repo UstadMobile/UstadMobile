@@ -58,6 +58,10 @@
     });
 }
 
+-(void) setProgressDialogTitleWithNSString:(NSString *) title {
+    //Not implemented on iOS
+}
+
 - (jboolean)dismissProgressDialog {
     if([NSThread isMainThread]) {
         if(self.progressAlertController) {
