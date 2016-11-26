@@ -69,7 +69,7 @@ public class EntityListFragment extends UstadBaseFragment {
     }
 
     private void checkListUpdate() {
-        if(mRecyclerView != null && mAdapter != null) {
+        if(mRecyclerView != null && mAdapter != null && getActivity() != null) {
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     mRecyclerView.setAdapter(mAdapter);
