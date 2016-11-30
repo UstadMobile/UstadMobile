@@ -226,9 +226,11 @@
 }
 
 
+/*
 -(NSInteger)presentationCountForPageViewController:(UIPageViewController *)pageViewController {
     return [self.linearSpineURLs length];
 }
+*/
 
 -(NSInteger)presentationIndexForPageViewController:(UIPageViewController *)pageViewController {
     return 0;
