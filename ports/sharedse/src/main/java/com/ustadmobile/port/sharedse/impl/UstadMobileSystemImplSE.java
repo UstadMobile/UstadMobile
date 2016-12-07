@@ -16,10 +16,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-<<<<<<< HEAD
-import com.ustadmobile.core.view.CatalogView;
-=======
->>>>>>> master
 
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.port.sharedse.impl.zip.*;
@@ -62,22 +58,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
      */
     @Override
     public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method, byte[] postBody) throws IOException {
-<<<<<<< HEAD
-        URL url = new URL(httpURL);
-        HttpURLConnection conn = (HttpURLConnection)openConnection(url);
-
-        if(headers != null) {
-            Enumeration e = headers.keys();
-            while(e.hasMoreElements()) {
-                String headerField = e.nextElement().toString();
-                String headerValue = headers.get(headerField).toString();
-                conn.setRequestProperty(headerField, headerValue);
-            }
-        }
-        //conn.setRequestProperty("Connection", "close");
-
-        conn.setRequestMethod(method);
-=======
         HttpURLConnection conn = null;
         OutputStream out = null;
         InputStream in = null;
@@ -86,7 +66,6 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         try {
             URL url = new URL(httpURL);
             conn = (HttpURLConnection)url.openConnection();
->>>>>>> master
 
             if(headers != null) {
                 Enumeration e = headers.keys();
