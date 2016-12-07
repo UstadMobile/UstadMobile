@@ -16,7 +16,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+<<<<<<< HEAD
 import com.ustadmobile.core.view.CatalogView;
+=======
+>>>>>>> master
 
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.port.sharedse.impl.zip.*;
@@ -59,6 +62,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
      */
     @Override
     public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method, byte[] postBody) throws IOException {
+<<<<<<< HEAD
         URL url = new URL(httpURL);
         HttpURLConnection conn = (HttpURLConnection)openConnection(url);
 
@@ -73,73 +77,111 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         //conn.setRequestProperty("Connection", "close");
 
         conn.setRequestMethod(method);
+=======
+        HttpURLConnection conn = null;
+        OutputStream out = null;
+        InputStream in = null;
+        HTTPResult result = null;
+        
+        try {
+            URL url = new URL(httpURL);
+            conn = (HttpURLConnection)url.openConnection();
+>>>>>>> master
 
-        if("POST".equals(method)) {
-            if(postBody == null && postParams != null && postParams.size() > 0) {
-                //we need to write the post params to the request
-                StringBuilder sb = new StringBuilder();
-                Enumeration e = postParams.keys();
-                boolean firstParam = true;
+            if(headers != null) {
+                Enumeration e = headers.keys();
                 while(e.hasMoreElements()) {
-                    String key = e.nextElement().toString();
-                    String value = postParams.get(key).toString();
-                    if(firstParam) {
-                        firstParam = false;
-                    }else {
-                        sb.append('&');
+                    String headerField = e.nextElement().toString();
+                    String headerValue = headers.get(headerField).toString();
+                    conn.setRequestProperty(headerField, headerValue);
+                }
+            }
+
+            conn.setRequestMethod(method);
+
+            if("POST".equals(method)) {
+                if(postBody == null && postParams != null && postParams.size() > 0) {
+                    //we need to write the post params to the request
+                    StringBuilder sb = new StringBuilder();
+                    Enumeration e = postParams.keys();
+                    boolean firstParam = true;
+                    while(e.hasMoreElements()) {
+                        String key = e.nextElement().toString();
+                        String value = postParams.get(key).toString();
+                        if(firstParam) {
+                            firstParam = false;
+                        }else {
+                            sb.append('&');
+                        }
+                        sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
+                        sb.append(URLEncoder.encode(value, "UTF-8"));
                     }
-                    sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
-                    sb.append(URLEncoder.encode(value, "UTF-8"));
+
+                    postBody = sb.toString().getBytes();
+                }else if(postBody == null) {
+                    throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
                 }
 
-                postBody = sb.toString().getBytes();
-            }else if(postBody == null) {
-                throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
+                conn.setDoOutput(true);
+                out = conn.getOutputStream();
+                out.write(postBody);
+                out.flush();
+                out.close();
+            }   
+
+            conn.connect();
+
+            int statusCode = conn.getResponseCode();
+            //on iOS this will not throw an exception but will have an response code of <= 0
+            if(statusCode <= 0) {
+                throw new IOException("HTTP Exception: status < 0" + statusCode);
+            }
+            
+            int contentLen = conn.getContentLength();
+            
+            
+            in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
+            byte[] buf = new byte[1024];
+            int bytesRead = 0;
+            int bytesReadTotal = 0;
+
+            //do not read more bytes than is available in the stream
+            int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            if(!method.equalsIgnoreCase("HEAD")) {
+                while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
+                    bout.write(buf, 0, bytesRead);
+                }
             }
 
-            conn.setDoOutput(true);
-            OutputStream out = conn.getOutputStream();
-            out.write(postBody);
-            out.flush();
-            out.close();
-        }
+            in.close();
 
-        conn.connect();
+            Hashtable responseHeaders = new Hashtable();
+            Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
+            while(headerIterator.hasNext()) {
+                String header = headerIterator.next();
+                if(header == null) {
+                    continue;//a null header is the response line not header; leave that alone...
+                }
 
-        int contentLen = conn.getContentLength();
-        int statusCode = conn.getResponseCode();
-        InputStream in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
-        byte[] buf = new byte[1024];
-        int bytesRead = 0;
-        int bytesReadTotal = 0;
-
-        //do not read more bytes than is available in the stream
-        int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        if(!method.equalsIgnoreCase("HEAD")) {
-            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
-                bout.write(buf, 0, bytesRead);
-            }
-        }
-
-        in.close();
-
-        Hashtable responseHeaders = new Hashtable();
-        Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
-        while(headerIterator.hasNext()) {
-            String header = headerIterator.next();
-            if(header == null) {
-                continue;//a null header is the response line not header; leave that alone...
+                String headerVal = conn.getHeaderField(header);
+                responseHeaders.put(header.toLowerCase(), headerVal);
             }
 
-            String headerVal = conn.getHeaderField(header);
-            responseHeaders.put(header.toLowerCase(), headerVal);
+            byte[] resultBytes = bout.toByteArray();
+            result = new HTTPResult(resultBytes, statusCode,
+                    responseHeaders);
+        }catch(IOException e) {
+            l(UMLog.ERROR, 80, httpURL, e);
+        }finally {
+            UMIOUtils.closeOutputStream(out);
+            UMIOUtils.closeInputStream(in);
+            
+            if(conn != null) {
+                conn.disconnect();
+            }
         }
-
-        byte[] resultBytes = bout.toByteArray();
-        HTTPResult result = new HTTPResult(resultBytes, statusCode,
-                responseHeaders);
-
+        
         return result;
     }
 
