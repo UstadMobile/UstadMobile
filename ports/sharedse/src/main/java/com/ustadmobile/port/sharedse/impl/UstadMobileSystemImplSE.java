@@ -62,6 +62,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         OutputStream out = null;
         InputStream in = null;
         HTTPResult result = null;
+        IOException ioe = null;
         
         try {
             URL url = new URL(httpURL);
@@ -154,6 +155,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
                     responseHeaders);
         }catch(IOException e) {
             l(UMLog.ERROR, 80, httpURL, e);
+            ioe = e;
         }finally {
             UMIOUtils.closeOutputStream(out);
             UMIOUtils.closeInputStream(in);
@@ -161,6 +163,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             if(conn != null) {
                 conn.disconnect();
             }
+            UMIOUtils.throwIfNotNullIO(ioe);
         }
         
         return result;
