@@ -432,7 +432,7 @@ public class LoginController extends UstadBaseController{
                     impl.setAppPref(PREFKEY_AUTHCACHE_PREFIX + username, authHashed, getContext());
                 }
 
-                if(result == 0 || result >= 500) {
+                if(result <= 0 || result >= 500) {
                     //check the cache
                     String storedAuth = impl.getAppPref(PREFKEY_AUTHCACHE_PREFIX + username, getContext());
                     String authHashed = impl.hashAuth(getContext(), password);

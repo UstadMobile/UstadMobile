@@ -111,8 +111,10 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             conn.connect();
 
             int statusCode = conn.getResponseCode();
+            
             //on iOS this will not throw an exception but will have an response code of <= 0
             if(statusCode <= 0) {
+                result = new HTTPResult(null, statusCode, null);
                 throw new IOException("HTTP Exception: status < 0" + statusCode);
             }
             
