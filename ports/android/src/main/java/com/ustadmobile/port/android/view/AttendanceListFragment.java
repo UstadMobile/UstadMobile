@@ -53,6 +53,7 @@ public class AttendanceListFragment extends EntityListFragment implements Attend
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = super.onCreateView(inflater, container, savedInstanceState);
         FloatingActionMenu fMenu = getFloatingActionMenu();
+
         fMenu.setVisibility(View.VISIBLE);
 
         cameraButton = new FloatingActionButton(getContext());
@@ -60,7 +61,6 @@ public class AttendanceListFragment extends EntityListFragment implements Attend
                 R.drawable.ic_photo_camera_white_18dp));
         cameraButton.setLabelText("Snap Sheet");
         cameraButton.setButtonSize(FloatingActionButton.SIZE_MINI);
-        cameraButton.setOnClickListener(this);
         fMenu.addMenuButton(cameraButton, 0);
 
         directEntryButton = new FloatingActionButton(getContext());
@@ -68,8 +68,12 @@ public class AttendanceListFragment extends EntityListFragment implements Attend
                 R.drawable.ic_phone_android_white_18dp));
         directEntryButton.setLabelText("Direct Entry");
         directEntryButton.setButtonSize(FloatingActionButton.SIZE_MINI);
-        directEntryButton.setOnClickListener(this);
         fMenu.addMenuButton(directEntryButton, 1);
+
+        fMenu.setClosedOnTouchOutside(true);
+        directEntryButton.setOnClickListener(this);
+        cameraButton.setOnClickListener(this);
+
 
         return rootView;
     }
