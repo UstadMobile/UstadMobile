@@ -9,6 +9,8 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -26,6 +28,10 @@ import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -54,6 +60,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     private String displayName;
 
+    private List<WeakReference<Fragment>> fragmentList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
@@ -62,6 +70,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);
 
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
+        fragmentList = new ArrayList<>();
         super.onCreate(savedInstanceState);
     }
 
@@ -232,5 +241,33 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         supportInvalidateOptionsMenu();
     }
 
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        super.onAttachFragment(fragment);
+        fragmentList.add(new WeakReference<>(fragment));
+    }
 
+
+
+    /**
+     * Handle our own delegation of back button presses.  This allows UstadBaseFragment child classes
+     * to handle back button presses if they want to.
+     */
+    @Override
+    public void onBackPressed() {
+        for(WeakReference<Fragment> fragmentReference : fragmentList) {
+            if(fragmentReference.get() == null)
+                continue;
+
+            if(!fragmentReference.get().isVisible())
+                continue;
+
+            if(fragmentReference.get() instanceof UstadBaseFragment && ((UstadBaseFragment)fragmentReference.get()).canGoBack()) {
+                ((UstadBaseFragment)fragmentReference.get()).goBack();
+                return;
+            }
+        }
+
+        super.onBackPressed();
+    }
 }

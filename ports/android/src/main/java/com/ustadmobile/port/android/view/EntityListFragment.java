@@ -87,4 +87,13 @@ public class EntityListFragment extends UstadBaseFragment {
         return floatingActionMenu;
     }
 
+    @Override
+    public boolean canGoBack() {
+        return floatingActionMenu.isOpened();
+    }
+
+    @Override
+    public void goBack() {
+        floatingActionMenu.close(true);
+    }
 }
