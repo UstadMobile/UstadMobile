@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E1267FEB7944348FCECBBD0 /* libPods-UstadMobileIOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C964A6379C0C943596269925 /* libPods-UstadMobileIOS.a */; };
+		3F601352F022734295FA86AD /* libPods-UstadMobileIOSUITests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 757CD715686C28269F9F689D /* libPods-UstadMobileIOSUITests.a */; };
+		8D7A0CFC9AD86F9E88323D9E /* libPods-UstadMobileIOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BC91F1DCA89100C5B64FEE4 /* libPods-UstadMobileIOSTests.a */; };
 		AD08D4641D5B4C96003CB878 /* LoginViewRegisterTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD0DAAEE1D6F29AD005FAFDD /* ContainerPageContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0DAAED1D6F29AD005FAFDD /* ContainerPageContentViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD0DAAF11D6F3191005FAFDD /* ContainerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -218,6 +221,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0F32E698A86DF0B8D6A6E9CB /* Pods-UstadMobileIOSUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOSUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOSUITests/Pods-UstadMobileIOSUITests.release.xcconfig"; sourceTree = "<group>"; };
+		4BC91F1DCA89100C5B64FEE4 /* libPods-UstadMobileIOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-UstadMobileIOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		757CD715686C28269F9F689D /* libPods-UstadMobileIOSUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-UstadMobileIOSUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		ACEFA2ECD3E486789CF4E540 /* Pods-UstadMobileIOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOS.release.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOS/Pods-UstadMobileIOS.release.xcconfig"; sourceTree = "<group>"; };
 		AD08D4621D5B4C96003CB878 /* LoginViewRegisterTabViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewRegisterTabViewController.h; sourceTree = "<group>"; };
 		AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewRegisterTabViewController.m; sourceTree = "<group>"; };
 		AD0DAAEC1D6F29AD005FAFDD /* ContainerPageContentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContainerPageContentViewController.h; sourceTree = "<group>"; };
@@ -599,6 +606,11 @@
 		ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadUIViewControllerHelper.m; sourceTree = "<group>"; };
 		ADD2C9601DABC957004D621E /* LoginViewForgotPasswordViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewForgotPasswordViewController.h; sourceTree = "<group>"; };
 		ADD2C9611DABC957004D621E /* LoginViewForgotPasswordViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewForgotPasswordViewController.m; sourceTree = "<group>"; };
+		BD4704988BB8809C57CC84B2 /* Pods-UstadMobileIOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOSTests/Pods-UstadMobileIOSTests.release.xcconfig"; sourceTree = "<group>"; };
+		C964A6379C0C943596269925 /* libPods-UstadMobileIOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-UstadMobileIOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D0372992CF0E0905941CA72D /* Pods-UstadMobileIOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOS/Pods-UstadMobileIOS.debug.xcconfig"; sourceTree = "<group>"; };
+		DFB2D3D070363BF8EA3DEEA6 /* Pods-UstadMobileIOSTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOSTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOSTests/Pods-UstadMobileIOSTests.debug.xcconfig"; sourceTree = "<group>"; };
+		F2917261CE77BFD0F4DFB77B /* Pods-UstadMobileIOSUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOSUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOSUITests/Pods-UstadMobileIOSUITests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -608,6 +620,7 @@
 			files = (
 				AD12B4301D65C4A8005D6D5D /* libz.tbd in Frameworks */,
 				AD12B42C1D65C3E0005D6D5D /* Security.framework in Frameworks */,
+				1E1267FEB7944348FCECBBD0 /* libPods-UstadMobileIOS.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -615,6 +628,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8D7A0CFC9AD86F9E88323D9E /* libPods-UstadMobileIOSTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -622,12 +636,36 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3F601352F022734295FA86AD /* libPods-UstadMobileIOSUITests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1F1FAE65A399E761CFB89C61 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				D0372992CF0E0905941CA72D /* Pods-UstadMobileIOS.debug.xcconfig */,
+				ACEFA2ECD3E486789CF4E540 /* Pods-UstadMobileIOS.release.xcconfig */,
+				DFB2D3D070363BF8EA3DEEA6 /* Pods-UstadMobileIOSTests.debug.xcconfig */,
+				BD4704988BB8809C57CC84B2 /* Pods-UstadMobileIOSTests.release.xcconfig */,
+				F2917261CE77BFD0F4DFB77B /* Pods-UstadMobileIOSUITests.debug.xcconfig */,
+				0F32E698A86DF0B8D6A6E9CB /* Pods-UstadMobileIOSUITests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		922154FB86ACD8AF73BFB7AA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C964A6379C0C943596269925 /* libPods-UstadMobileIOS.a */,
+				4BC91F1DCA89100C5B64FEE4 /* libPods-UstadMobileIOSTests.a */,
+				757CD715686C28269F9F689D /* libPods-UstadMobileIOSUITests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AD61807D1DE9EBA9002540B7 /* Generated */ = {
 			isa = PBXGroup;
 			children = (
@@ -975,6 +1013,8 @@
 				AD77D06A1D523A8A00A2F95A /* UstadMobileIOSTests */,
 				AD77D0751D523A8A00A2F95A /* UstadMobileIOSUITests */,
 				AD77D04F1D523A8A00A2F95A /* Products */,
+				1F1FAE65A399E761CFB89C61 /* Pods */,
+				922154FB86ACD8AF73BFB7AA /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1070,9 +1110,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AD77D07B1D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOS" */;
 			buildPhases = (
+				85DA86B96C8DDC1BF629AB65 /* [CP] Check Pods Manifest.lock */,
 				AD77D04A1D523A8A00A2F95A /* Sources */,
 				AD77D04B1D523A8A00A2F95A /* Frameworks */,
 				AD77D04C1D523A8A00A2F95A /* Resources */,
+				1E0E14F6D02A3B85E1F877E9 /* [CP] Embed Pods Frameworks */,
+				2D192A8A42D3496BCF89E8B3 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1087,9 +1130,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AD77D07E1D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSTests" */;
 			buildPhases = (
+				D5B76D10B256BFA47A252D65 /* [CP] Check Pods Manifest.lock */,
 				AD77D0631D523A8A00A2F95A /* Sources */,
 				AD77D0641D523A8A00A2F95A /* Frameworks */,
 				AD77D0651D523A8A00A2F95A /* Resources */,
+				D5325F0EA1EDFF1739D93403 /* [CP] Embed Pods Frameworks */,
+				C3C6E49B24B2DEDE3E08C4E9 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1105,9 +1151,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AD77D0811D523A8A00A2F95A /* Build configuration list for PBXNativeTarget "UstadMobileIOSUITests" */;
 			buildPhases = (
+				7E2457D71E2A733FD95D50B0 /* [CP] Check Pods Manifest.lock */,
 				AD77D06E1D523A8A00A2F95A /* Sources */,
 				AD77D06F1D523A8A00A2F95A /* Frameworks */,
 				AD77D0701D523A8A00A2F95A /* Resources */,
+				48BDCD32584B06C1AECD6331 /* [CP] Embed Pods Frameworks */,
+				2797785342708AE55394C2C5 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -1194,6 +1243,144 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		1E0E14F6D02A3B85E1F877E9 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UstadMobileIOS/Pods-UstadMobileIOS-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		2797785342708AE55394C2C5 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UstadMobileIOSUITests/Pods-UstadMobileIOSUITests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		2D192A8A42D3496BCF89E8B3 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UstadMobileIOS/Pods-UstadMobileIOS-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		48BDCD32584B06C1AECD6331 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UstadMobileIOSUITests/Pods-UstadMobileIOSUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7E2457D71E2A733FD95D50B0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		85DA86B96C8DDC1BF629AB65 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		C3C6E49B24B2DEDE3E08C4E9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UstadMobileIOSTests/Pods-UstadMobileIOSTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D5325F0EA1EDFF1739D93403 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UstadMobileIOSTests/Pods-UstadMobileIOSTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D5B76D10B256BFA47A252D65 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AD77D04A1D523A8A00A2F95A /* Sources */ = {
@@ -1531,6 +1718,7 @@
 		};
 		AD77D07C1D523A8A00A2F95A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D0372992CF0E0905941CA72D /* Pods-UstadMobileIOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_ARC = NO;
@@ -1538,10 +1726,14 @@
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"${HOME}/local/j2objc/lib",
+					"$(inherited)",
+				);
 				OTHER_LDFLAGS = (
 					"-ljre_emul",
 					"-ObjC",
+					"$(inherited)",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.umios;
 				PRODUCT_NAME = Sapienza;
@@ -1551,6 +1743,7 @@
 		};
 		AD77D07D1D523A8A00A2F95A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = ACEFA2ECD3E486789CF4E540 /* Pods-UstadMobileIOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_OBJC_ARC = NO;
@@ -1558,10 +1751,14 @@
 				INFOPLIST_FILE = UstadMobileIOS/Info.plist;
 				J2OBJC_HOME = "";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "${HOME}/local/j2objc/lib";
+				LIBRARY_SEARCH_PATHS = (
+					"${HOME}/local/j2objc/lib",
+					"$(inherited)",
+				);
 				OTHER_LDFLAGS = (
 					"-ljre_emul",
 					"-ObjC",
+					"$(inherited)",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ustadmobile.umios;
 				PRODUCT_NAME = Sapienza;
@@ -1571,6 +1768,7 @@
 		};
 		AD77D07F1D523A8A00A2F95A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = DFB2D3D070363BF8EA3DEEA6 /* Pods-UstadMobileIOSTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				INFOPLIST_FILE = UstadMobileIOSTests/Info.plist;
@@ -1583,6 +1781,7 @@
 		};
 		AD77D0801D523A8A00A2F95A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = BD4704988BB8809C57CC84B2 /* Pods-UstadMobileIOSTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				INFOPLIST_FILE = UstadMobileIOSTests/Info.plist;
@@ -1595,6 +1794,7 @@
 		};
 		AD77D0821D523A8A00A2F95A /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F2917261CE77BFD0F4DFB77B /* Pods-UstadMobileIOSUITests.debug.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = UstadMobileIOSUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
@@ -1606,6 +1806,7 @@
 		};
 		AD77D0831D523A8A00A2F95A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0F32E698A86DF0B8D6A6E9CB /* Pods-UstadMobileIOSUITests.release.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = UstadMobileIOSUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";

@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <SharkORM/SharkORM.h>
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
