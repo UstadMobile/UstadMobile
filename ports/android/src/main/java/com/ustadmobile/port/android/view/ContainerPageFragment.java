@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -35,6 +36,8 @@ public class ContainerPageFragment extends Fragment {
 
     public static final String ARG_PAGE_QUERY = "query";
 
+    public static final String ARG_PAGE_INDEX = "index";
+
     private String mBaseURI;
 
     private String mHref;
@@ -55,6 +58,11 @@ public class ContainerPageFragment extends Fragment {
 
     private String autoplayRunJavascript;
 
+    private String currentPageTitle;
+
+    private int pageSpineIndex;
+
+
     /**
      * Generates a new Fragment for a page fragment
      *
@@ -66,12 +74,13 @@ public class ContainerPageFragment extends Fragment {
      * @return A new instance of fragment ContainerPageFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ContainerPageFragment newInstance(String baseURI, String href, String query) {
+    public static ContainerPageFragment newInstance(String baseURI, String href, String query, int pageSpineIndex) {
         ContainerPageFragment fragment = new ContainerPageFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PAGE_BASE_URI, baseURI);
         args.putString(ARG_PAGE_HREF, href);
         args.putString(ARG_PAGE_QUERY, query);
+        args.putInt(ARG_PAGE_INDEX, pageSpineIndex);
         fragment.setArguments(args);
         return fragment;
     }
@@ -87,6 +96,7 @@ public class ContainerPageFragment extends Fragment {
             mBaseURI = getArguments().getString(ARG_PAGE_BASE_URI);
             mHref = getArguments().getString(ARG_PAGE_HREF);
             mQuery = getArguments().getString(ARG_PAGE_QUERY);
+            pageSpineIndex = getArguments().getInt(ARG_PAGE_INDEX);
         }
         this.autoplayRunJavascript = ((ContainerActivity)getActivity()).getAutoplayRunJavascript();
     }
@@ -110,9 +120,11 @@ public class ContainerPageFragment extends Fragment {
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.loadUrl(getPageURL());
         webView.setWebViewClient(new ContainerPageWebViewClient(webView));
+        webView.setWebChromeClient(new ContainerPageViewWebChromeClient());
+
 
         return viewGroup;
     }
@@ -159,6 +171,18 @@ public class ContainerPageFragment extends Fragment {
     public String getPageURL() {
         return UMFileUtil.joinPaths(new String[] {mBaseURI, mHref}) + mQuery;
     }
+
+    public String getPageTitle() {
+        return currentPageTitle;
+    }
+
+    private void updatePageTitle(String pageTitle) {
+        this.currentPageTitle = pageTitle;
+        if(getActivity() != null && getActivity() instanceof ContainerActivity) {
+            ((ContainerActivity)getActivity()).handlePageTitleUpdated(pageSpineIndex, pageTitle);
+        }
+    }
+
 
     /**
      * Shows a toast message with the page number / total number of pages
@@ -219,6 +243,8 @@ public class ContainerPageFragment extends Fragment {
         public void onFragmentInteraction(Uri uri);
     }
 
+
+
     /**
      * The WebView Client for Android handles a few tweaks including:
      *  Run autoplay on pages that the user winds up on by clicking links
@@ -244,9 +270,28 @@ public class ContainerPageFragment extends Fragment {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-            if(!this.isFirstPage) {
+
+            if(ContainerPageFragment.this.getUserVisibleHint()) {
                 this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
             }
+
+            /*
+            if(!this.isFirstPage) {
+
+            }
+            */
+        }
+
+
+    }
+
+    public class ContainerPageViewWebChromeClient extends WebChromeClient {
+
+        @Override
+        public void onReceivedTitle(WebView view, String title) {
+            ContainerPageFragment.this.updatePageTitle(title);
+
+            super.onReceivedTitle(view, title);
         }
     }
 

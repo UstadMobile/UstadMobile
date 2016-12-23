@@ -215,3 +215,7 @@ iOSInjectionProject/
 
 ### Objective-C Patch ###
 *.xcscmblueprint
+
+## Build specific AppConfig
+core/src/main/java/com/ustadmobile/core/impl/AppConfig.java
+

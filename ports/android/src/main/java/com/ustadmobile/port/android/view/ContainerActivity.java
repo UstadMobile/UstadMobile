@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -115,6 +116,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
      */
     private EPUBNavItem[] drawerNavItems;
 
+
     @Override
     protected void onCreate(Bundle saved) {
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, saved);
@@ -194,6 +196,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         public void onServiceConnected(ComponentName className, IBinder service) {
             HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
             mHttpService = binder.getService();
+
+            onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__", mHttpService.getAssetsBaseURL());
             ContainerActivity.this.initContent();
         }
 
@@ -205,7 +209,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     public void initContent() {
         mMountedPath = mHttpService.mountZIP(ContainerActivity.this.mContainerURI, mSavedMountPoint);
-        mBaseURL = mHttpService.getZipMountURL() + mMountedPath;
+        mBaseURL = UMFileUtil.joinPaths(new String[]{mHttpService.getBaseURL(), mMountedPath});
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
         UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + "on " + mBaseURL + " type "
                 + mMimeType);
@@ -386,6 +390,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                     frag.evaluateJavascript(onpageSelectedJS);
                     frag.showPagePosition(pos+1, numPages);
                     updateTOCSelection(frag.getPageHref());
+                    String pageTitle = frag.getPageTitle();
+                    if(pageTitle != null) {
+                        setTitle(frag.getPageTitle());
+                    }
                 }
 
                 @Override
@@ -430,6 +438,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         return success;
     }
 
+    @Override
+    public void setPageTitle(String pageTitle) {
+        setTitle(pageTitle);
+    }
+
     public String getAutoplayRunJavascript() {
         return onpageSelectedJS;
     }
@@ -454,6 +467,12 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     public void onStop() {
         super.onStop();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+    }
+
+    public void handlePageTitleUpdated(int index, String title) {
+        if(mPager.getCurrentItem() == index && mContainerController != null) {
+            mContainerController.handlePageTitleUpdated(title);
+        }
     }
 
     @Override
@@ -512,6 +531,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     @Override
     public void setContainerTitle(String title) {
+        ((Button)findViewById(R.id.container_tocdrawer_upbutton)).setText(title);
         setTitle(title);
     }
 
@@ -571,7 +591,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                 return existingFrag;
             }else {
                 ContainerPageFragment frag =
-                        ContainerPageFragment.newInstance(baseURI, hrefList[position], query);
+                        ContainerPageFragment.newInstance(baseURI, hrefList[position], query, position);
 
                 this.pagesMap.put(Integer.valueOf(position), frag);
                 return frag;

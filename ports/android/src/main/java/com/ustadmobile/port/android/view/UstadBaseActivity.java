@@ -2,9 +2,15 @@ package com.ustadmobile.port.android.view;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,13 +22,16 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
+import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.util.PythonServiceManager;
 
-//import org.renpy.android.PythonService;
-import org.kivy.android.PythonService;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -45,45 +54,39 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     private String[] appMenuLabels;
 
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = null;
-        manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        System.out.println("Services running:");
-        for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            System.out.println(service.service.getClassName());
-            
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+    private XapiStatementForwardingService mNanoLrsService;
+
+    private int syncStatus = UstadMobileConstants.STATUS_SYNCED;
+
+    private String displayName;
+
+    private List<WeakReference<Fragment>> fragmentList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
-        //If started by Splash Screen:
-        if(getContext() != null && getContext().getClass().equals(SplashScreenActivity.class)){
-            System.out.println("onCreate: Splash screen started this!");
-            PythonServiceManager psm = new PythonServiceManager();
-            psm.startThisOnThread(UstadBaseActivity.this);
-            System.out.println("ServiceCheck: Started (SplashScreen)");
-        }
-        //Else: All others: Check if LRS Service is running..
-        else if (isMyServiceRunning(PythonService.class)) { // if service is running:
-            System.out.println("ServiceCheck: Already running.");
-            if(getContext() != null && getContext().getClass().equals(SplashScreenActivity.class)){
-                System.out.println("Splash screen started this!");
-                UstadMobileSystemImpl.getInstance().startUI(getContext());
-            }
-        }else{ //if not running, start it.
-            System.out.println("ServiceCheck: Not running! Starting..");
-            PythonServiceManager psm = new PythonServiceManager();
-            psm.startThisOnThread(UstadBaseActivity.this);
-            System.out.println("ServiceCheck: Started (Not SplashScreen).");
-        }
+        //bind to the LRS forwarding service
+        Intent lrsForwardIntent = new Intent(this, XapiStatementForwardingService.class);
+        bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);
+
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
+        fragmentList = new ArrayList<>();
         super.onCreate(savedInstanceState);
     }
+
+    private ServiceConnection mLrsServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            XapiStatementForwardingService.XapiStatementForwardingBinder binder = (XapiStatementForwardingService.XapiStatementForwardingBinder)iBinder;
+            mNanoLrsService = binder.getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mNanoLrsService = null;
+        }
+    };
+
 
     public int getDirection() {
         return mUIDirection;
@@ -130,9 +133,20 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
+        if(displayName != null) {
+            MenuItem displayNameItem = menu.add(Menu.NONE, Menu.NONE, 0, displayName);
+        }
+
+        MenuItem statusItem = menu.add(Menu.NONE, Menu.NONE, 1, "Status");
+        if(syncStatus == UstadMobileConstants.STATUS_SYNCED) {
+            statusItem.setIcon(R.drawable.ic_done_black_18dp);
+        }else {
+            statusItem.setIcon(R.drawable.ic_autorenew_black_18dp);
+        }
+
         if(appMenuCommands != null && appMenuLabels != null) {
             for(int i = 0; i < appMenuLabels.length; i++) {
-                menu.add(Menu.NONE, appMenuCommands[i], i, appMenuLabels[i]);
+                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
             }
             return true;
         }else {
@@ -190,6 +204,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     public void onDestroy() {
         super.onDestroy();
+        unbindService(mLrsServiceConnection);
+        PersistenceManagerAndroid.getInstanceAndroid().releaseHelperForContext(this);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
 
@@ -215,5 +231,43 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     }
 
 
+    public void setAppStatus(int status)  {
+        this.syncStatus = status;
+        supportInvalidateOptionsMenu();
+    }
 
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+        supportInvalidateOptionsMenu();
+    }
+
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        super.onAttachFragment(fragment);
+        fragmentList.add(new WeakReference<>(fragment));
+    }
+
+
+
+    /**
+     * Handle our own delegation of back button presses.  This allows UstadBaseFragment child classes
+     * to handle back button presses if they want to.
+     */
+    @Override
+    public void onBackPressed() {
+        for(WeakReference<Fragment> fragmentReference : fragmentList) {
+            if(fragmentReference.get() == null)
+                continue;
+
+            if(!fragmentReference.get().isVisible())
+                continue;
+
+            if(fragmentReference.get() instanceof UstadBaseFragment && ((UstadBaseFragment)fragmentReference.get()).canGoBack()) {
+                ((UstadBaseFragment)fragmentReference.get()).goBack();
+                return;
+            }
+        }
+
+        super.onBackPressed();
+    }
 }

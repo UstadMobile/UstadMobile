@@ -53,8 +53,8 @@ public class SplashScreenActivity extends UstadBaseActivity {
         //impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.processing));
 
         impl.handleActivityStart(this); //Doesn't really do anything..
-        //impl.startUI(this); // Let UstadBaseActivity handle this.
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+
+        impl.startUI(this); // Let UstadBaseActivity handle this.
     }
 
     @Override

@@ -30,6 +30,9 @@
  */
 package com.ustadmobile.core.opds;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
 import java.io.IOException;
 import java.util.Vector;
 import org.xmlpull.v1.XmlSerializer;
@@ -92,6 +95,11 @@ public abstract class UstadJSOPDSItem {
     public String summary;
     public Vector authors;    
     public String publisher;
+    
+    public String bgColor;
+    
+    public String textColor;
+    
     /**
     * Atom/XML feed mime type constant
     * 
@@ -313,6 +321,29 @@ public abstract class UstadJSOPDSItem {
         xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
         serializeAttrs(xs);
         xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
+    }
+
+    private int parseColorString(String colorStr) {
+        if(bgColor == null) {
+            return -1;
+        }
+
+        try {
+            //This should be HTML/CSS style hex e.g. #000000
+            return Integer.parseInt(colorStr.substring(1), 16);
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 84, colorStr, e);
+        }
+
+        return -2;
+    }
+
+    public int getBgColor() {
+        return parseColorString(bgColor);
+    }
+
+    public int getTextColor() {
+        return parseColorString(textColor);
     }
 
 }

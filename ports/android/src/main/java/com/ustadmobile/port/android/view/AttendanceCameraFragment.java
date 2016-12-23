@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -69,12 +70,11 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
 
     private Camera.Size mCamPreviewSize;
 
-    private int targetWidth= 1400;
+    //private int targetWidth= 1400;
+    private int targetWidth= 640;
 
-    private int targetHeight = 800;
-
-    private Object mAutoFocusMoveCallback;
-
+    //private int targetHeight = 800;
+    private int targetHeight = 480;
 
     /**
      * Use this factory method to create a new instance of
@@ -111,6 +111,10 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
         }
         Camera.Parameters params = c.getParameters();
         mCamPreviewSize = params.getPreviewSize();
+
+        //tell the rectangle overlay about the camera image size (flipped)
+        mRectangleView.setPreviewImgSize(mCamPreviewSize.height, mCamPreviewSize.width);
+
         mPreviewFrameBuffer = new byte[mCamPreviewSize.width * mCamPreviewSize.height];
         mOMRImageSource = new RotatedNV21OMRImageSource(mCamPreviewSize.width, mCamPreviewSize.height);
 
@@ -158,28 +162,9 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
 
-        //Docs don't say so: but these are all values in landscape
-        List<Camera.Size> picSizes = params.getSupportedPictureSizes();
-
-
-        int bestWidth = -1;
-        int bestHeight = -1;
-        Camera.Size cSize;
-        for(int i = 0; i < picSizes.size(); i++) {
-            cSize = picSizes.get(i);
-            if(cSize.width >= targetWidth && cSize.height >= targetHeight) {
-                if(bestWidth == -1 ||cSize.width < bestWidth) {
-                    bestWidth = cSize.width;
-                    bestHeight = cSize.height;
-                }
-            }
-        }
-        params.setPictureSize(bestWidth, bestHeight);
         params.setRotation(90);
         c.setDisplayOrientation(90);
         c.setParameters(params);
-
-
         return c; // returns null if camera is unavailable
     }
 
@@ -237,10 +222,6 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
     public void onResume() {
         super.onResume();
         mCamera = getCameraInstance();
-        if(Build.VERSION.SDK_INT >= 16) {
-            mPreview.setAutoFocusMoveCallback(new AutoFocusMoveCallback());
-        }
-
         mPreview.setPreviewCallback(this);
         mPreview.setCamera(mCamera);
     }
@@ -467,18 +448,4 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
             }
         }
     }
-
-    /**
-     * Small internal class to keep this implements line out of the way for those devices that
-     * don't support API >= 16
-     */
-    @TargetApi(16)
-    public class AutoFocusMoveCallback implements Camera.AutoFocusMoveCallback{
-
-        @Override
-        public void onAutoFocusMoving(boolean moving, Camera camera) {
-            mSheet.setSourceFocusMoving(moving);
-        }
-    }
-
 }

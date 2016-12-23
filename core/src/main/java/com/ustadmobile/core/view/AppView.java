@@ -57,7 +57,15 @@ public interface AppView {
      * @param title 
      */
     public void showProgressDialog(String title);
-    
+
+
+    /**
+     * Update the title of the progress dialog (e.g. to show different stages of a process)
+     *
+     * @param title
+     */
+    void setProgressDialogTitle(String title);
+
     /**
      * Dismiss the progress dialog (if showing).  If this method is called
      * when no progress dialog is showing there is no effect/no error thrown

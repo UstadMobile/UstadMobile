@@ -5,6 +5,7 @@
  */
 package com.ustadmobile.core.controller;
 
+
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -16,6 +17,7 @@ import com.ustadmobile.core.view.UstadView;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import com.ustadmobile.core.impl.AppConfig;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -76,7 +78,7 @@ public class BasePointController extends UstadBaseController{
     public static Hashtable makeDefaultBasePointArgs(Object context) {
         Hashtable args = new Hashtable();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] basePointURLs = new String[] {CatalogController.OPDS_PROTO_DEVICE};
+        String[] basePointURLs = new String[] {AppConfig.BASEPOINT_CATALOG_URL};
         
         String iPrefix;
         for(int i = 0; i < BasePointController.NUM_CATALOG_TABS; i++) {
@@ -92,9 +94,9 @@ public class BasePointController extends UstadBaseController{
                 new Integer(CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE));
 
             //by default show the browse button on the first tab only
-            if(i == 0) {
+            if(i == 0 && AppConfig.BASEPOINT_BROWSEBUTTON_URL != null) {
                 args.put(iPrefix + CatalogController.KEY_BROWSE_BUTTON_URL,
-                        CatalogController.OPDS_PROTO_USER_FEEDLIST);
+                        AppConfig.BASEPOINT_BROWSEBUTTON_URL);
             }
         }
         

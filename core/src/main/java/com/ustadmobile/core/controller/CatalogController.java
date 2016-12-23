@@ -31,6 +31,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -303,6 +304,14 @@ public class CatalogController extends UstadBaseController implements AppViewCho
 
     public static final int OPDS_FEEDS_INDEX_TITLE = 1;
 
+    /**
+     * Constant representing the link type for background images in course listings - this is a
+     * non-standard link and requires AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS to be set to true
+     *
+     * Constant value: "http://www.ustadmobile.com/catalog/image/background"
+     */
+    public static final String OPDS_ENTRY_BACKGROUND_LINKREL = "http://www.ustadmobile.com/catalog/image/background";
+
     private String browseButtonURL;
 
     public CatalogController(Object context) {
@@ -492,7 +501,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         if(args.containsKey(KEY_BROWSE_BUTTON_URL)) {
             newController.setBrowseButtonURL((String)args.get(KEY_BROWSE_BUTTON_URL));
         }
-
+        
         newController.initEntryStatusCheck();
         return newController;
     }
@@ -516,39 +525,61 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public void run() {
         UstadJSOPDSFeed feed = model.opdsFeed;
-        String[] thumbnailLinks;
+        String[] imageLinks;
         HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
             resourceMode, context);
             
-        String thumbnailFile;
+        String imageURI;
+        Vector bgVector;
         
         for(int i = 0; i < feed.entries.length && !isDestroyed(); i++) {
-            thumbnailLinks = feed.entries[i].getThumbnailLink(false);
-            thumbnailFile = null;
-            if(thumbnailLinks != null) {
-                String thumbnailURI = UMFileUtil.resolveLink(
-                        feed.href, thumbnailLinks[UstadJSOPDSEntry.LINK_HREF]);
-                if(thumbnailURI.startsWith("file://")) {
-                    thumbnailFile = thumbnailURI;//this is already on disk...
-                }else {
-                    try {
-                        thumbnailFile = cache.get(thumbnailURI);
-                    }catch(Exception e) {
-                        UstadMobileSystemImpl.l(UMLog.ERROR, 132, 
-                            feed.entries[i].title + ": " + feed.entries[i].id, e);
-                    }
-                }
+            imageLinks = feed.entries[i].getThumbnailLink(false);
+            imageURI = null;
+
+            if(imageLinks != null) {
+                imageURI = getEntryImageAsset(cache, imageLinks, feed.entries[i]);
                 
                 if(isDestroyed()) {
                     return;
                 }
                 
-                if(thumbnailFile != null) {
-                    view.setEntrythumbnail(feed.entries[i].id, thumbnailFile);
+                if(imageURI != null) {
+                    view.setEntrythumbnail(feed.entries[i].id, imageURI);
+                }
+            }
+
+            if(AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
+                bgVector = feed.entries[i].getLinks(OPDS_ENTRY_BACKGROUND_LINKREL, null);
+                if(bgVector.size() > 0 && !isDestroyed() && view != null) {
+                    imageURI = getEntryImageAsset(cache, (String[])bgVector.elementAt(0), feed.entries[i]);
+                    view.setEntryBackground(feed.entries[i].id, imageURI);
                 }
             }
         }
     }
+
+    /**
+     *
+     * @param cache
+     * @param imageLinks
+     */
+    private String getEntryImageAsset(HTTPCacheDir cache, String[] imageLinks, UstadJSOPDSEntry entry) {
+        String imageURI = UMFileUtil.resolveLink(
+                entry.parentFeed.href, imageLinks[UstadJSOPDSEntry.LINK_HREF]);
+        String imageFile = null;
+        if(imageURI.startsWith("file://")) {
+            imageFile = imageURI;//this is already on disk...
+        }else {
+            try {
+                imageFile = cache.get(imageURI);
+            }catch(Exception e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 132, entry.title + ": " + entry.id, e);
+            }
+        }
+
+        return imageFile;
+    }
+
     
     public static Hashtable makeUserCatalogArgs(Object context) {
         Hashtable args = new Hashtable();
@@ -729,11 +760,11 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             for(int i = 0; i < selectedEntries.length; i++) {
                 CatalogController.removeEntry(selectedEntries[i].id,
                         USER_RESOURCE | SHARED_RESOURCE, getContext());
-                this.view.setEntryStatus(selectedEntries[i].id, STATUS_NOT_ACQUIRED);
             }
         }
 
-        this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
+        //TODO: Enable a refresh here that does not force no-cache
+        view.refresh();
     }
     
     /**
@@ -2006,14 +2037,20 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * 
      */
     private synchronized void initEntryStatusCheck() {
+        //TODO: For every entry marked as acquired : Make sure that the entry is still on disk
+
         CatalogEntryInfo info;
         UstadJSOPDSFeed feed = getModel().opdsFeed;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         for(int i = 0; i< feed.entries.length; i++) {
             info = getEntryInfo(feed.entries[i].id, determineSearchMode(), getContext());
-            if(info != null){
-                if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
+            if(info == null) {
+                continue;//nothing known or to check here
+            }
+
+            switch(info.acquisitionStatus) {
+                case CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS:
                     int[] fileDownloadStatus = impl.getFileDownloadStatus(info.downloadID, getContext());
                     if(fileDownloadStatus != null) {
                         int downloadStatus = fileDownloadStatus[UstadMobileSystemImpl.IDX_STATUS];
@@ -2028,14 +2065,25 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         }
                     }else {
                         //perhaps the system is not tracking the download anymore and it's actually complete
-                        int downloadedSize = 
-                            (int)UstadMobileSystemImpl.getInstance().fileSize(info.fileURI);
-                        if(downloadedSize != -1 && downloadedSize == info.downloadTotalSize) 
+                        int downloadedSize =
+                                (int)UstadMobileSystemImpl.getInstance().fileSize(info.fileURI);
+                        if(downloadedSize != -1 && downloadedSize == info.downloadTotalSize)
                             //this download has in fact completed
                             registerItemAcquisitionCompleted(feed.entries[i].id);
                     }
-                }
+                    break;
+
+                case CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED:
+                    try {
+                        if(!impl.fileExists(info.fileURI)) {
+                            setEntryInfo(feed.entries[i].id, null, resourceMode, context);
+                        }
+                    }catch(IOException e) {
+                        impl.l(UMLog.ERROR, 87, feed.entries[i].id, e);
+                    }
+                    break;
             }
+
         }
     }
     

@@ -3,11 +3,11 @@
     android:layout_height="match_parent"
     tools:context="com.ustadmobile.port.android.view.ClassListFragment">
 
-    <ListView
-        android:layout_width="match_parent"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="40.0sp"
+    <android.support.v7.widget.RecyclerView
         android:layout_height="match_parent"
-        android:id="@+id/fragment_class_list_listview"
-        android:layout_gravity="left|top" />
+        android:layout_width="match_parent"
+        android:id="@+id/fragment_class_list_recyclerview"
+        android:scrollbars="vertical"
+        />
+
 </FrameLayout>

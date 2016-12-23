@@ -45,7 +45,18 @@ public class UstadMobileConstants {
      * Hardcoded subdirectory used for caching
      */
     public static final String CACHEDIR = "cache";
-    
+
+    /**
+     * Status to indicate an item has sync'd
+     */
+    public static final int STATUS_SYNCED = 0;
+
+    /**
+     * Status to indicate an item sync is in progress
+     */
+    public static final int STATUS_SYNC_IN_PROGRESS = 1;
+
+
     /**
      * Locales and their name (in their own language).  Two dimensional string
      * array with the locale code and it's name

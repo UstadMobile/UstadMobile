@@ -8,12 +8,13 @@ package com.ustadmobile.port.sharedse.impl;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
 
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.port.sharedse.impl.zip.*;
@@ -32,7 +33,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -53,125 +57,121 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
      */
     @Override
     public HTTPResult makeRequest(String httpURL, Hashtable headers, Hashtable postParams, String method, byte[] postBody) throws IOException {
-        HttpURLConnection conn = null;
-        OutputStream out = null;
-        InputStream in = null;
-        HTTPResult result = null;
-        IOException ioe = null;
-        
-        try {
-            URL url = new URL(httpURL);
-            conn = (HttpURLConnection)url.openConnection();
+        URL url = new URL(httpURL);
+        HttpURLConnection conn = (HttpURLConnection)openConnection(url);
 
-            if(headers != null) {
-                Enumeration e = headers.keys();
-                while(e.hasMoreElements()) {
-                    String headerField = e.nextElement().toString();
-                    String headerValue = headers.get(headerField).toString();
-                    conn.setRequestProperty(headerField, headerValue);
-                }
+        if(headers != null) {
+            Enumeration e = headers.keys();
+            while(e.hasMoreElements()) {
+                String headerField = e.nextElement().toString();
+                String headerValue = headers.get(headerField).toString();
+                conn.setRequestProperty(headerField, headerValue);
             }
-
-            conn.setRequestMethod(method);
-
-            if("POST".equals(method)) {
-                if(postBody == null && postParams != null && postParams.size() > 0) {
-                    //we need to write the post params to the request
-                    StringBuilder sb = new StringBuilder();
-                    Enumeration e = postParams.keys();
-                    boolean firstParam = true;
-                    while(e.hasMoreElements()) {
-                        String key = e.nextElement().toString();
-                        String value = postParams.get(key).toString();
-                        if(firstParam) {
-                            firstParam = false;
-                        }else {
-                            sb.append('&');
-                        }
-                        sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
-                        sb.append(URLEncoder.encode(value, "UTF-8"));
-                    }
-
-                    postBody = sb.toString().getBytes();
-                }else if(postBody == null) {
-                    throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
-                }
-
-                conn.setDoOutput(true);
-                out = conn.getOutputStream();
-                out.write(postBody);
-                out.flush();
-                out.close();
-            }   
-
-            conn.connect();
-
-            int statusCode = conn.getResponseCode();
-            //on iOS this will not throw an exception but will have an response code of <= 0
-            if(statusCode <= 0) {
-                throw new IOException("HTTP Exception: status < 0" + statusCode);
-            }
-            
-            int contentLen = conn.getContentLength();
-            
-            
-            in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
-            byte[] buf = new byte[1024];
-            int bytesRead = 0;
-            int bytesReadTotal = 0;
-
-            //do not read more bytes than is available in the stream
-            int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
-            ByteArrayOutputStream bout = new ByteArrayOutputStream();
-            if(!method.equalsIgnoreCase("HEAD")) {
-                while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
-                    bout.write(buf, 0, bytesRead);
-                }
-            }
-
-            in.close();
-
-            Hashtable responseHeaders = new Hashtable();
-            Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
-            while(headerIterator.hasNext()) {
-                String header = headerIterator.next();
-                if(header == null) {
-                    continue;//a null header is the response line not header; leave that alone...
-                }
-
-                String headerVal = conn.getHeaderField(header);
-                responseHeaders.put(header.toLowerCase(), headerVal);
-            }
-
-            byte[] resultBytes = bout.toByteArray();
-            result = new HTTPResult(resultBytes, statusCode,
-                    responseHeaders);
-        }catch(IOException e) {
-            l(UMLog.ERROR, 80, httpURL, e);
-            ioe = e;
-        }finally {
-            UMIOUtils.closeOutputStream(out);
-            UMIOUtils.closeInputStream(in);
-            
-            if(conn != null) {
-                conn.disconnect();
-            }
-            UMIOUtils.throwIfNotNullIO(ioe);
         }
-        
+        //conn.setRequestProperty("Connection", "close");
+
+        conn.setRequestMethod(method);
+
+        if("POST".equals(method)) {
+            if(postBody == null && postParams != null && postParams.size() > 0) {
+                //we need to write the post params to the request
+                StringBuilder sb = new StringBuilder();
+                Enumeration e = postParams.keys();
+                boolean firstParam = true;
+                while(e.hasMoreElements()) {
+                    String key = e.nextElement().toString();
+                    String value = postParams.get(key).toString();
+                    if(firstParam) {
+                        firstParam = false;
+                    }else {
+                        sb.append('&');
+                    }
+                    sb.append(URLEncoder.encode(key, "UTF-8")).append('=');
+                    sb.append(URLEncoder.encode(value, "UTF-8"));
+                }
+
+                postBody = sb.toString().getBytes();
+            }else if(postBody == null) {
+                throw new IllegalArgumentException("Cant make a post request with no body and no parameters");
+            }
+
+            conn.setDoOutput(true);
+            OutputStream out = conn.getOutputStream();
+            out.write(postBody);
+            out.flush();
+            out.close();
+        }
+
+        conn.connect();
+
+        int contentLen = conn.getContentLength();
+        int statusCode = conn.getResponseCode();
+        InputStream in = statusCode < 400 ? conn.getInputStream() : conn.getErrorStream();
+        byte[] buf = new byte[1024];
+        int bytesRead = 0;
+        int bytesReadTotal = 0;
+
+        //do not read more bytes than is available in the stream
+        int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        if(!method.equalsIgnoreCase("HEAD")) {
+            while((contentLen != -1 ? (bytesRead < contentLen) : true)  && (bytesRead = in.read(buf, 0, contentLen == -1 ? buf.length : Math.min(buf.length, contentLen - bytesRead))) != -1) {
+                bout.write(buf, 0, bytesRead);
+            }
+        }
+
+        in.close();
+
+        Hashtable responseHeaders = new Hashtable();
+        Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();
+        while(headerIterator.hasNext()) {
+            String header = headerIterator.next();
+            if(header == null) {
+                continue;//a null header is the response line not header; leave that alone...
+            }
+
+            String headerVal = conn.getHeaderField(header);
+            responseHeaders.put(header.toLowerCase(), headerVal);
+        }
+
+        byte[] resultBytes = bout.toByteArray();
+        HTTPResult result = new HTTPResult(resultBytes, statusCode,
+                responseHeaders);
+
         return result;
     }
+
+    /**
+     * Open the given connection and return the HttpURLConnection object using a proxy if required
+     *
+     * @param url
+     *
+     * @return
+     */
+    public abstract URLConnection openConnection(URL url) throws IOException;
 
     @Override
     public boolean isJavascriptSupported() {
         return true;
     }
 
+    @Override
+    public boolean isHttpsSupported() {
+        return true;
+    }
 
     @Override
     public boolean queueTinCanStatement(final JSONObject stmt, final Object context) {
         //Placeholder for iOS usage
         return false;
+    }
+
+    public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
+        //TODO: remove this - it's not really used - do nothing
+    }
+
+    public void removeTinCanQueueListener(TinCanQueueListener listener) {
+        //TODO: remove this - it's not really used - do nothing
     }
 
     /**
@@ -364,5 +364,22 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     public ZipFileHandle openZip(String name) throws IOException{
         return new ZipFileHandleSharedSE(name);
     }
+
+    /**
+     * @{inheritDoc}
+     */
+    public String hashAuth(Object context, String auth) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(auth.getBytes());
+            byte[] digest = md.digest();
+            return new String(Base64Coder.encode(digest));
+        }catch(NoSuchAlgorithmException e) {
+            l(UMLog.ERROR, 86, null, e);
+        }
+
+        return null;
+    }
+
 
 }

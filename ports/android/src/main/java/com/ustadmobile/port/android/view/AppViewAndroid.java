@@ -76,6 +76,15 @@ public class AppViewAndroid implements AppView{
     }
 
     @Override
+    public void setProgressDialogTitle(final String title) {
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                progressDialog.setTitle(title);
+            }
+        });
+    }
+
+    @Override
     public boolean dismissProgressDialog() {
         activity.runOnUiThread(new Runnable() {
             public void run() {

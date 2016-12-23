@@ -721,7 +721,18 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             timer.schedule(task, delay);
         }
         
+        /**
+         * Buffer is enabled for all requests except audio and video media
+         * 
+         * @param di
+         * 
+         * @return 
+         */
         boolean shouldBeBufferEnabled(DocumentInfo di) {
+            if(di == null) {
+                return true;
+            }
+            
             int type = di.getExpectedContentType();
             return (type != DocumentInfo.TYPE_AUDIO) && 
                 (type != DocumentInfo.TYPE_VIDEO);
@@ -791,7 +802,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
                         try {
                             int[] endingPos = ContainerViewPageSplitter.dividePage(src, bout, 
                                 UstadMobileConstants.MICRO_ED_PAGESPLIT_TEXTLEN, 
-                                Display.getInstance().getDisplayWidth() * Display.getInstance().getDisplayHeight() * 2,
+                                Display.getInstance().getDisplayWidth() * Display.getInstance().getDisplayHeight() * 4,
                                 line, col);
 
                             if(index == boundaries.size()) {
@@ -875,7 +886,7 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
             this.ioc = ioc;
             this.handler = handler;
             this.bufferEnabled = bufferEnabled;
-            
+                  
             url = di.getUrl();
             expectedType = di.getExpectedContentType();
         }

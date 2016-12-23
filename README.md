@@ -19,9 +19,14 @@ ports/j2me: This is an ant project: Contains J2ME Implementation
 To build and run tests: 
 
 1. Copy core/testsettings.gradle.example to core/testsettings.gradle
-2. See the README file in ports/<platform name>
 
+2. Make gradle copy the default app config: 
+    cd core
+    gradle initAppConfig
 
+3. See the README file in ports/<platform name>
+
+ 
 
 
 

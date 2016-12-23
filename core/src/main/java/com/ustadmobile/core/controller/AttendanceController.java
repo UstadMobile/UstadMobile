@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -42,8 +43,17 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
+import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementManager;
+import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementProxy;
+import com.ustadmobile.nanolrs.core.model.XapiStatementProxy;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.List;
+
 import jp.sourceforge.qrcode.util.DebugCanvas;
 
 /* $if umplatform == 2  $
@@ -57,7 +67,31 @@ import jp.sourceforge.qrcode.util.DebugCanvas;
  *
  * @author mike
  */
-public class AttendanceController extends UstadBaseController{
+public class AttendanceController extends UstadBaseController {
+
+    /**
+     * Attendance for the given class has not yet been taken today
+     */
+    public static final int STATUS_ATTENDANCE_NOT_TAKEN = 0;
+
+    /**
+     * Attendance for the given class has been taken but not yet
+     * sent to the server
+     */
+    public static final int STATUS_ATTENDANCE_TAKEN = 1;
+
+    /**
+     * Attendance for the given class has been sent successfully to the server
+     */
+    public static final int STATUS_ATTENDANCE_SENT = 2;
+
+    public static final String XAPI_VERB_TEACHER_HOSTED = "http://activitystrea.ms/schema/1.0/host";
+
+
+
+    public static final int[] ATTENDANCE_MESSAGES = new int[] {
+            MessageIDConstants.not_taken, MessageIDConstants.sending, MessageIDConstants.sent
+    };
 
     //areas in which optical marks are to be found on the paper
     
@@ -86,6 +120,10 @@ public class AttendanceController extends UstadBaseController{
     public static final float OM_ROW_HEIGHT = 20.651441242f/AREA_HEIGHT;
     
     public static final int DEFAULT_GS_THRESHOLD = 128;
+
+    public static final int ENTRYMODE_SNAP_SHEET = 0;
+
+    public static final int ENTRYMODE_DIRECT_ENTRY = 1;
     
     
     /*
@@ -127,6 +165,8 @@ public class AttendanceController extends UstadBaseController{
      * Argument required for attendance class id
      */
     public static final String KEY_CLASSID = "classid";
+
+    public static final String ARG_ENTRYMODE = "mode";
     
 
     /**
@@ -139,10 +179,20 @@ public class AttendanceController extends UstadBaseController{
         "http://www.ustadmobile.com/xapi/verb/absent-excused",
         "http://id.tincanapi.com/verb/skipped"
     };
+
+    public static final int VERB_IDS_ATTENDED = 0;
+
+    public static final int VERB_IDS_LATE = 1;
+
+    public static final int VERB_IDS_EXCUSED = 2;
+
+    public static final int VERB_IDS_ABSENT = 3;
     
     public static final String[] VERB_DISPLAYS = new String[] {
         "Attended", "Late", "Absent - Excused", "Skipped"
     };
+
+    private int entryMode = ENTRYMODE_SNAP_SHEET;
     
     public AttendanceController(Object context, String classId) {
         super(context);
@@ -152,6 +202,11 @@ public class AttendanceController extends UstadBaseController{
     public static AttendanceController makeControllerForView(AttendanceView view, Hashtable args) {
         AttendanceController ctrl = new AttendanceController(view.getContext(), 
             (String)args.get(KEY_CLASSID));
+
+        if(args.containsKey(ARG_ENTRYMODE)) {
+            ctrl.setEntryMode((Integer)args.get(ARG_ENTRYMODE));
+        }
+
         ctrl.setView(view);
 
         return ctrl;
@@ -189,6 +244,40 @@ public class AttendanceController extends UstadBaseController{
 
         return teacherClasses;
     }
+
+    /**
+     *
+     * @param context
+     * @param classId
+     * @return
+     */
+    public static int getAttendanceStatusByClassId(Object context, String classId) {
+        //Determine the status
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+
+        long timeMidnight = cal.getTimeInMillis();
+
+        List<? extends XapiStatementProxy> statementList = XapiStatementsEndpoint.getStatements(context, null, null, null,
+                XAPI_VERB_TEACHER_HOSTED, UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId,
+                null, false, false, timeMidnight, -1, 0);
+
+        if(statementList.isEmpty()) {
+            return STATUS_ATTENDANCE_NOT_TAKEN;
+        }
+
+        boolean statementsPending = false;
+        XapiForwardingStatementManager manager = PersistenceManager.getInstance().getForwardingStatementManager();
+        for(int i = 0; i < statementList.size(); i++) {
+            if(manager.findStatusByXapiStatement(context, statementList.get(i)) != XapiForwardingStatementProxy.STATUS_SENT)
+                return STATUS_ATTENDANCE_TAKEN;
+        }
+
+        return STATUS_ATTENDANCE_SENT;
+    }
+
     
     
     public static AttendanceClassStudent[] loadClassStudentListFromNet(final String classID, final Object context) {
@@ -261,7 +350,13 @@ public class AttendanceController extends UstadBaseController{
      * the view should call this to get the workflow started
      */
     public void handleStartFlow() {
-        view.showTakePicture();
+        if(entryMode == ENTRYMODE_SNAP_SHEET) {
+            view.showTakePicture();
+        }else {
+            //TODO: Remove these hard coded values
+            boolean[][] marks = new boolean[66][4];
+            handleResultsDecoded(marks);
+        }
     }
     
     
@@ -272,7 +367,9 @@ public class AttendanceController extends UstadBaseController{
         this.view = (AttendanceView)view;
     }
     
-    
+    public void handleSetFocusWaitEnabled(boolean focusWaitEnabled) {
+
+    }
     
     public void handleClickSnap() {
         view.showTakePicture();
@@ -289,7 +386,7 @@ public class AttendanceController extends UstadBaseController{
         boolean[][] colMarks;
         for(int i = 0; i < offsetsX.length; i++) {
             colMarks = sheet.getOMRsByRow(sheet.getRecognizedImage(),
-                sheet.getGrayscaleThreshold(), 0.5f, offsetsX[i],
+                0.25f, offsetsX[i],
                 AttendanceSheetImage.DEFAULT_OMR_OFFSET_Y,
                 AttendanceSheetImage.DEFAULT_OM_DISTANCE_X, OM_HEIGHT/2, 
                 AttendanceSheetImage.DEFAULT_OM_DISTANCE_Y, 
@@ -329,76 +426,49 @@ public class AttendanceController extends UstadBaseController{
     }
 
     public void handleGoBack(){
-        Hashtable args = new Hashtable();
-        args.put(AttendanceController.KEY_CLASSID, theClass.id);
-        UstadMobileSystemImpl.getInstance().go(AttendanceView.class, args,
-                context);
+        view.goBack();
     }
     
     public void handleClickSubmitResults() {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        //send to local LRS.
-        String xAPIServer = LoginController.LLRS_XAPI_ENDPOINT;
-        JSONArray stmtArr = new JSONArray();
-        String registrationUUID = UMTinCanUtil.generateUUID();
-        
-        JSONObject teacherStmt = makeAttendendedStmt(
-            theClass.id, theClass.name,
-            impl.getActiveUser(getContext()), xAPIServer, 
-            "http://activitystrea.ms/schema/1.0/host", "hosted", registrationUUID, 
-            null);
-        stmtArr.put(teacherStmt);
-        
-        JSONObject studentStmt;
-        JSONObject instructorActor = UMTinCanUtil.makeActorFromActiveUser(getContext());
-        
-        for(int i = 0; i < attendanceResult.length; i++) {
-            int attendanceStatus = attendanceResult[i].attendanceStatus;
-            if(attendanceStatus >= 0) {
-                studentStmt = makeAttendendedStmt(theClass.id, 
-                    theClass.name, attendanceResult[i].userId, 
-                    xAPIServer, VERB_IDS[attendanceStatus], VERB_DISPLAYS[attendanceStatus], 
-                    registrationUUID, instructorActor);
-                stmtArr.put(studentStmt);
-            }
-            
-        }
-        sendToXAPIServer(stmtArr, xAPIServer, impl.getActiveUser(getContext()), 
-            impl.getActiveUserAuth(getContext()));
-    }
-    
-    public void handleResultsSubmitted() {
-        
-    }
-    
-    public void sendToXAPIServer(final JSONArray stmtArr, final String xapiServer, final String username, final String pasword) {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        final String stmtURL = UMFileUtil.joinPaths(new String[] {
-            xapiServer, "statements"});
-        final String stmtStr = stmtArr.toString();
-        final Hashtable headers = LoginController.makeAuthHeaders(username, 
-            pasword);
-        headers.put("X-Experience-API-Version", "1.0.1");
-        final Object ctx = getContext();
-        
-        Thread sendThread = new Thread(new Runnable() {
+        Thread saveThread = new Thread(new Runnable() {
             public void run() {
-                try {
-                    impl.makeRequest(stmtURL, headers, null, "POST", 
-                        stmtArr.toString().getBytes("UTF-8"));
-                    impl.getAppView(ctx).dismissProgressDialog();
-                    view.finish();
-                }catch(IOException e) {
-                    impl.getAppView(ctx).dismissProgressDialog();
-                    impl.getAppView(ctx).showAlertDialog("Error", "Error sending result - please try again");
-                    e.printStackTrace();
+                final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                String xAPIServer = impl.getAppPref(
+                        UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+                        UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                String registrationUUID = UMTinCanUtil.generateUUID();
+
+
+                JSONObject teacherStmt = makeAttendendedStmt(
+                        theClass.id, theClass.name,
+                        impl.getActiveUser(getContext()), xAPIServer,
+                        "http://activitystrea.ms/schema/1.0/host", "hosted", registrationUUID,
+                        null);
+                UstadMobileSystemImpl.getInstance().queueTinCanStatement(teacherStmt, context);
+
+
+                JSONObject studentStmt;
+                JSONObject instructorActor = UMTinCanUtil.makeActorFromActiveUser(getContext());
+
+                for(int i = 0; i < attendanceResult.length; i++) {
+                    int attendanceStatus = attendanceResult[i].attendanceStatus;
+                    if(attendanceStatus >= 0) {
+                        studentStmt = makeAttendendedStmt(theClass.id,
+                                theClass.name, attendanceResult[i].userId,
+                                xAPIServer, VERB_IDS[attendanceStatus], VERB_DISPLAYS[attendanceStatus],
+                                registrationUUID, instructorActor);
+                        UstadMobileSystemImpl.getInstance().queueTinCanStatement(studentStmt, context);
+                    }
+
                 }
-                
+                impl.getAppView(context).dismissProgressDialog();
+                view.finish();
             }
         });
-        impl.getAppView(getContext()).showProgressDialog("Sending...");
-        sendThread.start();
+        UstadMobileSystemImpl.getInstance().getAppView(getContext()).showProgressDialog("Saving...");
+        saveThread.start();
     }
+
     
     
     public JSONObject makeAttendendedStmt(String classID, String className, String username, String xapiServer, String verbID, String verbDisplay, String registrationUUID, JSONObject instructor) {
@@ -436,7 +506,21 @@ public class AttendanceController extends UstadBaseController{
         return stmt;
     }
 
-    
-    
-    
+    /**
+     * The entry mode : direct or by sheet snap - as per ENTRYMODE_ constants
+     *
+     * @return The entry mode as per ENTRYMODE_ constants
+     */
+    public int getEntryMode() {
+        return entryMode;
+    }
+
+    /**
+     * Set the entry mode : direct or by sheet snap .  Must be done before calling handleStartFlow()
+     *
+     * @param entryMode The entry mode as per ENTRYMODE_ constants
+     */
+    public void setEntryMode(int entryMode) {
+        this.entryMode = entryMode;
+    }
 }

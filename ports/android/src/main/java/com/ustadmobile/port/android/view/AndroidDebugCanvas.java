@@ -77,6 +77,14 @@ public class AndroidDebugCanvas extends Canvas implements DebugCanvas {
         canvas.drawPath(p, paint);
     }
 
+    @Override
+    public void drawCircle(Point point, int radius, int color) {
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth);
+        paint.setColor(color);
+        canvas.drawCircle(point.getX(), point.getY(), radius, paint);
+    }
+
     public  void drawPoints(Point[] points, int color){
 
     }

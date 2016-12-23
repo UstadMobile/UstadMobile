@@ -83,6 +83,7 @@ public class LoginFragment extends Fragment {
                 CheckBox advancedCheckbox =(CheckBox) mRootViewGroup.findViewById(R.id.login_advanced_checkbox);
                 advancedCheckbox.setOnCheckedChangeListener(loginActivity);
                 ((EditText)mRootViewGroup.findViewById(R.id.login_xapi_server)).setText(loginActivity.mXAPIServer);
+                ((TextView) mRootViewGroup.findViewById(R.id.login_version_label)).setText(loginActivity.mVersionLabel);
                 break;
             case LoginView.SECTION_REGISTER:
                 Spinner countrySpinner = (Spinner)mRootViewGroup.findViewById(R.id.login_registercountry);

@@ -366,6 +366,19 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
         }
         
     }
+
+    /**
+     * Entry backgrounds are not used on J2ME to avoid running over memory limits.
+     * Using it will have no effect on J2ME
+     * 
+     * @param entryId
+     * @param backgroundFileURI 
+     */
+    public void setEntryBackground(String entryId, String backgroundFileURI) {
+        //Not implemented on J2ME
+    }
+    
+    
     
     
     

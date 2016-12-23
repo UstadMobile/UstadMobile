@@ -431,7 +431,14 @@ public abstract class UstadMobileSystemImpl {
      * @return true if supported (eg. Android) false otherwise (e.g. J2ME)
      */
     public abstract boolean isJavascriptSupported();
-    
+
+    /**
+     * Answer whether or not this platform supports https
+     *
+     * @return True if the platform supports HTTPS , false otherwise (Temporarily - J2ME)
+     */
+    public abstract boolean isHttpsSupported();
+
     /**
      * Queue the given TinCan statement represented in the JSON object 
      * for transmission to the tin can server
@@ -440,7 +447,22 @@ public abstract class UstadMobileSystemImpl {
      * @return true if successfully queued, false otherwise
      */
     public abstract boolean queueTinCanStatement(JSONObject stmt, Object context);
-    
+
+
+    /**
+     * Add a listener to be notified when the tincan queue is updated (items added/sent)
+     * @param listener Listener to add
+     */
+    public abstract void addTinCanQueueStatusListener(TinCanQueueListener listener);
+
+    /**
+     * Remove a listener from the list to be notified when tincan queue is updated
+     *
+     * @param listener
+     */
+    public abstract void removeTinCanQueueListener(TinCanQueueListener listener);
+
+
     /**
      * Gets the cache directory for the platform for either user specific
      * cache contents / shared cache contents
@@ -1056,7 +1078,18 @@ public abstract class UstadMobileSystemImpl {
      * @return String with version number
      */
     public abstract String getVersion(Object context);
-    
+
+    /**
+     * Perform a one way hash of an authentication parameter
+     *
+     * @param context System context
+     * @param auth Authentication secret to be hashed
+     * @return The authentication secret hashed
+     */
+    public abstract String hashAuth(Object context, String auth);
+
+
+
     
 }
 

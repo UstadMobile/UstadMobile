@@ -41,6 +41,9 @@ public interface ContainerView extends UstadView {
     public void setController(ContainerController controller);
         
     public void setContainerTitle(String containerTitle);
+
+    void setPageTitle(String pageTitle);
+
     
     /**
      * This is a PDF container : show the PDF now
@@ -60,5 +63,7 @@ public interface ContainerView extends UstadView {
      * @return true if successfully executed, false otherwise
      */
     public boolean refreshURLs();
+
+
     
 }

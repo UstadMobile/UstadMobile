@@ -36,6 +36,7 @@ import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.ContainerView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -94,6 +95,8 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     private String registrationUUID;
     
     private TinCanXML tinCanXMLSummary;
+
+    private String currentPageTitle;
     
     public static final String PREFKEY_PREFIX_LASTOPENED = "laxs-";
         
@@ -324,7 +327,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         
         HTTPResult res = UstadMobileSystemImpl.getInstance().readURLToString(
             containerXMLURI, null);
-        
+
         XmlPullParser xpp = impl.newPullParser();
         xpp.setInput(new ByteArrayInputStream(res.getResponse()), "UTF-8");
         ocf = UstadOCF.loadFromXML(xpp);
@@ -425,10 +428,12 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public String getXAPIQuery() {
         String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
         String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+
+        //TODO: Change this hardcoded setting to something that is set properly
         return "?actor=" +
             URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
             "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
-            "&endpoint=" + URLTextUtil.urlEncodeUTF8(LoginController.LLRS_XAPI_ENDPOINT) +
+            "&endpoint=" + URLTextUtil.urlEncodeUTF8("http://127.0.0.1:8001/xapi/") +
             "&registration=" + registrationUUID;
     }
     
@@ -644,7 +649,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
                     labelSb.append(cal.get(Calendar.MONTH)+1).append('/');
                     labelSb.append(cal.get(Calendar.YEAR)).append(" - ");
                     labelSb.append(cal.get(Calendar.HOUR_OF_DAY)).append(':');
-                    labelSb.append(pad0(cal.get(Calendar.MINUTE)));
+                    labelSb.append(UMUtil.pad0(cal.get(Calendar.MINUTE)));
                     
                     regIds.addElement(regId);
                     labels.addElement(labelSb.toString());
@@ -670,13 +675,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         }
     }
     
-    private String pad0(int i) {
-        if(i > 9) {
-            return String.valueOf(i);
-        }else {
-            return "0"+i;
-        }
-    }
+
 
     /**
      * Handle when the user has chosen a session to resume
@@ -763,7 +762,12 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         this.registrationUUID = registrationUUID;
     }
 
-    
+    public void handlePageTitleUpdated(String pageTitle) {
+        this.currentPageTitle = pageTitle;
+        if(containerView != null) {
+            containerView.setPageTitle(pageTitle);
+        }
+    }
     
     
 }

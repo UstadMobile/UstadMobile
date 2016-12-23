@@ -29,7 +29,7 @@
 
  */
 
-package com.ustadmobile.port.android.impl.http;
+package com.ustadmobile.port.sharedse.impl.http;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
