@@ -62,21 +62,6 @@
     [self.refreshControl addTarget:self action:@selector(refreshWithUIRefreshControl:) forControlEvents:UIControlEventValueChanged];
     [self.catalogTableView addSubview:self.refreshControl];
     
-    //Set a color for the title bar
-    /*
-     UIColor *navBarColor = nil;
-     if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
-     //catalog view
-     UINavigationController *navController = (UINavigationController *)self.parentViewController;
-     navBarColor = [UIColor colorWithRed:0.325 green:0.73 blue:0.894 alpha:1];
-     [navController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
-     //navController.navigationBar.translucent = NO;
-     [navController.navigationBar setBarTintColor:navBarColor];
-     //[navController.navigationBar setTintColor:[UIColor whiteColor]];
-     //[navController.navigationBar.topItem setTitle:@""];
-     }
-     */
-    
     self.longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
     self.longPressGestureRecognizer.minimumPressDuration = 2.0;
     [self.catalogTableView addGestureRecognizer:self.longPressGestureRecognizer];
@@ -116,6 +101,12 @@
                 [self.parentViewController.navigationItem setTitle:title];
             }
             
+            //see if we should show a "custom lesson" button
+            if([[self.catalogController getModel]->opdsFeed_ isAcquisitionFeed]) {
+                UIBarButtonItem *customButton = [[UIBarButtonItem alloc] initWithTitle:@"Custom Lesson" style:UIBarButtonItemStylePlain target:self action:@selector(goCustomLesson)];
+                self.navigationItem.rightBarButtonItem = customButton;
+            }
+            
             jint bgColor = [feed getBgColor];
             if(bgColor >= 0) {
                 self.catalogBgColor =UIColorFromRGB(bgColor);
@@ -138,6 +129,10 @@
         
     });
     [self.catalogController loadThumbnails];
+}
+
+- (void)goCustomLesson {
+    [self.catalogController handleCatalogSelectedWithNSString:@"http://www.ustadmobile.com/files/sapienza/opds/german-custom.opds"];
 }
 
 - (void)didReceiveMemoryWarning {
