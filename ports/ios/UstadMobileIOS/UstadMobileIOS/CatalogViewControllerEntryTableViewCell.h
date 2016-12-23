@@ -16,5 +16,8 @@
 @property (retain, nonatomic) IBOutlet UIImageView *backgroundImageView;
 @property (retain, nonatomic) IBOutlet UIImageView *rightProgressIcon;
 @property (retain, nonatomic) IBOutlet UIImageView *statusIcon;
+@property (retain, nonatomic) IBOutlet UILabel *dividerTitleLabel;
+
+- (void)useAsDivider:(BOOL)dividerMode;
 
 @end

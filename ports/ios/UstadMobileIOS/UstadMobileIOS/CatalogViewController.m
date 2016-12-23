@@ -17,6 +17,7 @@
 #import "CatalogEntryInfo.h"
 #import "AppView.h"
 #import "java/lang/Integer.h"
+#import "java/util/Vector.h"
 
 
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:1.0];
@@ -63,17 +64,17 @@
     
     //Set a color for the title bar
     /*
-    UIColor *navBarColor = nil;
-    if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
-        //catalog view
-        UINavigationController *navController = (UINavigationController *)self.parentViewController;
-        navBarColor = [UIColor colorWithRed:0.325 green:0.73 blue:0.894 alpha:1];
-        [navController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
-        //navController.navigationBar.translucent = NO;
-        [navController.navigationBar setBarTintColor:navBarColor];
-        //[navController.navigationBar setTintColor:[UIColor whiteColor]];
-        //[navController.navigationBar.topItem setTitle:@""];
-    }
+     UIColor *navBarColor = nil;
+     if([self.parentViewController isKindOfClass:[UINavigationController class]]) {
+     //catalog view
+     UINavigationController *navController = (UINavigationController *)self.parentViewController;
+     navBarColor = [UIColor colorWithRed:0.325 green:0.73 blue:0.894 alpha:1];
+     [navController.navigationBar setTitleTextAttributes:@{NSForegroundColorAttributeName : [UIColor whiteColor]}];
+     //navController.navigationBar.translucent = NO;
+     [navController.navigationBar setBarTintColor:navBarColor];
+     //[navController.navigationBar setTintColor:[UIColor whiteColor]];
+     //[navController.navigationBar.topItem setTitle:@""];
+     }
      */
     
     self.longPressGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
@@ -361,14 +362,14 @@
 }
 
 /*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
+ #pragma mark - Navigation
+ 
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ }
+ */
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     NSInteger count;
@@ -400,13 +401,23 @@
     
     if(self.catalogTextColor != nil) {
         [cell.titleLabel setTextColor:self.catalogTextColor];
+        [cell.dividerTitleLabel setTextColor:self.catalogTextColor];
     }
     
     cell.titleLabel.text = item->title_;
-    [cell.progressView setHidden:YES];
     [self updateEntryThumbnail:item->id__];
     [self updateEntryBackground:item->id__];
     [self updateEntryStatusIcon:item->id__];
+    
+    [cell.progressView setHidden:YES];
+    
+    
+    if( [[item getLinks]size] == 0) {
+        cell.dividerTitleLabel.text = item->title_;
+        [cell useAsDivider:YES];
+    }else {
+        [cell useAsDivider:NO];
+    }
     
     if(indexPath.row >= 2) {
         [cell.rightProgressIcon setImage:[UIImage imageNamed:@"phases-progress-icon-empty"]];
@@ -418,7 +429,9 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:NO];
     ComUstadmobileCoreOpdsUstadJSOPDSEntry *item = IOSObjectArray_Get([self.catalogController getModel]->opdsFeed_->entries_, (jint)indexPath.row);
-    [self.catalogController handleClickEntryWithComUstadmobileCoreOpdsUstadJSOPDSEntry:item];
+    if([[item getLinks]size] > 0) {
+        [self.catalogController handleClickEntryWithComUstadmobileCoreOpdsUstadJSOPDSEntry:item];
+    }
 }
 
 - (IBAction)browseButtonClicked:(UIButton *)sender {

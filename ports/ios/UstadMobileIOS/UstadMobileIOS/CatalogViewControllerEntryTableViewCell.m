@@ -8,17 +8,37 @@
 
 #import "CatalogViewControllerEntryTableViewCell.h"
 
+@interface CatalogViewControllerEntryTableViewCell ()
+
+@property (nonatomic) BOOL dividerMode;
+
+@end
+
 @implementation CatalogViewControllerEntryTableViewCell
 
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code
+    self.dividerMode = NO;
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {
     [super setSelected:selected animated:animated];
 
     // Configure the view for the selected state
+}
+
+- (void)useAsDivider:(BOOL)dividerMode {
+    self.dividerMode = dividerMode;
+    
+    //hide these if we are in divider mode
+    [self.titleLabel setHidden:dividerMode];
+    [self.rightProgressIcon setHidden:dividerMode];
+    [self.thumbnailImageView setHidden:dividerMode];
+    [self.dividerTitleLabel setHidden:!dividerMode];
+    
+    self.dividerTitleLabel.layer.borderWidth = 2.0;
+    self.dividerTitleLabel.layer.borderColor = [UIColor whiteColor].CGColor;
 }
 
 @end
