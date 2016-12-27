@@ -8,6 +8,10 @@
 # Android studio IML file
 *.iml
 
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/libraries
+
 # Java class files
 *.class
 
@@ -48,46 +52,33 @@ core/build/
 ports/android/.idea
 
 #J2ME properties and build dist folders
-ports/j2me/build/
-ports/j2me/dist/
-ports/j2me/lib/
-ports/j2me/*-ANTENNA/
-ports/j2me/*~
+app-j2me/build/
+app-j2me/dist/
+app-j2me/lib/
+app-j2me/*-ANTENNA/
+app-j2me/*~
 
 #Preprocessed unit test files
 preproctmp
 ports/android/src/androidTest/java/com/ustadmobile/test/core/*
 !ports/android/src/androidTest/java/com/ustadmobile/test/core/UMContextGetter.java
 
-#Files copied into the main Android project to force
-#Android studio to cooperate debugging them
-
-ports/android/src/main/java/com/ustadmobile/core/*
-!ports/android/src/main/java/com/ustadmobile/core/view
-!ports/android/src/main/java/com/ustadmobile/core/impl
-
-ports/android/src/main/java/com/ustadmobile/core/view/*
-!ports/android/src/main/java/com/ustadmobile/core/view/ViewFactory.java
-
-ports/android/src/main/java/com/ustadmobile/core/impl/*
-!ports/android/src/main/java/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
-
 #Files preproc'd into j2me version
-ports/j2me/src/com/ustadmobile/core/*
-!ports/j2me/src/com/ustadmobile/core/view
-!ports/j2me/src/com/ustadmobile/core/impl
+app-j2me/src/com/ustadmobile/core/*
+!app-j2me/src/com/ustadmobile/core/view
+!app-j2me/src/com/ustadmobile/core/impl
 
-ports/j2me/src/com/ustadmobile/core/view/*
-!ports/j2me/src/com/ustadmobile/core/view/ViewFactory.java
+app-j2me/src/com/ustadmobile/core/view/*
+!app-j2me/src/com/ustadmobile/core/view/ViewFactory.java
 
-ports/j2me/src/com/ustadmobile/core/impl/*
-!ports/j2me/src/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
+app-j2me/src/com/ustadmobile/core/impl/*
+!app-j2me/src/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
 
 #QRCode that gets checked out into the source directory
-ports/j2me/src/jp
+app-j2me/src/jp
 
 #localization files copied into the j2me directory
-ports/j2me/src/res/locale
+app-j2me/src/res/locale
 
 #Testing node server files
 testres/node-qunit-server/node_modules
@@ -99,18 +90,13 @@ testres/DodgyHTTPD
 ustadmobilemicro-build.properties
 
 #Ignore Core Tests copied to port
-ports/j2me/src/com/ustadmobile/test/core/*.java
-!ports/j2me/src/com/ustadmobile/test/core/UMContextGetter.java
+app-j2me/src/com/ustadmobile/test/core/*.java
+!app-j2me/src/com/ustadmobile/test/core/UMContextGetter.java
 
 #Ignore mock unit test results sent by testing the test method
 testres/unittest-testresults.txt
 testres/unittest-result
 
-#Ignore LRS
-ports/android/lrs
-ports/android/LRSTEMP
-ports/android/settings.gradle
-ports/android/buildozer
 *.bak
 *~
 
@@ -120,8 +106,8 @@ ports/android/buildozer
 /core/.nb-gradle/
 
 # iOS Generated Sources
-ports/ios/UstadMobileIOS/Generated
-ports/ios/lib
+app-ios/UstadMobileIOS/Generated
+app-ios/lib
 
 # Created by https://www.gitignore.io/api/xcode,objective-c
 

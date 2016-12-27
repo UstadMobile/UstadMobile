@@ -1,6 +1,0 @@
-
-include ":sharedse"
-project(":sharedse").projectDir = new File("../sharedse")
-
-include ":core"
-project(":core").projectDir = new File("../../core")

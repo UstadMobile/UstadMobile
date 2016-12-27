@@ -1,7 +1,0 @@
-ext {
-    testServer = "127.0.0.1"
-    testServerPort = "8065"
-    testUser="user"
-    testUserAuth="secret"
-}
-
