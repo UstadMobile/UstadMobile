@@ -442,8 +442,8 @@ public class AttendanceController extends UstadBaseController {
                 JSONObject teacherStmt = makeAttendendedStmt(
                         theClass.id, theClass.name,
                         impl.getActiveUser(getContext()), xAPIServer,
-                        "http://activitystrea.ms/schema/1.0/host", "hosted", registrationUUID,
-                        null);
+                        AttendanceController.XAPI_VERB_TEACHER_HOSTED, "hosted", registrationUUID,
+                        null, "Ustad Mobile - " + UstadMobileSystemImpl.getInstance().getVersion(context));
                 UstadMobileSystemImpl.getInstance().queueTinCanStatement(teacherStmt, context);
 
 
@@ -456,7 +456,7 @@ public class AttendanceController extends UstadBaseController {
                         studentStmt = makeAttendendedStmt(theClass.id,
                                 theClass.name, attendanceResult[i].userId,
                                 xAPIServer, VERB_IDS[attendanceStatus], VERB_DISPLAYS[attendanceStatus],
-                                registrationUUID, instructorActor);
+                                registrationUUID, instructorActor, null);
                         UstadMobileSystemImpl.getInstance().queueTinCanStatement(studentStmt, context);
                     }
 
@@ -471,7 +471,7 @@ public class AttendanceController extends UstadBaseController {
 
     
     
-    public JSONObject makeAttendendedStmt(String classID, String className, String username, String xapiServer, String verbID, String verbDisplay, String registrationUUID, JSONObject instructor) {
+    public JSONObject makeAttendendedStmt(String classID, String className, String username, String xapiServer, String verbID, String verbDisplay, String registrationUUID, JSONObject instructor, String contextPlatform) {
         JSONObject stmt = new JSONObject();
         try {
             stmt.put("actor", UMTinCanUtil.makeActorFromUserAccount(username, 
@@ -498,6 +498,10 @@ public class AttendanceController extends UstadBaseController {
             if(instructor != null) {
                 stmtContext.put("instructor", instructor);
             }
+            if(contextPlatform != null) {
+                stmtContext.put("platform", contextPlatform);
+            }
+
             stmt.put("context", stmtContext);
         }catch(JSONException j) {
             
