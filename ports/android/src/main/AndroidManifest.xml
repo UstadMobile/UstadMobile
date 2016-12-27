@@ -60,16 +60,17 @@
         <activity android:name="com.ustadmobile.port.android.view.BasePointActivity" />
         <activity
             android:name="com.ustadmobile.port.android.view.AttendanceActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.ustadmobile.port.android.view.ClassManagementActivity"
             android:label="@string/title_activity_class_management"
-            android:theme="@style/Theme.UstadTheme"></activity>
+            android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.EnrollStudentActivity"
             android:label="@string/title_activity_enroll_student"
-            android:theme="@style/Theme.UstadTheme"></activity>
-        <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2"></activity>
+            android:theme="@style/Theme.UstadTheme" />
+        <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2" />
+        <activity android:name="com.ustadmobile.port.android.view.AboutActivity"></activity>
     </application>
 
 </manifest>

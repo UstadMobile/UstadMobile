@@ -137,13 +137,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
             MenuItem displayNameItem = menu.add(Menu.NONE, Menu.NONE, 0, displayName);
         }
 
-        MenuItem statusItem = menu.add(Menu.NONE, Menu.NONE, 1, "Status");
-        if(syncStatus == UstadMobileConstants.STATUS_SYNCED) {
-            statusItem.setIcon(R.drawable.ic_done_black_18dp);
-        }else {
-            statusItem.setIcon(R.drawable.ic_autorenew_black_18dp);
-        }
-
         if(appMenuCommands != null && appMenuLabels != null) {
             for(int i = 0; i < appMenuLabels.length; i++) {
                 menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
@@ -219,6 +212,9 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
             case android.R.id.home:
                 UstadMobileSystemImpl.getInstance().go(BasePointView.class,
                         BasePointController.makeDefaultBasePointArgs(this), this);
+                return true;
+            case R.id.action_finish:
+                finish();
                 return true;
 
         }

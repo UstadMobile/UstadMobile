@@ -35,6 +35,7 @@ import com.ustadmobile.core.impl.TinCanQueueEvent;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UserSettingsView;
 import java.util.Hashtable;
@@ -188,7 +189,7 @@ public abstract class UstadBaseController implements UstadController, TinCanQueu
     public static boolean handleClickAppMenuItem(int cmdId, Object context) {
         switch(cmdId) {
             case CMD_ABOUT:
-                //do nothing yet
+                UstadMobileSystemImpl.getInstance().go(AboutView.class, new Hashtable(), context);
                 return true;
             case CMD_SETTINGS:
                 UstadMobileSystemImpl.getInstance().go(UserSettingsView.class, 

@@ -36,6 +36,7 @@ public class ClassManagementActivity2 extends UstadBaseActivity implements Class
         setContentView(R.layout.activity_class_management2);
         baseArgs = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mController = ClassManagementController2.makeControllerForView(baseArgs, this);
+        mController.setView(this);
         setBaseController(mController);
         setUMToolbar();
 
@@ -45,6 +46,7 @@ public class ClassManagementActivity2 extends UstadBaseActivity implements Class
 
         TabLayout tabLayout = (TabLayout)findViewById(R.id.activity_class_management_tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        mController.setUIStrings();
     }
 
     @Override

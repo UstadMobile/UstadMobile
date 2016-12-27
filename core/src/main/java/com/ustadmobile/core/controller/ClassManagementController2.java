@@ -24,7 +24,7 @@ public class ClassManagementController2 extends UstadBaseController {
 
     @Override
     public void setUIStrings() {
-
+        setStandardAppMenuOptions();
     }
 
     public static ClassManagementController2 makeControllerForView(Hashtable args, ClassManagementView2 view) {

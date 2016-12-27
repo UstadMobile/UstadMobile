@@ -55,6 +55,7 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.tincan.TinCanStatement;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
@@ -67,6 +68,7 @@ import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerFactoryAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
+import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
@@ -282,6 +284,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             androidClass = EnrollStudentActivity.class;
         }else if(cls.equals(ClassManagementView2.class)) {
             androidClass = ClassManagementActivity2.class;
+        }else if(cls.equals(AboutView.class)) {
+            androidClass = AboutActivity.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);
