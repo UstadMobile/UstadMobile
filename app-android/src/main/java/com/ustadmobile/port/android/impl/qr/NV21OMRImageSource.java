@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.impl.qr;
 
-import com.ustadmobile.core.omr.OMRImageSource;
-
-import java.util.concurrent.locks.ReentrantLock;
+import com.ustadmobile.port.sharedse.omr.OMRImageSource;
 
 /**
  * Created by mike on 7/11/16.

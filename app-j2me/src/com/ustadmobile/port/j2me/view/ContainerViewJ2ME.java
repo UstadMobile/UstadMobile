@@ -251,6 +251,10 @@ public class ContainerViewJ2ME extends UstadViewFormJ2ME implements ContainerVie
         return title;
     }
 
+    public void setPageTitle(String pageTitle) {
+        super.setTitle(pageTitle);
+    }
+    
     public void show() {
         super.show();
         UstadMobileSystemImplJ2ME.getInstanceJ2ME().handleFormShow(this);

@@ -4,13 +4,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.graphics.Paint.Style;
 import android.view.View;
 
-import com.ustadmobile.core.omr.AttendanceSheetImage;
-import com.ustadmobile.core.omr.OMRRecognizer;
+import com.ustadmobile.port.sharedse.omr.AttendanceSheetImage;
+import com.ustadmobile.port.sharedse.omr.OMRRecognizer;
 
 /**
  * This view is to be used as a view to show above the camera preview to guide the user to place

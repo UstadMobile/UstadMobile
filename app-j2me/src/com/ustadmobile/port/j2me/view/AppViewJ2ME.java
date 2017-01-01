@@ -53,6 +53,8 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
      */
     private Dialog progressDialog;
     
+    private Button progressDialogLoadingButton;
+    
     private Dialog alertDialog;
     
     private Dialog choiceDialog;
@@ -160,14 +162,29 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
                 progressDialog.removeAllCommands();
 
                 progressDialog.setAutoDispose(true);
-                Button loadingButton = new Button(title);
-                loadingButton.getStyle().setBorder(Border.createEmpty());
-                loadingButton.getSelectedStyle().setBorder(Border.createEmpty());
-                progressDialog.addComponent(loadingButton);
+                progressDialogLoadingButton = new Button(title);
+                progressDialogLoadingButton.getStyle().setBorder(Border.createEmpty());
+                progressDialogLoadingButton.getSelectedStyle().setBorder(Border.createEmpty());
+                progressDialog.addComponent(progressDialogLoadingButton);
                 progressDialog.showPacked(BorderLayout.CENTER, false);      
             }
         });
     }
+
+    /**
+     * @{inheritDoc}
+     */
+    public void setProgressDialogTitle(final String title) {
+        if(progressDialogLoadingButton != null) {
+            Display.getInstance().callSerially(new Runnable() {
+               public void run() {
+                   progressDialogLoadingButton.setText(title);
+               } 
+            });
+        }
+    }
+    
+    
 
     public boolean dismissProgressDialog() {
         if(progressDialog == null) {
@@ -179,6 +196,7 @@ public class AppViewJ2ME implements AppView, ActionListener, Runnable {
                 if(progressDialog != null) {
                     progressDialog.dispose();
                     progressDialog = null;
+                    progressDialogLoadingButton = null;
                 }
             }
         });

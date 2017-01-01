@@ -1,7 +1,5 @@
 package com.ustadmobile.core.controller;
 
-import com.sun.corba.se.impl.protocol.giopmsgheaders.Message;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.view.AboutView;
@@ -11,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import javax.sound.midi.ControllerEventListener;
 
 /**
  * Created by mike on 12/27/16.
@@ -27,7 +24,6 @@ public class AboutController extends UstadBaseController implements AsyncLoadabl
         super(context);
     }
 
-    @Override
     public UstadController loadController(Hashtable args, Object context) throws Exception {
         AboutController controller = new AboutController(context);
         InputStream aboutIn = UstadMobileSystemImpl.getInstance().openResourceInputStream(
@@ -45,7 +41,6 @@ public class AboutController extends UstadBaseController implements AsyncLoadabl
         return controller;
     }
 
-    @Override
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         aboutView.setVersionInfo(impl.getVersion(context) + " - " +
@@ -58,7 +53,6 @@ public class AboutController extends UstadBaseController implements AsyncLoadabl
         new LoadControllerThread(args,loadCtrl, listener, view).start();
     }
 
-    @Override
     public void setView(UstadView view) {
         super.setView(view);
         aboutView = (AboutView)view;

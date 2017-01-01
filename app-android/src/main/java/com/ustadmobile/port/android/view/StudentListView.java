@@ -5,7 +5,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.model.AttendanceClassStudent;
+import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
 import android.content.Context;
 
 /**

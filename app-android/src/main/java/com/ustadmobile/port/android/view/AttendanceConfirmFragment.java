@@ -1,10 +1,6 @@
 package com.ustadmobile.port.android.view;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.media.Image;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -18,16 +14,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.AttendanceController;
-import com.ustadmobile.core.controller.ClassManagementController;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.model.AttendanceClass;
-import com.ustadmobile.core.model.AttendanceRowModel;
-import com.ustadmobile.core.model.UserSettingItem;
-import com.ustadmobile.core.view.AttendanceView;
-import com.ustadmobile.core.view.ClassManagementView;
-
-import java.util.Hashtable;
+import com.ustadmobile.port.sharedse.model.AttendanceRowModel;
 
 /**
  *

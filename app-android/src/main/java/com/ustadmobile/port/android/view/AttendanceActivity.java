@@ -4,9 +4,9 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.AttendanceController;
-import com.ustadmobile.core.model.AttendanceRowModel;
-import com.ustadmobile.core.view.AttendanceView;
+import com.ustadmobile.port.sharedse.controller.AttendanceController;
+import com.ustadmobile.port.sharedse.model.AttendanceRowModel;
+import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 

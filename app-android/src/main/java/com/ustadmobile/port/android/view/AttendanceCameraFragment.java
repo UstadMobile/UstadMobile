@@ -1,37 +1,29 @@
 package com.ustadmobile.port.android.view;
 
 
-import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.omr.AttendanceSheetImage;
-import com.ustadmobile.core.omr.OMRImageSource;
-import com.ustadmobile.core.omr.OMRRecognizer;
+import com.ustadmobile.port.sharedse.omr.AttendanceSheetImage;
+import com.ustadmobile.port.sharedse.omr.OMRImageSource;
+import com.ustadmobile.port.sharedse.omr.OMRRecognizer;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
-import com.ustadmobile.port.android.impl.qr.NV21OMRImageSource;
 import com.ustadmobile.port.android.impl.qr.RotatedNV21OMRImageSource;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -42,7 +34,6 @@ import java.util.List;
 import jp.sourceforge.qrcode.geom.Point;
 import jp.sourceforge.qrcode.pattern.FinderPattern;
 import jp.sourceforge.qrcode.reader.QRCodeImageReader;
-import jp.sourceforge.qrcode.util.DebugCanvas;
 
 
 /**

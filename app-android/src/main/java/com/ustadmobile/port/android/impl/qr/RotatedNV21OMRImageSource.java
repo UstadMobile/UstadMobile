@@ -1,6 +1,6 @@
 package com.ustadmobile.port.android.impl.qr;
 
-import com.ustadmobile.core.omr.OMRImageSource;
+import com.ustadmobile.port.sharedse.omr.OMRImageSource;
 
 /**
  * The camera preview image is in fact rotated 90 degrees.  When asked for image data this class

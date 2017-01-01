@@ -36,6 +36,7 @@ import com.sun.lwuit.Image;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.plaf.UIManager;
+import com.twmacinta.util.MD5;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
@@ -45,6 +46,7 @@ import javax.microedition.io.Connector;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.j2me.app.UserPref;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
@@ -77,6 +79,7 @@ import com.ustadmobile.port.j2me.view.UstadViewFormJ2ME;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
@@ -223,6 +226,16 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         return false;
     }
+
+    public void addTinCanQueueStatusListener(TinCanQueueListener listener) {
+        l(UMLog.ERROR, 82, "addTCQL");
+    }
+
+    public void removeTinCanQueueListener(TinCanQueueListener listener) {
+        l(UMLog.ERROR, 82, "removeTCQL");
+    }
+    
+    
     
     /**
      * {@inheritDoc}
@@ -1207,6 +1220,21 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         downloadService.unregisterDownloadCompleteReceiver(receiver);
     }
 
+    public boolean isHttpsSupported() {
+        return false;
+    }
+
+    public String hashAuth(Object context, String auth) {
+        try {
+            MD5 md5 = new MD5();
+            md5.Update(auth, null);
+            return md5.asHex();
+        }catch(UnsupportedEncodingException e) {
+            l(UMLog.ERROR, 83, null, e);
+            throw new RuntimeException(e.toString());
+        }
+    }
+    
     /**
      * {@inheritDoc}
      */

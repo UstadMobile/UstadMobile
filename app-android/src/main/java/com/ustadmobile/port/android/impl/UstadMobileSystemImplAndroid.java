@@ -43,27 +43,21 @@ import android.os.Environment;
 
 import java.io.*;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.util.*;
-import java.net.HttpURLConnection;
 import java.net.URL;
 
 import com.toughra.ustadmobile.BuildConfig;
-import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.tincan.TinCanResultListener;
-import com.ustadmobile.core.tincan.TinCanStatement;
-import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
-import com.ustadmobile.core.view.AttendanceView;
+import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
-import com.ustadmobile.core.view.ClassManagementView;
-import com.ustadmobile.core.view.ClassManagementView2;
+import com.ustadmobile.port.sharedse.view.ClassManagementView;
+import com.ustadmobile.port.sharedse.view.ClassManagementView2;
 import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.core.view.EnrollStudentView;
+import com.ustadmobile.port.sharedse.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerFactoryAndroid;
@@ -81,13 +75,11 @@ import com.ustadmobile.port.android.view.LoginActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.nanolrs.core.endpoints.*;
-import com.ustadmobile.nanolrs.core.model.*;
 
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 
 import android.os.Build;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.Xml;
 import android.webkit.MimeTypeMap;

@@ -71,9 +71,12 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
     private String passwordHint;
     
     private String buttonText;
+        
+    private TextField xAPIServerField;
     
     public LoginViewJ2ME(Hashtable args, Object context) {
         super(args, context);
+        xAPIServerField = new TextField();
     }
     
     public void initComponent() {
@@ -98,6 +101,8 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
 
             versionLabel = new Label();
             this.addComponent(versionLabel);
+            
+            
 
             controller = LoginController.makeControllerForView(this);
             controller.setUIStrings();
@@ -128,7 +133,7 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         int id = evt.getCommand().getId();
         if(id == CMD_LOGIN) {
             this.controller.handleClickLogin(usernameField.getText(),
-                passwordField.getText(), UstadMobileDefaults.DEFAULT_XAPI_SERVER);
+                passwordField.getText(), xAPIServerField.getText());
         }
     }
 
@@ -140,12 +145,8 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
         this.versionLabel.setText(versionLabel);
     }
     
-    /*
-    TODO: Below: to be brought up to speed with Android implementation 
-    */
-    
     public void setXAPIServerURL(String xAPIServerURL) {
-        
+        xAPIServerField.setText(xAPIServerURL);
     }
 
     public void setAdvancedSettingsVisible(boolean visible) {

@@ -8,10 +8,10 @@ import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.PersonListController;
+import com.ustadmobile.port.sharedse.controller.PersonListController;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.model.ListableEntity;
-import com.ustadmobile.core.view.PersonListView;
+import com.ustadmobile.port.sharedse.view.PersonListView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.List;

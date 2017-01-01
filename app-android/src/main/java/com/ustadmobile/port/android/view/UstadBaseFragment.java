@@ -89,14 +89,6 @@ public class UstadBaseFragment  extends Fragment{
         }
     }
 
-    public void setAppStatus(int status)  {
-        //not implemented yet
-    }
-
-    public void setDisplayName(String displayName) {
-        //not implemented yet
-    }
-
     /**
      * UstadBaseActivity overrides the onBackPressed and will ask all visible fragments if they want
      * to override the back button press.  This could be used to handle a back button press

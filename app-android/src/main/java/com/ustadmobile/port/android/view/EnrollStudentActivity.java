@@ -2,24 +2,17 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ClassManagementController;
-import com.ustadmobile.core.controller.EnrollStudentController;
+import com.ustadmobile.port.sharedse.controller.EnrollStudentController;
 import com.ustadmobile.core.controller.LoginController;
-import com.ustadmobile.core.impl.UstadMobileConstants;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.EnrollStudentView;
+import com.ustadmobile.port.sharedse.view.EnrollStudentView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 

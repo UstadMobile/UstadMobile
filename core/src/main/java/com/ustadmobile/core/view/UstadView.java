@@ -42,21 +42,21 @@ public interface UstadView {
      * 
      * @return 
      */
-    public Object getContext();
+    Object getContext();
     
     /**
      * Sets whether this view is left to right or right to left
      * 
      * @return UstadMobileConstants.DIR_RTL or UstadMobileConstants.DIR_LTR
      */
-    public int getDirection();
+    int getDirection();
     
     /**
      * Sets the direction of this view (if supported).  Will have no effect on platforms that don't support RTL e.g. Android < 4.2
      * 
      * @param dir UstadMobileConstants.DIR_RTL or UstadMobileConstants.DIR_LTR
      */
-    public void setDirection(int dir);
+    void setDirection(int dir);
     
     /**
      * Sets commands / buttons that should be available to the user to select.
@@ -67,26 +67,11 @@ public interface UstadView {
      * @param labels
      * @param ids 
      */
-    public void setAppMenuCommands(String[] labels, int[] ids);
+    void setAppMenuCommands(String[] labels, int[] ids);
 
     /**
      * Tells the view to refresh UI Strings : e.g. when the locale has been changed.
      */
-    public void setUIStrings();
-
-    /**
-     * Set the status of the sync process to display to the user
-     *
-     * @param status
-     */
-    void setAppStatus(int status);
-
-    /**
-     * Set the user to display at present (e.g. Bob Jones)
-     *
-     * @param displayName
-     */
-    void setDisplayName(String displayName);
-
+    void setUIStrings();
 
 }

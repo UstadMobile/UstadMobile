@@ -56,8 +56,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     private XapiStatementForwardingService mNanoLrsService;
 
-    private int syncStatus = UstadMobileConstants.STATUS_SYNCED;
-
     private String displayName;
 
     private List<WeakReference<Fragment>> fragmentList;
@@ -224,12 +222,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-
-    public void setAppStatus(int status)  {
-        this.syncStatus = status;
-        supportInvalidateOptionsMenu();
     }
 
     public void setDisplayName(String displayName) {

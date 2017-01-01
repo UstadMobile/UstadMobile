@@ -47,7 +47,7 @@ import java.util.Hashtable;
  * 
  * @author mike
  */
-public abstract class UstadBaseController implements UstadController, TinCanQueueListener {
+public abstract class UstadBaseController implements UstadController {
 
     private UstadView view;
     
@@ -70,8 +70,6 @@ public abstract class UstadBaseController implements UstadController, TinCanQueu
         MessageIDConstants.about, MessageIDConstants.settings, MessageIDConstants.logout};
 
 
-    private boolean statusEventListeningEnabled = true;
-    
     /**
      * Create a new controller with the given context
      * 
@@ -80,11 +78,6 @@ public abstract class UstadBaseController implements UstadController, TinCanQueu
      */
     public UstadBaseController(Object context, boolean statusEventListeningEnabled) {
         this.context = context;
-        this.statusEventListeningEnabled = statusEventListeningEnabled;
-
-        if(statusEventListeningEnabled) {
-            UstadMobileSystemImpl.getInstance().addTinCanQueueStatusListener(this);
-        }
     }
 
     /**
@@ -151,9 +144,6 @@ public abstract class UstadBaseController implements UstadController, TinCanQueu
      */
     public void handleViewDestroy() {
         setDestroyed(true);
-        if(statusEventListeningEnabled) {
-            UstadMobileSystemImpl.getInstance().removeTinCanQueueListener(this);
-        }
     }
     
     /**
@@ -227,34 +217,6 @@ public abstract class UstadBaseController implements UstadController, TinCanQueu
         String[] labels = new String[STANDARD_APPEMNU_CMDS.length];
         fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
-    }
-
-
-    /**
-     * Check if status event listening is enabled.  If true this controller will register itself
-     * to receive status events and pass them on to the view; if false it won't
-     *
-     * @return Status events enabled : true/false
-     */
-    public boolean isStatusEventListeningEnabled() {
-        return statusEventListeningEnabled;
-    }
-
-    /**
-     * Set whether status event listening is enabled. If true this controller will register itself
-     * to receive status events and pass them on to the view; if false it won't
-     *
-     * @param statusEventListeningEnabled status events enabled: true/false
-     */
-    public void setStatusEventListeningEnabled(boolean statusEventListeningEnabled) {
-        this.statusEventListeningEnabled = statusEventListeningEnabled;
-    }
-
-    public void statusUpdated(TinCanQueueEvent event) {
-        if(view != null) {
-            view.setAppStatus(event.getQueueSize() == 0 ?
-                    UstadMobileConstants.STATUS_SYNCED : UstadMobileConstants.STATUS_SYNC_IN_PROGRESS);
-        }
     }
 
 }
