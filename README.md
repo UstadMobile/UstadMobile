@@ -17,13 +17,17 @@ app-j2me: This is an ant project: Contains J2ME Implementation
 
 To build and run tests: 
 
-1. Copy core/testsettings.gradle.example to core/testsettings.gradle
+1. Copy keystore.properties.example to keystore.properties - use 
+   this for signing credentials.  You can copy it and leave the values
+   as they are for development/testing before signing.
 
-2. Make gradle copy the default app config: 
+2. Copy core/testsettings.gradle.example to core/testsettings.gradle
+
+3. Make gradle copy the default app config: 
     cd core
     gradle initAppConfig
 
-3. See the README file in ports/<platform name>
+4. See the README file in app-<platform name>
 
  
 
