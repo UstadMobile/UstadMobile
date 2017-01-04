@@ -95,7 +95,14 @@ public interface CatalogView extends UstadView{
      * @param entryId The entry ID for the image to set background on
      * @param backgroundFileURI URI of a file downloaded (in a cache directory) to use as the background
      */
-    public void setEntryBackground(String entryId, String backgroundFileURI);
+    void setEntryBackground(String entryId, String backgroundFileURI);
+
+    /**
+     * Set the background to use for the catalog itself
+     * 
+     * @param backgroundFileURI
+     */
+    void setCatalogBackground(String backgroundFileURI);
 
     /**
      * Update the download all progress bar at the bottom

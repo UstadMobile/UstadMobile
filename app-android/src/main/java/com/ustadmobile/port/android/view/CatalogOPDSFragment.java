@@ -443,6 +443,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
+    public void setCatalogBackground(String backgroundFileURI) {
+        //TODO: implement setting catalog background on Android
+    }
+
+    @Override
     public void updateDownloadAllProgress(int loaded, int total) {
 
     }

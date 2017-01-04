@@ -531,13 +531,20 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             
         String imageURI;
         Vector bgVector;
-        
+
+        if(AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
+            bgVector = feed.getLinks(OPDS_ENTRY_BACKGROUND_LINKREL, null);
+            if(bgVector.size() > 0 && !isDestroyed() && view != null) {
+                imageURI = getItemImageAsset(cache, (String[])bgVector.elementAt(0), feed, feed);
+                view.setCatalogBackground(imageURI);
+            }
+        }
+
         for(int i = 0; i < feed.entries.length && !isDestroyed(); i++) {
             imageLinks = feed.entries[i].getThumbnailLink(false);
-            imageURI = null;
 
             if(imageLinks != null) {
-                imageURI = getEntryImageAsset(cache, imageLinks, feed.entries[i]);
+                imageURI = getItemImageAsset(cache, imageLinks, feed.entries[i], feed);
                 
                 if(isDestroyed()) {
                     return;
@@ -551,11 +558,28 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             if(AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
                 bgVector = feed.entries[i].getLinks(OPDS_ENTRY_BACKGROUND_LINKREL, null);
                 if(bgVector.size() > 0 && !isDestroyed() && view != null) {
-                    imageURI = getEntryImageAsset(cache, (String[])bgVector.elementAt(0), feed.entries[i]);
+                    imageURI = getItemImageAsset(cache, (String[])bgVector.elementAt(0), feed.entries[i], feed);
                     view.setEntryBackground(feed.entries[i].id, imageURI);
                 }
             }
         }
+    }
+
+    private String getItemImageAsset(HTTPCacheDir cache, String[] imageLinks, UstadJSOPDSItem item, UstadJSOPDSFeed feed) {
+        String imageURI = UMFileUtil.resolveLink(
+                feed.href, imageLinks[UstadJSOPDSEntry.LINK_HREF]);
+        String imageFile = null;
+        if(imageURI.startsWith("file://")) {
+            imageFile = imageURI;//this is already on disk...
+        }else {
+            try {
+                imageFile = cache.get(imageURI);
+            }catch(Exception e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 132, item.title + ": " + item.id, e);
+            }
+        }
+
+        return imageFile;
     }
 
     /**
@@ -563,7 +587,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      * @param cache
      * @param imageLinks
      */
-    private String getEntryImageAsset(HTTPCacheDir cache, String[] imageLinks, UstadJSOPDSEntry entry) {
+    private String getItemImageAsset(HTTPCacheDir cache, String[] imageLinks, UstadJSOPDSEntry entry) {
+
         String imageURI = UMFileUtil.resolveLink(
                 entry.parentFeed.href, imageLinks[UstadJSOPDSEntry.LINK_HREF]);
         String imageFile = null;
