@@ -154,6 +154,9 @@
                                     <action selector="browseButtonClicked:" destination="fAY-0c-ng0" eventType="touchUpInside" id="EQh-wh-11g"/>
                                 </connections>
                             </button>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="G0K-cS-mWi">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </imageView>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="Ei7-sl-egj">
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                                 <subviews>
@@ -224,7 +227,7 @@
                                                         <constraint firstItem="kVD-4Q-qrg" firstAttribute="centerX" secondItem="ecu-VU-9MV" secondAttribute="centerX" id="MzQ-LV-Mdk"/>
                                                         <constraint firstItem="Ixm-Fj-cPv" firstAttribute="top" secondItem="ecu-VU-9MV" secondAttribute="topMargin" id="OHq-un-S0p"/>
                                                         <constraint firstAttribute="trailingMargin" secondItem="SxK-RD-wHg" secondAttribute="trailing" constant="-7" id="QKq-0X-1wf"/>
-                                                        <constraint firstItem="thu-VF-d4u" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" id="SBx-H7-aiv"/>
+                                                        <constraint firstItem="thu-VF-d4u" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" constant="12" id="SBx-H7-aiv"/>
                                                         <constraint firstItem="kVD-4Q-qrg" firstAttribute="centerY" secondItem="ecu-VU-9MV" secondAttribute="centerY" id="Xkp-cW-3me"/>
                                                         <constraint firstAttribute="trailingMargin" secondItem="cCC-w8-eHr" secondAttribute="trailing" constant="-8" id="ZXK-JY-Zeq"/>
                                                         <constraint firstItem="cCC-w8-eHr" firstAttribute="leading" secondItem="ecu-VU-9MV" secondAttribute="leadingMargin" constant="-8" id="a8k-e3-Gyq"/>
@@ -250,6 +253,10 @@
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.0" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="oDx-We-xjS" firstAttribute="top" secondItem="G0K-cS-mWi" secondAttribute="bottom" id="CU4-aU-Umh"/>
+                            <constraint firstAttribute="trailing" secondItem="G0K-cS-mWi" secondAttribute="trailing" id="GdX-Up-bG8"/>
+                            <constraint firstItem="G0K-cS-mWi" firstAttribute="top" secondItem="lWv-Ks-TGM" secondAttribute="bottom" id="SeJ-c0-8PH"/>
+                            <constraint firstItem="G0K-cS-mWi" firstAttribute="leading" secondItem="top-Wy-2Bv" secondAttribute="leading" id="UQW-S0-Nlf"/>
                             <constraint firstAttribute="trailing" secondItem="Ei7-sl-egj" secondAttribute="trailing" id="Z1o-lV-pUi"/>
                             <constraint firstItem="Ei7-sl-egj" firstAttribute="top" secondItem="lWv-Ks-TGM" secondAttribute="bottom" id="kKn-v0-pBp"/>
                             <constraint firstItem="Ei7-sl-egj" firstAttribute="leading" secondItem="top-Wy-2Bv" secondAttribute="leading" id="pvp-PY-nF2"/>
@@ -257,6 +264,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="backgroundImageVIew" destination="G0K-cS-mWi" id="wOU-i8-TgS"/>
                         <outlet property="browseButton" destination="PUe-Qi-Bpf" id="uFS-75-bPY"/>
                         <outlet property="catalogTableView" destination="qoR-6r-zbi" id="UGW-Zd-8zz"/>
                     </connections>

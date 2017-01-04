@@ -37,6 +37,7 @@
 @property UILongPressGestureRecognizer *longPressGestureRecognizer;
 @property UIRefreshControl *refreshControl;
 @property UIAlertController *actionSheetAlertController;
+@property (retain, nonatomic) IBOutlet UIImageView *backgroundImageVIew;
 
 @property ComUstadmobileCoreOpdsUstadJSOPDSEntry *entrySelectedByLongPress;
 
@@ -228,6 +229,13 @@
                           withNSString:(NSString *)backgroundFileURI {
     [self.idToBackgroundTable setObject:backgroundFileURI forKey:entryId];
     [self updateEntryBackground:entryId];
+}
+
+- (void)setCatalogBackgroundWithNSString:(NSString *)backgroundFileURI {
+    if(backgroundFileURI != nil) {
+        NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:backgroundFileURI];
+        [self.backgroundImageVIew setImage:[UIImage imageWithContentsOfFile:filePath]];
+    }
 }
 
 
