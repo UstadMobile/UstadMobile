@@ -233,8 +233,10 @@
 
 - (void)setCatalogBackgroundWithNSString:(NSString *)backgroundFileURI {
     if(backgroundFileURI != nil) {
-        NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:backgroundFileURI];
-        [self.backgroundImageVIew setImage:[UIImage imageWithContentsOfFile:filePath]];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:backgroundFileURI];
+            [self.backgroundImageVIew setImage:[UIImage imageWithContentsOfFile:filePath]];
+        });
     }
 }
 
