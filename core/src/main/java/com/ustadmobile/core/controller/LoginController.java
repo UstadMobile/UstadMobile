@@ -557,8 +557,9 @@ public class LoginController extends UstadBaseController{
                 HTTPCacheDir.makeHTTPDate(impl.getBuildTime()));
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
-        if(xAPIURL.equals(UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL))
+                    impl.isHttpsSupported() ? UstadMobileDefaults.DEFAULT_XAPI_SERVER : UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL,
+                    context);
+        if(xAPIURL.equals(UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL) && impl.isHttpsSupported())
             xAPIURL = UstadMobileDefaults.DEFAULT_XAPI_SERVER;
         view.setXAPIServerURL(xAPIURL);
     }
