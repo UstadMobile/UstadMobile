@@ -5,11 +5,18 @@ Setup:
 1. Make a symlink for $HOME/local/j2objc to point to your j2objc directory 
   (Sorry - XCode does not like using environment variables)
 
-2. Run ./xlate.sh from this dir
+2. Run the J2ObjC translation script:
 
-3. Open the XCode project UstadMobileIOS
+ $ ./xlate.sh
 
-4. Add a breakpoint in xcode to avoid stopping in SIGUSR2 sent by the internal 
+3. Initiate cocoapods libraries  
+
+ $ sudo gem install cocoapods #if you don't already have cocoapods installed
+ $ pod install
+
+4. Open the XCode workspace UstadMobileIOS.xcworkspace (NOT the xcode project as per cocoapod usage guidelines)
+
+5. Add a breakpoint in xcode to avoid stopping in SIGUSR2 sent by the internal 
  HTTP server.
  
  Go to breakpoints (click symbol on left panel), Click Debug, Breakpoints,

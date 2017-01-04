@@ -13,6 +13,8 @@
 		AD08D4641D5B4C96003CB878 /* LoginViewRegisterTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD08D4631D5B4C96003CB878 /* LoginViewRegisterTabViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD0DAAEE1D6F29AD005FAFDD /* ContainerPageContentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0DAAED1D6F29AD005FAFDD /* ContainerPageContentViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD0DAAF11D6F3191005FAFDD /* ContainerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD0E15811E1D3AB400EF5F8C /* AboutController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0E157E1E1D3AB400EF5F8C /* AboutController.m */; };
+		AD0E15821E1D3AB400EF5F8C /* AboutView.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0E15801E1D3AB400EF5F8C /* AboutView.m */; };
 		AD12B4211D631228005D6D5D /* LoginViewLoginTabViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD12B4241D631E42005D6D5D /* BasePointViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4231D631E42005D6D5D /* BasePointViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD12B4271D6325B6005D6D5D /* CatalogViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD12B4261D6325B6005D6D5D /* CatalogViewController.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -232,6 +234,10 @@
 		AD0DAAEF1D6F3191005FAFDD /* ContainerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ContainerViewController.h; sourceTree = "<group>"; };
 		AD0DAAF01D6F3191005FAFDD /* ContainerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ContainerViewController.m; sourceTree = "<group>"; };
 		AD0DAAF21D70B252005FAFDD /* UstadViewControllerWithArgs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadViewControllerWithArgs.h; sourceTree = "<group>"; };
+		AD0E157D1E1D3AB400EF5F8C /* AboutController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutController.h; sourceTree = "<group>"; };
+		AD0E157E1E1D3AB400EF5F8C /* AboutController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutController.m; sourceTree = "<group>"; };
+		AD0E157F1E1D3AB400EF5F8C /* AboutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutView.h; sourceTree = "<group>"; };
+		AD0E15801E1D3AB400EF5F8C /* AboutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutView.m; sourceTree = "<group>"; };
 		AD12B41F1D631228005D6D5D /* LoginViewLoginTabViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewLoginTabViewController.h; sourceTree = "<group>"; };
 		AD12B4201D631228005D6D5D /* LoginViewLoginTabViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewLoginTabViewController.m; sourceTree = "<group>"; };
 		AD12B4221D631E42005D6D5D /* BasePointViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasePointViewController.h; sourceTree = "<group>"; };
@@ -669,6 +675,10 @@
 		AD61807D1DE9EBA9002540B7 /* Generated */ = {
 			isa = PBXGroup;
 			children = (
+				AD0E157D1E1D3AB400EF5F8C /* AboutController.h */,
+				AD0E157E1E1D3AB400EF5F8C /* AboutController.m */,
+				AD0E157F1E1D3AB400EF5F8C /* AboutView.h */,
+				AD0E15801E1D3AB400EF5F8C /* AboutView.m */,
 				AD61807E1DE9EBA9002540B7 /* Activity.h */,
 				AD61807F1DE9EBA9002540B7 /* Activity.m */,
 				AD6180801DE9EBA9002540B7 /* AlignmentPattern.h */,
@@ -1446,6 +1456,7 @@
 				AD61821C1DE9EBAA002540B7 /* QRCodeImageReader.m in Sources */,
 				AD6182521DE9EBAA002540B7 /* XapiAgentEndpoint.m in Sources */,
 				AD6181DC1DE9EBAA002540B7 /* BCH_15_5.m in Sources */,
+				AD0E15811E1D3AB400EF5F8C /* AboutController.m in Sources */,
 				AD61820D1DE9EBAA002540B7 /* OMRImageSource.m in Sources */,
 				AD6181CE1DE9EBAA002540B7 /* AttendanceClassStudent.m in Sources */,
 				AD6181F61DE9EBAA002540B7 /* EPUBNavDocument.m in Sources */,
@@ -1458,6 +1469,7 @@
 				AD61822B1DE9EBAA002540B7 /* TinCanQueueListener.m in Sources */,
 				AD6182451DE9EBAA002540B7 /* UstadJSOPFItem.m in Sources */,
 				AD6181FB1DE9EBAA002540B7 /* HTTPCacheDir.m in Sources */,
+				AD0E15821E1D3AB400EF5F8C /* AboutView.m in Sources */,
 				AD6182211DE9EBAA002540B7 /* Registration.m in Sources */,
 				AD6181E91DE9EBAA002540B7 /* ContainerController.m in Sources */,
 				AD6181D31DE9EBAA002540B7 /* AttendanceRowModel.m in Sources */,

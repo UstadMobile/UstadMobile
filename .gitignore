@@ -173,7 +173,7 @@ xcuserdata/
 # you should judge for yourself, the pros and cons are mentioned at:
 # https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
 #
-ports/ios/UstadMobileIOS/Pods/
+app-ios/UstadMobileIOS/Pods/
 
 # Carthage
 #
@@ -205,7 +205,7 @@ iOSInjectionProject/
 .DS_Store
 
 # Shared resources added to the XCodeProject
-ports/ios/UstadMobileIOS/res
+app-ios/UstadMobileIOS/res
 
 ## Build specific AppConfig
 core/src/main/java/com/ustadmobile/core/impl/AppConfig.java

@@ -1,7 +1,7 @@
 #/bin/bash
 
 J2OBJC_DIR=~/local/j2objc
-JAVA_SRC_DIR=../../core/src/main/java
+JAVA_SRC_DIR=../core/src/main/java
 IMPL_SHAREDSE_DIR=../sharedse/src/main/java
 QR_SRC_DIR=lib/checkout/qrcode/src
 NANO_HTTPD_SRC_DIR=lib/checkout/nanohttpd/core/src/main/java
@@ -65,6 +65,6 @@ else
 	mkdir UstadMobileIOS/res
 fi
 
-cp -rv ../../core/src/main/assets/* UstadMobileIOS/res
+cp -rv ../core/src/main/assets/* UstadMobileIOS/res
 
 
