@@ -377,6 +377,12 @@ public class CatalogOPDSContainer extends UstadViewContainerJ2ME implements Cata
     public void setEntryBackground(String entryId, String backgroundFileURI) {
         //Not implemented on J2ME
     }
+
+    public void setCatalogBackground(String backgroundFileURI) {
+        //Not implemented on J2ME
+    }
+    
+    
     
     
     
