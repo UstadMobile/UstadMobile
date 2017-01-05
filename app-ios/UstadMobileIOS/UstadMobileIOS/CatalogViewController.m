@@ -240,14 +240,18 @@
     }
 }
 
-
+//TODO: This must be set to nil if that is what it's supposed to be
 -(void)updateEntryThumbnail:(NSString *)entryId {
     CatalogViewControllerEntryTableViewCell *cell = [self.idToCellMapTable objectForKey:entryId];
     NSString *iconFileURI = [self.idToThumbnailTable objectForKey:entryId];
-    if(cell != nil && iconFileURI != nil) {
+    if(cell != nil) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:iconFileURI];
-            [cell.thumbnailImageView setImage:[UIImage imageWithContentsOfFile:filePath]];
+            UIImage *img = nil;
+            if(iconFileURI != nil) {
+                NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:iconFileURI];
+                img = [UIImage imageWithContentsOfFile:filePath];
+            }
+            [cell.thumbnailImageView setImage:img];
         });
     }
 }
@@ -260,7 +264,6 @@
             NSString *filePath = [[ComUstadmobileCoreImplUstadMobileSystemImpl getInstance] resolveFileUriToPathWithNSString:bgURI];
             [cell.backgroundImageView setImage:[UIImage imageWithContentsOfFile:filePath]];
             [cell.titleLabel setTextColor:[UIColor whiteColor]];
-            [cell.rightProgressIcon setHidden:YES];
         });
     }
 }
@@ -403,6 +406,8 @@
     }
     
     [self.idToCellMapTable setObject:cell forKey:item->id__];
+    BOOL isEPUB = ![[item getLinksWithNSString:nil withNSString:ComUstadmobileCoreOpdsUstadJSOPDSItem_TYPE_EPUBCONTAINER] isEmpty];
+    [cell.rightProgressIcon setHidden:!isEPUB];
     
     if(self.catalogTextColor != nil) {
         [cell.titleLabel setTextColor:self.catalogTextColor];
@@ -416,16 +421,18 @@
     
     [cell.progressView setHidden:YES];
     
-    
-    if( [[item getLinks]size] == 0) {
+    jint numLinks = [[item getLinks]size];
+    if( numLinks == 0 || (numLinks == 1 && [[item getLinksWithNSString:ComUstadmobileCoreControllerCatalogController_OPDS_ENTRY_BACKGROUND_LINKREL withNSString:nil]size] == 1)) {
         cell.dividerTitleLabel.text = item->title_;
         [cell useAsDivider:YES];
     }else {
         [cell useAsDivider:NO];
     }
     
-    if(indexPath.row >= 2) {
+    if(indexPath.row >= 3) {
         [cell.rightProgressIcon setImage:[UIImage imageNamed:@"phases-progress-icon-empty"]];
+    }else {
+        [cell.rightProgressIcon setImage:[UIImage imageNamed:@"phases-progress-icon"]];
     }
     
     return cell;

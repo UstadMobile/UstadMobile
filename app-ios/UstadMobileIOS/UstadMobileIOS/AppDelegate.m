@@ -10,6 +10,7 @@
 #import "UstadMobileSystemImpl.h"
 #import "UstadMobileSystemImplIOS.h"
 #import "UstadMobileSystemImplFactoryIOS.h"
+#import "UMLog.h"
 #include "signal.h"
 
 @interface AppDelegate ()
@@ -26,6 +27,7 @@
     [ComUstadmobileCoreImplUstadMobileSystemImpl setSystemImplFactoryWithComUstadmobileCoreImplUstadMobileSystemImplFactory:iosFactory];
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];
     [impl init__WithId:self];
+    [[impl getLogger]lWithInt:ComUstadmobileCoreImplUMLog_INFO withInt:370 withNSString:[NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0]];
     return YES;
 }
 
