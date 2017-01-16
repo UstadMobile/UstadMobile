@@ -46,9 +46,9 @@ import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
-import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementManager;
-import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementProxy;
-import com.ustadmobile.nanolrs.core.model.XapiStatementProxy;
+import com.ustadmobile.nanolrs.core.manager.XapiForwardingStatementManager;
+import com.ustadmobile.nanolrs.core.model.XapiForwardingStatement;
+import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
 import java.io.IOException;
@@ -262,7 +262,7 @@ public class AttendanceController extends UstadBaseController {
 
         long timeMidnight = cal.getTimeInMillis();
 
-        List<? extends XapiStatementProxy> statementList = XapiStatementsEndpoint.getStatements(context, null, null, null,
+        List<? extends XapiStatement> statementList = XapiStatementsEndpoint.getStatements(context, null, null, null,
                 XAPI_VERB_TEACHER_HOSTED, UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId,
                 null, false, false, timeMidnight, -1, 0);
 
@@ -273,7 +273,7 @@ public class AttendanceController extends UstadBaseController {
         boolean statementsPending = false;
         XapiForwardingStatementManager manager = PersistenceManager.getInstance().getForwardingStatementManager();
         for(int i = 0; i < statementList.size(); i++) {
-            if(manager.findStatusByXapiStatement(context, statementList.get(i)) != XapiForwardingStatementProxy.STATUS_SENT)
+            if(manager.findStatusByXapiStatement(context, statementList.get(i)) != XapiForwardingStatement.STATUS_SENT)
                 return STATUS_ATTENDANCE_TAKEN;
         }
 

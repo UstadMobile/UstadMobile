@@ -14,7 +14,7 @@ import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEvent;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
-import com.ustadmobile.nanolrs.core.model.XapiStatementProxy;
+import com.ustadmobile.nanolrs.core.model.XapiStatement;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -52,12 +52,12 @@ public class AttendanceListController extends EntityListController implements Xa
 
     public void loadAttendanceList() {
         String attendanceActivityId = UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId;
-        List<? extends XapiStatementProxy> classHostedStmts = XapiStatementsEndpoint.getStatements(context,
+        List<? extends XapiStatement> classHostedStmts = XapiStatementsEndpoint.getStatements(context,
                 null, null, null, AttendanceController.XAPI_VERB_TEACHER_HOSTED,
                 attendanceActivityId, null, false, false, -1, -1, MAX_ATTENDANCE_ITEMS);
 
         getList().clear();
-        Iterator<? extends XapiStatementProxy> iterator = classHostedStmts.iterator();
+        Iterator<? extends XapiStatement> iterator = classHostedStmts.iterator();
         while(iterator.hasNext()) {
             AttendanceListEntry entry = new AttendanceListEntry(classId, iterator.next(), context);
             entry.loadDetail();
