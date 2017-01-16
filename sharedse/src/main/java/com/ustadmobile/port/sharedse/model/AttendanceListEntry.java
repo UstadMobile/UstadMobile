@@ -6,9 +6,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.ListableEntity;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
-import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementManager;
-import com.ustadmobile.nanolrs.core.model.XapiForwardingStatementProxy;
-import com.ustadmobile.nanolrs.core.model.XapiStatementProxy;
+import com.ustadmobile.nanolrs.core.manager.XapiForwardingStatementManager;
+import com.ustadmobile.nanolrs.core.model.XapiForwardingStatement;
+import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
 import java.util.Calendar;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class AttendanceListEntry implements ListableEntity {
 
-    private XapiStatementProxy hostedStatement;
+    private XapiStatement hostedStatement;
 
     private int syncStatus = 0;
 
@@ -32,7 +32,7 @@ public class AttendanceListEntry implements ListableEntity {
     //Integer of students in each attendance category e.g. use studentsByAttendanceStatus[ATTENDANCE_PRESENT] etc.
     private int[] studentsByAttendanceStatus = new int[]{0, 0, 0, 0};
 
-    public AttendanceListEntry(String classId, XapiStatementProxy hostedStatement, Object context) {
+    public AttendanceListEntry(String classId, XapiStatement hostedStatement, Object context) {
         this.classId = classId;
         this.hostedStatement = hostedStatement;
         this.context = context;
@@ -40,7 +40,7 @@ public class AttendanceListEntry implements ListableEntity {
 
     public void loadDetail() {
         XapiForwardingStatementManager forwardingMgr = PersistenceManager.getInstance().getForwardingStatementManager();
-        if(forwardingMgr.findStatusByXapiStatement(context, hostedStatement) == XapiForwardingStatementProxy.STATUS_SENT) {
+        if(forwardingMgr.findStatusByXapiStatement(context, hostedStatement) == XapiForwardingStatement.STATUS_SENT) {
             syncStatus = ListableEntity.STATUSICON_SENT;
         }else {
             syncStatus = ListableEntity.STATUSICON_SENDING;
@@ -50,12 +50,12 @@ public class AttendanceListEntry implements ListableEntity {
             return;//old version that did not process the registration - nothing we can do here.
         }
 
-        List<? extends XapiStatementProxy> allStmtList = XapiStatementsEndpoint.getStatements(context,
+        List<? extends XapiStatement> allStmtList = XapiStatementsEndpoint.getStatements(context,
                 null, null, null, null, null, hostedStatement.getContextRegistration(), false,
                 false, -1, -1, 0);
-        Iterator<? extends XapiStatementProxy> iterator = allStmtList.iterator();
+        Iterator<? extends XapiStatement> iterator = allStmtList.iterator();
 
-        XapiStatementProxy stmt;
+        XapiStatement stmt;
         String verbId;
         while (iterator.hasNext()) {
             stmt = iterator.next();

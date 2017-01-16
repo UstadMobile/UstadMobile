@@ -13,7 +13,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEvent;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
-import com.ustadmobile.nanolrs.core.model.XapiStatementProxy;
+import com.ustadmobile.nanolrs.core.model.XapiStatement;
 
 import java.util.Hashtable;
 
@@ -95,7 +95,7 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
 
 
     protected void updateViewAttendanceStatus(XapiStatementsForwardingEvent event, int statusId) {
-        XapiStatementProxy stmt = event.getStatement();
+        XapiStatement stmt = event.getStatement();
         if(stmt.getVerb().getId().equals(AttendanceController.XAPI_VERB_TEACHER_HOSTED)) {
             String activityId = stmt.getActivity().getActivityId();
             for(int i = 0; i < attendanceClasses.length; i++) {
