@@ -59,7 +59,7 @@ public class AttendanceListEntry implements ListableEntity {
         String verbId;
         while (iterator.hasNext()) {
             stmt = iterator.next();
-            verbId = stmt.getVerb() != null ? stmt.getVerb().getId() : null;
+            verbId = stmt.getVerb() != null ? stmt.getVerb().getVerbId() : null;
 
             if(verbId == null)
                 continue;
@@ -97,7 +97,7 @@ public class AttendanceListEntry implements ListableEntity {
 
     @Override
     public String getId() {
-        return hostedStatement.getId();
+        return hostedStatement.getUuid();
     }
 
     @Override
