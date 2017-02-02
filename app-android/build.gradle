@@ -55,7 +55,7 @@ android {
 }
 
 dependencies {
-    compile files('../core/lib/qrcode.jar')
+    compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
     compile project(':core')
     compile project(':sharedse')
     compile 'com.android.support:appcompat-v7:25.1.0'
