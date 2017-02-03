@@ -29,9 +29,14 @@ NetBeans.  See README for instructions on building from source.
     </condition>
     
     <taskdef classpath="${classpath.antenna}" resource="antenna.properties"/>
+    <taskdef classpath="./lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar" name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
     
     <!-- Find WTK HOME and Bootclasspath parameters-->
     <include file="build-wtk-common.xml"/>
+
+    <!-- common variables -->
+    <!-- The constant used for preprocessing to define the J2ME platform -->
+    <property name="preproc.var.umplatform" value="2"/>
     
     <!-- properties to make it build outside netbeans -->
     <property name="src.dir" value="./src/"/>
@@ -49,14 +54,14 @@ NetBeans.  See README for instructions on building from source.
     <property name="wtk.midp.version" value="2.0"/>
     
     <!-- do per version pre-processing -->
-    <target name="preprocess" depends="clean">
+    <target name="preprocess" depends="clean,copycore-all">
         
         <!-- end of properties to make it build outside of netbeans -->
         
         <!-- Include if building tests -->
         <path id="ustadlibclasspath_test.ref">
             <fileset dir="${lib.dir}" >
-	 	        <include name="j2meunit.jar" />         
+        	<include name="j2meunit.jar" />         
             </fileset>
         </path>
         
@@ -84,6 +89,65 @@ NetBeans.  See README for instructions on building from source.
 
 
     </target>
+    <!--
+    We copy the source code in and gitignore it because J2ME code
+    needs to be preverified and compiled to be JDK1.3 compliant.
+    -->
+    <target name="copycore-all" depends="copycore-tests,copycore-main"/>
+
+    <!-- Copy and preprocess JUnit tests -->
+    <target name="copycore-tests">
+        <echo message="Preproc tests in from ../core/src/test/java/src/test/java"/>
+        <delete dir="preproctmp"/>
+
+        <delete>
+            <fileset dir="src/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
+        </delete>
+        
+        <preprocess indir="../core/src/test/java" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${preproc.var.umplatform}"/>
+        </preprocess>
+
+        <copy todir="./src">
+            <fileset dir="preproctmp" excludes="**/UMContextGetter.java"/>
+        </copy>
+    </target>
+
+    <!--
+    Copy and preprocess the main core library
+    -->
+    <target name="copycore-main">
+	<!-- Using failonerror=false not cooperating with nested fileset -->
+	<mkdir dir="src/com/ustadmobile/core"/>
+        <delete>
+            <fileset dir="src/com/ustadmobile/core"/>
+        </delete>
+
+        <delete failonerror="false">
+            <fileset dir="src/res/locale"/>
+        </delete>
+        <mkdir dir="src/res/locale"/>
+
+	<mkdir dir="src/com/ustadmobile/core"/>
+        <delete dir="preproctmp"/>
+        <preprocess indir="../core/src/main/java/com/ustadmobile/core" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <!-- Platform 2 = J2ME -->
+            <var name="umplatform" value="${preproc.var.umplatform}"/>
+        </preprocess>
+        
+        
+        <copy todir="./src/com/ustadmobile/core">
+            <fileset dir="preproctmp"/>
+        </copy>
+        <delete dir="preproctmp"/>
+
+        <copy todir="./src/res/locale">
+            <fileset dir="../core/src/main/assets/locale"/>
+        </copy>
+    </target>
+
             
     <target name="build" depends="clean,preprocess">
         <mkdir dir="${classes.dir.ANTENNA}"/>
