@@ -1,4 +1,21 @@
-apply plugin: 'java'
+/**
+ * Core module build script : see buildconfig.core.default.gradle for configuration
+ */
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+    }
+}
+
+plugins {
+    id "java"
+}
 
 repositories {
     mavenCentral()
@@ -26,6 +43,10 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
+apply from: rootProject.file("buildconfig.core.gradle").exists() ?
+        rootProject.file("buildconfig.core.gradle") : rootProject.file("buildconfig.core.default.gradle")
+
+compileJava.dependsOn(generateCoreBuildConfig)
 /*
 test {
     systemProperty "ustadmobile.testserver", project.ext.testServer

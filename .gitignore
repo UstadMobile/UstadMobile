@@ -207,3 +207,10 @@ core/src/main/java/com/ustadmobile/core/impl/AppConfig.java
 
 #keystore.properties contains signing credentials
 keystore.properties
+
+# Generated build configuration
+buildconfig/*.java
+
+#Local buildconfig gradle files
+buildconfig.core.gradle
+
