@@ -28,14 +28,12 @@ repositories {
 
 
 android {
-    if(keyStorePropertiesExists) {
-        signingConfigs {
-            release {
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-                storeFile file(keystoreProperties['storeFile'])
-                storePassword keystoreProperties['storePassword']
-            }
+    signingConfigs {
+        release {
+            keyAlias keyStorePropertiesExists ? keystoreProperties['keyAlias'] : "default"
+            keyPassword keyStorePropertiesExists ? keystoreProperties['keyPassword'] : "default"
+            storeFile keyStorePropertiesExists ? file(keystoreProperties['storeFile']) : new File("keystore.ks")
+            storePassword keyStorePropertiesExists ? keystoreProperties['storePassword'] : "default"
         }
     }
 
