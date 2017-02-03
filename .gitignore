@@ -213,4 +213,4 @@ buildconfig/*.java
 
 #Local buildconfig gradle files
 buildconfig.core.gradle
-
+buildconfig.core.properties

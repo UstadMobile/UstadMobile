@@ -24,17 +24,6 @@ repositories {
     }
 }
 
-task initAppConfig(type: Copy) {
-    def buildConfigFile = new File("src/main/java/com/ustadmobile/core/impl/AppConfig.java")
-    if(!buildConfigFile.exists()) {
-        from "AppConfig.java.default"
-        into "src/main/java/com/ustadmobile/core/impl/"
-        rename { String fileName ->
-            fileName.replace("AppConfig.java.default", "AppConfig.java")
-        }
-    }
-}
-
 dependencies {
     compile "org.json:json:20160212";
     compile "net.sf.kxml:kxml2:2.3.0";
@@ -42,6 +31,11 @@ dependencies {
     compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.37'
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
+
+ext.buildConfigProperties = new Properties()
+def propertiesInFile = rootProject.file("buildconfig.core.properties").exists() ?
+        rootProject.file("buildconfig.core.properties") : ("buildconfig.core.default.properties")
+buildConfigProperties.load(new FileInputStream(propertiesInFile))
 
 apply from: rootProject.file("buildconfig.core.gradle").exists() ?
         rootProject.file("buildconfig.core.gradle") : rootProject.file("buildconfig.core.default.gradle")
