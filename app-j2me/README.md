@@ -1,6 +1,6 @@
 #J2ME Version
 
-The J2ME version should work on most CLDC-1.0 MIDP 2.0 models such as Nokia series 40 etc.
+The J2ME version should work on most CLDC-1.1 MIDP 2.0 models such as Nokia series 40 etc.
 It uses the LWUIT user interface toolkit to implement the view layer.
 
 ## Prerequesites
@@ -36,7 +36,7 @@ $ ant -f antenna-build.xml sign
 * Install the Netbeans Java Me plugins (under Tools - Plugins - Search for J2ME)
 * Click File - New Project - Java ME - Mobile Project with Existing MIDP Sources
 * Select app-j2me/src as the Sources location.
-* Select the Emulator of your choice and CLDC-1.1 / MIDP-2.0 Profile
+* Select the emulator of your choice and CLDC-1.1 / MIDP-2.0 Profile
 * Right click on the project properties, select Libraries and Resources, add these jars from app-j2me/lib:
  * j2meunit.jar
  * LWUIT-MIDP.jar
