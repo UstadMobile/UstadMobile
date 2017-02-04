@@ -221,6 +221,7 @@ buildconfig/*.java
 buildconfig/TestConstants.java
 app-j2me/src/com/ustadmobile/test/core/buildconfig/TestConstants.java
 core/src/test/java/com/ustadmobile/test/core/buildconfig/TestConstants.java
+core/src/main/java/com/ustadmobile/core/buildconfig/CoreBuildConfig.java
 
 #Local buildconfig gradle files
 buildconfig.core.gradle

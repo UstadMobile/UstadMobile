@@ -24,8 +24,9 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     packageName = "com.ustadmobile.core.buildconfig"
     appName = project.ext.buildConfigProperties['appName']
     clsName = "CoreBuildConfig"
-    buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", 'true'
-    buildConfigField "String", "BASEPOINT_CATALOG_URL", "com.ustadmobile.core.controller.CatalogController.OPDS_PROTO_DEVICE"
-    buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", "com.ustadmobile.core.controller.CatalogController.OPDS_PROTO_USER_FEEDLIST"
-    buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", 'true'
+    buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
+    buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
+    buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]
+    buildConfigField "boolean", "BASEPOINT_BROWSEBUTTON_ENABLED", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"].equals("") ? "false" : "true"
+    buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]
 }
