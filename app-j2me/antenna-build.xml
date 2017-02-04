@@ -104,8 +104,16 @@ NetBeans.  See README for instructions on building from source.
     -->
     <target name="copycore-all" depends="copycore-tests,copycore-main"/>
 
+    <!-- Call the project gradle to generate build config files with static constants -->
+    <target name="generate-core-buildconfig">
+        <exec executable="./gradlew" dir="../">
+            <arg value=":core:generateCoreBuildConfig"/>
+            <arg value=":core:generateCoreTestConstantsBuildConfig"/>
+        </exec>
+    </target>
+
     <!-- Copy and preprocess JUnit tests -->
-    <target name="copycore-tests">
+    <target name="copycore-tests" depends="generate-core-buildconfig">
         <echo message="Preproc tests in from ../core/src/test/java/src/test/java"/>
         <taskdef classpath="./lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar" name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
 
@@ -128,7 +136,7 @@ NetBeans.  See README for instructions on building from source.
     <!--
     Copy and preprocess the main core library
     -->
-    <target name="copycore-main">
+    <target name="copycore-main" depends="generate-core-buildconfig">
 	<!-- Using failonerror=false not cooperating with nested fileset -->
         <taskdef classpath="./lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar" name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
 

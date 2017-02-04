@@ -66,4 +66,4 @@ task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfi
     buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", buildConfigProperties["test.remote_network_timeout"]
     buildConfigField "String", "REGISTER_URL", buildConfigProperties["test.register_url"]
 }
-
+compileTestJava.dependsOn(generateCoreTestConstantsBuildConfig)
