@@ -12,6 +12,8 @@
 #import "UstadMobileSystemImplFactoryIOS.h"
 #import "UMLog.h"
 #include "signal.h"
+#include "PersonSrkObj.h"
+#include "DepartmentSrkObj.h"
 
 @interface AppDelegate ()
 
@@ -23,6 +25,9 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     signal(SIGPIPE, SIG_IGN);
+    [SharkORM setDelegate:self];
+    [SharkORM openDatabaseNamed:@"ustadmobile1.db"];
+    
     UstadMobileSystemImplFactoryIOS *iosFactory = [[UstadMobileSystemImplFactoryIOS alloc]init];
     [ComUstadmobileCoreImplUstadMobileSystemImpl setSystemImplFactoryWithComUstadmobileCoreImplUstadMobileSystemImplFactory:iosFactory];
     ComUstadmobileCoreImplUstadMobileSystemImpl *impl = [ComUstadmobileCoreImplUstadMobileSystemImpl getInstance];

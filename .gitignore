@@ -107,6 +107,7 @@ testres/unittest-result
 
 # iOS Generated Sources
 app-ios/UstadMobileIOS/Generated
+app-ios/UstadMobileIOS/Generated-Test
 app-ios/lib
 
 # Created by https://www.gitignore.io/api/xcode,objective-c
