@@ -1,9 +1,11 @@
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
-
-def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
 def keystoreProperties = new Properties()
-keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+if(keyStorePropertiesExists) {
+    keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
+}
 
 apply plugin: 'com.android.application'
 
@@ -28,12 +30,17 @@ repositories {
 android {
     signingConfigs {
         release {
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
+            keyAlias keyStorePropertiesExists ? keystoreProperties['keyAlias'] : "default"
+            keyPassword keyStorePropertiesExists ? keystoreProperties['keyPassword'] : "default"
+            storeFile keyStorePropertiesExists ? file(keystoreProperties['storeFile']) : new File("keystore.ks")
+            storePassword keyStorePropertiesExists ? keystoreProperties['storePassword'] : "default"
         }
     }
+
+    lintOptions {
+        abortOnError false
+    }
+
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -55,7 +62,7 @@ android {
 }
 
 dependencies {
-    compile files('../core/lib/qrcode.jar')
+    compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
     compile project(':core')
     compile project(':sharedse')
     compile 'com.android.support:appcompat-v7:25.1.0'
@@ -63,8 +70,8 @@ dependencies {
     compile 'com.android.support:design:25.1.0'
     compile 'com.android.support:support-v4:25.1.0'
     compile 'com.joanzapata.pdfview:android-pdfview:1.0.4@aar'
-    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.35'
-    compile 'com.ustadmobile.nanolrs:nanolrs-android:0.1.35'
+    compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.37'
+    compile 'com.ustadmobile.nanolrs:nanolrs-android:0.1.37'
     compile 'com.github.clans:fab:1.6.4'
     androidTestCompile 'junit:junit:4.12'
     /*

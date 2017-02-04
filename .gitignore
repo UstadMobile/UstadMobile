@@ -11,6 +11,8 @@
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/libraries
+.idea/markdown-navigator
+.idea/markdown-navigator.xml
 
 # Java class files
 *.class
@@ -213,3 +215,13 @@ core/src/main/java/com/ustadmobile/core/impl/AppConfig.java
 
 #keystore.properties contains signing credentials
 keystore.properties
+
+# Generated build configuration
+buildconfig/*.java
+buildconfig/TestConstants.java
+app-j2me/src/com/ustadmobile/test/core/buildconfig/TestConstants.java
+core/src/test/java/com/ustadmobile/test/core/buildconfig/TestConstants.java
+
+#Local buildconfig gradle files
+buildconfig.core.gradle
+buildconfig.core.local.properties

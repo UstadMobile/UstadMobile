@@ -103,9 +103,9 @@ public class AttendanceListController extends EntityListController implements Xa
     @Override
     public void queueStatementSent(XapiStatementsForwardingEvent event) {
         for(int i = 0; i < entityList.size(); i++) {
-            if(entityList.get(i).getId().equals(event.getStatement().getId()) && getView() != null) {
+            if(entityList.get(i).getId().equals(event.getStatement().getUuid()) && getView() != null) {
                 ((AttendanceListEntry)entityList.get(i)).setSyncStatus(ListableEntity.STATUSICON_SENT);
-                ((AttendanceListView)getView()).updateStatus(event.getStatement().getId(),
+                ((AttendanceListView)getView()).updateStatus(event.getStatement().getUuid(),
                     AttendanceController.STATUS_ATTENDANCE_SENT,
                     UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.sent));
             }

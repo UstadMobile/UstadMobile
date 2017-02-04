@@ -37,6 +37,11 @@ public class TestUtils {
     public static final String PROP_TESTUSER = "ustadmobile.testuser";
     
     public static final String PROP_TESTAUTH = "ustadmobile.testauth";
+
+    public static final int DEFAULT_NETWORK_TIMEOUT = 20000;
+
+    public static final int DEFAULT_NETWORK_INTERVAL = 1000;
+
     
     public TestUtils() {
         
@@ -169,8 +174,8 @@ public class TestUtils {
      */
     public static void waitForValueInTable(String valKey, Hashtable table) {
         int t = 0;
-        for(t = TestConstants.DEFAULT_NETWORK_TIMEOUT; t > 0 && table.get(valKey) == null; t -= TestConstants.DEFAULT_NETWORK_INTERVAL) {
-            try { Thread.sleep(TestConstants.DEFAULT_NETWORK_INTERVAL); }
+        for(t = DEFAULT_NETWORK_TIMEOUT; t > 0 && table.get(valKey) == null; t -= DEFAULT_NETWORK_INTERVAL) {
+            try { Thread.sleep(DEFAULT_NETWORK_INTERVAL); }
             catch(InterruptedException e) {}
         }
     }

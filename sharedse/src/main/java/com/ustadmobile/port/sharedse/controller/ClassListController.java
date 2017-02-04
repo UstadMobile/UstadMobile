@@ -96,7 +96,7 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
 
     protected void updateViewAttendanceStatus(XapiStatementsForwardingEvent event, int statusId) {
         XapiStatement stmt = event.getStatement();
-        if(stmt.getVerb().getId().equals(AttendanceController.XAPI_VERB_TEACHER_HOSTED)) {
+        if(stmt.getVerb().getVerbId().equals(AttendanceController.XAPI_VERB_TEACHER_HOSTED)) {
             String activityId = stmt.getActivity().getActivityId();
             for(int i = 0; i < attendanceClasses.length; i++) {
                 if(activityId.equals(UstadMobileConstants.PREFIX_ATTENDANCE_URL + attendanceClasses[i].id)) {

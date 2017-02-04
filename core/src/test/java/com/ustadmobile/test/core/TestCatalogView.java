@@ -41,12 +41,8 @@ $endif$ */
  $else$ */
     import junit.framework.TestCase;
 /* $endif$ */
-import com.ustadmobile.core.util.TestConstants;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.core.util.TestUtils;
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.CatalogView;
-import java.util.Hashtable;
 
 
 /**

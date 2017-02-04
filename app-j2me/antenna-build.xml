@@ -12,51 +12,65 @@ NetBeans.  See README for instructions on building from source.
     <property environment="env"/>
     
     <condition property="build.properties.filename" 
-        value="ustadmobilemicro-build.properties" 
-        else="ustadmobilemicro-build.default.properties">
+        value="buildconfig.j2me.local.properties" 
+        else="buildconfig.j2me.default.properties">
             
         <resourceexists>
             <file file="build-release.properties"/>
         </resourceexists>
     </condition>
 
-    <property file="ustadmobilemicro-build.properties" environment="env"/> 
-        
-    <condition property="classpath.antenna" 
-               value="${classpath}"
-               else="${antenna.home}">
-        <available resource="antenna.properties"/>
+    <property file="${build.properties.filename}" environment="env"/> 
+    
+    <condition property="buildconfig.properties.filename"
+        value="../buildconfig.core.properties"
+        else="../buildconfig.core.default.properties">
+
+        <resourceexists>
+            <file file="../buildconfig.core.properties"/>
+        </resourceexists>
     </condition>
+
+    <property file="${buildconfig.properties.filename}" prefix="buildconfig."/>
     
-    <taskdef classpath="${classpath.antenna}" resource="antenna.properties"/>
-    
+
     <!-- Find WTK HOME and Bootclasspath parameters-->
     <include file="build-wtk-common.xml"/>
-    
-    <!-- properties to make it build outside netbeans -->
-    <property name="src.dir" value="./src/"/>
-    
-    
-    <property name="MidletSuite" value="UstadMobileMicro-Test"/>
-    <property name="Midlet_1_name" value="Ustad Mobile Test"/>
-    <property name="Midlet_1_class" value="ustadmobilej2me.UstadMobileJ2METest"/>
 
-    <property name="MidletSuite2" value="UstadMobileMicro"/>
-    <property name="Midlet_2_name" value="Ustad Mobile"/>
-    <property name="Midlet_2_class" value="ustadmobilej2me.UstadMobileJ2MERun"/>    
+    <!-- common variables -->
+    <!-- The constant used for preprocessing to define the J2ME platform -->
+    <property name="preproc.var.umplatform" value="2"/>
+    
+    <!-- common directories -->
+    <property name="src.dir" value="./src/"/>
+    <property name="lib.dir" value="lib"/>
+    
+    <property name="src.preprocessed.ANTENNA" value="src-preprocessed-ANTENNA"/>
+    <property name="classes.dir.ANTENNA" value="classes-ANTENNA"/>
+    <property name="dist.dir.ANTENNA" value="dist-ANTENNA"/>
+
+    <!-- proguard is downloaded and unzipped by getlibs -->
+    <property name="wtk.proguard.home" value="${lib.dir}/proguard4.10"/>
+
+    <property name="classpath.antennaui" value="${lib.dir}/microemu-nokiaui.jar"/>
+
+    
+    <property name="midlet.class.test" value="ustadmobilej2me.UstadMobileJ2METest"/>
+    <property name="midlet.class.main" value="ustadmobilej2me.UstadMobileJ2MERun"/>    
     
     <property name="wtk.cldc.version" value="1.1"/>
     <property name="wtk.midp.version" value="2.0"/>
     
     <!-- do per version pre-processing -->
-    <target name="preprocess" depends="clean">
-        
+    <target name="preprocess" depends="clean,copycore-all">
+        <taskdef classpath="lib/antenna-bin-1.2.1-beta.jar" resource="antenna.properties"/>
+
         <!-- end of properties to make it build outside of netbeans -->
         
         <!-- Include if building tests -->
         <path id="ustadlibclasspath_test.ref">
             <fileset dir="${lib.dir}" >
-	 	        <include name="j2meunit.jar" />         
+        	<include name="j2meunit.jar" />         
             </fileset>
         </path>
         
@@ -84,6 +98,77 @@ NetBeans.  See README for instructions on building from source.
 
 
     </target>
+    <!--
+    We copy the source code in and gitignore it because J2ME code
+    needs to be preverified and compiled to be JDK1.3 compliant.
+    -->
+    <target name="copycore-all" depends="copycore-tests,copycore-main"/>
+
+    <!-- Call the project gradle to generate build config files with static constants -->
+    <target name="generate-core-buildconfig">
+        <exec executable="./gradlew" dir="../">
+            <arg value=":core:generateCoreBuildConfig"/>
+            <arg value=":core:generateCoreTestConstantsBuildConfig"/>
+        </exec>
+    </target>
+
+    <!-- Copy and preprocess JUnit tests -->
+    <target name="copycore-tests" depends="generate-core-buildconfig">
+        <echo message="Preproc tests in from ../core/src/test/java/src/test/java"/>
+        <taskdef classpath="./lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar" name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
+
+        <delete dir="preproctmp"/>
+
+        <delete>
+            <fileset dir="src/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
+        </delete>
+        
+        <preprocess indir="../core/src/test/java" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${preproc.var.umplatform}"/>
+        </preprocess>
+
+        <copy todir="./src">
+            <fileset dir="preproctmp" excludes="**/UMContextGetter.java"/>
+        </copy>
+    </target>
+
+    <!--
+    Copy and preprocess the main core library
+    -->
+    <target name="copycore-main" depends="generate-core-buildconfig">
+	<!-- Using failonerror=false not cooperating with nested fileset -->
+        <taskdef classpath="./lib/com.objfac.ant.preprocess_0.9.1/preprocessor.jar" name="preprocess" classname="com.objfac.prebop.ant.PreprocessorTask"/>
+
+	<mkdir dir="src/com/ustadmobile/core"/>
+        <delete>
+            <fileset dir="src/com/ustadmobile/core"/>
+        </delete>
+
+        <delete failonerror="false">
+            <fileset dir="src/res/locale"/>
+        </delete>
+        <mkdir dir="src/res/locale"/>
+
+	<mkdir dir="src/com/ustadmobile/core"/>
+        <delete dir="preproctmp"/>
+        <preprocess indir="../core/src/main/java/com/ustadmobile/core" outdir="preproctmp">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <!-- Platform 2 = J2ME -->
+            <var name="umplatform" value="${preproc.var.umplatform}"/>
+        </preprocess>
+        
+        
+        <copy todir="./src/com/ustadmobile/core">
+            <fileset dir="preproctmp"/>
+        </copy>
+        <delete dir="preproctmp"/>
+
+        <copy todir="./src/res/locale">
+            <fileset dir="../core/src/main/assets/locale"/>
+        </copy>
+    </target>
+
             
     <target name="build" depends="clean,preprocess">
         <mkdir dir="${classes.dir.ANTENNA}"/>
@@ -101,12 +186,12 @@ NetBeans.  See README for instructions on building from source.
         <mkdir dir="${dist.dir.ANTENNA}"/>
 
         <!-- Test Midlet Suite -->
-        <wtkjad jadfile="${dist.dir.ANTENNA}/${MidletSuite}.jad" 
-            jarfile="${dist.dir.ANTENNA}/${MidletSuite}.jar"
-            name="Ustad Mobile Tests"
-            vendor="Ustad Mobile Inc">
+        <wtkjad jadfile="${dist.dir.ANTENNA}/${buildconfig.baseName}-Test.jad" 
+            jarfile="${dist.dir.ANTENNA}/${buildconfig.baseName}-Test.jar"
+            name="${buildconfig.appName} Tests"
+            vendor="${buildconfig.vendorName}">
 
-            <midlet name="${Midlet_1_name}" class="${Midlet_1_class}"></midlet>
+            <midlet name="${buildconfig.appName} - Test" class="${midlet.class.test}"></midlet>
 
             <attribute name="MIDlet-Version" value="${ustadmobileversion}"/>
 
@@ -115,18 +200,19 @@ NetBeans.  See README for instructions on building from source.
             <attribute name="Antenna-MIDlet-Category" value="Application"/>
             <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket, javax.microedition.io.Connector.comm"/>
             <attribute name="Nokia-Update" value="http://www.ustadmobile.com/jad/midp2/UstadMobileMicro.jad"/>
-            <attribute name="MIDlet-Jar-URL" value="${MidletSuite}.jar"/>
+            <attribute name="MIDlet-Jar-URL" value="${buildconfig.baseName}-Test.jar"/>
 
             <attribute name="progressive_download" value="enabled"/>
 
         </wtkjad>
 
-        <wtkjad jadfile="${dist.dir.ANTENNA}/${MidletSuite2}.jad" 
-            jarfile="${dist.dir.ANTENNA}/${MidletSuite2}.jar"
-            name="Ustad Mobile"
-            vendor="Ustad Mobile Inc">
+        <!-- Main midlet -->
+        <wtkjad jadfile="${dist.dir.ANTENNA}/${buildconfig.baseName}.jad" 
+            jarfile="${dist.dir.ANTENNA}/${buildconfig.baseName}.jar"
+            name="${buildconfig.appName}"
+            vendor="${buildconfig.vendorName}">
 
-            <midlet icon="umicon_micro.png" name="${Midlet_2_name}" class="${Midlet_2_class}"></midlet>
+            <midlet icon="umicon_micro.png" name="${buildconfig.appName}" class="${midlet.class.main}"></midlet>
 
             <attribute name="MIDlet-Version" value="${ustadmobileversion}"/>
 
@@ -135,7 +221,7 @@ NetBeans.  See README for instructions on building from source.
             <attribute name="Antenna-MIDlet-Category" value="Application"/>
             <attribute name="MIDlet-Permissions" value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write, javax.microedition.io.Connector.http, javax.microedition.io.Connector.socket, javax.microedition.io.Connector.comm"/>
             <attribute name="Nokia-Update" value="http://www.ustadmobile.com/jad/midp2/UstadMobileMicro.jad"/>
-            <attribute name="MIDlet-Jar-URL" value="${MidletSuite2}.jar"/>
+            <attribute name="MIDlet-Jar-URL" value="${buildconfig.baseName}.jar"/>
 
             <attribute name="progressive_download" value="enabled"/>
 
@@ -158,10 +244,11 @@ NetBeans.  See README for instructions on building from source.
         
         <echo file="${classes.dir.ANTENNA}/res/buildstamp">Built ${time.stamp}</echo>
 
+        <!-- WTK Package tests -->
         <echo message="looking for proguard in: ${wtk.proguard.home}/lib/proguard.jar"/>
         <wtkpackage basedir="${classes.dir.ANTENNA}" 
-            jarfile="${dist.dir.ANTENNA}/${MidletSuite}.jar"
-            jadfile="${dist.dir.ANTENNA}/${MidletSuite}.jad"
+            jarfile="${dist.dir.ANTENNA}/${buildconfig.baseName}-Test.jar"
+            jadfile="${dist.dir.ANTENNA}/${buildconfig.baseName}-Test.jad"
             config="CLDC-1.1"
             profile="MIDP-2.0"
             obfuscate="${ustadmobile.obfuscate}"
@@ -216,9 +303,11 @@ NetBeans.  See README for instructions on building from source.
                 <fileset dir="${classes.dir.ANTENNA}"/>
 
         </wtkpackage>
+
+        <!-- WTK Package main -->
         <wtkpackage basedir="${classes.dir.ANTENNA}" 
-            jarfile="${dist.dir.ANTENNA}/${MidletSuite2}.jar"
-            jadfile="${dist.dir.ANTENNA}/${MidletSuite2}.jad"
+            jarfile="${dist.dir.ANTENNA}/${buildconfig.baseName}.jar"
+            jadfile="${dist.dir.ANTENNA}/${buildconfig.baseName}.jad"
             config="CLDC-1.1"
             profile="MIDP-2.0"
             obfuscate="${ustadmobile.obfuscate}"
@@ -243,16 +332,16 @@ NetBeans.  See README for instructions on building from source.
     <target name="sign" depends="jar">
         <wtksign 
             keystore="${wtk.keystore}"
-            jarfile="${dist.dir.ANTENNA}/${MidletSuite}.jar" 
-            jadfile="${dist.dir.ANTENNA}/${MidletSuite}.jad"
+            jarfile="${dist.dir.ANTENNA}/${buildconfig.baseName}-Test.jar" 
+            jadfile="${dist.dir.ANTENNA}/${buildconfig.baseName}-Test.jad"
             storepass="${wtk.storepass}" 
             certpass="${wtk.certpass}" 
             certalias="${wtk.certalias}"
         />
         <wtksign
             keystore="${wtk.keystore}"
-            jarfile="${dist.dir.ANTENNA}/${MidletSuite2}.jar" 
-            jadfile="${dist.dir.ANTENNA}/${MidletSuite2}.jad"
+            jarfile="${dist.dir.ANTENNA}/${buildconfig.baseName}.jar" 
+            jadfile="${dist.dir.ANTENNA}/${buildconfig.baseName}.jad"
             storepass="${wtk.storepass}" 
             certpass="${wtk.certpass}" 
             certalias="${wtk.certalias}"
@@ -260,7 +349,7 @@ NetBeans.  See README for instructions on building from source.
     </target>
 
     <target name="wtk-runme" depends="jar">
-        <wtkrun jadfile="${dist.dir.ANTENNA}/${MidletSuite}.jad" device="DefaultColorPhone" wait="true"/>
+        <wtkrun jadfile="${dist.dir.ANTENNA}/${buildconfig.baseName}.jad" device="DefaultColorPhone" wait="true"/>
     </target>
     
     <target name="getlibs">
@@ -287,6 +376,9 @@ NetBeans.  See README for instructions on building from source.
             <!-- microEmu ANTENNA from UstadMobile.com -->
             <url url="http://www.ustadmobile.com/build-dep/microemu-nokiaui.jar"/>
             
+            <!-- Antenna -->
+            <url url="http://www.ustadmobile.com/build-dep/antenna-bin-1.2.1-beta.jar"/>
+
             <!-- ProGuard 4.10 zipped binary from UstadMobile.com -->
             <url url="http://www.ustadmobile.com/build-dep/proguard4.10.zip"/>
 

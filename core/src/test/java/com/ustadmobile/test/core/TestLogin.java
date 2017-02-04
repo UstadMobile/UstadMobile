@@ -36,7 +36,7 @@ package com.ustadmobile.test.core;
     import junit.framework.TestCase;
 /* $endif$ */
 
-import com.ustadmobile.core.util.TestConstants;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.util.TestUtils;
 import java.io.IOException;

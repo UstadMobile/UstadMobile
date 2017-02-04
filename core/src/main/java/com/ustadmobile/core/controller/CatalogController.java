@@ -31,7 +31,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -532,7 +532,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         String imageURI;
         Vector bgVector;
 
-        if(AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
+        if(CoreBuildConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
             bgVector = feed.getLinks(OPDS_ENTRY_BACKGROUND_LINKREL, null);
             if(bgVector.size() > 0 && !isDestroyed() && view != null) {
                 imageURI = getItemImageAsset(cache, (String[])bgVector.elementAt(0), feed, feed);
@@ -555,7 +555,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 }
             }
 
-            if(AppConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
+            if(CoreBuildConfig.OPDS_ITEM_ENABLE_BACKGROUNDS) {
                 bgVector = feed.entries[i].getLinks(OPDS_ENTRY_BACKGROUND_LINKREL, null);
                 if(bgVector.size() > 0 && !isDestroyed() && view != null) {
                     imageURI = getItemImageAsset(cache, (String[])bgVector.elementAt(0), feed.entries[i], feed);

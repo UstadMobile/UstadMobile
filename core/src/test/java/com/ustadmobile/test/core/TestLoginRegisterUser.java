@@ -33,10 +33,10 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-import com.ustadmobile.core.util.TestConstants;
     import junit.framework.TestCase;
 /* $endif$ */
 
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.core.controller.LoginController;
 import java.io.IOException;
 import java.util.Hashtable;
