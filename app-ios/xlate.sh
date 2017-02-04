@@ -21,6 +21,11 @@ NANOLRS_CORE_TEST_FILES=$(find $NANOLRS_CORE_TEST_DIR -name "*.java")
 mkdir -p lib/checkout
 cd lib/checkout
 
+# Remove obsolete AppConfig if it's present (this was gitignored)
+if [ -e ../core/src/main/java/com/ustadmobile/core/impl/AppConfig.java ]; then
+	rm ../core/src/main/java/com/ustadmobile/core/impl/AppConfig.java
+fi
+
 #checkout the QR Code lib from Git.
 if [ -e qrcode ]; then
     cd qrcode

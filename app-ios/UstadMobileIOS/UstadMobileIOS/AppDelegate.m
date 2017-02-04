@@ -12,8 +12,6 @@
 #import "UstadMobileSystemImplFactoryIOS.h"
 #import "UMLog.h"
 #include "signal.h"
-#include "PersonSrkObj.h"
-#include "DepartmentSrkObj.h"
 
 @interface AppDelegate ()
 

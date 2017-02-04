@@ -8,7 +8,7 @@
 
 #import "LoginPageViewController.h"
 #import "UstadUIViewControllerHelper.h"
-#import "AppConfig.h"
+#import "CoreBuildConfig.h"
 
 @interface LoginPageViewController ()
 @property NSMapTable *pageTable;
@@ -37,7 +37,7 @@
 }
 
 -(void)viewWillAppear:(BOOL)animated {
-    if(!ComUstadmobileCoreImplAppConfig_LOGIN_TITLEBAR_VISIBLE) {
+    if(!ComUstadmobileCoreBuildconfigCoreBuildConfig_LOGIN_TITLEBAR_VISIBLE) {
         UINavigationController *navController = (UINavigationController *)self.parentViewController;
         [navController setNavigationBarHidden:YES];
     }
