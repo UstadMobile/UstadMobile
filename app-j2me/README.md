@@ -26,9 +26,9 @@ Jad and Jar files will be generated in dist-ANTENNA
 ### Build and sign
 If an app is not signed by a certificate issued by a recognized certificate authority most devices either won't allow it to be granted file access permissions or will insist on prompting for permission every time a file is accessed
 ```
-cp buildconfig.j2me.default.properties buildconfig.j2me.local.properties
-#Edit buildconfig.j2me.local.properties to set the signing keystore, alias, password
-ant -f antenna-build.xml sign
+$ cp buildconfig.j2me.default.properties buildconfig.j2me.local.properties
+$ #Edit buildconfig.j2me.local.properties to set the signing keystore, alias, password
+$ ant -f antenna-build.xml sign
 ```
 
 ### Develop using Netbeans
