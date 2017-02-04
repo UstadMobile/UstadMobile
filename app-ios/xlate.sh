@@ -3,10 +3,11 @@
 J2OBJC_DIR=~/local/j2objc
 JAVA_SRC_DIR=../core/src/main/java
 IMPL_SHAREDSE_DIR=../sharedse/src/main/java
-QR_SRC_DIR=lib/checkout/qrcode/src
+QR_SRC_DIR=lib/checkout/qrcode/qrcode-core/src/main/java
 NANO_HTTPD_SRC_DIR=lib/checkout/nanohttpd/core/src/main/java
 NANO_HTTPD_NANOLETS_DIR=lib/checkout/nanohttpd/nanolets/src/main/java
 NANOLRS_CORE_DIR=lib/checkout/NanoLRS/nanolrs-core/src/main/java
+NANOLRS_CORE_TEST_DIR=lib/checkout/NanoLRS/nanolrs-core/src/test/java
 
 JAVA_SRC_FILES=$(find $JAVA_SRC_DIR -iname "*.java")
 IMPL_SHAREDSE_FILES=$(find $IMPL_SHAREDSE_DIR -name "*.java") 
@@ -14,6 +15,8 @@ QR_SRC_FILES=$(find $QR_SRC_DIR -iname "*.java")
 NANO_HTTPD_FILES=$(find $NANO_HTTPD_SRC_DIR -name "*.java")
 NANO_HTTPD_NANOLETS_FILES=$(find $NANO_HTTPD_NANOLETS_DIR -name "*.java")
 NANOLRS_CORE_FILES=$(find $NANOLRS_CORE_DIR -name "*.java")
+NANOLRS_CORE_TEST_FILES=$(find $NANOLRS_CORE_TEST_DIR -name "*.java")
+
 
 mkdir -p lib/checkout
 cd lib/checkout
@@ -52,11 +55,34 @@ cd ../..
 
 pwd
 
+if [ -e UstadMobileIOS/Generated/ ]; then
+    rm UstadMobileIOS/Generated/*.h  UstadMobileIOS/Generated/*.m
+fi
+
+if [ -e UstadMobileIOS/Generated-Test ]; then
+    rm UstadMobileIOS/Generated-Test/*.h UstadMobileIOS/Generated-Test/*.m
+fi
+
+SOURCEPATH_MAIN=$JAVA_SRC_DIR:$QR_SRC_DIR:$IMPL_SHAREDSE_DIR:$NANO_HTTPD_SRC_DIR:$NANO_HTTPD_NANOLETS_DIR:$NANOLRS_CORE_DIR
+SOURCEPATH_TEST=$NANOLRS_CORE_TEST_DIR
+
 $J2OBJC_DIR/j2objc -d UstadMobileIOS/Generated/ \
-   -sourcepath $JAVA_SRC_DIR:$QR_SRC_DIR:$IMPL_SHAREDSE_DIR:$NANO_HTTPD_SRC_DIR:$NANO_HTTPD_NANOLETS_DIR \
+   -sourcepath $SOURCEPATH_MAIN \
    --no-package-directories $JAVA_SRC_FILES \
    $IMPL_SHAREDSE_FILES $QR_SRC_FILES $NANO_HTTPD_FILES \
    $NANO_HTTPD_NANOLETS_FILES $NANOLRS_CORE_FILES
+
+echo "junit jar: " $J2OBJC_DIR/lib/j2objc_junit.jar
+   
+$J2OBJC_DIR/j2objc -d UstadMobileIOS/Generated-Test \
+   -classpath $J2OBJC_DIR/lib/j2objc_junit.jar \
+   -sourcepath $SOURCEPATH_MAIN \
+   --no-package-directories $NANOLRS_CORE_TEST_FILES
+
+echo $J2OBJC_DIR/j2objc -d UstadMobileIOS/Generated-Test \
+   -classpath $J2OBJC_DIR/lib/j2objc_junit.jar \
+   -sourcepath $SOURCEPATH_MAIN \
+   --no-package-directories $NANOLRS_CORE_TEST_FILES
 
 #Copy resources (e.g. locale)
 if [ -e UstadMobileIOS/res ]; then
