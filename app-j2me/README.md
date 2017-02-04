@@ -1,62 +1,53 @@
-J2ME Version
+#J2ME Version
 
-Setup build:
-Copy the properties file: you can point to the Sun WTK installation:
-```
-$ cp ustadmobilemicro-build.default.properties ustadmobilemicro-build.properties
-```
-Run the getlibs script to download required jars:
-```
-$ ant -f antenna-build.xml -lib /path/to/antenna-dir getlibs
-```
-Run updatecore to copy the UstadMobile core library into place:
-```
-$ ./updatecore
-```
+The J2ME version should work on most CLDC-1.0 MIDP 2.0 models such as Nokia series 40 etc.
+It uses the LWUIT user interface toolkit to implement the view layer.
 
-To Build for debugging/emulator usage:
+## Prerequesites
+* Install a compatible Wireless Toolkit (WTK). You can use the [Sun WTK](www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javame-419430.html) on Linux or Windows.
+* Install the Android SDK. This is needed by the core build.
+* Install Apache ant
 
+### Download libraries (one time)
+Use the ant getlibs task to download required libraries (j2me JSON libs, testing libs, etc)
 ```
-export WTK_HOME=/path/to/WTK
-ant -f antenna-build.xml -lib /path/to/antenna-dir
+$ export WTK_HOME=/path/to/WTK ; export ANDROID_HOME=/path/to/android
+$ ant -f antenna-build.xml getlibs
 ```
 
-To Build and Sign:
-
+### Build for distribution
+This is done using an ant build with Antenna (which was automatically downloaded by the getlibs task)
 ```
-ant -f antenna-build.xml sign -lib /path/to/antenna-dir
+$ export WTK_HOME=/path/to/WTK ; export ANDROID_HOME=/path/to/android
+$ ant -f antenna-build.xml
+```
+Jad and Jar files will be generated in dist-ANTENNA
+
+### Build and sign
+If an app is not signed by a certificate issued by a recognized certificate authority most devices either won't allow it to be granted file access permissions or will insist on prompting for permission every time a file is accessed
+```
+cp buildconfig.j2me.default.properties buildconfig.j2me.local.properties
+#Edit buildconfig.j2me.local.properties to set the signing keystore, alias, password
+ant -f antenna-build.xml sign
 ```
 
-To run/debug using MicroEmu:
+### Develop using Netbeans
 
-* Create a plain Java project with the src and src-microemueun directories
-* Run UstadMobileMicroEmuRun.java with microemulator.jar and microemu's JSR-75 and JSR-135 jars in the classpath
-
-To setup Netbeans for Development
-
-This uses two projects: one for the core library and one for the j2me port.
-
-Setup Core Project:
-* Click File - New Project - Java Project with existing Sources
-* Give it a name (e.g. UstadMobileJava), click next.
-* Add the source directory (core/src/) to source package folders
-* Add the test directory (core/test) to the test package folders, Click Finish
-* Open the project properties, Libraries, Click Add Jar/Folder, and select these jars from core/lib/ :
-** kxml2-2.3.0.jar
-** json-20141113.jar
-** qrcode.jar
-
-Setup Micro Edition Project
-
-* Ensure that $ ./updatecore has been run as mentioned above
+* Install the Netbeans Java Me plugins (under Tools - Plugins - Search for J2ME)
 * Click File - New Project - Java ME - Mobile Project with Existing MIDP Sources
 * Select ports/j2me/src as the Sources location.
 * Select the Emulator of your choice and CLDC-1.1 / MIDP-2.0 Profile
 * Right click on the project properties, select Libraries and Resources, add these jars from core/lib:
-** j2meunit.jar
-** LWUIT-MIDP.jar
-** json-me.jar
-** kxml2-min-2.3.0.jar
+ * j2meunit.jar
+ * LWUIT-MIDP.jar
+ * json-me.jar
+ * kxml2-min-2.3.0.jar
+
+
+### To run/debug using MicroEmu (unsupported):
+
+* Create a plain Java project with the src and src-microemueun directories
+* Run UstadMobileMicroEmuRun.java with microemulator.jar and microemu's JSR-75 and JSR-135 jars in the classpath
 
 
 
