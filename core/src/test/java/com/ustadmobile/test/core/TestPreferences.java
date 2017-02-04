@@ -38,8 +38,7 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-import com.ustadmobile.core.util.TestConstants;
-    import junit.framework.TestCase;
+import junit.framework.TestCase;
 /* $endif$ */
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;

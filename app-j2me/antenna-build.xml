@@ -12,8 +12,8 @@ NetBeans.  See README for instructions on building from source.
     <property environment="env"/>
     
     <condition property="build.properties.filename" 
-        value="ustadmobilemicro-build.properties" 
-        else="ustadmobilemicro-build.default.properties">
+        value="buildconfig.j2me.local.properties" 
+        else="buildconfig.j2me.default.properties">
             
         <resourceexists>
             <file file="build-release.properties"/>

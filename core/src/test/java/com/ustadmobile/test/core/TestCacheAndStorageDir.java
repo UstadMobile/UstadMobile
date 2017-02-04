@@ -30,7 +30,6 @@
  */
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.util.TestConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;

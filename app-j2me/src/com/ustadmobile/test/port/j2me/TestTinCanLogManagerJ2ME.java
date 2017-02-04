@@ -42,7 +42,7 @@ import com.ustadmobile.port.j2me.app.AppPref;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
 import com.ustadmobile.port.j2me.impl.xapi.TinCanLogManagerJ2ME;
 import com.ustadmobile.port.j2me.util.J2MEIOUtils;
-import com.ustadmobile.test.core.TestConstants;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.UMContextGetter;
 import j2meunit.framework.TestCase;
 import java.io.ByteArrayOutputStream;
@@ -52,7 +52,6 @@ import java.util.Hashtable;
 import java.util.Vector;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
-import javax.microedition.m3g.Appearance;
 import org.json.me.JSONException;
 import org.json.me.JSONObject;
 

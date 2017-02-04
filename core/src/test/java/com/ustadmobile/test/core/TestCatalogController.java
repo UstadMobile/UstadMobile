@@ -31,7 +31,7 @@
 package com.ustadmobile.test.core;
 
 
-import com.ustadmobile.core.util.TestConstants;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.core.util.TestUtils;
 import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
