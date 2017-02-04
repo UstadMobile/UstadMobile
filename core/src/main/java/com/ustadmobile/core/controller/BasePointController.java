@@ -94,7 +94,7 @@ public class BasePointController extends UstadBaseController{
                 new Integer(CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE));
 
             //by default show the browse button on the first tab only
-            if(i == 0 && CoreBuildConfig.BASEPOINT_BROWSEBUTTON_URL != null) {
+            if(i == 0 && CoreBuildConfig.BASEPOINT_BROWSEBUTTON_ENABLED) {
                 args.put(iPrefix + CatalogController.KEY_BROWSE_BUTTON_URL,
                         CoreBuildConfig.BASEPOINT_BROWSEBUTTON_URL);
             }
