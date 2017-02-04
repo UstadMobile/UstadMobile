@@ -17,6 +17,16 @@ NANO_HTTPD_NANOLETS_FILES=$(find $NANO_HTTPD_NANOLETS_DIR -name "*.java")
 NANOLRS_CORE_FILES=$(find $NANOLRS_CORE_DIR -name "*.java")
 NANOLRS_CORE_TEST_FILES=$(find $NANOLRS_CORE_TEST_DIR -name "*.java")
 
+# Run the build config generation
+cd ..
+./gradlew :core:generateCoreBuildConfig
+if [ "$?" != "0" ]; then
+   RETVAL=$?
+   echo "Error running generate core build config on $(PWD): please check Android setup and retry"
+   exit $RETVAL
+fi
+cd app-ios
+
 
 mkdir -p lib/checkout
 cd lib/checkout
@@ -25,6 +35,7 @@ cd lib/checkout
 if [ -e ../core/src/main/java/com/ustadmobile/core/impl/AppConfig.java ]; then
 	rm ../core/src/main/java/com/ustadmobile/core/impl/AppConfig.java
 fi
+
 
 #checkout the QR Code lib from Git.
 if [ -e qrcode ]; then
