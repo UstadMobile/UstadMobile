@@ -23,6 +23,58 @@
 		AD12B4301D65C4A8005D6D5D /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = AD12B42F1D65C4A8005D6D5D /* libz.tbd */; };
 		AD1BE6621D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = AD1BE6611D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD1BE6651D6D968700373721 /* UstadMobileDownloadInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = AD1BE6641D6D968700373721 /* UstadMobileDownloadInfo.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F111E4F42BA006830C1 /* Base64CoderNanoLrs.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EBA1E4F42BA006830C1 /* Base64CoderNanoLrs.m */; };
+		AD401F121E4F42BA006830C1 /* HttpLrs.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EBC1E4F42BA006830C1 /* HttpLrs.m */; };
+		AD401F131E4F42BA006830C1 /* JsonUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EBE1E4F42BA006830C1 /* JsonUtil.m */; };
+		AD401F141E4F42BA006830C1 /* LrsIoUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EC01E4F42BA006830C1 /* LrsIoUtils.m */; };
+		AD401F151E4F42BA006830C1 /* NanoLrsHttpd.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EC21E4F42BA006830C1 /* NanoLrsHttpd.m */; };
+		AD401F161E4F42BA006830C1 /* NanoLrsResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EC41E4F42BA006830C1 /* NanoLrsResponder.m */; };
+		AD401F171E4F42BA006830C1 /* ParseUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EC61E4F42BA006830C1 /* ParseUtil.m */; };
+		AD401F181E4F42BA006830C1 /* PersistenceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EC81E4F42BA006830C1 /* PersistenceManager.m */; };
+		AD401F191E4F42BA006830C1 /* PersistenceManagerFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ECA1E4F42BA006830C1 /* PersistenceManagerFactory.m */; };
+		AD401F1A1E4F42BA006830C1 /* PersistenceManagerFactoryImpl.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ECC1E4F42BA006830C1 /* PersistenceManagerFactoryImpl.m */; };
+		AD401F1B1E4F42BA006830C1 /* PersistenceReceiver.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ECE1E4F42BA006830C1 /* PersistenceReceiver.m */; };
+		AD401F1C1E4F42BA006830C1 /* StatementsUriResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ED01E4F42BA006830C1 /* StatementsUriResponder.m */; };
+		AD401F1D1E4F42BA006830C1 /* StateUriResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ED21E4F42BA006830C1 /* StateUriResponder.m */; };
+		AD401F1E1E4F42BA006830C1 /* XapiActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ED41E4F42BA006830C1 /* XapiActivity.m */; };
+		AD401F1F1E4F42BA006830C1 /* XapiActivityEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ED61E4F42BA006830C1 /* XapiActivityEndpoint.m */; };
+		AD401F201E4F42BA006830C1 /* XapiActivityManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401ED81E4F42BA006830C1 /* XapiActivityManager.m */; };
+		AD401F211E4F42BA006830C1 /* XapiActivitySrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EDA1E4F42BA006830C1 /* XapiActivitySrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F221E4F42BA006830C1 /* XapiAgent.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EDC1E4F42BA006830C1 /* XapiAgent.m */; };
+		AD401F231E4F42BA006830C1 /* XapiAgentEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EDE1E4F42BA006830C1 /* XapiAgentEndpoint.m */; };
+		AD401F241E4F42BA006830C1 /* XapiAgentManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EE01E4F42BA006830C1 /* XapiAgentManager.m */; };
+		AD401F251E4F42BA006830C1 /* XapiAgentSrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EE21E4F42BA006830C1 /* XapiAgentSrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F261E4F42BA006830C1 /* XapiDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EE41E4F42BA006830C1 /* XapiDocument.m */; };
+		AD401F271E4F42BA006830C1 /* XapiDocumentSrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EE61E4F42BA006830C1 /* XapiDocumentSrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F281E4F42BA006830C1 /* XapiForwardingStatement.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EE81E4F42BA006830C1 /* XapiForwardingStatement.m */; };
+		AD401F291E4F42BA006830C1 /* XapiForwardingStatementManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EEA1E4F42BA006830C1 /* XapiForwardingStatementManager.m */; };
+		AD401F2A1E4F42BA006830C1 /* XapiForwardingStatementSrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EEC1E4F42BA006830C1 /* XapiForwardingStatementSrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F2B1E4F42BA006830C1 /* XapiState.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EEE1E4F42BA006830C1 /* XapiState.m */; };
+		AD401F2C1E4F42BA006830C1 /* XapiStateEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EF01E4F42BA006830C1 /* XapiStateEndpoint.m */; };
+		AD401F2D1E4F42BA006830C1 /* XapiStateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EF21E4F42BA006830C1 /* XapiStateManager.m */; };
+		AD401F2E1E4F42BA006830C1 /* XapiStatement.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EF41E4F42BA006830C1 /* XapiStatement.m */; };
+		AD401F2F1E4F42BA006830C1 /* XapiStatementManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EF61E4F42BA006830C1 /* XapiStatementManager.m */; };
+		AD401F301E4F42BA006830C1 /* XapiStatementsEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EF81E4F42BA006830C1 /* XapiStatementsEndpoint.m */; };
+		AD401F311E4F42BA006830C1 /* XapiStatementsForwardingEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EFA1E4F42BA006830C1 /* XapiStatementsForwardingEndpoint.m */; };
+		AD401F321E4F42BA006830C1 /* XapiStatementsForwardingEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EFC1E4F42BA006830C1 /* XapiStatementsForwardingEvent.m */; };
+		AD401F331E4F42BA006830C1 /* XapiStatementsForwardingListener.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401EFE1E4F42BA006830C1 /* XapiStatementsForwardingListener.m */; };
+		AD401F341E4F42BA006830C1 /* XapiStatementSrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F001E4F42BA006830C1 /* XapiStatementSrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F351E4F42BA006830C1 /* XapiStateSrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F021E4F42BA006830C1 /* XapiStateSrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F361E4F42BA006830C1 /* XapiUser.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F041E4F42BA006830C1 /* XapiUser.m */; };
+		AD401F371E4F42BA006830C1 /* XapiUserManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F061E4F42BA006830C1 /* XapiUserManager.m */; };
+		AD401F381E4F42BA006830C1 /* XapiUserSrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F081E4F42BA006830C1 /* XapiUserSrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F391E4F42BA006830C1 /* XapiVerb.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F0A1E4F42BA006830C1 /* XapiVerb.m */; };
+		AD401F3A1E4F42BA006830C1 /* XapiVerbEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F0C1E4F42BA006830C1 /* XapiVerbEndpoint.m */; };
+		AD401F3B1E4F42BA006830C1 /* XapiVerbManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F0E1E4F42BA006830C1 /* XapiVerbManager.m */; };
+		AD401F3C1E4F42BA006830C1 /* XapiVerbSrkObj.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F101E4F42BA006830C1 /* XapiVerbSrkObj.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F4E1E4F42DA006830C1 /* NanoLrsBaseManagerSharkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F3F1E4F42DA006830C1 /* NanoLrsBaseManagerSharkORM.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F4F1E4F42DA006830C1 /* PersistenceManagerIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F411E4F42DA006830C1 /* PersistenceManagerIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F501E4F42DA006830C1 /* XapiActivityManagerSharkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F431E4F42DA006830C1 /* XapiActivityManagerSharkORM.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F511E4F42DA006830C1 /* XapiAgentManagerSharkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F451E4F42DA006830C1 /* XapiAgentManagerSharkORM.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F521E4F42DA006830C1 /* XapiForwardingStatementManagerSharkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F471E4F42DA006830C1 /* XapiForwardingStatementManagerSharkORM.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F531E4F42DA006830C1 /* XapiStateManagerSharkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F491E4F42DA006830C1 /* XapiStateManagerSharkORM.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F541E4F42DA006830C1 /* XapiStatementManagerSharkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F4B1E4F42DA006830C1 /* XapiStatementManagerSharkORM.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
+		AD401F551E4F42DA006830C1 /* XapiVerbManagerSharkORM.m in Sources */ = {isa = PBXBuildFile; fileRef = AD401F4D1E4F42DA006830C1 /* XapiVerbManagerSharkORM.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD46A8F31D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		AD5D3DB41D5750B40063E9C0 /* AppViewIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = AD5D3DB31D5750B40063E9C0 /* AppViewIOS.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
@@ -43,7 +95,6 @@
 		AD6181D51DE9EBAA002540B7 /* AttendanceView.m in Sources */ = {isa = PBXBuildFile; fileRef = AD61809D1DE9EBA9002540B7 /* AttendanceView.m */; };
 		AD6181D61DE9EBAA002540B7 /* Axis.m in Sources */ = {isa = PBXBuildFile; fileRef = AD61809F1DE9EBA9002540B7 /* Axis.m */; };
 		AD6181D71DE9EBAA002540B7 /* Base64Coder.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180A11DE9EBA9002540B7 /* Base64Coder.m */; };
-		AD6181D81DE9EBAA002540B7 /* Base64CoderNanoLrs.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180A31DE9EBA9002540B7 /* Base64CoderNanoLrs.m */; };
 		AD6181D91DE9EBAA002540B7 /* BasePointController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180A51DE9EBA9002540B7 /* BasePointController.m */; };
 		AD6181DA1DE9EBAA002540B7 /* BasePointView.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180A71DE9EBA9002540B7 /* BasePointView.m */; };
 		AD6181DB1DE9EBAA002540B7 /* BCH15_5.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180A91DE9EBA9002540B7 /* BCH15_5.m */; };
@@ -79,12 +130,10 @@
 		AD6181F91DE9EBAA002540B7 /* FinderPatternNotFoundException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180E51DE9EBA9002540B7 /* FinderPatternNotFoundException.m */; };
 		AD6181FA1DE9EBAA002540B7 /* Galois.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180E71DE9EBA9002540B7 /* Galois.m */; };
 		AD6181FB1DE9EBAA002540B7 /* HTTPCacheDir.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180E91DE9EBA9002540B7 /* HTTPCacheDir.m */; };
-		AD6181FC1DE9EBAA002540B7 /* HttpLrs.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180EB1DE9EBA9002540B7 /* HttpLrs.m */; };
 		AD6181FD1DE9EBAA002540B7 /* HTTPResult.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180ED1DE9EBA9002540B7 /* HTTPResult.m */; };
 		AD6181FE1DE9EBAA002540B7 /* InvalidDataBlockException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180EF1DE9EBA9002540B7 /* InvalidDataBlockException.m */; };
 		AD6181FF1DE9EBAA002540B7 /* InvalidVersionException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180F11DE9EBA9002540B7 /* InvalidVersionException.m */; };
 		AD6182001DE9EBAA002540B7 /* InvalidVersionInfoException.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180F31DE9EBA9002540B7 /* InvalidVersionInfoException.m */; };
-		AD6182011DE9EBAA002540B7 /* JsonUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180F51DE9EBA9002540B7 /* JsonUtil.m */; };
 		AD6182021DE9EBAA002540B7 /* Line.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180F71DE9EBA9002540B7 /* Line.m */; };
 		AD6182031DE9EBAA002540B7 /* ListableEntity.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180F91DE9EBA9002540B7 /* ListableEntity.m */; };
 		AD6182041DE9EBAA002540B7 /* LoadControllerThread.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6180FB1DE9EBA9002540B7 /* LoadControllerThread.m */; };
@@ -99,10 +148,6 @@
 		AD61820D1DE9EBAA002540B7 /* OMRImageSource.m in Sources */ = {isa = PBXBuildFile; fileRef = AD61810D1DE9EBA9002540B7 /* OMRImageSource.m */; };
 		AD61820E1DE9EBAA002540B7 /* OMRRecognitionThread.m in Sources */ = {isa = PBXBuildFile; fileRef = AD61810F1DE9EBA9002540B7 /* OMRRecognitionThread.m */; };
 		AD61820F1DE9EBAA002540B7 /* OMRRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6181111DE9EBA9002540B7 /* OMRRecognizer.m */; };
-		AD6182101DE9EBAA002540B7 /* ParseUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6181131DE9EBA9002540B7 /* ParseUtil.m */; };
-		AD6182111DE9EBAA002540B7 /* PersistenceManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6181151DE9EBA9002540B7 /* PersistenceManager.m */; };
-		AD6182121DE9EBAA002540B7 /* PersistenceManagerFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6181171DE9EBA9002540B7 /* PersistenceManagerFactory.m */; };
-		AD6182131DE9EBAA002540B7 /* PersistenceReceiver.m in Sources */ = {isa = PBXBuildFile; fileRef = AD6181191DE9EBA9002540B7 /* PersistenceReceiver.m */; };
 		AD6182141DE9EBAA002540B7 /* PersonListController.m in Sources */ = {isa = PBXBuildFile; fileRef = AD61811B1DE9EBA9002540B7 /* PersonListController.m */; };
 		AD6182151DE9EBAA002540B7 /* PersonListView.m in Sources */ = {isa = PBXBuildFile; fileRef = AD61811D1DE9EBA9002540B7 /* PersonListView.m */; };
 		AD6182161DE9EBAA002540B7 /* PerspectiveTransform.m in Sources */ = {isa = PBXBuildFile; fileRef = AD61811F1DE9EBA9002540B7 /* PerspectiveTransform.m */; };
@@ -180,29 +225,6 @@
 		ADC3A2571D993DC500BDD24F /* UstadUIViewControllerHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = ADC3A2561D993DC500BDD24F /* UstadUIViewControllerHelper.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		ADCE877C1E34A06B005760B7 /* JUnitTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = ADCE877B1E34A06B005760B7 /* JUnitTestCase.m */; };
 		ADD2C9621DABC957004D621E /* LoginViewForgotPasswordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = ADD2C9611DABC957004D621E /* LoginViewForgotPasswordViewController.m */; };
-		ADDAD70F1E2CEAB5006894F8 /* XapiActivity.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6E21E2CEAB5006894F8 /* XapiActivity.m */; };
-		ADDAD7101E2CEAB5006894F8 /* XapiActivityEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6E41E2CEAB5006894F8 /* XapiActivityEndpoint.m */; };
-		ADDAD7111E2CEAB5006894F8 /* XapiActivityManager.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6E61E2CEAB5006894F8 /* XapiActivityManager.m */; };
-		ADDAD7121E2CEAB5006894F8 /* XapiAgent.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6E81E2CEAB5006894F8 /* XapiAgent.m */; };
-		ADDAD7131E2CEAB5006894F8 /* XapiAgentEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6EA1E2CEAB5006894F8 /* XapiAgentEndpoint.m */; };
-		ADDAD7141E2CEAB5006894F8 /* XapiAgentManager.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6EC1E2CEAB5006894F8 /* XapiAgentManager.m */; };
-		ADDAD7151E2CEAB5006894F8 /* XapiDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6EE1E2CEAB5006894F8 /* XapiDocument.m */; };
-		ADDAD7161E2CEAB5006894F8 /* XapiForwardingStatement.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6F01E2CEAB5006894F8 /* XapiForwardingStatement.m */; };
-		ADDAD7171E2CEAB5006894F8 /* XapiForwardingStatementManager.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6F21E2CEAB5006894F8 /* XapiForwardingStatementManager.m */; };
-		ADDAD7181E2CEAB5006894F8 /* XapiState.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6F41E2CEAB5006894F8 /* XapiState.m */; };
-		ADDAD7191E2CEAB5006894F8 /* XapiStateEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6F61E2CEAB5006894F8 /* XapiStateEndpoint.m */; };
-		ADDAD71A1E2CEAB5006894F8 /* XapiStateManager.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6F81E2CEAB5006894F8 /* XapiStateManager.m */; };
-		ADDAD71B1E2CEAB5006894F8 /* XapiStatement.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6FA1E2CEAB5006894F8 /* XapiStatement.m */; };
-		ADDAD71C1E2CEAB5006894F8 /* XapiStatementManager.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6FC1E2CEAB5006894F8 /* XapiStatementManager.m */; };
-		ADDAD71D1E2CEAB5006894F8 /* XapiStatementsEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD6FE1E2CEAB5006894F8 /* XapiStatementsEndpoint.m */; };
-		ADDAD71E1E2CEAB5006894F8 /* XapiStatementsForwardingEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD7001E2CEAB5006894F8 /* XapiStatementsForwardingEndpoint.m */; };
-		ADDAD71F1E2CEAB5006894F8 /* XapiStatementsForwardingEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD7021E2CEAB5006894F8 /* XapiStatementsForwardingEvent.m */; };
-		ADDAD7201E2CEAB5006894F8 /* XapiStatementsForwardingListener.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD7041E2CEAB5006894F8 /* XapiStatementsForwardingListener.m */; };
-		ADDAD7211E2CEAB5006894F8 /* XapiUser.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD7061E2CEAB5006894F8 /* XapiUser.m */; };
-		ADDAD7221E2CEAB5006894F8 /* XapiUserManager.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD7081E2CEAB5006894F8 /* XapiUserManager.m */; };
-		ADDAD7231E2CEAB5006894F8 /* XapiVerb.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD70A1E2CEAB5006894F8 /* XapiVerb.m */; };
-		ADDAD7241E2CEAB5006894F8 /* XapiVerbEndpoint.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD70C1E2CEAB5006894F8 /* XapiVerbEndpoint.m */; };
-		ADDAD7251E2CEAB5006894F8 /* XapiVerbManager.m in Sources */ = {isa = PBXBuildFile; fileRef = ADDAD70E1E2CEAB5006894F8 /* XapiVerbManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -253,6 +275,110 @@
 		AD1BE6611D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CatalogViewControllerEntryTableViewCell.m; sourceTree = "<group>"; };
 		AD1BE6631D6D968700373721 /* UstadMobileDownloadInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileDownloadInfo.h; sourceTree = "<group>"; };
 		AD1BE6641D6D968700373721 /* UstadMobileDownloadInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadMobileDownloadInfo.m; sourceTree = "<group>"; };
+		AD401EB91E4F42BA006830C1 /* Base64CoderNanoLrs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64CoderNanoLrs.h; sourceTree = "<group>"; };
+		AD401EBA1E4F42BA006830C1 /* Base64CoderNanoLrs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Base64CoderNanoLrs.m; sourceTree = "<group>"; };
+		AD401EBB1E4F42BA006830C1 /* HttpLrs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HttpLrs.h; sourceTree = "<group>"; };
+		AD401EBC1E4F42BA006830C1 /* HttpLrs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HttpLrs.m; sourceTree = "<group>"; };
+		AD401EBD1E4F42BA006830C1 /* JsonUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsonUtil.h; sourceTree = "<group>"; };
+		AD401EBE1E4F42BA006830C1 /* JsonUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsonUtil.m; sourceTree = "<group>"; };
+		AD401EBF1E4F42BA006830C1 /* LrsIoUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LrsIoUtils.h; sourceTree = "<group>"; };
+		AD401EC01E4F42BA006830C1 /* LrsIoUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LrsIoUtils.m; sourceTree = "<group>"; };
+		AD401EC11E4F42BA006830C1 /* NanoLrsHttpd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NanoLrsHttpd.h; sourceTree = "<group>"; };
+		AD401EC21E4F42BA006830C1 /* NanoLrsHttpd.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NanoLrsHttpd.m; sourceTree = "<group>"; };
+		AD401EC31E4F42BA006830C1 /* NanoLrsResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NanoLrsResponder.h; sourceTree = "<group>"; };
+		AD401EC41E4F42BA006830C1 /* NanoLrsResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NanoLrsResponder.m; sourceTree = "<group>"; };
+		AD401EC51E4F42BA006830C1 /* ParseUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseUtil.h; sourceTree = "<group>"; };
+		AD401EC61E4F42BA006830C1 /* ParseUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseUtil.m; sourceTree = "<group>"; };
+		AD401EC71E4F42BA006830C1 /* PersistenceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceManager.h; sourceTree = "<group>"; };
+		AD401EC81E4F42BA006830C1 /* PersistenceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceManager.m; sourceTree = "<group>"; };
+		AD401EC91E4F42BA006830C1 /* PersistenceManagerFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceManagerFactory.h; sourceTree = "<group>"; };
+		AD401ECA1E4F42BA006830C1 /* PersistenceManagerFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceManagerFactory.m; sourceTree = "<group>"; };
+		AD401ECB1E4F42BA006830C1 /* PersistenceManagerFactoryImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceManagerFactoryImpl.h; sourceTree = "<group>"; };
+		AD401ECC1E4F42BA006830C1 /* PersistenceManagerFactoryImpl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceManagerFactoryImpl.m; sourceTree = "<group>"; };
+		AD401ECD1E4F42BA006830C1 /* PersistenceReceiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceReceiver.h; sourceTree = "<group>"; };
+		AD401ECE1E4F42BA006830C1 /* PersistenceReceiver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceReceiver.m; sourceTree = "<group>"; };
+		AD401ECF1E4F42BA006830C1 /* StatementsUriResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatementsUriResponder.h; sourceTree = "<group>"; };
+		AD401ED01E4F42BA006830C1 /* StatementsUriResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatementsUriResponder.m; sourceTree = "<group>"; };
+		AD401ED11E4F42BA006830C1 /* StateUriResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StateUriResponder.h; sourceTree = "<group>"; };
+		AD401ED21E4F42BA006830C1 /* StateUriResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StateUriResponder.m; sourceTree = "<group>"; };
+		AD401ED31E4F42BA006830C1 /* XapiActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivity.h; sourceTree = "<group>"; };
+		AD401ED41E4F42BA006830C1 /* XapiActivity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivity.m; sourceTree = "<group>"; };
+		AD401ED51E4F42BA006830C1 /* XapiActivityEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivityEndpoint.h; sourceTree = "<group>"; };
+		AD401ED61E4F42BA006830C1 /* XapiActivityEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivityEndpoint.m; sourceTree = "<group>"; };
+		AD401ED71E4F42BA006830C1 /* XapiActivityManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivityManager.h; sourceTree = "<group>"; };
+		AD401ED81E4F42BA006830C1 /* XapiActivityManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivityManager.m; sourceTree = "<group>"; };
+		AD401ED91E4F42BA006830C1 /* XapiActivitySrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivitySrkObj.h; sourceTree = "<group>"; };
+		AD401EDA1E4F42BA006830C1 /* XapiActivitySrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivitySrkObj.m; sourceTree = "<group>"; };
+		AD401EDB1E4F42BA006830C1 /* XapiAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgent.h; sourceTree = "<group>"; };
+		AD401EDC1E4F42BA006830C1 /* XapiAgent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgent.m; sourceTree = "<group>"; };
+		AD401EDD1E4F42BA006830C1 /* XapiAgentEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgentEndpoint.h; sourceTree = "<group>"; };
+		AD401EDE1E4F42BA006830C1 /* XapiAgentEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgentEndpoint.m; sourceTree = "<group>"; };
+		AD401EDF1E4F42BA006830C1 /* XapiAgentManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgentManager.h; sourceTree = "<group>"; };
+		AD401EE01E4F42BA006830C1 /* XapiAgentManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgentManager.m; sourceTree = "<group>"; };
+		AD401EE11E4F42BA006830C1 /* XapiAgentSrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgentSrkObj.h; sourceTree = "<group>"; };
+		AD401EE21E4F42BA006830C1 /* XapiAgentSrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgentSrkObj.m; sourceTree = "<group>"; };
+		AD401EE31E4F42BA006830C1 /* XapiDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiDocument.h; sourceTree = "<group>"; };
+		AD401EE41E4F42BA006830C1 /* XapiDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiDocument.m; sourceTree = "<group>"; };
+		AD401EE51E4F42BA006830C1 /* XapiDocumentSrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiDocumentSrkObj.h; sourceTree = "<group>"; };
+		AD401EE61E4F42BA006830C1 /* XapiDocumentSrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiDocumentSrkObj.m; sourceTree = "<group>"; };
+		AD401EE71E4F42BA006830C1 /* XapiForwardingStatement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiForwardingStatement.h; sourceTree = "<group>"; };
+		AD401EE81E4F42BA006830C1 /* XapiForwardingStatement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiForwardingStatement.m; sourceTree = "<group>"; };
+		AD401EE91E4F42BA006830C1 /* XapiForwardingStatementManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiForwardingStatementManager.h; sourceTree = "<group>"; };
+		AD401EEA1E4F42BA006830C1 /* XapiForwardingStatementManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiForwardingStatementManager.m; sourceTree = "<group>"; };
+		AD401EEB1E4F42BA006830C1 /* XapiForwardingStatementSrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiForwardingStatementSrkObj.h; sourceTree = "<group>"; };
+		AD401EEC1E4F42BA006830C1 /* XapiForwardingStatementSrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiForwardingStatementSrkObj.m; sourceTree = "<group>"; };
+		AD401EED1E4F42BA006830C1 /* XapiState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiState.h; sourceTree = "<group>"; };
+		AD401EEE1E4F42BA006830C1 /* XapiState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiState.m; sourceTree = "<group>"; };
+		AD401EEF1E4F42BA006830C1 /* XapiStateEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStateEndpoint.h; sourceTree = "<group>"; };
+		AD401EF01E4F42BA006830C1 /* XapiStateEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStateEndpoint.m; sourceTree = "<group>"; };
+		AD401EF11E4F42BA006830C1 /* XapiStateManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStateManager.h; sourceTree = "<group>"; };
+		AD401EF21E4F42BA006830C1 /* XapiStateManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStateManager.m; sourceTree = "<group>"; };
+		AD401EF31E4F42BA006830C1 /* XapiStatement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatement.h; sourceTree = "<group>"; };
+		AD401EF41E4F42BA006830C1 /* XapiStatement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatement.m; sourceTree = "<group>"; };
+		AD401EF51E4F42BA006830C1 /* XapiStatementManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementManager.h; sourceTree = "<group>"; };
+		AD401EF61E4F42BA006830C1 /* XapiStatementManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementManager.m; sourceTree = "<group>"; };
+		AD401EF71E4F42BA006830C1 /* XapiStatementsEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsEndpoint.h; sourceTree = "<group>"; };
+		AD401EF81E4F42BA006830C1 /* XapiStatementsEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsEndpoint.m; sourceTree = "<group>"; };
+		AD401EF91E4F42BA006830C1 /* XapiStatementsForwardingEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsForwardingEndpoint.h; sourceTree = "<group>"; };
+		AD401EFA1E4F42BA006830C1 /* XapiStatementsForwardingEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsForwardingEndpoint.m; sourceTree = "<group>"; };
+		AD401EFB1E4F42BA006830C1 /* XapiStatementsForwardingEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsForwardingEvent.h; sourceTree = "<group>"; };
+		AD401EFC1E4F42BA006830C1 /* XapiStatementsForwardingEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsForwardingEvent.m; sourceTree = "<group>"; };
+		AD401EFD1E4F42BA006830C1 /* XapiStatementsForwardingListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsForwardingListener.h; sourceTree = "<group>"; };
+		AD401EFE1E4F42BA006830C1 /* XapiStatementsForwardingListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsForwardingListener.m; sourceTree = "<group>"; };
+		AD401EFF1E4F42BA006830C1 /* XapiStatementSrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementSrkObj.h; sourceTree = "<group>"; };
+		AD401F001E4F42BA006830C1 /* XapiStatementSrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementSrkObj.m; sourceTree = "<group>"; };
+		AD401F011E4F42BA006830C1 /* XapiStateSrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStateSrkObj.h; sourceTree = "<group>"; };
+		AD401F021E4F42BA006830C1 /* XapiStateSrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStateSrkObj.m; sourceTree = "<group>"; };
+		AD401F031E4F42BA006830C1 /* XapiUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiUser.h; sourceTree = "<group>"; };
+		AD401F041E4F42BA006830C1 /* XapiUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiUser.m; sourceTree = "<group>"; };
+		AD401F051E4F42BA006830C1 /* XapiUserManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiUserManager.h; sourceTree = "<group>"; };
+		AD401F061E4F42BA006830C1 /* XapiUserManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiUserManager.m; sourceTree = "<group>"; };
+		AD401F071E4F42BA006830C1 /* XapiUserSrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiUserSrkObj.h; sourceTree = "<group>"; };
+		AD401F081E4F42BA006830C1 /* XapiUserSrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiUserSrkObj.m; sourceTree = "<group>"; };
+		AD401F091E4F42BA006830C1 /* XapiVerb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerb.h; sourceTree = "<group>"; };
+		AD401F0A1E4F42BA006830C1 /* XapiVerb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerb.m; sourceTree = "<group>"; };
+		AD401F0B1E4F42BA006830C1 /* XapiVerbEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerbEndpoint.h; sourceTree = "<group>"; };
+		AD401F0C1E4F42BA006830C1 /* XapiVerbEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerbEndpoint.m; sourceTree = "<group>"; };
+		AD401F0D1E4F42BA006830C1 /* XapiVerbManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerbManager.h; sourceTree = "<group>"; };
+		AD401F0E1E4F42BA006830C1 /* XapiVerbManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerbManager.m; sourceTree = "<group>"; };
+		AD401F0F1E4F42BA006830C1 /* XapiVerbSrkObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerbSrkObj.h; sourceTree = "<group>"; };
+		AD401F101E4F42BA006830C1 /* XapiVerbSrkObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerbSrkObj.m; sourceTree = "<group>"; };
+		AD401F3E1E4F42DA006830C1 /* NanoLrsBaseManagerSharkORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NanoLrsBaseManagerSharkORM.h; sourceTree = "<group>"; };
+		AD401F3F1E4F42DA006830C1 /* NanoLrsBaseManagerSharkORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NanoLrsBaseManagerSharkORM.m; sourceTree = "<group>"; };
+		AD401F401E4F42DA006830C1 /* PersistenceManagerIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceManagerIOS.h; sourceTree = "<group>"; };
+		AD401F411E4F42DA006830C1 /* PersistenceManagerIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceManagerIOS.m; sourceTree = "<group>"; };
+		AD401F421E4F42DA006830C1 /* XapiActivityManagerSharkORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivityManagerSharkORM.h; sourceTree = "<group>"; };
+		AD401F431E4F42DA006830C1 /* XapiActivityManagerSharkORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivityManagerSharkORM.m; sourceTree = "<group>"; };
+		AD401F441E4F42DA006830C1 /* XapiAgentManagerSharkORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgentManagerSharkORM.h; sourceTree = "<group>"; };
+		AD401F451E4F42DA006830C1 /* XapiAgentManagerSharkORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgentManagerSharkORM.m; sourceTree = "<group>"; };
+		AD401F461E4F42DA006830C1 /* XapiForwardingStatementManagerSharkORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiForwardingStatementManagerSharkORM.h; sourceTree = "<group>"; };
+		AD401F471E4F42DA006830C1 /* XapiForwardingStatementManagerSharkORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiForwardingStatementManagerSharkORM.m; sourceTree = "<group>"; };
+		AD401F481E4F42DA006830C1 /* XapiStateManagerSharkORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStateManagerSharkORM.h; sourceTree = "<group>"; };
+		AD401F491E4F42DA006830C1 /* XapiStateManagerSharkORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStateManagerSharkORM.m; sourceTree = "<group>"; };
+		AD401F4A1E4F42DA006830C1 /* XapiStatementManagerSharkORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementManagerSharkORM.h; sourceTree = "<group>"; };
+		AD401F4B1E4F42DA006830C1 /* XapiStatementManagerSharkORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementManagerSharkORM.m; sourceTree = "<group>"; };
+		AD401F4C1E4F42DA006830C1 /* XapiVerbManagerSharkORM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerbManagerSharkORM.h; sourceTree = "<group>"; };
+		AD401F4D1E4F42DA006830C1 /* XapiVerbManagerSharkORM.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerbManagerSharkORM.m; sourceTree = "<group>"; };
 		AD46A6421D524FC600C63A29 /* UstadMobileSystemImplIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileSystemImplIOS.h; sourceTree = "<group>"; };
 		AD46A6431D524FC600C63A29 /* UstadMobileSystemImplIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UstadMobileSystemImplIOS.m; sourceTree = "<group>"; };
 		AD46A8F21D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UstadMobileSystemImplFactoryIOS.h; sourceTree = "<group>"; };
@@ -293,8 +419,6 @@
 		AD61809F1DE9EBA9002540B7 /* Axis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Axis.m; sourceTree = "<group>"; };
 		AD6180A01DE9EBA9002540B7 /* Base64Coder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64Coder.h; sourceTree = "<group>"; };
 		AD6180A11DE9EBA9002540B7 /* Base64Coder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Base64Coder.m; sourceTree = "<group>"; };
-		AD6180A21DE9EBA9002540B7 /* Base64CoderNanoLrs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Base64CoderNanoLrs.h; sourceTree = "<group>"; };
-		AD6180A31DE9EBA9002540B7 /* Base64CoderNanoLrs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Base64CoderNanoLrs.m; sourceTree = "<group>"; };
 		AD6180A41DE9EBA9002540B7 /* BasePointController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasePointController.h; sourceTree = "<group>"; };
 		AD6180A51DE9EBA9002540B7 /* BasePointController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BasePointController.m; sourceTree = "<group>"; };
 		AD6180A61DE9EBA9002540B7 /* BasePointView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasePointView.h; sourceTree = "<group>"; };
@@ -365,8 +489,6 @@
 		AD6180E71DE9EBA9002540B7 /* Galois.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Galois.m; sourceTree = "<group>"; };
 		AD6180E81DE9EBA9002540B7 /* HTTPCacheDir.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPCacheDir.h; sourceTree = "<group>"; };
 		AD6180E91DE9EBA9002540B7 /* HTTPCacheDir.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HTTPCacheDir.m; sourceTree = "<group>"; };
-		AD6180EA1DE9EBA9002540B7 /* HttpLrs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HttpLrs.h; sourceTree = "<group>"; };
-		AD6180EB1DE9EBA9002540B7 /* HttpLrs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HttpLrs.m; sourceTree = "<group>"; };
 		AD6180EC1DE9EBA9002540B7 /* HTTPResult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPResult.h; sourceTree = "<group>"; };
 		AD6180ED1DE9EBA9002540B7 /* HTTPResult.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HTTPResult.m; sourceTree = "<group>"; };
 		AD6180EE1DE9EBA9002540B7 /* InvalidDataBlockException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InvalidDataBlockException.h; sourceTree = "<group>"; };
@@ -375,8 +497,6 @@
 		AD6180F11DE9EBA9002540B7 /* InvalidVersionException.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InvalidVersionException.m; sourceTree = "<group>"; };
 		AD6180F21DE9EBA9002540B7 /* InvalidVersionInfoException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InvalidVersionInfoException.h; sourceTree = "<group>"; };
 		AD6180F31DE9EBA9002540B7 /* InvalidVersionInfoException.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InvalidVersionInfoException.m; sourceTree = "<group>"; };
-		AD6180F41DE9EBA9002540B7 /* JsonUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsonUtil.h; sourceTree = "<group>"; };
-		AD6180F51DE9EBA9002540B7 /* JsonUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsonUtil.m; sourceTree = "<group>"; };
 		AD6180F61DE9EBA9002540B7 /* Line.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Line.h; sourceTree = "<group>"; };
 		AD6180F71DE9EBA9002540B7 /* Line.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Line.m; sourceTree = "<group>"; };
 		AD6180F81DE9EBA9002540B7 /* ListableEntity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListableEntity.h; sourceTree = "<group>"; };
@@ -405,14 +525,6 @@
 		AD61810F1DE9EBA9002540B7 /* OMRRecognitionThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OMRRecognitionThread.m; sourceTree = "<group>"; };
 		AD6181101DE9EBA9002540B7 /* OMRRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMRRecognizer.h; sourceTree = "<group>"; };
 		AD6181111DE9EBA9002540B7 /* OMRRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OMRRecognizer.m; sourceTree = "<group>"; };
-		AD6181121DE9EBA9002540B7 /* ParseUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseUtil.h; sourceTree = "<group>"; };
-		AD6181131DE9EBA9002540B7 /* ParseUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ParseUtil.m; sourceTree = "<group>"; };
-		AD6181141DE9EBA9002540B7 /* PersistenceManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceManager.h; sourceTree = "<group>"; };
-		AD6181151DE9EBA9002540B7 /* PersistenceManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceManager.m; sourceTree = "<group>"; };
-		AD6181161DE9EBA9002540B7 /* PersistenceManagerFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceManagerFactory.h; sourceTree = "<group>"; };
-		AD6181171DE9EBA9002540B7 /* PersistenceManagerFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceManagerFactory.m; sourceTree = "<group>"; };
-		AD6181181DE9EBA9002540B7 /* PersistenceReceiver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersistenceReceiver.h; sourceTree = "<group>"; };
-		AD6181191DE9EBA9002540B7 /* PersistenceReceiver.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersistenceReceiver.m; sourceTree = "<group>"; };
 		AD61811A1DE9EBA9002540B7 /* PersonListController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersonListController.h; sourceTree = "<group>"; };
 		AD61811B1DE9EBA9002540B7 /* PersonListController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersonListController.m; sourceTree = "<group>"; };
 		AD61811C1DE9EBA9002540B7 /* PersonListView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PersonListView.h; sourceTree = "<group>"; };
@@ -566,52 +678,6 @@
 		ADCE877B1E34A06B005760B7 /* JUnitTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JUnitTestCase.m; sourceTree = "<group>"; };
 		ADD2C9601DABC957004D621E /* LoginViewForgotPasswordViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewForgotPasswordViewController.h; sourceTree = "<group>"; };
 		ADD2C9611DABC957004D621E /* LoginViewForgotPasswordViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewForgotPasswordViewController.m; sourceTree = "<group>"; };
-		ADDAD6E11E2CEAB5006894F8 /* XapiActivity.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivity.h; sourceTree = "<group>"; };
-		ADDAD6E21E2CEAB5006894F8 /* XapiActivity.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivity.m; sourceTree = "<group>"; };
-		ADDAD6E31E2CEAB5006894F8 /* XapiActivityEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivityEndpoint.h; sourceTree = "<group>"; };
-		ADDAD6E41E2CEAB5006894F8 /* XapiActivityEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivityEndpoint.m; sourceTree = "<group>"; };
-		ADDAD6E51E2CEAB5006894F8 /* XapiActivityManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiActivityManager.h; sourceTree = "<group>"; };
-		ADDAD6E61E2CEAB5006894F8 /* XapiActivityManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiActivityManager.m; sourceTree = "<group>"; };
-		ADDAD6E71E2CEAB5006894F8 /* XapiAgent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgent.h; sourceTree = "<group>"; };
-		ADDAD6E81E2CEAB5006894F8 /* XapiAgent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgent.m; sourceTree = "<group>"; };
-		ADDAD6E91E2CEAB5006894F8 /* XapiAgentEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgentEndpoint.h; sourceTree = "<group>"; };
-		ADDAD6EA1E2CEAB5006894F8 /* XapiAgentEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgentEndpoint.m; sourceTree = "<group>"; };
-		ADDAD6EB1E2CEAB5006894F8 /* XapiAgentManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiAgentManager.h; sourceTree = "<group>"; };
-		ADDAD6EC1E2CEAB5006894F8 /* XapiAgentManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiAgentManager.m; sourceTree = "<group>"; };
-		ADDAD6ED1E2CEAB5006894F8 /* XapiDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiDocument.h; sourceTree = "<group>"; };
-		ADDAD6EE1E2CEAB5006894F8 /* XapiDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiDocument.m; sourceTree = "<group>"; };
-		ADDAD6EF1E2CEAB5006894F8 /* XapiForwardingStatement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiForwardingStatement.h; sourceTree = "<group>"; };
-		ADDAD6F01E2CEAB5006894F8 /* XapiForwardingStatement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiForwardingStatement.m; sourceTree = "<group>"; };
-		ADDAD6F11E2CEAB5006894F8 /* XapiForwardingStatementManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiForwardingStatementManager.h; sourceTree = "<group>"; };
-		ADDAD6F21E2CEAB5006894F8 /* XapiForwardingStatementManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiForwardingStatementManager.m; sourceTree = "<group>"; };
-		ADDAD6F31E2CEAB5006894F8 /* XapiState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiState.h; sourceTree = "<group>"; };
-		ADDAD6F41E2CEAB5006894F8 /* XapiState.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiState.m; sourceTree = "<group>"; };
-		ADDAD6F51E2CEAB5006894F8 /* XapiStateEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStateEndpoint.h; sourceTree = "<group>"; };
-		ADDAD6F61E2CEAB5006894F8 /* XapiStateEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStateEndpoint.m; sourceTree = "<group>"; };
-		ADDAD6F71E2CEAB5006894F8 /* XapiStateManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStateManager.h; sourceTree = "<group>"; };
-		ADDAD6F81E2CEAB5006894F8 /* XapiStateManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStateManager.m; sourceTree = "<group>"; };
-		ADDAD6F91E2CEAB5006894F8 /* XapiStatement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatement.h; sourceTree = "<group>"; };
-		ADDAD6FA1E2CEAB5006894F8 /* XapiStatement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatement.m; sourceTree = "<group>"; };
-		ADDAD6FB1E2CEAB5006894F8 /* XapiStatementManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementManager.h; sourceTree = "<group>"; };
-		ADDAD6FC1E2CEAB5006894F8 /* XapiStatementManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementManager.m; sourceTree = "<group>"; };
-		ADDAD6FD1E2CEAB5006894F8 /* XapiStatementsEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsEndpoint.h; sourceTree = "<group>"; };
-		ADDAD6FE1E2CEAB5006894F8 /* XapiStatementsEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsEndpoint.m; sourceTree = "<group>"; };
-		ADDAD6FF1E2CEAB5006894F8 /* XapiStatementsForwardingEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsForwardingEndpoint.h; sourceTree = "<group>"; };
-		ADDAD7001E2CEAB5006894F8 /* XapiStatementsForwardingEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsForwardingEndpoint.m; sourceTree = "<group>"; };
-		ADDAD7011E2CEAB5006894F8 /* XapiStatementsForwardingEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsForwardingEvent.h; sourceTree = "<group>"; };
-		ADDAD7021E2CEAB5006894F8 /* XapiStatementsForwardingEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsForwardingEvent.m; sourceTree = "<group>"; };
-		ADDAD7031E2CEAB5006894F8 /* XapiStatementsForwardingListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiStatementsForwardingListener.h; sourceTree = "<group>"; };
-		ADDAD7041E2CEAB5006894F8 /* XapiStatementsForwardingListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiStatementsForwardingListener.m; sourceTree = "<group>"; };
-		ADDAD7051E2CEAB5006894F8 /* XapiUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiUser.h; sourceTree = "<group>"; };
-		ADDAD7061E2CEAB5006894F8 /* XapiUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiUser.m; sourceTree = "<group>"; };
-		ADDAD7071E2CEAB5006894F8 /* XapiUserManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiUserManager.h; sourceTree = "<group>"; };
-		ADDAD7081E2CEAB5006894F8 /* XapiUserManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiUserManager.m; sourceTree = "<group>"; };
-		ADDAD7091E2CEAB5006894F8 /* XapiVerb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerb.h; sourceTree = "<group>"; };
-		ADDAD70A1E2CEAB5006894F8 /* XapiVerb.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerb.m; sourceTree = "<group>"; };
-		ADDAD70B1E2CEAB5006894F8 /* XapiVerbEndpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerbEndpoint.h; sourceTree = "<group>"; };
-		ADDAD70C1E2CEAB5006894F8 /* XapiVerbEndpoint.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerbEndpoint.m; sourceTree = "<group>"; };
-		ADDAD70D1E2CEAB5006894F8 /* XapiVerbManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XapiVerbManager.h; sourceTree = "<group>"; };
-		ADDAD70E1E2CEAB5006894F8 /* XapiVerbManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XapiVerbManager.m; sourceTree = "<group>"; };
 		BD4704988BB8809C57CC84B2 /* Pods-UstadMobileIOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOSTests/Pods-UstadMobileIOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		C964A6379C0C943596269925 /* libPods-UstadMobileIOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-UstadMobileIOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0372992CF0E0905941CA72D /* Pods-UstadMobileIOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UstadMobileIOS.debug.xcconfig"; path = "Pods/Target Support Files/Pods-UstadMobileIOS/Pods-UstadMobileIOS.debug.xcconfig"; sourceTree = "<group>"; };
@@ -672,57 +738,131 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		AD401EB81E4F42BA006830C1 /* NanoLrs-Generated */ = {
+			isa = PBXGroup;
+			children = (
+				AD401EB91E4F42BA006830C1 /* Base64CoderNanoLrs.h */,
+				AD401EBA1E4F42BA006830C1 /* Base64CoderNanoLrs.m */,
+				AD401EBB1E4F42BA006830C1 /* HttpLrs.h */,
+				AD401EBC1E4F42BA006830C1 /* HttpLrs.m */,
+				AD401EBD1E4F42BA006830C1 /* JsonUtil.h */,
+				AD401EBE1E4F42BA006830C1 /* JsonUtil.m */,
+				AD401EBF1E4F42BA006830C1 /* LrsIoUtils.h */,
+				AD401EC01E4F42BA006830C1 /* LrsIoUtils.m */,
+				AD401EC11E4F42BA006830C1 /* NanoLrsHttpd.h */,
+				AD401EC21E4F42BA006830C1 /* NanoLrsHttpd.m */,
+				AD401EC31E4F42BA006830C1 /* NanoLrsResponder.h */,
+				AD401EC41E4F42BA006830C1 /* NanoLrsResponder.m */,
+				AD401EC51E4F42BA006830C1 /* ParseUtil.h */,
+				AD401EC61E4F42BA006830C1 /* ParseUtil.m */,
+				AD401EC71E4F42BA006830C1 /* PersistenceManager.h */,
+				AD401EC81E4F42BA006830C1 /* PersistenceManager.m */,
+				AD401EC91E4F42BA006830C1 /* PersistenceManagerFactory.h */,
+				AD401ECA1E4F42BA006830C1 /* PersistenceManagerFactory.m */,
+				AD401ECB1E4F42BA006830C1 /* PersistenceManagerFactoryImpl.h */,
+				AD401ECC1E4F42BA006830C1 /* PersistenceManagerFactoryImpl.m */,
+				AD401ECD1E4F42BA006830C1 /* PersistenceReceiver.h */,
+				AD401ECE1E4F42BA006830C1 /* PersistenceReceiver.m */,
+				AD401ECF1E4F42BA006830C1 /* StatementsUriResponder.h */,
+				AD401ED01E4F42BA006830C1 /* StatementsUriResponder.m */,
+				AD401ED11E4F42BA006830C1 /* StateUriResponder.h */,
+				AD401ED21E4F42BA006830C1 /* StateUriResponder.m */,
+				AD401ED31E4F42BA006830C1 /* XapiActivity.h */,
+				AD401ED41E4F42BA006830C1 /* XapiActivity.m */,
+				AD401ED51E4F42BA006830C1 /* XapiActivityEndpoint.h */,
+				AD401ED61E4F42BA006830C1 /* XapiActivityEndpoint.m */,
+				AD401ED71E4F42BA006830C1 /* XapiActivityManager.h */,
+				AD401ED81E4F42BA006830C1 /* XapiActivityManager.m */,
+				AD401ED91E4F42BA006830C1 /* XapiActivitySrkObj.h */,
+				AD401EDA1E4F42BA006830C1 /* XapiActivitySrkObj.m */,
+				AD401EDB1E4F42BA006830C1 /* XapiAgent.h */,
+				AD401EDC1E4F42BA006830C1 /* XapiAgent.m */,
+				AD401EDD1E4F42BA006830C1 /* XapiAgentEndpoint.h */,
+				AD401EDE1E4F42BA006830C1 /* XapiAgentEndpoint.m */,
+				AD401EDF1E4F42BA006830C1 /* XapiAgentManager.h */,
+				AD401EE01E4F42BA006830C1 /* XapiAgentManager.m */,
+				AD401EE11E4F42BA006830C1 /* XapiAgentSrkObj.h */,
+				AD401EE21E4F42BA006830C1 /* XapiAgentSrkObj.m */,
+				AD401EE31E4F42BA006830C1 /* XapiDocument.h */,
+				AD401EE41E4F42BA006830C1 /* XapiDocument.m */,
+				AD401EE51E4F42BA006830C1 /* XapiDocumentSrkObj.h */,
+				AD401EE61E4F42BA006830C1 /* XapiDocumentSrkObj.m */,
+				AD401EE71E4F42BA006830C1 /* XapiForwardingStatement.h */,
+				AD401EE81E4F42BA006830C1 /* XapiForwardingStatement.m */,
+				AD401EE91E4F42BA006830C1 /* XapiForwardingStatementManager.h */,
+				AD401EEA1E4F42BA006830C1 /* XapiForwardingStatementManager.m */,
+				AD401EEB1E4F42BA006830C1 /* XapiForwardingStatementSrkObj.h */,
+				AD401EEC1E4F42BA006830C1 /* XapiForwardingStatementSrkObj.m */,
+				AD401EED1E4F42BA006830C1 /* XapiState.h */,
+				AD401EEE1E4F42BA006830C1 /* XapiState.m */,
+				AD401EEF1E4F42BA006830C1 /* XapiStateEndpoint.h */,
+				AD401EF01E4F42BA006830C1 /* XapiStateEndpoint.m */,
+				AD401EF11E4F42BA006830C1 /* XapiStateManager.h */,
+				AD401EF21E4F42BA006830C1 /* XapiStateManager.m */,
+				AD401EF31E4F42BA006830C1 /* XapiStatement.h */,
+				AD401EF41E4F42BA006830C1 /* XapiStatement.m */,
+				AD401EF51E4F42BA006830C1 /* XapiStatementManager.h */,
+				AD401EF61E4F42BA006830C1 /* XapiStatementManager.m */,
+				AD401EF71E4F42BA006830C1 /* XapiStatementsEndpoint.h */,
+				AD401EF81E4F42BA006830C1 /* XapiStatementsEndpoint.m */,
+				AD401EF91E4F42BA006830C1 /* XapiStatementsForwardingEndpoint.h */,
+				AD401EFA1E4F42BA006830C1 /* XapiStatementsForwardingEndpoint.m */,
+				AD401EFB1E4F42BA006830C1 /* XapiStatementsForwardingEvent.h */,
+				AD401EFC1E4F42BA006830C1 /* XapiStatementsForwardingEvent.m */,
+				AD401EFD1E4F42BA006830C1 /* XapiStatementsForwardingListener.h */,
+				AD401EFE1E4F42BA006830C1 /* XapiStatementsForwardingListener.m */,
+				AD401EFF1E4F42BA006830C1 /* XapiStatementSrkObj.h */,
+				AD401F001E4F42BA006830C1 /* XapiStatementSrkObj.m */,
+				AD401F011E4F42BA006830C1 /* XapiStateSrkObj.h */,
+				AD401F021E4F42BA006830C1 /* XapiStateSrkObj.m */,
+				AD401F031E4F42BA006830C1 /* XapiUser.h */,
+				AD401F041E4F42BA006830C1 /* XapiUser.m */,
+				AD401F051E4F42BA006830C1 /* XapiUserManager.h */,
+				AD401F061E4F42BA006830C1 /* XapiUserManager.m */,
+				AD401F071E4F42BA006830C1 /* XapiUserSrkObj.h */,
+				AD401F081E4F42BA006830C1 /* XapiUserSrkObj.m */,
+				AD401F091E4F42BA006830C1 /* XapiVerb.h */,
+				AD401F0A1E4F42BA006830C1 /* XapiVerb.m */,
+				AD401F0B1E4F42BA006830C1 /* XapiVerbEndpoint.h */,
+				AD401F0C1E4F42BA006830C1 /* XapiVerbEndpoint.m */,
+				AD401F0D1E4F42BA006830C1 /* XapiVerbManager.h */,
+				AD401F0E1E4F42BA006830C1 /* XapiVerbManager.m */,
+				AD401F0F1E4F42BA006830C1 /* XapiVerbSrkObj.h */,
+				AD401F101E4F42BA006830C1 /* XapiVerbSrkObj.m */,
+			);
+			name = "NanoLrs-Generated";
+			path = "../lib/checkout/NanoLRS/nanolrs-ios/dist/include/NanoLrs-Generated";
+			sourceTree = "<group>";
+		};
+		AD401F3D1E4F42DA006830C1 /* NanoLrs-Objc */ = {
+			isa = PBXGroup;
+			children = (
+				AD401F3E1E4F42DA006830C1 /* NanoLrsBaseManagerSharkORM.h */,
+				AD401F3F1E4F42DA006830C1 /* NanoLrsBaseManagerSharkORM.m */,
+				AD401F401E4F42DA006830C1 /* PersistenceManagerIOS.h */,
+				AD401F411E4F42DA006830C1 /* PersistenceManagerIOS.m */,
+				AD401F421E4F42DA006830C1 /* XapiActivityManagerSharkORM.h */,
+				AD401F431E4F42DA006830C1 /* XapiActivityManagerSharkORM.m */,
+				AD401F441E4F42DA006830C1 /* XapiAgentManagerSharkORM.h */,
+				AD401F451E4F42DA006830C1 /* XapiAgentManagerSharkORM.m */,
+				AD401F461E4F42DA006830C1 /* XapiForwardingStatementManagerSharkORM.h */,
+				AD401F471E4F42DA006830C1 /* XapiForwardingStatementManagerSharkORM.m */,
+				AD401F481E4F42DA006830C1 /* XapiStateManagerSharkORM.h */,
+				AD401F491E4F42DA006830C1 /* XapiStateManagerSharkORM.m */,
+				AD401F4A1E4F42DA006830C1 /* XapiStatementManagerSharkORM.h */,
+				AD401F4B1E4F42DA006830C1 /* XapiStatementManagerSharkORM.m */,
+				AD401F4C1E4F42DA006830C1 /* XapiVerbManagerSharkORM.h */,
+				AD401F4D1E4F42DA006830C1 /* XapiVerbManagerSharkORM.m */,
+			);
+			name = "NanoLrs-Objc";
+			path = "../lib/checkout/NanoLRS/nanolrs-ios/dist/include/NanoLrs-Objc";
+			sourceTree = "<group>";
+		};
 		AD61807D1DE9EBA9002540B7 /* Generated */ = {
 			isa = PBXGroup;
 			children = (
 				AD80403D1E461D0300647996 /* CoreBuildConfig.h */,
 				AD80403E1E461D0300647996 /* CoreBuildConfig.m */,
-				ADDAD6E11E2CEAB5006894F8 /* XapiActivity.h */,
-				ADDAD6E21E2CEAB5006894F8 /* XapiActivity.m */,
-				ADDAD6E31E2CEAB5006894F8 /* XapiActivityEndpoint.h */,
-				ADDAD6E41E2CEAB5006894F8 /* XapiActivityEndpoint.m */,
-				ADDAD6E51E2CEAB5006894F8 /* XapiActivityManager.h */,
-				ADDAD6E61E2CEAB5006894F8 /* XapiActivityManager.m */,
-				ADDAD6E71E2CEAB5006894F8 /* XapiAgent.h */,
-				ADDAD6E81E2CEAB5006894F8 /* XapiAgent.m */,
-				ADDAD6E91E2CEAB5006894F8 /* XapiAgentEndpoint.h */,
-				ADDAD6EA1E2CEAB5006894F8 /* XapiAgentEndpoint.m */,
-				ADDAD6EB1E2CEAB5006894F8 /* XapiAgentManager.h */,
-				ADDAD6EC1E2CEAB5006894F8 /* XapiAgentManager.m */,
-				ADDAD6ED1E2CEAB5006894F8 /* XapiDocument.h */,
-				ADDAD6EE1E2CEAB5006894F8 /* XapiDocument.m */,
-				ADDAD6EF1E2CEAB5006894F8 /* XapiForwardingStatement.h */,
-				ADDAD6F01E2CEAB5006894F8 /* XapiForwardingStatement.m */,
-				ADDAD6F11E2CEAB5006894F8 /* XapiForwardingStatementManager.h */,
-				ADDAD6F21E2CEAB5006894F8 /* XapiForwardingStatementManager.m */,
-				ADDAD6F31E2CEAB5006894F8 /* XapiState.h */,
-				ADDAD6F41E2CEAB5006894F8 /* XapiState.m */,
-				ADDAD6F51E2CEAB5006894F8 /* XapiStateEndpoint.h */,
-				ADDAD6F61E2CEAB5006894F8 /* XapiStateEndpoint.m */,
-				ADDAD6F71E2CEAB5006894F8 /* XapiStateManager.h */,
-				ADDAD6F81E2CEAB5006894F8 /* XapiStateManager.m */,
-				ADDAD6F91E2CEAB5006894F8 /* XapiStatement.h */,
-				ADDAD6FA1E2CEAB5006894F8 /* XapiStatement.m */,
-				ADDAD6FB1E2CEAB5006894F8 /* XapiStatementManager.h */,
-				ADDAD6FC1E2CEAB5006894F8 /* XapiStatementManager.m */,
-				ADDAD6FD1E2CEAB5006894F8 /* XapiStatementsEndpoint.h */,
-				ADDAD6FE1E2CEAB5006894F8 /* XapiStatementsEndpoint.m */,
-				ADDAD6FF1E2CEAB5006894F8 /* XapiStatementsForwardingEndpoint.h */,
-				ADDAD7001E2CEAB5006894F8 /* XapiStatementsForwardingEndpoint.m */,
-				ADDAD7011E2CEAB5006894F8 /* XapiStatementsForwardingEvent.h */,
-				ADDAD7021E2CEAB5006894F8 /* XapiStatementsForwardingEvent.m */,
-				ADDAD7031E2CEAB5006894F8 /* XapiStatementsForwardingListener.h */,
-				ADDAD7041E2CEAB5006894F8 /* XapiStatementsForwardingListener.m */,
-				ADDAD7051E2CEAB5006894F8 /* XapiUser.h */,
-				ADDAD7061E2CEAB5006894F8 /* XapiUser.m */,
-				ADDAD7071E2CEAB5006894F8 /* XapiUserManager.h */,
-				ADDAD7081E2CEAB5006894F8 /* XapiUserManager.m */,
-				ADDAD7091E2CEAB5006894F8 /* XapiVerb.h */,
-				ADDAD70A1E2CEAB5006894F8 /* XapiVerb.m */,
-				ADDAD70B1E2CEAB5006894F8 /* XapiVerbEndpoint.h */,
-				ADDAD70C1E2CEAB5006894F8 /* XapiVerbEndpoint.m */,
-				ADDAD70D1E2CEAB5006894F8 /* XapiVerbManager.h */,
-				ADDAD70E1E2CEAB5006894F8 /* XapiVerbManager.m */,
 				AD0E157D1E1D3AB400EF5F8C /* AboutController.h */,
 				AD0E157E1E1D3AB400EF5F8C /* AboutController.m */,
 				AD0E157F1E1D3AB400EF5F8C /* AboutView.h */,
@@ -761,8 +901,6 @@
 				AD61809F1DE9EBA9002540B7 /* Axis.m */,
 				AD6180A01DE9EBA9002540B7 /* Base64Coder.h */,
 				AD6180A11DE9EBA9002540B7 /* Base64Coder.m */,
-				AD6180A21DE9EBA9002540B7 /* Base64CoderNanoLrs.h */,
-				AD6180A31DE9EBA9002540B7 /* Base64CoderNanoLrs.m */,
 				AD6180A41DE9EBA9002540B7 /* BasePointController.h */,
 				AD6180A51DE9EBA9002540B7 /* BasePointController.m */,
 				AD6180A61DE9EBA9002540B7 /* BasePointView.h */,
@@ -833,8 +971,6 @@
 				AD6180E71DE9EBA9002540B7 /* Galois.m */,
 				AD6180E81DE9EBA9002540B7 /* HTTPCacheDir.h */,
 				AD6180E91DE9EBA9002540B7 /* HTTPCacheDir.m */,
-				AD6180EA1DE9EBA9002540B7 /* HttpLrs.h */,
-				AD6180EB1DE9EBA9002540B7 /* HttpLrs.m */,
 				AD6180EC1DE9EBA9002540B7 /* HTTPResult.h */,
 				AD6180ED1DE9EBA9002540B7 /* HTTPResult.m */,
 				AD6180EE1DE9EBA9002540B7 /* InvalidDataBlockException.h */,
@@ -843,8 +979,6 @@
 				AD6180F11DE9EBA9002540B7 /* InvalidVersionException.m */,
 				AD6180F21DE9EBA9002540B7 /* InvalidVersionInfoException.h */,
 				AD6180F31DE9EBA9002540B7 /* InvalidVersionInfoException.m */,
-				AD6180F41DE9EBA9002540B7 /* JsonUtil.h */,
-				AD6180F51DE9EBA9002540B7 /* JsonUtil.m */,
 				AD6180F61DE9EBA9002540B7 /* Line.h */,
 				AD6180F71DE9EBA9002540B7 /* Line.m */,
 				AD6180F81DE9EBA9002540B7 /* ListableEntity.h */,
@@ -873,14 +1007,6 @@
 				AD61810F1DE9EBA9002540B7 /* OMRRecognitionThread.m */,
 				AD6181101DE9EBA9002540B7 /* OMRRecognizer.h */,
 				AD6181111DE9EBA9002540B7 /* OMRRecognizer.m */,
-				AD6181121DE9EBA9002540B7 /* ParseUtil.h */,
-				AD6181131DE9EBA9002540B7 /* ParseUtil.m */,
-				AD6181141DE9EBA9002540B7 /* PersistenceManager.h */,
-				AD6181151DE9EBA9002540B7 /* PersistenceManager.m */,
-				AD6181161DE9EBA9002540B7 /* PersistenceManagerFactory.h */,
-				AD6181171DE9EBA9002540B7 /* PersistenceManagerFactory.m */,
-				AD6181181DE9EBA9002540B7 /* PersistenceReceiver.h */,
-				AD6181191DE9EBA9002540B7 /* PersistenceReceiver.m */,
 				AD61811A1DE9EBA9002540B7 /* PersonListController.h */,
 				AD61811B1DE9EBA9002540B7 /* PersonListController.m */,
 				AD61811C1DE9EBA9002540B7 /* PersonListView.h */,
@@ -1012,6 +1138,8 @@
 		AD77D0451D523A8A00A2F95A = {
 			isa = PBXGroup;
 			children = (
+				AD401F3D1E4F42DA006830C1 /* NanoLrs-Objc */,
+				AD401EB81E4F42BA006830C1 /* NanoLrs-Generated */,
 				AD61807D1DE9EBA9002540B7 /* Generated */,
 				AD12B42F1D65C4A8005D6D5D /* libz.tbd */,
 				AD12B42D1D65C42D005D6D5D /* libz.1.dylib */,
@@ -1400,30 +1528,32 @@
 				AD61821E1DE9EBAA002540B7 /* QRCodeUtility.m in Sources */,
 				AD61824B1DE9EBAA002540B7 /* UstadOCF.m in Sources */,
 				AD6181CC1DE9EBAA002540B7 /* AsyncLoadableController.m in Sources */,
-				ADDAD71C1E2CEAB5006894F8 /* XapiStatementManager.m in Sources */,
+				AD401F1D1E4F42BA006830C1 /* StateUriResponder.m in Sources */,
 				AD61822E1DE9EBAA002540B7 /* TinCanStatement.m in Sources */,
 				AD61820B1DE9EBAA002540B7 /* MountedZipHandler.m in Sources */,
+				AD401F2C1E4F42BA006830C1 /* XapiStateEndpoint.m in Sources */,
 				AD6181CA1DE9EBAA002540B7 /* AppView.m in Sources */,
 				AD6181CB1DE9EBAA002540B7 /* AppViewChoiceListener.m in Sources */,
 				AD61821F1DE9EBAA002540B7 /* RangeInputStream.m in Sources */,
 				AD0DAAEE1D6F29AD005FAFDD /* ContainerPageContentViewController.m in Sources */,
+				AD401F261E4F42BA006830C1 /* XapiDocument.m in Sources */,
 				AD08D4641D5B4C96003CB878 /* LoginViewRegisterTabViewController.m in Sources */,
 				AD12B42A1D6327DC005D6D5D /* UstadBaseUIViewController.m in Sources */,
 				AD6181E61DE9EBAA002540B7 /* ClassManagementView.m in Sources */,
 				AD6182241DE9EBAA002540B7 /* RsEncode.m in Sources */,
 				AD61820E1DE9EBAA002540B7 /* OMRRecognitionThread.m in Sources */,
 				AD6182671DE9EBAA002540B7 /* ZipEntryHandleSharedSE.m in Sources */,
-				ADDAD7201E2CEAB5006894F8 /* XapiStatementsForwardingListener.m in Sources */,
 				AD6182301DE9EBAA002540B7 /* UMDownloadCompleteEvent.m in Sources */,
+				AD401F241E4F42BA006830C1 /* XapiAgentManager.m in Sources */,
 				AD6181EE1DE9EBAA002540B7 /* DebugCanvasAdapter.m in Sources */,
+				AD401F121E4F42BA006830C1 /* HttpLrs.m in Sources */,
 				AD6182001DE9EBAA002540B7 /* InvalidVersionInfoException.m in Sources */,
 				AD6182051DE9EBAA002540B7 /* LocaleUtil.m in Sources */,
 				AD6182181DE9EBAA002540B7 /* QRCodeDataBlockReader.m in Sources */,
 				AD6182411DE9EBAA002540B7 /* UstadJSOPDSEntry.m in Sources */,
 				AD6181E21DE9EBAA002540B7 /* ClassListController.m in Sources */,
-				ADDAD71E1E2CEAB5006894F8 /* XapiStatementsForwardingEndpoint.m in Sources */,
+				AD401F2B1E4F42BA006830C1 /* XapiState.m in Sources */,
 				AD46A8F41D52550900C63A29 /* UstadMobileSystemImplFactoryIOS.m in Sources */,
-				AD6182121DE9EBAA002540B7 /* PersistenceManagerFactory.m in Sources */,
 				AD61822C1DE9EBAA002540B7 /* TinCanResult.m in Sources */,
 				AD61821A1DE9EBAA002540B7 /* QRCodeEncoder.m in Sources */,
 				AD6182491DE9EBAA002540B7 /* UstadMobileSystemImplFactory.m in Sources */,
@@ -1431,28 +1561,29 @@
 				AD6181D11DE9EBAA002540B7 /* AttendanceListEntry.m in Sources */,
 				AD6182441DE9EBAA002540B7 /* UstadJSOPF.m in Sources */,
 				ADC3A2571D993DC500BDD24F /* UstadUIViewControllerHelper.m in Sources */,
+				AD401F521E4F42DA006830C1 /* XapiForwardingStatementManagerSharkORM.m in Sources */,
+				AD401F371E4F42BA006830C1 /* XapiUserManager.m in Sources */,
 				AD1BE6651D6D968700373721 /* UstadMobileDownloadInfo.m in Sources */,
 				AD12B4241D631E42005D6D5D /* BasePointViewController.m in Sources */,
 				AD6182231DE9EBAA002540B7 /* RsDecode.m in Sources */,
 				AD6182251DE9EBAA002540B7 /* SamplingGrid.m in Sources */,
 				AD7745E71D539DFE00A56306 /* UMLogIOS.m in Sources */,
 				AD6181F91DE9EBAA002540B7 /* FinderPatternNotFoundException.m in Sources */,
+				AD401F2D1E4F42BA006830C1 /* XapiStateManager.m in Sources */,
 				AD61820A1DE9EBAA002540B7 /* MessagesHashtable.m in Sources */,
-				ADDAD7131E2CEAB5006894F8 /* XapiAgentEndpoint.m in Sources */,
 				AD6181DF1DE9EBAA002540B7 /* CatalogLastAccessTimeComparer.m in Sources */,
-				ADDAD7251E2CEAB5006894F8 /* XapiVerbManager.m in Sources */,
+				AD401F3B1E4F42BA006830C1 /* XapiVerbManager.m in Sources */,
 				AD6182161DE9EBAA002540B7 /* PerspectiveTransform.m in Sources */,
 				AD6181FF1DE9EBAA002540B7 /* InvalidVersionException.m in Sources */,
+				AD401F4E1E4F42DA006830C1 /* NanoLrsBaseManagerSharkORM.m in Sources */,
 				AD6182381DE9EBAA002540B7 /* UMUUID.m in Sources */,
 				AD6181FD1DE9EBAA002540B7 /* HTTPResult.m in Sources */,
-				AD6181D81DE9EBAA002540B7 /* Base64CoderNanoLrs.m in Sources */,
 				AD6181EA1DE9EBAA002540B7 /* ContainerView.m in Sources */,
 				AD6182461DE9EBAA002540B7 /* UstadMobileConstants.m in Sources */,
 				AD61821C1DE9EBAA002540B7 /* QRCodeImageReader.m in Sources */,
 				AD6181DC1DE9EBAA002540B7 /* BCH_15_5.m in Sources */,
 				AD0E15811E1D3AB400EF5F8C /* AboutController.m in Sources */,
 				AD61820D1DE9EBAA002540B7 /* OMRImageSource.m in Sources */,
-				ADDAD71B1E2CEAB5006894F8 /* XapiStatement.m in Sources */,
 				AD6181CE1DE9EBAA002540B7 /* AttendanceClassStudent.m in Sources */,
 				AD6181F61DE9EBAA002540B7 /* EPUBNavDocument.m in Sources */,
 				AD61824D1DE9EBAA002540B7 /* UstadView.m in Sources */,
@@ -1463,18 +1594,21 @@
 				AD6182061DE9EBAA002540B7 /* LogicalSeed.m in Sources */,
 				AD61822B1DE9EBAA002540B7 /* TinCanQueueListener.m in Sources */,
 				AD6182451DE9EBAA002540B7 /* UstadJSOPFItem.m in Sources */,
-				ADDAD7191E2CEAB5006894F8 /* XapiStateEndpoint.m in Sources */,
 				AD6181FB1DE9EBAA002540B7 /* HTTPCacheDir.m in Sources */,
+				AD401F151E4F42BA006830C1 /* NanoLrsHttpd.m in Sources */,
 				AD0E15821E1D3AB400EF5F8C /* AboutView.m in Sources */,
 				AD6182211DE9EBAA002540B7 /* Registration.m in Sources */,
 				AD6181E91DE9EBAA002540B7 /* ContainerController.m in Sources */,
+				AD401F311E4F42BA006830C1 /* XapiStatementsForwardingEndpoint.m in Sources */,
 				AD6181D31DE9EBAA002540B7 /* AttendanceRowModel.m in Sources */,
 				AD61820C1DE9EBAA002540B7 /* NanoHTTPD.m in Sources */,
 				AD61823E1DE9EBAA002540B7 /* UstadBaseController.m in Sources */,
 				AD61822A1DE9EBAA002540B7 /* TinCanQueueEvent.m in Sources */,
 				AD6182471DE9EBAA002540B7 /* UstadMobileDefaults.m in Sources */,
+				AD401F281E4F42BA006830C1 /* XapiForwardingStatement.m in Sources */,
 				AD6181ED1DE9EBAA002540B7 /* DebugCanvas.m in Sources */,
 				AD6181F71DE9EBAA002540B7 /* EPUBNavItem.m in Sources */,
+				AD401F351E4F42BA006830C1 /* XapiStateSrkObj.m in Sources */,
 				AD6181F01DE9EBAA002540B7 /* EmbeddedHTTPD.m in Sources */,
 				AD61821B1DE9EBAA002540B7 /* QRCodeImage.m in Sources */,
 				AD6181F31DE9EBAA002540B7 /* EntityListController.m in Sources */,
@@ -1482,49 +1616,53 @@
 				AD6181E41DE9EBAA002540B7 /* ClassManagementController.m in Sources */,
 				AD6182391DE9EBAA002540B7 /* URLTextUtil.m in Sources */,
 				AD6181E81DE9EBAA002540B7 /* Color.m in Sources */,
-				ADDAD71A1E2CEAB5006894F8 /* XapiStateManager.m in Sources */,
 				AD6182291DE9EBAA002540B7 /* TestUtils.m in Sources */,
+				AD401F291E4F42BA006830C1 /* XapiForwardingStatementManager.m in Sources */,
 				AD6182421DE9EBAA002540B7 /* UstadJSOPDSFeed.m in Sources */,
-				AD6182131DE9EBAA002540B7 /* PersistenceReceiver.m in Sources */,
 				AD61824E1DE9EBAA002540B7 /* VersionInformationException.m in Sources */,
-				ADDAD7161E2CEAB5006894F8 /* XapiForwardingStatement.m in Sources */,
 				AD6181E71DE9EBAA002540B7 /* ClassManagementView2.m in Sources */,
 				AD6181F41DE9EBAA002540B7 /* EntityListView.m in Sources */,
 				AD6181F21DE9EBAA002540B7 /* EnrollStudentView.m in Sources */,
+				AD401F321E4F42BA006830C1 /* XapiStatementsForwardingEvent.m in Sources */,
+				AD401F301E4F42BA006830C1 /* XapiStatementsEndpoint.m in Sources */,
 				AD12B4271D6325B6005D6D5D /* CatalogViewController.m in Sources */,
-				ADDAD7111E2CEAB5006894F8 /* XapiActivityManager.m in Sources */,
+				AD401F551E4F42DA006830C1 /* XapiVerbManagerSharkORM.m in Sources */,
+				AD401F541E4F42DA006830C1 /* XapiStatementManagerSharkORM.m in Sources */,
 				AD6181DE1DE9EBAA002540B7 /* CatalogEntryInfo.m in Sources */,
 				AD6181E31DE9EBAA002540B7 /* ClassListView.m in Sources */,
 				AD6181C81DE9EBAA002540B7 /* AlignmentPatternNotFoundException.m in Sources */,
+				AD401F391E4F42BA006830C1 /* XapiVerb.m in Sources */,
 				AD6182171DE9EBAA002540B7 /* Point.m in Sources */,
-				AD6182111DE9EBAA002540B7 /* PersistenceManager.m in Sources */,
 				AD6182351DE9EBAA002540B7 /* UMStorageDir.m in Sources */,
 				AD6182031DE9EBAA002540B7 /* ListableEntity.m in Sources */,
 				AD6181DA1DE9EBAA002540B7 /* BasePointView.m in Sources */,
 				AD6181D01DE9EBAA002540B7 /* AttendanceListController.m in Sources */,
+				AD401F501E4F42DA006830C1 /* XapiActivityManagerSharkORM.m in Sources */,
+				AD401F4F1E4F42DA006830C1 /* PersistenceManagerIOS.m in Sources */,
 				AD61823D1DE9EBAA002540B7 /* UserSettingsView.m in Sources */,
+				AD401F191E4F42BA006830C1 /* PersistenceManagerFactory.m in Sources */,
+				AD401F1E1E4F42BA006830C1 /* XapiActivity.m in Sources */,
 				AD46A6441D524FC600C63A29 /* UstadMobileSystemImplIOS.m in Sources */,
-				ADDAD7181E2CEAB5006894F8 /* XapiState.m in Sources */,
 				AD61823B1DE9EBAA002540B7 /* UserSettingsController.m in Sources */,
 				AD5D3DB41D5750B40063E9C0 /* AppViewIOS.m in Sources */,
-				ADDAD7151E2CEAB5006894F8 /* XapiDocument.m in Sources */,
-				ADDAD7101E2CEAB5006894F8 /* XapiActivityEndpoint.m in Sources */,
 				AD0DAAF11D6F3191005FAFDD /* ContainerViewController.m in Sources */,
 				AD6182141DE9EBAA002540B7 /* PersonListController.m in Sources */,
+				AD401F3A1E4F42BA006830C1 /* XapiVerbEndpoint.m in Sources */,
 				AD6181E01DE9EBAA002540B7 /* CatalogModel.m in Sources */,
 				AD6182041DE9EBAA002540B7 /* LoadControllerThread.m in Sources */,
 				AD6182341DE9EBAA002540B7 /* UMLog.m in Sources */,
+				AD401F141E4F42BA006830C1 /* LrsIoUtils.m in Sources */,
 				AD6181F11DE9EBAA002540B7 /* EnrollStudentController.m in Sources */,
 				AD6182191DE9EBAA002540B7 /* QRCodeDecoder.m in Sources */,
 				AD6182071DE9EBAA002540B7 /* LoginController.m in Sources */,
-				ADDAD71F1E2CEAB5006894F8 /* XapiStatementsForwardingEvent.m in Sources */,
 				ADD2C9621DABC957004D621E /* LoginViewForgotPasswordViewController.m in Sources */,
 				AD6182361DE9EBAA002540B7 /* UMTinCanUtil.m in Sources */,
 				AD6181FE1DE9EBAA002540B7 /* InvalidDataBlockException.m in Sources */,
 				AD6182081DE9EBAA002540B7 /* LoginView.m in Sources */,
 				AD6181F81DE9EBAA002540B7 /* FinderPattern.m in Sources */,
+				AD401F1A1E4F42BA006830C1 /* PersistenceManagerFactoryImpl.m in Sources */,
+				AD401F531E4F42DA006830C1 /* XapiStateManagerSharkORM.m in Sources */,
 				AD6181D91DE9EBAA002540B7 /* BasePointController.m in Sources */,
-				ADDAD71D1E2CEAB5006894F8 /* XapiStatementsEndpoint.m in Sources */,
 				AD61824C1DE9EBAA002540B7 /* UstadOCFRootFile.m in Sources */,
 				AD6182201DE9EBAA002540B7 /* ReedSolomon.m in Sources */,
 				AD6182331DE9EBAA002540B7 /* UMIOUtils.m in Sources */,
@@ -1532,52 +1670,64 @@
 				AD61822D1DE9EBAA002540B7 /* TinCanResultListener.m in Sources */,
 				AD6181D61DE9EBAA002540B7 /* Axis.m in Sources */,
 				ADC3A2541D9817FF00BDD24F /* LoginPageContentViewController.m in Sources */,
-				ADDAD7171E2CEAB5006894F8 /* XapiForwardingStatementManager.m in Sources */,
 				AD6182151DE9EBAA002540B7 /* PersonListView.m in Sources */,
+				AD401F341E4F42BA006830C1 /* XapiStatementSrkObj.m in Sources */,
 				AD6181C71DE9EBAA002540B7 /* AlignmentPattern.m in Sources */,
 				AD6181DB1DE9EBAA002540B7 /* BCH15_5.m in Sources */,
 				AD6181C61DE9EBAA002540B7 /* Activity.m in Sources */,
+				AD401F111E4F42BA006830C1 /* Base64CoderNanoLrs.m in Sources */,
 				AD6181DD1DE9EBAA002540B7 /* CatalogController.m in Sources */,
+				AD401F3C1E4F42BA006830C1 /* XapiVerbSrkObj.m in Sources */,
+				AD401F1C1E4F42BA006830C1 /* StatementsUriResponder.m in Sources */,
+				AD401F2E1E4F42BA006830C1 /* XapiStatement.m in Sources */,
 				AD61821D1DE9EBAA002540B7 /* QRCodeSymbol.m in Sources */,
+				AD401F211E4F42BA006830C1 /* XapiActivitySrkObj.m in Sources */,
 				AD6182321DE9EBAA002540B7 /* UMFileUtil.m in Sources */,
-				ADDAD7211E2CEAB5006894F8 /* XapiUser.m in Sources */,
+				AD401F511E4F42DA006830C1 /* XapiAgentManagerSharkORM.m in Sources */,
 				AD6182401DE9EBAA002540B7 /* UstadJSOPDSAuthor.m in Sources */,
 				AD1BE6621D69DED200373721 /* CatalogViewControllerEntryTableViewCell.m in Sources */,
 				AD6182271DE9EBAA002540B7 /* SymbolNotFoundException.m in Sources */,
 				AD61823F1DE9EBAA002540B7 /* UstadController.m in Sources */,
+				AD401F361E4F42BA006830C1 /* XapiUser.m in Sources */,
+				AD401F1B1E4F42BA006830C1 /* PersistenceReceiver.m in Sources */,
+				AD401F381E4F42BA006830C1 /* XapiUserSrkObj.m in Sources */,
+				AD401F181E4F42BA006830C1 /* PersistenceManager.m in Sources */,
 				AD77D0561D523A8A00A2F95A /* AppDelegate.m in Sources */,
+				AD401F2F1E4F42BA006830C1 /* XapiStatementManager.m in Sources */,
 				AD6181FA1DE9EBAA002540B7 /* Galois.m in Sources */,
-				ADDAD7241E2CEAB5006894F8 /* XapiVerbEndpoint.m in Sources */,
 				AD6182221DE9EBAA002540B7 /* RouterNanoHTTPD.m in Sources */,
+				AD401F271E4F42BA006830C1 /* XapiDocumentSrkObj.m in Sources */,
 				AD6182091DE9EBAA002540B7 /* MessageIDConstants.m in Sources */,
+				AD401F221E4F42BA006830C1 /* XapiAgent.m in Sources */,
+				AD401F231E4F42BA006830C1 /* XapiAgentEndpoint.m in Sources */,
+				AD401F201E4F42BA006830C1 /* XapiActivityManager.m in Sources */,
+				AD401F2A1E4F42BA006830C1 /* XapiForwardingStatementSrkObj.m in Sources */,
 				AD61823C1DE9EBAA002540B7 /* UserSettingsModel.m in Sources */,
 				AD61820F1DE9EBAA002540B7 /* OMRRecognizer.m in Sources */,
-				ADDAD7121E2CEAB5006894F8 /* XapiAgent.m in Sources */,
-				AD6182011DE9EBAA002540B7 /* JsonUtil.m in Sources */,
 				AD77D0531D523A8A00A2F95A /* main.m in Sources */,
 				AD6181E11DE9EBAA002540B7 /* CatalogView.m in Sources */,
 				AD61823A1DE9EBAA002540B7 /* UserSettingItem.m in Sources */,
 				AD6181EC1DE9EBAA002540B7 /* ControllerReadyListener.m in Sources */,
 				AD12B4211D631228005D6D5D /* LoginViewLoginTabViewController.m in Sources */,
+				AD401F171E4F42BA006830C1 /* ParseUtil.m in Sources */,
+				AD401F131E4F42BA006830C1 /* JsonUtil.m in Sources */,
 				AD6181CF1DE9EBAA002540B7 /* AttendanceController.m in Sources */,
 				AD80403F1E461D0300647996 /* CoreBuildConfig.m in Sources */,
-				ADDAD70F1E2CEAB5006894F8 /* XapiActivity.m in Sources */,
+				AD401F1F1E4F42BA006830C1 /* XapiActivityEndpoint.m in Sources */,
 				AD6181D51DE9EBAA002540B7 /* AttendanceView.m in Sources */,
 				AD6182661DE9EBAA002540B7 /* ZipEntryHandle.m in Sources */,
 				AD6181D41DE9EBAA002540B7 /* AttendanceSheetImage.m in Sources */,
-				AD6181FC1DE9EBAA002540B7 /* HttpLrs.m in Sources */,
-				AD6182101DE9EBAA002540B7 /* ParseUtil.m in Sources */,
 				AD6181F51DE9EBAA002540B7 /* EPUBContainerView.m in Sources */,
-				ADDAD7221E2CEAB5006894F8 /* XapiUserManager.m in Sources */,
 				AD6181D21DE9EBAA002540B7 /* AttendanceListView.m in Sources */,
 				AD6181E51DE9EBAA002540B7 /* ClassManagementController2.m in Sources */,
+				AD401F331E4F42BA006830C1 /* XapiStatementsForwardingListener.m in Sources */,
 				AD6181EF1DE9EBAA002540B7 /* DecodingFailedException.m in Sources */,
 				AD6181CD1DE9EBAA002540B7 /* AttendanceClass.m in Sources */,
-				ADDAD7141E2CEAB5006894F8 /* XapiAgentManager.m in Sources */,
-				ADDAD7231E2CEAB5006894F8 /* XapiVerb.m in Sources */,
 				AD61824A1DE9EBAA002540B7 /* UstadMobileSystemImplSE.m in Sources */,
 				AD6182261DE9EBAA002540B7 /* ServerRunner.m in Sources */,
+				AD401F251E4F42BA006830C1 /* XapiAgentSrkObj.m in Sources */,
 				ADC3A2511D98168F00BDD24F /* LoginPageViewController.m in Sources */,
+				AD401F161E4F42BA006830C1 /* NanoLrsResponder.m in Sources */,
 				AD6182691DE9EBAA002540B7 /* ZipFileHandleSharedSE.m in Sources */,
 				AD6182371DE9EBAA002540B7 /* UMUtil.m in Sources */,
 				AD6182681DE9EBAA002540B7 /* ZipFileHandle.m in Sources */,

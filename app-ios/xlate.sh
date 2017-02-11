@@ -1,13 +1,17 @@
 #/bin/bash
 
+NANOHTTPD_VERSION_TAG=nanohttpd-project-2.3.1
+NANOLRS_VERSION_TAG=v0.1.43
+
 J2OBJC_DIR=~/local/j2objc
 JAVA_SRC_DIR=../core/src/main/java
 IMPL_SHAREDSE_DIR=../sharedse/src/main/java
 QR_SRC_DIR=lib/checkout/qrcode/qrcode-core/src/main/java
+
 NANO_HTTPD_SRC_DIR=lib/checkout/nanohttpd/core/src/main/java
 NANO_HTTPD_NANOLETS_DIR=lib/checkout/nanohttpd/nanolets/src/main/java
+
 NANOLRS_CORE_DIR=lib/checkout/NanoLRS/nanolrs-core/src/main/java
-NANOLRS_CORE_TEST_DIR=lib/checkout/NanoLRS/nanolrs-core/src/test/java
 
 JAVA_SRC_FILES=$(find $JAVA_SRC_DIR -iname "*.java")
 IMPL_SHAREDSE_FILES=$(find $IMPL_SHAREDSE_DIR -name "*.java") 
@@ -15,7 +19,8 @@ QR_SRC_FILES=$(find $QR_SRC_DIR -iname "*.java")
 NANO_HTTPD_FILES=$(find $NANO_HTTPD_SRC_DIR -name "*.java")
 NANO_HTTPD_NANOLETS_FILES=$(find $NANO_HTTPD_NANOLETS_DIR -name "*.java")
 NANOLRS_CORE_FILES=$(find $NANOLRS_CORE_DIR -name "*.java")
-NANOLRS_CORE_TEST_FILES=$(find $NANOLRS_CORE_TEST_DIR -name "*.java")
+
+BASEDIR=$(pwd)
 
 # Run the build config generation
 cd ..
@@ -51,32 +56,33 @@ fi
 if [ ! -e nanohttpd ]; then
     git clone https://github.com/NanoHttpd/nanohttpd.git
     cd nanohttpd
-    git checkout tags/nanohttpd-project-2.3.1
+    git checkout tags/$NANOHTTPD_VERSION_TAG
     cd ..
 fi
 
-
-
-#Checkout NanoLRS
-if [ -e NanoLRS ]; then
-	cd NanoLRS
-	git pull
-	cd ..
-else
+#Checkout NanoLRS and "build" it's iOS version
+if [ ! -e NanoLRS ]; then
 	git clone https://github.com/UstadMobile/NanoLRS.git NanoLRS
 fi
+cd NanoLRS
+git checkout master
+git pull
+git checkout tags/$NANOLRS_VERSION_TAG
+cd nanolrs-ios
+./generate.sh
 
-cd ../..
+if [ "$?" != "0" ]; then
+    "Error running nanolrs build : please check and try again"
+    exit 1
+fi
 
+#back to base dir
+cd $BASEDIR
 
-pwd
+echo "Back to base directory " pwd
 
 if [ -e UstadMobileIOS/Generated/ ]; then
     rm UstadMobileIOS/Generated/*.h  UstadMobileIOS/Generated/*.m
-fi
-
-if [ -e UstadMobileIOS/Generated-Test ]; then
-    rm UstadMobileIOS/Generated-Test/*.h UstadMobileIOS/Generated-Test/*.m
 fi
 
 SOURCEPATH_MAIN=$JAVA_SRC_DIR:$QR_SRC_DIR:$IMPL_SHAREDSE_DIR:$NANO_HTTPD_SRC_DIR:$NANO_HTTPD_NANOLETS_DIR:$NANOLRS_CORE_DIR
@@ -86,19 +92,7 @@ $J2OBJC_DIR/j2objc -d UstadMobileIOS/Generated/ \
    -sourcepath $SOURCEPATH_MAIN \
    --no-package-directories $JAVA_SRC_FILES \
    $IMPL_SHAREDSE_FILES $QR_SRC_FILES $NANO_HTTPD_FILES \
-   $NANO_HTTPD_NANOLETS_FILES $NANOLRS_CORE_FILES
-
-echo "junit jar: " $J2OBJC_DIR/lib/j2objc_junit.jar
-   
-$J2OBJC_DIR/j2objc -d UstadMobileIOS/Generated-Test \
-   -classpath $J2OBJC_DIR/lib/j2objc_junit.jar \
-   -sourcepath $SOURCEPATH_MAIN \
-   --no-package-directories $NANOLRS_CORE_TEST_FILES
-
-echo $J2OBJC_DIR/j2objc -d UstadMobileIOS/Generated-Test \
-   -classpath $J2OBJC_DIR/lib/j2objc_junit.jar \
-   -sourcepath $SOURCEPATH_MAIN \
-   --no-package-directories $NANOLRS_CORE_TEST_FILES
+   $NANO_HTTPD_NANOLETS_FILES   
 
 #Copy resources (e.g. locale)
 if [ -e UstadMobileIOS/res ]; then
