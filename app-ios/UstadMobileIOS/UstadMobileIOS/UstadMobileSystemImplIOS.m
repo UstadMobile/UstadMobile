@@ -24,7 +24,7 @@
 #import "UMDownloadCompleteReceiver.h"
 #import "EmbeddedHTTPD.h"
 #import "UstadViewControllerWithArgs.h"
-
+#import "NanoLrsHttpd.h"
 #include "J2ObjC_source.h"
 
 
@@ -85,6 +85,7 @@ NSString *PROTOCOL_UM_IOS_FILEURI = @"umiosappdir:///";
     self.downloadInfoTable = [NSMapTable strongToStrongObjectsMapTable];
     self.downloadCompleteListeners = [[NSMutableArray alloc]init];
     self.httpd = [[ComUstadmobilePortSharedseImplHttpEmbeddedHTTPD alloc]initWithInt:8071];
+    [ComUstadmobileNanolrsHttpNanoLrsHttpd mountXapiEndpointsOnServerWithFiIkiElonenRouterRouterNanoHTTPD:self.httpd withId:self withNSString:@"/xapi/"];
     [self.httpd start];
     return self;
 }
