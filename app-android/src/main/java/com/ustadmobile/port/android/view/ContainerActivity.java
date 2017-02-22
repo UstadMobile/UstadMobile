@@ -186,38 +186,23 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     }
 
     @Override
-    public void onHttpServiceConnected(HTTPService service) {
-        super.onHttpServiceConnected(service);
-        mHttpService = service;
-        onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__", mHttpService.getAssetsBaseURL());
-        ContainerActivity.this.initContent();
-    }
-
-    @Override
-    public void onHttpServiceDisconnected() {
-        super.onHttpServiceDisconnected();
-        mHttpService = null;
-    }
-
-    /*
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)service;
-            mHttpService = binder.getService();
-
+    public void onServiceConnected(ComponentName name, IBinder iBinder) {
+        super.onServiceConnected(name, iBinder);
+        if(name.getClassName().equals(HTTPService.class.getName())) {
+            mHttpService = ((HTTPService.HTTPBinder) iBinder).getService();
             onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__", mHttpService.getAssetsBaseURL());
             ContainerActivity.this.initContent();
         }
+    }
 
-        public void onServiceDisconnected(ComponentName arg0) {
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        if(name.getClassName().equals(HTTPService.class.getName())) {
             mHttpService = null;
         }
+        super.onServiceDisconnected(name);
+    }
 
-    };
-    */
 
     public void initContent() {
         mMountedPath = mHttpService.mountZIP(ContainerActivity.this.mContainerURI, mSavedMountPoint);

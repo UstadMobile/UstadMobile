@@ -25,8 +25,6 @@ import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
-import com.ustadmobile.port.android.util.P2PAndroidUtils;
-import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;
@@ -40,8 +38,8 @@ import edu.rit.se.wifibuddy.WifiDirectHandler;
  *
  * Created by mike on 10/15/15.
  */
+public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
 
-public abstract class UstadBaseActivity extends AppCompatActivity implements HTTPService.HTTPServiceConnectionListener {
 
     private String mUILocale;
 
@@ -113,16 +111,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements HTT
     };
 
     /**
-     * UstadMobileSystemImplAndroid will automatically bind to the HTTP service in handleActivityCreate
-     * @param service
+     * UstadMobileSystemImpl will bind certain services to each activity (e.g. HTTP, P2P services)
+     * If needed the child activity can override this method to listen for when the service is ready
+     *
+     * @param name
+     * @param iBinder
      */
     @Override
-    public void onHttpServiceConnected(HTTPService service) {
+    public void onServiceConnected(ComponentName name, IBinder iBinder) {
 
     }
 
     @Override
-    public void onHttpServiceDisconnected() {
+    public void onServiceDisconnected(ComponentName name) {
 
     }
 

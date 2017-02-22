@@ -149,35 +149,36 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private HashMap<String, String> knownMimeToExtensionMap;
 
     /**
-     *
+     * Base ServiceConnection class used to bind any given context to shared services: notably
+     * the HTTP service and the upcoming p2p service.
      */
-    private static class HTTPServiceConnection implements ServiceConnection {
-        private HTTPService service;
+    private static class BaseServiceConnection implements ServiceConnection {
+        private IBinder iBinder;
 
         private Context context;
 
-        private HTTPServiceConnection(Context context) {
+        private BaseServiceConnection(Context context) {
             this.context = context;
         }
 
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder) {
-            HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)iBinder;
-            service = binder.getService();
-            if(context instanceof HTTPService.HTTPServiceConnectionListener)
-                ((HTTPService.HTTPServiceConnectionListener)context).onHttpServiceConnected(service);
+            this.iBinder = iBinder;
+            if(context instanceof ServiceConnection) {
+                ((ServiceConnection)context).onServiceConnected(name, iBinder);
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            service = null;
-            if(context instanceof HTTPService.HTTPServiceConnectionListener)
-                ((HTTPService.HTTPServiceConnectionListener)context).onHttpServiceDisconnected();
+            iBinder= null;
+            if(context instanceof ServiceConnection)
+                ((ServiceConnection)context).onServiceDisconnected(name);
         }
 
-        public HTTPService getService() {
-            return service;
+        public IBinder getBinder() {
+            return iBinder;
         }
     }
 
@@ -287,7 +288,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
         init(activity);
         Intent intent = new Intent(activity, HTTPService.class);
-        HTTPServiceConnection connection = new HTTPServiceConnection(activity);
+        BaseServiceConnection connection = new BaseServiceConnection(activity);
         httpServiceConnections.put(activity, connection);
         activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }

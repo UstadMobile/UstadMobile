@@ -220,3 +220,6 @@ core/src/main/java/com/ustadmobile/core/buildconfig/CoreBuildConfig.java
 #Local buildconfig gradle files
 buildconfig.core.gradle
 buildconfig.core.local.properties
+
+#MacOS annoying .DS_Store
+.DS_Store
