@@ -16,7 +16,6 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointController;
-import com.ustadmobile.core.controller.SettingsDataUsageController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -27,6 +26,7 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
 import com.ustadmobile.port.android.util.P2PAndroidUtils;
+import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;
@@ -40,7 +40,8 @@ import edu.rit.se.wifibuddy.WifiDirectHandler;
  *
  * Created by mike on 10/15/15.
  */
-public abstract class UstadBaseActivity extends AppCompatActivity{
+
+public abstract class UstadBaseActivity extends AppCompatActivity implements HTTPService.HTTPServiceConnectionListener {
 
     private String mUILocale;
 
@@ -112,6 +113,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity{
         }
     };
 
+    /**
+     * UstadMobileSystemImplAndroid will automatically bind to the HTTP service in handleActivityCreate
+     * @param service
+     */
+    @Override
+    public void onHttpServiceConnected(HTTPService service) {
+
+    }
+
+    @Override
+    public void onHttpServiceDisconnected() {
+
+    }
 
 
 
@@ -290,4 +304,4 @@ public abstract class UstadBaseActivity extends AppCompatActivity{
     }
 
 
-    }
+}

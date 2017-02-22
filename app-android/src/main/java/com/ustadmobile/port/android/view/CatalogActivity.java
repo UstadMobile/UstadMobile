@@ -35,8 +35,6 @@ public class CatalogActivity extends UstadBaseActivity  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
-
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_catalog);

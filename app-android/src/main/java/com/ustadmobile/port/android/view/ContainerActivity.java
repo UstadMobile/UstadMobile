@@ -119,7 +119,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     @Override
     protected void onCreate(Bundle saved) {
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, saved);
         super.onCreate(saved);
 
         setContentView(R.layout.activity_container_epubpager);
@@ -184,11 +183,23 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
         mDrawerList = (ListView)findViewById(R.id.container_tocdrawer);
         mDrawerList.setOnItemClickListener(this);
-
-        //now bind to the HTTPService - the onServiceConnected method will call initContent
-        Intent intent = new Intent(this, HTTPService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
+
+    @Override
+    public void onHttpServiceConnected(HTTPService service) {
+        super.onHttpServiceConnected(service);
+        mHttpService = service;
+        onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__", mHttpService.getAssetsBaseURL());
+        ContainerActivity.this.initContent();
+    }
+
+    @Override
+    public void onHttpServiceDisconnected() {
+        super.onHttpServiceDisconnected();
+        mHttpService = null;
+    }
+
+    /*
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -206,6 +217,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
 
     };
+    */
 
     public void initContent() {
         mMountedPath = mHttpService.mountZIP(ContainerActivity.this.mContainerURI, mSavedMountPoint);
@@ -491,12 +503,9 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             mHttpService.ummountZIP(mMountedPath);
         }
 
-        unbindService(mConnection);
         mContainerURI = null;
         mMimeType = null;
         mSavedPosition = -1;
-
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
 
         super.onDestroy();
     }

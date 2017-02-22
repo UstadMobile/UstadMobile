@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
+import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 
@@ -38,6 +39,14 @@ public class HTTPService extends Service {
 
     private String assetsPath;
 
+
+    public interface HTTPServiceConnectionListener {
+        void onHttpServiceConnected(HTTPService service);
+
+        void onHttpServiceDisconnected();
+    }
+
+
     public HTTPService() {
         id = idcount;
         idcount++;
@@ -53,8 +62,8 @@ public class HTTPService extends Service {
         Log.i(UstadMobileSystemImplAndroid.TAG, "Create HTTP P2PServiceAndroid " + this);
         httpd = new EmbeddedHTTPD(DEFAULT_PORT);
         assetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
-        httpd.addRoute(assetsPath +"(.)+",
-                AndroidAssetsHandler.class, this);
+        httpd.addRoute(assetsPath +"(.)+",  AndroidAssetsHandler.class, this);
+        httpd.addRoute("/catalog/(.)+", CatalogUriResponder.class, this);
 
         NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, this, "/xapi/");
 
@@ -65,8 +74,6 @@ public class HTTPService extends Service {
             Log.e(UstadMobileSystemImplAndroid.TAG, "Error starting http server", e);
             e.printStackTrace();
         }
-
-
     }
 
 
@@ -88,6 +95,7 @@ public class HTTPService extends Service {
             return HTTPService.this;
         }
     }
+
 
     /**
      * The base URL and port of the server: e.g.

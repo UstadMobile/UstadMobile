@@ -45,15 +45,9 @@ public class SplashScreenActivity extends UstadBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
 
-
         UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        //impl.getAppView(getContext()).showProgressDialog(impl.getString(MessageIDConstants.processing));
-
-        impl.handleActivityStart(this); //Doesn't really do anything..
-
         impl.startUI(this); // Let UstadBaseActivity handle this.
     }
 
@@ -63,16 +57,6 @@ public class SplashScreenActivity extends UstadBaseActivity {
         UstadMobileSystemImpl.getInstance();
 
 
-    }
-
-    public void onStop() {
-        super.onStop();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-        UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
 
     @Override
