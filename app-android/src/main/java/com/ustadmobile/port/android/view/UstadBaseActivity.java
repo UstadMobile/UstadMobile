@@ -39,7 +39,7 @@ import java.util.List;
  *
  * Created by mike on 10/15/15.
  */
-public abstract class UstadBaseActivity extends AppCompatActivity implements HTTPService.HTTPServiceConnectionListener {
+public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
 
     private String mUILocale;
 
@@ -87,16 +87,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements HTT
     };
 
     /**
-     * UstadMobileSystemImplAndroid will automatically bind to the HTTP service in handleActivityCreate
-     * @param service
+     * UstadMobileSystemImpl will bind certain services to each activity (e.g. HTTP, P2P services)
+     * If needed the child activity can override this method to listen for when the service is ready
+     *
+     * @param name
+     * @param iBinder
      */
     @Override
-    public void onHttpServiceConnected(HTTPService service) {
+    public void onServiceConnected(ComponentName name, IBinder iBinder) {
 
     }
 
     @Override
-    public void onHttpServiceDisconnected() {
+    public void onServiceDisconnected(ComponentName name) {
 
     }
 
