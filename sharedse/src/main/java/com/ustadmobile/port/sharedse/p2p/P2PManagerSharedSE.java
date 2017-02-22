@@ -78,11 +78,24 @@ public abstract class P2PManagerSharedSE implements Runnable, P2PManager {
 
     protected abstract void discoverPeers();
 
+    /**
+     * Set if supernode mode is enabled or not (by default this is disabled)
+     *
+     * @param enabled
+     */
+    public abstract void setSuperNodeEnabled(boolean enabled);
+
+    /**
+     *  Set if normal client mode is enabled (enabled by default on platforms that support it)
+     *
+     *  @param enabled
+     */
+    public abstract void setClientEnabled(boolean enabled);
 
     /**
      * check if there is super node around
      * */
-    public abstract boolean IsSuperNodeAvailable();
+    public abstract boolean isSuperNodeAvailable();
 
     /**
      * check if the file is available locally
@@ -91,7 +104,8 @@ public abstract class P2PManagerSharedSE implements Runnable, P2PManager {
 
     /**
      * request to download a file from super node
-     * */
+     *
+     */
     public abstract int requestDownload(DownloadRequest request);
 
     /**
@@ -105,7 +119,7 @@ public abstract class P2PManagerSharedSE implements Runnable, P2PManager {
     public abstract int[] getRequestStatus(int requestId);
 
     /**
-     * request to download state status
+     * request to status of the peer to peer environment
      * */
     public abstract int getStatus();
 

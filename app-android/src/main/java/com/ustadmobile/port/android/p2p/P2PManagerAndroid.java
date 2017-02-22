@@ -325,7 +325,7 @@ class P2PManagerAndroid extends P2PManagerSharedSE {
     }
 
     @Override
-    public boolean IsSuperNodeAvailable() {
+    public boolean isSuperNodeAvailable() {
         try{
             JSONObject devices=new JSONObject(UstadMobileSystemImpl.getInstance().getAppPref("devices",context));
 
@@ -348,6 +348,9 @@ class P2PManagerAndroid extends P2PManagerSharedSE {
     }
 
     @Override
+    /**
+     * Start a foreground service that downloads the requested file from available peers
+     */
     public int requestDownload(DownloadRequest request) {
         return 0;
     }

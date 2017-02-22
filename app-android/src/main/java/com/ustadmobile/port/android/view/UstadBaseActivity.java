@@ -89,8 +89,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements HTT
         public void onServiceConnected(ComponentName name, IBinder service) {
             WifiDirectHandler.WifiTesterBinder binder = (WifiDirectHandler.WifiTesterBinder) service;
             wifiDirectHandler = binder.getService();
-            P2PAndroidUtils.wifiDirectHandler=wifiDirectHandler;
-            //wifiDirectHandler.setSuperNodeEnabled(Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(SettingsDataUsageController.PREFKEY_SUPERNODE,getApplicationContext())));
+
 
         }
 

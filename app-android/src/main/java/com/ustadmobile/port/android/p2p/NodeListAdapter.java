@@ -11,10 +11,11 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.port.android.util.P2PAndroidUtils;
+import com.ustadmobile.port.sharedse.p2p.P2PNode;
+
 
 import java.util.ArrayList;
 
-import edu.rit.se.wifibuddy.P2PNode;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 /**
@@ -92,16 +93,7 @@ public class NodeListAdapter extends RecyclerView.Adapter<NodeHolder> {
         }
     }
 
-    private String getNodeType(int type){
-        switch (type){
-            case 1:
-                return "Super Node";
-            case 0:
-                return "Normal Node";
-            default:
-                return "Unknown";
-        }
-    }
+
 }
 
 class NodeHolder extends RecyclerView.ViewHolder{

@@ -710,4 +710,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return true;
     }
 
+    @Override
+    public P2PManagerSharedSE getP2PManager(Object context) {
+        return super.getP2PManager(context);
+    }
 }

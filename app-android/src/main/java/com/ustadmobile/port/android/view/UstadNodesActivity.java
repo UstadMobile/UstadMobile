@@ -11,6 +11,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,10 +21,10 @@ import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.p2p.NodeListAdapter;
 import com.ustadmobile.port.android.util.P2PAndroidUtils;
+import com.ustadmobile.port.sharedse.p2p.P2PNode;
 
 import java.util.ArrayList;
 
-import edu.rit.se.wifibuddy.P2PNode;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 public class UstadNodesActivity extends UstadBaseActivity implements SwipeRefreshLayout.OnRefreshListener{
@@ -31,6 +32,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements SwipeRefres
     private RecyclerView allNodesList;
     private NodeListAdapter nodeListAdapter;
     private SwipeRefreshLayout refreshNodeList;
+    private ArrayList<P2PNode> nodeList;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -40,34 +42,46 @@ public class UstadNodesActivity extends UstadBaseActivity implements SwipeRefres
         setUMToolbar(R.id.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        nodeList=new ArrayList<>();
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
         filter.addAction(WifiDirectHandler.Action.MESSAGE_RECEIVED);
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
-        filter.addAction(WifiDirectHandler.Action.P2P_GROUP_FORMED);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                if(intent.getAction().equalsIgnoreCase(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE)){
-                    refreshNodeList.setRefreshing(false);
-                    nodeListAdapter.setNodeList(P2PAndroidUtils.wifiDirectHandler.getP2PNodeList());
+                if(intent.getAction().equals(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE)){
+
+
+
+                    P2PNode node=new P2PNode(intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY));
+                    node.setNetworkPass(
+                            wifiDirectHandler.getDnsSdTxtRecordMap().get(
+                                    intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY)
+                            ).getRecord().get(WifiDirectHandler.Keys.NO_PROMPT_NETWORK_PASS).toString()
+
+                    );
+                    node.setNetworkSSID(
+                            wifiDirectHandler.getDnsSdTxtRecordMap().get(
+                                    intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY)
+                            ).getRecord().get(WifiDirectHandler.Keys.NO_PROMPT_NETWORK_NAME).toString()
+
+                    );
+                    node.setNodeAddress(intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY));
+                    node.setTimeStamp(String.valueOf(System.currentTimeMillis()/1000));
+                    nodeList.add(node);
+
+                    nodeListAdapter.setNodeList(nodeList);
                     nodeListAdapter.notifyDataSetChanged();
                     allNodesList.invalidate();
-
                 }
 
-                Toast.makeText(getApplicationContext(),intent.getAction(),Toast.LENGTH_LONG).show();
-
             }
-        }, filter);
-
-        P2PAndroidUtils.wifiDirectHandler.continuouslyDiscoverServices();
-
-
+        },filter);
 
 
         ((TextView)findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.nodeListTitle));
