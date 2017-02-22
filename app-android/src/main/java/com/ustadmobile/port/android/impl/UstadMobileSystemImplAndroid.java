@@ -146,13 +146,17 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      * Base ServiceConnection class used to bind any given context to shared services: notably
      * the HTTP service and the upcoming p2p service.
      */
-    private static class BaseServiceConnection implements ServiceConnection {
+    public static class BaseServiceConnection implements ServiceConnection {
         private IBinder iBinder;
 
         private Context context;
 
-        private BaseServiceConnection(Context context) {
+        private Map<Context, ServiceConnection> contextToBinderMap;
+
+        private BaseServiceConnection(Context context, Map<Context, ServiceConnection> contextToBinderMap) {
             this.context = context;
+            this.contextToBinderMap = contextToBinderMap;
+            contextToBinderMap.put(context, this);
         }
 
 
@@ -169,6 +173,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             iBinder= null;
             if(context instanceof ServiceConnection)
                 ((ServiceConnection)context).onServiceDisconnected(name);
+
+            contextToBinderMap.remove(context);
         }
 
         public IBinder getBinder() {
@@ -282,8 +288,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
         init(activity);
         Intent intent = new Intent(activity, HTTPService.class);
-        BaseServiceConnection connection = new BaseServiceConnection(activity);
-        httpServiceConnections.put(activity, connection);
+        BaseServiceConnection connection = new BaseServiceConnection(activity, httpServiceConnections);
         activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
@@ -297,9 +302,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     public void handleActivityDestroy(Activity activity) {
-        ServiceConnection connection = httpServiceConnections.get(activity);
-        activity.unbindService(connection);
-        httpServiceConnections.remove(activity);
+        activity.unbindService(httpServiceConnections.get(activity));
     }
 
     @Override
