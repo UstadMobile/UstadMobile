@@ -27,6 +27,7 @@ import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
+import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;
@@ -38,7 +39,7 @@ import java.util.List;
  *
  * Created by mike on 10/15/15.
  */
-public abstract class UstadBaseActivity extends AppCompatActivity {
+public abstract class UstadBaseActivity extends AppCompatActivity implements HTTPService.HTTPServiceConnectionListener {
 
     private String mUILocale;
 
@@ -85,6 +86,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * UstadMobileSystemImplAndroid will automatically bind to the HTTP service in handleActivityCreate
+     * @param service
+     */
+    @Override
+    public void onHttpServiceConnected(HTTPService service) {
+
+    }
+
+    @Override
+    public void onHttpServiceDisconnected() {
+
+    }
 
     public int getDirection() {
         return mUIDirection;

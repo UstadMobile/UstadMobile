@@ -80,6 +80,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 
 import android.os.Build;
+import android.os.IBinder;
 import android.util.Log;
 import android.util.Xml;
 import android.webkit.MimeTypeMap;
@@ -140,6 +141,41 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      * Mapped: Mime type -> extension
      */
     private HashMap<String, String> knownMimeToExtensionMap;
+
+    /**
+     *
+     */
+    private static class HTTPServiceConnection implements ServiceConnection {
+        private HTTPService service;
+
+        private Context context;
+
+        private HTTPServiceConnection(Context context) {
+            this.context = context;
+        }
+
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder iBinder) {
+            HTTPService.HTTPBinder binder = (HTTPService.HTTPBinder)iBinder;
+            service = binder.getService();
+            if(context instanceof HTTPService.HTTPServiceConnectionListener)
+                ((HTTPService.HTTPServiceConnectionListener)context).onHttpServiceConnected(service);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            service = null;
+            if(context instanceof HTTPService.HTTPServiceConnectionListener)
+                ((HTTPService.HTTPServiceConnectionListener)context).onHttpServiceDisconnected();
+        }
+
+        public HTTPService getService() {
+            return service;
+        }
+    }
+
+    private HashMap<Context, ServiceConnection> httpServiceConnections = new HashMap<>();
 
     /**
      @deprecated
@@ -236,10 +272,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     /**
      * To be called by activities as the first matter of business in the onCreate method
      *
+     * Will bind to the HTTP service
+     *
+     * TODO: This should really be handleContextCreate : This should be used by background services as well
+     *
      * @param activity
      */
     public void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
         init(activity);
+        Intent intent = new Intent(activity, HTTPService.class);
+        HTTPServiceConnection connection = new HTTPServiceConnection(activity);
+        httpServiceConnections.put(activity, connection);
+        activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     public void handleActivityStart(Activity activity) {
@@ -252,7 +296,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     public void handleActivityDestroy(Activity activity) {
-
+        ServiceConnection connection = httpServiceConnections.get(activity);
+        activity.unbindService(connection);
+        httpServiceConnections.remove(activity);
     }
 
     @Override
