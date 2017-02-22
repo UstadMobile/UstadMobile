@@ -51,6 +51,12 @@ import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.port.android.p2p.AndroidP2PContext;
+import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
+import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
+import com.ustadmobile.port.android.view.SettingsHome;
+import com.ustadmobile.port.sharedse.p2p.P2PManagerSharedSE;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
@@ -265,7 +271,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }else if(cls.equals(CatalogView.class)) {
             androidClass = CatalogActivity.class;
         }else if(cls.equals(UserSettingsView.class)) {
-            androidClass = UserSettingsActivity.class;
+            androidClass = SettingsHome.class;
         }else if(cls.equals(AttendanceView.class)) {
             androidClass = AttendanceActivity.class;
         }else if(cls.equals(BasePointView.class)) {
@@ -278,6 +284,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             androidClass = ClassManagementActivity2.class;
         }else if(cls.equals(AboutView.class)) {
             androidClass = AboutActivity.class;
+        }else if(cls.equals(SettingsDataUsageView.class)) {
+            androidClass = SettingsDataUsageActivity.class;
         }
 
         Intent startIntent = new Intent((Context)context, androidClass);
@@ -649,4 +657,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
         return versionInfo;
     }
+
+    @Override
+    public boolean isWiFiP2PSupported() {
+        //TODO: Use android specific code here to determine if this device supports wifi p2p
+        return true;
+    }
+
 }

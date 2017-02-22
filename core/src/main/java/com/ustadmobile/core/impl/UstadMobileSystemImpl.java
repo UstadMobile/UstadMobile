@@ -35,6 +35,7 @@ import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
+import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
@@ -1087,6 +1088,19 @@ public abstract class UstadMobileSystemImpl {
      * @return The authentication secret hashed
      */
     public abstract String hashAuth(Object context, String auth);
+
+    /**
+     * Indicates whether or not this platform/device supports WiFi Direct (aka P2P WiFi)
+     * @return
+     */
+    public boolean isWiFiP2PSupported() {
+        return false;
+    }
+
+
+    public P2PManager getP2PManager(Object context) {
+        return null;
+    }
 
 
 

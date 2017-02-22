@@ -1,48 +1,69 @@
 package com.ustadmobile.port.sharedse.p2p;
 
 /**
- * Created by kileha3 on 05/02/2017.
+ * Created by kileha3 on 21/02/2017.
  */
 
 public class P2PNode {
 
-    private String address;
+    private String timeStamp;
 
-    private String name;
+    private String nodeAddress;
 
-    public int getStatus() {
-        return status;
-    }
+    private String networkSSID;
 
-    public void setStatus(int status) {
-        this.status = status;
-    }
+    private String networkPass;
 
-    private int status;
 
-    public P2PNode(String address) {
-        this.address = address;
+
+    public P2PNode(String nodeAddress){
+        this.nodeAddress=nodeAddress;
     }
 
 
-    public String getAddress() {
-        return address;
+    public void setNetworkSSID(String networkSSID) {
+        this.networkSSID = networkSSID;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+
+    public String getNetworkPass() {
+        return networkPass;
     }
 
-    public String getName() {
-        return name;
+    public void setNetworkPass(String networkPass) {
+        this.networkPass = networkPass;
     }
 
-    public void setName(String name) {
-        this.name = name;
+
+
+
+    public String getNetworkSSID() {
+        return networkSSID;
     }
+
+    public String getNodeAddress() {
+        return nodeAddress;
+    }
+
+    public void setNodeAddress(String nodeAddress) {
+        this.nodeAddress = nodeAddress;
+    }
+
+    public void setTimeStamp(String timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+
+    public String getTimeStamp() {
+        return timeStamp;
+    }
+
+
+
 
     @Override
-    public boolean equals(Object obj) {
-        return obj instanceof P2PNode && ((P2PNode) obj).getAddress().equals(this.address);
+    public boolean equals(Object object) {
+
+        return object instanceof P2PNode && getNodeAddress().equals(this.nodeAddress);
     }
 }

@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.p2p;
 
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.p2p.P2PManager;
 
 import java.util.HashMap;
 
@@ -8,7 +9,7 @@ import java.util.HashMap;
  * Created by kileha3 on 05/02/2017.
  */
 
-public abstract class P2PManager implements Runnable{
+public abstract class P2PManagerSharedSE implements Runnable, P2PManager {
 
 
     /**
@@ -20,9 +21,6 @@ public abstract class P2PManager implements Runnable{
 
     private boolean running;
 
-    public static final String P2P_SERVICE_NAME = "_ustadnode";
-
-    public static final String P2P_REGISTRATION_TYPE = P2P_SERVICE_NAME + "._tcp";
 
 
     /**
@@ -33,6 +31,7 @@ public abstract class P2PManager implements Runnable{
             running = true;
             runThread = new Thread(this);
             runThread.start();
+            System.out.print("Service started");
         }
     }
 
@@ -61,12 +60,13 @@ public abstract class P2PManager implements Runnable{
 
         if(running) {
 
+            System.out.print("Service started is running");
         }
     }
 
     protected abstract void init(P2PActionListener listener);
 
-    protected abstract void addLocalService(P2PActionListener listener,int nodeType);
+    protected abstract void addLocalService(P2PActionListener listener);
 
     protected abstract void removeLocalService(P2PActionListener listener);
 
@@ -76,7 +76,7 @@ public abstract class P2PManager implements Runnable{
 
     protected abstract void stopServiceDiscovery(P2PActionListener listener);
 
-    protected abstract void discoverPeers();//change this to have a suitable listener
+    protected abstract void discoverPeers();
 
 
     /**
@@ -109,8 +109,5 @@ public abstract class P2PManager implements Runnable{
      * */
     public abstract int getStatus();
 
-    /**
-     * opt for the client or server mode
-     * */
-    public abstract void setSuperNodeEnabled(boolean enabled);
+
 }

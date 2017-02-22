@@ -1,7 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -9,8 +7,8 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -18,27 +16,31 @@ import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.SettingsDataUsageController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
+import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
+import com.ustadmobile.port.android.util.P2PAndroidUtils;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.rit.se.wifibuddy.WifiDirectHandler;
+
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
  *
  * Created by mike on 10/15/15.
  */
-public abstract class UstadBaseActivity extends AppCompatActivity {
+public abstract class UstadBaseActivity extends AppCompatActivity{
 
     private String mUILocale;
 
@@ -55,8 +57,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     private String[] appMenuLabels;
 
     private XapiStatementForwardingService mNanoLrsService;
+    private P2PServiceAndroid p2PServiceAndroid;
 
     private String displayName;
+    public WifiDirectHandler wifiDirectHandler;
 
     private List<WeakReference<Fragment>> fragmentList;
 
@@ -67,10 +71,33 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         Intent lrsForwardIntent = new Intent(this, XapiStatementForwardingService.class);
         bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);
 
+        Intent intent = new Intent(this, WifiDirectHandler.class);
+        bindService(intent, wifiServiceConnection, BIND_AUTO_CREATE);
+
+
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
         super.onCreate(savedInstanceState);
     }
+
+
+    private ServiceConnection wifiServiceConnection = new ServiceConnection() {
+
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            WifiDirectHandler.WifiTesterBinder binder = (WifiDirectHandler.WifiTesterBinder) service;
+            wifiDirectHandler = binder.getService();
+            P2PAndroidUtils.wifiDirectHandler=wifiDirectHandler;
+            //wifiDirectHandler.setSuperNodeEnabled(Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(SettingsDataUsageController.PREFKEY_SUPERNODE,getApplicationContext())));
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            wifiDirectHandler.removeService();
+        }
+    };
 
     private ServiceConnection mLrsServiceConnection = new ServiceConnection() {
         @Override
@@ -84,6 +111,10 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
             mNanoLrsService = null;
         }
     };
+
+
+
+
 
 
     public int getDirection() {
@@ -118,6 +149,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
+
         if(Build.VERSION.SDK_INT >= 21) {
             umToolbar.setElevation(10);
         }
@@ -196,6 +228,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
     public void onDestroy() {
         super.onDestroy();
         unbindService(mLrsServiceConnection);
+        unbindService(wifiServiceConnection);
         PersistenceManagerAndroid.getInstanceAndroid().releaseHelperForContext(this);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
@@ -206,7 +239,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case android.R.id.home:
                 UstadMobileSystemImpl.getInstance().go(BasePointView.class,
                         BasePointController.makeDefaultBasePointArgs(this), this);
@@ -217,11 +250,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
         }
 
-        if(handleClickAppMenuItem(item, baseController)) {
-            return true;
-        }
+        return handleClickAppMenuItem(item, baseController) || super.onOptionsItemSelected(item);
 
-        return super.onOptionsItemSelected(item);
     }
 
     public void setDisplayName(String displayName) {
@@ -258,4 +288,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity {
 
         super.onBackPressed();
     }
-}
+
+
+    }

@@ -48,6 +48,8 @@ public class UserSettingsController extends UstadBaseController implements Ustad
     public static final String PREFKEY_LANG = "lang";
     
     public static final int SETTING_LANG = 0;
+
+    public static final int SETTING_SUPERNODE = 1;
     
     private UserSettingsView settingsView;
     
@@ -122,6 +124,15 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         
         settingsView.setSettingsList(items);
     }
+
+    public void handleClickAccount() {
+
+    }
+
+    public void handleClickDataUsage() {
+
+    }
+
     
     public void handleClickSetting(int index) {
         switch(index) {

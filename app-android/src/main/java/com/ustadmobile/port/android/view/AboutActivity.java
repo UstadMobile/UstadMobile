@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,11 +10,10 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.AboutController;
+import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.core.controller.ControllerReadyListener;
 
 import java.util.Hashtable;
 

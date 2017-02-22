@@ -26,4 +26,9 @@
     <string name="title_activity_user_settings">UserSettingsActivity</string>
     <string name="title_activity_class_management">ClassManagementActivity</string>
     <string name="title_activity_enroll_student">EnrollStudentActivity</string>
+    <string name="account">Account</string>
+    <string name="data_usage">Data usage</string>
+    <string name="language">Language preference</string>
+    <string name="logout">Logout</string>
+    <string name="supernodeOption">Set super node enabled</string>
 </resources>

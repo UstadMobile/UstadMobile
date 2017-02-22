@@ -1,19 +1,12 @@
 package com.toughra.ustadmobile;
 
-import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.test.ActivityInstrumentationTestCase2;
-import android.test.ActivityUnitTestCase;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.view.CatalogActivity;
-import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.core.util.TestUtils;
-
-import java.util.Locale;
+import com.ustadmobile.port.android.view.CatalogActivity;
 
 /**
  * Created by mike on 9/22/15.
@@ -29,7 +22,7 @@ public class CatalogActivityTest extends ActivityInstrumentationTestCase2<Catalo
     protected void setUp() throws Exception{
         super.setUp();
 
-        //load impl with skipping the locale load (cant be done before an activity is created)
+       /* //load impl with skipping the locale load (cant be done before an activity is created)
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         String opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;
@@ -39,7 +32,7 @@ public class CatalogActivityTest extends ActivityInstrumentationTestCase2<Catalo
         intent.putExtra(CatalogController.KEY_RESMOD, CatalogController.SHARED_RESOURCE);
         intent.putExtra(CatalogController.KEY_FLAGS, CatalogController.CACHE_ENABLED);
 
-        setActivityIntent(intent);
+        setActivityIntent(intent);*/
     }
 
 

@@ -191,4 +191,19 @@ public class MessageIDConstants {
 
     public static final int people = 109;
 
+    public static final int connection_use_any = 131;
+
+    public static final int superNode = 132;
+    public static final int connection = 112;
+    public static final int dataUsage = 109;
+    public static final int dataUsageLabel =113;
+    public static final int resetCounterLabel=114;
+    public static final int usageStatistics=115;
+    public static final int cell_data_label=116;
+    public static final int wifi_data_label=117;
+    public static final int data_label=118;
+    public static final int p2pConnectionLabel=119;
+    public static final int nodeListTitle=120;
+
+
 }

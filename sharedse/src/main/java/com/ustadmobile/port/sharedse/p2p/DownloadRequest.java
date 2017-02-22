@@ -6,4 +6,7 @@ package com.ustadmobile.port.sharedse.p2p;
 public class DownloadRequest {
     String fileId;
     String fileDestination;
+    String fileSize;
+    String lastModified;
+
 }

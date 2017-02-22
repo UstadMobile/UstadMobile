@@ -1,16 +1,7 @@
 package com.toughra.ustadmobile;
 
-import android.content.Intent;
 import android.test.ActivityInstrumentationTestCase2;
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.controller.ContainerController;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.view.ContainerActivity;
 
 /**
