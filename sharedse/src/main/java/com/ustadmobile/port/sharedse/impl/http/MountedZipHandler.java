@@ -4,7 +4,6 @@ import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -18,9 +17,13 @@ import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
 /**
+ * A RouterNanoHTTPD UriResponder that when mounted serves files from the zip for content viewing
+ * purposes. It will replace autoplay with data-autoplay so that the autoplay can be triggered
+ * by javascript when the WebView is actually in view (rather than when it is loaded).
+ *
  * Created by mike on 8/30/16.
  */
-public class MountedZipHandler implements RouterNanoHTTPD.UriResponder {
+public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
     /**
      * The string that is added
@@ -39,149 +42,88 @@ public class MountedZipHandler implements RouterNanoHTTPD.UriResponder {
         public String replacement;
     }
 
+    public static class FilteredSource implements IFileSource {
+
+        private IFileSource src;
+
+        private List<MountedZipFilter> filters;
+
+        private ByteArrayInputStream inputStream;
+
+        private long length = -1;
+
+        public FilteredSource(IFileSource src, List<MountedZipFilter> filters) {
+            this.src = src;
+            this.filters = filters;
+        }
+
+        @Override
+        public long getLength() {
+            try { getInputStream(); }
+            catch(IOException e) {}
+            return length;
+        }
+
+        @Override
+        public long getLastModifiedTime() {
+            return src.getLastModifiedTime();
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            if(inputStream == null) {
+                //init and filter
+                InputStream srcIn = src.getInputStream();
+                byte[] buf = new byte[1024];
+                int bytesRead = -1;
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                while((bytesRead = srcIn.read(buf, 0, buf.length)) != -1) {
+                    bout.write(buf, 0, bytesRead);
+                }
+                srcIn.close();
+                String content = new String(bout.toByteArray(), "UTF-8");
+
+                MountedZipFilter currentFilter = null;
+                for(int i = 0; i < filters.size(); i++) {
+                    currentFilter = filters.get(i);
+                    content = currentFilter.pattern.matcher(content).replaceAll(currentFilter.replacement);
+                }
+                byte[] filteredBytes = content.getBytes("UTF-8");
+                length = filteredBytes.length;
+                inputStream = new ByteArrayInputStream(filteredBytes);
+            }
+            return inputStream;
+        }
+
+        @Override
+        public boolean exists() {
+            return true;
+        }
+
+        @Override
+        public String getName() {
+            return src.getName();
+        }
+    }
+
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-        NanoHTTPD.Response response = null;
-        int range[];
-        String ifNoneMatchHeader;
-        InputStream retInputStream;
-
         String pathInZip = RouterNanoHTTPD.normalizeUri(session.getUri()).substring(
                 uriResource.getUri().length() - URI_ROUTE_POSTFIX.length());
-        try {
-            ZipFile zipFile = uriResource.initParameter(0, ZipFile.class);
-            HashMap<String, List<MountedZipHandler.MountedZipFilter>> filters = uriResource.initParameter(1, HashMap.class);
-            ZipEntry entry = zipFile.getEntry(pathInZip);
+        ZipFile zipFile = uriResource.initParameter(0, ZipFile.class);
+        ZipEntry entry = zipFile.getEntry(pathInZip);
+        IFileSource src = new ZipEntrySource(entry, zipFile);
 
-            if(entry != null) {
-                int totalLength = (int)entry.getSize();
-                String etag = Integer.toHexString((pathInZip + entry.getTime() + "" +
-                        totalLength).hashCode());
-                String extension = UMFileUtil.getExtension(pathInZip);
-                InputStream zipEntryStream = zipFile.getInputStream(entry);
-                retInputStream = zipEntryStream;
-
-                ifNoneMatchHeader = session.getHeaders().get("if-none-match");
-                if(ifNoneMatchHeader != null && ifNoneMatchHeader.equals(etag)) {
-                    NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_MODIFIED,
-                            EmbeddedHTTPD.getMimeType(pathInZip), null);
-                    r.addHeader("ETag", etag);
-                    r.addHeader("Connection", "close");
-                    return r;
-                }
-
-
-                range = parseRangeRequest(session, totalLength);
-
-                //see if this is an entry we need to filter.
-                if(extension != null) {
-                    if(filters != null && filters.containsKey(extension)) {
-                        byte[] buf = new byte[1024];
-                        int bytesRead = -1;
-                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                        while((bytesRead = zipEntryStream.read(buf, 0, buf.length)) != -1) {
-                            bout.write(buf, 0, bytesRead);
-                        }
-                        zipEntryStream.close();
-                        String contentStr = new String(bout.toByteArray(), "UTF-8");
-                        contentStr = filterEntry(filters.get(extension), contentStr);
-                        byte[] strBytes = contentStr.getBytes("UTF-8");
-                        retInputStream = new ByteArrayInputStream(strBytes);
-                        totalLength = strBytes.length;
-                    }
-                }
-
-                if(range != null) {
-                    if(range[0] != -1) {
-                        retInputStream = new RangeInputStream(retInputStream, range[0], range[1]);
-                        int contentLength = (range[1]+1) - range[0];
-                        NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.PARTIAL_CONTENT,
-                                EmbeddedHTTPD.getMimeType(pathInZip), retInputStream, contentLength);
-
-                        r.addHeader("ETag", etag);
-
-                        /*
-                         * range request is inclusive: e.g. range 0-1 length is 2 bytes as per
-                         * https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html 14.35.1 Byte Ranges
-                         */
-                        r.addHeader("Content-Length", String.valueOf(contentLength));
-                        r.addHeader("Content-Range", "bytes " + range[0] + '-' + range[1] +
-                                '/' + totalLength);
-                        r.addHeader( "Accept-Ranges", "bytes");
-                        r.addHeader("Connection", "close");
-                        return r;
-                    }else {
-                        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
-                                "Range request not satisfiable");
-                    }
-                }else {
-                    //Workaround : NanoHTTPD is using the InputStream.available method incorrectly
-                    // see RangeInputStream.available
-                    retInputStream = new RangeInputStream(retInputStream, 0, totalLength);
-                    NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                            EmbeddedHTTPD.getMimeType(pathInZip), retInputStream, totalLength);
-
-                    r.addHeader("ETag", etag);
-                    r.addHeader("Content-Length", String.valueOf(totalLength));
-                    r.addHeader("Connection", "close");
-                    r.addHeader("Cache-Control", "cache, max-age=86400");
-                    return r;
-                }
-
-
-            }else {
-                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, "text/plain",
-                        "Not found within zip: " + pathInZip);
-            }
-        }catch(IOException e) {
-            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR, "text/plain",
-                    "Exception : " + e.toString());
+        HashMap<String, List<MountedZipHandler.MountedZipFilter>> filters =
+                uriResource.initParameter(1, HashMap.class);
+        String extension = UMFileUtil.getExtension(pathInZip);
+        if(filters != null && filters.containsKey(extension)) {
+            src = new FilteredSource(src, filters.get(extension));
         }
+
+
+        return newResponseFromFile(uriResource, session, src);
     }
-
-    private int[] parseRangeRequest(NanoHTTPD.IHTTPSession session, int totalLength) {
-        int[] range = null;
-        String header = session.getHeaders().get("range");
-        if(header != null  && header.startsWith("bytes=")) {
-            range = new int[] {0, -1};
-            header = header.substring("bytes=".length());
-            int dashPos = header.indexOf('-');
-            try {
-                if(dashPos > 0) {
-                    range[0] = Integer.parseInt(header.substring(0,dashPos));
-                }
-
-                if(dashPos == header.length()-1) {
-                    range[1] = totalLength-1;
-                }else if(dashPos > 0) {
-                    range[1] = Integer.parseInt(header.substring(dashPos+1));
-
-                }
-            }catch(NumberFormatException nfe) {
-
-            }
-            if(range[0] < 0 || range[1] > totalLength) {
-                range[0] = -1;//Error flag
-            }
-        }
-
-        return range;
-    }
-
-    public String filterEntry(List<MountedZipFilter> entryFilterList, String content) {
-        if(entryFilterList == null) {
-            return content;
-        }
-
-        MountedZipFilter currentFilter = null;
-        for(int i = 0; i < entryFilterList.size(); i++) {
-            currentFilter = entryFilterList.get(i);
-            content = currentFilter.pattern.matcher(content).replaceAll(currentFilter.replacement);
-        }
-
-        return content;
-    }
-
 
     @Override
     public NanoHTTPD.Response put(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {

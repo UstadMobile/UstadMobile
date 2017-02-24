@@ -1,12 +1,14 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -18,7 +20,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  *
  * Created by mike on 2/21/17.
  */
-public class CatalogUriResponder implements RouterNanoHTTPD.UriResponder {
+public class CatalogUriResponder extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
@@ -29,9 +31,9 @@ public class CatalogUriResponder implements RouterNanoHTTPD.UriResponder {
         try {
             if(normalizedUri.endsWith("acquire.opds")) {
                 UstadJSOPDSFeed deviceFeed = CatalogController.makeDeviceFeed(
-                        impl.getStorageDirs(CatalogController.SHARED_RESOURCE, context),
-                        CatalogController.SHARED_RESOURCE, "/catalog/", CatalogController.LINK_HREF_MODE_ID,
-                        context);
+                    impl.getStorageDirs(CatalogController.SHARED_RESOURCE, context),
+                    CatalogController.SHARED_RESOURCE, "/catalog/container/", CatalogController.LINK_HREF_MODE_ID,
+                    context);
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 deviceFeed.serialize(bout);
                 bout.flush();
@@ -39,6 +41,12 @@ public class CatalogUriResponder implements RouterNanoHTTPD.UriResponder {
                 NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
                     UstadJSOPDSItem.TYPE_ACQUISITIONFEED, bin, bout.size());
                 return r;
+            }else if(normalizedUri.contains("/container/")) {
+                String uuid = normalizedUri.substring(normalizedUri.lastIndexOf('/')+1);
+                CatalogEntryInfo info = CatalogController.getEntryInfo(uuid, CatalogController.SHARED_RESOURCE,
+                        context);
+                File containerFile = new File(info.fileURI);
+                return newResponseFromFile(uriResource, session, new FileSource(containerFile));
             }
         }catch(IOException e) {
             e.printStackTrace();

@@ -31,6 +31,9 @@
 package com.ustadmobile.core.epubnav;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -64,19 +67,21 @@ public class EPUBNavDocument {
         EPUBNavItem currentNav = null;//represents the current nav tag
         EPUBNavItem currentItem = null;
         int itemDepth = 0;
+        String tagName;
         
         while((evtType = xpp.next()) != XmlPullParser.END_DOCUMENT) {
             switch(evtType) {
-                case XmlPullParser.START_TAG:                    
-                    if(xpp.getName().equals("nav")) {
+                case XmlPullParser.START_TAG:
+                    tagName = xpp.getName();
+                    if(tagName.equals("nav")) {
                         currentNav = new EPUBNavItem(null, null, null, 0);
                         result.navItems.put(xpp.getAttributeValue(null, "id"), 
                             currentNav);
-                    }else if(xpp.getName().equals("li")) {
+                    }else if(tagName.equals("li")) {
                         currentItem = new EPUBNavItem(currentItem != null ? 
                             currentItem : currentNav, itemDepth);
                         itemDepth++;
-                    }else if(xpp.getName().equals("a")) {
+                    }else if(tagName.equals("a")) {
                         currentItem.href = xpp.getAttributeValue(null, "href");
                         if(xpp.next() == XmlPullParser.TEXT) {
                             currentItem.title = xpp.getText();
