@@ -383,10 +383,5 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         return null;
     }
 
-    public P2PManagerSharedSE getP2PManager(Object context) {
-        return null;
-    }
-
-
 
 }

@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.RequiresApi;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +28,8 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
     private Switch superNodeSwitch;
     private RadioButton setWifiOnly,setMobileData;
     private LinearLayout superNodeLayoutWrapper,wifiLayoutWrapper,mobileLayoutWrapper;
+
+    private PowerManager.WakeLock mWakeLock;
 
 
     @Override
@@ -65,16 +68,23 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         mobileLayoutWrapper.setOnClickListener(this);
         wifiLayoutWrapper.setOnClickListener(this);
         superNodeLayoutWrapper.setOnClickListener(this);
+        PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "StayUp");
+        mWakeLock.acquire();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public void onDestroy() {
+        mWakeLock.release();
+        super.onDestroy();
+    }
+
     @Override
     public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
         if(compoundButton == superNodeSwitch) {
             mController.handleSetSupernodeEnabledChanged(b);
-            if(wifiDirectHandler!=null){
-                P2PAndroidUtils.wifiDirectHandler.setSuperNodeEnabled(b);
-            }
+
         }else if(compoundButton==setMobileData){
 
             if(mController.handleMobileDataOnlyMode(b)){
@@ -141,6 +151,7 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
                 superNodeSwitch.setChecked(true);
             }
             mController.handleSetSupernodeEnabledChanged(superNodeSwitch.isChecked());
+
         }else if(view==wifiLayoutWrapper){
 
             if(!setWifiOnly.isActivated()){

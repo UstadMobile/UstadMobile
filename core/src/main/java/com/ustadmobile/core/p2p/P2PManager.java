@@ -6,10 +6,6 @@ package com.ustadmobile.core.p2p;
 
 public interface P2PManager {
 
-    void setSuperNodeEnabled(boolean enabled);
-
-    void start();
-
-    void stop();
+    void setSuperNodeEnabled(Object context,boolean enabled);
 
 }

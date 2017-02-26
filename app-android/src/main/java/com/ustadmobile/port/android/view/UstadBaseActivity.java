@@ -7,7 +7,6 @@ import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -59,7 +58,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private P2PServiceAndroid p2PServiceAndroid;
 
     private String displayName;
-    public WifiDirectHandler wifiDirectHandler;
 
     private List<WeakReference<Fragment>> fragmentList;
 
@@ -70,9 +68,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         Intent lrsForwardIntent = new Intent(this, XapiStatementForwardingService.class);
         bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);
 
-        Intent intent = new Intent(this, WifiDirectHandler.class);
-        bindService(intent, wifiServiceConnection, BIND_AUTO_CREATE);
-
 
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
@@ -80,22 +75,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     }
 
 
-    private ServiceConnection wifiServiceConnection = new ServiceConnection() {
 
-        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            WifiDirectHandler.WifiTesterBinder binder = (WifiDirectHandler.WifiTesterBinder) service;
-            wifiDirectHandler = binder.getService();
-
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            wifiDirectHandler.removeService();
-        }
-    };
 
     private ServiceConnection mLrsServiceConnection = new ServiceConnection() {
         @Override
@@ -242,7 +222,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onDestroy() {
         super.onDestroy();
         unbindService(mLrsServiceConnection);
-        unbindService(wifiServiceConnection);
         PersistenceManagerAndroid.getInstanceAndroid().releaseHelperForContext(this);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }

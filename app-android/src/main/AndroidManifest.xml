@@ -16,13 +16,15 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
 
     <application
-        android:name="com.ustadmobile.port.android.p2p.Application"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -58,16 +60,6 @@
             android:name="com.ustadmobile.port.android.p2p.P2PServiceAndroid"
             android:enabled="true" />
 
-        <receiver
-            android:name="com.ustadmobile.port.android.p2p.P2PListChangeReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:label="FetchNodeListWhenChanged">
-            <intent-filter>
-                <action android:name="com.ustadmobile.port.android.p2p.NODE_LIST_CHANGED" />
-            </intent-filter>
-        </receiver>
-
         <service
             android:name="com.ustadmobile.port.android.impl.http.HTTPService"
             android:enabled="true"
@@ -95,7 +87,8 @@
             android:theme="@style/Theme.UstadTheme" />
         <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2" />
         <activity android:name="com.ustadmobile.port.android.view.AboutActivity" />
-        <activity android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"/>
+        <activity
+            android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"/>
         <activity android:name="com.ustadmobile.port.android.view.UstadNodesActivity"/>
 
         <activity android:name="com.ustadmobile.port.android.view.SettingsHome"/>

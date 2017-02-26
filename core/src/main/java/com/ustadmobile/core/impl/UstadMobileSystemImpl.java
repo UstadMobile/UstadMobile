@@ -1098,9 +1098,11 @@ public abstract class UstadMobileSystemImpl {
     }
 
 
-    public P2PManager getP2PManager(Object context) {
+    public P2PManager getP2PManager() {
+
         return null;
     }
+
 
 
 

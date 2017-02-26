@@ -52,7 +52,7 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
-import com.ustadmobile.port.android.p2p.AndroidP2PContext;
+import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
 import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
 import com.ustadmobile.port.android.view.SettingsHome;
@@ -78,7 +78,6 @@ import com.ustadmobile.port.android.view.ClassManagementActivity2;
 import com.ustadmobile.port.android.view.ContainerActivity;
 import com.ustadmobile.port.android.view.EnrollStudentActivity;
 import com.ustadmobile.port.android.view.LoginActivity;
-import com.ustadmobile.port.android.view.UserSettingsActivity;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.nanolrs.core.endpoints.*;
 
@@ -190,6 +189,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     private HashMap<Context, ServiceConnection> httpServiceConnections = new HashMap<>();
 
+    private HashMap<Context, ServiceConnection> p2pServiceConnections = new HashMap<>();
+
+    private P2PManagerAndroid p2pManager;
+
     /**
      @deprecated
      */
@@ -202,6 +205,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
         PersistenceManager.setPersistenceManagerFactory(new PersistenceManagerFactoryAndroid());
+        p2pManager = new P2PManagerAndroid();
+        p2pManager.setServiceConnectionMap(p2pServiceConnections);
     }
 
     /**
@@ -264,14 +269,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      */
     @Override
     public void addTinCanQueueStatusListener(final TinCanQueueListener listener) {
-        /*
-        queueStatusListeners.put(listener, new XapiStatementsForwardingListener() {
-            @Override
-            public void queueStatusUpdated(XapiQueueStatusEvent event) {
-                listener.statusUpdated(new TinCanQueueEvent(event.getStatementsRemaining()));
-            }
-        });
-        */
+
     }
 
     /**
@@ -296,6 +294,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         Intent intent = new Intent(activity, HTTPService.class);
         BaseServiceConnection connection = new BaseServiceConnection(activity, httpServiceConnections);
         activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        Intent p2pIntent = new Intent(activity, P2PServiceAndroid.class);
+        connection = new BaseServiceConnection(activity, p2pServiceConnections);
+        activity.bindService(p2pIntent, connection, Context.BIND_AUTO_CREATE);
     }
 
     public void handleActivityStart(Activity activity) {
@@ -309,6 +310,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public void handleActivityDestroy(Activity activity) {
         activity.unbindService(httpServiceConnections.get(activity));
+        activity.unbindService(p2pServiceConnections.get(activity));
     }
 
     @Override
@@ -715,7 +717,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public P2PManagerSharedSE getP2PManager(Object context) {
-        return super.getP2PManager(context);
+    public P2PManagerSharedSE getP2PManager() {
+        return p2pManager;
     }
 }

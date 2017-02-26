@@ -31,13 +31,24 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.MenuItem;
 
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.toughra.ustadmobile.R;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import java.util.List;
 
 
 public class SplashScreenActivity extends UstadBaseActivity {
@@ -56,6 +67,14 @@ public class SplashScreenActivity extends UstadBaseActivity {
         super.onStart();
         UstadMobileSystemImpl.getInstance();
 
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.M){
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    checkPermission();
+                }
+            },500);
+        }
 
     }
 
@@ -72,6 +91,20 @@ public class SplashScreenActivity extends UstadBaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    void checkPermission(){
+        Dexter.withActivity(this)
+                .withPermissions(
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ).withListener(new MultiplePermissionsListener() {
+            @Override public void onPermissionsChecked(MultiplePermissionsReport report) {
+            }
+            @Override public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {/* ... */}
+        }).check();
     }
 
 }

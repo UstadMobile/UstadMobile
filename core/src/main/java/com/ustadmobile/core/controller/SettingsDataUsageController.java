@@ -23,11 +23,13 @@ public class SettingsDataUsageController extends UstadBaseController {
     }
 
     public void handleSetSupernodeEnabledChanged(boolean enabled) {
-        UstadMobileSystemImpl.getInstance().setAppPref(PREFKEY_SUPERNODE,
-                String.valueOf(enabled), getContext());
-        P2PManager manager = UstadMobileSystemImpl.getInstance().getP2PManager(getContext());
+
+        UstadMobileSystemImpl.getInstance().setAppPref(PREFKEY_SUPERNODE, String.valueOf(enabled), getContext());
+
+        P2PManager manager = UstadMobileSystemImpl.getInstance().getP2PManager();
+
         if(manager != null)
-            manager.setSuperNodeEnabled(enabled);
+            manager.setSuperNodeEnabled(context, enabled);
     }
 
 
@@ -54,9 +56,9 @@ public class SettingsDataUsageController extends UstadBaseController {
         this.view = (SettingsDataUsageView)view;
         boolean wifiP2PSupported = impl.isWiFiP2PSupported();
         this.view.setSupernodeSettingVisible(wifiP2PSupported);
+
         if(wifiP2PSupported) {
-            this.view.setSupernodeEnabled(Boolean.parseBoolean(
-                impl.getAppPref(PREFKEY_SUPERNODE, "false", getContext())));
+            this.view.setSupernodeEnabled(Boolean.parseBoolean(impl.getAppPref(PREFKEY_SUPERNODE, "false", getContext())));
         }
     }
 
