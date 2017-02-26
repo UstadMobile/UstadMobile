@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
 public class HTTPService extends Service {
@@ -63,7 +64,7 @@ public class HTTPService extends Service {
         httpd = new EmbeddedHTTPD(DEFAULT_PORT);
         assetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(assetsPath +"(.)+",  AndroidAssetsHandler.class, this);
-        httpd.addRoute("/catalog/(.)+", CatalogUriResponder.class, this);
+        httpd.addRoute("/catalog/(.)+", CatalogUriResponder.class, this, new WeakHashMap());
 
         NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, this, "/xapi/");
 
