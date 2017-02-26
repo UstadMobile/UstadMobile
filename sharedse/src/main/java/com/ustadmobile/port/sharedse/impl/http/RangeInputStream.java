@@ -43,15 +43,15 @@ import java.io.InputStream;
  */
 public class RangeInputStream extends FilterInputStream {
 
-    private int pos;
+    private long pos;
 
     private boolean markSupported;
 
-    private int resetPos;
+    private long resetPos;
 
-    private int resetInvalidate;
+    private long resetInvalidate;
 
-    private int end;
+    private long end;
 
 
     /**
@@ -64,7 +64,7 @@ public class RangeInputStream extends FilterInputStream {
      *            bytes this stream will return -1 to signal the end of the stream
      * @throws IOException
      */
-    public RangeInputStream(InputStream in, int start, int end) throws IOException {
+    public RangeInputStream(InputStream in, long start, long end) throws IOException {
         super(in);
         markSupported = in.markSupported();
         resetPos = -1;
@@ -99,7 +99,7 @@ public class RangeInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] buffer, int byteOffset, int byteCount) throws IOException {
-        byteCount = Math.min((end +1)- pos, byteCount);
+        byteCount = (int)Math.min((end +1)- pos, byteCount);
         if(byteCount > 0) {
             int bytesRead = in.read(buffer, byteOffset, byteCount);
             pos += bytesRead;
@@ -119,7 +119,7 @@ public class RangeInputStream extends FilterInputStream {
      * blocking
      */
     public int available() throws IOException {
-        return (end +1)- pos;
+        return (int)((end +1)- pos);
     }
 
     @Override
