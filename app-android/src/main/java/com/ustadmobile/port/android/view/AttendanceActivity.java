@@ -1,7 +1,14 @@
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.port.sharedse.controller.AttendanceController;
@@ -31,10 +38,12 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         setUMToolbar();
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Attendance");
+
         if(savedInstanceState == null) {
             mController.handleStartFlow();
         }
     }
+
 
     @Override
     public void goBack() {
@@ -54,6 +63,16 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         Fragment resultsFrag = AttendanceConfirmFragment.newInstance();
         getSupportFragmentManager().beginTransaction().replace(R.id.attendance_fragment_container,
                 resultsFrag, TAG_RESULTSFRAG).addToBackStack(TAG_CAMERAFRAG).commit();
+    }
+
+    /**
+     * workaround for bug: see https://code.google.com/p/android/issues/detail?id=19917
+     * @param outState
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("bug:fix", true);
+        super.onSaveInstanceState(outState);
     }
 
     protected AttendanceRowModel[] getAttendanceResults() {

@@ -31,8 +31,16 @@
 
 package com.ustadmobile.port.android.view;
 
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.toughra.ustadmobile.R;
 
@@ -40,15 +48,57 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 
-public class SplashScreenActivity extends UstadBaseActivity {
+public class SplashScreenActivity extends UstadBaseActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
+
+    UstadMobileSystemImplAndroid impl;
+
+    public static final int EXTERNAL_STORAGE_REQUESTED = 1;
+
+    public static final String[] REQUIRED_PERMISSIONS = new String[]{
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
+        impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
+        checkPermissions();
+    }
 
-        UstadMobileSystemImplAndroid impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        impl.startUI(this); // Let UstadBaseActivity handle this.
+    public void checkPermissions() {
+        boolean hasRequiredPermissions = true;
+        for(int i = 0; i < REQUIRED_PERMISSIONS.length; i++) {
+            hasRequiredPermissions &= ContextCompat.checkSelfPermission(this, REQUIRED_PERMISSIONS[i]) == PackageManager.PERMISSION_GRANTED;
+        }
+
+        if(!hasRequiredPermissions){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                //show an alert
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("File permissions required").setMessage("This app requires file permissions on the SD card to download and save content");
+                builder.setPositiveButton("OK", this);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                return;
+            }else {
+                ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, EXTERNAL_STORAGE_REQUESTED);
+                return;
+            }
+        }
+
+        impl.startUI(this);
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        checkPermissions();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        checkPermissions();
     }
 
     @Override
