@@ -2,7 +2,9 @@ package com.ustadmobile.port.android.p2p;
 
 import android.content.Context;
 import android.content.ServiceConnection;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Handler;
+import android.util.Log;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -13,6 +15,7 @@ import com.ustadmobile.port.sharedse.p2p.P2PNode;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.rit.se.wifibuddy.FailureReason;
 import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
@@ -35,6 +38,8 @@ public class P2PManagerAndroid extends P2PManagerSharedSE  {
 
     public static final String SERVICE_NAME="ustadMobile";
 
+    public static final String PREFKEY_SUPERNODE = "supernode_enabled";
+
 
     public Map<Context, ServiceConnection> getServiceConnectionMap() {
         return serviceConnectionMap;
@@ -44,39 +49,50 @@ public class P2PManagerAndroid extends P2PManagerSharedSE  {
         this.serviceConnectionMap = serviceConnectionMap;
     }
 
-    private P2PServiceAndroid getService(Object context) {
-        UstadMobileSystemImplAndroid.BaseServiceConnection connection =
-                (UstadMobileSystemImplAndroid.BaseServiceConnection)serviceConnectionMap.get(context);
-        P2PServiceAndroid.LocalServiceBinder binder = (P2PServiceAndroid.LocalServiceBinder)connection.getBinder();
-        return binder.getService();
+    /**
+     * This needs to be called by P2PServiceAndroid once the p2pservice has started
+     */
+    public void init(Object context) {
+        boolean supernodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
+                PREFKEY_SUPERNODE, "false", context));
+        setSuperNodeEnabled(context, supernodeEnabled);
     }
+
+    public P2PServiceAndroid getService(Object context) {
+        if(context instanceof P2PServiceAndroid) {
+            //the context itself is the service
+            return (P2PServiceAndroid)context;
+        }else {
+            UstadMobileSystemImplAndroid.BaseServiceConnection connection =
+                    (UstadMobileSystemImplAndroid.BaseServiceConnection)serviceConnectionMap.get(context);
+            P2PServiceAndroid.LocalServiceBinder binder = (P2PServiceAndroid.LocalServiceBinder)connection.getBinder();
+            return binder.getService();
+        }
+    }
+
+    public static ServiceData makeServiceData() {
+        HashMap<String,String> record=new HashMap<>();
+        record.put("available","available");
+        ServiceData serviceData=new ServiceData(SERVICE_NAME,8001,record, ServiceType.PRESENCE_TCP);
+        return serviceData;
+    }
+
 
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
-
         UstadMobileSystemImpl.getInstance().setAppPref("devices","",context);
         P2PServiceAndroid service = getService(context);
-
-
-
-        if(enabled){
-            getService(context).showNotification();
-            HashMap<String,String> record=new HashMap<>();
-            record.put("available","available");
-            ServiceData serviceData=new ServiceData(SERVICE_NAME,8001,record, ServiceType.PRESENCE_TCP);
-            service.getWifiDirectHandlerAPI().startAddingNoPromptService(serviceData);
-
-        }else{
-
-            getService(context).dismissNotification();
+        if(enabled && service.getWifiDirectHandlerAPI().getNoPromptServiceStatus() == WifiDirectHandler.NOPROMPT_STATUS_INACTIVE) {
+            service.showNotification();
+            service.getWifiDirectHandlerAPI().startAddingNoPromptService(makeServiceData(),service.mNoPromptActionListener);
+        }else if(!enabled){
+            service.dismissNotification();
             if(service.getWifiDirectHandlerAPI().isGroupFormed()){
                 service.getWifiDirectHandlerAPI().removeGroup();
             }
             service.getWifiDirectHandlerAPI().continuouslyDiscoverServices();
         }
-
     }
-
 
 
 
@@ -98,6 +114,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE  {
 
     @Override
     public boolean isFileAvailable(Object context, String fileId) {
+
         return false;
     }
 

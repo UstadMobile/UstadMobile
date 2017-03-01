@@ -29,7 +29,6 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
     private RadioButton setWifiOnly,setMobileData;
     private LinearLayout superNodeLayoutWrapper,wifiLayoutWrapper,mobileLayoutWrapper;
 
-    private PowerManager.WakeLock mWakeLock;
 
 
     @Override
@@ -40,7 +39,7 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         setUMToolbar(R.id.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        superNodeSwitch = (Switch)findViewById(R.id.superNodeEnabled);
+        superNodeSwitch = (Switch) findViewById(R.id.superNodeEnabled);
         setWifiOnly = (RadioButton) findViewById(R.id.wifiData);
         setMobileData = (RadioButton) findViewById(R.id.mobileData);
         superNodeLayoutWrapper = (LinearLayout) findViewById(R.id.nodeWrapper);
@@ -49,17 +48,17 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
 
         ((TextView) findViewById(R.id.set_super_node_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.superNode));
 
-        ((TextView)findViewById(R.id.connectionLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.connection));
-        ((TextView)findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.dataUsage));
-        ((TextView)findViewById(R.id.data_usage_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.dataUsageLabel));
-        ((TextView)findViewById(R.id.reset_counter_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.resetCounterLabel));
-        ((TextView)findViewById(R.id.reset_counter_data)).setText("Last reset: (Never)");
-        ((TextView)findViewById(R.id.data_usage_data)).setText("12KB");
-        ((TextView)findViewById(R.id.dataLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.usageStatistics));
-        ((TextView)findViewById(R.id.mobile_data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.cell_data_label));
-        ((TextView)findViewById(R.id.wifi_data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.wifi_data_label));
-        ((TextView)findViewById(R.id.data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.data_label));
-        ((TextView)findViewById(R.id.p2pConnectionLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.p2pConnectionLabel));
+        ((TextView) findViewById(R.id.connectionLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.connection));
+        ((TextView) findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.dataUsage));
+        ((TextView) findViewById(R.id.data_usage_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.dataUsageLabel));
+        ((TextView) findViewById(R.id.reset_counter_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.resetCounterLabel));
+        ((TextView) findViewById(R.id.reset_counter_data)).setText("Last reset: (Never)");
+        ((TextView) findViewById(R.id.data_usage_data)).setText("12KB");
+        ((TextView) findViewById(R.id.dataLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.usageStatistics));
+        ((TextView) findViewById(R.id.mobile_data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.cell_data_label));
+        ((TextView) findViewById(R.id.wifi_data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.wifi_data_label));
+        ((TextView) findViewById(R.id.data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.data_label));
+        ((TextView) findViewById(R.id.p2pConnectionLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.p2pConnectionLabel));
 
         mController.setView(this);
         superNodeSwitch.setOnCheckedChangeListener(this);
@@ -68,14 +67,11 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         mobileLayoutWrapper.setOnClickListener(this);
         wifiLayoutWrapper.setOnClickListener(this);
         superNodeLayoutWrapper.setOnClickListener(this);
-        PowerManager powerManager = (PowerManager)getSystemService(POWER_SERVICE);
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "StayUp");
-        mWakeLock.acquire();
     }
 
     @Override
     public void onDestroy() {
-        mWakeLock.release();
+
         super.onDestroy();
     }
 

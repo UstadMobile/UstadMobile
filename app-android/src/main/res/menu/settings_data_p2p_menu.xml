@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/p2pDeviceList"
-        android:title="P2P Device List"
+        android:title="List Super Nodes"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

@@ -158,7 +158,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         private Map<Context, ServiceConnection> contextToBinderMap;
 
-        private BaseServiceConnection(Context context, Map<Context, ServiceConnection> contextToBinderMap) {
+        public BaseServiceConnection(Context context, Map<Context, ServiceConnection> contextToBinderMap) {
             this.context = context;
             this.contextToBinderMap = contextToBinderMap;
             contextToBinderMap.put(context, this);
@@ -167,7 +167,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder) {
-            this.iBinder = iBinder;
+                this.iBinder = iBinder;
             if(context instanceof ServiceConnection) {
                 ((ServiceConnection)context).onServiceConnected(name, iBinder);
             }

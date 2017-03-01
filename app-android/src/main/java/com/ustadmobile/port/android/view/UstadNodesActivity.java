@@ -4,17 +4,25 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,14 +41,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
+import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 public class UstadNodesActivity extends UstadBaseActivity{
 
 
     private RecyclerView allNodesList;
+    private CoordinatorLayout coordinatorLayout;
+    private Snackbar snackbar;
     private NodeListAdapter nodeListAdapter;
+    private int nodeCounter=0;
     private static final String NO_PROMPT_NETWORK_PASS="passphrase",
             NO_PROMPT_NETWORK_NAME="networkName",
             DEVICE_MAC_ADDRESS="deviceAddress",
@@ -58,6 +71,15 @@ public class UstadNodesActivity extends UstadBaseActivity{
 
         ((TextView)findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.nodeListTitle));
         allNodesList= (RecyclerView) findViewById(R.id.allNodes);
+        coordinatorLayout= (CoordinatorLayout) findViewById(R.id.coordinationLayout);
+        snackbar = Snackbar
+                .make(coordinatorLayout, "", Snackbar.LENGTH_LONG);
+        View snackbarView = snackbar.getView();
+        snackbarView.setBackgroundColor(Color.DKGRAY);
+        final TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setGravity(Gravity.CENTER_HORIZONTAL);
+        textView.setTextColor(Color.WHITE);
+
 
         P2PManagerAndroid android=new P2PManagerAndroid();
         android.getServiceConnectionMap();
@@ -67,6 +89,14 @@ public class UstadNodesActivity extends UstadBaseActivity{
         nodeListAdapter=new NodeListAdapter(getApplicationContext());
         allNodesList.setLayoutManager(linearLayoutManager);
         allNodesList.setAdapter(nodeListAdapter);
+        if(getNodes().size()>0){
+            nodeCounter=getNodes().size();
+            snackbar.show();
+            textView.setText("Found "+nodeCounter+" super nodes");
+        }else{
+            textView.setText("Searching super nodes...");
+            snackbar.show();
+        }
         nodeListAdapter.setNodeList(getNodes());
 
         IntentFilter filter = new IntentFilter();
@@ -75,14 +105,16 @@ public class UstadNodesActivity extends UstadBaseActivity{
         LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-
-
                 if(intent.getAction().equals(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE)){
+                    if(nodeCounter<getNodes().size()){
+                        nodeCounter=getNodes().size();
+                        textView.setText("Found "+getNodes().size()+" super nodes");
+                        snackbar.show();
+                    }
 
                     nodeListAdapter.setNodeList(getNodes());
                     nodeListAdapter.notifyDataSetChanged();
                     allNodesList.invalidate();
-
                 }
 
             }
@@ -102,17 +134,24 @@ public class UstadNodesActivity extends UstadBaseActivity{
 
         try{
             JSONObject jsonObject=new JSONObject(nodes);
-            JSONArray jsonArray=jsonObject.getJSONArray("devices");
-
-            for(int position=0;position<jsonArray.length();position++){
-                JSONObject object=jsonArray.getJSONObject(position);
-                P2PNode node=new P2PNode(object.getString(DEVICE_MAC_ADDRESS));
-                node.setNetworkPass(object.getString(NO_PROMPT_NETWORK_PASS));
-                node.setNetworkSSID(object.getString(NO_PROMPT_NETWORK_NAME));
-                node.setNodeAddress(object.getString(DEVICE_MAC_ADDRESS));
-                node.setStatus(Integer.parseInt(object.getString(DEVICE_STATUS)));
-                nodeList.add(node);
+            Iterator<String> macAddresses = jsonObject.keys();
+            String macAddr;
+            Object keyVal;
+            JSONObject currentNode;
+            while(macAddresses.hasNext()) {
+                macAddr = macAddresses.next();
+                keyVal = jsonObject.get(macAddr);
+                if(keyVal instanceof  JSONObject) {
+                    currentNode = (JSONObject)keyVal;
+                    P2PNode node=new P2PNode(currentNode.getString(DEVICE_MAC_ADDRESS));
+                    node.setNetworkPass(currentNode.getString(NO_PROMPT_NETWORK_PASS));
+                    node.setNetworkSSID(currentNode.getString(NO_PROMPT_NETWORK_NAME));
+                    node.setNodeAddress(currentNode.getString(DEVICE_MAC_ADDRESS));
+                    node.setStatus(Integer.parseInt(currentNode.getString(DEVICE_STATUS)));
+                    nodeList.add(node);
+                }
             }
+
 
             return nodeList;
         }catch (JSONException e) {
@@ -164,9 +203,10 @@ public class UstadNodesActivity extends UstadBaseActivity{
             holder.nodeHolder.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(getApplicationContext(),"Initiating connection to "
-                            +getNodeList().get(holder.getAdapterPosition())
-                            .getNetworkSSID(),Toast.LENGTH_LONG).show();
+
+                    UstadMobileSystemImpl.getInstance().setAppPref("net_ssid",
+                            getNodeList().get(holder.getAdapterPosition()).getNetworkSSID(),
+                            getApplicationContext());
 
                     connectNetwork(
                             getNodeList().get(holder.getAdapterPosition()).getNetworkSSID(),
@@ -232,19 +272,26 @@ public class UstadNodesActivity extends UstadBaseActivity{
     }
 
 
+
     void connectNetwork(String SSID,String pasPhrase){
+
+
+        UstadMobileSystemImpl.getInstance().setAppPref("mama","true",getApplicationContext());
         Log.d(WifiDirectHandler.TAG,"Connecting to the no prompt network");
         WifiManager wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = "\"" + SSID + "\"";
-        configuration.preSharedKey = "\"" + pasPhrase+ "\"";
+        configuration.preSharedKey = "\"" + pasPhrase+"\"";
         int netId = wifiManager.addNetwork(configuration);
 
         //disconnect form current network and connect to this one
         wifiManager.disconnect();
         wifiManager.enableNetwork(netId, true);
         wifiManager.reconnect();
+        Toast.makeText(this, "Initiating connection to " + SSID, Toast.LENGTH_LONG).show();
     }
+
+
 
 
 
