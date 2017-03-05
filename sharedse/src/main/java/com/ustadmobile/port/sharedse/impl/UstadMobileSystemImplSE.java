@@ -53,6 +53,15 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     private XmlPullParserFactory xmlPullParserFactory;
 
     /**
+     * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
+     *
+     * @return Casted UstadMobileSystemImplSharedSE
+     */
+    public static UstadMobileSystemImplSE getInstanceSE() {
+        return (UstadMobileSystemImplSE)UstadMobileSystemImpl.getInstance();
+    }
+
+    /**
      * @inheritDoc
      */
     @Override
