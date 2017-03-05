@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.p2p;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -17,6 +18,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -32,12 +34,13 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.FailureReason;
@@ -60,9 +63,21 @@ public class P2PServiceAndroid extends Service{
             DEVICE_STATUS="deviceStatus";
 
 
-    private JSONObject nodeListObject=new JSONObject();
+    //download a file from p2p
+    private NotificationCompat.Builder mBuilder;
 
-    String UstadFullDomain=SERVICE_NAME+"."+ServiceType.PRESENCE_TCP+".local.";
+    private NotificationManager mNotifyManager;
+
+    private int DOWNLOAD_NOTIFICATION_ID = 8;
+
+    private int fileDownloadingTracker = 0;
+
+    private ArrayList<AsyncTask<String, String, Void>> downloadQueue;
+
+    private ArrayList<String> deviceToDownloadFrom=new ArrayList<>();
+
+    private JSONObject nodeListObject=new JSONObject();
+    private String UstadFullDomain=SERVICE_NAME+"."+ServiceType.PRESENCE_TCP+".local.";
 
 
     /**
@@ -170,6 +185,14 @@ public class P2PServiceAndroid extends Service{
                             Log.i(WifiDirectHandler.TAG,"Available Nodes:\n" +nodeListObject.toString());
                             UstadMobileSystemImpl.getInstance().setAppPref("devices",
                                     nodeListObject.toString(), getApplicationContext());
+
+                            //update device list
+
+                            if(!deviceToDownloadFrom.contains(deviceMac)){
+                                deviceToDownloadFrom.add(deviceMac);
+                            }
+
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -183,6 +206,7 @@ public class P2PServiceAndroid extends Service{
         },filter);
 
         //Handle on connection change
+
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
         bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
 
@@ -201,9 +225,7 @@ public class P2PServiceAndroid extends Service{
                         connectionChangeListener.onConnected(gateWaySSID);
 
                         //start file/Index exchange here
-
-                        String url="http://192.168.49.1:8001/catalog/acquire.opds";
-                        new checkDownloadIndex().execute(url);
+                        prepareFileDownload();
 
                     }else{
                         connectionChangeListener.onFailure(extraInfo.getReason());
@@ -232,6 +254,11 @@ public class P2PServiceAndroid extends Service{
         }
         unregisterReceiver(mNetworkReceiver);
         unbindService(wifiP2PServiceConnection);
+
+        //kill download task
+        if(downloadQueue.size()>0){
+            killAllDownloadTasks();
+        }
         super.onDestroy();
     }
 
@@ -255,11 +282,11 @@ public class P2PServiceAndroid extends Service{
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 
-
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
             P2PManagerAndroid manager = (P2PManagerAndroid)UstadMobileSystemImpl.getInstance().getP2PManager();
             manager.init(P2PServiceAndroid.this);
+
         }
 
 
@@ -309,44 +336,8 @@ public class P2PServiceAndroid extends Service{
 
 
     /**
-     * Async class to download file/index out of the main thread
+     * show fore ground notification when super node mode is activated
      */
-    private class checkDownloadIndex extends AsyncTask<String,Void,String> {
-        String pageData = "",data;
-
-        @Override
-        protected String doInBackground(String... strings) {
-
-            try{
-                URL url = new URL(strings[0]);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.connect();
-                InputStream is = conn.getInputStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-
-
-                while ((data = reader.readLine()) != null){
-                    pageData += data + "\n";
-                }
-
-
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return pageData;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            Log.d(WifiDirectHandler.TAG,"Response Data\n"+result);
-        }
-    }
-
-
-
     public void showNotification() {
         Bitmap bitmap=BitmapFactory.decodeResource(getResources(),R.drawable.launcher_icon);
         final Notification notification = new NotificationCompat.Builder(this)
@@ -366,9 +357,161 @@ public class P2PServiceAndroid extends Service{
 
     }
 
+
+    /**
+     *
+     * @return instance of the WifiDirectHandler API
+     */
     public WifiDirectHandler getWifiDirectHandlerAPI(){
         return wifiDirectHandler;
     }
 
 
+    /* *************************  File handling starts here ****************** */
+
+    /**
+     * Cancel all downloads
+     */
+    private void killAllDownloadTasks() {
+        if (null != downloadQueue & downloadQueue.size() > 0) {
+            for (AsyncTask<String, String, Void> downloadInstance : downloadQueue) {
+                if (downloadInstance != null) {
+                    Log.i("NotificationReceiver", "Killing download thread");
+                    downloadInstance.cancel(true);
+                }
+            }
+            mNotifyManager.cancelAll();
+        }
+    }
+
+
+    /**
+     * Setup notification for file download process
+     */
+    private void prepareFileDownload(){
+
+        if(deviceToDownloadFrom.size()>0){
+            dismissNotification();
+            downloadQueue=new ArrayList<>();
+            mNotifyManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mBuilder = new NotificationCompat.Builder(this);
+            mBuilder.setContentTitle("Downloading Files...").setContentText("Download in progress").setSmallIcon(R.drawable.ic_launcher);
+            mBuilder.setProgress(0, 0, true);
+            mNotifyManager.notify(DOWNLOAD_NOTIFICATION_ID, mBuilder.build());
+            mBuilder.setAutoCancel(true);
+
+            startDownloading();
+
+        }else{
+            Log.d(WifiDirectHandler.TAG,deviceToDownloadFrom.size()+" devices");
+        }
+        
+
+    }
+
+    /**
+     * Start file downloading task, this will be called every time after completion of the task
+     */
+    void startDownloading(){
+        FileDownloader fileDownloader=new FileDownloader();
+        fileDownloader.execute("https://endlessfame.co.tz/cms-v1/files/images/poster/3X9A5308.jpg",deviceToDownloadFrom.get(fileDownloadingTracker));
+        downloadQueue.add(fileDownloader);
+    }
+
+
+    /**
+     * @param downloadUrl file link from p2p to be downloaded
+     * @param fileName file name
+     */
+    private void downloadImagesToSdCard(String downloadUrl, String fileName) {
+        FileOutputStream fos;
+        InputStream inputStream;
+
+        try {
+            URL url = new URL(downloadUrl);
+            String sdCard = Environment.getExternalStorageDirectory().toString();
+
+            //point it to the right directory for the files to be saved
+            File myDir = new File(sdCard, "UstadDemoDownload");
+
+			/* if specified not exist create new */
+            if (!myDir.exists()) {
+                myDir.mkdir();
+            }
+
+            File file = new File(myDir, fileName);
+
+            //check if file exits possibly resume download here
+
+
+            URLConnection ucon = url.openConnection();
+
+            HttpURLConnection httpConn = (HttpURLConnection) ucon;
+            httpConn.setRequestMethod("GET");
+            httpConn.connect();
+            inputStream = httpConn.getInputStream();
+
+            fos = new FileOutputStream(file);
+            byte[] buffer = new byte[1024];
+            int bufferLength = 0;
+            while ((bufferLength = inputStream.read(buffer)) > 0) {
+                fos.write(buffer, 0, bufferLength);
+            }
+            inputStream.close();
+            fos.close();
+        } catch (Exception e) {
+            Log.d(WifiDirectHandler.TAG,"Failed to Download file #"+(fileDownloadingTracker+1));
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Async class to handle the download out of the Main UI Thread
+     */
+    private class FileDownloader extends AsyncTask<String, String, Void> {
+
+        @Override
+        protected Void doInBackground(String... param) {
+
+            Log.d(WifiDirectHandler.TAG," Downloading file #"+(fileDownloadingTracker+1));
+            //handle file name and extension to avoid overwriting them = with MAC ADDRESS
+            downloadImagesToSdCard(param[0], "file_"+fileDownloadingTracker+"_" + param[1] + ".opds");
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            Log.i(WifiDirectHandler.TAG, "onPreExecute Called");
+            Log.d(WifiDirectHandler.TAG,"Preparing to download file #"+(fileDownloadingTracker+1));
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            Log.d(WifiDirectHandler.TAG," File #"+(fileDownloadingTracker+1)+" downloaded successfully");
+
+            float len = deviceToDownloadFrom.size();
+
+            // When the loop is finished, updates the notification
+            if (fileDownloadingTracker >= len - 1) {
+                mBuilder.setContentTitle("Download Completed");
+                mBuilder.setContentText(fileDownloadingTracker +" files downloaded").setProgress(0, 0, false);
+                mNotifyManager.notify(DOWNLOAD_NOTIFICATION_ID, mBuilder.build());
+            } else {
+
+                //add another download to the queue if any
+
+                int per = (int) (((fileDownloadingTracker + 1) / len) * 100f);
+                Log.i("Counter", "Counter : " + fileDownloadingTracker + ", per : " + per);
+                mBuilder.setContentTitle("Downloading...");
+                mBuilder.setContentText("Downloaded so far (" + fileDownloadingTracker + "/"+deviceToDownloadFrom.size()+")");
+                mBuilder.setProgress(100, per, false);
+                mNotifyManager.notify(DOWNLOAD_NOTIFICATION_ID, mBuilder.build());
+            }
+
+            fileDownloadingTracker++;
+
+        }
+
+    }
 }

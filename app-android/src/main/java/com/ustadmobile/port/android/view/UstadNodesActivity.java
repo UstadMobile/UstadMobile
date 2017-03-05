@@ -125,7 +125,7 @@ public class UstadNodesActivity extends UstadBaseActivity{
 
     /**
      * Get the list of the available nodes from shared preference of which will be
-     * update using broadcast receiver from P2pServiceAndroid
+     * updated using broadcast receiver from P2pServiceAndroid
      * @return
      */
     ArrayList<P2PNode> getNodes(){
@@ -189,6 +189,7 @@ public class UstadNodesActivity extends UstadBaseActivity{
 
         @Override
         public NodeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
 
             return new NodeHolder(inflater.inflate(R.layout.single_node_view, parent, false));
         }
@@ -278,12 +279,11 @@ public class UstadNodesActivity extends UstadBaseActivity{
 
         UstadMobileSystemImpl.getInstance().setAppPref("mama","true",getApplicationContext());
         Log.d(WifiDirectHandler.TAG,"Connecting to the no prompt network");
-        WifiManager wifiManager = (WifiManager)getSystemService(Context.WIFI_SERVICE);
+        WifiManager wifiManager = (WifiManager)getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         WifiConfiguration configuration = new WifiConfiguration();
         configuration.SSID = "\"" + SSID + "\"";
         configuration.preSharedKey = "\"" + pasPhrase+"\"";
         int netId = wifiManager.addNetwork(configuration);
-
         //disconnect form current network and connect to this one
         wifiManager.disconnect();
         wifiManager.enableNetwork(netId, true);
