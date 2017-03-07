@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.toughra.ustadmobile"
-    android:versionCode="89"
-    android:versionName="0.2.4.20">
+    android:versionCode="90"
+    android:versionName="0.2.4.21">
 
     <uses-sdk tools:overrideLibrary="edu.rit.se.wifibuddy"/>
 
@@ -40,7 +40,7 @@
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/title_activity_splash_screen"
-            android:noHistory="true">
+            android:noHistory="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

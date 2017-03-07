@@ -55,6 +55,9 @@ public class RectangleView extends View{
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if(pageArea == null)
+            return;//it's not ready yet
+
         paint.setStyle(Style.FILL);
         paint.setAlpha(128);
 
@@ -121,6 +124,7 @@ public class RectangleView extends View{
         this.previewImgWidth = width;
         this.previewImgHeight = height;
         calcAreas();
+        invalidate();
     }
 
     @Override

@@ -445,7 +445,10 @@ public class AttendanceSheetImage {
     }
 
     public void stopChecking() {
-        recognitionThread.stopProcesing();
+        if(recognitionThread != null) {
+            recognitionThread.stopProcesing();
+            recognitionThread = null;
+        }
     }
 
     public int isAligned(OMRImageSource src) {

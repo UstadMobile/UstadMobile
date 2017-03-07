@@ -1,14 +1,21 @@
 package com.ustadmobile.port.android.view;
 
 
+import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +48,9 @@ import jp.sourceforge.qrcode.reader.QRCodeImageReader;
  * Use the {@link AttendanceCameraFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AttendanceCameraFragment extends Fragment implements  Camera.PreviewCallback, CameraPreview.PreviewStartedCallback, AttendanceSheetImage.DebugSaveRequestListener, AttendanceSheetImage.SheetRecognizedListener {
+public class AttendanceCameraFragment extends Fragment implements  Camera.PreviewCallback, CameraPreview.PreviewStartedCallback, AttendanceSheetImage.DebugSaveRequestListener, AttendanceSheetImage.SheetRecognizedListener, DialogInterface.OnClickListener {
+
+    public static final int CAMERA_PERMISSION_REQUESTED = 10;
 
     private CameraPreview mPreview;
 
@@ -66,6 +75,8 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
 
     //private int targetHeight = 800;
     private int targetHeight = 480;
+
+    private boolean permissionsExplained = false;
 
     /**
      * Use this factory method to create a new instance of
@@ -209,18 +220,85 @@ public class AttendanceCameraFragment extends Fragment implements  Camera.Previe
         return view;
     }
 
+
     @Override
-    public void onResume() {
-        super.onResume();
-        mCamera = getCameraInstance();
-        mPreview.setPreviewCallback(this);
-        mPreview.setCamera(mCamera);
+    public void onClick(DialogInterface dialog, int which) {
+        switch(which) {
+            case DialogInterface.BUTTON_POSITIVE:
+                onResumeCheckPermissions();
+                break;
+            case DialogInterface.BUTTON_NEGATIVE:
+                getActivity().finish();
+                break;
+        }
     }
 
 
     @Override
+    public void onResume() {
+        super.onResume();
+        onResumeCheckPermissions();
+    }
+
+    /**
+     * This is called once permissions have been granted for the camera: then we can start the
+     * preview
+     */
+    protected void onResumePermissionGranted() {
+        if(mCamera == null) {
+            mCamera = getCameraInstance();
+            mPreview.setPreviewCallback(this);
+            mPreview.setCamera(mCamera);
+        }
+    }
+
+    /**
+     * Check and see if we have the camera permission
+     */
+    protected void onResumeCheckPermissions() {
+        if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) && !permissionsExplained){
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Camera permission required")
+                        .setMessage("To use attendance sheet snap functionality camera permissions are required");
+                builder.setPositiveButton("OK", this);
+                builder.setNegativeButton("Cancel", this);
+                builder.create().show();
+                permissionsExplained = true;
+                return;
+            }else {
+                //request the permission
+                requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_REQUESTED);
+                return;
+            }
+        }
+
+        onResumePermissionGranted();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case CAMERA_PERMISSION_REQUESTED:
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onResumePermissionGranted();
+                }else if(!permissionsExplained) {
+                    onResumeCheckPermissions();
+                }else {
+                    getActivity().finish();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                break;
+        }
+    }
+
+    @Override
     public void onPause() {
-        mSheet.stopChecking();
+        if(mSheet != null)
+            mSheet.stopChecking();
         mPreview.stopAndRelease();
         mCamera = null;
         super.onPause();
