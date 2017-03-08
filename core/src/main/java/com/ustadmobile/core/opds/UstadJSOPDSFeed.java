@@ -35,6 +35,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
@@ -56,9 +57,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     public static final String NS_UMOPDSSTYLE = "http://www.ustadmobile.com/ns/xml/opdsstyle";
     
     public UstadJSOPDSEntry[] entries;
-    
-    
-    
+
     /**
      * The absolute URL of this catalog (HTTP or Filesystem based)
      */
@@ -82,15 +81,46 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         this.title = title;
         this.id = id;
     }
-    
+
+    /**
+     * Parse OPDS from a String
+     *
+     * @param str String with OPDS XML
+     * @return UstadJSOPDSFeed object representing the feed from the string
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     public static UstadJSOPDSFeed loadFromXML(String str) throws XmlPullParserException, IOException {
-        
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
         parser.setInput(bin, "UTF-8");
         return loadFromXML(parser);
     }
-    
+
+    /**
+     * Parse the given XML from the given input stream and return an instance of UstadJSOPDSFeed
+     * representing that OPDS feed
+     *
+     * @param in XmlPullParser to read from
+     * @return UstadJSOPDSFeed object representing the feed
+     *
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public static UstadJSOPDSFeed loadFromXML(InputStream in, String encoding) throws XmlPullParserException, IOException {
+        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser(in, encoding);
+        return loadFromXML(parser);
+    }
+
+    /**
+     * Parse the given XML and return an instance of UstadJSOPDSFeed representing that OPDS feed
+     *
+     * @param xpp XmlPullParser to read from
+     * @return UstadJSOPDSFeed object representing the feed
+     *
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
     public static UstadJSOPDSFeed loadFromXML(XmlPullParser xpp) throws 
             XmlPullParserException, IOException{
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.VERBOSE,
