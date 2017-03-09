@@ -51,6 +51,9 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     private P2PServiceAndroid p2pService;
 
+    /**
+     * WiFi Discovery Service full domain
+     */
     private String ustadFullDomain = SERVICE_NAME + "." + ServiceType.PRESENCE_TCP + ".local.";
 
     public P2PManagerAndroid() {
@@ -104,8 +107,8 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
     public void onDestroy() {
         LocalBroadcastManager.getInstance(p2pService).unregisterReceiver(mBroadcastReceiver);
 
-        if(P2PManagerAndroid.this.knownSupernodes!=null){
-            P2PManagerAndroid.this.knownSupernodes=null;
+        if(P2PManagerAndroid.this.knownSuperNodes !=null){
+            P2PManagerAndroid.this.knownSuperNodes =null;
         }
 
     }
@@ -128,9 +131,9 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
                 if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
 
                     P2PNode newNode = new P2PNode(deviceMac);
-                    int nodeIndex = knownSupernodes.indexOf(newNode);
+                    int nodeIndex = knownSuperNodes.indexOf(newNode);
                     if (nodeIndex >= 0) {
-                        newNode = knownSupernodes.get(nodeIndex);
+                        newNode = knownSuperNodes.get(nodeIndex);
                     }
 
                     newNode.setNetworkSSID(txtRecord.getRecord().get(NO_PROMPT_NETWORK_NAME).toString());
@@ -138,7 +141,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
                     newNode.setStatus(txtRecord.getDevice().status);
 
                     if(nodeIndex<0){
-                        P2PManagerAndroid.this.knownSupernodes.add(newNode);
+                        P2PManagerAndroid.this.knownSuperNodes.add(newNode);
                         handleNodeDiscovered(newNode);
                     }
                 }
@@ -199,7 +202,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     @Override
     public List<P2PNode> getSuperNodes(Object context) {
-        return knownSupernodes;
+        return knownSuperNodes;
     }
 
     @Override
@@ -209,14 +212,10 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     @Override
     public boolean isSuperNodeAvailable(Object context) {
-        return knownSupernodes.size()>0;
+        return knownSuperNodes.size()>0;
     }
 
 
-    @Override
-    public int requestDownload(Object context, DownloadRequest request) {
-        return 0;
-    }
 
     @Override
     public void stopDownload(Object context, int requestId, boolean delete) {
@@ -233,20 +232,48 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         return 0;
     }
 
+    /**
+     *
+     * @return collection of all super nodes around
+     */
 
     public List<P2PNode> getNodeList(){
-        return knownSupernodes;
+        return knownSuperNodes;
     }
+
+    /**
+     *
+     * @return all previously connected WiFi Hotspot to keep track, when  the task queue is completed then
+     * the device will be connected to this network.
+     */
 
     public HashMap<String, String> getPreviousConnectedNetwork(){
         return P2PManagerAndroid.this.previousConnectedNetwork;
     }
 
+    /**
+     * Set true if the previous and the current network are the same false otherwise
+     * @param isConnected boolean value to indicate the connection state.
+     */
     public void setIsConnectedToSameNetwork(boolean isConnected){
         P2PManagerAndroid.this.isConnectedSameNetwork =isConnected;
     }
+
+    /**
+     *
+     * @return isConnectedSameNetwork which is used for checking whether to execute No prompt
+     * connection or not.
+     */
     public boolean isConnectedToSameNetwork(){
         return P2PManagerAndroid.this.isConnectedSameNetwork;
+    }
+
+    /**
+     *
+     * @return HashMap of all requests made so that you can get request/download status
+     */
+    public HashMap<Integer,P2PTask> getDownloadRequest(){
+        return P2PManagerAndroid.this.downloadRequests;
     }
 
 

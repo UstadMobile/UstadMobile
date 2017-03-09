@@ -1,20 +1,24 @@
 package com.ustadmobile.port.sharedse.p2p;
 
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.p2p.P2PManager;
+import com.ustadmobile.core.util.UMFileUtil;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by kileha3 on 05/02/2017.
@@ -31,15 +35,33 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     /**
      * List of supernodes that we know about around us
      */
-    protected List<P2PNode> knownSupernodes=new ArrayList<>();
+    protected List<P2PNode> knownSuperNodes =new ArrayList<>();
 
     protected Vector<P2PNodeListener> nodeListeners = new Vector<>();
-
+    /**
+     * Store the tasks of which will be executed in a FIFO way
+     */
     private Vector<P2PTask> taskQueue = new Vector<>();
+
+    /**
+     * Store the download requests of which will be executed in a FIFO way
+     */
+    public HashMap<Integer,P2PTask> downloadRequests=new HashMap<>();
 
     private P2PTask currentTask;
 
+    /**
+     * Store information of the previously connected WiFi hotspot before connecting to
+     * the no prompt network.
+     */
     protected HashMap<String,String> previousConnectedNetwork=new HashMap<>();
+
+    /**
+     * Used to check if the previous and the current network are the same, so that
+     * we can skip the logic of connecting to no prompt network.
+     * i.e. Download task will be made if they are same otherwise device will be
+     * connected to no prompt network.
+     */
     protected boolean isConnectedSameNetwork =false;
 
     /**
@@ -67,10 +89,9 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      * check if the file is available locally
      * */
     public boolean isFileAvailable(Object context, String fileId) {
-
-        for (P2PNode node: knownSupernodes) {
+        for (P2PNode node: knownSuperNodes) {
             UstadJSOPDSFeed nodeFeed=availableIndexes.get(node);
-            if(nodeFeed.id.equals(fileId)){
+            if(nodeFeed.getEntryById(fileId) != null){
                 return true;
             }
         }
@@ -82,7 +103,48 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      * request to download a file from super node
      *
      */
-    public abstract int requestDownload(Object context, DownloadRequest request);
+    public int requestDownload(Object context, DownloadRequest request) {
+        //make download task here
+        //find which node has the course
+        P2PNode nodeWithFile = null;
+        UstadJSOPDSFeed nodeFeed;
+        UstadJSOPDSEntry fileEntry = null;
+        for (P2PNode node: knownSuperNodes) {
+            nodeFeed=availableIndexes.get(node);
+            fileEntry = nodeFeed.getEntryById(request.getFileId());
+            if(fileEntry != null){
+                nodeWithFile = node;
+                break;
+            }
+        }
+
+        //if nodeWithFile = null - it's not available - this shouldn't happen
+        Vector acquisitionLinks = fileEntry.getAcquisitionLinks();
+        P2PTask downloadIndexTask;
+        int requestId=0;
+        if(acquisitionLinks.size() > 0) {
+
+            String[] acquisitionAttrs = (String[])acquisitionLinks.get(0);
+            String url = acquisitionAttrs[UstadJSOPDSItem.ATTR_HREF];
+            String fileName = UMFileUtil.getFilename(url);
+            downloadIndexTask = makeDownloadTask(nodeWithFile,url);
+            String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                    CatalogController.SHARED_RESOURCE, context)[0].getDirURI();
+            File fileDir = new File(storageDir+"/"+fileName);
+            downloadIndexTask.setDestinationPath(fileDir.getAbsolutePath());
+            downloadIndexTask.setTaskType(P2PTask.TYPE_COURSE);
+            downloadIndexTask.setP2PTaskListener(this);
+
+            //generate request id
+            requestId = new AtomicInteger().incrementAndGet();
+            downloadRequests.put(requestId,downloadIndexTask);
+            queueP2PTask(downloadIndexTask);
+        }
+
+
+
+        return requestId;
+    }
 
     /**
      * stop the download once has been started
@@ -126,12 +188,18 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
             e.printStackTrace();
         }
     }
+    /**
+     * Cross platform logic to execute when updating node indexes
+     *
+     * @param node
+     */
 
     protected void handleNodeIndexUpdated(P2PNode node, String fileUri) {
         try{
             UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(new FileInputStream(fileUri), "UTF-8");//params needed: input stream
             availableIndexes.put(node, feed);
             UstadMobileSystemImpl.l(UMLog.DEBUG, 2, "Available Index "+availableIndexes.size());
+            //feed.entries[0].id
 
 
         }catch (XmlPullParserException e) {
@@ -141,18 +209,33 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
         }
     }
 
+    /**
+     * Cross platform listener method to execute when a new node is discovered
+     *
+     * @param node
+     */
     protected void fireNodeDiscovered(P2PNode node) {
         for(P2PNodeListener listener: nodeListeners) {
             listener.nodeDiscovered(node);
         }
     }
 
+    /**
+     * Cross platform listener method to execute when a new node is no longer active
+     *
+     * @param node
+     */
     protected void fireNodeGone(P2PNode node) {
         for(P2PNodeListener listener: nodeListeners) {
             listener.nodeGone(node);
         }
     }
 
+    /**
+     * Cross platform queuing logic, it check if there are task to execute and if any assign to the
+     * current task and process it by calling currentTask.start() which handles all connection logic
+     *
+     */
     public synchronized void checkQueue(){
         if (currentTask == null && !taskQueue.isEmpty()) {
             currentTask = taskQueue.remove(0);
@@ -161,6 +244,14 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
 
         //do nothing - a task is already running
     }
+
+    /**
+     * Cross platform method to execute when download (Task) is completed,
+     * it checks for the task type and if the task is of type P2PTask.TYPE_INDEX that means
+     * the connection will be terminated and connecting to the next node.
+     *
+     * @param task
+     */
 
     @Override
     public void taskEnded(P2PTask task) {
@@ -182,12 +273,24 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     }
 
 
+    /**
+     * Cross platform method add tasks to the queue
+     *
+     * @param task
+     */
 
     protected void queueP2PTask(P2PTask task) {
         taskQueue.add(task);
         checkQueue();
     }
 
+
+    /**
+     * Cross platform method which will create a new download task of which
+     *
+     * @param node - This refer to the node that will be exchanging content/index from.
+     * @param downloadUri - This refer to the file URI to download.
+     */
     protected abstract P2PTask makeDownloadTask(P2PNode node, String downloadUri);
 
 

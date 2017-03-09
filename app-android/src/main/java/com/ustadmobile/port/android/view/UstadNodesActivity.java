@@ -22,6 +22,7 @@ import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.port.sharedse.p2p.DownloadRequest;
 import com.ustadmobile.port.sharedse.p2p.P2PNode;
 import com.ustadmobile.port.sharedse.p2p.P2PNodeListener;
 
@@ -59,13 +60,19 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
         final TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setTextColor(Color.WHITE);
-
-
-
         p2PManagerAndroid=(P2PManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
 
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+
+        //test if the functionality of knowing if the file is available locally works perfect.
+        boolean isFileAvailable=p2PManagerAndroid.isFileAvailable(this,"202b10fe-b028-4b84-9b84-852aa766607d");
+        if(isFileAvailable){
+            DownloadRequest downloadRequest=new DownloadRequest();
+            downloadRequest.setFileId("202b10fe-b028-4b84-9b84-852aa766607d");
+            p2PManagerAndroid.requestDownload(getApplicationContext(),downloadRequest);
+        }
+
 
         nodeListAdapter=new NodeListAdapter();
         allNodesList.setLayoutManager(linearLayoutManager);
@@ -81,7 +88,6 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
         nodeListAdapter.setNodeList((ArrayList<P2PNode>) p2PManagerAndroid.getNodeList());
         ((P2PManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).addNodeListener(this);
     }
-
 
 
     @Override
@@ -211,9 +217,4 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
 
         }
     }
-
-
-
-
-
 }
