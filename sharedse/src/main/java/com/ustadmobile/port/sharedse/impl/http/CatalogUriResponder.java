@@ -35,7 +35,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  */
 public class CatalogUriResponder extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
-    public static final String ENTRY_PATH_COMPONENT = "/container/";
+    public static final String ENTRY_PATH_COMPONENT = "/entry/";
 
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
