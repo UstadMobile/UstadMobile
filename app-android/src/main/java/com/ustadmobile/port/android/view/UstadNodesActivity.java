@@ -61,6 +61,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
         textView.setTextColor(Color.WHITE);
 
 
+
         p2PManagerAndroid=(P2PManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
 
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);

@@ -1,8 +1,16 @@
 package com.ustadmobile.port.sharedse.p2p;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +26,7 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     /**
      * Map of available supernodes mapped as node to index file
      */
-    protected HashMap<P2PNode, UstadJSOPDSFeed> availableIndexes;
+    protected HashMap<P2PNode, UstadJSOPDSFeed> availableIndexes=new HashMap<>();
 
     /**
      * List of supernodes that we know about around us
@@ -30,6 +38,9 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     private Vector<P2PTask> taskQueue = new Vector<>();
 
     private P2PTask currentTask;
+
+    protected HashMap<String,String> previousConnectedNetwork=new HashMap<>();
+    protected boolean isConnectedSameNetwork =false;
 
     /**
      * Set if supernode mode is enabled or not (by default this is disabled)
@@ -55,7 +66,17 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     /**
      * check if the file is available locally
      * */
-    public abstract boolean isFileAvailable(Object context, String fileId);
+    public boolean isFileAvailable(Object context, String fileId) {
+
+        for (P2PNode node: knownSupernodes) {
+            UstadJSOPDSFeed nodeFeed=availableIndexes.get(node);
+            if(nodeFeed.id.equals(fileId)){
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * request to download a file from super node
@@ -95,8 +116,29 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     protected void handleNodeDiscovered(P2PNode node) {
         fireNodeDiscovered(node);
         P2PTask downloadIndexTask = makeDownloadTask(node, "/catalog/acquire.opds");
-        downloadIndexTask.setP2PTaskListener(this);
-        queueP2PTask(downloadIndexTask);
+        try{
+            File tmpFile = File.createTempFile("acquire", ".opds");
+            downloadIndexTask.setDestinationPath(tmpFile.getAbsolutePath());
+            downloadIndexTask.setTaskType(P2PTask.TYPE_INDEX);
+            downloadIndexTask.setP2PTaskListener(this);
+            queueP2PTask(downloadIndexTask);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected void handleNodeIndexUpdated(P2PNode node, String fileUri) {
+        try{
+            UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(new FileInputStream(fileUri), "UTF-8");//params needed: input stream
+            availableIndexes.put(node, feed);
+            UstadMobileSystemImpl.l(UMLog.DEBUG, 2, "Available Index "+availableIndexes.size());
+
+
+        }catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     protected void fireNodeDiscovered(P2PNode node) {
@@ -122,11 +164,24 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
 
     @Override
     public void taskEnded(P2PTask task) {
-        if(task == currentTask) {
-            currentTask = null;
-            checkQueue();
+        if(task != currentTask) {
+            //something is very wrong
+            UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Task ended != current task");
+            return;
         }
+
+
+        if(task.getTaskType() == P2PTask.TYPE_INDEX) {
+            handleNodeIndexUpdated(task.getNode(),task.getDestinationPath());
+        }
+
+
+        currentTask = null;
+        checkQueue();
+
     }
+
+
 
     protected void queueP2PTask(P2PTask task) {
         taskQueue.add(task);
@@ -134,10 +189,6 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     }
 
     protected abstract P2PTask makeDownloadTask(P2PNode node, String downloadUri);
-
-
-
-
 
 
 }

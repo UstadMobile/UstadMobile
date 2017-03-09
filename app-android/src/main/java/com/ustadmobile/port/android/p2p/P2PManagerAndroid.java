@@ -1,18 +1,15 @@
 package com.ustadmobile.port.android.p2p;
 
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.net.NetworkInfo;
-import android.support.v4.app.NotificationCompat;
+import android.net.wifi.WifiInfo;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -45,30 +42,20 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     public static final String SERVICE_NAME = "ustadMobile";
 
-    public static final String PREFKEY_SUPERNODE = "supernode_enabled";
+    public static final String PREFKEY_SUPERNODE = "supernode_enabled",
+            NETWORK_ID="networkID",
+            NETWORK_MACADDRESS="networkMacAddress";
     private static final String NO_PROMPT_NETWORK_PASS = "passphrase",
             NO_PROMPT_NETWORK_NAME = "networkName";
 
 
     private P2PServiceAndroid p2pService;
 
-    private NotificationCompat.Builder mBuilder;
-    private NotificationManager mNotifyManager;
-
     private String ustadFullDomain = SERVICE_NAME + "." + ServiceType.PRESENCE_TCP + ".local.";
-    private NetworkInfo extraInfo;
 
-
-
-    private int DOWNLOAD_NOTIFICATION_ID = 8;
-
-    private P2PDownloadFile p2PDownloadFile;
-
-
-
-    public Map<Context, ServiceConnection> getServiceConnectionMap() {
-        return serviceConnectionMap;
+    public P2PManagerAndroid() {
     }
+
 
     public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
         this.serviceConnectionMap = serviceConnectionMap;
@@ -82,6 +69,13 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
     public void init(Object context) {
 
         this.p2pService = (P2PServiceAndroid) context;
+
+        WifiInfo wifiInfo=p2pService.getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
+        if(wifiInfo!=null){
+            P2PManagerAndroid.this.previousConnectedNetwork.put(NETWORK_ID,String.valueOf(wifiInfo.getNetworkId()));
+            P2PManagerAndroid.this.previousConnectedNetwork.put(NETWORK_MACADDRESS,wifiInfo.getMacAddress());
+        }
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
         filter.addAction(WifiDirectHandler.Action.MESSAGE_RECEIVED);
@@ -109,9 +103,6 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
      */
     public void onDestroy() {
         LocalBroadcastManager.getInstance(p2pService).unregisterReceiver(mBroadcastReceiver);
-        if(p2PDownloadFile!=null){
-            p2PDownloadFile.cancel(true);
-        }
 
         if(P2PManagerAndroid.this.knownSupernodes!=null){
             P2PManagerAndroid.this.knownSupernodes=null;
@@ -221,10 +212,6 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         return knownSupernodes.size()>0;
     }
 
-    @Override
-    public boolean isFileAvailable(Object context, String fileId) {
-        return false;
-    }
 
     @Override
     public int requestDownload(Object context, DownloadRequest request) {
@@ -246,32 +233,22 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         return 0;
     }
 
-    private void prepareDownloadNotification(){
-        mNotifyManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(context);
-        mBuilder.setSmallIcon(R.drawable.ic_launcher);
-        mBuilder.setProgress(0, 0, true);
-        mBuilder.setAutoCancel(true);
-        mNotifyManager.notify(DOWNLOAD_NOTIFICATION_ID, mBuilder.build());
-
-    }
 
     public List<P2PNode> getNodeList(){
         return knownSupernodes;
     }
 
+    public HashMap<String, String> getPreviousConnectedNetwork(){
+        return P2PManagerAndroid.this.previousConnectedNetwork;
+    }
+
+    public void setIsConnectedToSameNetwork(boolean isConnected){
+        P2PManagerAndroid.this.isConnectedSameNetwork =isConnected;
+    }
+    public boolean isConnectedToSameNetwork(){
+        return P2PManagerAndroid.this.isConnectedSameNetwork;
+    }
 
 
 
-    /*
-    public void onDownloadStatusChange(boolean isDownloadCompleted,String reason) {
-
-        if(isDownloadCompleted){
-            taskQueue.remove(0);
-            currentTask=null;
-            checkQueue();
-        }else{
-            Log.e(WifiDirectHandler.TAG,"P2PManagerAndroid: onDownloadStatusChange: Failed - Download Failed \n"+reason);
-        }
-    }*/
 }
