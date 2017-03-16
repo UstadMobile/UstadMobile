@@ -37,33 +37,46 @@ dependencies {
 }
 
 ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.core.default.properties")))
-if(rootProject.file("buildconfig.core.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.core.local.properties")))
+ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
+if(project.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
 }
 
-apply from: rootProject.file("buildconfig.core.gradle").exists() ?
-        rootProject.file("buildconfig.core.gradle") : rootProject.file("buildconfig.core.default.gradle")
 
+
+/**
+ * Note: This is compiled into the main source directory (then gitignore'd) because Android studio
+ * will otherwise mark it as an unresolved reference if we use the default generated sources directory.
+ */
+task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    outputDir = new File ("${projectDir}/src/main/java")
+    packageName = "com.ustadmobile.core.buildconfig"
+    appName = project.ext.buildConfigProperties['appName']
+    clsName = "CoreBuildConfig"
+    buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
+    buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
+    buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]
+    buildConfigField "boolean", "BASEPOINT_BROWSEBUTTON_ENABLED", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"].equals("") ? "false" : "true"
+    buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]
+}
 compileJava.dependsOn(generateCoreBuildConfig)
 
 /**
  * Generate build constants for testing purposes (e.g. remote servers etc.
  */
-
 task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
     outputDir = new File("${projectDir}/src/test/java")
     packageName ="com.ustadmobile.test.core.buildconfig"
     clsName = "TestConstants"
-    buildConfigField "String", "LOGIN_USER", buildConfigProperties["test.remote_user"]
-    buildConfigField "String", "LOGIN_PASS", buildConfigProperties["test.remote_auth"]
-    buildConfigField "String", "XAPI_SERVER", buildConfigProperties["test.remote_xapi_server"]
-    buildConfigField "String", "LOGIN_URL", buildConfigProperties["test.remote_login_url"]
-    buildConfigField "String", "TEST_SERVER", buildConfigProperties["test.remote_http_test_server"]
-    buildConfigField "String", "TEST_CONTROL_PORT", buildConfigProperties["test.remote_http_control_port"]
-    buildConfigField "String", "CATALOG_OPDS_ROOT", buildConfigProperties["test.catalog_opds_root"]
-    buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", buildConfigProperties["test.remote_network_interval"]
-    buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", buildConfigProperties["test.remote_network_timeout"]
-    buildConfigField "String", "REGISTER_URL", buildConfigProperties["test.register_url"]
+    buildConfigField "String", "LOGIN_USER", project.ext.buildConfigProperties["test.remote_user"]
+    buildConfigField "String", "LOGIN_PASS", project.ext.buildConfigProperties["test.remote_auth"]
+    buildConfigField "String", "XAPI_SERVER", project.ext.buildConfigProperties["test.remote_xapi_server"]
+    buildConfigField "String", "LOGIN_URL", project.ext.buildConfigProperties["test.remote_login_url"]
+    buildConfigField "String", "TEST_SERVER", project.ext.buildConfigProperties["test.remote_http_test_server"]
+    buildConfigField "String", "TEST_CONTROL_PORT", project.ext.buildConfigProperties["test.remote_http_control_port"]
+    buildConfigField "String", "CATALOG_OPDS_ROOT", project.ext.buildConfigProperties["test.catalog_opds_root"]
+    buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", project.ext.buildConfigProperties["test.remote_network_interval"]
+    buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", project.ext.buildConfigProperties["test.remote_network_timeout"]
+    buildConfigField "String", "REGISTER_URL", project.ext.buildConfigProperties["test.register_url"]
 }
 compileTestJava.dependsOn(generateCoreTestConstantsBuildConfig)

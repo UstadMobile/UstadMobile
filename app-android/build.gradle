@@ -26,6 +26,12 @@ repositories {
     }
 }
 
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
+if(project.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
+}
+
 
 android {
     signingConfigs {
@@ -47,11 +53,33 @@ android {
         applicationId "com.toughra.ustadmobile"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 90
-        versionName "0.2.4.21"
+        versionCode rootProject.ext.ustadVersionCode
+        versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
     }
+
+    productFlavors {
+        /*
+         * The localconfig flavor is created based on the buildconfig.local.properties settings
+         */
+        localconfig {
+            applicationId project.ext.buildConfigProperties['android.applicationId']
+            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
+        }
+
+        /*
+         * The vanilla config flavor is here for convenience : it's the same as having no
+         * buildconfig.local.properties and relying on what's in buildconfig.default.properties
+         *
+         * It's just here to make life easier so you can switch flavors in Android studio without
+         * having to remove the local config files themselves
+         */
+        vanilla {
+            versionCode rootProject.ext.ustadVersionCode
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false

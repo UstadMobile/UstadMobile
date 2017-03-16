@@ -20,3 +20,16 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+version = "0.2.4.21"
+ext {
+    ustadVersion = project.version
+    ustadVersionCode = 90
+}
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
+if(project.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
+}
+
