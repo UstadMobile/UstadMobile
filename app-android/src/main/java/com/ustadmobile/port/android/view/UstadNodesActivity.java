@@ -1,5 +1,9 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
@@ -16,10 +20,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.p2p.P2PDownloadTaskAndroid;
 import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.p2p.DownloadRequest;
@@ -39,6 +45,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
     private NodeListAdapter nodeListAdapter;
     private int nodeCounter=0;
     private  P2PManagerAndroid p2PManagerAndroid;
+    private BroadcastReceiver broadcastReceiver;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -64,14 +71,6 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
 
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-
-        //test if the functionality of knowing if the file is available locally works perfect.
-        boolean isFileAvailable=p2PManagerAndroid.isFileAvailable(this,"202b10fe-b028-4b84-9b84-852aa766607d");
-        if(isFileAvailable){
-            DownloadRequest downloadRequest=new DownloadRequest();
-            downloadRequest.setFileId("202b10fe-b028-4b84-9b84-852aa766607d");
-            p2PManagerAndroid.requestDownload(getApplicationContext(),downloadRequest);
-        }
 
 
         nodeListAdapter=new NodeListAdapter();

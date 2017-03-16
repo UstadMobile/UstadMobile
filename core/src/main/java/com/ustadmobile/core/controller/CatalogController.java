@@ -1951,13 +1951,13 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             info.srcURLs = new String[]{itemURL};
             info.fileURI = UMFileUtil.joinPaths(new String[] {
                 request.getDestDirPath(), suggestedFilename
-            });;
+            });
             info.mimeType = mimeTypes[i];
             saveEntryInfo(entries[i], info, suggestedFilename);
                         
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 435, itemURL + "->" + 
                 info.fileURI);
-            String downloadID = impl.queueFileDownload(itemURL, info.fileURI,
+            String downloadID = impl.queueFileDownload(itemURL, info.fileURI, entries[i].id,
                 authHeaders, request.getContext());
             info.downloadID = downloadID;
             setEntryInfo(entries[i].id, info, resourceMode, request.getContext());

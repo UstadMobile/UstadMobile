@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.sharedse.p2p.DownloadRequest;
 import com.ustadmobile.port.sharedse.p2p.P2PManagerSharedSE;
 import com.ustadmobile.port.sharedse.p2p.P2PNode;
 import com.ustadmobile.port.sharedse.p2p.P2PTask;
@@ -42,14 +41,25 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     public static final String SERVICE_NAME = "ustadMobile";
 
-    public static final String PREFKEY_SUPERNODE = "supernode_enabled",
-            NETWORK_ID="networkID",
-            NETWORK_MACADDRESS="networkMacAddress";
+    public static final String PREFKEY_SUPERNODE = "supernode_enabled";
     private static final String NO_PROMPT_NETWORK_PASS = "passphrase",
             NO_PROMPT_NETWORK_NAME = "networkName";
 
 
     private P2PServiceAndroid p2pService;
+    /**
+     * This hold a position of the bytes downloaded so far in the status array
+     */
+    public static final int DOWNLOAD_BYTES_DOWNLOADED_SOFAR = 0;
+    /**
+     * Holds a position of file total bytes in the status array
+     */
+    public static final int DOWNLOAD_FILE_TOTAL_BYTES = 1;
+    /**
+     * Holds a position of the actual downloading status in the status array
+     */
+    public static final int DOWNLOAD_STATUS = 2;
+
 
     /**
      * WiFi Discovery Service full domain
@@ -75,8 +85,9 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
         WifiInfo wifiInfo=p2pService.getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
         if(wifiInfo!=null){
-            P2PManagerAndroid.this.previousConnectedNetwork.put(NETWORK_ID,String.valueOf(wifiInfo.getNetworkId()));
-            P2PManagerAndroid.this.previousConnectedNetwork.put(NETWORK_MACADDRESS,wifiInfo.getMacAddress());
+            P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_SSID]=wifiInfo.getSSID();
+            P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_NETID]=String.valueOf(wifiInfo.getNetworkId());
+            P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]=wifiInfo.getMacAddress();
         }
 
         IntentFilter filter = new IntentFilter();
@@ -87,6 +98,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
+        filter.addAction(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
 
         LocalBroadcastManager.getInstance(p2pService).registerReceiver(mBroadcastReceiver, filter);
         boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
@@ -151,6 +163,8 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
                 boolean connected = intent.getBooleanExtra(WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED,false);
                 Log.d(WifiDirectHandler.TAG,"noPromptConnection: status "+String.valueOf(connected));
                 checkQueue();
+            }else if(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE.equals(action)){
+                Toast.makeText(context,"Download with ID "+intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID)+" Finished",Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -224,7 +238,15 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     @Override
     public int[] getRequestStatus(Object context, int requestId) {
-        return new int[0];
+        int statusVal[]=new int[3];
+
+        P2PTask currentTask=getDownloadRequest().get(requestId);
+        if(currentTask!=null){
+            statusVal[DOWNLOAD_BYTES_DOWNLOADED_SOFAR]=currentTask.getBytesDownloadedSoFar();
+            statusVal[DOWNLOAD_FILE_TOTAL_BYTES]=currentTask.getDownloadTotalBytes();
+            statusVal[DOWNLOAD_STATUS]=currentTask.getDownloadStatus();
+        }
+        return statusVal;
     }
 
     @Override
@@ -247,30 +269,17 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
      * the device will be connected to this network.
      */
 
-    public HashMap<String, String> getPreviousConnectedNetwork(){
-        return P2PManagerAndroid.this.previousConnectedNetwork;
+    public String [] getCurrentConnectedNetwork(){
+        return P2PManagerAndroid.this.currentConnectedNetwork;
     }
 
-    /**
-     * Set true if the previous and the current network are the same false otherwise
-     * @param isConnected boolean value to indicate the connection state.
-     */
-    public void setIsConnectedToSameNetwork(boolean isConnected){
-        P2PManagerAndroid.this.isConnectedSameNetwork =isConnected;
+    public void setCurrentConnectedNetwork(String [] currentConnectedNetwork){
+        P2PManagerAndroid.this.currentConnectedNetwork=currentConnectedNetwork;
     }
 
     /**
      *
-     * @return isConnectedSameNetwork which is used for checking whether to execute No prompt
-     * connection or not.
-     */
-    public boolean isConnectedToSameNetwork(){
-        return P2PManagerAndroid.this.isConnectedSameNetwork;
-    }
-
-    /**
-     *
-     * @return HashMap of all requests made so that you can get request/download status
+     * @return HashMap of all requests made so that you can get task properties
      */
     public HashMap<Integer,P2PTask> getDownloadRequest(){
         return P2PManagerAndroid.this.downloadRequests;

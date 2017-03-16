@@ -1,7 +1,5 @@
 package com.ustadmobile.port.sharedse.p2p;
 
-import java.util.HashMap;
-
 /**
  * Created by kileha3 on 05/03/2017.
  */
@@ -14,7 +12,17 @@ public abstract class P2PTask {
 
     private String destinationPath;
 
+    private int downloadStatus;
+
+    private int bytesDownloadedSoFar;
+
+    private int downloadTotalBytes;
+
+    private final Object bytesDownloadedLock = new Object();
+
     protected P2PTaskListener listener;
+
+
 
     /**
      * The task is getting an index of the available contents from another node
@@ -30,6 +38,38 @@ public abstract class P2PTask {
 
 
 
+
+    public int getBytesDownloadedSoFar() {
+        synchronized (bytesDownloadedLock) {
+            return bytesDownloadedSoFar;
+        }
+    }
+
+    protected void setBytesDownloadedSoFar(int bytesDownloadedSoFar) {
+        synchronized (bytesDownloadedLock) {
+            this.bytesDownloadedSoFar = bytesDownloadedSoFar;
+        }
+    }
+
+    public int getDownloadTotalBytes() {
+        return downloadTotalBytes;
+    }
+
+    public void setDownloadTotalBytes(int downloadTotalBytes) {
+        this.downloadTotalBytes = downloadTotalBytes;
+    }
+
+
+    public int getDownloadStatus() {
+        return downloadStatus;
+    }
+
+    public void setDownloadStatus(int downloadStatus) {
+        this.downloadStatus = downloadStatus;
+    }
+
+
+
     public P2PTask(P2PNode node, String downloadUri) {
         this.node = node;
         this.downloadUri = downloadUri;
@@ -42,9 +82,11 @@ public abstract class P2PTask {
     /**
      * Runs the task
      */
-    public void start() {
+    public synchronized void start() {
 
     }
+
+
 
 
     public P2PNode getNode() {
@@ -69,7 +111,7 @@ public abstract class P2PTask {
     }
 
     /**
-     * The path to download the file to e.g. /path/to/file.opds
+     * The path to download the file to e.g. /path/to/file
      *
      * @return
      */
@@ -80,13 +122,6 @@ public abstract class P2PTask {
     public void setDestinationPath(String destinationPath) {
         this.destinationPath = destinationPath;
     }
-
-    /**
-     * Return the current status of the task
-     *
-     * @return
-     */
-    public abstract int getStatus();
 
     protected void fireTaskEnded() {
         if(listener != null)
@@ -106,7 +141,7 @@ public abstract class P2PTask {
         return CURRENT_TASK_TYPE;
     }
 
-    public abstract void disconnect(HashMap<String,String> prevConnectedNetwork);
+    public abstract void disconnect(String [] currentConnectedNetwork);
 
 
 }

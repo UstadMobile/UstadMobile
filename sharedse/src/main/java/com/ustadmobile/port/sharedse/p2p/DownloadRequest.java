@@ -6,7 +6,9 @@ package com.ustadmobile.port.sharedse.p2p;
 public class DownloadRequest {
 
     String fileDestination;
+    String fileSource;
     String fileId;
+
     public String getFileId() {
         return fileId;
     }
@@ -15,7 +17,6 @@ public class DownloadRequest {
         this.fileId = fileId;
     }
 
-
     public String getFileDestination() {
         return fileDestination;
     }
@@ -23,7 +24,13 @@ public class DownloadRequest {
     public void setFileDestination(String fileDestination) {
         this.fileDestination = fileDestination;
     }
+    public String getFileSource() {
+        return fileSource;
+    }
 
+    public void setFileSource(String fileSource) {
+        this.fileSource = fileSource;
+    }
 
 
 }

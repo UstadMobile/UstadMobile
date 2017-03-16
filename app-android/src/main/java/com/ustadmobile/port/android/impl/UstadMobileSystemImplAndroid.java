@@ -48,14 +48,18 @@ import java.net.URL;
 
 import com.toughra.ustadmobile.BuildConfig;
 import com.ustadmobile.core.impl.*;
+import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.port.android.p2p.P2PDownloadTaskAndroid;
 import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
 import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
 import com.ustadmobile.port.android.view.SettingsHome;
+import com.ustadmobile.port.sharedse.p2p.DownloadRequest;
 import com.ustadmobile.port.sharedse.p2p.P2PManagerSharedSE;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
@@ -448,50 +452,29 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String queueFileDownload(String url, String destFileURI, Hashtable headers, Object context) {
-        Context aContext = (Context)context;
-        DownloadManager mgr = (DownloadManager)aContext.getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-
-        File destFile = new File(destFileURI);
-        String destStr = destFile.getAbsolutePath();
-        request.setDestinationUri(Uri.fromFile(destFile));
-
-        return String.valueOf(mgr.enqueue(request));
+    public String queueFileDownload(String url, String destFileURI, String entryId, Hashtable headers, Object context) {
+        DownloadRequest p2prequest = new DownloadRequest();
+        p2prequest.setFileId(entryId);
+        p2prequest.setFileSource(url);
+        String id = String.valueOf(p2pManager.requestDownload(context, p2prequest));
+        return id;
     }
 
     @Override
     public int[] getFileDownloadStatus(String downloadID, Object context) {
-        //TODO: surround with try catch - sometimes this can go wrong with android SQL errors: in which case return null
-        Context ctx = (Context)context;
-        DownloadManager mgr = (DownloadManager)ctx.getSystemService(
-                Context.DOWNLOAD_SERVICE);
-        DownloadManager.Query query = new DownloadManager.Query();
-        query.setFilterById(Long.valueOf(downloadID));
-
-        Cursor cursor = mgr.query(query);
-        cursor.moveToFirst();
-
-        int[] retVal = new int[3];
-        retVal[IDX_DOWNLOADED_SO_FAR] = cursor.getInt(cursor.getColumnIndex(
-                DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-        retVal[IDX_BYTES_TOTAL] = cursor.getInt(cursor.getColumnIndex(
-                DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-        retVal[IDX_STATUS] = cursor.getInt(cursor.getColumnIndex(
-                DownloadManager.COLUMN_STATUS));
-        return retVal;
+        return p2pManager.getRequestStatus(context,Integer.parseInt(downloadID));
     }
 
     @Override
     public void registerDownloadCompleteReceiver(final UMDownloadCompleteReceiver receiver, final Object context) {
         IntentFilter downloadCompleteIntentFilter =
-                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+                new IntentFilter(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
         BroadcastReceiver completeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String downloadID = String.valueOf(intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L));
-                receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(downloadID,
-                        getFileDownloadStatus(downloadID, context)));
+                String downloadID = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID);
+                String downloadStatus = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS);
+                receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(downloadID,Integer.parseInt(downloadStatus)));
             }
         };
 
