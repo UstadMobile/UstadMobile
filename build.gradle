@@ -11,6 +11,11 @@ buildscript {
     }
 }
 
+plugins {
+    id "org.ajoberstar.grgit" version '1.6.0'
+    id 'org.ajoberstar.git-publish' version "0.1.0"
+}
+
 allprojects {
     repositories {
         jcenter()
@@ -32,4 +37,117 @@ ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.def
 if(project.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
 }
+
+/**
+ * Local configuration management
+ *
+ * Run gradle with -PconfigDst=path/to/dir to specify where to copy to. This will default to a directory
+ * parallel to the source directory called UstadMobile-config-<localConfigId> where localConfigId
+ * is the config id in the buildconfig.local.properties
+ */
+task copyLocalConfigToRepoDir(type: Copy) {
+    from("./") {
+        include "buildconfig.local.properties"
+        include "app-android/buildconfig.local.properties"
+        include "app-android/src/localconfig/**"
+    }
+
+    into project.hasProperty("configDst") ? configDst : "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]
+}
+
+task copyLocalConfigFromRepoDir(type: Copy) {
+    from(project.ext.has("localConfigDir") ? localConfigDir :  "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]) {
+        include "buildconfig.local.properties"
+        include "app-android/buildconfig.local.properties"
+        include "app-android/src/localconfig/**"
+    }
+
+    into "./"
+}
+
+//from https://github.com/ajoberstar/gradle-git/issues/145
+// See also : http://ajoberstar.org/grgit/docs/groovydoc/org/ajoberstar/grgit/Grgit.htm
+import org.ajoberstar.grgit.Grgit
+import org.ajoberstar.grgit.Status
+
+/**
+ * localConfig
+ *
+ * Run gradle with
+ * PconfigRepoUri=remotegituri
+ */
+task pushLocalConfig(dependsOn: copyLocalConfigToRepoDir) {
+    outputs.upToDateWhen { false }
+    doLast {
+        String repoDirPath = project.hasProperty("configDst") ? configDst : "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]
+        String remoteRepoUri = project.hasProperty("configRepoUri") ? configRepoUri : "git@server.com:/default"
+        if(!project.hasProperty("configRepoUri")){
+            println("WARNING: No configRepoUri specified: using default - probably not what you want. Adjust the git remote origin in " + repoDirPath + " to fix this")
+        }
+
+        def localConfigRepoDir = project.file(repoDirPath)
+        Grgit repo = null
+        try {
+            repo = Grgit.open(dir: localConfigRepoDir)
+        }catch(Exception e) {
+            //probably not yet a git directory yet - initialize it
+            repo = Grgit.init(dir: localConfigRepoDir)
+            repo.remote.add(name: "origin", url: remoteRepoUri)
+        }
+
+        Status status = repo.status()
+        if(status.staged.allChanges.size() > 0 || status.unstaged.allChanges.size() > 0) {
+            Iterator<String> unstagedChanges = status.unstaged.allChanges.iterator()
+            while(unstagedChanges.hasNext()){
+                repo.add(patterns:[unstagedChanges.next()])
+            }
+            repo.commit(message: "Local config change detected", all:true)
+            repo.push(all: true)
+        }
+    }
+}
+
+task cloneLocalConfig() {
+    outputs.upToDateWhen {
+        false
+    }
+
+    doLast {
+        if(!project.hasProperty("configRepoUri")) {
+            throw GradleException("Clone local config requires configRepoUri project property set. Run with -PconfigRepoUri=")
+        }
+
+        File checkoutDir = new File("../UstadMobile-local-checkout")
+        Grgit.clone(dir: checkoutDir, uri: configRepoUri)
+        Properties localConfigProperties = new Properties()
+        File repoConfigPropertiesFile = new File("../UstadMobile-local-checkout/buildconfig.local.properties")
+        if(!repoConfigPropertiesFile.exists()) {
+            throw new GradleException("ERROR: Config " + configRepoUri + " has no buildconfig.local.properties - wrong repo maybe?")
+        }
+
+        localConfigProperties.load(new FileInputStream(repoConfigPropertiesFile))
+        File checkoutDirDefaultName = new File("../UstadMobile-config-" + localConfigProperties["localConfigId"])
+        checkoutDir.renameTo(checkoutDirDefaultName)
+
+        //now do tasks.copyIn.execute as per https://discuss.gradle.org/t/how-can-i-call-a-task-from-another-task-with-dependencies/5961/5
+        project.ext.localConfigDir =  checkoutDir.getPath()
+        tasks.copyLocalConfigFromRepoDir.execute()
+    }
+}
+
+task pullLocalConfig() {
+    outputs.upToDateWhen {
+        false
+    }
+
+    doLast {
+        String repoDirPath = project.hasProperty("configDst") ? configDst : "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]
+        def localConfigRepoDir = project.file(repoDirPath)
+        Grgit repo = Grgit.open(dir: localConfigRepoDir)
+        repo.pull()
+        tasks.copyLocalConfigFromRepoDir.execute()
+    }
+}
+
+
 
