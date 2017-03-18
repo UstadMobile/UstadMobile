@@ -29,6 +29,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
@@ -87,7 +88,12 @@ public class P2PDownloadTaskAndroid extends P2PTask {
         }
     };
 
-
+    /**
+     * Task to download file as per request sent.
+     * @param node
+     * @param downloadUri
+     * @param p2pManager
+     */
     public P2PDownloadTaskAndroid(P2PNode node, String downloadUri, P2PManagerAndroid p2pManager) {
         super(node, downloadUri);
         this.p2pManager = p2pManager;
@@ -204,9 +210,11 @@ public class P2PDownloadTaskAndroid extends P2PTask {
                     byte[] buffer = new byte[1024];
                     int total=0;
                     fileInfoEtag=con.getHeaderField(HEADER_ETAG);
+                    Map<String,List<String>> headers=con.getHeaderFields();
+                    Log.d(WifiDirectHandler.TAG,headers.toString());
                     fileInfoLastModified=con.getHeaderField(HEADER_LAST_MODIFIED);
 
-                    if(fileInfoEtag!=null && !isFileResuming){
+                    if((fileInfoEtag!=null || fileInfoLastModified!=null) && !isFileResuming){
                         currentDownloadFileInfo= saveFileInfoToFile(fileInfoEtag,fileInfoLastModified);
                     }else if(fileInfoEtag!=null && isFileResuming){
                         currentDownloadFileInfo=infoFile;
@@ -239,15 +247,14 @@ public class P2PDownloadTaskAndroid extends P2PTask {
             protected void onProgressUpdate(Integer... values) {
                 super.onProgressUpdate(values);
                 setBytesDownloadedSoFar(values[0]);
-                Log.d(WifiDirectHandler.TAG,"Downloaded Bytes: "+values[0]);
             }
 
             @Override
             protected void onPostExecute(Boolean isFileAvailable) {
 
-               if(getNode()!=null && getTaskType()==P2PTask.TYPE_INDEX){
-                   disconnect(p2pManager.getCurrentConnectedNetwork());
-               }
+                if(getNode()!=null && getTaskType()==P2PTask.TYPE_INDEX) {
+                    disconnect(p2pManager.getCurrentConnectedNetwork());
+                }
 
                 if(isFileAvailable){
 
@@ -282,6 +289,11 @@ public class P2PDownloadTaskAndroid extends P2PTask {
         task.execute();
     }
 
+    /**
+     * Save file with it's original extension after being downloaded
+     * @param fileUri
+     * @return
+     */
 
     private File saveFileWithNewExtension(String fileUri){
         File oldFile=new File(fileUri);
@@ -293,18 +305,26 @@ public class P2PDownloadTaskAndroid extends P2PTask {
         return null;
     }
 
+    /**
+     * Broadcast download completion completion event
+     */
     private void sendBroadCast(){
         Intent intent=new Intent();
         intent.setAction(ACTION_DOWNLOAD_COMPLETE);
         intent.putExtra(EXTRA_DOWNLOAD_ID,getKeyFromValue(p2pManager.getDownloadRequest(),getNode()));
         intent.putExtra(EXTRA_DOWNLOAD_STATUS,DOWNLOAD_STATUS_COMPLETED);
-        Log.d(WifiDirectHandler.TAG+" DownloadID",getKeyFromValue(p2pManager.getDownloadRequest(),getNode())+"");
+        Log.d(WifiDirectHandler.TAG,"Download ID:"+getKeyFromValue(p2pManager.getDownloadRequest(),getNode())
+                +" Download Status: "+DOWNLOAD_STATUS_COMPLETED);
         p2pManager.getP2pService().getApplicationContext().sendBroadcast(intent);
 
     }
 
-
-
+    /**
+     * Create a temporally file to store file info.
+     * @param fileInfoEtag - Header File Etag
+     * @param fileInfoLastModified Header File last-modified
+     * @return
+     */
     private File saveFileInfoToFile(String fileInfoEtag, String fileInfoLastModified){
         File tempFileInfo=null;
         try{
@@ -313,8 +333,7 @@ public class P2PDownloadTaskAndroid extends P2PTask {
             FileWriter writer = new FileWriter(tempFileInfo.getAbsolutePath());
             JSONObject fileObject=new JSONObject();
             fileObject.put(HEADER_ETAG,fileInfoEtag);
-            //TODO: Adding Last-Modified header to the temp file
-            //fileObject.put(HEADER_LAST_MODIFIED,fileInfoLastModified);
+            fileObject.put(HEADER_LAST_MODIFIED,fileInfoLastModified);
             writer.append(fileObject.toString());
             writer.flush();
             writer.close();
@@ -326,8 +345,11 @@ public class P2PDownloadTaskAndroid extends P2PTask {
 
     }
 
-
-
+    /**
+     * Read the temporally (.dinfo) file content as JSON
+     * @param file - temporally file
+     * @return
+     */
     private JSONObject getFileContentFromFile(File file){
 
         StringBuilder fileText = new StringBuilder();
@@ -347,6 +369,12 @@ public class P2PDownloadTaskAndroid extends P2PTask {
         return null;
     }
 
+    /**
+     * Get specific download Id from Map of download request
+     * @param requestQueue all request received to be processed
+     * @param p2PNode node of which the request will be sent to.
+     * @return
+     */
 
     public static int getKeyFromValue(HashMap<Integer,P2PTask> requestQueue, P2PNode p2PNode) {
         Iterator iterator = requestQueue.entrySet().iterator();
@@ -360,4 +388,5 @@ public class P2PDownloadTaskAndroid extends P2PTask {
 
         return 0;
     }
+
 }

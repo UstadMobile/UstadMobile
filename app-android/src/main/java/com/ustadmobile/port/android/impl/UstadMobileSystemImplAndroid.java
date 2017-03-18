@@ -98,6 +98,8 @@ import android.webkit.WebView;
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
 
+import edu.rit.se.wifibuddy.WifiDirectHandler;
+
 
 /**
  * Created by mike on 07/06/15.
@@ -472,9 +474,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         BroadcastReceiver completeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                String downloadID = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID);
-                String downloadStatus = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS);
-                receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(downloadID,Integer.parseInt(downloadStatus)));
+               if(intent!=null){
+                   int downloadID = intent.getIntExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID,0);
+                   int downloadStatus = intent.getIntExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS,0);
+                   Log.d(WifiDirectHandler.TAG,"Download ID:"+downloadID+" Download Status:"+downloadStatus);
+                   receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(String.valueOf(downloadID),downloadStatus));
+               }
             }
         };
 

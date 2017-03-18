@@ -185,4 +185,5 @@ public interface CatalogView extends UstadView{
     public void setAddOptionAvailable(boolean addOptionAvailable);
 
 
+
 }

@@ -204,6 +204,9 @@ public class MessageIDConstants {
     public static final int data_label=118;
     public static final int p2pConnectionLabel=119;
     public static final int nodeListTitle=120;
+    public static final int fileAvailableLocally=121;
+    public static final int fileUnAvailableLocally=122;
+
 
 
 }

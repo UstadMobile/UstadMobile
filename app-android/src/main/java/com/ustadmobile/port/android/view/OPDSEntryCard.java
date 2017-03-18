@@ -43,8 +43,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 /**
@@ -87,6 +89,17 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
         return this.entry;
     }
 
+    /**
+     * set the status on whether a file can be downloaded locally or not
+     * @param isAvailable
+     */
+
+    public void setLocalAvailableFile(boolean isAvailable){
+        ((TextView)findViewById(R.id.opds_item_detail_text)).setText(
+                isAvailable? UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.fileAvailableLocally)
+                        : UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.fileUnAvailableLocally));
+    }
+
 
     @Override
     protected void drawableStateChanged() {
@@ -107,6 +120,16 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
      */
     public void setDownloadProgressBarProgress(int loaded) {
         ((ProgressBar)findViewById(R.id.opds_item_progressbar)).setProgress(loaded);
+    }
+
+    /**
+     * Set visibility of the caption view - Available Locally/Unavailable Locally
+     * @param visible
+     */
+    public void setFileAvailabilityTextVisibility(boolean visible){
+        int visibility=visible ? View.VISIBLE : View.INVISIBLE;
+        ((TextView)findViewById(R.id.opds_item_detail_text)).setVisibility(visibility);
+
     }
 
     public void setOPDSEntryOverlay(int overlay) {

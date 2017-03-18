@@ -38,8 +38,6 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -56,32 +54,29 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -554,6 +549,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         //getActivity().invalidateOptionsMenu();
     }
 
+
     @Override
     public void showAddFeedDialog() {
         AddFeedDialogFragment dialogFragment = new AddFeedDialogFragment();
@@ -652,6 +648,24 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
             //check the acquisition status
             int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);
+
+            //if the file is not available - show whether it can be acquired locally
+            boolean isAcquisitionEntry = !feed.entries[position].getAcquisitionLinks().isEmpty();
+            if(isAcquisitionEntry && entryStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+                boolean isAvailableLocally = UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().isFileAvailable(
+                        getContext(), feed.entries[position].id);
+                holder.mEntryCard.setLocalAvailableFile(isAvailableLocally);
+                //set the text line to be visible
+                holder.mEntryCard.setFileAvailabilityTextVisibility(true);
+            }else {
+                //set the text line to be invisible
+                holder.mEntryCard.setFileAvailabilityTextVisibility(false);
+            }
+
+
+
+
+
             if(entryStatus != -1) {
                 holder.mEntryCard.setOPDSEntryOverlay(entryStatus);
             }
