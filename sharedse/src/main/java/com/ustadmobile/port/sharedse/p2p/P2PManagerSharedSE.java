@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by kileha3 on 05/02/2017.
@@ -36,7 +35,7 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     /**
      * List of supernodes that we know about around us
      */
-    protected List<P2PNode> knownSuperNodes =new ArrayList<>();
+    public List<P2PNode> knownSuperNodes =new ArrayList<>();
 
     protected Vector<P2PNodeListener> nodeListeners = new Vector<>();
     /**
@@ -60,6 +59,13 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     public static final int CURRENT_NETWORK_SSID=0;
     public static final int CURRENT_NETWORK_NETID=1;
     public static final int CURRENT_NETWORK_GATWAY_ADDRESS=2;
+    private int requestDownloadId = 0;
+    public static final String  CURRENT_NETWORK_EMPTY_STATE = "empty";
+
+    /**
+     * Set the environment in such a way that there will be no broadcast and UI update during/after the test
+     */
+    public  boolean TEST_MODE_ENVIRONMENT =false;
 
     /**
      * Used to check if the previous and the current network are the same, so that
@@ -108,12 +114,8 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      *
      */
     public int requestDownload(Object context, DownloadRequest request) {
-        int requestDownloadId;
-        String fileName=null;
-        P2PTask downloadIndexTask = null;
-        String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogController.SHARED_RESOURCE, context)[0].getDirURI();
 
+        P2PTask downloadIndexTask = null;
         boolean isAvailableLocally=isFileAvailable(context,request.fileId);
 
         if(isAvailableLocally){
@@ -135,24 +137,31 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
 
                 String[] acquisitionAttrs = (String[])acquisitionLinks.get(0);
                 String url = acquisitionAttrs[UstadJSOPDSItem.ATTR_HREF];
-                fileName = UMFileUtil.getFilename(url);
                 downloadIndexTask = makeDownloadTask(nodeWithFile,url);
             }
         }else{
+            if(currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]==null){
+                currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]=CURRENT_NETWORK_EMPTY_STATE;
+                currentConnectedNetwork[CURRENT_NETWORK_SSID]=CURRENT_NETWORK_EMPTY_STATE;
+            }
             P2PNode node=new P2PNode(currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]);
             node.setNetworkSSID(currentConnectedNetwork[CURRENT_NETWORK_SSID]);
             downloadIndexTask = makeDownloadTask(node,request.fileSource);
-            fileName=UMFileUtil.getFilename(request.fileSource);
         }
 
-        File fileDir = new File(storageDir+"/"+fileName);
-        downloadIndexTask.setDestinationPath(fileDir.getAbsolutePath());
-        downloadIndexTask.setTaskType(P2PTask.TYPE_COURSE);
-        downloadIndexTask.setP2PTaskListener(this);
+        if(downloadIndexTask!=null){
+            downloadIndexTask.setDestinationPath(request.getFileDestination());
+            downloadIndexTask.setTaskType(P2PTask.TYPE_COURSE);
+            if(TEST_MODE_ENVIRONMENT){
+                downloadIndexTask.setTestMode(true);
+            }
+            downloadIndexTask.setP2PTaskListener(this);
 
-        requestDownloadId = new Random().nextInt(100-1)+1;
-        downloadRequests.put(requestDownloadId,downloadIndexTask);
-        queueP2PTask(downloadIndexTask);
+            requestDownloadId = new Random().nextInt(100-1)+1;
+            downloadIndexTask.setDownloadRequestID(requestDownloadId);
+            downloadRequests.put(requestDownloadId,downloadIndexTask);
+            queueP2PTask(downloadIndexTask);
+        }
 
         return requestDownloadId;
     }
@@ -186,7 +195,7 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      *
      * @param node
      */
-    protected void handleNodeDiscovered(P2PNode node) {
+    public void handleNodeDiscovered(P2PNode node) {
         fireNodeDiscovered(node);
 
         P2PTask downloadIndexTask = makeDownloadTask(node, "/catalog/acquire.opds");
@@ -211,7 +220,6 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
             UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(new FileInputStream(fileUri), "UTF-8");//params needed: input stream
             availableIndexes.put(node, feed);
             UstadMobileSystemImpl.l(UMLog.DEBUG, 2, "Available Index "+availableIndexes.size());
-            //feed.entries[0].id
 
 
         }catch (XmlPullParserException e) {
@@ -252,6 +260,8 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
         if (currentTask == null && !taskQueue.isEmpty()) {
             currentTask = taskQueue.remove(0);
             currentTask.start();
+
+
         }
 
         //do nothing - a task is already running
@@ -267,12 +277,11 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
 
     @Override
     public void taskEnded(P2PTask task) {
+
         if(task != currentTask) {
-            //something is very wrong
             UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Task ended != current task");
             return;
         }
-
 
         if(task.getTaskType() == P2PTask.TYPE_INDEX) {
             handleNodeIndexUpdated(task.getNode(),task.getDestinationPath());
@@ -293,7 +302,10 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
 
     protected void queueP2PTask(P2PTask task) {
         taskQueue.add(task);
-        checkQueue();
+         if(taskQueue.size()==1 && taskQueue.get(0).getDownloadStatus()!=P2PTask.DOWNLOAD_STATUS_RUNNING){
+             checkQueue();
+         }
+
     }
 
 
@@ -304,6 +316,5 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      * @param downloadUri - This refer to the file URI to download.
      */
     protected abstract P2PTask makeDownloadTask(P2PNode node, String downloadUri);
-
 
 }

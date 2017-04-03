@@ -6,6 +6,12 @@ package com.ustadmobile.port.sharedse.p2p;
 
 public abstract class P2PTask {
 
+    public static final int DOWNLOAD_STATUS_FAILED=-1;
+    public static final int DOWNLOAD_STATUS_COMPLETED=2;
+    public static final int DOWNLOAD_STATUS_RUNNING=1;
+    public static final int DOWNLOAD_STATUS_CANCELLED=3;
+    public static final int DOWNLOAD_STATUS_QUEUED =0;
+
     private P2PNode node;
 
     private String downloadUri;
@@ -17,6 +23,8 @@ public abstract class P2PTask {
     private int bytesDownloadedSoFar;
 
     private int downloadTotalBytes;
+
+    private int downloadRequestID;
 
     private final Object bytesDownloadedLock = new Object();
 
@@ -36,7 +44,19 @@ public abstract class P2PTask {
 
     private int CURRENT_TASK_TYPE;
 
+    /**
+     * check if the current downloading task is coming from the test environment
+     */
+    private boolean isTestMode=false;
 
+
+    public int getDownloadRequestID() {
+        return downloadRequestID;
+    }
+
+    public void setDownloadRequestID(int downloadRequestID) {
+        this.downloadRequestID = downloadRequestID;
+    }
 
 
     public int getBytesDownloadedSoFar() {
@@ -80,10 +100,18 @@ public abstract class P2PTask {
     }
 
     /**
-     * Runs the task
+     * Start the download task
      */
     public synchronized void start() {
 
+    }
+
+    /**
+     * Stop the download task
+     * @return
+     */
+    public synchronized boolean stop(){
+        return false;
     }
 
 
@@ -139,6 +167,14 @@ public abstract class P2PTask {
 
     public int getTaskType(){
         return CURRENT_TASK_TYPE;
+    }
+
+    public void setTestMode(boolean isTestMode){
+        this.isTestMode=isTestMode;
+    }
+
+    public boolean getTestMode(){
+        return isTestMode;
     }
 
     public abstract void disconnect(String [] currentConnectedNetwork);

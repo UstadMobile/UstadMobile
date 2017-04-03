@@ -27,9 +27,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
@@ -37,6 +37,7 @@ import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.CURRENT_NETWORK_NETID;
 import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.CURRENT_NETWORK_SSID;
+import static com.ustadmobile.port.sharedse.p2p.P2PManagerSharedSE.CURRENT_NETWORK_EMPTY_STATE;
 
 
 /**
@@ -49,13 +50,12 @@ public class P2PDownloadTaskAndroid extends P2PTask {
 
     private File currentDownloadFileInfo=null;
 
-    public static final int DOWNLOAD_STATUS_FAILED=-1;
-    public static final int DOWNLOAD_STATUS_COMPLETED=2;
-    public static final int DOWNLOAD_STATUS_RUNNING=1;
-    public static final int DOWNLOAD_STATUS_QUEUED =0;
+
+    private static int currentStatus=-1;
     public static final String ACTION_DOWNLOAD_COMPLETE ="com.ustadmobile.port.android.p2p.DOWNLOAD_COMPLETE";
     public static final String EXTRA_DOWNLOAD_ID ="extra_download_id";
     public static final String EXTRA_DOWNLOAD_STATUS ="extra_download_status";
+    public static final String EXTRA_DOWNLOAD_SOURCE ="extra_download_source";
 
 
     public static final String P2P_SUPERNODE_SERVER_ADDRESS = "http://192.168.49.1:8001/";
@@ -68,6 +68,7 @@ public class P2PDownloadTaskAndroid extends P2PTask {
 
     private boolean isFileResuming=false;
     private boolean downloadFromCloud=false;
+    private DownLoadTask downloadTask;
 
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -78,7 +79,8 @@ public class P2PDownloadTaskAndroid extends P2PTask {
             boolean result = intent.getBooleanExtra(WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED,
                     false);
             if(!result) {
-                setDownloadStatus(DOWNLOAD_STATUS_FAILED);
+                currentStatus=DOWNLOAD_STATUS_FAILED;
+                setDownloadStatus(currentStatus);
                 P2PDownloadTaskAndroid.this.fireTaskEnded();
             }else {
                 P2PDownloadTaskAndroid.this.downloadInBackground();
@@ -102,8 +104,7 @@ public class P2PDownloadTaskAndroid extends P2PTask {
     @Override
     public void start() {
         P2PNode node = getNode();
-        String currentSsid = p2pManager.getCurrentConnectedNetwork()[CURRENT_NETWORK_SSID];
-        if(node != null && node.getNetworkSSID() != null && !node.getNetworkSSID().equals(currentSsid)) {
+        if(node != null && !node.getNetworkSSID().equals(CURRENT_NETWORK_EMPTY_STATE) && p2pManager!=null) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
             LocalBroadcastManager.getInstance(p2pManager.getP2pService()).registerReceiver(mBroadcastReceiver,
@@ -111,16 +112,18 @@ public class P2PDownloadTaskAndroid extends P2PTask {
             WifiDirectHandler wifiDirectHandler = p2pManager.getP2pService().getWifiDirectHandlerAPI();
             DnsSdTxtRecord txtRecord = wifiDirectHandler.getDnsSdTxtRecordMap().get(getNode().getNodeAddress());
             wifiDirectHandler.connectToNoPromptService(txtRecord);
-        }else{
+
+        }else {
             downloadFromCloud=true;
             downloadInBackground();
         }
-
-
     }
 
-
-
+    /**
+     * Disconnect after using the service, if there are more
+     * tasks from the same Node, the connection won't be terminated
+     * @param currentConnectedNetwork
+     */
     @Override
     public void disconnect(String [] currentConnectedNetwork) {
         currentConnectedNetwork[CURRENT_NETWORK_SSID]=currentConnectedNetwork[CURRENT_NETWORK_SSID].replaceAll("\\s+","\"");
@@ -135,162 +138,180 @@ public class P2PDownloadTaskAndroid extends P2PTask {
 
     }
 
+    /**
+     * Initialize download task
+     */
 
     private void downloadInBackground() {
+        downloadTask=new DownLoadTask();
+        downloadTask.execute();
+    }
 
+    private class DownLoadTask extends AsyncTask<String,Integer,Boolean>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            currentStatus=DOWNLOAD_STATUS_QUEUED;
+            setDownloadStatus(currentStatus);
+            setDownloadTotalBytes(0);
+            setDownloadTotalBytes(0);
+        }
 
-        final AsyncTask<String,Integer,Boolean> task = new AsyncTask<String,Integer,Boolean>() {
+        @Override
+        protected Boolean doInBackground(String... params) {
+            InputStream in = null;
+            HttpURLConnection con = null;
+            OutputStream out = null;
+            File file = null;
+            String fileInfoEtag,fileInfoLastModified,downloadUri;
+            int fileLength=0;
+            int bytesDownloadedSoFar;
+            try {
 
+                File infoFile=new File(P2PDownloadTaskAndroid.this.getDestinationPath()+INFO_FILE_EXTENSION);
+                boolean isFileExists=infoFile.exists();
+                currentStatus=DOWNLOAD_STATUS_RUNNING;
+                setDownloadStatus(currentStatus);
 
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                setDownloadStatus(DOWNLOAD_STATUS_QUEUED);
-                setDownloadTotalBytes(0);
-                setDownloadTotalBytes(0);
-            }
+                if(downloadFromCloud){
+                    downloadUri= getDownloadUri();
 
-            @Override
-            protected Boolean doInBackground(String... params) {
-                InputStream in = null;
-                HttpURLConnection con = null;
-                OutputStream out = null;
-                File file = null;
-                String fileInfoEtag,fileInfoLastModified,downloadUri;
-                int fileLength=0;
-                int bytesDownloadedSoFar;
-                try {
+                }else{
+                    downloadUri= UMFileUtil.joinPaths(new String[]{P2P_SUPERNODE_SERVER_ADDRESS,
+                            getDownloadUri()});
+                }
 
-                    File infoFile=new File(P2PDownloadTaskAndroid.this.getDestinationPath()+INFO_FILE_EXTENSION);
-                    boolean isFileExists=infoFile.exists();
-                    setDownloadStatus(DOWNLOAD_STATUS_RUNNING);
+                URL url = new URL(downloadUri.replaceAll("\\s+","%20"));
 
-                     if(downloadFromCloud){
-                         downloadUri= getDownloadUri();
-
-                     }else{
-                         downloadUri= UMFileUtil.joinPaths(new String[]{P2P_SUPERNODE_SERVER_ADDRESS,
-                                 getDownloadUri()});
-                     }
-
-                    URL url = new URL(downloadUri);
-
-                     if(isFileExists && getTaskType()==P2PTask.TYPE_COURSE){
-                         con = (HttpURLConnection) url.openConnection();
-                         con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
-                         con.connect();
-                         fileInfoEtag=con.getHeaderField(HEADER_ETAG);
-                         if(fileInfoEtag!=null){
-                             con.disconnect();
-                         }
-
-                         con = (HttpURLConnection) url.openConnection();
-                         JSONObject infoFromFile= getFileContentFromFile(infoFile);
-
-                         long existingFileLength=new File(P2PDownloadTaskAndroid.this.getDestinationPath()
-                                 +UNFINISHED_FILE_EXTENSION).length();
-                         if(infoFromFile!=null && infoFromFile.get(HEADER_ETAG).equals(fileInfoEtag)){
-                             isFileResuming=true;
-                             con.setRequestProperty(HEADER_RANGE,"bytes="+String.valueOf(existingFileLength)+"-");
-                         }
-                    }else{
-                         con = (HttpURLConnection) url.openConnection();
-                     }
+                if(isFileExists && getTaskType()==P2PTask.TYPE_COURSE){
+                    con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
                     con.connect();
-                    fileLength = con.getContentLength();
-                    setDownloadTotalBytes(fileLength);
-
-                    in = con.getInputStream();
-                    P2PDownloadTaskAndroid.this.setDestinationPath(P2PDownloadTaskAndroid.this.getDestinationPath()
-                            +UNFINISHED_FILE_EXTENSION);
-                    file = new File(P2PDownloadTaskAndroid.this.getDestinationPath());
-
-                    out = new FileOutputStream(file,true);
-                    byte[] buffer = new byte[1024];
-                    int total=0;
                     fileInfoEtag=con.getHeaderField(HEADER_ETAG);
-                    Map<String,List<String>> headers=con.getHeaderFields();
-                    Log.d(WifiDirectHandler.TAG,headers.toString());
-                    fileInfoLastModified=con.getHeaderField(HEADER_LAST_MODIFIED);
-
-                    if((fileInfoEtag!=null || fileInfoLastModified!=null) && !isFileResuming){
-                        currentDownloadFileInfo= saveFileInfoToFile(fileInfoEtag,fileInfoLastModified);
-                    }else if(fileInfoEtag!=null && isFileResuming){
-                        currentDownloadFileInfo=infoFile;
-                    }
-
-                    while ((bytesDownloadedSoFar = in.read(buffer)) > 0) {
-                        total+= bytesDownloadedSoFar;
-                        out.write(buffer, 0, bytesDownloadedSoFar);
-                        publishProgress(total);
-
-                    }
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                } finally {
-                    UMIOUtils.closeOutputStream(out);
-                    UMIOUtils.closeInputStream(in);
-                    if (con != null)
+                    if(fileInfoEtag!=null){
                         con.disconnect();
-                }
+                    }
 
-                 if(isFileResuming){
-                    file=saveFileWithNewExtension(P2PDownloadTaskAndroid.this.getDestinationPath());
-                    return file!=null && file.exists();
-                }else{
-                    return file != null && file.exists() && file.length()==fileLength;
-                }
-            }
+                    con = (HttpURLConnection) url.openConnection();
+                    JSONObject infoFromFile= getFileContentFromFile(infoFile);
 
-            @Override
-            protected void onProgressUpdate(Integer... values) {
-                super.onProgressUpdate(values);
-                setBytesDownloadedSoFar(values[0]);
-            }
-
-            @Override
-            protected void onPostExecute(Boolean isFileAvailable) {
-
-                if(getNode()!=null && getTaskType()==P2PTask.TYPE_INDEX) {
-                    disconnect(p2pManager.getCurrentConnectedNetwork());
-                }
-
-                if(isFileAvailable){
-
-                    if(new File(P2PDownloadTaskAndroid.this.getDestinationPath())
-                            .getAbsolutePath().endsWith(UNFINISHED_FILE_EXTENSION)){
-
-                        File newFile=saveFileWithNewExtension(P2PDownloadTaskAndroid.this.getDestinationPath());
-
-                        if(isFileResuming){
-                            newFile=new File(P2PDownloadTaskAndroid.this.getDestinationPath());
-                        }
-                        if(newFile!=null){
-
-                           if(currentDownloadFileInfo!=null){
-                               currentDownloadFileInfo.delete();
-                               setDownloadStatus(DOWNLOAD_STATUS_COMPLETED);
-                               sendBroadCast();
-
-                           }
-                            setDestinationPath(newFile.getAbsolutePath());
-                        }
-                    }else{
-                        Log.d(WifiDirectHandler.TAG,"File Extension doesn't match: status - partial download");
+                    long existingFileLength=new File(P2PDownloadTaskAndroid.this.getDestinationPath()
+                            +UNFINISHED_FILE_EXTENSION).length();
+                    if(infoFromFile!=null && infoFromFile.get(HEADER_ETAG).equals(fileInfoEtag)){
+                        isFileResuming=true;
+                        con.setRequestProperty(HEADER_RANGE,"bytes="+String.valueOf(existingFileLength)+"-");
                     }
                 }else{
-                    setDownloadStatus(DOWNLOAD_STATUS_FAILED);
+                    con = (HttpURLConnection) url.openConnection();
+                }
+                con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
+                con.connect();
+                fileLength = con.getContentLength();
+                setDownloadTotalBytes(fileLength);
+
+                in = con.getInputStream();
+                P2PDownloadTaskAndroid.this.setDestinationPath(P2PDownloadTaskAndroid.this.getDestinationPath()
+                        +UNFINISHED_FILE_EXTENSION);
+                file = new File(P2PDownloadTaskAndroid.this.getDestinationPath());
+
+                out = new FileOutputStream(file,true);
+                byte[] buffer = new byte[1024];
+                int total=0;
+                fileInfoEtag=con.getHeaderField(HEADER_ETAG);
+                fileInfoLastModified=con.getHeaderField(HEADER_LAST_MODIFIED);
+
+                //check for file ETag or Last-modified date and log them to the temp file info
+                if((fileInfoEtag!=null || fileInfoLastModified!=null) && !isFileResuming){
+                    currentDownloadFileInfo= saveFileInfoToFile(fileInfoEtag,fileInfoLastModified);
+                }else if(fileInfoEtag!=null && isFileResuming){
+                    currentDownloadFileInfo=infoFile;
                 }
 
-                P2PDownloadTaskAndroid.this.fireTaskEnded();
+                while ((bytesDownloadedSoFar = in.read(buffer)) > 0 && currentStatus!=DOWNLOAD_STATUS_CANCELLED) {
+                    total+= bytesDownloadedSoFar;
+                    out.write(buffer, 0, bytesDownloadedSoFar);
+                    publishProgress(total);
+
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            } finally {
+                UMIOUtils.closeOutputStream(out);
+                UMIOUtils.closeInputStream(in);
+                if (con != null)
+                    con.disconnect();
             }
-        };
-        task.execute();
+
+            if(isFileResuming){
+                file=saveFileWithNewExtension(P2PDownloadTaskAndroid.this.getDestinationPath());
+                return file!=null && file.exists();
+            }else{
+                return file != null && file.exists() && file.length()==fileLength;
+            }
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            Log.d(WifiDirectHandler.TAG,":downloading ="+values[0]);
+            setBytesDownloadedSoFar(values[0]);
+        }
+
+        @Override
+        protected void onCancelled() {
+            currentStatus=DOWNLOAD_STATUS_CANCELLED;
+            P2PDownloadTaskAndroid.this.fireTaskEnded();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isFileAvailable) {
+
+            if(isFileAvailable && currentDownloadFileInfo!=null){
+                currentDownloadFileInfo.delete();
+                if(new File(P2PDownloadTaskAndroid.this.getDestinationPath())
+                        .getAbsolutePath().endsWith(UNFINISHED_FILE_EXTENSION)){
+
+                    File newFile=saveFileWithNewExtension(P2PDownloadTaskAndroid.this.getDestinationPath());
+
+                    if(isFileResuming){
+                        newFile=new File(P2PDownloadTaskAndroid.this.getDestinationPath());
+                    }
+                    if(newFile!=null){
+                        currentStatus=DOWNLOAD_STATUS_COMPLETED;
+                        setDownloadStatus(currentStatus);
+                        if(getTestMode()){
+                            fireTaskEnded();
+                        }else{
+                            sendBroadCast();
+                        }
+                        setDestinationPath(newFile.getAbsolutePath());
+                    }
+                }else{
+                    Log.d(WifiDirectHandler.TAG,"File Extension doesn't match: status - partial download");
+                }
+            }else{
+                /*Partial Download: download task was incomplete, possibly it was interrupted or cancelled*/
+
+                currentStatus=DOWNLOAD_STATUS_FAILED;
+                setDownloadStatus(currentStatus);
+            }
+
+            P2PDownloadTaskAndroid.this.fireTaskEnded();
+        }
+    }
+
+    @Override
+    public synchronized boolean stop() {
+        if(downloadTask!=null && downloadTask.getStatus()!= AsyncTask.Status.FINISHED){
+            downloadTask.cancel(true);
+            return downloadTask.isCancelled();
+        }else{
+            return false;
+        }
     }
 
     /**
-     * Save file with it's original extension after being downloaded
+     * Save file with it's original extension after success downloaded
      * @param fileUri
      * @return
      */
@@ -311,11 +332,10 @@ public class P2PDownloadTaskAndroid extends P2PTask {
     private void sendBroadCast(){
         Intent intent=new Intent();
         intent.setAction(ACTION_DOWNLOAD_COMPLETE);
-        intent.putExtra(EXTRA_DOWNLOAD_ID,getKeyFromValue(p2pManager.getDownloadRequest(),getNode()));
-        intent.putExtra(EXTRA_DOWNLOAD_STATUS,DOWNLOAD_STATUS_COMPLETED);
-        Log.d(WifiDirectHandler.TAG,"Download ID:"+getKeyFromValue(p2pManager.getDownloadRequest(),getNode())
-                +" Download Status: "+DOWNLOAD_STATUS_COMPLETED);
-        p2pManager.getP2pService().getApplicationContext().sendBroadcast(intent);
+        intent.putExtra(EXTRA_DOWNLOAD_ID,String.valueOf(getDownloadRequestID()));
+        intent.putExtra(EXTRA_DOWNLOAD_STATUS,String.valueOf(DOWNLOAD_STATUS_COMPLETED));
+        intent.putExtra(EXTRA_DOWNLOAD_SOURCE,String.valueOf(downloadFromCloud));
+        p2pManager.getP2pService().sendBroadcast(intent);
 
     }
 
@@ -369,24 +389,6 @@ public class P2PDownloadTaskAndroid extends P2PTask {
         return null;
     }
 
-    /**
-     * Get specific download Id from Map of download request
-     * @param requestQueue all request received to be processed
-     * @param p2PNode node of which the request will be sent to.
-     * @return
-     */
 
-    public static int getKeyFromValue(HashMap<Integer,P2PTask> requestQueue, P2PNode p2PNode) {
-        Iterator iterator = requestQueue.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry pair = (Map.Entry)iterator.next();
-            P2PTask task=(P2PTask) pair.getValue();
-            if(task.getNode().equals(p2PNode)){
-                return (int)pair.getKey();
-            }
-        }
-
-        return 0;
-    }
 
 }

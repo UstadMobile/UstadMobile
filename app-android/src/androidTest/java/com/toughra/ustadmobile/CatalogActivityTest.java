@@ -22,7 +22,7 @@ public class CatalogActivityTest extends ActivityInstrumentationTestCase2<Catalo
     protected void setUp() throws Exception{
         super.setUp();
 
-       /* //load impl with skipping the locale load (cant be done before an activity is created)
+       /* //load impl with skipping the locale load (can't be done before an activity is created)
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         String opdsURL = TestUtils.getInstance().getHTTPRoot() + TestConstants.CATALOG_OPDS_ROOT;

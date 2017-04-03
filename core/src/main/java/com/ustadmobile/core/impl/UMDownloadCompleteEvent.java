@@ -13,10 +13,18 @@ public class UMDownloadCompleteEvent {
     private String downloadID;
     
     private int status;
+
+    private boolean downloadedFromPeer = false;
     
     public UMDownloadCompleteEvent(String downloadID, int status) {
         this.downloadID = downloadID;
         this.status = status;
+    }
+
+    public UMDownloadCompleteEvent(String downloadID, int status, boolean downloadedFromPeer) {
+        this.downloadID = downloadID;
+        this.status = status;
+        this.downloadedFromPeer = downloadedFromPeer;
     }
     
     /**
@@ -33,6 +41,10 @@ public class UMDownloadCompleteEvent {
      */
     public int getStatus() {
         return status;
+    }
+
+    public boolean getDownloadedFromPeer(){
+        return downloadedFromPeer;
     }
     
 }

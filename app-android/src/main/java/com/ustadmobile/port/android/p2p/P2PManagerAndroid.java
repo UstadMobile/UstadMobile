@@ -10,13 +10,16 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.p2p.P2PManagerSharedSE;
 import com.ustadmobile.port.sharedse.p2p.P2PNode;
 import com.ustadmobile.port.sharedse.p2p.P2PTask;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,18 +35,14 @@ import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager {
 
-    /**
-     * Manage all P2P service discovery operation, from files to normal service.
-     */
-    private Context context;
-
     private Map<Context, ServiceConnection> serviceConnectionMap;
 
     public static final String SERVICE_NAME = "ustadMobile";
 
     public static final String PREFKEY_SUPERNODE = "supernode_enabled";
-    private static final String NO_PROMPT_NETWORK_PASS = "passphrase",
+    public static final String NO_PROMPT_NETWORK_PASS = "passphrase",
             NO_PROMPT_NETWORK_NAME = "networkName";
+
 
 
     private P2PServiceAndroid p2pService;
@@ -88,6 +87,10 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_SSID]=wifiInfo.getSSID();
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_NETID]=String.valueOf(wifiInfo.getNetworkId());
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]=wifiInfo.getMacAddress();
+        }else{
+            P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_SSID]= CURRENT_NETWORK_EMPTY_STATE;
+            P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_NETID]= CURRENT_NETWORK_EMPTY_STATE;
+            P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]= CURRENT_NETWORK_EMPTY_STATE;
         }
 
         IntentFilter filter = new IntentFilter();
@@ -96,9 +99,10 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
-        filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
         filter.addAction(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
+        filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_CREATED_ACTION);
+        filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_TIMEOUT_ACTION);
 
         LocalBroadcastManager.getInstance(p2pService).registerReceiver(mBroadcastReceiver, filter);
         boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
@@ -132,52 +136,55 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
             String action = intent.getAction();
             Toast.makeText(context,action,Toast.LENGTH_LONG).show();
 
-            if (action.equals(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE)) {
-                String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
-                DnsSdTxtRecord txtRecord = p2pService.getWifiDirectHandlerAPI().getDnsSdTxtRecordMap().get(deviceMac);
-                String fullDomain = txtRecord.getFullDomain();
+            switch (action) {
+                case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
+                    String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
+                    DnsSdTxtRecord txtRecord = p2pService.getWifiDirectHandlerAPI().getDnsSdTxtRecordMap().get(deviceMac);
+                    String fullDomain = txtRecord.getFullDomain();
 
 
+                    //TODO Here: Validate the record received
+                    if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
 
-                //TODO Here: Validate the record received
-                if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
+                        P2PNode newNode = new P2PNode(deviceMac);
+                        int nodeIndex = knownSuperNodes.indexOf(newNode);
+                        if (nodeIndex >= 0) {
+                            newNode = knownSuperNodes.get(nodeIndex);
+                        }
 
-                    P2PNode newNode = new P2PNode(deviceMac);
-                    int nodeIndex = knownSuperNodes.indexOf(newNode);
-                    if (nodeIndex >= 0) {
-                        newNode = knownSuperNodes.get(nodeIndex);
+                        newNode.setNetworkSSID(txtRecord.getRecord().get(NO_PROMPT_NETWORK_NAME));
+                        newNode.setNetworkPass(txtRecord.getRecord().get(NO_PROMPT_NETWORK_PASS));
+                        newNode.setStatus(txtRecord.getDevice().status);
+
+                        if (nodeIndex < 0) {
+                            P2PManagerAndroid.this.knownSuperNodes.add(newNode);
+                            handleNodeDiscovered(newNode);
+                        }
                     }
 
-                    newNode.setNetworkSSID(txtRecord.getRecord().get(NO_PROMPT_NETWORK_NAME).toString());
-                    newNode.setNetworkPass(txtRecord.getRecord().get(NO_PROMPT_NETWORK_PASS).toString());
-                    newNode.setStatus(txtRecord.getDevice().status);
+                    break;
 
-                    if(nodeIndex<0){
-                        P2PManagerAndroid.this.knownSuperNodes.add(newNode);
-                        handleNodeDiscovered(newNode);
-                    }
-                }
+                case WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION:
+                    boolean connected = intent.getBooleanExtra(WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED, false);
+                    Log.d(WifiDirectHandler.TAG, "noPromptConnection: status " + String.valueOf(connected));
+                    checkQueue();
+                    break;
 
-            } else if (WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION.equals(action)) {
-
-                boolean connected = intent.getBooleanExtra(WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED,false);
-                Log.d(WifiDirectHandler.TAG,"noPromptConnection: status "+String.valueOf(connected));
-                checkQueue();
-            }else if(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE.equals(action)){
-                Toast.makeText(context,"Download with ID "+intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID)+" Finished",Toast.LENGTH_LONG).show();
+                case P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE:
+                    Toast.makeText(context, "Download with ID " + intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID) + " Finished", Toast.LENGTH_LONG).show();
+                    break;
             }
         }
     };
 
     @Override
-    protected P2PTask makeDownloadTask(P2PNode node, String downloadUri) {
+    public P2PTask makeDownloadTask(P2PNode node, String downloadUri) {
         return new P2PDownloadTaskAndroid(node, downloadUri, this);
     }
 
     public P2PServiceAndroid getService(Object context) {
 
             if (context instanceof P2PServiceAndroid) {
-
                 return (P2PServiceAndroid) context;
             } else {
                 UstadMobileSystemImplAndroid.BaseServiceConnection connection =
@@ -190,8 +197,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         public static ServiceData makeServiceData() {
             HashMap<String, String> record = new HashMap<>();
             record.put("available", "available");
-            ServiceData serviceData = new ServiceData(SERVICE_NAME, 8001, record, ServiceType.PRESENCE_TCP);
-            return serviceData;
+            return new ServiceData(SERVICE_NAME, 8001, record, ServiceType.PRESENCE_TCP);
         }
 
 
@@ -199,13 +205,13 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
-        this.context=(Context) context;
+
         UstadMobileSystemImpl.getInstance().setAppPref("devices","",context);
         P2PServiceAndroid service = getService(context);
-        if(enabled && service.getWifiDirectHandlerAPI().getNoPromptServiceStatus() == WifiDirectHandler.NOPROMPT_STATUS_INACTIVE) {
+        if(enabled) {
             service.showNotification();
             service.getWifiDirectHandlerAPI().startAddingNoPromptService(makeServiceData(),service.mNoPromptActionListener);
-        }else if(!enabled){
+        }else {
             service.dismissNotification();
             if(service.getWifiDirectHandlerAPI().isGroupFormed()){
                 service.getWifiDirectHandlerAPI().removeGroup();
@@ -213,6 +219,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
             service.getWifiDirectHandlerAPI().continuouslyDiscoverServices();
         }
     }
+
 
     @Override
     public List<P2PNode> getSuperNodes(Object context) {
@@ -230,9 +237,19 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
     }
 
 
-
     @Override
     public void stopDownload(Object context, int requestId, boolean delete) {
+        P2PTask currentTask=P2PManagerAndroid.this.downloadRequests.get(requestId);
+        File downloadingFile=new File(currentTask.getDestinationPath());
+        boolean isStopped=currentTask.stop();
+        if(isStopped){
+            P2PManagerAndroid.this.downloadRequests=new HashMap<>();
+        }
+
+        if(delete){
+            downloadingFile.delete();
+        }
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 2, "stopDownload(): download process interrupted");
 
     }
 
@@ -283,6 +300,24 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
      */
     public HashMap<Integer,P2PTask> getDownloadRequest(){
         return P2PManagerAndroid.this.downloadRequests;
+    }
+
+    /**
+     * Get the map of all found yes available indexes
+     * @return
+     */
+
+    public HashMap<P2PNode, UstadJSOPDSFeed> getAvailableIndexes(){
+        return availableIndexes;
+    }
+
+
+    /**
+     * Set found indexes on the availableIndexMap.
+     * @param indexes
+     */
+    public void setAvailableIndexes(HashMap<P2PNode, UstadJSOPDSFeed> indexes){
+        P2PManagerAndroid.this.availableIndexes=indexes;
     }
 
 

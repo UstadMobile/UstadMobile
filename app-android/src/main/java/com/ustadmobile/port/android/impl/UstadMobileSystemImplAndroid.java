@@ -47,6 +47,7 @@ import java.util.*;
 import java.net.URL;
 
 import com.toughra.ustadmobile.BuildConfig;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
@@ -293,30 +294,30 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      *
      * TODO: This should really be handleContextCreate : This should be used by background services as well
      *
-     * @param activity
+     * @param mContext
      */
-    public void handleActivityCreate(Activity activity, Bundle savedInstanceState) {
-        init(activity);
-        Intent intent = new Intent(activity, HTTPService.class);
-        BaseServiceConnection connection = new BaseServiceConnection(activity, httpServiceConnections);
-        activity.bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        Intent p2pIntent = new Intent(activity, P2PServiceAndroid.class);
-        connection = new BaseServiceConnection(activity, p2pServiceConnections);
-        activity.bindService(p2pIntent, connection, Context.BIND_AUTO_CREATE);
+    public void handleActivityCreate(Activity mContext, Bundle savedInstanceState) {
+        init(mContext);
+        Intent intent = new Intent(mContext, HTTPService.class);
+        BaseServiceConnection connection = new BaseServiceConnection(mContext, httpServiceConnections);
+        mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        Intent p2pIntent = new Intent(mContext, P2PServiceAndroid.class);
+        connection = new BaseServiceConnection(mContext, p2pServiceConnections);
+        mContext.bindService(p2pIntent, connection, Context.BIND_AUTO_CREATE);
     }
 
-    public void handleActivityStart(Activity activity) {
-
-    }
-
-
-    public void handleActivityStop(Activity activity) {
+    public void handleActivityStart(Activity mContext) {
 
     }
 
-    public void handleActivityDestroy(Activity activity) {
-        activity.unbindService(httpServiceConnections.get(activity));
-        activity.unbindService(p2pServiceConnections.get(activity));
+
+    public void handleActivityStop(Activity mContext) {
+
+    }
+
+    public void handleActivityDestroy(Activity mContext) {
+        mContext.unbindService(httpServiceConnections.get(mContext));
+        mContext.unbindService(p2pServiceConnections.get(mContext));
     }
 
     @Override
@@ -455,11 +456,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public String queueFileDownload(String url, String destFileURI, String entryId, Hashtable headers, Object context) {
-        DownloadRequest p2prequest = new DownloadRequest();
-        p2prequest.setFileId(entryId);
-        p2prequest.setFileSource(url);
-        String id = String.valueOf(p2pManager.requestDownload(context, p2prequest));
-        return id;
+
+        DownloadRequest p2pRequest = new DownloadRequest();
+        p2pRequest.setFileId(entryId);
+        p2pRequest.setFileSource(url);
+        p2pRequest.setFileDestination(destFileURI);
+        return String.valueOf(p2pManager.requestDownload(context, p2pRequest));
     }
 
     @Override
@@ -475,10 +477,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             @Override
             public void onReceive(Context context, Intent intent) {
                if(intent!=null){
-                   int downloadID = intent.getIntExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID,0);
-                   int downloadStatus = intent.getIntExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS,0);
-                   Log.d(WifiDirectHandler.TAG,"Download ID:"+downloadID+" Download Status:"+downloadStatus);
-                   receiver.downloadStatusUpdated(new UMDownloadCompleteEvent(String.valueOf(downloadID),downloadStatus));
+                   String downloadID = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID);
+                   String downloadStatus = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS);
+                   String downloadSource = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_SOURCE);
+                   Log.d(WifiDirectHandler.TAG,"Download ID:"+downloadID+" Download Status:"
+                           +downloadStatus+" Download Source: "+(Boolean.parseBoolean(downloadSource)?" Cloud":"Local"));
+                   receiver.downloadStatusUpdated(
+                           new UMDownloadCompleteEvent(downloadID,Integer.parseInt(downloadStatus),!Boolean.parseBoolean(downloadSource)));
+
                }
             }
         };
