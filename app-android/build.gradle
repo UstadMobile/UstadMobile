@@ -92,33 +92,4 @@ dependencies {
 }
 
 
-task broadcast(type: Exec) {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    def sdkPath = properties.getProperty('sdk.dir')
-    def adb = sdkPath+"/platform-tools/adb"
-    if(project.hasProperty("broadcast")) {
-        commandLine "$adb",'-s', (String)project.property("broadcast"), 'shell','am','instrument','-w', '-r','-e','debug','false','-e','class com.toughra.ustadmobile.p2p.ServiceBroadcastTest com.toughra.ustadmobile.test/android.support.test.runner.AndroidJUnitRunner'
-    }
-
-}
-
-
-
-task discover(type: Exec) {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    def sdkPath = properties.getProperty('sdk.dir')
-    def adb = sdkPath+"/platform-tools/adb"
-    if(project.hasProperty("discover")) {
-        commandLine "$adb",'-s', (String)project.property("discover"), 'shell','am','instrument','-w', '-r','-e','debug','false','-e','class com.toughra.ustadmobile.p2p.DiscoverAndDownloadTest com.toughra.ustadmobile.test/android.support.test.runner.AndroidJUnitRunner'
-    }
-}
-
-task runTask(type: Exec){
-    commandLine './','task.sh','9b05d221','AMVKOVGQ8PRSLZYP'
-}
-
-
-
 
