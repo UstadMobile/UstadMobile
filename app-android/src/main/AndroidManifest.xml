@@ -5,6 +5,10 @@
     android:versionCode="90"
     android:versionName="0.2.4.21">
 
+
+
+
+
     <uses-sdk tools:overrideLibrary="edu.rit.se.wifibuddy"/>
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -90,6 +94,9 @@
         <activity android:name="com.ustadmobile.port.android.view.UstadNodesActivity"/>
 
         <activity android:name="com.ustadmobile.port.android.view.SettingsHome"/>
+
+
     </application>
+
 
 </manifest>

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ServiceTestRule;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
@@ -25,10 +27,18 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.TimeoutException;
 
-import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.PREFKEY_SUPERNODE;
+import edu.rit.se.wifibuddy.WifiDirectHandler;
+
+import static com.toughra.ustadmobile.p2p.ServiceBroadcastTest.TEST_SERVICE_NAME;
+import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.PREF_KEY_SUPERNODE;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -40,9 +50,9 @@ import static org.junit.Assert.assertThat;
 public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadCompleteReceiver {
 
     private Context mContext;
-    private static final int mWaitingTimeToDiscoverANode =60000;
-    private static final int mWaitingTimeForLocalFileAvailability =10000;
-    private static final int mWaitingTimeDownloadFileTask =40000;
+    private static final int mWaitingTimeToDiscoverANode =40000;
+    private static final int mWaitingTimeForLocalFileAvailability =2000;
+    private static final int mWaitingTimeDownloadFileTask =8000;
     private static final int mSuperNodeIndex=0;
     private static final String TEST_FILE_ID = "202b10fe-b028-4b84-9b84-852aa766607d";
     private static final String TEST_FILE_URI = "http://www.ustadmobile.com/files/budget-savings-trainer.epub";
@@ -60,11 +70,10 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
         UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
         mContext= InstrumentationRegistry.getTargetContext();
         UstadMobileSystemImpl.getInstance().init(mContext);
-        UstadMobileSystemImpl.getInstance().getAppPref(PREFKEY_SUPERNODE, "false", mContext);
+        UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_SUPERNODE, "false", mContext);
         Intent serviceIntent = new Intent(mContext, P2PServiceAndroid.class);
-        //serviceIntent ... put extra for to set service name
+        serviceIntent.putExtra(EXTRA_SERVICE_NAME,TEST_SERVICE_NAME);
         mServiceRule.bindService(serviceIntent);
-
         lastNodeDiscovered = null;
         downloadedFromPeer = false;
     }

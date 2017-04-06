@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -22,6 +23,9 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import edu.rit.se.wifibuddy.FailureReason;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
+
+import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.SERVICE_NAME;
 
 
 public class P2PServiceAndroid extends Service{
@@ -39,6 +43,7 @@ public class P2PServiceAndroid extends Service{
     public static final int NOPROMPT_RETRY_MAX_RETRIES = 6;
 
     private P2PManagerAndroid p2pManager;
+    private String serviceName=null;
 
 
 
@@ -136,6 +141,12 @@ public class P2PServiceAndroid extends Service{
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Bundle extra=intent.getExtras();
+        if(extra!=null && extra.containsKey(EXTRA_SERVICE_NAME)){
+            serviceName=intent.getStringExtra(EXTRA_SERVICE_NAME);
+        }else{
+            serviceName=SERVICE_NAME;
+        }
 
         return mBinder;
     }
@@ -149,7 +160,7 @@ public class P2PServiceAndroid extends Service{
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
             p2pManager = (P2PManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
-            p2pManager.init(P2PServiceAndroid.this);
+            p2pManager.init(P2PServiceAndroid.this,serviceName);
         }
 
 

@@ -223,3 +223,8 @@ buildconfig.core.local.properties
 
 #MacOS annoying .DS_Store
 .DS_Store
+
+#Test logs generated after test completion
+testres/p2p/*
+!testres/p2p/startTestsTask.sh
+

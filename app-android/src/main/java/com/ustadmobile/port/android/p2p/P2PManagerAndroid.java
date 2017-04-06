@@ -38,8 +38,10 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
     private Map<Context, ServiceConnection> serviceConnectionMap;
 
     public static final String SERVICE_NAME = "ustadMobile";
+    public static final String EXTRA_SERVICE_NAME="extra_test_service_name";
+    private static String serviceName;
 
-    public static final String PREFKEY_SUPERNODE = "supernode_enabled";
+    public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
     public static final String NO_PROMPT_NETWORK_PASS = "passphrase",
             NO_PROMPT_NETWORK_NAME = "networkName";
 
@@ -60,11 +62,6 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
     public static final int DOWNLOAD_STATUS = 2;
 
 
-    /**
-     * WiFi Discovery Service full domain
-     */
-    private String ustadFullDomain = SERVICE_NAME + "." + ServiceType.PRESENCE_TCP + ".local.";
-
     public P2PManagerAndroid() {
     }
 
@@ -78,8 +75,8 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
      * This needs to be called by P2PServiceAndroid once the p2pservice has started
      * Context is going to be the P2PServiceAndroid
      */
-    public void init(Object context) {
-
+    public void init(Object context,String service_name) {
+        serviceName=service_name;
         this.p2pService = (P2PServiceAndroid) context;
 
         WifiInfo wifiInfo=p2pService.getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
@@ -106,7 +103,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
         LocalBroadcastManager.getInstance(p2pService).registerReceiver(mBroadcastReceiver, filter);
         boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
-                PREFKEY_SUPERNODE, "false", context));
+                PREF_KEY_SUPERNODE, "false", context));
         setSuperNodeEnabled(context, isSuperNodeEnabled);
 
     }
@@ -141,7 +138,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
                     DnsSdTxtRecord txtRecord = p2pService.getWifiDirectHandlerAPI().getDnsSdTxtRecordMap().get(deviceMac);
                     String fullDomain = txtRecord.getFullDomain();
-
+                    String ustadFullDomain = serviceName + "." + ServiceType.PRESENCE_TCP + ".local.";
 
                     //TODO Here: Validate the record received
                     if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
@@ -197,7 +194,7 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         public static ServiceData makeServiceData() {
             HashMap<String, String> record = new HashMap<>();
             record.put("available", "available");
-            return new ServiceData(SERVICE_NAME, 8001, record, ServiceType.PRESENCE_TCP);
+            return new ServiceData(serviceName, 8001, record, ServiceType.PRESENCE_TCP);
         }
 
 
@@ -207,10 +204,13 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
     public void setSuperNodeEnabled(Object context, boolean enabled) {
 
         UstadMobileSystemImpl.getInstance().setAppPref("devices","",context);
+        /*
+      WiFi Discovery Service full domain
+     */
         P2PServiceAndroid service = getService(context);
         if(enabled) {
             service.showNotification();
-            service.getWifiDirectHandlerAPI().startAddingNoPromptService(makeServiceData(),service.mNoPromptActionListener);
+            service.getWifiDirectHandlerAPI().startAddingNoPromptService(makeServiceData(), service.mNoPromptActionListener);
         }else {
             service.dismissNotification();
             if(service.getWifiDirectHandlerAPI().isGroupFormed()){
@@ -309,15 +309,6 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
 
     public HashMap<P2PNode, UstadJSOPDSFeed> getAvailableIndexes(){
         return availableIndexes;
-    }
-
-
-    /**
-     * Set found indexes on the availableIndexMap.
-     * @param indexes
-     */
-    public void setAvailableIndexes(HashMap<P2PNode, UstadJSOPDSFeed> indexes){
-        P2PManagerAndroid.this.availableIndexes=indexes;
     }
 
 
