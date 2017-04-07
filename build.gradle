@@ -48,8 +48,10 @@ if(project.file("buildconfig.local.properties").exists()) {
 task copyLocalConfigToRepoDir(type: Copy) {
     from("./") {
         include "buildconfig.local.properties"
-        include "app-android/buildconfig.local.properties"
+        include "app-*/buildconfig.local.properties"
+
         include "app-android/src/localconfig/**"
+        include "app-j2me/res-local/**"
     }
 
     into project.hasProperty("configDst") ? configDst : "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]
@@ -58,8 +60,10 @@ task copyLocalConfigToRepoDir(type: Copy) {
 task copyLocalConfigFromRepoDir(type: Copy) {
     from(project.ext.has("localConfigDir") ? localConfigDir :  "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]) {
         include "buildconfig.local.properties"
-        include "app-android/buildconfig.local.properties"
+        include "app-*/buildconfig.local.properties"
+
         include "app-android/src/localconfig/**"
+        include "app-j2me/res-local/**"
     }
 
     into "./"

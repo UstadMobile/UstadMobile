@@ -80,7 +80,7 @@ app-j2me/src/com/ustadmobile/core/impl/*
 app-j2me/src/jp
 
 #localization files copied into the j2me directory
-app-j2me/src/res/locale
+app-j2me/src/res
 
 #Testing node server files
 testres/node-qunit-server/node_modules

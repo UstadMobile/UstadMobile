@@ -37,9 +37,9 @@ dependencies {
 }
 
 ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
-if(project.file("buildconfig.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
+ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
+if(rootProject.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
 

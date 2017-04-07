@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package ustadmobilej2me;
+package com.ustadmobile.port.j2me.impl;
 
 import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.port.j2me.buildconfig.BuildConfigJ2ME;
 import com.ustadmobile.port.j2me.impl.UMLogJ2ME;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplFactoryJ2ME;
 import com.ustadmobile.port.j2me.impl.UstadMobileSystemImplJ2ME;
@@ -23,7 +24,7 @@ import javax.microedition.midlet.*;
 /**
  * @author varuna
  */
-public class UstadMobileJ2MERun extends MIDlet {
+public class UstadMobileMidlet extends MIDlet {
 
     public void startApp() {
         Display.init(this);
@@ -67,8 +68,8 @@ public class UstadMobileJ2MERun extends MIDlet {
         
         
         try{
-            Resources r = Resources.open("/theme.res");
-            Hashtable theme = r.getTheme("NokiaTheme");
+            Resources r = Resources.open("/res/theme.res");
+            Hashtable theme = r.getTheme(BuildConfigJ2ME.LWUIT_THEME_NAME);
             UIManager.getInstance().setThemeProps(theme);
             Display.getInstance().setBidiAlgorithm(true);
         }catch(Exception e) {
@@ -80,7 +81,6 @@ public class UstadMobileJ2MERun extends MIDlet {
         loadingForm.show();
         impl.handleFormShow(loadingForm);
         impl.startUI(this);
-        
     }
     
     public void pauseApp() {
