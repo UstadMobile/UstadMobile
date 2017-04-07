@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/app-android" />
             <option value="$PROJECT_DIR$/app-j2me" />
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core-tests" />
             <option value="$PROJECT_DIR$/sharedse" />
           </set>
         </option>

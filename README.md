@@ -17,6 +17,7 @@ The platform consisits of a main cross platform 'core' and an implementation of 
 
 Code lives mostly in gradle projects as follows:
 * __core__ : Contains core models and logic
+* __core-tests__ : Contains testing code shared between implementations. Some tests of core functionality cannot run without an implementation: So the tests are placed in this separate module and then included as test dependencies for individual implementations (e.g. Android, J2ME, etc)
 * __sharedse__: Contains implementation for "full fat" non-micro implementations: e.g. Android, J2SE, iOS via J2ObjC
 * __app-android__: Contains Android implementation.
 * __app-j2me__: This is an ant project: Contains J2ME feature phone mplementation.

@@ -195,7 +195,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         queueStatusListeners = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
-        PersistenceManager.setPersistenceManagerFactory(new PersistenceManagerFactoryAndroid());
     }
 
     /**
