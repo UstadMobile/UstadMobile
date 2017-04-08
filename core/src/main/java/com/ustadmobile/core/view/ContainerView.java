@@ -44,12 +44,6 @@ public interface ContainerView extends UstadView {
 
     void setPageTitle(String pageTitle);
 
-    
-    /**
-     * This is a PDF container : show the PDF now
-     */
-    public void showPDF();
-    
     /**
      * The content is an EPUB - show the EPUB
      */

@@ -55,15 +55,10 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         }
     }
 
-
-
-
-
     @Override
     public void refreshCatalog(int column) {
         ((CatalogOPDSFragment) mPagerAdapter.getItem(column)).loadCatalog();
     }
-
 
     @Override
     public void setClassListVisible(boolean visible) {
