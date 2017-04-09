@@ -129,7 +129,7 @@ public class EnrollStudentController extends UstadBaseController {
     public void handleShowEnrollForm(){
         Hashtable args = new Hashtable();
         args.put(AttendanceController.KEY_CLASSID, mClass.id);
-        UstadMobileSystemImpl.getInstance().go(EnrollStudentView.class, args, 
+        UstadMobileSystemImpl.getInstance().go(EnrollStudentView.VIEW_NAME, args,
                 context);
     }
     
@@ -190,7 +190,7 @@ public class EnrollStudentController extends UstadBaseController {
                 args.put(ClassManagementController.KEY_CLASSID, 
                         classId);
                 args.put(ClassManagementController.KEY_UPDATE_STUDENT_LIST, "true");
-                UstadMobileSystemImpl.getInstance().go(ClassManagementView.class, args, 
+                UstadMobileSystemImpl.getInstance().go(ClassManagementView.VIEW_NAME, args,
                         context);
                 //return serverSays;
                       

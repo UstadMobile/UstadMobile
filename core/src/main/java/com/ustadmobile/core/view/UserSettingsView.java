@@ -37,7 +37,9 @@ import com.ustadmobile.core.model.UserSettingItem;
  * @author mike
  */
 public interface UserSettingsView extends UstadView {
-    
+
+    public static final String VIEW_NAME = "UserSettings";
+
     /** 
      * The name of each setting - e.g. Language
      * 

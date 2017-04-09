@@ -37,7 +37,9 @@ import com.ustadmobile.core.controller.ContainerController;
  * @author mike
  */
 public interface ContainerView extends UstadView {
-    
+
+    public static final String VIEW_NAME = "Container";
+
     public void setController(ContainerController controller);
         
     public void setContainerTitle(String containerTitle);

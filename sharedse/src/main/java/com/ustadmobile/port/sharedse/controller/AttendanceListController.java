@@ -91,7 +91,7 @@ public class AttendanceListController extends EntityListController implements Xa
         Hashtable args = new Hashtable();
         args.put(AttendanceController.KEY_CLASSID, classId);
         args.put(AttendanceController.ARG_ENTRYMODE, new Integer(mode));
-        UstadMobileSystemImpl.getInstance().go(AttendanceView.class, args, context);
+        UstadMobileSystemImpl.getInstance().go(AttendanceView.VIEW_NAME, args, context);
     }
 
 

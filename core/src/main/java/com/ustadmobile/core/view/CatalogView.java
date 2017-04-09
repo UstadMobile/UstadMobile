@@ -45,6 +45,8 @@ public interface CatalogView extends UstadView{
     public int CMD_DELETEITEM = 1;
     
     public int CMD_DOWNLOADENTRY = 2;
+
+    public static final String VIEW_NAME = "Catalog";
     
     /**
      * Set the controller linked to this view: the feed is referenced

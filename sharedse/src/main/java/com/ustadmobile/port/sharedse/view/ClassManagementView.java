@@ -13,7 +13,9 @@ import com.ustadmobile.core.view.UstadView;
  * @author varuna
  */
 public interface ClassManagementView extends UstadView {
-    
+
+    public static final String VIEW_NAME = "ClassManagement";
+
     public void setClassName(String className);
     
     public void setStudentList(AttendanceClassStudent[] students);

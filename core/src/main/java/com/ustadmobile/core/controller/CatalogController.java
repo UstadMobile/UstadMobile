@@ -838,7 +838,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
                 openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
                 openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
-                UstadMobileSystemImpl.getInstance().go(ContainerView.class, openArgs, 
+                UstadMobileSystemImpl.getInstance().go(ContainerView.VIEW_NAME, openArgs,
                         getContext());
             }else if(isInProgress(entry.id)){
                 UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
@@ -862,7 +862,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         args.put(KEY_RESMOD, new Integer(getResourceMode()));
         args.put(KEY_FLAGS, new Integer(CACHE_ENABLED));
 
-        UstadMobileSystemImpl.getInstance().go(CatalogView.class, args,
+        UstadMobileSystemImpl.getInstance().go(CatalogView.VIEW_NAME, args,
                 getContext());
     }
 

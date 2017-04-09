@@ -37,7 +37,9 @@ import com.ustadmobile.core.controller.LoginController;
  * @author varuna
  */
 public interface LoginView extends UstadView {
-    
+
+    public static final String VIEW_NAME = "Login";
+
     public static final int SECTION_LOGIN = 0;
     
     public static final int SECTION_REGISTER = 1;

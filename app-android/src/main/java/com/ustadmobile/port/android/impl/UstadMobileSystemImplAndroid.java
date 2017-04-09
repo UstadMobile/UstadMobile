@@ -51,6 +51,7 @@ import com.ustadmobile.core.impl.*;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
@@ -60,20 +61,8 @@ import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.sharedse.view.EnrollStudentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.UserSettingsView;
-import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerFactoryAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.view.AboutActivity;
-import com.ustadmobile.port.android.view.AppViewAndroid;
-import com.ustadmobile.port.android.view.AttendanceActivity;
-import com.ustadmobile.port.android.view.BasePointActivity;
-import com.ustadmobile.port.android.view.CatalogActivity;
-import com.ustadmobile.port.android.view.ClassManagementActivity;
-import com.ustadmobile.port.android.view.ClassManagementActivity2;
-import com.ustadmobile.port.android.view.ContainerActivity;
-import com.ustadmobile.port.android.view.EnrollStudentActivity;
-import com.ustadmobile.port.android.view.LoginActivity;
-import com.ustadmobile.port.android.view.UserSettingsActivity;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.port.android.view.*;
 import com.ustadmobile.nanolrs.core.endpoints.*;
 
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
@@ -106,6 +95,27 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public static final String KEY_CURRENTUSER = "app-currentuser";
 
     public static final String KEY_CURRENTAUTH = "app-currentauth";
+
+    /**
+     * Map of view names to the activity class that is implementing them on Android
+     *
+     * @see UstadMobileSystemImplAndroid#go(String, Hashtable, Object)
+     */
+    public static final HashMap<String, Class> viewNameToActivityMap = new HashMap<>();
+
+    static {
+        viewNameToActivityMap.put(LoginView.VIEW_NAME, LoginActivity.class);
+        viewNameToActivityMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
+        viewNameToActivityMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
+        viewNameToActivityMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
+        viewNameToActivityMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
+        viewNameToActivityMap.put(ClassManagementView.VIEW_NAME, ClassManagementActivity.class);
+        viewNameToActivityMap.put(EnrollStudentView.VIEW_NAME, EnrollStudentActivity.class);
+        viewNameToActivityMap.put(ClassManagementView2.VIEW_NAME, ClassManagementView2.class);
+        viewNameToActivityMap.put(AboutView.VIEW_NAME, AboutActivity.class);
+        viewNameToActivityMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
+    }
+
 
     private String currentUsername;
 
@@ -305,50 +315,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public void go(Class cls, Hashtable args, Object context) {
-        Class androidClass = null;
-        if(cls.equals(LoginView.class)) {
-            androidClass = LoginActivity.class;
-        }else if(cls.equals(ContainerView.class)) {
-            androidClass = ContainerActivity.class;
-        }else if(cls.equals(CatalogView.class)) {
-            androidClass = CatalogActivity.class;
-        }else if(cls.equals(UserSettingsView.class)) {
-            androidClass = UserSettingsActivity.class;
-        }else if(cls.equals(AttendanceView.class)) {
-            androidClass = AttendanceActivity.class;
-        }else if(cls.equals(BasePointView.class)) {
-            androidClass = BasePointActivity.class;
-        }else if(cls.equals(ClassManagementView.class)) {
-            androidClass = ClassManagementActivity.class;
-        }else if(cls.equals(EnrollStudentView.class)){
-            androidClass = EnrollStudentActivity.class;
-        }else if(cls.equals(ClassManagementView2.class)) {
-            androidClass = ClassManagementActivity2.class;
-        }else if(cls.equals(AboutView.class)) {
-            androidClass = AboutActivity.class;
+    public void go(String viewName, Hashtable args, Object context) {
+        Class activityClass = viewNameToActivityMap.get(viewName);
+        if(activityClass == null) {
+            Log.wtf(UMLogAndroid.LOGTAG, "No activity for " + viewName + " found");
         }
 
-        Intent startIntent = new Intent((Context)context, androidClass);
+        Context ctx = (Context)context;
+        Intent startIntent = new Intent(ctx, activityClass);
+        if(args != null)
+            startIntent.putExtras(UMAndroidUtil.hashtableToBundle(args));
 
-        if(args != null) {
-            Enumeration argE = args.keys();
-
-            String currentKey;
-            Object currentVal;
-            while(argE.hasMoreElements()) {
-                currentKey = (String)argE.nextElement();
-                currentVal = args.get(currentKey);
-
-                if(currentVal instanceof String) {
-                    startIntent.putExtra(currentKey, (String)currentVal);
-                }else if(currentVal instanceof Integer) {
-                    startIntent.putExtra(currentKey, (Integer)currentVal);
-                }
-            }
-        }
-
-        ((Context)context).startActivity(startIntent);
+        ctx.startActivity(startIntent);
     }
 
     @Override

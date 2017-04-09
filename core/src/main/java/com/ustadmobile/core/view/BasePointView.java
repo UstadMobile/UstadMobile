@@ -41,6 +41,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
  */
 public interface BasePointView extends UstadView{
     
+    public static final String VIEW_NAME = "BasePoint";
 
     /**
      * Refresh the given column 

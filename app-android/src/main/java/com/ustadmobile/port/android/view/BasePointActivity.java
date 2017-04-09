@@ -1,5 +1,12 @@
 package com.ustadmobile.port.android.view;
 
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
@@ -7,13 +14,17 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarDrawerToggle;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
@@ -54,6 +65,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
             tabLayout.getTabAt(i).setIcon(tabIconsIds[i]);
         }
     }
+
+
 
     @Override
     public void refreshCatalog(int column) {

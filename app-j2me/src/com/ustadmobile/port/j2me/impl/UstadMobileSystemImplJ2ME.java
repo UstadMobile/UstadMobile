@@ -1138,17 +1138,17 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     }
 
     
-    private UstadViewFormJ2ME getFormByArgs(Class cls, Hashtable args, Object context) {
+    private UstadViewFormJ2ME getFormByArgs(String viewName, Hashtable args, Object context) {
         UstadViewFormJ2ME form = null;
-        if(cls.equals(LoginView.class)) {
+        if(viewName.equals(LoginView.VIEW_NAME)) {
             form = new LoginViewJ2ME(args, context);
-        }else if(cls.equals(CatalogView.class)) {
+        }else if(viewName.equals(CatalogView.VIEW_NAME)) {
             form = new CatalogWrapperForm(args, context, true);
-        }else if(cls.equals(ContainerView.class)) {
+        }else if(viewName.equals(ContainerView.VIEW_NAME)) {
             form = new ContainerViewJ2ME(args, context);
-        }else if(cls.equals(UserSettingsView.class)) {
+        }else if(viewName.equals(UserSettingsView.VIEW_NAME)) {
             form = new UserSettingsViewJ2ME(args, context);
-        }else if(cls.equals(BasePointView.class)) {
+        }else if(viewName.equals(BasePointView.VIEW_NAME)) {
             form = new BasePointViewJ2ME(args, context, true);
         }
         
@@ -1161,10 +1161,10 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         }
     }
     
-    public void go(Class cls, Hashtable args, Object context) {
-        UstadViewFormJ2ME form = getFormByArgs(cls, args, context);
+    public void go(String viewName, Hashtable args, Object context) {
+        UstadViewFormJ2ME form = getFormByArgs(viewName, args, context);
         
-        viewHistory.insertElementAt(new ViewHistoryEntry(cls, args), 0);
+        viewHistory.insertElementAt(new ViewHistoryEntry(viewName, args), 0);
         if(viewHistory.size() > VIEW_HISTORY_LIMIT) {
             viewHistory.setSize(VIEW_HISTORY_LIMIT);
         }
@@ -1181,7 +1181,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         }else if(viewHistory.size() >= 2) {
             viewHistory.removeElementAt(0);
             ViewHistoryEntry entry = (ViewHistoryEntry)viewHistory.elementAt(0);
-            UstadViewFormJ2ME frm = getFormByArgs(entry.viewClass, entry.viewArgs, context);
+            UstadViewFormJ2ME frm = getFormByArgs(entry.viewName, entry.viewArgs, context);
             
             destroyCurrentForm();
             currentForm = frm;
@@ -1333,12 +1333,12 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
     
     public static class ViewHistoryEntry {
         
-        Class viewClass;
+        String viewName;
         
         Hashtable viewArgs;
         
-        public ViewHistoryEntry(Class viewClass, Hashtable viewArgs) {
-            this.viewClass = viewClass;
+        public ViewHistoryEntry(String viewName, Hashtable viewArgs) {
+            this.viewName = viewName;
             this.viewArgs = viewArgs;
         }
         

@@ -158,14 +158,14 @@ public class ClassManagementController extends UstadBaseController {
     public void handleShowEnrollForm(){
         Hashtable args = new Hashtable();
         args.put(AttendanceController.KEY_CLASSID, mClass.id);
-        UstadMobileSystemImpl.getInstance().go(EnrollStudentView.class, args, 
+        UstadMobileSystemImpl.getInstance().go(EnrollStudentView.VIEW_NAME, args,
                 context);
     }
         
     public void handleClickAttendanceButton() {
         Hashtable args = new Hashtable();
         args.put(AttendanceController.KEY_CLASSID, mClass.id);
-        UstadMobileSystemImpl.getInstance().go(AttendanceView.class, args, 
+        UstadMobileSystemImpl.getInstance().go(AttendanceView.VIEW_NAME, args,
                 context);
     }
     

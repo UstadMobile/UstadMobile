@@ -230,7 +230,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.class,
+                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
                         BasePointController.makeDefaultBasePointArgs(this), this);
                 return true;
             case R.id.action_finish:

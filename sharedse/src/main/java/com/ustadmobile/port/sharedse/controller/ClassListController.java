@@ -66,7 +66,7 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
         args.put(ClassManagementController.KEY_CLASSID, 
                 attendanceClasses[index].id);
         args.put(ClassManagementController2.ARG_CLASS_NAME, attendanceClasses[index].getTitle());
-        UstadMobileSystemImpl.getInstance().go(ClassManagementView2.class, args,
+        UstadMobileSystemImpl.getInstance().go(ClassManagementView2.vIEW_NAME, args,
                 context);
     }
 

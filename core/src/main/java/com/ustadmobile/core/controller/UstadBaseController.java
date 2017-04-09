@@ -179,10 +179,10 @@ public abstract class UstadBaseController implements UstadController {
     public static boolean handleClickAppMenuItem(int cmdId, Object context) {
         switch(cmdId) {
             case CMD_ABOUT:
-                UstadMobileSystemImpl.getInstance().go(AboutView.class, new Hashtable(), context);
+                UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
                 return true;
             case CMD_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(UserSettingsView.class, 
+                UstadMobileSystemImpl.getInstance().go(UserSettingsView.VIEW_NAME,
                     new Hashtable(), context);
                 return true;
             case CMD_LOGOUT:
