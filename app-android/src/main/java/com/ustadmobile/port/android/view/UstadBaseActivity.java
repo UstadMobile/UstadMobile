@@ -49,7 +49,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private boolean handleUIStringsOnResume = true;
 
-    private Toolbar umToolbar;
+    protected Toolbar umToolbar;
 
     private int[] appMenuCommands;
 
@@ -166,6 +166,11 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         return UstadBaseController.handleClickAppMenuItem(item.getItemId(), getContext());
     }
 
+    /**
+     * Get the toolbar that's used for the support action bar
+     *
+     * @return
+     */
     protected Toolbar getUMToolbar() {
         return umToolbar;
     }
@@ -275,4 +280,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         super.onBackPressed();
     }
+
+
 }
