@@ -135,9 +135,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
-        if(Build.VERSION.SDK_INT >= 21) {
-            umToolbar.setElevation(10);
-        }
     }
 
 

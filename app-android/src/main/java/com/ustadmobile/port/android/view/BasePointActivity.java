@@ -1,30 +1,26 @@
 package com.ustadmobile.port.android.view;
 
-import com.mikepenz.materialdrawer.AccountHeader;
-import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
+import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.MenuItem;
+import android.view.WindowManager;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
@@ -41,9 +37,19 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     protected boolean classListVisible;
 
+    private ActionBarDrawerToggle mDrawerToggle;
+
+    private DrawerLayout mDrawerLayout;
+
+    private NavigationView mDrawerNavigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.LOLLIPOP){
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
         setContentView(R.layout.activity_base_point);
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
 
@@ -51,22 +57,45 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mBasePointController = BasePointController.makeControllerForView(this, args);
         setBaseController(mBasePointController);
         setUMToolbar();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mPagerAdapter = new BasePointPagerAdapter(getSupportFragmentManager());
         ViewPager viewPager = (ViewPager)findViewById(R.id.basepoint_pager);
         viewPager.setAdapter(mPagerAdapter);
-        TabLayout tabLayout = (TabLayout)findViewById(R.id.basepoint_tabs);
-        tabLayout.setupWithViewPager(viewPager);
-        if(Build.VERSION.SDK_INT >= 21) {
-            tabLayout.setElevation(10);
-        }
+        SlidingTabLayout tabs = (SlidingTabLayout)findViewById(R.id.activity_basepoint_sliding_tab_layout);
+        tabs.setDistributeEvenly(false);
+        tabs.setViewPager(viewPager);
+        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+            @Override
+            public int getIndicatorColor(int position) {
+                return getResources().getColor(R.color.primary_text);
+            }
+        });
 
-        for(int i = 0; i < mPagerAdapter.getCount(); i++) {
-            tabLayout.getTabAt(i).setIcon(tabIconsIds[i]);
-        }
+        mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
+        mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
+                R.string.drawer_close);
     }
 
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if(!mDrawerLayout.isDrawerOpen(mDrawerNavigationView)){
+                    mDrawerLayout.openDrawer(mDrawerNavigationView);
+                }
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void refreshCatalog(int column) {

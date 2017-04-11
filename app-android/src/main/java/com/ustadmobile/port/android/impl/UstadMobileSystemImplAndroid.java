@@ -111,7 +111,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToActivityMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
         viewNameToActivityMap.put(ClassManagementView.VIEW_NAME, ClassManagementActivity.class);
         viewNameToActivityMap.put(EnrollStudentView.VIEW_NAME, EnrollStudentActivity.class);
-        viewNameToActivityMap.put(ClassManagementView2.VIEW_NAME, ClassManagementView2.class);
+        viewNameToActivityMap.put(ClassManagementView2.VIEW_NAME, ClassManagementActivity2.class);
         viewNameToActivityMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToActivityMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
     }
