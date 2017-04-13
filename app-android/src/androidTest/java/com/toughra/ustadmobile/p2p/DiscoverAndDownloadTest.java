@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ServiceTestRule;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
@@ -17,8 +15,8 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
-import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
-import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
+import com.ustadmobile.port.android.p2p.NetworkManagerAndroid;
+import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
 import com.ustadmobile.port.sharedse.p2p.P2PNode;
 import com.ustadmobile.port.sharedse.p2p.P2PNodeListener;
 
@@ -27,18 +25,13 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
 import java.util.Vector;
 import java.util.concurrent.TimeoutException;
 
-import edu.rit.se.wifibuddy.WifiDirectHandler;
-
 import static com.toughra.ustadmobile.p2p.ServiceBroadcastTest.TEST_SERVICE_NAME;
-import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.EXTRA_SERVICE_NAME;
-import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.PREF_KEY_SUPERNODE;
+import static com.ustadmobile.port.android.p2p.DownloadTaskAndroid.DOWNLOAD_SOURCE_P2P;
+import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -56,7 +49,7 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
     private static final int mSuperNodeIndex=0;
     private static final String TEST_FILE_ID = "202b10fe-b028-4b84-9b84-852aa766607d";
     private static final String TEST_FILE_URI = "http://www.ustadmobile.com/files/budget-savings-trainer.epub";
-    private static boolean downloadedFromPeer=false;
+    private static int downloadedFromPeer=-1;
 
     private P2PNode lastNodeDiscovered = null;
     private UstadMobileSystemImplAndroid implAndroid=null;
@@ -71,11 +64,11 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
         mContext= InstrumentationRegistry.getTargetContext();
         UstadMobileSystemImpl.getInstance().init(mContext);
         UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_SUPERNODE, "false", mContext);
-        Intent serviceIntent = new Intent(mContext, P2PServiceAndroid.class);
+        Intent serviceIntent = new Intent(mContext, NetworkServiceAndroid.class);
         serviceIntent.putExtra(EXTRA_SERVICE_NAME,TEST_SERVICE_NAME);
         mServiceRule.bindService(serviceIntent);
         lastNodeDiscovered = null;
-        downloadedFromPeer = false;
+        downloadedFromPeer = -1;
     }
 
 
@@ -108,7 +101,7 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
         }
 
         assertThat("File was downloaded: ",destinationFile.exists(),is(true));
-        assertThat("Was file Downloaded from peer: ",downloadedFromPeer,is(true));
+        assertThat("Was file Downloaded from peer: ",downloadedFromPeer,is(DOWNLOAD_SOURCE_P2P));
 
     }
 
@@ -132,7 +125,7 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
                 CatalogController.SHARED_RESOURCE, mContext)[0].getDirURI();
 
         P2PNode node=implAndroid.getP2PManager().knownSuperNodes.get(mSuperNodeIndex);
-        UstadJSOPDSFeed   fileFeed = ((P2PManagerAndroid)implAndroid.getP2PManager())
+        UstadJSOPDSFeed   fileFeed = ((NetworkManagerAndroid)implAndroid.getP2PManager())
                 .getAvailableIndexes().get(node);
         UstadJSOPDSEntry  fileEntry = fileFeed.getEntryById(TEST_FILE_ID);
         Vector acquisitionLinks = fileEntry.getAcquisitionLinks();

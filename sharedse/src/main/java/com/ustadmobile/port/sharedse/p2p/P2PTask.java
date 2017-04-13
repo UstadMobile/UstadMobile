@@ -26,6 +26,8 @@ public abstract class P2PTask {
 
     private int downloadRequestID;
 
+    private long startTaskAfter;
+
     private final Object bytesDownloadedLock = new Object();
 
     protected P2PTaskListener listener;
@@ -179,5 +181,11 @@ public abstract class P2PTask {
 
     public abstract void disconnect(String [] currentConnectedNetwork);
 
+    public long getStartTaskAfter() {
+        return startTaskAfter;
+    }
 
+    public void setStartTaskAfter(long startTaskAfter) {
+        this.startTaskAfter = startTaskAfter;
+    }
 }

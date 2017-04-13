@@ -24,11 +24,11 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import edu.rit.se.wifibuddy.FailureReason;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.EXTRA_SERVICE_NAME;
-import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.SERVICE_NAME;
+import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.SERVICE_NAME;
 
 
-public class P2PServiceAndroid extends Service{
+public class NetworkServiceAndroid extends Service{
 
 
     private final static int NOTIFICATION_CODE =12;
@@ -42,7 +42,7 @@ public class P2PServiceAndroid extends Service{
 
     public static final int NOPROMPT_RETRY_MAX_RETRIES = 6;
 
-    private P2PManagerAndroid p2pManager;
+    private NetworkManagerAndroid p2pManager;
     private String serviceName=null;
 
 
@@ -58,32 +58,32 @@ public class P2PServiceAndroid extends Service{
 
         @Override
         public void onSuccess() {
-            Log.i(WifiDirectHandler.TAG, "P2PServiceAndroid:noPromptActionListener:onSuccess");
+            Log.i(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener:onSuccess");
             retryCount = 0;
         }
 
         @Override
         public void onFailure(int i) {
-            Log.e(WifiDirectHandler.TAG, "P2PServiceAndroid:noPromptActionListener:onFailure: " +
+            Log.e(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener:onFailure: " +
                     FailureReason.fromInteger(i));
             retryCount++;
             if(retryCount < NOPROMPT_RETRY_MAX_RETRIES) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        Log.i(WifiDirectHandler.TAG, "P2PServiceAndroid:noPromptActionListener: Retry #"
+                        Log.i(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener: Retry #"
                                 + retryCount);
                         getWifiDirectHandlerAPI().removeGroup(
                                 new WifiP2pManager.ActionListener() {
                               @Override
                               public void onSuccess() {
-                                  getWifiDirectHandlerAPI().startAddingNoPromptService(P2PManagerAndroid.makeServiceData(),
+                                  getWifiDirectHandlerAPI().startAddingNoPromptService(NetworkManagerAndroid.makeServiceData(),
                                           mNoPromptActionListener);
                               }
 
                               @Override
                               public void onFailure(int i) {
-                                  getWifiDirectHandlerAPI().startAddingNoPromptService(P2PManagerAndroid.makeServiceData(),
+                                  getWifiDirectHandlerAPI().startAddingNoPromptService(NetworkManagerAndroid.makeServiceData(),
                                           mNoPromptActionListener);
                               }
                           });
@@ -91,7 +91,7 @@ public class P2PServiceAndroid extends Service{
                     }
                 }, NOPROMPT_RETRY_WAIT_INTERVAL);
             }else {
-                Log.e(WifiDirectHandler.TAG, "P2PServiceAndroid:noPromptActionListener: Exceeded retry counts!");
+                Log.e(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener: Exceeded retry counts!");
 
                 retryCount = 0;
             }
@@ -99,7 +99,7 @@ public class P2PServiceAndroid extends Service{
     };
 
 
-    public P2PServiceAndroid(){
+    public NetworkServiceAndroid(){
 
     }
 
@@ -159,8 +159,8 @@ public class P2PServiceAndroid extends Service{
 
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            p2pManager = (P2PManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
-            p2pManager.init(P2PServiceAndroid.this,serviceName);
+            p2pManager = (NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
+            p2pManager.init(NetworkServiceAndroid.this,serviceName);
         }
 
 
@@ -173,8 +173,8 @@ public class P2PServiceAndroid extends Service{
 
 
     public class LocalServiceBinder extends Binder {
-        public P2PServiceAndroid getService(){
-            return P2PServiceAndroid.this;
+        public NetworkServiceAndroid getService(){
+            return NetworkServiceAndroid.this;
         }
 
     }

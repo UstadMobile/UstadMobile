@@ -59,7 +59,7 @@
 
 
         <service
-            android:name="com.ustadmobile.port.android.p2p.P2PServiceAndroid"
+            android:name="com.ustadmobile.port.android.p2p.NetworkServiceAndroid"
             android:enabled="true" />
 
         <service

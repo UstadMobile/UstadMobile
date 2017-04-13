@@ -7,11 +7,10 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ServiceTestRule;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
+import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -21,8 +20,8 @@ import java.util.concurrent.TimeoutException;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.EXTRA_SERVICE_NAME;
-import static com.ustadmobile.port.android.p2p.P2PManagerAndroid.PREF_KEY_SUPERNODE;
+import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -41,7 +40,7 @@ public class ServiceBroadcastTest {
     public final ServiceTestRule mServiceRuleWifi = new ServiceTestRule();
     public final ServiceTestRule mServiceRuleHTTPD = new ServiceTestRule();
     private final Object mLock=new Object();
-    private P2PServiceAndroid p2PServiceAndroid=null;
+    private NetworkServiceAndroid networkServiceAndroid =null;
 
     @Before
     public void setUp() throws TimeoutException {
@@ -50,10 +49,10 @@ public class ServiceBroadcastTest {
         UstadMobileSystemImpl.getInstance().init(mContext);
         UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_SUPERNODE, "true", mContext);
 
-        Intent serviceIntent = new Intent(mContext, P2PServiceAndroid.class);
+        Intent serviceIntent = new Intent(mContext, NetworkServiceAndroid.class);
         serviceIntent.putExtra(EXTRA_SERVICE_NAME,TEST_SERVICE_NAME);
         IBinder mBinder= mServiceRuleWifi.bindService(serviceIntent);
-        p2PServiceAndroid=((P2PServiceAndroid.LocalServiceBinder)mBinder) .getService();
+        networkServiceAndroid =((NetworkServiceAndroid.LocalServiceBinder)mBinder) .getService();
         UstadMobileSystemImplAndroid.getInstanceAndroid();
 
         Intent httpd = new Intent(mContext, HTTPService.class);
@@ -71,8 +70,8 @@ public class ServiceBroadcastTest {
         synchronized (mLock){
             mLock.wait(mWaitingTimeForBindService);
         }
-        assertNotNull("Was service bound: ",p2PServiceAndroid);
-        WifiDirectHandler mWifiDirectHandler = p2PServiceAndroid.getWifiDirectHandlerAPI();
+        assertNotNull("Was service bound: ", networkServiceAndroid);
+        WifiDirectHandler mWifiDirectHandler = networkServiceAndroid.getWifiDirectHandlerAPI();
 
         synchronized (mLock){
             mLock.wait(mMaxExecutionTime);

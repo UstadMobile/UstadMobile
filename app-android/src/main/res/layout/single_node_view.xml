@@ -38,7 +38,7 @@
                 android:text="34:44:4"
                 android:layout_marginTop="8dp"
                 android:layout_below="@+id/nodeName"
-                android:id="@+id/nodeAddress"
+                android:id="@+id/nodeMacAddress"
                 android:textSize="16sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />

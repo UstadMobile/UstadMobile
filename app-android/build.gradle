@@ -15,7 +15,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.0'
+        classpath 'com.android.tools.build:gradle:2.3.1'
     }
 }
 
@@ -51,7 +51,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "com.toughra.ustadmobile"
-        minSdkVersion 14
+        minSdkVersion 16
         targetSdkVersion 25
         versionCode 90
         versionName "0.2.4.21"

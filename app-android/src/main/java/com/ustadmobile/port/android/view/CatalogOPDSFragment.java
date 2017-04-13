@@ -70,9 +70,7 @@ import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import java.util.Hashtable;
 import java.util.Iterator;

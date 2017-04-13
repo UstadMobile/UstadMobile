@@ -23,14 +23,12 @@ import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
-import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
+import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -55,7 +53,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private String[] appMenuLabels;
 
     private XapiStatementForwardingService mNanoLrsService;
-    private P2PServiceAndroid p2PServiceAndroid;
+    private NetworkServiceAndroid networkServiceAndroid;
 
     private String displayName;
 

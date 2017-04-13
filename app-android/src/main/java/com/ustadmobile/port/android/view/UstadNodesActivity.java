@@ -1,9 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
@@ -20,15 +17,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.p2p.P2PDownloadTaskAndroid;
-import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
+import com.ustadmobile.port.android.p2p.NetworkManagerAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.p2p.DownloadRequest;
 import com.ustadmobile.port.sharedse.p2p.P2PNode;
 import com.ustadmobile.port.sharedse.p2p.P2PNodeListener;
 
@@ -44,8 +38,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
     private Snackbar snackbar;
     private NodeListAdapter nodeListAdapter;
     private int nodeCounter=0;
-    private  P2PManagerAndroid p2PManagerAndroid;
-    private BroadcastReceiver broadcastReceiver;
+    private NetworkManagerAndroid networkManagerAndroid;
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -67,7 +60,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
         final TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setTextColor(Color.WHITE);
-        p2PManagerAndroid=(P2PManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
+        networkManagerAndroid =(NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
 
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -76,16 +69,16 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
         nodeListAdapter=new NodeListAdapter();
         allNodesList.setLayoutManager(linearLayoutManager);
         allNodesList.setAdapter(nodeListAdapter);
-        if(p2PManagerAndroid.getNodeList().size()>0){
-            nodeCounter=p2PManagerAndroid.getNodeList().size();
+        if(networkManagerAndroid.getNodeList().size()>0){
+            nodeCounter= networkManagerAndroid.getNodeList().size();
             snackbar.show();
             textView.setText("Found "+nodeCounter+" super nodes");
         }else{
             textView.setText("Searching super nodes...");
             snackbar.show();
         }
-        nodeListAdapter.setNodeList((ArrayList<P2PNode>) p2PManagerAndroid.getNodeList());
-        ((P2PManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).addNodeListener(this);
+        nodeListAdapter.setNodeList((ArrayList<P2PNode>) networkManagerAndroid.getNodeList());
+        ((NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).addNodeListener(this);
     }
 
 
@@ -104,7 +97,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
 
     @Override
     public void nodeDiscovered(P2PNode node) {
-        nodeListAdapter.setNodeList((ArrayList<P2PNode>) p2PManagerAndroid.getNodeList());
+        nodeListAdapter.setNodeList((ArrayList<P2PNode>) networkManagerAndroid.getNodeList());
         nodeListAdapter.notifyDataSetChanged();
         allNodesList.invalidate();
     }
@@ -116,7 +109,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
 
     @Override
     public void onDestroy() {
-        ((P2PManagerAndroid)UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).removeNodeListener(this);
+        ((NetworkManagerAndroid)UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).removeNodeListener(this);
         super.onDestroy();
     }
 
@@ -142,7 +135,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
         @Override
         public void onBindViewHolder(final NodeListAdapter.NodeHolder holder, int position) {
 
-            holder.nodeAddress.setText(getNodeList().get(holder.getAdapterPosition()).getNodeAddress());
+            holder.nodeAddress.setText(getNodeList().get(holder.getAdapterPosition()).getNodeMacAddress());
             holder.nodeName.setText(getNodeList().get(holder.getAdapterPosition()).getNetworkSSID());
             holder.nodeStatus.setBackgroundResource(getDeviceStatus(getNodeList().get(holder.getAdapterPosition()).getStatus()));
 
@@ -154,9 +147,9 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
                             getNodeList().get(holder.getAdapterPosition()).getNetworkSSID(),
                             getApplicationContext());
 
-                    DnsSdTxtRecord nodeRecord=p2PManagerAndroid.getService(getContext()).getWifiDirectHandlerAPI()
-                            .getDnsSdTxtRecordMap().get(getNodeList().get(holder.getAdapterPosition()).getNodeAddress());
-                    p2PManagerAndroid.getService(getContext()).getWifiDirectHandlerAPI().connectToNoPromptService(nodeRecord);
+                    DnsSdTxtRecord nodeRecord= networkManagerAndroid.getService(getContext()).getWifiDirectHandlerAPI()
+                            .getDnsSdTxtRecordMap().get(getNodeList().get(holder.getAdapterPosition()).getNodeMacAddress());
+                    networkManagerAndroid.getService(getContext()).getWifiDirectHandlerAPI().connectToNoPromptService(nodeRecord);
 
                 }
             });
@@ -185,7 +178,6 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
             NodeHolder(View itemView) {
                 super(itemView);
                 nodeName= (TextView) itemView.findViewById(R.id.nodeName);
-                nodeAddress= (TextView) itemView.findViewById(R.id.nodeAddress);
                 nodeStatus= (TextView) itemView.findViewById(R.id.nodeStatus);
                 nodeHolder= (CardView) itemView.findViewById(R.id.nodeHolder);
             }

@@ -14,14 +14,14 @@ public class UMDownloadCompleteEvent {
     
     private int status;
 
-    private boolean downloadedFromPeer = false;
+    private int downloadedFromPeer = 2;
     
     public UMDownloadCompleteEvent(String downloadID, int status) {
         this.downloadID = downloadID;
         this.status = status;
     }
 
-    public UMDownloadCompleteEvent(String downloadID, int status, boolean downloadedFromPeer) {
+    public UMDownloadCompleteEvent(String downloadID, int status, int downloadedFromPeer) {
         this.downloadID = downloadID;
         this.status = status;
         this.downloadedFromPeer = downloadedFromPeer;
@@ -43,7 +43,7 @@ public class UMDownloadCompleteEvent {
         return status;
     }
 
-    public boolean getDownloadedFromPeer(){
+    public int getDownloadedFromPeer(){
         return downloadedFromPeer;
     }
     

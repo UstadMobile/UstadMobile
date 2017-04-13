@@ -8,11 +8,15 @@ package com.ustadmobile.port.sharedse.p2p;
 public class P2PNode {
 
 
-    private String nodeAddress;
+    private String nodeMacAddress;
 
     private String networkSSID;
 
     private String networkPass;
+
+    private String nodeIPAddress;
+
+    private int nodePortNumber;
 
 
     public int getStatus() {
@@ -24,11 +28,19 @@ public class P2PNode {
     }
 
     private int status;
+    private boolean locallyFound=false;
 
 
 
-    public P2PNode(String nodeAddress){
-        this.nodeAddress=nodeAddress;
+    public P2PNode(String nodeMacAddress){
+        locallyFound=false;
+        this.nodeMacAddress = nodeMacAddress;
+    }
+
+    public P2PNode(String nodeIPAddress,int portNumber){
+        locallyFound=true;
+        this.nodeIPAddress=nodeIPAddress;
+        this.nodePortNumber=portNumber;
     }
 
 
@@ -52,21 +64,38 @@ public class P2PNode {
         return networkSSID;
     }
 
-    public String getNodeAddress() {
-        return nodeAddress;
+    public String getNodeMacAddress() {
+        return nodeMacAddress;
     }
 
-    public void setNodeAddress(String nodeAddress) {
-        this.nodeAddress = nodeAddress;
+    public void setNodeMacAddress(String nodeMacAddress) {
+        this.nodeMacAddress = nodeMacAddress;
     }
 
 
+    public String getNodeIPAddress() {
+        return nodeIPAddress;
+    }
 
+    public void setNodeIPAddress(String nodeIPAddress) {
+        this.nodeIPAddress = nodeIPAddress;
+    }
 
+    public int getNodePortNumber() {
+        return nodePortNumber;
+    }
 
+    public void setNodePortNumber(int nodePortNumber) {
+        this.nodePortNumber = nodePortNumber;
+    }
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof P2PNode && ((P2PNode)object).getNodeAddress().equals(this.nodeAddress);
+        if(locallyFound){
+            return object instanceof P2PNode && ((P2PNode)object).getNodeIPAddress().equals(this.nodeIPAddress)
+                    && ((P2PNode)object).getNodePortNumber()==this.nodePortNumber;
+        }else{
+            return object instanceof P2PNode && ((P2PNode)object).getNodeMacAddress().equals(this.nodeMacAddress);
+        }
     }
 }

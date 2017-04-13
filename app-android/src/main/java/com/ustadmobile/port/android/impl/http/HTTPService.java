@@ -60,7 +60,7 @@ public class HTTPService extends Service {
 
     @Override
     public void onCreate() {
-        Log.i(UstadMobileSystemImplAndroid.TAG, "Create HTTP P2PServiceAndroid " + this);
+        Log.i(UstadMobileSystemImplAndroid.TAG, "Create HTTP NetworkServiceAndroid " + this);
         httpd = new EmbeddedHTTPD(DEFAULT_PORT);
         assetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(assetsPath +"(.)+",  AndroidAssetsHandler.class, this);
@@ -80,7 +80,7 @@ public class HTTPService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.i(UstadMobileSystemImplAndroid.TAG, "Destroy HTTP P2PServiceAndroid");
+        Log.i(UstadMobileSystemImplAndroid.TAG, "Destroy HTTP NetworkServiceAndroid");
         httpd.stop();
         httpd = null;
     }

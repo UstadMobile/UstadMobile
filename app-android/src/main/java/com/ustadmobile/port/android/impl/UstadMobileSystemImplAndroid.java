@@ -32,12 +32,9 @@
 package com.ustadmobile.port.android.impl;
 
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.*;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 
@@ -47,17 +44,14 @@ import java.util.*;
 import java.net.URL;
 
 import com.toughra.ustadmobile.BuildConfig;
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.*;
-import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
-import com.ustadmobile.port.android.p2p.P2PDownloadTaskAndroid;
-import com.ustadmobile.port.android.p2p.P2PManagerAndroid;
-import com.ustadmobile.port.android.p2p.P2PServiceAndroid;
+import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
+import com.ustadmobile.port.android.p2p.DownloadTaskAndroid;
+import com.ustadmobile.port.android.p2p.NetworkManagerAndroid;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
 import com.ustadmobile.port.android.view.SettingsHome;
 import com.ustadmobile.port.sharedse.p2p.DownloadRequest;
@@ -198,7 +192,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     private HashMap<Context, ServiceConnection> p2pServiceConnections = new HashMap<>();
 
-    private P2PManagerAndroid p2pManager;
+    private NetworkManagerAndroid p2pManager;
 
     /**
      @deprecated
@@ -212,7 +206,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
         PersistenceManager.setPersistenceManagerFactory(new PersistenceManagerFactoryAndroid());
-        p2pManager = new P2PManagerAndroid();
+        p2pManager = new NetworkManagerAndroid();
         p2pManager.setServiceConnectionMap(p2pServiceConnections);
     }
 
@@ -301,7 +295,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         Intent intent = new Intent(mContext, HTTPService.class);
         BaseServiceConnection connection = new BaseServiceConnection(mContext, httpServiceConnections);
         mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        Intent p2pIntent = new Intent(mContext, P2PServiceAndroid.class);
+        Intent p2pIntent = new Intent(mContext, NetworkServiceAndroid.class);
         connection = new BaseServiceConnection(mContext, p2pServiceConnections);
         mContext.bindService(p2pIntent, connection, Context.BIND_AUTO_CREATE);
     }
@@ -472,18 +466,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     @Override
     public void registerDownloadCompleteReceiver(final UMDownloadCompleteReceiver receiver, final Object context) {
         IntentFilter downloadCompleteIntentFilter =
-                new IntentFilter(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
+                new IntentFilter(DownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
         BroadcastReceiver completeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                if(intent!=null){
-                   String downloadID = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_ID);
-                   String downloadStatus = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS);
-                   String downloadSource = intent.getStringExtra(P2PDownloadTaskAndroid.EXTRA_DOWNLOAD_SOURCE);
+                   String downloadID = intent.getStringExtra(DownloadTaskAndroid.EXTRA_DOWNLOAD_ID);
+                   String downloadStatus = intent.getStringExtra(DownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS);
+                   String downloadSource = intent.getStringExtra(DownloadTaskAndroid.EXTRA_DOWNLOAD_SOURCE);
                    Log.d(WifiDirectHandler.TAG,"Download ID:"+downloadID+" Download Status:"
                            +downloadStatus+" Download Source: "+(Boolean.parseBoolean(downloadSource)?" Cloud":"Local"));
                    receiver.downloadStatusUpdated(
-                           new UMDownloadCompleteEvent(downloadID,Integer.parseInt(downloadStatus),!Boolean.parseBoolean(downloadSource)));
+                           new UMDownloadCompleteEvent(downloadID,Integer.parseInt(downloadStatus),Integer.parseInt(downloadSource)));
 
                }
             }

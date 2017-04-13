@@ -1,13 +1,11 @@
 package com.ustadmobile.port.sharedse.p2p;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.p2p.P2PManager;
-import com.ustadmobile.core.util.UMFileUtil;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -15,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -32,10 +31,12 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      */
     protected HashMap<P2PNode, UstadJSOPDSFeed> availableIndexes=new HashMap<>();
 
+
     /**
      * List of supernodes that we know about around us
      */
     public List<P2PNode> knownSuperNodes =new ArrayList<>();
+    public List<P2PNode> knownLocalNodes =new ArrayList<>();
 
     protected Vector<P2PNodeListener> nodeListeners = new Vector<>();
     /**
@@ -50,17 +51,34 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
 
     private P2PTask currentTask;
 
+    public int currentDownloadSource =-1;
+    public static final int DOWNLOAD_SOURCE_CLOUD =1;
+    public static final int DOWNLOAD_SOURCE_P2P =2;
+    public static final int DOWNLOAD_SOURCE_LOCAL_NETWORK =3;
+
     /**
      * Store information of the previously connected WiFi hotspot before connecting to
      * the no prompt network.
      */
     protected String [] currentConnectedNetwork=new String[3];
 
+    /**
+     * store current network SSID
+     */
     public static final int CURRENT_NETWORK_SSID=0;
+
+    /**
+     * Store current network NETID
+     */
     public static final int CURRENT_NETWORK_NETID=1;
+
+    /**
+     * Sore the current network MAC address
+     */
     public static final int CURRENT_NETWORK_GATWAY_ADDRESS=2;
     private int requestDownloadId = 0;
     public static final String  CURRENT_NETWORK_EMPTY_STATE = "empty";
+    private static final int START_TASK_INTERVAL=0;
 
     /**
      * Set the environment in such a way that there will be no broadcast and UI update during/after the test
@@ -119,6 +137,7 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
         boolean isAvailableLocally=isFileAvailable(context,request.fileId);
 
         if(isAvailableLocally){
+            currentDownloadSource=DOWNLOAD_SOURCE_P2P;
             P2PNode nodeWithFile = null;
             UstadJSOPDSFeed nodeFeed;
             UstadJSOPDSEntry fileEntry = null;
@@ -137,26 +156,30 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
 
                 String[] acquisitionAttrs = (String[])acquisitionLinks.get(0);
                 String url = acquisitionAttrs[UstadJSOPDSItem.ATTR_HREF];
-                downloadIndexTask = makeDownloadTask(nodeWithFile,url);
+                downloadIndexTask = makeDownloadTask(nodeWithFile,url,START_TASK_INTERVAL);
             }
         }else{
-            if(currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]==null){
-                currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]=CURRENT_NETWORK_EMPTY_STATE;
-                currentConnectedNetwork[CURRENT_NETWORK_SSID]=CURRENT_NETWORK_EMPTY_STATE;
+
+            if(knownLocalNodes.size()>0){
+                currentDownloadSource=DOWNLOAD_SOURCE_LOCAL_NETWORK;
+                P2PNode node=new P2PNode(knownSuperNodes.get(0).getNodeIPAddress(),knownSuperNodes.get(0).getNodePortNumber());
+                downloadIndexTask=makeDownloadTask(node,request.fileId,START_TASK_INTERVAL);
+            }else{
+                currentDownloadSource=DOWNLOAD_SOURCE_CLOUD;
+                if(currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]==null){
+                    currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]=CURRENT_NETWORK_EMPTY_STATE;
+                    currentConnectedNetwork[CURRENT_NETWORK_SSID]=CURRENT_NETWORK_EMPTY_STATE;
+                }
+                P2PNode node=new P2PNode(currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]);
+                node.setNetworkSSID(currentConnectedNetwork[CURRENT_NETWORK_SSID]);
+                downloadIndexTask = makeDownloadTask(node,request.fileSource,START_TASK_INTERVAL);
             }
-            P2PNode node=new P2PNode(currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]);
-            node.setNetworkSSID(currentConnectedNetwork[CURRENT_NETWORK_SSID]);
-            downloadIndexTask = makeDownloadTask(node,request.fileSource);
         }
 
         if(downloadIndexTask!=null){
             downloadIndexTask.setDestinationPath(request.getFileDestination());
             downloadIndexTask.setTaskType(P2PTask.TYPE_COURSE);
-            if(TEST_MODE_ENVIRONMENT){
-                downloadIndexTask.setTestMode(true);
-            }
             downloadIndexTask.setP2PTaskListener(this);
-
             requestDownloadId = new Random().nextInt(100-1)+1;
             downloadIndexTask.setDownloadRequestID(requestDownloadId);
             downloadRequests.put(requestDownloadId,downloadIndexTask);
@@ -195,15 +218,17 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      *
      * @param node
      */
-    public void handleNodeDiscovered(P2PNode node) {
+    public void handleNodeDiscovered(P2PNode node, long runTaskAfter) {
         fireNodeDiscovered(node);
 
-        P2PTask downloadIndexTask = makeDownloadTask(node, "/catalog/acquire.opds");
+        P2PTask downloadIndexTask = makeDownloadTask(node, "/catalog/acquire.opds", runTaskAfter);
         try{
             File tmpFile = File.createTempFile("acquire", ".opds");
             downloadIndexTask.setDestinationPath(tmpFile.getAbsolutePath());
             downloadIndexTask.setTaskType(P2PTask.TYPE_INDEX);
+            downloadIndexTask.setStartTaskAfter(runTaskAfter);
             downloadIndexTask.setP2PTaskListener(this);
+            currentDownloadSource=DOWNLOAD_SOURCE_P2P;
             queueP2PTask(downloadIndexTask);
         } catch (IOException e) {
             e.printStackTrace();
@@ -259,8 +284,24 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
     public synchronized void checkQueue(){
         if (currentTask == null && !taskQueue.isEmpty()) {
             currentTask = taskQueue.remove(0);
-            currentTask.start();
+            //if task starts immediately or it is after the tasks start time
+            if(currentTask.getStartTaskAfter()==0){
+                currentTask.start();
+            }
 
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        long startTask=currentTask.getStartTaskAfter() - new Date().getTime();
+                        Thread.sleep(startTask>0?startTask:0); }
+                    catch(InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    currentTask.start();
+                }
+            }).start();
 
         }
 
@@ -314,7 +355,23 @@ public abstract class P2PManagerSharedSE implements P2PManager, P2PTaskListener 
      *
      * @param node - This refer to the node that will be exchanging content/index from.
      * @param downloadUri - This refer to the file URI to download.
+     * @param startAfterTime if greater than 0: Do not start this task until after this time
      */
-    protected abstract P2PTask makeDownloadTask(P2PNode node, String downloadUri);
+    protected abstract P2PTask makeDownloadTask(P2PNode node, String downloadUri, long startAfterTime);
+
+    /**
+     * Publish Local Network Service, this will broadcast the service over the local network
+     * @param context
+     */
+    public abstract void startNetworkService(Object context);
+
+    /**
+     * Start Local Network service discovery, get all devices which runs
+     * the same service and are connected on the same network
+     * @param context
+     */
+    public abstract void discoverNetworkService(Object context);
+
+
 
 }
