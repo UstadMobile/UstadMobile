@@ -46,7 +46,6 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
             NO_PROMPT_NETWORK_NAME = "networkName";
 
 
-
     private P2PServiceAndroid p2pService;
     /**
      * This hold a position of the bytes downloaded so far in the status array
@@ -80,31 +79,36 @@ public class P2PManagerAndroid extends P2PManagerSharedSE implements P2PManager 
         this.p2pService = (P2PServiceAndroid) context;
 
         WifiInfo wifiInfo=p2pService.getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
+        boolean isOnSameNetwork;
         if(wifiInfo!=null){
+            isOnSameNetwork =true;
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_SSID]=wifiInfo.getSSID();
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_NETID]=String.valueOf(wifiInfo.getNetworkId());
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]=wifiInfo.getMacAddress();
         }else{
+            isOnSameNetwork =false;
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_SSID]= CURRENT_NETWORK_EMPTY_STATE;
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_NETID]= CURRENT_NETWORK_EMPTY_STATE;
             P2PManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]= CURRENT_NETWORK_EMPTY_STATE;
         }
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
-        filter.addAction(WifiDirectHandler.Action.MESSAGE_RECEIVED);
-        filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
-        filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
-        filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
-        filter.addAction(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_CREATED_ACTION);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_TIMEOUT_ACTION);
+        if(isOnSameNetwork){
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
+            filter.addAction(WifiDirectHandler.Action.MESSAGE_RECEIVED);
+            filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
+            filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
+            filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
+            filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
+            filter.addAction(P2PDownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
+            filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_CREATED_ACTION);
+            filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_TIMEOUT_ACTION);
 
-        LocalBroadcastManager.getInstance(p2pService).registerReceiver(mBroadcastReceiver, filter);
-        boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
-                PREF_KEY_SUPERNODE, "false", context));
-        setSuperNodeEnabled(context, isSuperNodeEnabled);
+            LocalBroadcastManager.getInstance(p2pService).registerReceiver(mBroadcastReceiver, filter);
+            boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
+                    PREF_KEY_SUPERNODE, "false", context));
+            setSuperNodeEnabled(context, isSuperNodeEnabled);
+        }
 
     }
 

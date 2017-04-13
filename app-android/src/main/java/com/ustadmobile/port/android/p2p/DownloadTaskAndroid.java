@@ -27,10 +27,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
@@ -56,6 +52,9 @@ public class P2PDownloadTaskAndroid extends P2PTask {
     public static final String EXTRA_DOWNLOAD_ID ="extra_download_id";
     public static final String EXTRA_DOWNLOAD_STATUS ="extra_download_status";
     public static final String EXTRA_DOWNLOAD_SOURCE ="extra_download_source";
+    public static final int DOWNLOAD_SOURCE_CLOUD =1;
+    public static final int DOWNLOAD_SOURCE_P2P =2;
+    public static final int DOWNLOAD_SOURCE_LOCAL_NETWORK =3;
 
 
     public static final String P2P_SUPERNODE_SERVER_ADDRESS = "http://192.168.49.1:8001/";
@@ -67,7 +66,7 @@ public class P2PDownloadTaskAndroid extends P2PTask {
     private static final String DOWNLOAD_REQUEST_METHOD="GET";
 
     private boolean isFileResuming=false;
-    private boolean downloadFromCloud=false;
+    private int currentDownloadSource =-1;
     private DownLoadTask downloadTask;
 
 
@@ -105,16 +104,21 @@ public class P2PDownloadTaskAndroid extends P2PTask {
     public void start() {
         P2PNode node = getNode();
         if(node != null && !node.getNetworkSSID().equals(CURRENT_NETWORK_EMPTY_STATE) && p2pManager!=null) {
+            currentDownloadSource=DOWNLOAD_SOURCE_P2P;
             IntentFilter filter = new IntentFilter();
             filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
             LocalBroadcastManager.getInstance(p2pManager.getP2pService()).registerReceiver(mBroadcastReceiver,
                     filter);
             WifiDirectHandler wifiDirectHandler = p2pManager.getP2pService().getWifiDirectHandlerAPI();
-            DnsSdTxtRecord txtRecord = wifiDirectHandler.getDnsSdTxtRecordMap().get(getNode().getNodeAddress());
+            DnsSdTxtRecord txtRecord = wifiDirectHandler.getDnsSdTxtRecordMap().get(getNode().getNodeMacAddress());
             wifiDirectHandler.connectToNoPromptService(txtRecord);
 
         }else {
-            downloadFromCloud=true;
+            if(node!=null && node.getNodePortNumber()!=0 && node.getNodeIPAddress()!=null){
+                currentDownloadSource=DOWNLOAD_SOURCE_LOCAL_NETWORK;
+            }else{
+                currentDownloadSource=DOWNLOAD_SOURCE_CLOUD;
+            }
             downloadInBackground();
         }
     }
@@ -173,7 +177,7 @@ public class P2PDownloadTaskAndroid extends P2PTask {
                 currentStatus=DOWNLOAD_STATUS_RUNNING;
                 setDownloadStatus(currentStatus);
 
-                if(downloadFromCloud){
+                if(currentDownloadSource==DOWNLOAD_SOURCE_CLOUD || currentDownloadSource==DOWNLOAD_SOURCE_LOCAL_NETWORK){
                     downloadUri= getDownloadUri();
 
                 }else{
@@ -334,7 +338,7 @@ public class P2PDownloadTaskAndroid extends P2PTask {
         intent.setAction(ACTION_DOWNLOAD_COMPLETE);
         intent.putExtra(EXTRA_DOWNLOAD_ID,String.valueOf(getDownloadRequestID()));
         intent.putExtra(EXTRA_DOWNLOAD_STATUS,String.valueOf(DOWNLOAD_STATUS_COMPLETED));
-        intent.putExtra(EXTRA_DOWNLOAD_SOURCE,String.valueOf(downloadFromCloud));
+        intent.putExtra(EXTRA_DOWNLOAD_SOURCE,String.valueOf(currentDownloadSource));
         p2pManager.getP2pService().sendBroadcast(intent);
 
     }
