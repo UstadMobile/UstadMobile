@@ -74,6 +74,7 @@ import android.util.Log;
 import android.util.Xml;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.*;
@@ -317,11 +318,15 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     @Override
     public void go(String viewName, Hashtable args, Object context) {
         Class activityClass = viewNameToActivityMap.get(viewName);
+        Context ctx = (Context)context;
+
         if(activityClass == null) {
             Log.wtf(UMLogAndroid.LOGTAG, "No activity for " + viewName + " found");
+            Toast.makeText(ctx, "ERROR: No Activity found for view: " + viewName,
+                    Toast.LENGTH_LONG).show();
+            return;
         }
 
-        Context ctx = (Context)context;
         Intent startIntent = new Intent(ctx, activityClass);
         if(args != null)
             startIntent.putExtras(UMAndroidUtil.hashtableToBundle(args));

@@ -94,8 +94,27 @@ android {
 task checkBuildConfig {
     inputs.files("buildconfig.*.properties")
 }
-
 assemble.dependsOn(checkBuildConfig)
+
+task copyLocaleFilesFromCore(type: Copy) {
+    inputs.files('../core/locale/**/*.properties')
+    from('../core/src/main/assets/locale/') {
+        include "*.properties"
+    }
+    into "src/main/assets/locale"
+    doLast {
+        System.out.println("Update locale files android")
+    }
+
+}
+assemble.dependsOn(copyLocaleFilesFromCore)
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'assembleLocalconfig' || task.name == 'assembleLocalconfigDebug' || task.name == 'assembleLocalconfigRelease') {
+        task.dependsOn copyLocaleFilesFromCore
+        task.dependsOn checkBuildConfig
+    }
+}
 
 
 dependencies {

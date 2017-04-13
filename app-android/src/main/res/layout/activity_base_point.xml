@@ -13,6 +13,7 @@
         android:orientation="vertical"
         >
 
+        <!-- Use if there is more than one view that's sticky at the top -->
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,6 +47,7 @@
         android:layout_width="match_parent"
         android:layout_gravity="start"
         app:headerLayout="@layout/item_basepoint_header_view"
+        app:itemIconTint="@color/basepoint_navigation_drawer_tint"
         android:background="@android:color/white"
 
         />

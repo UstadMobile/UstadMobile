@@ -3,14 +3,17 @@ package com.ustadmobile.port.android.view;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -19,13 +22,15 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class BasePointActivity extends UstadBaseActivity implements BasePointView {
+public class BasePointActivity extends UstadBaseActivity implements BasePointView, NavigationView.OnNavigationItemSelectedListener {
 
     protected BasePointController mBasePointController;
 
@@ -42,6 +47,11 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     private DrawerLayout mDrawerLayout;
 
     private NavigationView mDrawerNavigationView;
+
+    private static final int BASEPOINT_MENU_CMD_ID_OFFSET = 5000;
+
+    private BasePointMenuItem openItemOnDrawerClose = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +84,31 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
         mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
+        mDrawerNavigationView.setNavigationItemSelectedListener(this);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
                 R.string.drawer_close);
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        populateNavigationMenu();
     }
+
+    private void populateNavigationMenu() {
+        Menu drawerMenu = mDrawerNavigationView.getMenu();
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        MenuItem item;
+        String iconName;
+        for(int i = 0; i < CoreBuildConfig.BASEPOINT_MENU.length; i++) {
+            item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0, impl.getString(CoreBuildConfig.BASEPOINT_MENU[i].getTitleStringId()));
+            iconName = CoreBuildConfig.BASEPOINT_MENU[i].getIconName();
+            if(iconName != null){
+                int resId = getResources().getIdentifier(iconName, "drawable", getPackageName());
+                if(resId > 0){
+                    item.setIcon(resId);
+                }
+            }
+
+        }
+    }
+
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
@@ -105,6 +137,28 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     @Override
     public void setClassListVisible(boolean visible) {
         this.classListVisible= visible;
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        if(itemId >= BASEPOINT_MENU_CMD_ID_OFFSET && itemId < BASEPOINT_MENU_CMD_ID_OFFSET+CoreBuildConfig.BASEPOINT_MENU.length) {
+            int basePointIndex = item.getItemId() - BASEPOINT_MENU_CMD_ID_OFFSET;
+
+
+            //We have to close the drawer; then navigate to avoid trouble -
+            //this will be handled in onDrawerClosed
+            openItemOnDrawerClose = CoreBuildConfig.BASEPOINT_MENU[basePointIndex];
+            UstadMobileSystemImpl.getInstance().go(openItemOnDrawerClose.getDestination(), this);
+
+            if(mDrawerLayout.isDrawerOpen(mDrawerNavigationView)) {
+                mDrawerLayout.closeDrawer(mDrawerNavigationView, true);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {

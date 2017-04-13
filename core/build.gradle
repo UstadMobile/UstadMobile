@@ -50,10 +50,43 @@ if(rootProject.file("buildconfig.local.properties").exists()) {
  * will otherwise mark it as an unresolved reference if we use the default generated sources directory.
  */
 task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    inputs.files(rootProject.files("buildconfig.*.properties"))
     outputDir = new File ("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.core.buildconfig"
     appName = project.ext.buildConfigProperties['appName']
     clsName = "CoreBuildConfig"
+    int menuItemIndex = 0
+    String menuItemTitle=null
+    ArrayList<String> titleIdsList = new ArrayList<>()
+    ArrayList<String> destinationsList = new ArrayList<>()
+    ArrayList<String> iconList = new ArrayList<>()
+    while((menuItemTitle = project.ext.buildConfigProperties.getProperty("baseMenu." + menuItemIndex + ".title")) != null) {
+        String itemPrefix = "baseMenu." + menuItemIndex
+        String itemDest = project.ext.buildConfigProperties.getProperty(itemPrefix + ".dest")
+        if(itemDest == null || itemDest.equals("null")) {
+            break
+        }
+
+        titleIdsList.add(menuItemTitle)
+        destinationsList.add(itemDest)
+        iconList.add(project.ext.buildConfigProperties.getProperty(itemPrefix + ".icon"))
+        menuItemIndex++
+    }
+
+    String basePointMenuArrayStr = "new com.ustadmobile.core.view.BasePointMenuItem[]{"
+    for(int i = 0; i< titleIdsList.size(); i++) {
+        String titleIdVal = titleIdsList.get(i)
+        if(titleIdsList[i].startsWith("MessageIDConstants")) {
+            titleIdVal = "com.ustadmobile.core." + titleIdVal
+        }
+        basePointMenuArrayStr += "new com.ustadmobile.core.view.BasePointMenuItem("+ titleIdVal + ", \"" + destinationsList.get(i) + "\", " + (iconList.get(i) != null ? "\""+iconList.get(i) + "\"": "null") +")"
+        if(i < titleIdsList.size()-1){
+            basePointMenuArrayStr += ", "
+        }
+    }
+    basePointMenuArrayStr += "}"
+
+    buildConfigField "com.ustadmobile.core.view.BasePointMenuItem[]", "BASEPOINT_MENU",basePointMenuArrayStr
     buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
     buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
     buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]
@@ -61,3 +94,41 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]
 }
 compileJava.dependsOn(generateCoreBuildConfig)
+
+task prepareLocale {
+    inputs.files("core/locale/*/*.properties")
+    doLast {
+        File coreLocaleDir = rootProject.file("core/locale/main")
+        String[] coreLocaleFileNames = coreLocaleDir.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File file, String s) {
+                return s.endsWith(".properties")
+            }
+        })
+
+        for(int i = 0; i < coreLocaleFileNames.length; i++){
+            Properties locale = new Properties()
+            File mainLocaleFile = new File(coreLocaleFileNames[i])
+            locale.load(new FileReader(mainLocaleFile))
+            String nameOnly = coreLocaleFileNames[i]
+            System.out.println("Path Sep = '" + File.separator +"'")
+            if(nameOnly.contains(File.separator)) {
+                nameOnly = nameOnly.substring(nameOnly.lastIndexOf(File.separator)+1)
+            }
+
+            System.out.println("Name only = " + nameOnly)
+            String localFileName = "core/locale/localconfig/" + nameOnly
+            File localConfigMatch = rootProject.file(localFileName)
+            if(localConfigMatch.exists()) {
+                locale.load(new FileReader(localConfigMatch))
+            }
+
+
+
+            File mergedDestFile = rootProject.file("core/src/main/assets/locale/" + nameOnly)
+            locale.store(new FileWriter(mergedDestFile), "DO NOT EDIT! This is an automerge of main and localconfig locale properties and will be overwritten on build")
+        }
+    }
+}
+
+compileJava.dependsOn(prepareLocale)

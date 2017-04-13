@@ -115,7 +115,7 @@ NetBeans.  See README for instructions on building from source.
     <target name="generate-core-buildconfig">
         <exec executable="./gradlew" dir="../">
             <arg value=":core:generateCoreBuildConfig"/>
-            <arg value=":core:generateCoreTestConstantsBuildConfig"/>
+            <arg value=":core-tests:generateCoreTestConstantsBuildConfig"/>
         </exec>
     </target>
 
@@ -130,7 +130,12 @@ NetBeans.  See README for instructions on building from source.
             <fileset dir="src/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
         </delete>
         
-        <preprocess indir="../core/src/test/java" outdir="preproctmp">
+        <preprocess indir="../core/src/test/java" outdir="preproctmp" out="merge">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${preproc.var.umplatform}"/>
+        </preprocess>
+        
+        <preprocess indir="../core-tests/src/main/java" outdir="preproctmp" out="merge">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <var name="umplatform" value="${preproc.var.umplatform}"/>
         </preprocess>

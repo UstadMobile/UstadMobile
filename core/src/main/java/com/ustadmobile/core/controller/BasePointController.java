@@ -12,6 +12,7 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.UstadView;
 import java.util.Enumeration;
@@ -163,6 +164,18 @@ public class BasePointController extends UstadBaseController{
         }else {
             return true;
         }
+    }
+
+    /**
+     * Handle when the user clicks one of the base point menu items.
+     *
+     * This is configured via the buildconfig system : see buildconfig.default.properties for
+     * details on configuring this.
+     *
+     * @param item
+     */
+    public void handleClickBasePointMenuItem(BasePointMenuItem item) {
+        UstadMobileSystemImpl.getInstance().go(item.getDestination(), getContext());
     }
 
 }

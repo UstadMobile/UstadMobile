@@ -191,4 +191,6 @@ public class MessageIDConstants {
 
     public static final int people = 109;
 
+    public static final int notifications = 110;
+
 }

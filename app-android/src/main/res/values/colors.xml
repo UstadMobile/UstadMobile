@@ -16,4 +16,6 @@
     <item name="umblue" type="color">#FF3F31B5</item>
     <item name="opds_card_pressed" type="color">#FF888888</item>
     <item name="opds_card_normal" type="color">#FFFFFFFF</item>
+    <item name="basepoint_navigation_drawer_tint" type="color">#FF757575</item>
+
 </resources>
