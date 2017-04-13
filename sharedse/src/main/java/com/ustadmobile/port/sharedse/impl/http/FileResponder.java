@@ -155,12 +155,14 @@ public abstract class FileResponder {
      * also take care of responding to partial range requests. It will respond 404 if the file does
      * not exist.
      *
+     * @param method The HTTP method being used : We support GET (default) and HEAD (for headers only with no response body)
      * @param uriResource uriResource from the request
      * @param session session from the request
      * @param file Interface representing the file or file like source
      * @return An appropriate NanoHTTPD.Response as above for the request
      */
-    public static NanoHTTPD.Response newResponseFromFile(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session, IFileSource file) {
+    public static NanoHTTPD.Response newResponseFromFile(NanoHTTPD.Method method, RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session, IFileSource file) {
+        boolean isHeadRequest = method.equals(NanoHTTPD.Method.HEAD);
         try {
             long range[];
             String ifNoneMatchHeader;
@@ -168,7 +170,7 @@ public abstract class FileResponder {
 
             if(!file.exists()) {
                 return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, "text/plain",
-                        "File not found");
+                        isHeadRequest ? null : "File not found");
             }
 
             long totalLength = file.getLength();
@@ -192,10 +194,10 @@ public abstract class FileResponder {
             }
 
             range = parseRangeRequest(session, totalLength);
-            retInputStream = file.getInputStream();
+            retInputStream = isHeadRequest ? null : file.getInputStream();
             if(range != null) {
                 if(range[0] != -1) {
-                    retInputStream = new RangeInputStream(retInputStream, range[0], range[1]);
+                    retInputStream = isHeadRequest ? null : new RangeInputStream(retInputStream, range[0], range[1]);
                     long contentLength = (range[1]+1) - range[0];
                     NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.PARTIAL_CONTENT,
                             EmbeddedHTTPD.getMimeType(fileName), retInputStream, contentLength);
@@ -214,12 +216,12 @@ public abstract class FileResponder {
                     return r;
                 }else {
                     return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.RANGE_NOT_SATISFIABLE, "text/plain",
-                            "Range request not satisfiable");
+                            isHeadRequest ? null :  "Range request not satisfiable");
                 }
             }else {
                 //Workaround : NanoHTTPD is using the InputStream.available method incorrectly
                 // see RangeInputStream.available
-                retInputStream = new RangeInputStream(retInputStream, 0, totalLength);
+                retInputStream = isHeadRequest ? null : new RangeInputStream(retInputStream, 0, totalLength);
                 NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
                     EmbeddedHTTPD.getMimeType(fileName), retInputStream, totalLength);
 
@@ -232,8 +234,12 @@ public abstract class FileResponder {
         }catch(IOException e) {
             e.printStackTrace();
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
-                    "text/plain", "Internal exception: " + e.toString());
+                    "text/plain", isHeadRequest ? null : "Internal exception: " + e.toString());
         }
+    }
+
+    public static NanoHTTPD.Response newResponseFromFile(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session, IFileSource file) {
+        return newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, file);
     }
 
     private static long[] parseRangeRequest(NanoHTTPD.IHTTPSession session, long totalLength) {
