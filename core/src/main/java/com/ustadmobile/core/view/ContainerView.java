@@ -37,19 +37,15 @@ import com.ustadmobile.core.controller.ContainerController;
  * @author mike
  */
 public interface ContainerView extends UstadView {
-    
+
+    public static final String VIEW_NAME = "Container";
+
     public void setController(ContainerController controller);
         
     public void setContainerTitle(String containerTitle);
 
     void setPageTitle(String pageTitle);
 
-    
-    /**
-     * This is a PDF container : show the PDF now
-     */
-    public void showPDF();
-    
     /**
      * The content is an EPUB - show the EPUB
      */

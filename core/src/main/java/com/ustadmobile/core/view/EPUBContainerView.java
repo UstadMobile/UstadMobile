@@ -10,7 +10,9 @@ package com.ustadmobile.core.view;
  * @author mike
  */
 public interface EPUBContainerView extends ContainerView {
-    
+
+    public static final String VIEW_NAME = "EPUBContainer";
+
     public void setEPUBTitle(String title);
     
     public String getEPUBTitle();

@@ -17,4 +17,12 @@
     <dimen name="text_body_small">14sp</dimen>
     <dimen name="text_caption">12sp</dimen>
     <dimen name="text_caption_small">10sp</dimen>
+    <!--layout dimension-->
+    <dimen name="profile_picture_dimension">60dp</dimen>
+    <dimen name="default_margin_dimension">16dp</dimen>
+
+    <!--Typography-->
+
+    <dimen name="default_text_dimension">14sp</dimen>
+    <dimen name="default_title_dimension">18sp</dimen>
 </resources>

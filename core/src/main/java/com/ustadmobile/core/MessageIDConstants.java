@@ -190,7 +190,6 @@ public class MessageIDConstants {
     public static final int students = 108;
 
     public static final int people = 109;
-
     public static final int connection_use_any = 131;
 
     public static final int superNode = 132;
@@ -207,6 +206,6 @@ public class MessageIDConstants {
     public static final int fileAvailableLocally=121;
     public static final int fileUnAvailableLocally=122;
 
-
+    public static final int notifications = 110;
 
 }

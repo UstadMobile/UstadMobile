@@ -12,7 +12,9 @@ import com.ustadmobile.core.view.UstadView;
  * @author varuna
  */
 public interface EnrollStudentView extends UstadView {
-    
+
+    public static final String VIEW_NAME = "EnrollStudent";
+
     public void setController(EnrollStudentController mController);
     
     /**

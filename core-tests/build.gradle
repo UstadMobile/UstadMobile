@@ -1,0 +1,46 @@
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+    }
+}
+
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
+if(rootProject.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
+}
+
+/**
+ * Generate build constants for testing purposes (e.g. remote servers etc.
+ */
+task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    outputDir = new File("${projectDir}/src/main/java")
+    packageName ="com.ustadmobile.test.core.buildconfig"
+    clsName = "TestConstants"
+    buildConfigField "String", "LOGIN_USER", project.ext.buildConfigProperties["test.remote_user"]
+    buildConfigField "String", "LOGIN_PASS", project.ext.buildConfigProperties["test.remote_auth"]
+    buildConfigField "String", "XAPI_SERVER", project.ext.buildConfigProperties["test.remote_xapi_server"]
+    buildConfigField "String", "LOGIN_URL", project.ext.buildConfigProperties["test.remote_login_url"]
+    buildConfigField "String", "TEST_SERVER", project.ext.buildConfigProperties["test.remote_http_test_server"]
+    buildConfigField "String", "TEST_CONTROL_PORT", project.ext.buildConfigProperties["test.remote_http_control_port"]
+    buildConfigField "String", "CATALOG_OPDS_ROOT", project.ext.buildConfigProperties["test.catalog_opds_root"]
+    buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", project.ext.buildConfigProperties["test.remote_network_interval"]
+    buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", project.ext.buildConfigProperties["test.remote_network_timeout"]
+    buildConfigField "String", "REGISTER_URL", project.ext.buildConfigProperties["test.register_url"]
+}
+compileJava.dependsOn(generateCoreTestConstantsBuildConfig)

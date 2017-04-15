@@ -8,6 +8,8 @@ import com.ustadmobile.core.view.UstadView;
 
 public interface ClassManagementView2 extends UstadView {
 
+    public static final String VIEW_NAME = "ClassManagement2";
+
     /**
      * Sets the name of the class (should be the title normally)
      *

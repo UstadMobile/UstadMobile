@@ -26,10 +26,16 @@ Jad and Jar files will be generated in dist-ANTENNA
 ### Build and sign
 If an app is not signed by a certificate issued by a recognized certificate authority most devices either won't allow it to be granted file access permissions or will insist on prompting for permission every time a file is accessed
 ```
-$ cp buildconfig.j2me.default.properties buildconfig.j2me.local.properties
+$ cp buildconfig.default.properties buildconfig.local.properties
 $ #Edit buildconfig.j2me.local.properties to set the signing keystore, alias, password
 $ ant -f antenna-build.xml sign
 ```
+
+### Build customization
+The build system will make a res directory in the jar. This has two input directories: res-default and res-local. 
+Anything in res-local will override res-default. J2ME specific customizations include:
+* res/theme.res - This is the lwuit theme used by the app.
+* res/app_icon.png - The midlet icon
 
 ### Develop using Netbeans
 

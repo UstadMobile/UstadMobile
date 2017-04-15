@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package ustadmobilej2me;
+package com.ustadmobile.test.port.j2me;
 import com.ustadmobile.test.port.j2me.AllTestCases;
 import com.ustadmobile.test.port.j2me.TestUtils;
 import java.io.IOException;
@@ -30,7 +30,7 @@ import javax.microedition.lcdui.Form;
 /**
  * @author varuna
  */
-public class UstadMobileJ2METest extends j2meunit.midletui.TestRunner {
+public class UstadMobileTestMidlet extends j2meunit.midletui.TestRunner {
  
     
     private javax.microedition.lcdui.Display lcduiDisplay;

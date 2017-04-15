@@ -33,37 +33,102 @@ dependencies {
     compile "net.sf.kxml:kxml2:2.3.0";
     compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
     compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.37'
+    testCompile project(":core-tests")
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
 
 ext.buildConfigProperties = new Properties()
-ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.core.default.properties")))
-if(rootProject.file("buildconfig.core.local.properties").exists()) {
-    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.core.local.properties")))
+ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))
+if(rootProject.file("buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.local.properties")))
 }
 
-apply from: rootProject.file("buildconfig.core.gradle").exists() ?
-        rootProject.file("buildconfig.core.gradle") : rootProject.file("buildconfig.core.default.gradle")
 
-compileJava.dependsOn(generateCoreBuildConfig)
 
 /**
- * Generate build constants for testing purposes (e.g. remote servers etc.
+ * Note: This is compiled into the main source directory (then gitignore'd) because Android studio
+ * will otherwise mark it as an unresolved reference if we use the default generated sources directory.
  */
+task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    inputs.files(rootProject.files("buildconfig.*.properties"))
+    outputDir = new File ("${projectDir}/src/main/java")
+    packageName = "com.ustadmobile.core.buildconfig"
+    appName = project.ext.buildConfigProperties['appName']
+    clsName = "CoreBuildConfig"
+    int menuItemIndex = 0
+    String menuItemTitle=null
+    ArrayList<String> titleIdsList = new ArrayList<>()
+    ArrayList<String> destinationsList = new ArrayList<>()
+    ArrayList<String> iconList = new ArrayList<>()
+    while((menuItemTitle = project.ext.buildConfigProperties.getProperty("baseMenu." + menuItemIndex + ".title")) != null) {
+        String itemPrefix = "baseMenu." + menuItemIndex
+        String itemDest = project.ext.buildConfigProperties.getProperty(itemPrefix + ".dest")
+        if(itemDest == null || itemDest.equals("null")) {
+            break
+        }
 
-task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    outputDir = new File("${projectDir}/src/test/java")
-    packageName ="com.ustadmobile.test.core.buildconfig"
-    clsName = "TestConstants"
-    buildConfigField "String", "LOGIN_USER", buildConfigProperties["test.remote_user"]
-    buildConfigField "String", "LOGIN_PASS", buildConfigProperties["test.remote_auth"]
-    buildConfigField "String", "XAPI_SERVER", buildConfigProperties["test.remote_xapi_server"]
-    buildConfigField "String", "LOGIN_URL", buildConfigProperties["test.remote_login_url"]
-    buildConfigField "String", "TEST_SERVER", buildConfigProperties["test.remote_http_test_server"]
-    buildConfigField "String", "TEST_CONTROL_PORT", buildConfigProperties["test.remote_http_control_port"]
-    buildConfigField "String", "CATALOG_OPDS_ROOT", buildConfigProperties["test.catalog_opds_root"]
-    buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", buildConfigProperties["test.remote_network_interval"]
-    buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", buildConfigProperties["test.remote_network_timeout"]
-    buildConfigField "String", "REGISTER_URL", buildConfigProperties["test.register_url"]
+        titleIdsList.add(menuItemTitle)
+        destinationsList.add(itemDest)
+        iconList.add(project.ext.buildConfigProperties.getProperty(itemPrefix + ".icon"))
+        menuItemIndex++
+    }
+
+    String basePointMenuArrayStr = "new com.ustadmobile.core.view.BasePointMenuItem[]{"
+    for(int i = 0; i< titleIdsList.size(); i++) {
+        String titleIdVal = titleIdsList.get(i)
+        if(titleIdsList[i].startsWith("MessageIDConstants")) {
+            titleIdVal = "com.ustadmobile.core." + titleIdVal
+        }
+        basePointMenuArrayStr += "new com.ustadmobile.core.view.BasePointMenuItem("+ titleIdVal + ", \"" + destinationsList.get(i) + "\", " + (iconList.get(i) != null ? "\""+iconList.get(i) + "\"": "null") +")"
+        if(i < titleIdsList.size()-1){
+            basePointMenuArrayStr += ", "
+        }
+    }
+    basePointMenuArrayStr += "}"
+
+    buildConfigField "com.ustadmobile.core.view.BasePointMenuItem[]", "BASEPOINT_MENU",basePointMenuArrayStr
+    buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
+    buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
+    buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]
+    buildConfigField "boolean", "BASEPOINT_BROWSEBUTTON_ENABLED", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"].equals("") ? "false" : "true"
+    buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]
 }
-compileTestJava.dependsOn(generateCoreTestConstantsBuildConfig)
+compileJava.dependsOn(generateCoreBuildConfig)
+
+task prepareLocale {
+    inputs.files("core/locale/*/*.properties")
+    doLast {
+        File coreLocaleDir = rootProject.file("core/locale/main")
+        String[] coreLocaleFileNames = coreLocaleDir.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File file, String s) {
+                return s.endsWith(".properties")
+            }
+        })
+
+        for(int i = 0; i < coreLocaleFileNames.length; i++){
+            Properties locale = new Properties()
+            File mainLocaleFile = new File(coreLocaleFileNames[i])
+            locale.load(new FileReader(mainLocaleFile))
+            String nameOnly = coreLocaleFileNames[i]
+            System.out.println("Path Sep = '" + File.separator +"'")
+            if(nameOnly.contains(File.separator)) {
+                nameOnly = nameOnly.substring(nameOnly.lastIndexOf(File.separator)+1)
+            }
+
+            System.out.println("Name only = " + nameOnly)
+            String localFileName = "core/locale/localconfig/" + nameOnly
+            File localConfigMatch = rootProject.file(localFileName)
+            if(localConfigMatch.exists()) {
+                locale.load(new FileReader(localConfigMatch))
+            }
+
+
+
+            File mergedDestFile = rootProject.file("core/src/main/assets/locale/" + nameOnly)
+            locale.store(new FileWriter(mergedDestFile), "DO NOT EDIT! This is an automerge of main and localconfig locale properties and will be overwritten on build")
+        }
+    }
+}
+
+compileJava.dependsOn(prepareLocale)

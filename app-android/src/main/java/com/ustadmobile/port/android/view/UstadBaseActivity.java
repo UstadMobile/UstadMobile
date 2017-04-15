@@ -4,7 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -12,8 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -46,7 +43,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private boolean handleUIStringsOnResume = true;
 
-    private Toolbar umToolbar;
+    protected Toolbar umToolbar;
 
     private int[] appMenuCommands;
 
@@ -141,10 +138,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         umToolbar = (Toolbar)findViewById(toolbarID);
         setSupportActionBar(umToolbar);
         getSupportActionBar().setHomeButtonEnabled(true);
-
-        if(Build.VERSION.SDK_INT >= 21) {
-            umToolbar.setElevation(10);
-        }
     }
 
 
@@ -173,13 +166,15 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         return UstadBaseController.handleClickAppMenuItem(item.getItemId(), getContext());
     }
 
+    /**
+     * Get the toolbar that's used for the support action bar
+     *
+     * @return
+     */
     protected Toolbar getUMToolbar() {
         return umToolbar;
     }
 
-    protected void setUMToolbar() {
-        setUMToolbar(R.id.um_toolbar);
-    }
 
     protected void setBaseController(UstadBaseController baseController) {
         this.baseController = baseController;
@@ -230,19 +225,20 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        switch(item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.class,
+                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
                         BasePointController.makeDefaultBasePointArgs(this), this);
                 return true;
-            case R.id.action_finish:
-                finish();
-                return true;
+
 
         }
 
-        return handleClickAppMenuItem(item, baseController) || super.onOptionsItemSelected(item);
+        if(handleClickAppMenuItem(item, baseController)) {
+            return true;
+        }
 
+        return super.onOptionsItemSelected(item);
     }
 
     public void setDisplayName(String displayName) {

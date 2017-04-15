@@ -299,14 +299,36 @@ public abstract class UstadMobileSystemImpl {
         initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
         mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
     }
-    
+
     /**
-     * Go and start a new activity / view
-     * 
-     * @param cls What type of view to start
-     * @param args 
+     * Go to a new view : This is simply a convenience wrapper for go(viewName, args, context):
+     * it will parse the a destination into the viewname and arguments, and then build a hashtable
+     * to pass on.
+     *
+     * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
+     * @param context System context object
      */
-    public abstract void go(Class cls, Hashtable args, Object context);
+    public void go(String destination, Object context) {
+        Hashtable argsTable = null;
+        int destinationQueryPos = destination.indexOf('?');
+        if(destinationQueryPos == -1) {
+            go(destination, null, context);
+        }else {
+            go(destination, UMFileUtil.parseURLQueryString(destination), context);
+        }
+    }
+
+    /**
+     * The main method used to go to a new view. This is implemented at the platform level. On
+     * Android this involves starting a new activity with the arguments being turned into an
+     * Android bundle. On J2ME it creates a new Form and shows it, on iOS it looks up the related
+     * UIViewController.
+     *
+     * @param viewName The name of the view to go to: This should match the view's interface .VIEW_NAME constant
+     * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
+     * @param context System context object
+     */
+    public abstract void go(String viewName, Hashtable args, Object context);
     
     public boolean loadLocale(Object context) {
         //choose the locale
@@ -372,10 +394,10 @@ public abstract class UstadMobileSystemImpl {
         
         
         if(activeUser == null || activeUserAuth == null) {
-            go(LoginView.class, null, context);
+            go(LoginView.VIEW_NAME, null, context);
         }else {
             Hashtable args = BasePointController.makeDefaultBasePointArgs(context);
-            go(BasePointView.class, args, context);
+            go(BasePointView.VIEW_NAME, args, context);
             
         }
     }

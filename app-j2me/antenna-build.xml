@@ -12,27 +12,34 @@ NetBeans.  See README for instructions on building from source.
     <property environment="env"/>
     
     <condition property="build.properties.filename" 
-        value="buildconfig.j2me.local.properties" 
-        else="buildconfig.j2me.default.properties">
+        value="buildconfig.local.properties" 
+        else="buildconfig.default.properties">
             
         <resourceexists>
-            <file file="build-release.properties"/>
+            <file file="buildconfig.local.properties"/>
         </resourceexists>
     </condition>
 
-    <property file="${build.properties.filename}" environment="env"/> 
-    
+    <property file="${build.properties.filename}" />
+    <property file="buildconfig.default.properties"/>
+
+    <echo message="keystore = ${wtk.keystore} from ${build.properties.filename}"/>
+        
     <condition property="buildconfig.properties.filename"
-        value="../buildconfig.core.properties"
-        else="../buildconfig.core.default.properties">
+        value="../buildconfig.local.properties"
+        else="../buildconfig.default.properties">
 
         <resourceexists>
-            <file file="../buildconfig.core.properties"/>
+            <file file="../buildconfig.local.properties"/>
         </resourceexists>
     </condition>
 
+    <!-- 
+     Strangely overwriting properties seems to happen in reverse order
+     see https://ant.apache.org/manual/Tasks/property.html
+    -->
     <property file="${buildconfig.properties.filename}" prefix="buildconfig."/>
-    
+    <property file="../buildconfig.default.properties" prefix="buildconfig."/>
 
     <!-- Find WTK HOME and Bootclasspath parameters-->
     <include file="build-wtk-common.xml"/>
@@ -55,8 +62,8 @@ NetBeans.  See README for instructions on building from source.
     <property name="classpath.antennaui" value="${lib.dir}/microemu-nokiaui.jar"/>
 
     
-    <property name="midlet.class.test" value="ustadmobilej2me.UstadMobileJ2METest"/>
-    <property name="midlet.class.main" value="ustadmobilej2me.UstadMobileJ2MERun"/>    
+    <property name="midlet.class.test" value="com.ustadmobile.test.port.j2me.UstadMobileTestMidlet"/>
+    <property name="midlet.class.main" value="com.ustadmobile.port.j2me.impl.UstadMobileMidlet"/>    
     
     <property name="wtk.cldc.version" value="1.1"/>
     <property name="wtk.midp.version" value="2.0"/>
@@ -108,7 +115,7 @@ NetBeans.  See README for instructions on building from source.
     <target name="generate-core-buildconfig">
         <exec executable="./gradlew" dir="../">
             <arg value=":core:generateCoreBuildConfig"/>
-            <arg value=":core:generateCoreTestConstantsBuildConfig"/>
+            <arg value=":core-tests:generateCoreTestConstantsBuildConfig"/>
         </exec>
     </target>
 
@@ -123,7 +130,12 @@ NetBeans.  See README for instructions on building from source.
             <fileset dir="src/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
         </delete>
         
-        <preprocess indir="../core/src/test/java" outdir="preproctmp">
+        <preprocess indir="../core/src/test/java" outdir="preproctmp" out="merge">
+            <filetype commentend="*/" commentbegin="/*" extensions="java"/>
+            <var name="umplatform" value="${preproc.var.umplatform}"/>
+        </preprocess>
+        
+        <preprocess indir="../core-tests/src/main/java" outdir="preproctmp" out="merge">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <var name="umplatform" value="${preproc.var.umplatform}"/>
         </preprocess>
@@ -146,9 +158,25 @@ NetBeans.  See README for instructions on building from source.
         </delete>
 
         <delete failonerror="false">
-            <fileset dir="src/res/locale"/>
+            <fileset dir="src/res"/>
         </delete>
         <mkdir dir="src/res/locale"/>
+        
+        <copy todir="./src/res/locale" overwrite="true">
+            <fileset dir="../core/src/main/assets/locale"/>
+        </copy>
+        
+        <!-- 
+         copy anything in the res-default folder to the actual res 
+         folder, then res-local so anything from res-local will overwrite
+         res-default
+        -->
+        <copy todir="./src/res">
+            <fileset dir="./res-default"/>
+        </copy>
+        <copy todir="./src/res" overwrite="true">
+            <fileset dir="./res-local"/>
+        </copy>
 
 	<mkdir dir="src/com/ustadmobile/core"/>
         <delete dir="preproctmp"/>
@@ -163,10 +191,6 @@ NetBeans.  See README for instructions on building from source.
             <fileset dir="preproctmp"/>
         </copy>
         <delete dir="preproctmp"/>
-
-        <copy todir="./src/res/locale">
-            <fileset dir="../core/src/main/assets/locale"/>
-        </copy>
     </target>
 
             
@@ -212,7 +236,7 @@ NetBeans.  See README for instructions on building from source.
             name="${buildconfig.appName}"
             vendor="${buildconfig.vendorName}">
 
-            <midlet icon="umicon_micro.png" name="${buildconfig.appName}" class="${midlet.class.main}"></midlet>
+            <midlet icon="res/app_icon.png" name="${buildconfig.appName}" class="${midlet.class.main}"></midlet>
 
             <attribute name="MIDlet-Version" value="${ustadmobileversion}"/>
 
@@ -233,9 +257,6 @@ NetBeans.  See README for instructions on building from source.
         <copy file="${src.dir}/com/ustadmobile/test/port/j2me/test-settings.xml" tofile="${classes.dir.ANTENNA}/com/ustadmobile/test/port/j2me/test-settings.xml"/>
 
 	
-        <copy file="${src.dir}/theme.res" todir="${classes.dir.ANTENNA}"/>
-        <copy file="${src.dir}/umicon_micro.png" todir="${classes.dir.ANTENNA}"/>        
-
         <mkdir dir="${classes.dir.ANTENNA}/res"/>
         <copy todir="${classes.dir.ANTENNA}/res" verbose="true">
             <fileset dir="${src.dir}/res"/>
@@ -318,7 +339,6 @@ NetBeans.  See README for instructions on building from source.
             includes="${javac.includes}">
                 <fileset dir="${classes.dir.ANTENNA}">
                     <exclude name="com/ustadmobile/test/**/*.class"/>
-                    <exclude name="ustadmobilej2me/UstadMobileJ2METest.class"/>
                 </fileset>
         </wtkpackage>
     </target>

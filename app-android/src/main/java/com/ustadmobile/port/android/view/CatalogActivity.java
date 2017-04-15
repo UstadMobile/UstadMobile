@@ -63,7 +63,7 @@ public class CatalogActivity extends UstadBaseActivity  {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.class,
+                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
                         BasePointController.makeDefaultBasePointArgs(this), this);
                 return true;
         }

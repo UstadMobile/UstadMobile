@@ -26,7 +26,6 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
-import com.joanzapata.pdfview.PDFView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.ContainerController;
@@ -257,8 +256,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         mContainerController.setUIStrings();
         if(mMimeType.startsWith("application/epub+zip")) {
             showEPUB();
-        }else if(mMimeType.startsWith("application/pdf")) {
-            showPDF();
         }
     }
 
@@ -300,22 +297,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         return true;
     }
 
-    /**
-     * Show a PDF container using
-     */
-    public void showPDF() {
-        com.joanzapata.pdfview.PDFView pdfView;
-        RelativeLayout container = (RelativeLayout)findViewById(R.id.container_relative_layout);
-        container.removeView(findViewById(R.id.container_epubrunner_pager));
-        pdfView = (PDFView)getLayoutInflater().inflate(R.layout.item_container_pdfview, null);
-        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
-        params.addRule(RelativeLayout.BELOW, R.id.container_toolbar);
-        container.addView(pdfView, params);
-        setContainerTitle(UMFileUtil.getFilename(mContainerURI));
-        pdfView.fromFile(new File(UMFileUtil.stripPrefixIfPresent("file:///", mContainerURI)))
-            .enableSwipe(true).load();
-    }
+
 
     /**
      * Update the selected item in the drawer

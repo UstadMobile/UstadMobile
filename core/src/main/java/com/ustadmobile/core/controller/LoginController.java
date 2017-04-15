@@ -220,7 +220,7 @@ public class LoginController extends UstadBaseController{
         //delete the active user
         UstadMobileSystemImpl.getInstance().setActiveUser(null, context);
         UstadMobileSystemImpl.getInstance().setActiveUserAuth(null, context);
-        UstadMobileSystemImpl.getInstance().go(LoginView.class, new Hashtable(), 
+        UstadMobileSystemImpl.getInstance().go(LoginView.VIEW_NAME, new Hashtable(),
             context);
     }
     
@@ -499,7 +499,7 @@ public class LoginController extends UstadBaseController{
                     }
 
                     impl.getAppView(context).dismissProgressDialog();
-                    UstadMobileSystemImpl.getInstance().go(BasePointView.class, 
+                    UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
                         BasePointController.makeDefaultBasePointArgs(context), context);
                 }
             }
@@ -529,7 +529,7 @@ public class LoginController extends UstadBaseController{
     private void handleUserLoginAuthComplete(final String username, final String password) {
         UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
         UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
-        UstadMobileSystemImpl.getInstance().go(BasePointView.class, 
+        UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
             BasePointController.makeDefaultBasePointArgs(context), context);
     }    
     
