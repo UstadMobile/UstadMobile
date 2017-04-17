@@ -1222,7 +1222,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 }
                 
                 parser.setInput(catalogIn, "UTF-8");
-                opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+                //opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
+                opdsFeed = new UstadJSOPDSFeed();
+                opdsFeed.parseFromXpp(parser);
                 opdsFeed.href = url;
                 CatalogController.cacheCatalog(opdsFeed, resourceMode, context);
             }catch(Exception e1) {
@@ -1469,7 +1471,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         if(filename != null) {
             String contentsXML = impl.readFileAsText(
                 cacheDir.getCacheFileURIByFilename(filename), "UTF-8");
-            UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(contentsXML);
+            UstadJSOPDSFeed feed = new UstadJSOPDSFeed();
+            feed.loadFromString(contentsXML);
             return feed;
         }
 	
@@ -1636,9 +1639,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 isEPUB = containerFiles[i].endsWith(EPUB_EXTENSION);
                 //see oif
                 if(impl.fileExists(entryCacheFile) && (impl.fileLastModified(entryCacheFile) > impl.fileLastModified(containerFiles[i])) || !isEPUB) {
-                    try { 
-                        containerFeed = UstadJSOPDSFeed.loadFromXML(
-                            impl.readFileAsText(entryCacheFile, "UTF-8"));
+                    try {
+                        containerFeed = new UstadJSOPDSFeed();
+                        containerFeed.loadFromString(impl.readFileAsText(entryCacheFile, "UTF-8"));
                     }catch(IOException e) {
                         impl.l(UMLog.ERROR, 140, entryCacheFile, e);
                     }
@@ -1712,7 +1715,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         for(i = 0; i < opdsFiles.length; i++) {
             try {
                 //let's try reading it and loading it in
-                feed = UstadJSOPDSFeed.loadFromXML(impl.readFileAsText(opdsFiles[i]));
+                feed = new UstadJSOPDSFeed();
+                feed.loadFromString(impl.readFileAsText(opdsFiles[i]));
                 feedEntry = UstadJSOPDSEntry.makeEntryForItem(
                     feed, retVal, "subsection", UstadJSOPDSEntry.TYPE_NAVIGATIONFEED, 
                     UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, 

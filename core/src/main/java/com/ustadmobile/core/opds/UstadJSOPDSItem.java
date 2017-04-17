@@ -35,9 +35,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.io.IOException;
 import java.util.Vector;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
+ *
+ * Represents an OPDS Item - this can be a feed itself or an entry within a feed.
  *
  * @author varuna
  */
@@ -322,6 +327,95 @@ public abstract class UstadJSOPDSItem {
         serializeAttrs(xs);
         xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
     }
+
+    /**
+     * Load values from An XmlPullParser into this OPDSItem. This method can be used both to parse a
+     * single entry on it's own or it can be used to parse a feed of entries.
+     *
+     * @param xpp XmlPullParser being used to parse XML
+     * @param parentFeed The OPDS Feed object to be set as the parent if we found a new entry
+     * @throws XmlPullParserException If there's an XML parsing exception
+     * @throws IOException If there's an underlying IO exception
+     */
+    public void loadFromXpp(XmlPullParser xpp, UstadJSOPDSFeed parentFeed) throws XmlPullParserException, IOException{
+        int evtType;
+        String name;
+        String[] linkAttrs;
+        int i;
+        String content = null;
+        boolean isFeed = this instanceof UstadJSOPDSFeed;
+        Vector entriesFound = isFeed? new Vector() : null;
+
+        while((evtType = xpp.next()) != XmlPullParser.END_DOCUMENT) {
+            if(evtType == XmlPullParser.START_TAG) {
+                name = xpp.getName();
+                if(isFeed && name.equals(ATTR_NAMES[ATTR_ENTRY])) {
+                    UstadJSOPDSEntry newEntry = new UstadJSOPDSEntry(parentFeed);
+                    newEntry.loadFromXpp(xpp, parentFeed);
+                    entriesFound.addElement(newEntry);
+                }else if(name.equals(ATTR_NAMES[ATTR_TITLE]) && xpp.next() == XmlPullParser.TEXT) {
+                    this.title = xpp.getText();
+                }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
+                    this.id = xpp.getText();
+                }else if(name.equals("link")){
+                    linkAttrs = new String[UstadJSOPDSItem.LINK_ATTRS_END];
+                    for(i = 0; i < UstadJSOPDSItem.LINK_ATTRS_END; i++) {
+                        linkAttrs[i] = xpp.getAttributeValue(null, ATTR_NAMES[i]);
+                    }
+                    this.addLink(linkAttrs);
+                }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
+                    this.updated = xpp.getText();
+                }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {
+                    this.summary = xpp.getText();
+                }else if(name.equals("content") && xpp.next() == XmlPullParser.TEXT) {
+                    content = xpp.getText();
+                }else if(name.equals("dc:publisher") && xpp.next() == XmlPullParser.TEXT){ // Fix this
+                    this.publisher = xpp.getText();
+                }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
+                    this.publisher = xpp.getText();
+                }else if(name.equals("author")){
+                    UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
+                    do {
+                        evtType = xpp.next();
+
+                        if(evtType == XmlPullParser.START_TAG) {
+                            if(xpp.getName().equals("name")){
+                                if(xpp.next() == XmlPullParser.TEXT) {
+                                    currentAuthor.name = xpp.getText();
+                                }
+                            }else if (xpp.getName().equals("uri")) {
+                                if(xpp.next() == XmlPullParser.TEXT) {
+                                    currentAuthor.uri = xpp.getText();
+                                }
+                            }
+                        }else if(evtType == XmlPullParser.END_TAG
+                                && xpp.getName().equals("author")){
+                            if (this.authors == null){
+                                this.authors = new Vector();
+                                this.authors.addElement(currentAuthor);
+                            }else{
+                                this.authors.addElement(currentAuthor);
+                            }
+                        }
+                    }while(!(evtType == XmlPullParser.END_TAG && xpp.getName().equals("author")));
+                }
+            }else if(evtType == XmlPullParser.END_TAG) {
+                if(xpp.getName().equals("entry")) {
+                    if(this.summary == null && content != null) {
+                        this.summary = content;
+                    }
+                    return;
+                }
+            }
+        }
+
+        if(isFeed) {
+            UstadJSOPDSFeed feed = (UstadJSOPDSFeed)this;
+            feed.entries = new UstadJSOPDSEntry[entriesFound.size()];
+            entriesFound.copyInto(feed.entries);
+        }
+    }
+
 
     private int parseColorString(String colorStr) {
         if(bgColor == null) {
