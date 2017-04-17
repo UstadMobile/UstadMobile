@@ -13,4 +13,17 @@
     <dimen name="default_text_dimension">14sp</dimen>
     <dimen name="default_title_dimension">18sp</dimen>
 
+
+    <dimen name="dimen_2dp">2dp</dimen>
+    <dimen name="dimen_8dp">8dp</dimen>
+    <dimen name="dimen_10dp">10dp</dimen>
+    <dimen name="dimen_12dp">12dp</dimen>
+    <dimen name="dimen_16dp">16dp</dimen>
+    <dimen name="dimen_20dp">20dp</dimen>
+    <dimen name="dimen_50dp">50dp</dimen>
+    <dimen name="dimen_70dp">70dp</dimen>
+
+    <dimen name="text_title">20sp</dimen>
+    <dimen name="text_hint">16sp</dimen>
+
 </resources>

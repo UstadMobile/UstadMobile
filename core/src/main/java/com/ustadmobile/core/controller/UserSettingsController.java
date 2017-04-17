@@ -34,6 +34,7 @@ import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.UserSettingItem;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.UserSettingsView;
 
 /**
@@ -139,6 +140,13 @@ public class UserSettingsController extends UstadBaseController implements Ustad
         UstadMobileSystemImpl.getInstance().loadLocale(getContext());
         setUIStrings();
         settingsView.showSettingsList();
+    }
+
+    /**
+     * Handle when the user selects to logout
+     */
+    public void handleClickLogout() {
+        LoginController.handleLogout(getContext(), BasePointView.VIEW_NAME);
     }
     
     

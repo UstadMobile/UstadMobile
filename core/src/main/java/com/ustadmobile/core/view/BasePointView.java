@@ -57,5 +57,13 @@ public interface BasePointView extends UstadView{
      * @param viewable
      */
     public void setClassListVisible(boolean visible);
+
+    /**
+     * Set the top level navigation items for this view. On J2ME these appear in the command menu,
+     * on other platforms they appear in the navigation drawer.
+     *
+     * @param menuItems
+     */
+    void setMenuItems(BasePointMenuItem[] menuItems);
     
 }

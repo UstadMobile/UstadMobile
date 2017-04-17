@@ -35,6 +35,9 @@ public class UMAndroidUtil {
      * @return
      */
     public static Hashtable bundleToHashtable(Bundle bundle) {
+        if(bundle == null)
+            return null;
+
         Hashtable retVal = new Hashtable();
         Set<String> keys = bundle.keySet();
         Iterator<String> iterator = keys.iterator();

@@ -2,6 +2,8 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.Menu;
+import android.view.MenuItem;
 
 
 import com.ustadmobile.core.controller.UserSettingsController;
@@ -21,6 +23,8 @@ public class UserSettingsActivity extends UstadBaseActivity implements UserSetti
     static final String FRAGMENT_TAG_SETTINGSLIST = "SETTINGSLIST";
 
     static final String FRAGMENT_TAG_LANGLIST = "LANGLIST";
+
+    public static final int CMD_LOGOUT_ID = 5001;
 
 
     @Override
@@ -80,4 +84,21 @@ public class UserSettingsActivity extends UstadBaseActivity implements UserSetti
                 frag, FRAGMENT_TAG_LANGLIST).commit();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuItem item = menu.add(Menu.NONE, CMD_LOGOUT_ID, 0, "Logout tmp");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case CMD_LOGOUT_ID:
+                settingsController.handleClickLogout();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }

@@ -193,4 +193,6 @@ public class MessageIDConstants {
 
     public static final int notifications = 110;
 
+    public static final int forgot_password = 111;
+
 }

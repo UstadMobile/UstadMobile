@@ -32,6 +32,7 @@
 package com.ustadmobile.port.android.impl;
 
 import android.app.Activity;
+import android.support.v4.app.DialogFragment;
 import android.app.DownloadManager;
 import android.content.*;
 import android.content.pm.PackageInfo;
@@ -70,6 +71,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import android.os.Build;
 import android.os.IBinder;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Xml;
 import android.webkit.MimeTypeMap;
@@ -97,24 +99,27 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public static final String KEY_CURRENTAUTH = "app-currentauth";
 
+    public static final String TAG_DIALOG_FRAGMENT = "UMDialogFrag";
+
     /**
      * Map of view names to the activity class that is implementing them on Android
      *
      * @see UstadMobileSystemImplAndroid#go(String, Hashtable, Object)
      */
-    public static final HashMap<String, Class> viewNameToActivityMap = new HashMap<>();
+    public static final HashMap<String, Class> viewNameToAndroidImplMap = new HashMap<>();
 
     static {
-        viewNameToActivityMap.put(LoginView.VIEW_NAME, LoginActivity.class);
-        viewNameToActivityMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
-        viewNameToActivityMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
-        viewNameToActivityMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
-        viewNameToActivityMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
-        viewNameToActivityMap.put(ClassManagementView.VIEW_NAME, ClassManagementActivity.class);
-        viewNameToActivityMap.put(EnrollStudentView.VIEW_NAME, EnrollStudentActivity.class);
-        viewNameToActivityMap.put(ClassManagementView2.VIEW_NAME, ClassManagementActivity2.class);
-        viewNameToActivityMap.put(AboutView.VIEW_NAME, AboutActivity.class);
-        viewNameToActivityMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
+        viewNameToAndroidImplMap.put(LoginView.VIEW_NAME, LoginDialogFragment.class);
+        viewNameToAndroidImplMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
+        viewNameToAndroidImplMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
+        viewNameToAndroidImplMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
+        viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
+        viewNameToAndroidImplMap.put(ClassManagementView.VIEW_NAME, ClassManagementActivity.class);
+        viewNameToAndroidImplMap.put(EnrollStudentView.VIEW_NAME, EnrollStudentActivity.class);
+        viewNameToAndroidImplMap.put(ClassManagementView2.VIEW_NAME, ClassManagementActivity2.class);
+        viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
+        viewNameToAndroidImplMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
+
     }
 
 
@@ -317,21 +322,40 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public void go(String viewName, Hashtable args, Object context) {
-        Class activityClass = viewNameToActivityMap.get(viewName);
+        Class androidImplClass = viewNameToAndroidImplMap.get(viewName);
         Context ctx = (Context)context;
 
-        if(activityClass == null) {
+        if(androidImplClass == null) {
             Log.wtf(UMLogAndroid.LOGTAG, "No activity for " + viewName + " found");
             Toast.makeText(ctx, "ERROR: No Activity found for view: " + viewName,
                     Toast.LENGTH_LONG).show();
             return;
         }
 
-        Intent startIntent = new Intent(ctx, activityClass);
-        if(args != null)
-            startIntent.putExtras(UMAndroidUtil.hashtableToBundle(args));
+        if(DialogFragment.class.isAssignableFrom(androidImplClass)) {
+            String toastMsg = null;
+            try {
+                DialogFragment dialog = (DialogFragment)androidImplClass.newInstance();
+                AppCompatActivity activity = (AppCompatActivity)context;
+                dialog.show(activity.getSupportFragmentManager(),TAG_DIALOG_FRAGMENT);
+            }catch(InstantiationException e) {
+                Log.wtf(UMLogAndroid.LOGTAG, "Could not instantiate dialog", e);
+                toastMsg = "Dialog error: " + e.toString();
+            }catch(IllegalAccessException e2) {
+                Log.wtf(UMLogAndroid.LOGTAG, "Could not instantiate dialog", e2);
+                toastMsg = "Dialog error: " + e2.toString();
+            }
 
-        ctx.startActivity(startIntent);
+            if(toastMsg != null) {
+                Toast.makeText(ctx, toastMsg, Toast.LENGTH_LONG).show();
+            }
+        }else {
+            Intent startIntent = new Intent(ctx, androidImplClass);
+            if(args != null)
+                startIntent.putExtras(UMAndroidUtil.hashtableToBundle(args));
+
+            ctx.startActivity(startIntent);
+        }
     }
 
     @Override
@@ -401,7 +425,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             String proxyAddress = proxyString.split(":")[0];
             int proxyPort = Integer.parseInt(proxyString.split(":")[1]);
             Proxy p = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyAddress,proxyPort));
-            HttpHost proxy = new HttpHost(proxyAddress,proxyPort);
+            HttpHost proxy = new HttpHosqt(proxyAddress,proxyPort);
             con = (HttpURLConnection) url.openConnection(p);
         }
         else
@@ -551,7 +575,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public String getUserPref(String key, Object context) {
-        return getUserPreferences((Context)context).getString(key, null);
+        return currentUsername != null ? getUserPreferences((Context)context).getString(key, null) : null;
     }
 
     /**

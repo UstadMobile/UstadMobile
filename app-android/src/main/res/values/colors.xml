@@ -18,4 +18,12 @@
     <item name="opds_card_normal" type="color">#FFFFFFFF</item>
     <item name="basepoint_navigation_drawer_tint" type="color">#FF757575</item>
 
+    <!--
+    Text only button background color: Used when we want something that looks like hyperlink
+    text but actually uses a button for accessibility purposes
+    -->
+    <item name="text_only_button_background_color" type="color">@android:color/white</item>
+
+    <color name="highlight_area">#009688</color>
+
 </resources>

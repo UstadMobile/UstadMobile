@@ -38,6 +38,8 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.HTTPCacheDir;
+import com.ustadmobile.core.view.DialogResultListener;
+import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
@@ -55,7 +57,12 @@ import java.util.Hashtable;
 
 
 /**
- * w
+ * The Login Controller: manages Login View and has static methods to handle logging a user out
+ *
+ * This can be used as an activity of it's own or as a dialog. In case of a dialog the hosting
+ * activity will want to know when the login process has been completed. For this to work the
+ * hosting view (e.g. BasePointView, CatalogEntryView, etc) itself *MUST* implement DialogResultListener.
+ *
  * @author varuna
  */
 public class LoginController extends UstadBaseController{
@@ -81,12 +88,22 @@ public class LoginController extends UstadBaseController{
     //Hashed user authentication to cache in case they login next time when offline
     public static final String PREFKEY_AUTHCACHE_PREFIX = "um-authcache-";
 
+    private DialogResultListener resultListener;
+
+    public static final int RESULT_LOGIN_SUCCESSFUL = 1;
+
+    public static final int RESULT_CLICK_REGISTER = 2;
 
     public LoginController(Object context) {
         super(context);
     }
-    
-    
+
+    /**
+     * Make a controller for the given view.
+     *
+     * @param view
+     * @return
+     */
     public static LoginController makeControllerForView(LoginView view) {
         LoginController ctrl = new LoginController(view.getContext());
         ctrl.setView(view);
@@ -214,17 +231,29 @@ public class LoginController extends UstadBaseController{
     }
     
     /**
-     * Removes the credentials of the current user from the system
+     * Removes the credentials of the current user from the system and goes to the next view
+     * specified
+     *
+     * @param context system context object
+     * @param destAfterLogout (Optional) destination view to go to after login
      */
-    public static void handleLogout(Object context) {
+    public static void handleLogout(Object context, String destAfterLogout) {
         //delete the active user
         UstadMobileSystemImpl.getInstance().setActiveUser(null, context);
         UstadMobileSystemImpl.getInstance().setActiveUserAuth(null, context);
-        UstadMobileSystemImpl.getInstance().go(LoginView.VIEW_NAME, new Hashtable(),
-            context);
+        UstadMobileSystemImpl.getInstance().go(destAfterLogout, context);
     }
-    
-    
+
+    /**
+     * Removes the credentials of the current user from the system and goes to the LoginView
+     *
+     * @param context
+     */
+    public static void handleLogout(Object context) {
+        handleLogout(context, LoginView.VIEW_NAME);
+    }
+
+
     /**
      * Register a new user
      * @param userInfoParams Hashtable with 
@@ -499,8 +528,13 @@ public class LoginController extends UstadBaseController{
                     }
 
                     impl.getAppView(context).dismissProgressDialog();
-                    UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-                        BasePointController.makeDefaultBasePointArgs(context), context);
+
+                    if(resultListener != null) {
+                        resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog)view, null);
+                    }else {
+                        UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
+                                BasePointController.makeDefaultBasePointArgs(context), context);
+                    }
                 }
             }
         };
@@ -562,6 +596,14 @@ public class LoginController extends UstadBaseController{
         if(xAPIURL.equals(UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL) && impl.isHttpsSupported())
             xAPIURL = UstadMobileDefaults.DEFAULT_XAPI_SERVER;
         view.setXAPIServerURL(xAPIURL);
+    }
+
+    public DialogResultListener getResultListener() {
+        return resultListener;
+    }
+
+    public void setResultListener(DialogResultListener resultListener) {
+        this.resultListener = resultListener;
     }
 }
 

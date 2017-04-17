@@ -12,8 +12,11 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.DialogResultListener;
+import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.UstadView;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -33,7 +36,7 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
  * 
  * @author mike
  */
-public class BasePointController extends UstadBaseController{
+public class BasePointController extends UstadBaseController implements DialogResultListener{
 
     private BasePointView basePointView;
     
@@ -70,9 +73,15 @@ public class BasePointController extends UstadBaseController{
     
     public static BasePointController makeControllerForView(BasePointView view, Hashtable args) {
         BasePointController ctrl = new BasePointController(view.getContext());
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(args == null)
+            args = makeDefaultBasePointArgs(view.getContext());
+
         ctrl.args = args;
         ctrl.setView(view);
         view.setClassListVisible(ctrl.isUserTeacher());
+        view.setMenuItems(impl.getActiveUser(view.getContext()) != null ?
+            CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
         return ctrl;
     }
     
@@ -85,10 +94,16 @@ public class BasePointController extends UstadBaseController{
         for(int i = 0; i < BasePointController.NUM_CATALOG_TABS; i++) {
             iPrefix = i+BasePointController.OPDS_ARGS_PREFIX;
             args.put(iPrefix + CatalogController.KEY_URL, basePointURLs[i]);
-            args.put(iPrefix + CatalogController.KEY_HTTPUSER, 
-                impl.getActiveUser(context));
-            args.put(iPrefix + CatalogController.KEY_HTTPPPASS, 
-                impl.getActiveUserAuth(context));
+            if(impl.getActiveUser(context) != null) {
+                args.put(iPrefix + CatalogController.KEY_HTTPUSER,
+                        impl.getActiveUser(context));
+            }
+
+            if(impl.getActiveUserAuth(context) != null) {
+                args.put(iPrefix + CatalogController.KEY_HTTPPPASS,
+                        impl.getActiveUserAuth(context));
+            }
+
             args.put(iPrefix + CatalogController.KEY_FLAGS, 
                 new Integer(CatalogController.CACHE_ENABLED));
             args.put(iPrefix + CatalogController.KEY_RESMOD, 
@@ -157,6 +172,9 @@ public class BasePointController extends UstadBaseController{
      */
     public boolean isUserTeacher() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(impl.getActiveUser(getContext()) == null)
+            return false;
+
         String classListJSON = impl.getUserPref("teacherclasslist", context);
 
         if(classListJSON == null) {
@@ -178,4 +196,15 @@ public class BasePointController extends UstadBaseController{
         UstadMobileSystemImpl.getInstance().go(item.getDestination(), getContext());
     }
 
+    @Override
+    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        switch(commandId) {
+            case LoginController.RESULT_LOGIN_SUCCESSFUL:
+                dialog.dismiss();
+                basePointView.setMenuItems(CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED);
+                impl.getAppView(getContext()).showNotification("Login successful", AppView.LENGTH_LONG);
+                break;
+        }
+    }
 }
