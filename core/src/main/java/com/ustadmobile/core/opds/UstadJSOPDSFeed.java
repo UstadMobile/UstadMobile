@@ -42,18 +42,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
+ * Represents an OPDS Feed containing entries.
  *
  * @author varuna
  */
 public class UstadJSOPDSFeed extends UstadJSOPDSItem{
-    
-    public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
-    
-    public static final String NS_DC = "http://purl.org/dc/terms/";
-    
-    public static final String NS_OPDS = "http://opds-spec.org/2010/catalog";
-    
-    public static final String NS_UMOPDSSTYLE = "http://www.ustadmobile.com/ns/xml/opdsstyle";
     
     public UstadJSOPDSEntry[] entries;
 
@@ -90,23 +83,11 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * @throws XmlPullParserException
      * @throws IOException
      */
-    public void parseFromXpp(XmlPullParser xpp) throws XmlPullParserException, IOException{
+    public void loadFromXpp(XmlPullParser xpp) throws XmlPullParserException, IOException{
         loadFromXpp(xpp, this);
     }
 
-    /**
-     * Load fthe OPDS feed from a String.
-     *
-     * @param str
-     * @throws XmlPullParserException
-     * @throws IOException
-     */
-    public void loadFromString(String str) throws XmlPullParserException, IOException{
-        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-        ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
-        parser.setInput(bin, "UTF-8");
-        parseFromXpp(parser);
-    }
+
     
     /**
      * Add an entry to the end of this feed
@@ -163,21 +144,27 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                 UstadJSOPDSEntry.LINK_ACQUIRE, null, true, false);
         return (entries.length > 0);
     }
-    
+
+    /**
+     * Serialize the entire feed to an XmlSerializer. Creates a new Xml document using the XmlSerializer
+     *
+     * @param xs XmlSerializer to use
+     *
+     * @throws IOException
+     */
     public void serialize(XmlSerializer xs) throws IOException {
-        xs.startDocument("UTF-8", Boolean.FALSE);
-        xs.setPrefix("", NS_ATOM);
-        xs.setPrefix("dc", NS_DC);
-        xs.setPrefix("opds", NS_OPDS);
+        serializeStartDoc(xs);
         xs.startTag(NS_ATOM, "feed");
         serializeAttrs(xs);
         
         for(int i = 0; i < entries.length; i++) {
-            entries[i].serializeEntry(xs);
+            entries[i].serializeEntryTag(xs);
         }
         xs.endTag(NS_ATOM, "feed");
         xs.endDocument();
     }
+
+
     
     /**
      * Serializes the feed as XML to the given output stream.  This will flush

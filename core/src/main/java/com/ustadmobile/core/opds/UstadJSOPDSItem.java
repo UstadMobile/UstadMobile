@@ -33,6 +33,8 @@ package com.ustadmobile.core.opds;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -41,8 +43,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
+ * Abstract class that represents an OPDS Item - this can be a feed itself or an entry within a feed.
  *
- * Represents an OPDS Item - this can be a feed itself or an entry within a feed.
+ * Items can be serialized to Xml using the XmlSerializer class and the serialize method
+ * Items can be loaded from Xml using the XmlPullParser and the method loadFromXpp
  *
  * @author varuna
  */
@@ -53,7 +57,13 @@ public abstract class UstadJSOPDSItem {
     public String id;
     
     protected Vector linkVector;
-    
+
+    public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
+
+    public static final String NS_DC = "http://purl.org/dc/terms/";
+
+    public static final String NS_OPDS = "http://opds-spec.org/2010/catalog";
+
     public static final int ATTR_REL = 0;
     public static final int ATTR_MIMETYPE = 1;
     public static final int ATTR_HREF = 2;
@@ -278,9 +288,20 @@ public abstract class UstadJSOPDSItem {
     public Vector getNavigationLinks(){
         return this.getLinks(null, TYPE_ATOMFEED, false, true);
     }
-    
+
     /**
-     * 
+     * Serialize this item to an XmlSerializer. This will create a new Xml Document, set the name
+     * spaces and then create a root item.
+     *
+     * @param xs XmlSerializer to use
+     * @throws IOException If an IOException is thrown by the underlying output stream
+     */
+    public abstract void serialize(XmlSerializer xs) throws IOException;
+
+    /**
+     * Serialize the attributes of this item. This will generate the idm title, summary tags etc.
+     * e.g. &lt;id&gt;item-id&lt;/id&gt;
+     *
      * @param xs
      * @throws IOException 
      */
@@ -321,11 +342,35 @@ public abstract class UstadJSOPDSItem {
             xs.startTag(ns, tagName).text(tagValue).endTag(ns, tagName);
         }
     }
-    
-    public void serializeEntry(XmlSerializer xs) throws IOException{
-        xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
-        serializeAttrs(xs);
-        xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
+
+    protected void serializeStartDoc(XmlSerializer xs) throws IOException {
+        xs.startDocument("UTF-8", Boolean.FALSE);
+        xs.setPrefix("", NS_ATOM);
+        xs.setPrefix("dc", NS_DC);
+        xs.setPrefix("opds", NS_OPDS);
+    }
+
+
+
+    /**
+     * Serialize this item to a String.
+     *
+     * @return
+     */
+    public String serializeToString()  {
+        try {
+            XmlSerializer serializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            serializer.setOutput(bout, "UTF-8");
+            serialize(serializer);
+            bout.flush();
+            return new String(bout.toByteArray(), "UTF-8");
+        }catch(IOException e) {
+            //This should not happen as we're only using a byte array output stream
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     /**
@@ -414,6 +459,32 @@ public abstract class UstadJSOPDSItem {
             feed.entries = new UstadJSOPDSEntry[entriesFound.size()];
             entriesFound.copyInto(feed.entries);
         }
+    }
+
+    /**
+     * Load the given item from an XmlPullParser.
+     *
+     * @param xpp XmlPullParser to read from
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public void loadFromXpp(XmlPullParser xpp) throws XmlPullParserException, IOException{
+        loadFromXpp(xpp, null);
+    }
+
+
+    /**
+     * Load the OPDS feed from a String.
+     *
+     * @param str
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public void loadFromString(String str) throws XmlPullParserException, IOException{
+        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+        ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
+        parser.setInput(bin, "UTF-8");
+        loadFromXpp(parser);
     }
 
 

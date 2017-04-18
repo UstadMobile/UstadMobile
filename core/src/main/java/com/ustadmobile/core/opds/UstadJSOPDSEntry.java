@@ -31,9 +31,14 @@
 package com.ustadmobile.core.opds;
 
 import com.ustadmobile.core.opf.UstadJSOPF;
+
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
 import java.util.Vector;
 
 /**
+ * Represents an OPDSItem as defined by an entry tag in an OPDS feed
  *
  * @author varuna
  */
@@ -181,6 +186,33 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         }
         
         return null;
+    }
+
+
+    /**
+     * Serialize this entry to it's own XML document. When this is done the entry tag will be the
+     * root element of the XML document.
+     *
+     * @param xs XmlSerializer to use
+     * @throws IOException
+     */
+    public void serialize(XmlSerializer xs) throws IOException{
+        serializeStartDoc(xs);
+        serializeEntryTag(xs);
+        xs.endDocument();
+    }
+
+    /**
+     * Serialize this entry as a tag the given XmlSerializer. This will *NOT* start and end the document.
+     * It is used both by the serialize method and UstadJSOPDSFeed,
+     *
+     * @param xs
+     * @throws IOException
+     */
+    protected void serializeEntryTag(XmlSerializer xs) throws IOException{
+        xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
+        serializeAttrs(xs);
+        xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
     }
 
 }
