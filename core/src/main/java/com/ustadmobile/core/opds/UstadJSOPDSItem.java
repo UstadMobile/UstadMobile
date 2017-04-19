@@ -261,6 +261,31 @@ public abstract class UstadJSOPDSItem {
         
         return result;
     }
+
+    /**
+     * Returns the String of attributes for the first link matching the given criteria. Convenience
+     * method that returns the first result that would be found by getLinks
+     *
+     * @param linkRel
+     * @param mimeType
+     * @param relByPrefix
+     * @param mimeTypeByPrefix
+     *
+     * @return
+     */
+    public String[] getFirstLink(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix ){
+        Vector result = getLinks(linkRel, mimeType, relByPrefix, mimeTypeByPrefix);
+        if(result.size() == 0) {
+            return null;
+        }else {
+            return (String[])result.elementAt(0);
+        }
+    }
+
+    public String[] getFirstLink(String linkRel, String mimeType) {
+        return getFirstLink(linkRel, mimeType, false, false);
+    }
+
     
     /**
      * Return the link String array for the thumbnail for this item
