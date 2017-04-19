@@ -152,6 +152,17 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
     public Vector getAcquisitionLinks(String mimeType){
         return this.getLinks(LINK_ACQUIRE, mimeType, true, false);
     }
+
+    /**
+     * Get the first acquisition link for this entry
+     *
+     * @param mimeType Required mime type. Can be null to indicate any mime type
+     * @return String[] array of link attributes or null if there is no matching acquisition link
+     */
+    public String[] getFirstAcquisitionLink(String mimeType) {
+        return this.getFirstLink(LINK_ACQUIRE, mimeType, true, false);
+    }
+
     
     public Vector getNavigationLinks(){
         return this.getLinks(null, TYPE_ATOMFEED, false, true);
