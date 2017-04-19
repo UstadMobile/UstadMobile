@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="-"
+            android:text="status"
             android:id="@+id/opds_item_detail_text"
             android:layout_below="@+id/opdsitem_title_text"
             android:layout_alignLeft="@+id/opdsitem_title_text"

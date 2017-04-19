@@ -24,7 +24,7 @@ public class ClassManagementActivity extends UstadBaseActivity implements ClassM
         mController = ClassManagementController.makeControllerForView(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()));
         setBaseController(mController);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((Button)findViewById(R.id.class_management_attendance_button)).setOnClickListener(this);
         ((FloatingActionButton)findViewById(R.id.class_management_new_student_fab)

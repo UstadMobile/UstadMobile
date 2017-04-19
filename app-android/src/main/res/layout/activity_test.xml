@@ -4,7 +4,7 @@
     android:id="@+id/activity_test"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.ustadmobile.port.android.p2p.TestActivity">
+    tools:context="com.ustadmobile.port.android.network.TestActivity">
 
     <Button
         android:layout_width="wrap_content"

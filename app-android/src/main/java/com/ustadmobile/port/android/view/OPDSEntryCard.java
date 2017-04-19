@@ -37,6 +37,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -110,7 +111,7 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
 
     public void setProgressBarVisible(boolean visible) {
         int visibility = visible ? View.VISIBLE : View.INVISIBLE;
-        ((ProgressBar)findViewById(R.id.opds_item_progressbar)).setVisibility(visibility);
+        findViewById(R.id.opds_item_progressbar).setVisibility(visibility);
     }
 
     /**
@@ -127,8 +128,9 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
      * @param visible
      */
     public void setFileAvailabilityTextVisibility(boolean visible){
+        Log.d("File Availability",String.valueOf(visible));
         int visibility=visible ? View.VISIBLE : View.INVISIBLE;
-        ((TextView)findViewById(R.id.opds_item_detail_text)).setVisibility(visibility);
+        findViewById(R.id.opds_item_detail_text).setVisibility(visibility);
 
     }
 

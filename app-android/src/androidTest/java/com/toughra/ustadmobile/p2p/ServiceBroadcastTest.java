@@ -10,7 +10,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
+import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -20,8 +20,8 @@ import java.util.concurrent.TimeoutException;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
-import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
+import static com.ustadmobile.port.android.network.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.network.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;

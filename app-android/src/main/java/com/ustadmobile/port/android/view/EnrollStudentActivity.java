@@ -71,7 +71,7 @@ public class EnrollStudentActivity extends UstadBaseActivity implements EnrollSt
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()));
 
         setBaseController(mEnrollStudentController);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Enroll Student");
         Button registerButton = (Button)this.findViewById(R.id.enroll_registerbutton);

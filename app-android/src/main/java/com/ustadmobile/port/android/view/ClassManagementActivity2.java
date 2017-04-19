@@ -37,7 +37,7 @@ public class ClassManagementActivity2 extends UstadBaseActivity implements Class
         mController = ClassManagementController2.makeControllerForView(baseArgs, this);
         mController.setView(this);
         setBaseController(mController);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
 
         mPagerAdapter = new ClassManagementPagerAdapter2(getSupportFragmentManager());
         mViewPager = (ViewPager)findViewById(R.id.activity_class_management_pager);

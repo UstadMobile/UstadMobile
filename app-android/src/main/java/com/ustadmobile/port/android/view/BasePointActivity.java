@@ -66,7 +66,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         //make OPDS fragments and set them here
         mBasePointController = BasePointController.makeControllerForView(this, args);
         setBaseController(mBasePointController);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mPagerAdapter = new BasePointPagerAdapter(getSupportFragmentManager());

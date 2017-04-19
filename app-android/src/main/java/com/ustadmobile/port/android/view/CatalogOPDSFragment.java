@@ -44,6 +44,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -72,6 +73,8 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -650,16 +653,21 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             //if the file is not available - show whether it can be acquired locally
             boolean isAcquisitionEntry = !feed.entries[position].getAcquisitionLinks().isEmpty();
             if(isAcquisitionEntry && entryStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
-                boolean isAvailableLocally = UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().isFileAvailable(
-                        getContext(), feed.entries[position].id);
-                holder.mEntryCard.setLocalAvailableFile(isAvailableLocally);
+                ArrayList<String> idList = new ArrayList<>();
+                for(int i = 0; i < feed.entries.length; i++){
+                    if(!feed.entries[i].getAcquisitionLinks().isEmpty())
+                        idList.add(feed.entries[i].id);
+                }
+                UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().areFilesAvailable(getActivity(), idList.toArray(new String[idList.size()]));
+
+                boolean isAvailableLocally = UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().availableFiles.containsKey(feed.entries[position].id);
+                        holder.mEntryCard.setLocalAvailableFile(isAvailableLocally);
                 //set the text line to be visible
                 holder.mEntryCard.setFileAvailabilityTextVisibility(true);
             }else {
                 //set the text line to be invisible
                 holder.mEntryCard.setFileAvailabilityTextVisibility(false);
             }
-
 
 
 

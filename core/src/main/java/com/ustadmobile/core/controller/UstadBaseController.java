@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UserSettingsView;
 import java.util.Hashtable;
@@ -182,7 +183,7 @@ public abstract class UstadBaseController implements UstadController {
                 UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
                 return true;
             case CMD_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(UserSettingsView.VIEW_NAME,
+                UstadMobileSystemImpl.getInstance().go(SettingsDataUsageView.VIEW_NAME,
                     new Hashtable(), context);
                 return true;
             case CMD_LOGOUT:

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:replace="label"
+    android:label="${appName}"
     package="com.toughra.ustadmobile">
 
 
@@ -8,9 +11,11 @@
 
 
 
-    <uses-sdk tools:overrideLibrary="edu.rit.se.wifibuddy"/>
+    <uses-sdk tools:overrideLibrary="edu.rit.se.wifibuddy"  />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -28,7 +33,6 @@
 
     <application
         android:icon="@drawable/ic_launcher"
-        android:label="${appName}"
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme">
         <activity
@@ -58,7 +62,7 @@
 
 
         <service
-            android:name="com.ustadmobile.port.android.p2p.NetworkServiceAndroid"
+            android:name="com.ustadmobile.port.android.network.NetworkServiceAndroid"
             android:enabled="true" />
 
         <service

@@ -53,7 +53,7 @@ public class SettingsHome extends UstadBaseActivity implements View.OnClickListe
 
 
         if(view==data_usage_settings){
-            UstadMobileSystemImpl.getInstance().go(SettingsDataUsageView.class, null, this);
+            UstadMobileSystemImpl.getInstance().go(SettingsDataUsageView.VIEW_NAME, null, this);
 
         }
     }

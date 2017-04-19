@@ -6,6 +6,8 @@ package com.ustadmobile.core.view;
 
 public interface SettingsDataUsageView extends UstadView {
 
+    public static final String VIEW_NAME="SettingsDataUsage";
+
     /**
      * Sets the display of the superNode setting (e.g. radio button for enabled/disabled etc)
      * @param enabled
@@ -15,5 +17,6 @@ public interface SettingsDataUsageView extends UstadView {
     void setSupernodeSettingVisible(boolean visible);
     void setOnlyWiFiConnection(boolean isWiFiOnly);
     void setOnlyMobileConnection(boolean isWiFiOnly);
+
 
 }

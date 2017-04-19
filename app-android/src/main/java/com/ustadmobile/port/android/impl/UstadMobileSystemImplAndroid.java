@@ -47,12 +47,13 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 
-import com.ustadmobile.port.android.p2p.DownloadTaskAndroid;
-import com.ustadmobile.port.android.p2p.NetworkManagerAndroid;
-import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
+import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.port.android.network.DownloadTaskAndroid;
+import com.ustadmobile.port.android.network.NetworkManagerAndroid;
+import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.sharedse.p2p.DownloadRequest;
-import com.ustadmobile.port.sharedse.p2p.P2PManagerSharedSE;
+import com.ustadmobile.port.sharedse.network.DownloadRequest;
+import com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
@@ -119,6 +120,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToActivityMap.put(ClassManagementView2.VIEW_NAME, ClassManagementActivity2.class);
         viewNameToActivityMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToActivityMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
+        viewNameToActivityMap.put(SettingsDataUsageView.VIEW_NAME,SettingsDataUsageActivity.class);
     }
 
 
@@ -433,7 +435,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         p2pRequest.setFileId(entryId);
         p2pRequest.setFileSource(url);
         p2pRequest.setFileDestination(destFileURI);
-        return String.valueOf(p2pManager.requestDownload(context, p2pRequest));
+        return null;
+        //return String.valueOf(p2pManager.requestDownload(context, p2pRequest));
     }
 
     @Override
@@ -683,7 +686,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public P2PManagerSharedSE getP2PManager() {
+    public NetworkManagerSharedSE getP2PManager() {
         return p2pManager;
     }
 }

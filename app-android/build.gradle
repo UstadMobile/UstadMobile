@@ -137,7 +137,7 @@ dependencies {
     compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.47'
     compile 'com.ustadmobile.nanolrs:nanolrs-android:0.1.47'
     compile 'com.github.clans:fab:1.6.4'
-    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.7-SNAPSHOT'
+    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.8-SNAPSHOT'
     androidTestCompile project(":core-tests")
     androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'com.android.support.test:runner:0.5'

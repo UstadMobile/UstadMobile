@@ -25,7 +25,7 @@ public class AboutActivity extends UstadBaseActivity implements AboutView, Contr
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
         setTitle(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.about));
 
         AboutController.makeControllerForView(new Hashtable(),

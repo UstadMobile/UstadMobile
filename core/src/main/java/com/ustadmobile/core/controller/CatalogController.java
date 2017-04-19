@@ -1957,6 +1957,10 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 435, itemURL + "->" + 
                 info.fileURI);
+
+
+
+
             String downloadID = impl.queueFileDownload(itemURL, info.fileURI, entries[i].id,
                 authHeaders, request.getContext());
             info.downloadID = downloadID;

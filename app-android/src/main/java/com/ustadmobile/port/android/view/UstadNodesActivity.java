@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.BroadcastReceiver;
 import android.graphics.Color;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Build;
@@ -21,16 +20,16 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.p2p.NetworkManagerAndroid;
+import com.ustadmobile.port.android.network.NetworkManagerAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.p2p.P2PNode;
-import com.ustadmobile.port.sharedse.p2p.P2PNodeListener;
+import com.ustadmobile.port.sharedse.network.NetworkNode;
+import com.ustadmobile.port.sharedse.network.NetworkNodeListener;
 
 import java.util.ArrayList;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 
-public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeListener{
+public class UstadNodesActivity extends UstadBaseActivity implements NetworkNodeListener {
 
 
     private RecyclerView allNodesList;
@@ -69,7 +68,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
         nodeListAdapter=new NodeListAdapter();
         allNodesList.setLayoutManager(linearLayoutManager);
         allNodesList.setAdapter(nodeListAdapter);
-        if(networkManagerAndroid.getNodeList().size()>0){
+       /* if(networkManagerAndroid.getNodeList().size()>0){
             nodeCounter= networkManagerAndroid.getNodeList().size();
             snackbar.show();
             textView.setText("Found "+nodeCounter+" super nodes");
@@ -77,8 +76,8 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
             textView.setText("Searching super nodes...");
             snackbar.show();
         }
-        nodeListAdapter.setNodeList((ArrayList<P2PNode>) networkManagerAndroid.getNodeList());
-        ((NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).addNodeListener(this);
+        nodeListAdapter.setNodeList((ArrayList<NetworkNode>) networkManagerAndroid.getNodeList());
+        ((NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).addNodeListener(this);*/
     }
 
 
@@ -96,14 +95,14 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
 
 
     @Override
-    public void nodeDiscovered(P2PNode node) {
-        nodeListAdapter.setNodeList((ArrayList<P2PNode>) networkManagerAndroid.getNodeList());
+    public void nodeDiscovered(NetworkNode node) {
+       /* nodeListAdapter.setNodeList((ArrayList<NetworkNode>) networkManagerAndroid.getNodeList());
         nodeListAdapter.notifyDataSetChanged();
-        allNodesList.invalidate();
+        allNodesList.invalidate();*/
     }
 
     @Override
-    public void nodeGone(P2PNode node) {
+    public void nodeGone(NetworkNode node) {
 
     }
 
@@ -118,7 +117,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
      */
     public class NodeListAdapter extends RecyclerView.Adapter<NodeListAdapter.NodeHolder> {
 
-        private ArrayList<P2PNode> nodeLists;
+        private ArrayList<NetworkNode> nodeLists;
         private LayoutInflater inflater;
         public NodeListAdapter() {
 
@@ -155,11 +154,11 @@ public class UstadNodesActivity extends UstadBaseActivity implements P2PNodeList
             });
         }
 
-        void setNodeList(ArrayList<P2PNode> nodeList) {
+        void setNodeList(ArrayList<NetworkNode> nodeList) {
             this.nodeLists = nodeList;
         }
 
-        ArrayList<P2PNode> getNodeList() {
+        ArrayList<NetworkNode> getNodeList() {
 
             return nodeLists;
         }

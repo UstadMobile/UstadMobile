@@ -35,7 +35,7 @@ public class AttendanceActivity extends UstadBaseActivity implements AttendanceV
         mController = AttendanceController.makeControllerForView(this,
                 UMAndroidUtil.bundleToHashtable(getIntent().getExtras()));
         setBaseController(mController);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
         //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Attendance");
 

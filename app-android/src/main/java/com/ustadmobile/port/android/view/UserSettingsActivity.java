@@ -27,7 +27,7 @@ public class UserSettingsActivity extends UstadBaseActivity implements UserSetti
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_settings);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
 
 
         settingsController = UserSettingsController.makeControllerForView(this);

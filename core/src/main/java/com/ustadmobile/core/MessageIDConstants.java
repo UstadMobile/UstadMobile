@@ -193,9 +193,9 @@ public class MessageIDConstants {
     public static final int connection_use_any = 131;
 
     public static final int superNode = 132;
-    public static final int connection = 112;
+    public static final int connection = 123;
     public static final int dataUsage = 109;
-    public static final int dataUsageLabel =113;
+    public static final int dataUsageLabel =124;
     public static final int resetCounterLabel=114;
     public static final int usageStatistics=115;
     public static final int cell_data_label=116;

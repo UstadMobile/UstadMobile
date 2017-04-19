@@ -20,7 +20,7 @@ import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
-import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
+import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;

@@ -15,10 +15,10 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
-import com.ustadmobile.port.android.p2p.NetworkManagerAndroid;
-import com.ustadmobile.port.android.p2p.NetworkServiceAndroid;
-import com.ustadmobile.port.sharedse.p2p.P2PNode;
-import com.ustadmobile.port.sharedse.p2p.P2PNodeListener;
+import com.ustadmobile.port.android.network.NetworkManagerAndroid;
+import com.ustadmobile.port.android.network.NetworkServiceAndroid;
+import com.ustadmobile.port.sharedse.network.NetworkNode;
+import com.ustadmobile.port.sharedse.network.NetworkNodeListener;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -29,9 +29,9 @@ import java.util.Vector;
 import java.util.concurrent.TimeoutException;
 
 import static com.toughra.ustadmobile.p2p.ServiceBroadcastTest.TEST_SERVICE_NAME;
-import static com.ustadmobile.port.android.p2p.DownloadTaskAndroid.DOWNLOAD_SOURCE_P2P;
-import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
-import static com.ustadmobile.port.android.p2p.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
+import static com.ustadmobile.port.android.network.DownloadTaskAndroid.DOWNLOAD_SOURCE_P2P;
+import static com.ustadmobile.port.android.network.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.network.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 import static junit.framework.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -40,7 +40,7 @@ import static org.junit.Assert.assertThat;
  * Created by kileha3 on 03/04/2017.
  */
 
-public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadCompleteReceiver {
+public class DiscoverAndDownloadTest implements NetworkNodeListener,UMDownloadCompleteReceiver {
 
     private Context mContext;
     private static final int mWaitingTimeToDiscoverANode =40000;
@@ -51,7 +51,7 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
     private static final String TEST_FILE_URI = "http://www.ustadmobile.com/files/budget-savings-trainer.epub";
     private static int downloadedFromPeer=-1;
 
-    private P2PNode lastNodeDiscovered = null;
+    private NetworkNode lastNodeDiscovered = null;
     private UstadMobileSystemImplAndroid implAndroid=null;
 
     @Rule
@@ -106,13 +106,13 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
     }
 
     @Override
-    public void nodeDiscovered(P2PNode node) {
+    public void nodeDiscovered(NetworkNode node) {
         lastNodeDiscovered = node;
 
     }
 
     @Override
-    public void nodeGone(P2PNode node) {
+    public void nodeGone(NetworkNode node) {
 
     }
     @Override
@@ -124,7 +124,7 @@ public class DiscoverAndDownloadTest implements P2PNodeListener,UMDownloadComple
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogController.SHARED_RESOURCE, mContext)[0].getDirURI();
 
-        P2PNode node=implAndroid.getP2PManager().knownSuperNodes.get(mSuperNodeIndex);
+        NetworkNode node=implAndroid.getP2PManager().knownNodes.get(mSuperNodeIndex);
         UstadJSOPDSFeed   fileFeed = ((NetworkManagerAndroid)implAndroid.getP2PManager())
                 .getAvailableIndexes().get(node);
         UstadJSOPDSEntry  fileEntry = fileFeed.getEntryById(TEST_FILE_ID);
