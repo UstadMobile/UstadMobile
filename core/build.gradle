@@ -20,6 +20,10 @@ plugins {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
+jar {
+    //Exclude factory classes that are intended to be replaced by platform specific implementations
+    exclude("com/ustadmobile/core/impl/AcquisitionManagerFactory.class")
+}
 
 repositories {
     mavenCentral()
