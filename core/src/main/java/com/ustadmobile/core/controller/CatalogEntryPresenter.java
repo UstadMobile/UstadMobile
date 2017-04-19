@@ -35,9 +35,25 @@ public class CatalogEntryPresenter extends UstadBaseController{
                 entry = new UstadJSOPDSEntry(null);
                 entry.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
                 catalogEntryView.setTitle(entry.title);
+
+                CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
+                        CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
+                if(entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
+                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
+                }else {
+                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN,false);
+                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE,false);
+                }
             }catch(Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void handleClickButton(int buttonId) {
+        switch(buttonId) {
+            case CatalogEntryView.BUTTON_DOWNLOAD:
+
         }
     }
 

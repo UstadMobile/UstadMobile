@@ -28,6 +28,15 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private RecyclerView seeAlsoRecyclerView;
 
+    private static Hashtable<Integer, Integer> BUTTON_ID_MAP =new Hashtable<>();
+
+    static {
+        BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
+        BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_OPEN, R.id.activity_catalog_entry_open_button);
+        BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_REMOVE, R.id.activity_catalog_entry_remove_modify_button);
+    }
+
+
     private class SeeAlsoViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView iconView;
@@ -88,7 +97,11 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             }
         });
         seeAlsoRecyclerView.setNestedScrollingEnabled(false);
+    }
 
+    @Override
+    public void setButtonDisplayed(int buttonId, boolean display) {
+        findViewById(BUTTON_ID_MAP.get(buttonId)).setVisibility(display ? View.VISIBLE : View.GONE);
     }
 
     @Override

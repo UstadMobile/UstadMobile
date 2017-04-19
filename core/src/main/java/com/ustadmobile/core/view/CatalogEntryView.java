@@ -10,7 +10,26 @@ public interface CatalogEntryView extends UstadView {
 
     int MODE_ENTRY_DOWNLOADED = 1;
 
+
+
+    int BUTTON_DOWNLOAD = 0;
+
+    int BUTTON_REMOVE = 1;
+
+    int BUTTON_OPEN = 2;
+
+
     String VIEW_NAME = "CatalogEntry";
+
+    /**
+     * Set which buttons are visible or not :
+     *  When the item is not yet downloaded only the download button is visible
+     *  When the item is downloaded remove/modify is available and open is available.
+     *
+     * @param buttonId
+     * @param display
+     */
+    void setButtonDisplayed(int buttonId, boolean display);
 
     void setHeader(String headerFileUri);
 
