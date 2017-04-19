@@ -52,6 +52,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.UstadView;
@@ -831,6 +832,12 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         firstLink[UstadJSOPDSItem.ATTR_HREF]));
             }
         }else {
+            //Go to the entry view
+            Hashtable catalogEntryArgs = new Hashtable();
+            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR, entry.serializeToString());
+            impl.go(CatalogEntryView.VIEW_NAME, catalogEntryArgs, context);
+
+            /*
             CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
                     SHARED_RESOURCE | USER_RESOURCE, getContext());
             if(entryInfo != null && entryInfo.acquisitionStatus == STATUS_ACQUIRED) {
@@ -846,6 +853,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
             }else{
                 this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
             }
+            */
         }
     }
 
@@ -1224,7 +1232,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 parser.setInput(catalogIn, "UTF-8");
                 //opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
                 opdsFeed = new UstadJSOPDSFeed();
-                opdsFeed.parseFromXpp(parser);
+                opdsFeed.loadFromXpp(parser);
                 opdsFeed.href = url;
                 CatalogController.cacheCatalog(opdsFeed, resourceMode, context);
             }catch(Exception e1) {

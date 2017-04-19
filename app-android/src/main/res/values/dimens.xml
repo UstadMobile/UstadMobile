@@ -13,6 +13,20 @@
     <dimen name="default_text_dimension">14sp</dimen>
     <dimen name="default_title_dimension">18sp</dimen>
 
+    <!-- Catalog entry view: height of cover image-->
+    <dimen name="catalog_entry_coverimg_height">50dp</dimen>
+
+
+    <!-- width of entry icon on catalog entry view (e.g. OPDS Thumbnail)-->
+    <dimen name="catalog_entry_iconimg_width">90dp</dimen>
+    <dimen name="catalog_entry_iconimg_height">90dp</dimen>
+
+    <!-- Size of icon on catalog entry view for indicating if the course is available locally -->
+    <dimen name="catalog_entry_local_availability_icon_size">24dp</dimen>
+
+    <dimen name="catalog_entry_see_also_icon_size">150dp</dimen>
+
+
 
     <dimen name="dimen_2dp">2dp</dimen>
     <dimen name="dimen_8dp">8dp</dimen>

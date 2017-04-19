@@ -12,11 +12,25 @@
     <color name="secondary_text">#727272</color>
     <color name="icons">#FFFFFF</color>
     <color name="divider">#B6B6B6</color>
+    <color name="background_light">#E8EAED</color>
 
     <item name="umblue" type="color">#FF3F31B5</item>
     <item name="opds_card_pressed" type="color">#FF888888</item>
     <item name="opds_card_normal" type="color">#FFFFFFFF</item>
     <item name="basepoint_navigation_drawer_tint" type="color">#FF757575</item>
+
+    <!-- Catalog Entry View colors-->
+    <item name="catalog_entry_remove_modify_button_background" type="color">@color/primary_dark</item>
+    <item name="catalog_entry_remove_modify_button_text" type="color">@color/primary_text</item>
+
+    <item name="catalog_entry_download_button_background" type="color">@color/primary</item>
+    <item name="catalog_entry_download_button_text" type="color">@color/primary_text</item>
+
+    <item name="catalog_entry_open_button_background" type="color">@color/primary</item>
+    <item name="catalog_entry_open_button_text" type="color">@color/primary_text</item>
+
+
+
 
     <!--
     Text only button background color: Used when we want something that looks like hyperlink

@@ -97,35 +97,6 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
         buildConfigField "com.ustadmobile.core.view.BasePointMenuItem[]", "BASEPOINT_MENU_" + baseMenuTypes.get(i).toUpperCase(),basePointMenuArrayStr
     }
 
-
-    /*
-    while((menuItemTitle = project.ext.buildConfigProperties.getProperty("baseMenu." + menuItemIndex + ".title")) != null) {
-        String itemPrefix = "baseMenu." + menuItemIndex
-        String itemDest = project.ext.buildConfigProperties.getProperty(itemPrefix + ".dest")
-        if(itemDest == null || itemDest.equals("null")) {
-            break
-        }
-
-        titleIdsList.add(menuItemTitle)
-        destinationsList.add(itemDest)
-        iconList.add(project.ext.buildConfigProperties.getProperty(itemPrefix + ".icon"))
-        menuItemIndex++
-    }
-
-    String basePointMenuArrayStr = "new com.ustadmobile.core.view.BasePointMenuItem[]{"
-    for(int i = 0; i< titleIdsList.size(); i++) {
-        String titleIdVal = titleIdsList.get(i)
-        if(titleIdsList[i].startsWith("MessageIDConstants")) {
-            titleIdVal = "com.ustadmobile.core." + titleIdVal
-        }
-        basePointMenuArrayStr += "new com.ustadmobile.core.view.BasePointMenuItem("+ titleIdVal + ", \"" + destinationsList.get(i) + "\", " + (iconList.get(i) != null ? "\""+iconList.get(i) + "\"": "null") +")"
-        if(i < titleIdsList.size()-1){
-            basePointMenuArrayStr += ", "
-        }
-    }
-    basePointMenuArrayStr += "}"
-    */
-
     buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
     buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
     buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]

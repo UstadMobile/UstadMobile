@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.toughra.ustadmobile">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.toughra.ustadmobile">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -67,7 +68,8 @@
             android:label="@string/title_activity_enroll_student"
             android:theme="@style/Theme.UstadTheme" />
         <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2" />
-        <activity android:name="com.ustadmobile.port.android.view.AboutActivity"></activity>
+        <activity android:name="com.ustadmobile.port.android.view.AboutActivity" />
+        <activity android:name="com.ustadmobile.port.android.view.CatalogEntryActivity"></activity>
     </application>
 
 </manifest>
