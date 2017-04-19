@@ -1224,7 +1224,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 parser.setInput(catalogIn, "UTF-8");
                 //opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
                 opdsFeed = new UstadJSOPDSFeed();
-                opdsFeed.parseFromXpp(parser);
+                opdsFeed.loadFromXpp(parser);
                 opdsFeed.href = url;
                 CatalogController.cacheCatalog(opdsFeed, resourceMode, context);
             }catch(Exception e1) {
@@ -1876,6 +1876,9 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         
         return filteredLinks;
     }
+
+
+
     
     /**
      * Fetch and download the given containers, save required information about it to
