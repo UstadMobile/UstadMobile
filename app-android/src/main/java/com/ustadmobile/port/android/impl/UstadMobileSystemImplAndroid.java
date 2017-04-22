@@ -32,55 +32,83 @@
 package com.ustadmobile.port.android.impl;
 
 import android.app.Activity;
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-
-import java.io.*;
-import java.net.URLConnection;
-import java.util.*;
-import java.net.URL;
-import com.ustadmobile.core.impl.*;
-import com.ustadmobile.core.tincan.TinCanResultListener;
-import com.ustadmobile.core.view.AboutView;
-import com.ustadmobile.core.view.AppView;
-
-import com.ustadmobile.core.view.SettingsDataUsageView;
-import com.ustadmobile.port.android.network.DownloadTaskAndroid;
-import com.ustadmobile.port.android.network.NetworkManagerAndroid;
-import com.ustadmobile.port.android.network.NetworkServiceAndroid;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.sharedse.network.DownloadRequest;
-import com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE;
-import com.ustadmobile.port.sharedse.view.AttendanceView;
-import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.CatalogView;
-import com.ustadmobile.port.sharedse.view.ClassManagementView;
-import com.ustadmobile.port.sharedse.view.ClassManagementView2;
-import com.ustadmobile.core.view.ContainerView;
-import com.ustadmobile.port.sharedse.view.EnrollStudentView;
-import com.ustadmobile.core.view.LoginView;
-import com.ustadmobile.core.view.UserSettingsView;
-import com.ustadmobile.port.android.impl.http.HTTPService;
-
-import com.ustadmobile.port.android.view.*;
-import com.ustadmobile.nanolrs.core.endpoints.*;
-
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-
-
-import android.os.Build;
 import android.os.IBinder;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Xml;
 import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.ustadmobile.core.impl.TinCanQueueListener;
+import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
+import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.core.view.UserSettingsView;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
+import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
+import com.ustadmobile.port.android.impl.http.HTTPService;
+import com.ustadmobile.port.android.network.DownloadTaskAndroid;
+import com.ustadmobile.port.android.network.NetworkManagerAndroid;
+import com.ustadmobile.port.android.network.NetworkServiceAndroid;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.android.view.AboutActivity;
+import com.ustadmobile.port.android.view.AppViewAndroid;
+import com.ustadmobile.port.android.view.AttendanceActivity;
+import com.ustadmobile.port.android.view.BasePointActivity;
+import com.ustadmobile.port.android.view.CatalogActivity;
+import com.ustadmobile.port.android.view.ClassManagementActivity;
+import com.ustadmobile.port.android.view.ClassManagementActivity2;
+import com.ustadmobile.port.android.view.ContainerActivity;
+import com.ustadmobile.port.android.view.EnrollStudentActivity;
+import com.ustadmobile.port.android.view.LoginDialogFragment;
+import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
+import com.ustadmobile.port.android.view.UserSettingsActivity;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.port.sharedse.network.DownloadRequest;
+import com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE;
+import com.ustadmobile.port.sharedse.view.AttendanceView;
+import com.ustadmobile.port.sharedse.view.ClassManagementView;
+import com.ustadmobile.port.sharedse.view.ClassManagementView2;
+import com.ustadmobile.port.sharedse.view.EnrollStudentView;
+
 import org.json.JSONObject;
-import org.xmlpull.v1.*;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.WeakHashMap;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
@@ -102,25 +130,29 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public static final String KEY_CURRENTAUTH = "app-currentauth";
 
+    public static final String TAG_DIALOG_FRAGMENT = "UMDialogFrag";
+
     /**
      * Map of view names to the activity class that is implementing them on Android
      *
      * @see UstadMobileSystemImplAndroid#go(String, Hashtable, Object)
      */
-    public static final HashMap<String, Class> viewNameToActivityMap = new HashMap<>();
+    public static final HashMap<String, Class> viewNameToAndroidImplMap = new HashMap<>();
 
     static {
-        viewNameToActivityMap.put(LoginView.VIEW_NAME, LoginActivity.class);
-        viewNameToActivityMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
-        viewNameToActivityMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
-        viewNameToActivityMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
-        viewNameToActivityMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
-        viewNameToActivityMap.put(ClassManagementView.VIEW_NAME, ClassManagementActivity.class);
-        viewNameToActivityMap.put(EnrollStudentView.VIEW_NAME, EnrollStudentActivity.class);
-        viewNameToActivityMap.put(ClassManagementView2.VIEW_NAME, ClassManagementActivity2.class);
-        viewNameToActivityMap.put(AboutView.VIEW_NAME, AboutActivity.class);
-        viewNameToActivityMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
-        viewNameToActivityMap.put(SettingsDataUsageView.VIEW_NAME,SettingsDataUsageActivity.class);
+
+        viewNameToAndroidImplMap.put(LoginView.VIEW_NAME, LoginDialogFragment.class);
+        viewNameToAndroidImplMap.put(ContainerView.VIEW_NAME, ContainerActivity.class);
+        viewNameToAndroidImplMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
+        viewNameToAndroidImplMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
+        viewNameToAndroidImplMap.put(SettingsDataUsageView.VIEW_NAME, SettingsDataUsageActivity.class);
+        viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);
+        viewNameToAndroidImplMap.put(ClassManagementView.VIEW_NAME, ClassManagementActivity.class);
+        viewNameToAndroidImplMap.put(EnrollStudentView.VIEW_NAME, EnrollStudentActivity.class);
+        viewNameToAndroidImplMap.put(ClassManagementView2.VIEW_NAME, ClassManagementActivity2.class);
+        viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
+        viewNameToAndroidImplMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
+
     }
 
 
@@ -326,21 +358,40 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
 
     public void go(String viewName, Hashtable args, Object context) {
-        Class activityClass = viewNameToActivityMap.get(viewName);
+        Class androidImplClass = viewNameToAndroidImplMap.get(viewName);
         Context ctx = (Context)context;
 
-        if(activityClass == null) {
+        if(androidImplClass == null) {
             Log.wtf(UMLogAndroid.LOGTAG, "No activity for " + viewName + " found");
             Toast.makeText(ctx, "ERROR: No Activity found for view: " + viewName,
                     Toast.LENGTH_LONG).show();
             return;
         }
 
-        Intent startIntent = new Intent(ctx, activityClass);
-        if(args != null)
-            startIntent.putExtras(UMAndroidUtil.hashtableToBundle(args));
+        if(DialogFragment.class.isAssignableFrom(androidImplClass)) {
+            String toastMsg = null;
+            try {
+                DialogFragment dialog = (DialogFragment)androidImplClass.newInstance();
+                AppCompatActivity activity = (AppCompatActivity)context;
+                dialog.show(activity.getSupportFragmentManager(),TAG_DIALOG_FRAGMENT);
+            }catch(InstantiationException e) {
+                Log.wtf(UMLogAndroid.LOGTAG, "Could not instantiate dialog", e);
+                toastMsg = "Dialog error: " + e.toString();
+            }catch(IllegalAccessException e2) {
+                Log.wtf(UMLogAndroid.LOGTAG, "Could not instantiate dialog", e2);
+                toastMsg = "Dialog error: " + e2.toString();
+            }
 
-        ctx.startActivity(startIntent);
+            if(toastMsg != null) {
+                Toast.makeText(ctx, toastMsg, Toast.LENGTH_LONG).show();
+            }
+        }else {
+            Intent startIntent = new Intent(ctx, androidImplClass);
+            if(args != null)
+                startIntent.putExtras(UMAndroidUtil.hashtableToBundle(args));
+
+            ctx.startActivity(startIntent);
+        }
     }
 
     @Override
@@ -410,7 +461,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             String proxyAddress = proxyString.split(":")[0];
             int proxyPort = Integer.parseInt(proxyString.split(":")[1]);
             Proxy p = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyAddress,proxyPort));
-            HttpHost proxy = new HttpHost(proxyAddress,proxyPort);
+            HttpHost proxy = new HttpHosqt(proxyAddress,proxyPort);
             con = (HttpURLConnection) url.openConnection(p);
         }
         else
@@ -441,7 +492,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public int[] getFileDownloadStatus(String downloadID, Object context) {
-        return p2pManager.getRequestStatus(context,Integer.parseInt(downloadID));
+        return p2pManager.getRequestStatus(context,0);
     }
 
     @Override
@@ -548,7 +599,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public String getUserPref(String key, Object context) {
-        return getUserPreferences((Context)context).getString(key, null);
+        return currentUsername != null ? getUserPreferences((Context)context).getString(key, null) : null;
     }
 
     /**

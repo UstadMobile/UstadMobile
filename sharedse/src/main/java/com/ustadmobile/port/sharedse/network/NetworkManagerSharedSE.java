@@ -1,14 +1,7 @@
 package com.ustadmobile.port.sharedse.network;
 
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,15 +13,8 @@ import java.util.Vector;
 
 public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskListener {
 
-
     /**
-     * Map of available supernodes mapped as node to index file
-     */
-    protected HashMap<NetworkNode, UstadJSOPDSFeed> availableIndexes=new HashMap<>();
-
-
-    /**
-     * List of super nodes that we know about around us
+     * List of nodes that we know about around us
      */
     public List<NetworkNode> knownNodes =new ArrayList<>();
 
@@ -43,44 +29,32 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
      * Store the download requests of which will be executed in a FIFO way
      */
     public HashMap<Integer,P2PTask> downloadRequests=new HashMap<>();
-
+    /**
+     * Store all reference of all locally available files
+     * and their respective nodes to get from.
+     */
     public HashMap<String,HashMap<String,String>> availableFiles=new HashMap<>();
-
 
     private P2PTask currentTask;
     public BluetoothTask currentBluetoothTask;
 
     /**
-     * TAG to set where to get file from (Cloud,P2P or Local network)
+     * Flags to set where to get file from (Cloud,P2P or Local network)
+     */
+    /**
+     * This will be set if the file will be downloaded from the cloud
+     */
+    public static final int DOWNLOAD_SOURCE_CLOUD =1;
+    /**
+     * This willl be set if the file will be downloaded from peer device
+     */
+    public static final int DOWNLOAD_SOURCE_P2P =2;
+
+    /**
+     * The current download source holder
      */
     public int currentDownloadSource =-1;
-    public static final int DOWNLOAD_SOURCE_CLOUD =1;
-    public static final int DOWNLOAD_SOURCE_P2P =2;
-    public static final int DOWNLOAD_SOURCE_LOCAL_NETWORK =3;
-
-    /**
-     * Store information of the previously connected WiFi hotspot before connecting to
-     * the no prompt network.
-     */
-    protected String [] currentConnectedNetwork=new String[3];
-
-    /**
-     * store current network SSID
-     */
-    public static final int CURRENT_NETWORK_SSID=0;
-
-    /**
-     * Store current network NETID
-     */
-    public static final int CURRENT_NETWORK_NETID=1;
-
-    /**
-     * Sore the current network MAC address
-     */
-    public static final int CURRENT_NETWORK_GATWAY_ADDRESS=2;
-    private int requestDownloadId = 0;
-    public static final String  CURRENT_NETWORK_EMPTY_STATE = "empty";
-    private static final int START_TASK_INTERVAL=0;
+    public int currentTaskIndex=0;
 
     /**
      * Set if supernode mode is enabled or not (by default this is disabled)
@@ -102,9 +76,9 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
     public abstract boolean isSuperNodeAvailable(Object context);
 
     /**
-     * check if files are available locally
+     * Process locally file availability
      * */
-    public abstract String [] areFilesAvailable(Object context, String [] fileIds);
+    public abstract void checkLocalFilesAvailability(Object context, List<String> files);
 
     /**
      * stop the download once has been started
@@ -140,24 +114,42 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
         BluetoothTask bluetoothTask=makeBlueToothTask(node);
         queueBluetoothTask(bluetoothTask);
     }
+
+
+
+
     /**
-     * Cross platform logic to execute when updating node indexes
-     *
-     * @param node
+     * This method is used to handle all the connection between two devices,
+     * it will take acre if we have more than one device to communicate to
+     * @param bluetoothTask - created bluetooth communication task
      */
-
-    protected void handleNodeIndexUpdated(NetworkNode node, String fileUri) {
-        try{
-            UstadJSOPDSFeed feed = UstadJSOPDSFeed.loadFromXML(new FileInputStream(fileUri), "UTF-8");//params needed: input stream
-            availableIndexes.put(node, feed);
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 2, "Available Index "+availableIndexes.size());
+    protected void queueBluetoothTask(BluetoothTask bluetoothTask){
+        bluetoothQueue.add(bluetoothTask);
+    }
 
 
-        }catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+    /**
+     * Cross platform queuing logic, it check if there are task to execute and if any assign to the
+     * current task and process it by calling bluetoothTask.start() which handles all connection logic
+     *
+     */
+    public synchronized void checkBluetoothQueue(){
+        if(!bluetoothQueue.isEmpty() && currentTaskIndex <=(bluetoothQueue.size()-1)){
+            currentBluetoothTask=bluetoothQueue.get(currentTaskIndex);
+            currentBluetoothTask.setNetworkTaskListener(this);
+            currentBluetoothTask.start();
         }
+    }
+
+
+    @Override
+    public void taskEnded(BluetoothTask task) {
+        if(task!=currentBluetoothTask){
+            return;
+        }
+        currentBluetoothTask=null;
+        checkBluetoothQueue();
     }
 
     /**
@@ -171,16 +163,6 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
         }
     }
 
-    /**
-     * Cross platform listener method to execute when a new node is no longer active
-     *
-     * @param node
-     */
-    protected void fireNodeGone(NetworkNode node) {
-        for(NetworkNodeListener listener: networkNodeListeners) {
-            listener.nodeGone(node);
-        }
-    }
 
     /**
      * Cross platform queuing logic, it check if there are task to execute and if any assign to the
@@ -194,54 +176,15 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
         }
     }
 
-
     /**
-     * Cross platform queuing logic, it check if there are task to execute and if any assign to the
-     * current task and process it by calling bluetoothTask.start() which handles all connection logic
+     * Cross platform listener method to execute when a new node is no longer active
      *
+     * @param node
      */
-
-    public synchronized void checkBluetoothQueue(){
-        if(!bluetoothQueue.isEmpty()){
-            currentBluetoothTask=bluetoothQueue.remove(0);
-            currentBluetoothTask.setNetworkTaskListener(this);
-            currentBluetoothTask.start();
+    protected void fireNodeGone(NetworkNode node) {
+        for(NetworkNodeListener listener: networkNodeListeners) {
+            listener.nodeGone(node);
         }
-    }
-
-    /**
-     * Cross platform method to execute when download (Task) is completed,
-     * it checks for the task type and if the task is of type P2PTask.TYPE_INDEX that means
-     * the connection will be terminated and connecting to the next node.
-     *
-     * @param task
-     */
-
-    @Override
-    public void taskEnded(P2PTask task) {
-
-        if(task != currentTask) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Task ended != current task");
-            return;
-        }
-
-        if(task.getTaskType() == P2PTask.TYPE_INDEX) {
-            handleNodeIndexUpdated(task.getNode(),task.getDestinationPath());
-        }
-
-
-        currentTask = null;
-        checkDownloadQueue();
-
-    }
-
-    @Override
-    public void taskEnded(BluetoothTask task) {
-        if(task!=currentBluetoothTask){
-            return;
-        }
-        currentBluetoothTask=null;
-        checkBluetoothQueue();
     }
 
     /**
@@ -259,16 +202,21 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
     }
 
 
-    protected void queueBluetoothTask(BluetoothTask bluetoothTask){
-        bluetoothQueue.add(bluetoothTask);
-        if(bluetoothQueue.size()==1){
-            checkBluetoothQueue();
-        }
-    }
+    /**
+     * Start insecure bluetooth service (register services,open socket and listen for the incoming communication)
+     */
+    public abstract void startInsecureBluetoothService();
 
+    /**
+     * Stop insecure bluetooth service which was started
+     */
+    public abstract void stopInsecureBluetoothService();
 
-    protected abstract P2PTask makeDownloadTask(NetworkNode node, String downloadUri, long startAfterTime);
-
+    /**
+     * Create bluetooth task and start communication between two devices.
+     * @param node Network node in this case it will be Bluetooth node
+     * @return
+     */
     protected abstract BluetoothTask makeBlueToothTask(NetworkNode node);
 
 }

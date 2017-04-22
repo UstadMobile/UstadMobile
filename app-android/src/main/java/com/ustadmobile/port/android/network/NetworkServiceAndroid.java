@@ -77,14 +77,12 @@ public class NetworkServiceAndroid extends Service{
                                 new WifiP2pManager.ActionListener() {
                               @Override
                               public void onSuccess() {
-                                  getWifiDirectHandlerAPI().startAddingNoPromptService(NetworkManagerAndroid.makeServiceData(),
-                                          mNoPromptActionListener);
+                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.serviceData(),null);
                               }
 
                               @Override
                               public void onFailure(int i) {
-                                  getWifiDirectHandlerAPI().startAddingNoPromptService(NetworkManagerAndroid.makeServiceData(),
-                                          mNoPromptActionListener);
+                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.serviceData(),null);
                               }
                           });
 

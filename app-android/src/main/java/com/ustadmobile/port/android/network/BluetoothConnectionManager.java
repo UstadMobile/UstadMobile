@@ -1,29 +1,18 @@
-/*
- * Copyright (C) 2014 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.ustadmobile.port.android.network;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.ustadmobile.core.controller.CatalogController;
@@ -32,7 +21,14 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+
+import edu.rit.se.wifibuddy.WifiDirectHandler;
+
 
 /**
  * This class does all the work for setting up and managing Bluetooth
@@ -41,25 +37,58 @@ import java.util.UUID;
  * thread for performing data transmissions when connected.
  */
 public class BluetoothConnectionManager {
-    // Debugging
+
     public static final String TAG = "BluetoothManager";
 
-    // Name for the SDP record when creating server socket
+    /**
+     * Name for the SDP record when creating server socket
+     */
+
     private static final String NAME_SECURE = "BluetoothChatSecure";
     private static final String NAME_INSECURE = "BluetoothChatInsecure";
 
-    // Unique UUID for this application
+    /**
+     * Unique UUID for this application
+     */
     private static final UUID MY_UUID_SECURE =
             UUID.fromString("c22707f1-0500-4a34-a292-532d47795ee7");
     private static final UUID MY_UUID_INSECURE =
             UUID.fromString("ad9e3a05-7d80-4a12-b50b-91c72d442683");
 
-    // Message types sent from the BluetoothConnectionManager Handler
+    /**
+     * Message types sent from the BluetoothConnectionManager Handler
+     */
     public static final int MESSAGE_STATE_CHANGE = 1;
+
     public static final int MESSAGE_READ = 2;
+
     public static final int MESSAGE_WRITE = 3;
+
     public static final int MESSAGE_DEVICE_NAME = 4;
+
     public static final int MESSAGE_TOAST = 5;
+
+    /**
+     * Command to exchange between connected devices to check if files are available locally or not
+     */
+
+    public static final String  COMMAND_TAG_FILE_AVAILABLE_CHECK = "file_status_check";
+    public static final String COMMAND_TAG_FILE_AVAILABLE_FEEDBACK = "file_status_feedback";
+    public static final String COMMAND_TAG_FILE_ACQUIRE = "acquire";
+
+    /**
+     * Separator used during transition to separate between commands and file ids
+     */
+    public static final String FILE_IDS_SEPARATOR = "@";
+    public static final String FILE_AVAILABLE_COMMAND_SEPARATOR = ":";
+
+
+    public static final String FILE_AVAILABILITY_RESPONSE = "available";
+    public static final String ACTION_FILE_CHECKING_COMPLETED = "action_file_checking_completed";
+    public static final String ACTION_DEVICE_BLUETOOTH_CONNECTIVITY_CHANGE = "action_device_bluetooth_connectivity_change";
+    public static final String EXTRA_FILE_CHECKING_TASK = "extra_file_checking";
+    public static final String EXTRA_DEVICE_BLUETOOTH_CONNECTIVITY_FLAG = "extra_device_connectivity";
+    public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
 
     /**
      * Code to return if the file is available
@@ -71,52 +100,190 @@ public class BluetoothConnectionManager {
     public static final boolean STATUS_UNAVAILABLE=false;
 
 
-    // Key names received from the BluetoothConnectionManager Handler
+    /**
+     * Key names received from the BluetoothConnectionManager Handler
+     */
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
 
     // Member fields
     private final BluetoothAdapter mAdapter;
-    private final Handler mHandler;
     private AcceptThread mSecureAcceptThread;
     private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
+    private NetworkManagerAndroid managerAndroid;
     private int mState;
-    private int mNewState;
 
-    // Constants that indicate the current connection state
-    public static final int STATE_NONE = 0;       // we're doing nothing
-    public static final int STATE_LISTEN = 1;     // now listening for incoming connections
-    public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
-    public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
     /**
-     * Constructor. Prepares a new BluetoothChat session.
      *
-     * @param context The UI Activity Context
-     * @param handler A Handler to send messages back to the UI Activity
+     * Constants that indicate the current connection state
+
+     *
+     * bluetooth is doing nothing
+     */
+    public static final int STATE_NONE = 0;
+
+    /**
+     * Socket is now listening for incoming connections
+     */
+    public static final int STATE_LISTEN = 1;
+
+    /**
+     * Device now initiating an outgoing connection
+     */
+    public static final int STATE_CONNECTING = 2;
+
+    /**
+     * Device now connected to a remote device
+     */
+    public static final int STATE_CONNECTED = 3;
+
+
+
+    /**
+     * Handle all outgoing and incoming bluetooth connection message exchange
      */
 
-    private Context mContext;
-    public BluetoothConnectionManager(Context context, Handler handler) {
-        mAdapter = BluetoothAdapter.getDefaultAdapter();
-        mState = STATE_NONE;
-        mNewState = mState;
-        mHandler = handler;
-        this.mContext=context;
+    private Handler mHandler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    String sentCommand = new String(writeBuf);
+                    Log.d(BluetoothConnectionManager.TAG,"Sent Command: "+sentCommand);
+
+                    break;
+                case MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    String receivedCommand[]  = new String(readBuf, 0, msg.arg1).split(FILE_AVAILABLE_COMMAND_SEPARATOR);
+                    Log.d(BluetoothConnectionManager.TAG,"Received Command: command "+receivedCommand[0]+" data: "+receivedCommand[1]);
+
+                    switch (receivedCommand[0]){
+
+                        case COMMAND_TAG_FILE_AVAILABLE_CHECK:
+                            List<String> request=new ArrayList<>();
+                            Collections.addAll(request, TextUtils.split(receivedCommand[1],FILE_IDS_SEPARATOR));
+                            List<String> responses= checkAvailability(request);
+                            String feedbackCommand= COMMAND_TAG_FILE_AVAILABLE_FEEDBACK +
+                                    FILE_AVAILABLE_COMMAND_SEPARATOR +idsToString(responses);
+                            sendCommandMessage(feedbackCommand);
+                            break;
+
+                        case COMMAND_TAG_FILE_AVAILABLE_FEEDBACK:
+
+                            if(managerAndroid.getCurrentBluetoothTask()!=null){
+
+                                String serverBluetoothAddress=managerAndroid.getCurrentBluetoothTask()
+                                        .getNode().getNodeBluetoothAddress();
+
+                                if(!getBluetoothMacAddress().equals(serverBluetoothAddress)){
+                                    try{
+
+                                        List<String> requestResponse=stringsToIds(receivedCommand[1]);
+
+                                        for (int position=0;position<requestResponse.size();position++){
+                                            HashMap<String,String> response=new HashMap<>();
+                                            response.put(BLUETOOTH_ADDRESS,serverBluetoothAddress);
+                                            response.put(FILE_AVAILABILITY_RESPONSE,requestResponse.get(position).replaceAll("\\s+",""));
+
+                                            if(managerAndroid.knownNodes.size()>1 && managerAndroid.getCurrentTaskIndex()
+                                                    < managerAndroid.getBluetoothTaskQueue().size()){
+
+                                                if(!managerAndroid.getAvailableFiles().containsValue(response)){
+
+                                                    if(Boolean.parseBoolean(requestResponse.get(position))){
+                                                        managerAndroid.getAvailableFiles().put(NetworkManagerAndroid.FILE_IDSTO_PROCESS.get(position),response);
+                                                        NetworkManagerAndroid.FILE_IDSTO_PROCESS.remove(position);
+                                                    }
+                                                }else if(managerAndroid.getCurrentTaskIndex()
+                                                        == (managerAndroid.getBluetoothTaskQueue().size()-1)){
+                                                    managerAndroid.getAvailableFiles().put(NetworkManagerAndroid.FILE_IDSTO_PROCESS.get(position),response);
+
+                                                }
+
+                                            }else{
+                                                managerAndroid.getAvailableFiles().put(NetworkManagerAndroid.FILE_IDSTO_PROCESS.get(position),response);
+
+                                            }
+
+                                        }
+
+
+                                    }catch (ArrayIndexOutOfBoundsException e){
+                                        e.printStackTrace();
+                                    }
+
+                                    if(managerAndroid.getCurrentTaskIndex()==(managerAndroid.getBluetoothTaskQueue().size()-1)){
+                                        managerAndroid.setCurrentTaskIndex(0);
+                                        Intent taskCompleted=new Intent(ACTION_FILE_CHECKING_COMPLETED);
+                                        taskCompleted.putExtra(EXTRA_FILE_CHECKING_TASK,serverBluetoothAddress);
+                                        LocalBroadcastManager.getInstance(managerAndroid.getP2pService()).sendBroadcast(taskCompleted);
+                                    }else{
+                                        start();
+                                    }
+                                    int index=managerAndroid.getCurrentTaskIndex()+1;
+                                    managerAndroid.setCurrentTaskIndex(index);
+                                    managerAndroid.getCurrentBluetoothTask().fireTaskEnded();
+
+                                }
+
+                            }
+                            break;
+
+                        case COMMAND_TAG_FILE_ACQUIRE:
+                            //command to
+                            String deviceMacAddress=receivedCommand[1];
+                            managerAndroid.getP2pService().getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceMacAddress);
+                            break;
+
+                    }
+
+                    break;
+                case MESSAGE_STATE_CHANGE:
+
+                    switch (msg.arg1) {
+
+                        case STATE_CONNECTED:
+                            sendBroadcasts(STATE_CONNECTED);
+                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Connected");
+                            break;
+                        case STATE_CONNECTING:
+                            sendBroadcasts(STATE_CONNECTING);
+                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Connecting");
+                            break;
+                        case STATE_LISTEN:
+                            sendBroadcasts(STATE_LISTEN);
+                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Listening");
+                            break;
+
+                        case STATE_NONE:
+                            sendBroadcasts(STATE_NONE);
+                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Not Connected");
+                            break;
+                    }
+
+                    break;
+
+            }
+        }
+    };
+
+
+    private void sendBroadcasts(int state){
+        Intent connectivity=new Intent(ACTION_DEVICE_BLUETOOTH_CONNECTIVITY_CHANGE);
+        connectivity.putExtra(EXTRA_DEVICE_BLUETOOTH_CONNECTIVITY_FLAG,state);
+        LocalBroadcastManager.getInstance(managerAndroid.getP2pService()).sendBroadcast(connectivity);
     }
 
-    /**
-     * Update UI title according to the current state of the chat connection
-     */
-    private synchronized void updateUserInterfaceTitle() {
-        mState = getState();
-        Log.d(TAG, "updateUserInterfaceTitle() " + mNewState + " -> " + mState);
-        mNewState = mState;
-
-        // Give the new state to the Handler so the UI Activity can update
-        mHandler.obtainMessage(MESSAGE_STATE_CHANGE, mNewState, -1).sendToTarget();
+    private Context mContext;
+    public BluetoothConnectionManager(Context context,NetworkManagerAndroid managerAndroid) {
+        mAdapter = BluetoothAdapter.getDefaultAdapter();
+        mState = STATE_NONE;
+        this.mContext=context;
+        this.managerAndroid=managerAndroid;
     }
 
     /**
@@ -132,30 +299,27 @@ public class BluetoothConnectionManager {
      */
     public synchronized void start() {
         Log.d(TAG, "start");
-
-        // Cancel any thread attempting to make a connection
         if (mConnectThread != null) {
             mConnectThread.cancel();
             mConnectThread = null;
         }
 
-        // Cancel any thread currently running a connection
         if (mConnectedThread != null) {
             mConnectedThread.cancel();
             mConnectedThread = null;
         }
 
-        // Start the thread to listen on a BluetoothServerSocket
-        if (mSecureAcceptThread == null) {
+        /*if (mSecureAcceptThread == null) {
             mSecureAcceptThread = new AcceptThread(true);
             mSecureAcceptThread.start();
-        }
+        }*/
+
         if (mInsecureAcceptThread == null) {
             mInsecureAcceptThread = new AcceptThread(false);
             mInsecureAcceptThread.start();
         }
-        // Update UI title
-        updateUserInterfaceTitle();
+
+        updateConnectionState();
     }
 
     /**
@@ -164,28 +328,25 @@ public class BluetoothConnectionManager {
      * @param device The BluetoothDevice to connect
      * @param secure Socket Security type - Secure (true) , Insecure (false)
      */
-    public synchronized void connect(BluetoothDevice device, boolean secure) {
-        Log.d(TAG, "connect to: " + device);
+    public synchronized void connectToBluetoothDevice(BluetoothDevice device, boolean secure) {
+        Log.d(TAG, "connecting to: " + device.getName());
 
-        // Cancel any thread attempting to make a connection
         if (mState == STATE_CONNECTING) {
             if (mConnectThread != null) {
                 mConnectThread.cancel();
                 mConnectThread = null;
             }
         }
-
-        // Cancel any thread currently running a connection
         if (mConnectedThread != null) {
             mConnectedThread.cancel();
             mConnectedThread = null;
         }
 
-        // Start the thread to connect with the given device
         mConnectThread = new ConnectThread(device, secure);
         mConnectThread.start();
-        // Update UI title
-        updateUserInterfaceTitle();
+
+        updateConnectionState();
+
     }
 
     /**
@@ -196,21 +357,18 @@ public class BluetoothConnectionManager {
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice
             device, final String socketType) {
-        Log.d(TAG, "connected, Socket Type:" + socketType);
+        Log.d(TAG, "connected to "+device.getName()+" "+device.getAddress());
 
-        // Cancel the thread that completed the connection
         if (mConnectThread != null) {
             mConnectThread.cancel();
             mConnectThread = null;
         }
 
-        // Cancel any thread currently running a connection
         if (mConnectedThread != null) {
             mConnectedThread.cancel();
             mConnectedThread = null;
         }
 
-        // Cancel the accept thread because we only want to connect to one device
         if (mSecureAcceptThread != null) {
             mSecureAcceptThread.cancel();
             mSecureAcceptThread = null;
@@ -220,18 +378,15 @@ public class BluetoothConnectionManager {
             mInsecureAcceptThread = null;
         }
 
-        // Start the thread to manage the connection and perform transmissions
         mConnectedThread = new ConnectedThread(socket, socketType);
         mConnectedThread.start();
 
-        // Send the name of the connected device back to the UI Activity
         Message msg = mHandler.obtainMessage(MESSAGE_DEVICE_NAME);
         Bundle bundle = new Bundle();
         bundle.putString(DEVICE_NAME, device.getName());
         msg.setData(bundle);
         mHandler.sendMessage(msg);
-        // Update UI title
-        updateUserInterfaceTitle();
+        updateConnectionState();
     }
 
     /**
@@ -260,33 +415,28 @@ public class BluetoothConnectionManager {
             mInsecureAcceptThread = null;
         }
         mState = STATE_NONE;
-        // Update UI title
-        updateUserInterfaceTitle();
+        updateConnectionState();
     }
 
     /**
-     * Write to the ConnectedThread in an unsynchronized manner
+     * Write to the ConnectedThread in an un-synchronized manner
      *
      * @param out The bytes to write
      * @see ConnectedThread#write(byte[])
      */
     public void write(byte[] out) {
-        // Create temporary object
-        ConnectedThread r;
-        // Synchronize a copy of the ConnectedThread
+        ConnectedThread thread;
         synchronized (this) {
             if (mState != STATE_CONNECTED) return;
-            r = mConnectedThread;
+            thread = mConnectedThread;
         }
-        // Perform the write unsynchronized
-        r.write(out);
+        thread.write(out);
     }
 
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
      */
     private void connectionFailed() {
-        // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(TOAST, "Unable to connect device");
@@ -294,10 +444,7 @@ public class BluetoothConnectionManager {
         mHandler.sendMessage(msg);
 
         mState = STATE_NONE;
-        // Update UI title
-        updateUserInterfaceTitle();
-
-        // Start the service over to restart listening mode
+        updateConnectionState();
         BluetoothConnectionManager.this.start();
     }
 
@@ -305,18 +452,13 @@ public class BluetoothConnectionManager {
      * Indicate that the connection was lost and notify the UI Activity.
      */
     private void connectionLost() {
-        // Send a failure message back to the Activity
         Message msg = mHandler.obtainMessage(MESSAGE_TOAST);
         Bundle bundle = new Bundle();
         bundle.putString(TOAST, "Device connection was lost");
         msg.setData(bundle);
         mHandler.sendMessage(msg);
-
         mState = STATE_NONE;
-        // Update UI title
-        updateUserInterfaceTitle();
-
-        // Start the service over to restart listening mode
+        updateConnectionState();
         BluetoothConnectionManager.this.start();
     }
 
@@ -326,15 +468,12 @@ public class BluetoothConnectionManager {
      * (or until cancelled).
      */
     private class AcceptThread extends Thread {
-        // The local server socket
         private final BluetoothServerSocket mmServerSocket;
         private String mSocketType;
 
         public AcceptThread(boolean secure) {
             BluetoothServerSocket tmp = null;
             mSocketType = secure ? "Secure" : "Insecure";
-
-            // Create a new listening server socket
             try {
                 if (secure) {
                     tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE,
@@ -355,32 +494,26 @@ public class BluetoothConnectionManager {
                     "BEGIN mAcceptThread" + this);
             setName("AcceptThread" + mSocketType);
 
-            BluetoothSocket socket = null;
+            BluetoothSocket socket;
 
-            // Listen to the server socket if we're not connected
             while (mState != STATE_CONNECTED) {
                 try {
-                    // This is a blocking call and will only return on a
-                    // successful connection or an exception
                     socket = mmServerSocket.accept();
                 } catch (IOException e) {
 
                     break;
                 }
 
-                // If a connection was accepted
                 if (socket != null) {
                     synchronized (BluetoothConnectionManager.this) {
                         switch (mState) {
                             case STATE_LISTEN:
                             case STATE_CONNECTING:
-                                // Situation normal. Start the connected thread.
                                 connected(socket, socket.getRemoteDevice(),
                                         mSocketType);
                                 break;
                             case STATE_NONE:
                             case STATE_CONNECTED:
-                                // Either not ready or already connected. Terminate new socket.
                                 try {
                                     socket.close();
                                 } catch (IOException e) {
@@ -420,9 +553,6 @@ public class BluetoothConnectionManager {
             mmDevice = device;
             BluetoothSocket tmp = null;
             mSocketType = secure ? "Secure" : "Insecure";
-
-            // Get a BluetoothSocket for a connection with the
-            // given BluetoothDevice
             try {
                 if (secure) {
                     tmp = device.createRfcommSocketToServiceRecord(
@@ -442,16 +572,12 @@ public class BluetoothConnectionManager {
             Log.i(TAG, "BEGIN mConnectThread SocketType:" + mSocketType);
             setName("ConnectThread" + mSocketType);
 
-            // Always cancel discovery because it will slow down a connection
             mAdapter.cancelDiscovery();
 
-            // Make a connection to the BluetoothSocket
             try {
-                // This is a blocking call and will only return on a
-                // successful connection or an exception
                 mmSocket.connect();
             } catch (IOException e) {
-                // Close the socket
+
                 try {
                     mmSocket.close();
                 } catch (IOException e2) {
@@ -462,12 +588,10 @@ public class BluetoothConnectionManager {
                 return;
             }
 
-            // Reset the ConnectThread because we're done
             synchronized (BluetoothConnectionManager.this) {
                 mConnectThread = null;
             }
 
-            // Start the connected thread
             connected(mmSocket, mmDevice, mSocketType);
         }
 
@@ -495,7 +619,6 @@ public class BluetoothConnectionManager {
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
-            // Get the BluetoothSocket input and output streams
             try {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
@@ -513,13 +636,9 @@ public class BluetoothConnectionManager {
             byte[] buffer = new byte[1024];
             int bytes;
 
-            // Keep listening to the InputStream while connected
             while (mState == STATE_CONNECTED) {
                 try {
-                    // Read from the InputStream
                     bytes = mmInStream.read(buffer);
-
-                    // Send the obtained bytes to the UI Activity
                     mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
                             .sendToTarget();
                 } catch (IOException e) {
@@ -539,7 +658,6 @@ public class BluetoothConnectionManager {
             try {
                 mmOutStream.write(buffer);
 
-                // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(MESSAGE_WRITE, -1, -1, buffer)
                         .sendToTarget();
             } catch (IOException e) {
@@ -558,20 +676,25 @@ public class BluetoothConnectionManager {
 
 
     /**
+     * Update current state of the bluetooth connection
+     */
+    private synchronized void updateConnectionState() {
+        mState = getState();
+        mHandler.obtainMessage(MESSAGE_STATE_CHANGE, mState, -1).sendToTarget();
+    }
+
+
+    /**
      * Sends a message.
      *
      * @param message A string of text to send.
      */
     public void sendCommandMessage(String message) {
-        // Check that we're actually connected before trying anything
         if (getState() != BluetoothConnectionManager.STATE_CONNECTED) {
 
             return;
         }
-
-        // Check that there's actually something to send
         if (message.length() > 0) {
-            // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
             write(send);
         }
@@ -582,18 +705,69 @@ public class BluetoothConnectionManager {
         return mAdapter;
     }
 
-    public String [] checkAvailability(String [] fileId){
+    /**
+     * Check files if are available locally
+     * @param fileIds- list of file ids to be checked if they are available locally
+     * @return
+     */
 
+    public List<String> checkAvailability(List<String> fileIds){
+        List<String> responses=new ArrayList<>();
         CatalogEntryInfo info;
-        String [] responses=new String[fileId.length];
-        Log.d(TAG,"Request Size"+fileId.length);
+        for(String fileId: fileIds){
+            info=CatalogController.getEntryInfo(fileId, CatalogController.SHARED_RESOURCE,mContext);
+            String isAvailable=info==null ? String.valueOf(STATUS_UNAVAILABLE):String.valueOf(STATUS_AVAILABLE);
+            responses.add(isAvailable);
 
-        for (int position=0;position<fileId.length;position++){
-            info=CatalogController.getEntryInfo(fileId[position], CatalogController.SHARED_RESOURCE,mContext);
-            String response=info==null ? String.valueOf(STATUS_UNAVAILABLE):String.valueOf(STATUS_AVAILABLE);
-            responses[position]=response;
         }
 
         return responses;
+    }
+
+
+
+
+    String getBluetoothMacAddress() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            Log.d(WifiDirectHandler.TAG, "device does not support bluetooth");
+            return null;
+        }
+        String address = mBluetoothAdapter.getAddress();
+        if (address.equals("02:00:00:00:00:00")) {
+            try {
+                ContentResolver mContentResolver = managerAndroid.getP2pService().getApplicationContext().getContentResolver();
+                address = Settings.Secure.getString(mContentResolver, BLUETOOTH_ADDRESS);
+                Log.d(WifiDirectHandler.TAG,"MAC Address - Resolved: " + address);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            Log.d(WifiDirectHandler.TAG,"MAC Address-No resolution: " + address);
+        }
+        return address;
+    }
+
+    /**
+     * Convert array of IDS to be processed to normal string form bluetooth exchange
+     * @param fileIds - File ids as string
+     * @return
+     */
+    public String idsToString(List<String> fileIds){
+        return TextUtils.join(FILE_IDS_SEPARATOR, fileIds);
+    }
+
+    /**
+     * Convert string of file id responses as received from peer
+     * device and change them to array of ids
+     * @param fileIds
+     * @return
+     */
+    private List<String> stringsToIds(String fileIds){
+        List<String> fileIdsList=new ArrayList<>();
+        Collections.addAll(fileIdsList, TextUtils.split(fileIds,FILE_IDS_SEPARATOR));
+        return fileIdsList;
     }
 }

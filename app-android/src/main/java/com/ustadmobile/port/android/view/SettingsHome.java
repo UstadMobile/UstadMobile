@@ -51,7 +51,6 @@ public class SettingsHome extends UstadBaseActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
 
-
         if(view==data_usage_settings){
             UstadMobileSystemImpl.getInstance().go(SettingsDataUsageView.VIEW_NAME, null, this);
 

@@ -31,10 +31,7 @@ import java.net.URL;
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static com.ustadmobile.port.android.network.NetworkManagerAndroid.CURRENT_NETWORK_NETID;
-import static com.ustadmobile.port.android.network.NetworkManagerAndroid.CURRENT_NETWORK_SSID;
 import static com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE.DOWNLOAD_SOURCE_CLOUD;
-import static com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE.DOWNLOAD_SOURCE_LOCAL_NETWORK;
 import static com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE.DOWNLOAD_SOURCE_P2P;
 
 
@@ -45,12 +42,11 @@ import static com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE.DOWNL
 public class DownloadTaskAndroid extends P2PTask {
 
     private NetworkManagerAndroid p2pManager;
-
     private File currentDownloadFileInfo=null;
 
 
     private static int currentStatus=-1;
-    public static final String ACTION_DOWNLOAD_COMPLETE ="com.ustadmobile.port.android.p2p.DOWNLOAD_COMPLETE";
+    public static final String ACTION_DOWNLOAD_COMPLETE ="action_download_completed";
     public static final String EXTRA_DOWNLOAD_ID ="extra_download_id";
     public static final String EXTRA_DOWNLOAD_STATUS ="extra_download_status";
     public static final String EXTRA_DOWNLOAD_SOURCE ="extra_download_source";
@@ -61,7 +57,6 @@ public class DownloadTaskAndroid extends P2PTask {
     public static final String INFO_FILE_EXTENSION=".dlinfo";
     public static final String UNFINISHED_FILE_EXTENSION=".part";
     public static final String DOWNLOAD_REQUEST_METHOD="GET";
-
     private boolean isFileResuming=false;
     private DownLoadTask downloadTask;
 
@@ -71,8 +66,7 @@ public class DownloadTaskAndroid extends P2PTask {
         public void onReceive(Context context, Intent intent) {
             LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
 
-            boolean result = intent.getBooleanExtra(WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED,
-                    false);
+            boolean result = intent.getBooleanExtra(WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED, false);
             if(!result) {
                 currentStatus=DOWNLOAD_STATUS_FAILED;
                 setDownloadStatus(currentStatus);
@@ -80,8 +74,6 @@ public class DownloadTaskAndroid extends P2PTask {
             }else {
                 DownloadTaskAndroid.this.downloadInBackground();
             }
-
-
         }
     };
 
@@ -119,15 +111,6 @@ public class DownloadTaskAndroid extends P2PTask {
      */
     @Override
     public void disconnect(String [] currentConnectedNetwork) {
-        currentConnectedNetwork[CURRENT_NETWORK_SSID]=currentConnectedNetwork[CURRENT_NETWORK_SSID].replaceAll("\\s+","\"");
-        if(currentConnectedNetwork[CURRENT_NETWORK_SSID]!=null &&
-                getNode().getNetworkSSID().replaceAll("\\s+","\"").equals(currentConnectedNetwork[CURRENT_NETWORK_SSID])){
-            p2pManager.setCurrentConnectedNetwork(currentConnectedNetwork);
-        }else{
-            p2pManager.setCurrentConnectedNetwork(currentConnectedNetwork);
-            WifiManager wifiManager = (WifiManager)p2pManager.getP2pService().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            wifiManager.enableNetwork(Integer.parseInt(currentConnectedNetwork[CURRENT_NETWORK_NETID]),true);
-        }
 
     }
 
@@ -166,8 +149,7 @@ public class DownloadTaskAndroid extends P2PTask {
                 currentStatus=DOWNLOAD_STATUS_RUNNING;
                 setDownloadStatus(currentStatus);
 
-                if(p2pManager.getCurrentDownloadSource()==DOWNLOAD_SOURCE_CLOUD ||
-                        p2pManager.getCurrentDownloadSource()==DOWNLOAD_SOURCE_LOCAL_NETWORK){
+                if(p2pManager.getCurrentDownloadSource()==DOWNLOAD_SOURCE_CLOUD){
                     downloadUri= getDownloadUri();
                 }else{
                     downloadUri= UMFileUtil.joinPaths(new String[]{P2P_SUPERNODE_SERVER_ADDRESS,
@@ -258,9 +240,7 @@ public class DownloadTaskAndroid extends P2PTask {
 
         @Override
         protected void onPostExecute(Boolean isFileAvailable) {
-            if(getTaskType()==P2PTask.TYPE_INDEX){
-                disconnect(p2pManager.getCurrentConnectedNetwork());
-            }
+
             if(isFileAvailable && currentDownloadFileInfo!=null){
                 currentDownloadFileInfo.delete();
                 if(new File(DownloadTaskAndroid.this.getDestinationPath())

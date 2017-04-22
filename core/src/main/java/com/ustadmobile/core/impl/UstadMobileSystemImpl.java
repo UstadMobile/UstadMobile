@@ -32,6 +32,7 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
@@ -392,14 +393,21 @@ public abstract class UstadMobileSystemImpl {
         String activeUserAuth = getActiveUserAuth(context);
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
 
-
-        if(activeUser == null || activeUserAuth == null) {
+        if(CoreBuildConfig.LOGIN_BEFORE_FIRST_DESTINATION && (activeUser == null || activeUserAuth == null)) {
             go(LoginView.VIEW_NAME, null, context);
+        }else {
+            go(CoreBuildConfig.FIRST_DESTINATION, context);
+        }
+
+        /*
+        if(activeUser == null || activeUserAuth == null) {
+
         }else {
             Hashtable args = BasePointController.makeDefaultBasePointArgs(context);
             go(BasePointView.VIEW_NAME, args, context);
 
         }
+        */
     }
 
     /**

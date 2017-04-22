@@ -34,12 +34,17 @@ package com.ustadmobile.port.android.view;
 
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -71,14 +76,18 @@ import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.android.network.BluetoothConnectionManager;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
+
+import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_AVAILABILITY_RESPONSE;
 
 /**
  * An Android Fragment that implements the CatalogView to show an OPDS Catalog
@@ -121,6 +130,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
+    private boolean isRequesting=false;
+
 
     /**
      * Use this factory method to create a new instance of
@@ -143,6 +154,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public CatalogOPDSFragment() {
         // Required empty public constructor
     }
+
+    private BroadcastReceiver broadcastReceiver;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -169,6 +182,26 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         rootContainer.findViewById(R.id.fragment_catalog_addbutton).setOnClickListener(this);
 
         loadCatalog();
+
+        broadcastReceiver=new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mSwipeRefreshLayout.setRefreshing(true);
+                if(BluetoothConnectionManager.ACTION_FILE_CHECKING_COMPLETED.equals(intent.getAction())){
+                    mSwipeRefreshLayout.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            onRefresh();
+                        }
+                    });
+                }
+            }
+        };
+
+        IntentFilter intentFilter=new IntentFilter();
+        intentFilter.addAction(BluetoothConnectionManager.ACTION_FILE_CHECKING_COMPLETED);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver,intentFilter);
 
         return rootContainer;
     }
@@ -322,8 +355,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(mCatalogController != null) {
+        if (mCatalogController != null) {
             mCatalogController.handleViewDestroy();
+            isRequesting=false;
+            LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         }
     }
 
@@ -658,10 +693,18 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                     if(!feed.entries[i].getAcquisitionLinks().isEmpty())
                         idList.add(feed.entries[i].id);
                 }
-                UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().areFilesAvailable(getActivity(), idList.toArray(new String[idList.size()]));
 
-                boolean isAvailableLocally = UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().availableFiles.containsKey(feed.entries[position].id);
-                        holder.mEntryCard.setLocalAvailableFile(isAvailableLocally);
+                if(position==(feed.entries.length-1) && !isRequesting){
+                    UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().checkLocalFilesAvailability(getActivity(), idList);
+                    isRequesting=true;
+                }
+
+                boolean isAvailableLocally = UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().
+                        availableFiles.containsKey(feed.entries[position].id) &&
+                        Boolean.parseBoolean(UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().
+                                availableFiles.get(feed.entries[position].id).get(FILE_AVAILABILITY_RESPONSE));
+
+                holder.mEntryCard.setLocalAvailableFile(isAvailableLocally);
                 //set the text line to be visible
                 holder.mEntryCard.setFileAvailabilityTextVisibility(true);
             }else {
@@ -693,6 +736,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             }
 
             idToCardMap.put(feed.entries[position].id, holder.mEntryCard);
+
+
         }
 
         public int getItemCount() {

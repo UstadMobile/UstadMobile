@@ -1,24 +1,17 @@
 package com.ustadmobile.port.android.network;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.wifi.WifiInfo;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.network.BluetoothTask;
@@ -28,20 +21,18 @@ import com.ustadmobile.port.sharedse.network.P2PTask;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
-import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.MESSAGE_READ;
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.MESSAGE_STATE_CHANGE;
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.MESSAGE_WRITE;
+import static com.ustadmobile.port.android.network.BluetoothConnectionManager.BLUETOOTH_ADDRESS;
+import static com.ustadmobile.port.android.network.BluetoothConnectionManager.COMMAND_TAG_FILE_AVAILABLE_CHECK;
+import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_AVAILABLE_COMMAND_SEPARATOR;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.STATE_CONNECTED;
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.STATE_CONNECTING;
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.STATE_LISTEN;
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.STATE_NONE;
 
 /**
  * Created by kileha3 on 05/02/2017.
@@ -53,23 +44,19 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
     private Map<Context, ServiceConnection> serviceConnectionMap;
 
     public static final String SERVICE_NAME = "ustadMobile";
+    public static final String SERVICE_DEVICE_AVAILABILITY = "available";
+    /**
+     * tag to get the service name if it
+     * was passed as an extra during service binding
+     */
     public static final String EXTRA_SERVICE_NAME="extra_test_service_name";
-    private static String serviceName;
-    private boolean isConnected=false;
-    private String [] fileAvailabilityResponse=null;
+    private static String currentServiceName;
 
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
     public static final String NO_PROMPT_NETWORK_PASS = "passphrase",
-            NO_PROMPT_NETWORK_NAME = "networkName",
-            COMMAND_TAG_FILE_AVAILABLE_CHECK = "file_status_check",
-            COMMAND_TAG_FILE_AVAILABLE_FEEDBACK = "file_status_feedback",
-            COMMAND_TAG_FILE_AVAILABLE_SEPARATOR = ":",
-            FILE_IDS_SEPARATOR = "@",
-            COMMAND_TAG_FILE_ACQUIRE = "acquire",
-            FILE_AVAILABILITY_RESPONSE = "available",
-            BLUETOOTH_ADDRESS = "bluetooth_address";
+            NO_PROMPT_NETWORK_NAME = "networkName";
 
-    private String [] FILE_IDSTO_PROCESS=null;
+    public static List<String> FILE_IDSTO_PROCESS=null;
 
 
     private NetworkServiceAndroid p2pService;
@@ -88,7 +75,8 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
      */
     public static final int DOWNLOAD_STATUS = 2;
 
-    private static String bluetoothAddress =null;
+    public static String DEVICE_BLUETOOTH_ADDRESS =null;
+    public static final int START_QUE_INDEX=0;
 
     public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
         this.serviceConnectionMap = serviceConnectionMap;
@@ -98,23 +86,11 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
      * Context is going to be the NetworkServiceAndroid
      */
     public void init(Object context,String service_name) {
-        serviceName=service_name;
+        currentServiceName =service_name;
         this.p2pService = (NetworkServiceAndroid) context;
-        bluetoothAddress =getBluetoothMacAddress();
-        mBluetoothManager =new BluetoothConnectionManager(p2pService.getApplicationContext(),mBluetoothHandler);
-        mBluetoothManager.start();
+        startInsecureBluetoothService();
 
         WifiInfo wifiInfo=p2pService.getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
-        if(wifiInfo!=null){
-            NetworkManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_SSID]=wifiInfo.getSSID();
-            NetworkManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_NETID]=String.valueOf(wifiInfo.getNetworkId());
-            NetworkManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]=wifiInfo.getMacAddress();
-
-        }else{
-            NetworkManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_SSID]= CURRENT_NETWORK_EMPTY_STATE;
-            NetworkManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_NETID]= CURRENT_NETWORK_EMPTY_STATE;
-            NetworkManagerAndroid.this.currentConnectedNetwork[CURRENT_NETWORK_GATWAY_ADDRESS]= CURRENT_NETWORK_EMPTY_STATE;
-        }
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
@@ -127,6 +103,8 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_CREATED_ACTION);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_TIMEOUT_ACTION);
         filter.addAction(WifiDirectHandler.Action.NORMAL_WIFIDIRECT_CONNECTIVITY_ACTION);
+        filter.addAction(BluetoothConnectionManager.ACTION_FILE_CHECKING_COMPLETED);
+        filter.addAction(BluetoothConnectionManager.ACTION_DEVICE_BLUETOOTH_CONNECTIVITY_CHANGE);
 
         LocalBroadcastManager.getInstance(p2pService).registerReceiver(mBroadcastReceiver, filter);
         boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
@@ -161,7 +139,7 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
                     DnsSdTxtRecord txtRecord = p2pService.getWifiDirectHandlerAPI().getDnsSdTxtRecordMap().get(deviceMac);
                     String fullDomain = txtRecord.getFullDomain();
-                    String ustadFullDomain = serviceName + "." + ServiceType.PRESENCE_TCP + ".local.";
+                    String ustadFullDomain = currentServiceName + "." + ServiceType.PRESENCE_TCP + ".local.";
 
                     if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
 
@@ -179,6 +157,7 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
                         if (nodeIndex < 0) {
                             NetworkManagerAndroid.this.knownNodes.add(newNode);
                             handleNodeDiscovered(newNode);
+                            Log.d(BluetoothConnectionManager.TAG,"Node count "+knownNodes.size()+" "+txtRecord.getDevice().deviceName);
                         }
                     }
 
@@ -194,14 +173,20 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
                     Toast.makeText(context, "Download with ID " + intent.getStringExtra(DownloadTaskAndroid.EXTRA_DOWNLOAD_ID) + " Finished", Toast.LENGTH_LONG).show();
                     break;
 
+                case BluetoothConnectionManager.ACTION_DEVICE_BLUETOOTH_CONNECTIVITY_CHANGE:
+                    int state=intent.getIntExtra(BluetoothConnectionManager.EXTRA_DEVICE_BLUETOOTH_CONNECTIVITY_FLAG,
+                            BluetoothConnectionManager.STATE_NONE);
+                    if(state==STATE_CONNECTED){
+                        if(!mBluetoothManager.getBluetoothMacAddress().equals(currentBluetoothTask.getNode().getNodeBluetoothAddress()) &&
+                                FILE_IDSTO_PROCESS!=null && FILE_IDSTO_PROCESS.size()>0){
+                            String checkCommand= COMMAND_TAG_FILE_AVAILABLE_CHECK +
+                                    FILE_AVAILABLE_COMMAND_SEPARATOR +mBluetoothManager.idsToString(FILE_IDSTO_PROCESS);
+                            mBluetoothManager.sendCommandMessage(checkCommand);
+                        }
+                    }
             }
         }
     };
-
-    @Override
-    public P2PTask makeDownloadTask(NetworkNode node, String downloadUri, long startTaskAfter) {
-        return new DownloadTaskAndroid(node, downloadUri, this);
-    }
 
     @Override
     protected BluetoothTask makeBlueToothTask(NetworkNode node) {
@@ -220,17 +205,11 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
             }
         }
 
-        public static ServiceData makeServiceData() {
-            HashMap<String, String> record = new HashMap<>();
-            record.put("available", "available");
-            record.put(BLUETOOTH_ADDRESS, bluetoothAddress);
-            return new ServiceData(serviceName, 8001, record, ServiceType.PRESENCE_TCP);
-        }
 
-        private HashMap<String, String> serviceData(){
+        public static HashMap<String, String> serviceData(){
             HashMap<String, String> record = new HashMap<>();
-            record.put("available", "available");
-            record.put(BLUETOOTH_ADDRESS, bluetoothAddress);
+            record.put(SERVICE_DEVICE_AVAILABILITY, "available");
+            record.put(BLUETOOTH_ADDRESS, DEVICE_BLUETOOTH_ADDRESS);
             return record;
         }
 
@@ -243,14 +222,11 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
         NetworkServiceAndroid service = getService(context);
         if(enabled) {
             service.showNotification();
-            service.getWifiDirectHandlerAPI().addLocalService(serviceName,serviceData(),null);
+            service.getWifiDirectHandlerAPI().stopServiceDiscovery();
+            service.getWifiDirectHandlerAPI().addLocalService(currentServiceName,serviceData(),null);
         }else {
             service.dismissNotification();
-            if(service.getWifiDirectHandlerAPI().isGroupFormed()){
-                service.getWifiDirectHandlerAPI().removeGroup();
-            }
-
-
+            service.getWifiDirectHandlerAPI().removeService();
             service.getWifiDirectHandlerAPI().continuouslyDiscoverServices();
         }
     }
@@ -264,6 +240,12 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
     @Override
     public boolean isSuperNodeAvailable(Object context) {
         return knownNodes.size()>0;
+    }
+
+    @Override
+    public void checkLocalFilesAvailability(Object context, List<String> fileIds) {
+        FILE_IDSTO_PROCESS=fileIds;
+        checkBluetoothQueue();
     }
 
 
@@ -292,12 +274,9 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
     @Override
     public int[] getRequestStatus(Object context, int requestId) {
         int statusVal[]=new int[3];
-        P2PTask currentTask=getDownloadRequest().get(requestId);
-        if(currentTask!=null){
-            statusVal[DOWNLOAD_BYTES_DOWNLOADED_SOFAR]=currentTask.getBytesDownloadedSoFar();
-            statusVal[DOWNLOAD_FILE_TOTAL_BYTES]=currentTask.getDownloadTotalBytes();
-            statusVal[DOWNLOAD_STATUS]=currentTask.getDownloadStatus();
-        }
+        statusVal[DOWNLOAD_BYTES_DOWNLOADED_SOFAR]=0;
+        statusVal[DOWNLOAD_FILE_TOTAL_BYTES]=0;
+        statusVal[DOWNLOAD_STATUS]=0;
         return statusVal;
     }
 
@@ -306,141 +285,16 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
         return 0;
     }
 
+    @Override
+    public void startInsecureBluetoothService() {
+        mBluetoothManager =new BluetoothConnectionManager(p2pService.getApplicationContext(),this);
+        DEVICE_BLUETOOTH_ADDRESS =mBluetoothManager.getBluetoothMacAddress();
+        mBluetoothManager.start();
+    }
 
     @Override
-    public String[] areFilesAvailable(Object context, String[] fileIds) {
-        FILE_IDSTO_PROCESS=fileIds;
-        String checkCommand= COMMAND_TAG_FILE_AVAILABLE_CHECK +
-                COMMAND_TAG_FILE_AVAILABLE_SEPARATOR +idsToString(fileIds);
-        mBluetoothManager.sendCommandMessage(checkCommand);
-        return fileAvailabilityResponse;
-    }
-
-
-    String getBluetoothMacAddress() {
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
-            Log.d(WifiDirectHandler.TAG, "device does not support bluetooth");
-            return null;
-        }
-        String address = mBluetoothAdapter.getAddress();
-        if (address.equals("02:00:00:00:00:00")) {
-
-            //  System.out.println(">>>>>G fail to get mac address " + address);
-            try {
-                ContentResolver mContentResolver = p2pService.getApplicationContext().getContentResolver();
-                address = Settings.Secure.getString(mContentResolver, BLUETOOTH_ADDRESS);
-                Log.d(WifiDirectHandler.TAG,"MAC Address - Resolved: " + address);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        } else {
-            Log.d(WifiDirectHandler.TAG,"MAC Address-No resolution: " + address);
-        }
-        return address;
-    }
-
-
-    /**
-     * Handle all outgoing and incoming bluetooth connection message exchange
-     */
-
-    private Handler mBluetoothHandler=new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what){
-                case MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    String sentCommand = new String(writeBuf);
-                    Log.d(BluetoothConnectionManager.TAG,"Sent Command: "+sentCommand);
-
-                    break;
-                case MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    String receivedCommand[]  = new String(readBuf, 0, msg.arg1).split(COMMAND_TAG_FILE_AVAILABLE_SEPARATOR);
-                    Log.d(BluetoothConnectionManager.TAG,"Received Command: command "+receivedCommand[0]+" data: "+receivedCommand[1]);
-
-                    switch (receivedCommand[0]){
-
-                        case COMMAND_TAG_FILE_AVAILABLE_CHECK:
-
-                            String [] responses= mBluetoothManager.checkAvailability(receivedCommand[1].split(FILE_IDS_SEPARATOR));
-                            String feedbackCommand= COMMAND_TAG_FILE_AVAILABLE_FEEDBACK +
-                                    COMMAND_TAG_FILE_AVAILABLE_SEPARATOR +idsToString(responses);
-
-                            mBluetoothManager.sendCommandMessage(feedbackCommand);
-                            break;
-
-                        case COMMAND_TAG_FILE_AVAILABLE_FEEDBACK:
-                           if(NetworkManagerAndroid.this.currentBluetoothTask!=null){
-                               String serverBluetoothAddress=NetworkManagerAndroid.this.currentBluetoothTask
-                                       .getNode().getNodeBluetoothAddress();
-
-                               if(!bluetoothAddress.equals(serverBluetoothAddress)){
-                                   try{
-
-                                       String [] feedback=stringsToIds(receivedCommand[1]);
-                                       for (int position=0;position<feedback.length;position++){
-                                           HashMap<String,String> response=new HashMap<>();
-                                           response.put(BLUETOOTH_ADDRESS,serverBluetoothAddress);
-                                           response.put(FILE_AVAILABILITY_RESPONSE,feedback[position].replaceAll("\\s+",""));
-
-                                           if(!NetworkManagerAndroid.this.availableFiles.containsKey(FILE_IDSTO_PROCESS[position])){
-                                               NetworkManagerAndroid.this.availableFiles.put(FILE_IDSTO_PROCESS[position],response);
-                                           }
-                                       }
-                                   }catch (ArrayIndexOutOfBoundsException e){
-                                       e.printStackTrace();
-                                   }
-                                   NetworkManagerAndroid.this.currentBluetoothTask.fireTaskEnded();
-                               }
-
-                           }
-                            break;
-
-                        case COMMAND_TAG_FILE_ACQUIRE:
-
-                            String deviceMacAddress=receivedCommand[1];
-                            p2pService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceMacAddress);
-                            break;
-
-                    }
-
-                    break;
-                case MESSAGE_STATE_CHANGE:
-
-                    switch (msg.arg1) {
-                        case STATE_CONNECTED:
-                            isConnected=true;
-                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Connected");
-                            break;
-                        case STATE_CONNECTING:
-                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Connecting");
-                            break;
-                        case STATE_LISTEN:
-                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Listening");
-                            break;
-
-                        case STATE_NONE:
-                            Log.d(BluetoothConnectionManager.TAG,"Bluetooth State: Not Connected");
-                            break;
-                    }
-
-                    break;
-            }
-        }
-    };
-
-
-    private String idsToString(String [] fileIds){
-        return TextUtils.join(FILE_IDS_SEPARATOR, fileIds);
-    }
-
-
-    private String [] stringsToIds(String stringIds){
-        return TextUtils.split(stringIds,FILE_IDS_SEPARATOR);
+    public void stopInsecureBluetoothService() {
+        mBluetoothManager.stop();
     }
 
 
@@ -454,42 +308,12 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
         return p2pService;
     }
 
-
-    /**
-     *
-     * @return all previously connected WiFi Hotspot to keep
-     * track, when  the task queue is completed then
-     * the device will be connected to this network.
-     */
-
-    public String [] getCurrentConnectedNetwork(){
-        return NetworkManagerAndroid.this.currentConnectedNetwork;
-    }
-
-    /**
-     *
-     * @param currentConnectedNetwork - set current connected
-     *                                network information (SSID,MAC address and NetID)
-     */
-    public void setCurrentConnectedNetwork(String [] currentConnectedNetwork){
-        NetworkManagerAndroid.this.currentConnectedNetwork=currentConnectedNetwork;
-    }
-
     /**
      *
      * @return HashMap of all requests made so that you can get task properties
      */
     public HashMap<Integer,P2PTask> getDownloadRequest(){
         return NetworkManagerAndroid.this.downloadRequests;
-    }
-
-    /**
-     * Get the map of all found yes available indexes
-     * @return
-     */
-
-    public HashMap<NetworkNode, UstadJSOPDSFeed> getAvailableIndexes(){
-        return availableIndexes;
     }
 
     /**
@@ -500,4 +324,37 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE
         return this.currentDownloadSource;
     }
 
+    @Override
+    public void taskEnded(P2PTask task) {
+
+    }
+
+
+    public HashMap<String,HashMap<String,String>> getAvailableFiles(){
+        return NetworkManagerAndroid.this.availableFiles;
+    }
+
+    /**
+     * Get the current running Bluetooth task
+     * @return
+     */
+    public BluetoothTask getCurrentBluetoothTask(){
+        return NetworkManagerAndroid.this.currentBluetoothTask;
+    }
+
+    /**
+     * Get bluetooth tasks queued to be processed
+     * @return
+     */
+    public Vector<BluetoothTask> getBluetoothTaskQueue(){
+        return NetworkManagerAndroid.this.bluetoothQueue;
+    }
+
+   public int getCurrentTaskIndex(){
+       return NetworkManagerAndroid.this.currentTaskIndex;
+   }
+
+   public void setCurrentTaskIndex(int index){
+       NetworkManagerAndroid.this.currentTaskIndex=index;
+   }
 }

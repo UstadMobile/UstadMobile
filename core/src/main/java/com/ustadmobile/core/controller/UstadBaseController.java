@@ -183,8 +183,7 @@ public abstract class UstadBaseController implements UstadController {
                 UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
                 return true;
             case CMD_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(SettingsDataUsageView.VIEW_NAME,
-                    new Hashtable(), context);
+                UstadMobileSystemImpl.getInstance().go(SettingsDataUsageView.VIEW_NAME,null, context);
                 return true;
             case CMD_LOGOUT:
                 LoginController.handleLogout(context);

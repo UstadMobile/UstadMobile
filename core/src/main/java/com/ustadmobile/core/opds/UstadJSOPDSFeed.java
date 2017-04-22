@@ -35,7 +35,6 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
@@ -43,18 +42,11 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 /**
+ * Represents an OPDS Feed containing entries.
  *
  * @author varuna
  */
 public class UstadJSOPDSFeed extends UstadJSOPDSItem{
-    
-    public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
-    
-    public static final String NS_DC = "http://purl.org/dc/terms/";
-    
-    public static final String NS_OPDS = "http://opds-spec.org/2010/catalog";
-    
-    public static final String NS_UMOPDSSTYLE = "http://www.ustadmobile.com/ns/xml/opdsstyle";
     
     public UstadJSOPDSEntry[] entries;
 
@@ -82,151 +74,20 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         this.id = id;
     }
 
-    /**
-     * Parse OPDS from a String
-     *
-     * @param str String with OPDS XML
-     * @return UstadJSOPDSFeed object representing the feed from the string
-     * @throws XmlPullParserException
-     * @throws IOException
-     */
-    public static UstadJSOPDSFeed loadFromXML(String str) throws XmlPullParserException, IOException {
-        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
-        ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
-        parser.setInput(bin, "UTF-8");
-        return loadFromXML(parser);
-    }
 
     /**
-     * Parse the given XML from the given input stream and return an instance of UstadJSOPDSFeed
-     * representing that OPDS feed
-     *
-     * @param in XmlPullParser to read from
-     * @return UstadJSOPDSFeed object representing the feed
-     *
-     * @throws XmlPullParserException
-     * @throws IOException
-     */
-    public static UstadJSOPDSFeed loadFromXML(InputStream in, String encoding) throws XmlPullParserException, IOException {
-        XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser(in, encoding);
-        return loadFromXML(parser);
-    }
-
-    /**
-     * Parse the given XML and return an instance of UstadJSOPDSFeed representing that OPDS feed
+     * Load the given feed from an XmlPullParser. This will parse the feed itself and all child
+     * entries.
      *
      * @param xpp XmlPullParser to read from
-     * @return UstadJSOPDSFeed object representing the feed
-     *
      * @throws XmlPullParserException
      * @throws IOException
      */
-    public static UstadJSOPDSFeed loadFromXML(XmlPullParser xpp) throws 
-            XmlPullParserException, IOException{
-        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.VERBOSE,
-            511, null);
-        UstadJSOPDSFeed resultFeed = new UstadJSOPDSFeed();
-        
-        int evtType = xpp.getEventType();
-        
-        UstadJSOPDSItem currentItem = resultFeed;
-        Vector entryVector = new Vector();
-        
-        String[] linkAttrs;
-        //cache the content string of an entry in case we dont find summary
-        String content = null;
-        String name;
-        
-        int i;
-        do {
-            name = null;
-            if(evtType == XmlPullParser.START_TAG) {
-                name = xpp.getName();
-                
-                if(name.equals(ATTR_NAMES[ATTR_ENTRY])) {
-                    currentItem = new UstadJSOPDSEntry(resultFeed);
-                }else if(name.equals(ATTR_NAMES[ATTR_TITLE]) && xpp.next() == XmlPullParser.TEXT) {                    
-                    currentItem.title = xpp.getText();
-                }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
-                    currentItem.id = xpp.getText();
-                }else if(name.equals("link")){
-                    linkAttrs = new String[UstadJSOPDSItem.LINK_ATTRS_END];
-                    for(i = 0; i < UstadJSOPDSItem.LINK_ATTRS_END; i++) {
-                        linkAttrs[i] = xpp.getAttributeValue(null, 
-                            ATTR_NAMES[i]);
-                    }
-                    currentItem.addLink(linkAttrs);
-                }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
-                    currentItem.updated = xpp.getText();
-                }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {
-                    currentItem.summary = xpp.getText();
-                }else if(name.equals("content") && xpp.next() == XmlPullParser.TEXT) {
-                    content = xpp.getText();
-                }else if(name.equals("dc:publisher") && xpp.next() == XmlPullParser.TEXT){ // Fix this
-                    currentItem.publisher = xpp.getText();
-                }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
-                    currentItem.publisher = xpp.getText();
-                }else if(currentItem == resultFeed && name.equals("umopdsstyle:bgcolor") && xpp.next() == XmlPullParser.TEXT) {
-                    currentItem.bgColor = xpp.getText();
-                }else if(currentItem == resultFeed && name.equals("umopdsstyle:textcolor") && xpp.next() == XmlPullParser.TEXT) {
-                    currentItem.textColor = xpp.getText();
-                }
-                
-                
-                else if(name.equals("author")){
-                    
-                    UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
-                    do
-                    {
-                        evtType = xpp.next();
-                        
-                        if(evtType == XmlPullParser.START_TAG) {
-                            if(xpp.getName().equals("name")){
-                                if(xpp.next() == XmlPullParser.TEXT) {
-                                    currentAuthor.name = xpp.getText();
-                                }
-                            }else if (xpp.getName().equals("uri")) {
-                                if(xpp.next() == XmlPullParser.TEXT) {
-                                    currentAuthor.uri = xpp.getText();
-                                }
-                            }
-                        }else if(evtType == XmlPullParser.END_TAG
-                                && xpp.getName().equals("author")){
-                            if (currentItem.authors == null){
-                                currentItem.authors = new Vector();
-                                currentItem.authors.addElement(currentAuthor);
-                            }else{
-                                currentItem.authors.addElement(currentAuthor);
-                            }
-                        }
-                    }while(!(evtType == XmlPullParser.END_TAG && xpp.getName().equals("author")));
-                }
-                
-            }else if(evtType == XmlPullParser.END_TAG) {
-                if(xpp.getName().equals("entry")) {
-                    if(currentItem.summary == null && content != null) {
-                        currentItem.summary = content;
-                    }
-                    
-                    entryVector.addElement(currentItem);
-                    currentItem = resultFeed;
-                    content = null;
-                }else if (xpp.getName().equals("author")){
-                    //currentItem.author = currentAuthor;
-                }
-            }
-            
-            evtType = xpp.next();
-        }while(evtType != XmlPullParser.END_DOCUMENT);
-        
-        resultFeed.entries = new UstadJSOPDSEntry[entryVector.size()];
-        entryVector.copyInto(resultFeed.entries);
-        
-        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.VERBOSE,
-            512, null);
-        
-        return resultFeed;
+    public void loadFromXpp(XmlPullParser xpp) throws XmlPullParserException, IOException{
+        loadFromXpp(xpp, this);
     }
+
+
     
     /**
      * Add an entry to the end of this feed
@@ -283,21 +144,27 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
                 UstadJSOPDSEntry.LINK_ACQUIRE, null, true, false);
         return (entries.length > 0);
     }
-    
+
+    /**
+     * Serialize the entire feed to an XmlSerializer. Creates a new Xml document using the XmlSerializer
+     *
+     * @param xs XmlSerializer to use
+     *
+     * @throws IOException
+     */
     public void serialize(XmlSerializer xs) throws IOException {
-        xs.startDocument("UTF-8", Boolean.FALSE);
-        xs.setPrefix("", NS_ATOM);
-        xs.setPrefix("dc", NS_DC);
-        xs.setPrefix("opds", NS_OPDS);
+        serializeStartDoc(xs);
         xs.startTag(NS_ATOM, "feed");
         serializeAttrs(xs);
         
         for(int i = 0; i < entries.length; i++) {
-            entries[i].serializeEntry(xs);
+            entries[i].serializeEntryTag(xs);
         }
         xs.endTag(NS_ATOM, "feed");
         xs.endDocument();
     }
+
+
     
     /**
      * Serializes the feed as XML to the given output stream.  This will flush

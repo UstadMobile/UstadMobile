@@ -8,6 +8,8 @@ import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.DialogResultListener;
+import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
@@ -30,7 +32,7 @@ import android.view.WindowManager;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class BasePointActivity extends UstadBaseActivity implements BasePointView, NavigationView.OnNavigationItemSelectedListener {
+public class BasePointActivity extends UstadBaseActivity implements BasePointView, NavigationView.OnNavigationItemSelectedListener, DialogResultListener {
 
     protected BasePointController mBasePointController;
 
@@ -51,6 +53,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     private static final int BASEPOINT_MENU_CMD_ID_OFFSET = 5000;
 
     private BasePointMenuItem openItemOnDrawerClose = null;
+
+    private BasePointMenuItem[] mNavigationDrawerItems;
 
 
     @Override
@@ -88,27 +92,42 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
                 R.string.drawer_close);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-        populateNavigationMenu();
+        setMenuItems(this.mNavigationDrawerItems);
     }
 
-    private void populateNavigationMenu() {
-        Menu drawerMenu = mDrawerNavigationView.getMenu();
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        MenuItem item;
-        String iconName;
-        for(int i = 0; i < CoreBuildConfig.BASEPOINT_MENU.length; i++) {
-            item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0, impl.getString(CoreBuildConfig.BASEPOINT_MENU[i].getTitleStringId()));
-            iconName = CoreBuildConfig.BASEPOINT_MENU[i].getIconName();
-            if(iconName != null){
-                int resId = getResources().getIdentifier(iconName, "drawable", getPackageName());
-                if(resId > 0){
-                    item.setIcon(resId);
+    @Override
+    public void setMenuItems(final BasePointMenuItem[] menuItems) {
+        this.mNavigationDrawerItems = menuItems;
+        runOnUiThread(new Runnable() {
+            public void run() {
+
+                if(mDrawerNavigationView == null)
+                    return;//the onCreate process is underway - wait
+
+                mDrawerNavigationView.getMenu().clear();
+                if(menuItems == null)
+                    return;//There are no items
+
+
+                Menu drawerMenu = mDrawerNavigationView.getMenu();
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                MenuItem item;
+                String iconName;
+
+                for(int i = 0; i < menuItems.length; i++) {
+                    item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0, impl.getString(menuItems[i].getTitleStringId()));
+                    iconName = menuItems[i].getIconName();
+                    if(iconName != null){
+                        int resId = getResources().getIdentifier(iconName, "drawable", getPackageName());
+                        if(resId > 0){
+                            item.setIcon(resId);
+                        }
+                    }
                 }
             }
+        });
 
-        }
     }
-
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
@@ -135,6 +154,11 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     }
 
     @Override
+    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
+        mBasePointController.onDialogResult(commandId, dialog, args);
+    }
+
+    @Override
     public void setClassListVisible(boolean visible) {
         this.classListVisible= visible;
     }
@@ -142,14 +166,13 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if(itemId >= BASEPOINT_MENU_CMD_ID_OFFSET && itemId < BASEPOINT_MENU_CMD_ID_OFFSET+CoreBuildConfig.BASEPOINT_MENU.length) {
+        if(itemId >= BASEPOINT_MENU_CMD_ID_OFFSET && itemId < (BASEPOINT_MENU_CMD_ID_OFFSET + mNavigationDrawerItems.length)) {
             int basePointIndex = item.getItemId() - BASEPOINT_MENU_CMD_ID_OFFSET;
-
+            mBasePointController.handleClickBasePointMenuItem(mNavigationDrawerItems[basePointIndex]);
 
             //We have to close the drawer; then navigate to avoid trouble -
             //this will be handled in onDrawerClosed
-            openItemOnDrawerClose = CoreBuildConfig.BASEPOINT_MENU[basePointIndex];
-            UstadMobileSystemImpl.getInstance().go(openItemOnDrawerClose.getDestination(), this);
+            openItemOnDrawerClose = mNavigationDrawerItems[basePointIndex];
 
             if(mDrawerLayout.isDrawerOpen(mDrawerNavigationView)) {
                 mDrawerLayout.closeDrawer(mDrawerNavigationView, true);

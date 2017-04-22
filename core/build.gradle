@@ -20,6 +20,10 @@ plugins {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
+jar {
+    //Exclude factory classes that are intended to be replaced by platform specific implementations
+    exclude("com/ustadmobile/core/impl/AcquisitionManagerFactory.class")
+}
 
 repositories {
     mavenCentral()
@@ -55,11 +59,50 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     packageName = "com.ustadmobile.core.buildconfig"
     appName = project.ext.buildConfigProperties['appName']
     clsName = "CoreBuildConfig"
-    int menuItemIndex = 0
-    String menuItemTitle=null
-    ArrayList<String> titleIdsList = new ArrayList<>()
-    ArrayList<String> destinationsList = new ArrayList<>()
-    ArrayList<String> iconList = new ArrayList<>()
+
+    ArrayList<String> baseMenuTypes = new ArrayList<>()
+    baseMenuTypes.add("guest")
+    baseMenuTypes.add("authenticated")
+
+    for(int i = 0; i < baseMenuTypes.size(); i++) {
+        String menuTypePrefix = "baseMenu." + baseMenuTypes.get(i)
+        int menuItemIndex = 0
+        String menuItemTitle=null
+        ArrayList<String> titleIdsList = new ArrayList<>()
+        ArrayList<String> destinationsList = new ArrayList<>()
+        ArrayList<String> iconList = new ArrayList<>()
+
+        while((menuItemTitle = project.ext.buildConfigProperties.getProperty(menuTypePrefix + "." + menuItemIndex + ".title")) != null) {
+            String itemPrefix = menuTypePrefix + "." + menuItemIndex
+            String itemDest = project.ext.buildConfigProperties.getProperty(itemPrefix + ".dest")
+            if(itemDest == null || itemDest.equals("null")) {
+                break
+            }
+
+            titleIdsList.add(menuItemTitle)
+            destinationsList.add(itemDest)
+            iconList.add(project.ext.buildConfigProperties.getProperty(itemPrefix + ".icon"))
+            menuItemIndex++
+        }
+
+        String basePointMenuArrayStr = "new com.ustadmobile.core.view.BasePointMenuItem[]{"
+        for(int j = 0; j< titleIdsList.size(); j++) {
+            String titleIdVal = titleIdsList.get(j)
+            if(titleIdsList[i].startsWith("MessageIDConstants")) {
+                titleIdVal = "com.ustadmobile.core." + titleIdVal
+            }
+            basePointMenuArrayStr += "new com.ustadmobile.core.view.BasePointMenuItem("+ titleIdVal + ", \"" + destinationsList.get(j) + "\", " + (iconList.get(j) != null ? "\""+iconList.get(j) + "\"": "null") +")"
+            if(j < titleIdsList.size()-1){
+                basePointMenuArrayStr += ", "
+            }
+        }
+        basePointMenuArrayStr += "}"
+
+        buildConfigField "com.ustadmobile.core.view.BasePointMenuItem[]", "BASEPOINT_MENU_" + baseMenuTypes.get(i).toUpperCase(),basePointMenuArrayStr
+    }
+
+
+    /*
     while((menuItemTitle = project.ext.buildConfigProperties.getProperty("baseMenu." + menuItemIndex + ".title")) != null) {
         String itemPrefix = "baseMenu." + menuItemIndex
         String itemDest = project.ext.buildConfigProperties.getProperty(itemPrefix + ".dest")
@@ -85,13 +128,16 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
         }
     }
     basePointMenuArrayStr += "}"
+    */
 
-    buildConfigField "com.ustadmobile.core.view.BasePointMenuItem[]", "BASEPOINT_MENU",basePointMenuArrayStr
     buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
     buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
     buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]
     buildConfigField "boolean", "BASEPOINT_BROWSEBUTTON_ENABLED", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"].equals("") ? "false" : "true"
     buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]
+    buildConfigField "String", "FIRST_DESTINATION", project.ext.buildConfigProperties["appFirstDest"]
+    buildConfigField "boolean", "LOGIN_BEFORE_FIRST_DESTINATION", project.ext.buildConfigProperties["appLoginBeforeFirstDest"]
+    buildConfigField "boolean", "LOGIN_BEFORE_DOWNLOAD", project.ext.buildConfigProperties["appLoginBeforeDownload"]
 }
 compileJava.dependsOn(generateCoreBuildConfig)
 

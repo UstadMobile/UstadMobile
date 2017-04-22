@@ -26,7 +26,7 @@ public class BluetoothConnectionTask extends BluetoothTask {
 
         String bluetoothAddress=getNode().getNodeBluetoothAddress();
         BluetoothDevice bluetoothDevice=mBluetoothAdapter.getRemoteDevice(bluetoothAddress);
-        bConnectionManager.connect(bluetoothDevice,false);
+        bConnectionManager.connectToBluetoothDevice(bluetoothDevice,false);
 
     }
 }
