@@ -45,7 +45,7 @@ import java.util.Hashtable;
  *
  * @author mike
  */
-public class TestLoginRegisterUser extends TestCase {
+public abstract class TestLoginRegisterUser extends TestCase {
     
     public TestLoginRegisterUser() {
         

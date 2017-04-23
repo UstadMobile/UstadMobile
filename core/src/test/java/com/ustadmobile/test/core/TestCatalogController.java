@@ -66,7 +66,7 @@ import org.xmlpull.v1.XmlSerializer;
 /* $if umplatform == 1  $
 public class TestCatalogController extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestCatalogController extends TestCase{
+public abstract class TestCatalogController extends TestCase{
 /* $endif */
     
     private String opdsURL;
@@ -139,7 +139,8 @@ public class TestCatalogController extends TestCase{
         
         XmlPullParser parser = impl.newPullParser();
         parser.setInput(bin, "UTF-8");
-        UstadJSOPDSFeed fromXMLItem = UstadJSOPDSFeed.loadFromXML(parser);
+        UstadJSOPDSFeed fromXMLItem = new UstadJSOPDSFeed();
+        fromXMLItem.loadFromXpp(parser);
         assertEquals("Same id when reparsed", feedItem.id, fromXMLItem.id);
         CatalogController.cacheCatalog(feedItem, CatalogController.USER_RESOURCE, 
                 context);

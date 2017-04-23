@@ -98,7 +98,7 @@ import org.xmlpull.v1.XmlSerializer;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController extends UstadBaseController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable {
+public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -834,7 +834,8 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }else {
             //Go to the entry view
             Hashtable catalogEntryArgs = new Hashtable();
-            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR, entry.serializeToString());
+            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
+                    entry.getEntryFeed().serializeToString());
             impl.go(CatalogEntryView.VIEW_NAME, catalogEntryArgs, context);
 
             /*

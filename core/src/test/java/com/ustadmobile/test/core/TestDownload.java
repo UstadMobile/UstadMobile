@@ -60,7 +60,7 @@ $endif$ */
 /* $if umplatform == 1  $
 public class TestDownload extends ActivityInstrumentationTestCase2<UstadMobileActivity> implements UMDownloadCompleteReceiver{
  $else$ */
-public class TestDownload extends TestCase implements  UMDownloadCompleteReceiver{
+public abstract class TestDownload extends TestCase implements  UMDownloadCompleteReceiver{
 /* $endif$ */
     
     private boolean downloadFinished = false;

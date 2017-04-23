@@ -68,7 +68,7 @@ import org.xmlpull.v1.XmlPullParserException;
 /* $if umplatform == 1  $
 public class TestContainerController extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestContainerController extends TestCase  {
+public abstract class TestContainerController extends TestCase  {
 /* $endif */
 
      /**

@@ -48,7 +48,7 @@ import java.util.Hashtable;
  *
  * @author mike
  */
-public class TestHTTPCacheDir extends TestCase {
+public abstract class TestHTTPCacheDir extends TestCase {
     
     private String httpRoot;
     

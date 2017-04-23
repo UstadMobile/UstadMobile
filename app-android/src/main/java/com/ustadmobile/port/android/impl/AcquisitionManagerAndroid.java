@@ -29,11 +29,11 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
         File downloadDestDir = new File(((String[])downloadDestVector.get(0))[UstadJSOPDSEntry.LINK_HREF]);
 
 
-        Vector selfLinkVector = acquireFeed.getLinks("self", null);
-        if(selfLinkVector.isEmpty())
+        String[] selfLink = acquireFeed.getSelfLink();
+        if(selfLink == null)
             throw new IllegalArgumentException("No self link on feed - required to resolve links");
 
-        String feedHref = ((String[])selfLinkVector.get(0))[UstadJSOPDSEntry.LINK_HREF];
+        String feedHref = selfLink[UstadJSOPDSEntry.LINK_HREF];
 
         Context aContext = (Context)context;
         DownloadManager manager = (DownloadManager)aContext.getSystemService(Context.DOWNLOAD_SERVICE);

@@ -42,7 +42,7 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
  *
  * @author mike
  */
-public class TestCatalogEntryInfo extends TestCase {
+public abstract class TestCatalogEntryInfo extends TestCase {
     
     public void testCatalogEntryInfo() {
         CatalogEntryInfo testInfo = new CatalogEntryInfo();

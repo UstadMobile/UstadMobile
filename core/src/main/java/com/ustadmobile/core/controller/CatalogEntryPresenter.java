@@ -1,9 +1,15 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.impl.AcquisitionManager;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.core.view.CatalogEntryView;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Created by mike on 4/17/17.
@@ -32,7 +38,9 @@ public class CatalogEntryPresenter extends UstadBaseController{
     public void onCreate() {
         if(this.args.containsKey(ARG_ENTRY_OPDS_STR)) {
             try {
-                entry = new UstadJSOPDSEntry(null);
+                UstadJSOPDSFeed entryFeed = new UstadJSOPDSFeed();
+                entryFeed.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
+                entry = entryFeed.entries[0];
                 entry.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
                 catalogEntryView.setTitle(entry.title);
 
@@ -53,7 +61,20 @@ public class CatalogEntryPresenter extends UstadBaseController{
     public void handleClickButton(int buttonId) {
         switch(buttonId) {
             case CatalogEntryView.BUTTON_DOWNLOAD:
-
+                UMStorageDir[] dirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                    CatalogController.SHARED_RESOURCE, context);
+                String[] parentSelfLink = this.entry.parentFeed.getSelfLink();
+                UstadJSOPDSFeed acquireFeed = new UstadJSOPDSFeed(
+                        parentSelfLink[UstadJSOPDSEntry.LINK_HREF], "Acquire feed",
+                        UMUUID.randomUUID().toString());
+                acquireFeed.addEntry(new UstadJSOPDSEntry(acquireFeed, entry));
+                acquireFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION, "application/file",
+                        dirs[0].getDirURI());
+                String[] selfLink = acquireFeed.getSelfLink();
+                if(selfLink == null) {
+                    acquireFeed.addLink(entry.parentFeed.getSelfLink());
+                }
+                AcquisitionManager.getInstance().acquireCatalogEntries(acquireFeed, context);
         }
     }
 

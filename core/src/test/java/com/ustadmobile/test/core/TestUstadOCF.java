@@ -61,7 +61,7 @@ import org.xmlpull.v1.XmlPullParserException;
 /* $if umplatform == 1  $
 public class TestUstadOCF extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestUstadOCF extends TestCase {
+public abstract class TestUstadOCF extends TestCase {
 /* $endif */    
     
     private byte[] ocfData;

@@ -44,7 +44,7 @@ import java.io.IOException;
  *
  * @author mike
  */
-public class TestTestUtils extends TestCase {
+public abstract class TestTestUtils extends TestCase {
     
     public TestTestUtils() {
         

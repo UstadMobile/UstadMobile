@@ -31,6 +31,7 @@
 package com.ustadmobile.core.opds;
 
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.util.UMUtil;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -62,19 +63,43 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
      * 
      * All other properties will be copied by reference.
      * 
-     * @param parentFeed
-     * @param srcItem 
+     * @param parentFeed Parent feed that this entry is linked to.
+     *                   Note: this constructor does *NOT* add itself to the parent feed. The feed's
+     *                   addItem method must be used to do this
+     * @param srcItem UstadJSOPDSEntry item to copy from
+     * @param copyLinks If true copy all links for this item.
      */
-    public UstadJSOPDSEntry(UstadJSOPDSFeed parentFeed, UstadJSOPDSEntry srcItem) {
+    public UstadJSOPDSEntry(UstadJSOPDSFeed parentFeed, UstadJSOPDSEntry srcItem, boolean copyLinks) {
         this(parentFeed);
         
         setEntryFromSrcItem(srcItem);
         
         this.linkVector = new Vector();
-        for(int i = 0; i < srcItem.linkVector.size(); i++) {
-            this.linkVector.addElement(srcItem.linkVector.elementAt(i));
+        if(copyLinks) {
+            for(int i = 0; i < srcItem.linkVector.size(); i++) {
+                this.linkVector.addElement(srcItem.linkVector.elementAt(i));
+            }
         }
     }
+
+    /**
+     * Constructor that will copy the given srcItem.  The vectors used to store
+     * links, authors etc. will be new vectors but their content will be
+     * references to the same items.
+     *
+     * All other properties will be copied by reference.
+     *
+     * This method is simply a synonym for UstadJSOPDSEntry(parentFeed, srcItem, true)
+     *
+     * @param parentFeed Parent feed that this entry is linked to.
+     *                   Note: this constructor does *NOT* add itself to the parent feed. The feed's
+     *                   addItem method must be used to do this
+     * @param srcItem UstadJSOPDSEntry item to copy from
+     */
+    public UstadJSOPDSEntry(UstadJSOPDSFeed parentFeed, UstadJSOPDSEntry srcItem) {
+        this(parentFeed, srcItem, true);
+    }
+
     
     /**
      * Create a new entry for a given OPF
@@ -163,6 +188,59 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         return this.getFirstLink(LINK_ACQUIRE, mimeType, true, false);
     }
 
+
+
+
+    public String[] getBestAcquisitionLink(final String[] preferredMimeTypes, final String[] preferredLanguages, final int mimeWeight, final int langWeight) {
+        Vector acquisitionLinks = getLinks();
+        if(acquisitionLinks.size() == 0) {
+            return null;
+        }
+
+        Object[] acquireLinks = new Object[acquisitionLinks.size()];
+        final String entryLang = getLanguage();
+
+        if(acquisitionLinks.size() > 1) {
+            acquisitionLinks.copyInto(acquireLinks);
+            UMUtil.bubbleSort(acquireLinks, new UMUtil.Comparer() {
+                @Override
+                public int compare(Object o1, Object o2) {
+                    String[] link1 = (String[]) o1;
+                    String[] link2 = (String[]) o2;
+
+                    int mimeDiff1 = UMUtil.indexInArray(preferredMimeTypes,
+                            link1[UstadJSOPDSEntry.LINK_MIMETYPE]);
+                    if(mimeDiff1 == -1)
+                        mimeDiff1 = preferredMimeTypes.length+1;
+
+                    int mimeDiff2 = UMUtil.indexInArray(preferredMimeTypes,
+                            link2[UstadJSOPDSEntry.LINK_MIMETYPE]);
+                    if(mimeDiff2 == -1)
+                        mimeDiff2 = preferredMimeTypes.length+1;
+
+                    int mimeDiff = (mimeDiff1 - mimeDiff2) * mimeWeight;
+
+                    String lang1 = link1[ATTR_HREFLANG] != null ? link1[ATTR_HREFLANG] : entryLang;
+                    String lang2 = link1[ATTR_HREFLANG] != null ? link2[ATTR_HREFLANG] : entryLang;
+                    int langDiff1 = UMUtil.indexInArray(preferredLanguages, lang1);
+                    if(langDiff1 == -1)
+                        langDiff1 = preferredLanguages.length+1;
+
+                    int langDiff2 = UMUtil.indexInArray(preferredLanguages, lang2);
+                    if(langDiff2 == -1)
+                        langDiff2 = preferredLanguages.length+1;
+
+                    int langDiff = (langDiff1 - langDiff2) * langWeight;
+
+                    return langDiff + mimeDiff;
+                }
+            });
+        }
+
+        return (String[])acquireLinks[0];
+
+    }
+
     
     public Vector getNavigationLinks(){
         return this.getLinks(null, TYPE_ATOMFEED, false, true);
@@ -224,6 +302,19 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
         serializeAttrs(xs);
         xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
+    }
+
+    /**
+     * Create an OPDS Entry Feed from this entry item.
+     *
+     * @return UstadJSOPDSFeed with one entry 
+     */
+    public UstadJSOPDSFeed getEntryFeed() {
+        String feedHref = this.parentFeed != null ? this.parentFeed.href : null;
+        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(feedHref,this.title, this.id + "-um-entry");
+        feed.addEntry(new UstadJSOPDSEntry(this.parentFeed, this));
+        feed.addLink(LINK_REL_SELF, UstadJSOPDSFeed.TYPE_ACQUISITIONFEED, feedHref);
+        return feed;
     }
 
 }

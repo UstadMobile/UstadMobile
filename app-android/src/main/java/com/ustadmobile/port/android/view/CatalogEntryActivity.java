@@ -18,9 +18,11 @@ import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 
-public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView {
+public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener {
 
     private CatalogEntryPresenter mPresenter;
 
@@ -67,6 +69,11 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         }
         descTmp.setText(str);
 
+        Enumeration<Integer> buttonIds = BUTTON_ID_MAP.keys();
+        while(buttonIds.hasMoreElements()) {
+            findViewById(BUTTON_ID_MAP.get(buttonIds.nextElement())).setOnClickListener(this);
+        }
+
         //mCollapsingToolbar = (CollapsingToolbarLayout)findViewById(R.id.activity_catalog_entry_collapsing_toolbar);
 
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
@@ -97,6 +104,23 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             }
         });
         seeAlsoRecyclerView.setNestedScrollingEnabled(false);
+    }
+
+    private int getButtonIdFromViewId(int viewId) {
+        Enumeration<Integer> enumeration = BUTTON_ID_MAP.keys();
+        Integer buttonId;
+        while(enumeration.hasMoreElements()) {
+            buttonId = enumeration.nextElement();
+            if(BUTTON_ID_MAP.get(buttonId).equals(viewId))
+                return buttonId;
+        }
+
+        return -1;
+    }
+
+    @Override
+    public void onClick(View v) {
+        mPresenter.handleClickButton(getButtonIdFromViewId(v.getId()));
     }
 
     @Override

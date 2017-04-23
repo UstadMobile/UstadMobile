@@ -58,6 +58,8 @@ public abstract class UstadJSOPDSItem {
     
     protected Vector linkVector;
 
+    protected String language;
+
     public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
 
     public static final String NS_DC = "http://purl.org/dc/terms/";
@@ -83,7 +85,7 @@ public abstract class UstadJSOPDSItem {
         "href", //ATTR_HREF
         "length", //ATTR_LENGTH
         "title",  //ATTR_TITLE
-        "hreflang", //AtTR_HREFLANG
+        "hreflang", //ATTR_HREFLANG
         "id", //ATTR_ID
         "summary",//ATTR_SUMMARY
         "publisher", //ATTR_PUBLISHER
@@ -141,6 +143,8 @@ public abstract class UstadJSOPDSItem {
     public static String LINK_ACQUIRE_OPENACCESS = 
            "http://opds-spec.org/acquisition/open-access";
 
+    public static final String LINK_REL_SELF = "self";
+
     /**
     * Type to be used for a catalog link of an acquisition feed as per OPDS spec
     * 
@@ -176,13 +180,30 @@ public abstract class UstadJSOPDSItem {
     * @type String
     */
     public static String LINK_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
-    
-    
+
 
     public UstadJSOPDSItem() {
         this.linkVector = new Vector();
     }
-    
+
+    /**
+     * The language of this item as specified by the dublin core dc:language tag if present
+     *
+     * @return Language specified by dc language tag, or null if not present
+     */
+    public String getLanguage() {
+        return language;
+    }
+
+    /**
+     * The language of this item as specified by the dublin core dc:language tag
+     *
+     * @param language The langauge for this item
+     */
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
     public void addLink(String rel, String mimeType, String href) {
         linkVector.addElement(new String[]{rel, mimeType, href, null, null, null});
     }
@@ -443,6 +464,8 @@ public abstract class UstadJSOPDSItem {
                     this.publisher = xpp.getText();
                 }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
                     this.publisher = xpp.getText();
+                }else if(name.equals("dc:language") && xpp.next() == XmlPullParser.TEXT) {
+                    this.language = xpp.getText();
                 }else if(name.equals("author")){
                     UstadJSOPDSAuthor currentAuthor = new UstadJSOPDSAuthor();
                     do {
@@ -512,6 +535,33 @@ public abstract class UstadJSOPDSItem {
         loadFromXpp(parser);
     }
 
+    /**
+     * Find a list of the languages a link is available in. If no language is specified on hreflang
+     * then we assume that link is in the language of the item it came from.
+     *
+     * @param links Vector of String[] arrays representing links
+     * @param languageList (can be null) The vector into which we will add new languages found.
+     *
+     * @return Vector containing all distinct languages found
+     */
+    public Vector getHrefLanguagesFromLinks(Vector links, Vector languageList) {
+        if(languageList == null)
+            languageList = new Vector();
+
+        int numLinks = links.size();
+        String lang;
+        for(int i = 0; i < numLinks; i++) {
+            lang = ((String[])links.elementAt(i))[ATTR_HREFLANG];
+            if(lang == null)
+                lang = getLanguage();
+
+            if(languageList.indexOf(lang) == -1)
+                languageList.addElement(lang);
+        }
+
+        return languageList;
+    }
+
 
     private int parseColorString(String colorStr) {
         if(bgColor == null) {
@@ -535,5 +585,8 @@ public abstract class UstadJSOPDSItem {
     public int getTextColor() {
         return parseColorString(textColor);
     }
+
+
+
 
 }
