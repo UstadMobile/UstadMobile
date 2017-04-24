@@ -32,6 +32,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.AcquisitionStatusEvent;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -765,12 +766,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      */
     public void handleClickDownloadAll() {
         selectedEntries = getModel().opdsFeed.entries;
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        view.showConfirmDialog(impl.getString(MessageIDConstants.download_q),
-            LocaleUtil.formatMessage(impl.getString(MessageIDConstants.download_all_q),
-                String.valueOf(selectedEntries.length)),
-                impl.getString(MessageIDConstants.ok), impl.getString(MessageIDConstants.cancel),
-                CMD_DOWNLOADENTRY);
+        handleClickDownload(getModel().opdsFeed);
     }
     
     /**
@@ -834,27 +830,11 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         }else {
             //Go to the entry view
             Hashtable catalogEntryArgs = new Hashtable();
+            UstadJSOPDSFeed entryFeed = entry.getEntryFeed();
+            String[] entryAbsoluteLink = entryFeed.getAbsoluteSelfLink();
             catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
                     entry.getEntryFeed().serializeToString());
             impl.go(CatalogEntryView.VIEW_NAME, catalogEntryArgs, context);
-
-            /*
-            CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
-                    SHARED_RESOURCE | USER_RESOURCE, getContext());
-            if(entryInfo != null && entryInfo.acquisitionStatus == STATUS_ACQUIRED) {
-                Hashtable openArgs = new Hashtable();
-                openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
-                openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
-                openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
-                UstadMobileSystemImpl.getInstance().go(ContainerView.VIEW_NAME, openArgs,
-                        getContext());
-            }else if(isInProgress(entry.id)){
-                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                        impl.getString(MessageIDConstants.download_in_progress), AppView.LENGTH_LONG);
-            }else{
-                this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
-            }
-            */
         }
     }
 
@@ -2599,5 +2579,18 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         view.refresh();
     }
 
+    @Override
+    protected void onDownloadStarted() {
 
+    }
+
+    @Override
+    protected void onEntriesRemoved() {
+
+    }
+
+    @Override
+    public void statusUpdated(AcquisitionStatusEvent event) {
+
+    }
 }

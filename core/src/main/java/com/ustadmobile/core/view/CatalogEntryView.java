@@ -44,4 +44,11 @@ public interface CatalogEntryView extends UstadView {
     void setDescription(String description);
 
     void setTitle(String title);
+
+    /**
+     * Sets whether or not the progress section of the view (progress bar, status text etc) are
+     * visible
+     * @param visible
+     */
+    void setProgressVisible(boolean visible);
 }

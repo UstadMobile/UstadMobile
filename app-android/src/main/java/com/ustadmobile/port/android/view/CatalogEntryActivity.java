@@ -163,4 +163,16 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         super.setTitle(title);
         //mCollapsingToolbar.setTitle(title);
     }
+
+    @Override
+    public void setProgressVisible(boolean visible) {
+        findViewById(R.id.activity_catalog_entry_download_status_layout).setVisibility(
+                visible? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mPresenter.onDestroy();
+    }
 }

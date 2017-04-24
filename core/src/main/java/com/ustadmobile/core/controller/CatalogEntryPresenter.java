@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.AcquisitionManager;
+import com.ustadmobile.core.impl.AcquisitionStatusEvent;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -15,7 +16,7 @@ import java.util.Vector;
  * Created by mike on 4/17/17.
  */
 
-public class CatalogEntryPresenter extends UstadBaseController{
+public class CatalogEntryPresenter extends BaseCatalogController{
 
     private CatalogEntryView catalogEntryView;
 
@@ -24,6 +25,8 @@ public class CatalogEntryPresenter extends UstadBaseController{
     public static final String ARG_ENTRY_OPDS_STR = "opds_str";
 
     private UstadJSOPDSEntry entry;
+
+    private UstadJSOPDSFeed entryFeed;
 
     public CatalogEntryPresenter(Object context) {
         super(context);
@@ -38,7 +41,7 @@ public class CatalogEntryPresenter extends UstadBaseController{
     public void onCreate() {
         if(this.args.containsKey(ARG_ENTRY_OPDS_STR)) {
             try {
-                UstadJSOPDSFeed entryFeed = new UstadJSOPDSFeed();
+                entryFeed = new UstadJSOPDSFeed();
                 entryFeed.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
                 entry = entryFeed.entries[0];
                 entry.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
@@ -56,31 +59,57 @@ public class CatalogEntryPresenter extends UstadBaseController{
                 e.printStackTrace();
             }
         }
+
+        AcquisitionManager.getInstance().registerEntryAquisitionStatusListener(this, context);
+
     }
 
     public void handleClickButton(int buttonId) {
         switch(buttonId) {
             case CatalogEntryView.BUTTON_DOWNLOAD:
-                UMStorageDir[] dirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
-                    CatalogController.SHARED_RESOURCE, context);
-                String[] parentSelfLink = this.entry.parentFeed.getSelfLink();
-                UstadJSOPDSFeed acquireFeed = new UstadJSOPDSFeed(
-                        parentSelfLink[UstadJSOPDSEntry.LINK_HREF], "Acquire feed",
-                        UMUUID.randomUUID().toString());
-                acquireFeed.addEntry(new UstadJSOPDSEntry(acquireFeed, entry));
-                acquireFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION, "application/file",
-                        dirs[0].getDirURI());
-                String[] selfLink = acquireFeed.getSelfLink();
-                if(selfLink == null) {
-                    acquireFeed.addLink(entry.parentFeed.getSelfLink());
-                }
-                AcquisitionManager.getInstance().acquireCatalogEntries(acquireFeed, context);
+                handleClickDownload(entryFeed);
+                break;
+
+            case CatalogEntryView.BUTTON_REMOVE:
+                handleClickRemove(new UstadJSOPDSEntry[]{entry});
+                break;
+
         }
     }
 
+    @Override
+    protected void onDownloadStarted() {
+        catalogEntryView.setProgressVisible(true);
+    }
+
+    @Override
+    protected void onEntriesRemoved() {
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, true);
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE, false);
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, false);
+    }
 
     @Override
     public void setUIStrings() {
 
+    }
+
+    @Override
+    public void statusUpdated(AcquisitionStatusEvent event) {
+        if(event.getEntryId() != null && event.getEntryId().equals(entry.id)) {
+            catalogEntryView.setProgress(event.getBytesDownloadedSoFar() / event.getTotalBytes());
+            switch(event.getStatus()) {
+                case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
+                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
+                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE, true);
+                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, true);
+                    catalogEntryView.setProgressVisible(false);
+                    registerItemAcquisitionCompleted(event.getEntryId());
+            }
+        }
+    }
+
+    public void onDestroy() {
+        AcquisitionManager.getInstance().unregisterEntryAquisitionStatusListener(this, context);
     }
 }

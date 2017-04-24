@@ -35,10 +35,13 @@ import com.ustadmobile.core.impl.TinCanQueueEvent;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.core.view.UserSettingsView;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -218,5 +221,7 @@ public abstract class UstadBaseController implements UstadController {
         fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
     }
+
+
 
 }

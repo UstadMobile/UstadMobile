@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.impl;
 
+import java.util.Hashtable;
+
 /**
  *
  * @author mike
@@ -750,4 +752,14 @@ public class UstadMobileConstants {
         "Zambia",
         "Zimbabwe"
     };
+
+    public static final Hashtable LANGUAGE_NAMES = new Hashtable();
+
+    static {
+        LANGUAGE_NAMES.put("en", "English");
+        LANGUAGE_NAMES.put("en-US", "English (US)");
+        LANGUAGE_NAMES.put("ps", "پښتو");
+        LANGUAGE_NAMES.put("fa-AF", "دری");
+    }
+
 }

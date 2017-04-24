@@ -146,6 +146,15 @@ public abstract class UstadJSOPDSItem {
     public static final String LINK_REL_SELF = "self";
 
     /**
+     * Sometimes we need to know where a feed came from in order to resolve a link contained in that
+     * feed. The self link itself might be relative. The feed might be serialized along the way.
+     * Therefor we need to embed an absolute link to the feed itself.
+     *
+     * We do this by adding a link with the rel attribute set
+     */
+    public static final String LINK_REL_SELF_ABSOLUTE = "http://www.ustadmobile.com/namespace/self-absolute";
+
+    /**
     * Type to be used for a catalog link of an acquisition feed as per OPDS spec
     * 
     * @type String
@@ -204,8 +213,10 @@ public abstract class UstadJSOPDSItem {
         this.language = language;
     }
 
-    public void addLink(String rel, String mimeType, String href) {
-        linkVector.addElement(new String[]{rel, mimeType, href, null, null, null});
+    public String[] addLink(String rel, String mimeType, String href) {
+        String[] newLink = new String[]{rel, mimeType, href, null, null, null};
+        linkVector.addElement(newLink);
+        return newLink;
     }
     
     /**

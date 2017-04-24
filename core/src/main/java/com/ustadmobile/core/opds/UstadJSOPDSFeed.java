@@ -33,7 +33,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Vector;
@@ -161,6 +160,14 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     public void serialize(XmlSerializer xs) throws IOException {
         serializeStartDoc(xs);
         xs.startTag(NS_ATOM, "feed");
+
+        //set the href where this came from if not already added as a link
+        Vector absoluteSelfLink = getLinks(LINK_REL_SELF_ABSOLUTE, null);
+        if(absoluteSelfLink.isEmpty()) {
+            //Todo: this should be the feeds mime type
+            addLink(LINK_REL_SELF_ABSOLUTE, "application/xml", href);
+        }
+
         serializeAttrs(xs);
         
         for(int i = 0; i < entries.length; i++) {
@@ -208,6 +215,21 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         return selfLink;
     }
 
+
+    /**
+     * Get an absolute link to where this catalog was loaded from
+     * @return
+     */
+    public String[] getAbsoluteSelfLink() {
+        String[] absoluteSelfLink = getFirstLink(LINK_REL_SELF_ABSOLUTE, null);
+        if(absoluteSelfLink == null && href != null){
+            absoluteSelfLink = addLink(LINK_REL_SELF_ABSOLUTE, TYPE_ACQUISITIONFEED, href);
+        }
+
+
+        return absoluteSelfLink;
+    }
+
     /**
      * Returns the number of entries in this feed
      *
@@ -236,6 +258,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      */
     public UstadJSOPDSFeed selectAcquisitionLinks(final String[] preferredMimeTypes, final String[] preferredLangs, int mimeWeight, int langWeight) {
         UstadJSOPDSFeed retFeed = new UstadJSOPDSFeed(href, title, id);
+        retFeed.addLink(getAbsoluteSelfLink());
 
         int numEntries = getNumEntries();
         UstadJSOPDSEntry srcEntry;
