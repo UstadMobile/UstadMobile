@@ -1,4 +1,4 @@
-package com.ustadmobile.impl;
+package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.port.android.impl.AcquisitionManagerAndroid;

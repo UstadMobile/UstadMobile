@@ -52,7 +52,7 @@ import com.ustadmobile.core.util.UMUtil;
 /* $if umplatform == 1  $
 public class TestPreferences extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
-public class TestPreferences extends TestCase {
+public abstract class TestPreferences extends TestCase {
 /* $endif */
    
     

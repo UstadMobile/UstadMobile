@@ -14,10 +14,13 @@ public class AcquisitionStatusEvent {
 
     private long bytesDownloadedSoFar;
 
-    public AcquisitionStatusEvent(int status, long totalBytes, long bytesDownloadedSoFar) {
+    String entryId;
+
+    public AcquisitionStatusEvent(int status, long totalBytes, long bytesDownloadedSoFar, String entryId) {
         this.status  = status;
         this.totalBytes = totalBytes;
         this.bytesDownloadedSoFar = bytesDownloadedSoFar;
+        this.entryId = entryId;
     }
 
 
@@ -52,5 +55,9 @@ public class AcquisitionStatusEvent {
 
     public void setBytesDownloadedSoFar(long bytesDownloadedSoFar) {
         this.bytesDownloadedSoFar = bytesDownloadedSoFar;
+    }
+
+    public String getEntryId() {
+        return entryId;
     }
 }

@@ -58,7 +58,7 @@ $endif$ */
 /* $if umplatform == 1  $
 public class TestCacheAndStorageDir extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
-public class TestCacheAndStorageDir extends TestCase{
+public abstract class TestCacheAndStorageDir extends TestCase{
 /* $endif$ */
 
     public TestCacheAndStorageDir() {

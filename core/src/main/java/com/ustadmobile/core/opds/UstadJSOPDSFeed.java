@@ -33,7 +33,6 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Vector;
@@ -54,6 +53,12 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * The absolute URL of this catalog (HTTP or Filesystem based)
      */
     public String href;
+
+    /**
+     * Cached reference to the OPDS self link
+     */
+    private String[] selfLink;
+
     
     public UstadJSOPDSFeed() {
         href = null;
@@ -155,6 +160,14 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     public void serialize(XmlSerializer xs) throws IOException {
         serializeStartDoc(xs);
         xs.startTag(NS_ATOM, "feed");
+
+        //set the href where this came from if not already added as a link
+        Vector absoluteSelfLink = getLinks(LINK_REL_SELF_ABSOLUTE, null);
+        if(absoluteSelfLink.isEmpty()) {
+            //Todo: this should be the feeds mime type
+            addLink(LINK_REL_SELF_ABSOLUTE, "application/xml", href);
+        }
+
         serializeAttrs(xs);
         
         for(int i = 0; i < entries.length; i++) {
@@ -190,6 +203,106 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         }
         
     }
-    
-    
+
+    /**
+     *
+     */
+    public String[] getSelfLink() {
+        if(selfLink == null) {
+            selfLink = getFirstLink(LINK_REL_SELF, null);
+        }
+
+        return selfLink;
+    }
+
+
+    /**
+     * Get an absolute link to where this catalog was loaded from
+     * @return
+     */
+    public String[] getAbsoluteSelfLink() {
+        String[] absoluteSelfLink = getFirstLink(LINK_REL_SELF_ABSOLUTE, null);
+        if(absoluteSelfLink == null && href != null){
+            absoluteSelfLink = addLink(LINK_REL_SELF_ABSOLUTE, TYPE_ACQUISITIONFEED, href);
+        }
+
+
+        return absoluteSelfLink;
+    }
+
+    /**
+     * Returns the number of entries in this feed
+     *
+     * @return Number of entries in this feed
+     */
+    public int getNumEntries() {
+        return entries.length;
+    }
+
+
+    /**
+     * Return the entry at the given index in this feed
+     *
+     * @param index Index of the entry
+     * @return Entry at the given index
+     */
+    public UstadJSOPDSEntry getEntry(int index) {
+        return entries[index];
+    }
+
+    /**
+     * Given acquisition preferences : select the links to actually download
+     *
+     * @param preferredMimeTypes
+     * @param preferredLangs
+     */
+    public UstadJSOPDSFeed selectAcquisitionLinks(final String[] preferredMimeTypes, final String[] preferredLangs, int mimeWeight, int langWeight) {
+        UstadJSOPDSFeed retFeed = new UstadJSOPDSFeed(href, title, id);
+        retFeed.addLink(getAbsoluteSelfLink());
+
+        int numEntries = getNumEntries();
+        UstadJSOPDSEntry srcEntry;
+        String[] acquisitionLinks;
+        for(int i = 0; i < numEntries; i++) {
+            srcEntry = getEntry(i);
+            UstadJSOPDSEntry acquireEntry = new UstadJSOPDSEntry(retFeed, srcEntry, false);
+            acquisitionLinks = srcEntry.getBestAcquisitionLink(preferredMimeTypes, preferredLangs, mimeWeight, langWeight);
+            if(acquisitionLinks != null) {
+                acquireEntry.addLink(acquisitionLinks);
+                retFeed.addEntry(acquireEntry);
+            }
+        }
+
+        return retFeed;
+    }
+
+    /**
+     * Finds the langauges for which entries from this feed are available.
+     *
+     * @param linkRel Link relationship to search for - e.g. acquisition
+     * @param mimeType mime type to search for
+     * @param relByPrefix whether to match by prefix for relationship as per getLinks
+     * @param mimeTypeByPrefix whether to match mime type by prefix as per getLinks
+     * @param languageList Optionally an existing vector to use to add languages found to
+     * @return A vector with a list of all distinct languages found in all entries of this feed
+     */
+    public Vector getLinkHrefLanguageOptions(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix, Vector languageList) {
+        int numEntries = getNumEntries();
+        if(languageList == null)
+            languageList = new Vector();
+
+        Vector linkVector;
+        for(int i = 0; i < numEntries; i++) {
+            linkVector = this.entries[i].getLinks(linkRel, mimeType, relByPrefix, mimeTypeByPrefix);
+            this.entries[i].getHrefLanguagesFromLinks(linkVector, languageList);
+        }
+
+        return languageList;
+    }
+
+
+
+
+
+
 }

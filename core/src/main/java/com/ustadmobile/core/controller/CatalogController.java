@@ -32,6 +32,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.AcquisitionStatusEvent;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -52,6 +53,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.UstadView;
@@ -97,7 +99,7 @@ import org.xmlpull.v1.XmlSerializer;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController extends UstadBaseController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable {
+public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -177,12 +179,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     
     
     private UstadJSOPDSEntry[] selectedEntries;
-    
-    /**
-     * The acquire request that the user is in the process of building up
-     */
-    private AcquireRequest acquireRequest;
-    
+
     /**
      * The locations available for a user to store downloaded content
      */
@@ -764,12 +761,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
      */
     public void handleClickDownloadAll() {
         selectedEntries = getModel().opdsFeed.entries;
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        view.showConfirmDialog(impl.getString(MessageIDConstants.download_q),
-            LocaleUtil.formatMessage(impl.getString(MessageIDConstants.download_all_q),
-                String.valueOf(selectedEntries.length)),
-                impl.getString(MessageIDConstants.ok), impl.getString(MessageIDConstants.cancel),
-                CMD_DOWNLOADENTRY);
+        handleClickDownload(getModel().opdsFeed);
     }
     
     /**
@@ -831,21 +823,13 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                         firstLink[UstadJSOPDSItem.ATTR_HREF]));
             }
         }else {
-            CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id, 
-                    SHARED_RESOURCE | USER_RESOURCE, getContext());
-            if(entryInfo != null && entryInfo.acquisitionStatus == STATUS_ACQUIRED) {
-                Hashtable openArgs = new Hashtable();
-                openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
-                openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
-                openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
-                UstadMobileSystemImpl.getInstance().go(ContainerView.VIEW_NAME, openArgs,
-                        getContext());
-            }else if(isInProgress(entry.id)){
-                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                        impl.getString(MessageIDConstants.download_in_progress), AppView.LENGTH_LONG);
-            }else{
-                this.handleClickDownloadEntries(new UstadJSOPDSEntry[]{entry});
-            }
+            //Go to the entry view
+            Hashtable catalogEntryArgs = new Hashtable();
+            UstadJSOPDSFeed entryFeed = entry.getEntryFeed();
+            String[] entryAbsoluteLink = entryFeed.getAbsoluteSelfLink();
+            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
+                    entry.getEntryFeed().serializeToString());
+            impl.go(CatalogEntryView.VIEW_NAME, catalogEntryArgs, context);
         }
     }
 
@@ -869,108 +853,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     public void handleClickBrowseButton() {
         handleCatalogSelected(browseButtonURL);
     }
-    
-    /**
-     * Handle when the user has selected where the entries they want to 
-     * download should be stored
-     * 
-     * @param storageMode 
-     */
-    public void handleSelectDownloadStorageMode(int storageMode) {
-        acquireRequest.setResourceMode(storageMode);
-        UMStorageDir[] allDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
-            storageMode, getContext());
-        Vector availableVector = new Vector();
-        for(int i = 0; i < allDirs.length; i++) {
-            if(allDirs[i].isAvailable() && allDirs[i].isWritable()) {
-                availableVector.addElement(allDirs[i]);
-            }
-        }
-        availableStorageDirs = new UMStorageDir[availableVector.size()];
-        availableVector.copyInto(availableStorageDirs);
-        
-        String[] storageChoices = new String[availableStorageDirs.length];
-        for(int i = 0; i < storageChoices.length; i++) {
-            storageChoices[i] = availableStorageDirs[i].getName();
-        }
-        UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog(
-            UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.save_to),
-            storageChoices, CMD_SELECT_STORAGE_DIR, this);
-    }
 
-    /**
-     * Handle when the choice dialog has resulted in a decision 
-     * 
-     * The methods the user goes through to acquire entries are:
-     *  1. handleClickDownloadEntries : Prompt user to choose to download to 
-     *     their own dir or shared dir
-     * 
-     *  2. handleSelectStorageMode : Get a list of available directories 
-     *     (e.g. device, sd card): allow the user to select where they want to
-     *     save files.
-     * 
-     * 3.  handleSelectDestinationDir: User has chosen a directory: If required
-     *     prompt the user to choose their preferred format for download
-     * 
-     * 4.  handleConfirmDownload: Everything ready to go: start acquisition
-     * 
-     * @param commandId
-     * @param choice 
-     */
-    public void appViewChoiceSelected(int commandId, int choice) {
-        AppView appView = UstadMobileSystemImpl.getInstance().getAppView(getContext());
-        switch(commandId) {
-            case CMD_SELECT_SHARED_OR_USERONLY:
-                switch(choice) {
-                    case CHOICE_DOWNLOAD_USER:
-                        handleSelectDownloadStorageMode(USER_RESOURCE);
-                        break;
-                    case CHOICE_DOWNLOAD_SHARED:
-                        handleSelectDownloadStorageMode(SHARED_RESOURCE);
-                        break;
-                    case CHOICE_DOWNLOAD_CANCEL:
-                        appView.dismissChoiceDialog();
-                        break;
-                }
-                break;
-                
-            case CMD_SELECT_STORAGE_DIR:
-                //here we need to call confirmDownload - and add a parameter for the storage dir selected
-                appView.dismissChoiceDialog();
-                String destDirURI = availableStorageDirs[choice].getDirURI();
-                UstadMobileSystemImpl.l(UMLog.DEBUG, 526, "#" + choice + ": " 
-                    + destDirURI);
-                handleSelectDestDir(selectedEntries, destDirURI);
-                break;
-            case CMD_SELECT_FORMAT:
-                handleEntryFormatSelected(choice, false);
-                appView.dismissChoiceDialog();
-                
-                    
-        }
-    }
-    
-    
-    
-    /**
-     * This should be called when the user has selected entries and requested
-     * them to be downloaded
-     * 
-     * @param entries The entries selected by the user to download
-     */
-    public void handleClickDownloadEntries(final UstadJSOPDSEntry[] entries) {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        selectedEntries = entries;
-        acquireRequest = new AcquireRequest(entries, null, 
-            impl.getActiveUser(getContext()), impl.getActiveUserAuth(getContext()), 
-            -1, getContext(), this);
-        
-        String[] choices = new String[]{impl.getString(MessageIDConstants.all_users),
-            impl.getString(MessageIDConstants.only_me), impl.getString(MessageIDConstants.cancel)};
-        impl.getAppView(getContext()).showChoiceDialog(impl.getString(MessageIDConstants.download_for),
-            choices, CMD_SELECT_SHARED_OR_USERONLY, this);
-    }
-    
     /**
      * Called when the user makes a choice on the confirm dialog
      * 
@@ -988,109 +871,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
                 this.handleConfirmDeleteEntries();
                 break;
         }
-    }
-    
-    
-    /**
-     * Triggered when the user confirms that they wish to download a given set 
-     * of entries
-     * 
-     * @param entries - the entries that the user wants to download
-     * @param destDirURI - the directory in which the entries should be saved
-     */
-    public void handleSelectDestDir(UstadJSOPDSEntry[] entries, String destDirURI) {
-        acquireRequest.setDestDirPath(destDirURI);
-        
-        //check and see if we need to choose formats...
-        promptSelectEntryFormat();
-    }
-    
-    public void handleEntryFormatSelected(int choice, boolean setAll) {
-        acquireRequest.setSelectedFormat(acquireRequest.currentFormatChoiceEntry,
-            acquireRequest.getCurrentFormatOptions()[choice]);
-        //for any remaining entries...
-        promptSelectEntryFormat();
-    }
-    
-    /**
-     * 
-     */
-    public void promptSelectEntryFormat() {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        
-        Vector acquireLinks;
-        int i;
-        int j;
-        String[] currentLink;        
-        
-        for(i = 0; i < acquireRequest.getEntries().length; i++) {
-            if(acquireRequest.getSelectedFormat(i) != null) {
-                continue;//skip over whatever we already have a format for
-            }
-            acquireLinks = filterAcquisitionLinksByProfile(
-                acquireRequest.getEntries()[i].getAcquisitionLinks(),
-                impl.getUMProfileName());
-            
-            //check and see how many types we have...
-            if(acquireLinks.size() == 1) {
-                //set this one and continue
-                currentLink = (String[])acquireLinks.elementAt(0);
-                acquireRequest.setSelectedFormat(i, 
-                    currentLink[UstadJSOPDSItem.ATTR_MIMETYPE]);
-            }else {
-                String mimeChoices[] = new String[acquireLinks.size()];
-                String choiceLabels[] = new String[acquireLinks.size()];
-                
-                for(j = 0; j < mimeChoices.length; j++) {
-                    currentLink = (String[])acquireLinks.elementAt(j);
-                    mimeChoices[j] = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
-                    if(currentLink[UstadJSOPDSItem.ATTR_TITLE] != null) {
-                        choiceLabels[j] = currentLink[UstadJSOPDSItem.ATTR_TITLE];
-                    }else {
-                        choiceLabels[j] = currentLink[UstadJSOPDSItem.ATTR_MIMETYPE];
-                    }
-                    
-                    if(currentLink[UstadJSOPDSItem.ATTR_LENGTH] != null) {
-                        try {
-                            choiceLabels[j] += "(" + UMFileUtil.formatFileSize(
-                                Integer.parseInt(currentLink[UstadJSOPDSItem.ATTR_LENGTH])) +
-                                ")";
-                        }catch(Exception e) {
-                            //number format exception of some kind probably...
-                            impl.l(UMLog.WARN, 207, 
-                                currentLink[UstadJSOPDSItem.ATTR_LENGTH], e);
-                        }
-                    }
-                }
-                
-                acquireRequest.setCurrentFormatOptions(mimeChoices);
-                acquireRequest.setCurrentFormatChoiceEntry(i);
-                impl.getAppView(context).showChoiceDialog("Choose Format" +
-                    acquireRequest.getEntries()[i].title, 
-                    choiceLabels, CMD_SELECT_FORMAT, this);
-                break;
-            }
-       }
-        
-        if(i == acquireRequest.getEntries().length) {
-            //now we are good to go...
-            startAcquireRequest();
-        }
-        
-    }
-    
-    protected void startAcquireRequest() {
-        final AcquireRequest request = acquireRequest;
-        this.acquireRequest = null;
-        
-        this.view.setSelectedEntries(new UstadJSOPDSEntry[0]);
-        
-        Thread startDownloadThread = new Thread(new Runnable() {
-            public void run() {
-                CatalogController.acquireCatalogEntries(request);
-            }
-        });
-        startDownloadThread.start();
     }
     
     /**
@@ -1357,7 +1137,7 @@ public class CatalogController extends UstadBaseController implements AppViewCho
 	
         String filename = getFileNameForOPDSFeedId(catalog.id);        
         String idKeyName = "opds-cache-" + catalog.id;
-	String urlKeyName = getPrefKeyNameForOPDSURLToIDMap(catalog.href);
+	    String urlKeyName = getPrefKeyNameForOPDSURLToIDMap(catalog.href);
         
         impl.setPref(isUserMode, idKeyName, filename, context);
         impl.setPref(isUserMode, urlKeyName, catalog.id, context);
@@ -1877,107 +1657,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         return filteredLinks;
     }
 
-
-
-    
-    /**
-     * Fetch and download the given containers, save required information about it to
-     * disk
-     * 
-     * 1. Download the given srcURL to disk (see options.destdir and destname) to 
-     * override destination
-     * 
-     * 2. Generate a .<filename>.container file that will contains an OPDS acquisition feed
-     * with one entry in it.
-     * 
-     * 3. Update the localstorage map of EntryID -> containerURI 
-     * 
-     * @param request The AcquireReuqest 
-     * 
-     */
-    public static void acquireCatalogEntries(CatalogController.AcquireRequest request) {
-        UstadJSOPDSEntry[] entries = request.getEntries();
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] mimeTypes = new String[entries.length];
-        
-        Hashtable authHeaders = makeAuthHeaders(request.getHttpUsername(), 
-                request.getHttpPassword());
-        int resourceMode = request.getResourceMode();
-        UstadMobileSystemImpl.l(UMLog.VERBOSE, 433, request.getDestDirPath());
-        
-        String[] preferredLink;        
-        String itemHref;
-        String itemURL;
-        String suggestedFilename;
-        String mimeWithoutParams;
-        String requiredExtension;
-        Vector acquisitionLinks;
-        
-        for(int i = 0; i < entries.length; i++) {
-            acquisitionLinks = entries[i].getAcquisitionLinks(
-                request.getSelectedFormat(i));
-            if(acquisitionLinks.size() == 0) {
-                //nothing available for this link that we want... skip it
-                continue;
-            }
-            
-            preferredLink = (String[])acquisitionLinks.elementAt(0);
-            
-            itemHref = preferredLink[UstadJSOPDSItem.ATTR_HREF];
-            mimeTypes[i] = preferredLink[UstadJSOPDSItem.ATTR_MIMETYPE];
-            
-            itemURL = UMFileUtil.resolveLink(entries[i].parentFeed.href, 
-                    itemHref);
-            
-            CatalogEntryInfo info = new CatalogEntryInfo();
-            info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
-            info.srcURLs = new String[]{itemURL};
-            
-            
-            HTTPResult result = null;
-            try {
-                result = impl.makeRequest(itemURL, null, null,"HEAD");
-                suggestedFilename = result.getSuggestedFilename(itemURL);
-                info.downloadTotalSize  = result.getContentLength();
-            }catch(Exception e) {
-                //the info we want isn't available right now ... can still try to queue it...
-                suggestedFilename = UMFileUtil.getFilename(itemURL);
-                info.downloadTotalSize = HTTPResult.HTTP_SIZE_IO_EXCEPTION;
-            }
-            
-            //save information from the catalog about it
-            mimeWithoutParams = UMFileUtil.stripMimeParams(mimeTypes[i]);
-            requiredExtension = impl.getExtensionFromMimeType(mimeWithoutParams);
-            if(requiredExtension != null) {
-                suggestedFilename = UMFileUtil.ensurePathHasSuffix(
-                    '.' + requiredExtension, suggestedFilename);
-            }
-            
-            saveThumbnail(entries[i], request, suggestedFilename);
-            info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
-            info.srcURLs = new String[]{itemURL};
-            info.fileURI = UMFileUtil.joinPaths(new String[] {
-                request.getDestDirPath(), suggestedFilename
-            });
-            info.mimeType = mimeTypes[i];
-            saveEntryInfo(entries[i], info, suggestedFilename);
-                        
-            UstadMobileSystemImpl.l(UMLog.VERBOSE, 435, itemURL + "->" + 
-                info.fileURI);
-
-
-
-
-            String downloadID = impl.queueFileDownload(itemURL, info.fileURI, entries[i].id,
-                authHeaders, request.getContext());
-            info.downloadID = downloadID;
-            setEntryInfo(entries[i].id, info, resourceMode, request.getContext());
-            
-            if(request.getController() != null) {
-                request.getController().registerDownloadingEntry(entries[i].id, downloadID);
-            }
-        }
-    }
     
     /**
      * Save the portion of the OPDS feed we are looking at that is entry information
@@ -2008,61 +1687,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         }
         
         return savedOK;
-    }
-    
-    /**
-     * Grabs the Thumbnail for an entry that is being downloaded from the HTTP
-     * cache and puts it into the same directory as containername.thumb.filetype
-     * e.g. bookname.epub.thumb.png
-     * 
-     * @param entry The entry that we want to get a thumbnail for
-     * @param request The Acquisition request being acted upon
-     * @param containerFilename the filename of the container being downloaded e.g. bookname.epub
-     * @return The base name of the thumbnail if it was found and copied, null otherwise
-     */
-    public static String saveThumbnail(UstadJSOPDSEntry entry, AcquireRequest request, String containerFilename) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] thumbnailLink = entry.getThumbnailLink(false);
-        String result = null;
-        
-        if(thumbnailLink != null) {
-            String thumbnailURL = UMFileUtil.resolveLink(
-                entry.parentFeed.href, 
-                thumbnailLink[UstadJSOPDSEntry.LINK_HREF]);
-                    
-            HTTPCacheDir[] dirs = impl.getCacheDirsByMode(
-                CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, 
-                request.getContext());
-            
-            String thumbnailFile = dirs[0].getCacheFileURIByURL(thumbnailURL);
-            if(thumbnailFile == null && dirs[1] != null) {
-                thumbnailFile = dirs[1].getCacheFileURIByFilename(thumbnailURL);
-            }
-            
-            if(thumbnailFile != null) {
-                //we have the thumbnail file in the cahce... let's copy it
-                InputStream in = null;
-                OutputStream out = null;
-                String extension = impl.getExtensionFromMimeType(
-                    thumbnailLink[UstadJSOPDSEntry.LINK_MIMETYPE]);
-                String thumbnailFilename = containerFilename + ".thumb." + 
-                    extension;
-                try {
-                    in = impl.openFileInputStream(thumbnailFile);
-                    out = impl.openFileOutputStream(UMFileUtil.joinPaths(
-                        new String[]{request.getDestDirPath(), thumbnailFilename}), 0);
-                    UMIOUtils.readFully(in, out, 1024);
-                    result = thumbnailFilename;
-                }catch(Exception e) {
-                    impl.l(UMLog.ERROR, 119, containerFilename, e);
-                }finally {
-                    UMIOUtils.closeInputStream(in);
-                    UMIOUtils.closeOutputStream(out);
-                }
-            }
-        }
-        
-        return result;
     }
     
     /**
@@ -2266,151 +1890,6 @@ public class CatalogController extends UstadBaseController implements AppViewCho
     }
     
     /**
-     * Class represents a request to acquire a set of OPDS entries
-     */
-    public static class AcquireRequest {
-        
-        private UstadJSOPDSEntry[] entries;
-        
-        private String destDirPath;
-        
-        private String httpUsername;
-        
-        private String httpPassword;
-        
-        private int resourceMode;
-        
-        private int flags;
-        
-        private Object context;
-        
-        private CatalogController controller;
-        
-        /**
-         * EPUBs by device type profile: currently only null and "micro" represented
-         * by the mime type params after the epub x-umprofile=micro etc.
-         */
-        private String preferredProfile;
-        
-        private int[] preferredResolution;
-        
-        /**
-         * The mime type of the format to be downloaded for each link
-         */
-        private String[] selectedFormat;
-        
-        /**
-         * When options are being selected - track which options have been
-         * presented to the user and the order of them
-         */
-        private String[] currentFormatOptions;
-        
-        /**
-         * The index of the entry that is currently up for the user to choose
-         * the desired format
-         */
-        private int currentFormatChoiceEntry;
-        
-        /**
-         * @param entries The OPDS Entries that should be acquired.  Must be OPDS 
-         * Entry items with acquire links.  For now the first acquisition link will
-         * be used
-         * TODO: Enable user specification of preferred acquisition types
-         * @param destDirPath The destination directory where to save acquired entries
-         * @param httpUsername optional HTTP authentication username - can be null
-         * @param httpPassword optional HTTP authentication password - can be null
-         * @param resourceMode SHARED_RESOURCE or USER_RESOURCE - controls where 
-         * @param controller : the controller that will want to know about updates etc.  Can be null
-         * we update info about this acquisition - in user prefs or in app wide prefs
-         */
-        public AcquireRequest(UstadJSOPDSEntry[] entries, String destDirPath, String httpUsername, String httpPassword, int resourceMode, Object context, CatalogController controller) {
-            this.entries = entries;
-            this.destDirPath = destDirPath;
-            this.httpUsername = httpUsername;
-            this.httpPassword = httpPassword;
-            this.resourceMode = resourceMode;
-            this.context = context;
-            this.controller = controller;
-            this.preferredResolution = null;
-            this.selectedFormat = new String[entries.length];
-        }
-        
-        public void setPreferredProfile(String preferredProfile) {
-            this.preferredProfile = preferredProfile;
-        }
-        
-        public String getPreferredProfile() {
-            return preferredProfile;
-        }
-        
-        /**
-         * Get the entries to be downloaded
-         * @return 
-         */
-        public UstadJSOPDSEntry[] getEntries() {
-            return entries;
-        }
-        
-        public void setSelectedFormat(int index, String format) {
-            selectedFormat[index] = format;
-        }
-        
-        public String getSelectedFormat(int index) {
-            return selectedFormat[index];
-        }
-        
-        public void setCurrentFormatOptions(String[] currentFormatOptions) {
-            this.currentFormatOptions = currentFormatOptions;
-        }
-        
-        public String[] getCurrentFormatOptions() {
-            return this.currentFormatOptions;
-        }
-        
-        public int getCurrentFormatChoiceEntry() {
-            return currentFormatChoiceEntry;
-        }
-        
-        public void setCurrentFormatChoiceEntry(int currentFormatChoiceEntry) {
-            this.currentFormatChoiceEntry = currentFormatChoiceEntry;
-        }
-        
-        public String getDestDirPath() {
-            return destDirPath;
-        }
-        
-        public void setDestDirPath(String destDirPath) {
-            this.destDirPath = destDirPath;
-        }
-        
-        public String getHttpUsername() {
-            return httpUsername;
-        }
-        
-        public String getHttpPassword() {
-            return httpPassword;
-        }
-        
-        public int getResourceMode() {
-            return resourceMode;
-        }
-        
-        public void setResourceMode(int resourceMode) {
-            this.resourceMode = resourceMode;
-        }
-        
-        public Object getContext() {
-            return context;
-        }
-        
-        public CatalogController getController() {
-            return controller;
-        }
-        
-        
-    }    
-    
-    /**
      * Delete the given entry
      * 
      * @param entryID
@@ -2594,5 +2073,18 @@ public class CatalogController extends UstadBaseController implements AppViewCho
         view.refresh();
     }
 
+    @Override
+    protected void onDownloadStarted() {
 
+    }
+
+    @Override
+    protected void onEntriesRemoved() {
+
+    }
+
+    @Override
+    public void statusUpdated(AcquisitionStatusEvent event) {
+
+    }
 }

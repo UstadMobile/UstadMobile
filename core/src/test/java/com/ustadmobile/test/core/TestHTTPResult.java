@@ -40,7 +40,7 @@ package com.ustadmobile.test.core;
 import com.ustadmobile.core.impl.HTTPResult;
 import java.util.Hashtable;
 
-public class TestHTTPResult extends TestCase{
+public abstract class TestHTTPResult extends TestCase{
     
     
     public void testHTTPResult() {

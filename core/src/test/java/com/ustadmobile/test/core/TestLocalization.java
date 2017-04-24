@@ -59,7 +59,7 @@ import junit.framework.TestCase;
 /* $if umplatform == 1  $
 public class TestLocalization extends ActivityInstrumentationTestCase2<UstadMobileActivity> {
  $else$ */
-public class TestLocalization extends TestCase{
+public abstract class TestLocalization extends TestCase{
 /* $endif$ */
 
     public TestLocalization() {

@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:replace="label"
-    android:label="${appName}"
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.toughra.ustadmobile">
-
-
-
-
-
-
-    <uses-sdk tools:overrideLibrary="edu.rit.se.wifibuddy"  />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -92,13 +81,7 @@
             android:theme="@style/Theme.UstadTheme" />
         <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2" />
         <activity android:name="com.ustadmobile.port.android.view.AboutActivity" />
-        <activity
-            android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"/>
-        <activity android:name="com.ustadmobile.port.android.view.UstadNodesActivity"/>
-
-        <activity android:name="com.ustadmobile.port.android.view.SettingsHome"/>
-
-
+        <activity android:name="com.ustadmobile.port.android.view.CatalogEntryActivity"/>
     </application>
 
 

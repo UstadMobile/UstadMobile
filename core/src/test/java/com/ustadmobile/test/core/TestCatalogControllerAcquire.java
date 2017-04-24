@@ -59,7 +59,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 /* $if umplatform == 1  $
 public class TestCatalogControllerAcquire extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestCatalogControllerAcquire extends TestCase{
+public abstract class TestCatalogControllerAcquire extends TestCase{
 /* $endif */
     
     /**

@@ -56,7 +56,7 @@ import com.ustadmobile.core.util.TestUtils;
 /* $if umplatform == 1  $
 public class TestCatalogView extends ActivityInstrumentationTestCase2<CatalogActivity>{
  $else$ */
-public class TestCatalogView extends TestCase {
+public abstract class TestCatalogView extends TestCase {
 /* $endif */    
     
     public static final int VIEWSHOWTIMEOUT = 10000;

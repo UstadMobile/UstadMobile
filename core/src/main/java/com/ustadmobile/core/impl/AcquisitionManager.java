@@ -57,14 +57,14 @@ public abstract class AcquisitionManager {
      *
      * @param listener
      */
-    public abstract void registerEntryAquisitionStatusListener(AcquisitionStatusListener listener);
+    public abstract void registerEntryAquisitionStatusListener(AcquisitionStatusListener listener, Object context);
 
     /**
      * Unregister a listener to receive entry status updates
      *
      * @param listener
      */
-    public abstract void unregisterEntryAquisitionStatusListener(AcquisitionStatusListener listener);
+    public abstract void unregisterEntryAquisitionStatusListener(AcquisitionStatusListener listener, Object context);
 
 
 }

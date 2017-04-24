@@ -59,7 +59,7 @@ import java.io.OutputStream;
 /* $if umplatform == 1  $
 public class TestFileImpl extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestFileImpl extends TestCase {
+public abstract class TestFileImpl extends TestCase {
 /* $endif */
     
     public TestFileImpl() {

@@ -341,8 +341,36 @@ public class UMUtil {
         public int compare(Object o1, Object o2);
         
     }
-    
-    
-    
+
+    /**
+     * Get the index of an item in an array. Filler method because this doesn't existing on J2ME.
+     *
+     * @param haystack Array to search in
+     * @param needle Value to search for
+     * @param from Index to start searching from (inclusive)
+     * @param to Index to search until (exclusive)
+     * @return Index of needle in haystack, -1 if not found
+     */
+    public static int indexInArray(Object[] haystack, Object needle, int from, int to) {
+        for(int i = from; i < to; i++) {
+            if(haystack[i] == null && needle == null) {
+                return i;
+            }else if(haystack[i] != null && haystack[i].equals(needle)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Get the index of an item in an array. Filler method because this doesn't existing on J2ME.
+     *
+     * @param haystack Array to search in
+     * @param needle Value to search for
+     */
+    public static int indexInArray(Object[] haystack, Object needle) {
+        return indexInArray(haystack, needle, 0, haystack.length);
+    }
     
 }
