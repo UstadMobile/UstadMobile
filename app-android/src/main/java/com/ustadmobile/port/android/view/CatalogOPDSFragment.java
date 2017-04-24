@@ -298,7 +298,15 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 return true;
             case R.id.action_opds_acquire:
                 if(getSelectedEntries().length > 0) {
-                    mCatalogController.handleClickDownloadEntries(getSelectedEntries());
+                    UstadJSOPDSFeed feed = mCatalogController.getModel().opdsFeed;
+                    UstadJSOPDSFeed acquisitionFeed = new UstadJSOPDSFeed(feed.href, feed.title,
+                            feed.id+"-acquire");
+                    UstadJSOPDSEntry[] selectedEntries = getSelectedEntries();
+                    for(int i = 0; i  <selectedEntries.length; i++) {
+                        acquisitionFeed.addEntry(new UstadJSOPDSEntry(acquisitionFeed, selectedEntries[i]));
+                    }
+
+                    mCatalogController.handleClickDownload(acquisitionFeed);
                 }else {
                     mCatalogController.handleClickDownloadAll();
                 }
