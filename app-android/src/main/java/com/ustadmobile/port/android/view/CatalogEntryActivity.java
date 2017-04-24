@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -145,7 +146,24 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setProgress(float progress) {
+        final int progressSize = Math.round(progress * 100);
+        final ProgressBar progressBar = (ProgressBar)findViewById(R.id.activity_catalog_entry_progress_bar);
+        runOnUiThread(new Runnable() {
+            public void run() {
+                progressBar.setProgress(progressSize);
+            }
+        });
+    }
 
+    @Override
+    public void setProgressStatusText(final String progressStatusText) {
+        final TextView statusView = (TextView)findViewById(R.id.activity_catalog_entry_progress_status_text);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                statusView.setText(progressStatusText);
+            }
+        });
     }
 
     @Override

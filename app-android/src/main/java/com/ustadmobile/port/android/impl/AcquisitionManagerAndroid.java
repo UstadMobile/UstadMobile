@@ -21,8 +21,13 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.File;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 /**
@@ -37,11 +42,42 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
 
     private HashMap<AcquisitionStatusListener, BroadcastReceiver> downloadCompleteReceivers;
 
+    private HashMap<AcquisitionStatusListener, Context> downloadCompleteContexts;
+
+    private Timer updateTimer;
+
+    private TimerTask updateTimerTask = new TimerTask() {
+        @Override
+        public void run() {
+            synchronized (downloadCompleteReceivers) {
+                Iterator<AcquisitionStatusListener> listeners = downloadCompleteReceivers.keySet().iterator();
+
+                while(listeners.hasNext()) {
+                    AcquisitionStatusListener listener = listeners.next();
+                    Iterator<String> activeEntryIds = entryIdToDownloadIdHashmap.keySet().iterator();
+                    while(activeEntryIds.hasNext()) {
+                        String entryId = activeEntryIds.next();
+                        int[] downloadStatus = AcquisitionManagerAndroid.getInstance().getEntryStatusById(
+                                entryId, downloadCompleteContexts.get(listener));
+                        AcquisitionStatusEvent event = new AcquisitionStatusEvent(
+                                downloadStatus[UstadMobileSystemImpl.IDX_STATUS],
+                                downloadStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL],
+                                downloadStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], entryId);
+                        listener.statusUpdated(event);
+                    }
+                }
+            }
+        }
+    };
+
     public AcquisitionManagerAndroid() {
         entryIdToDownloadIdHashmap = new HashMap<>();
         downloadIdToEntryIdHashmap = new HashMap<>();
         downloadCompleteReceivers = new HashMap<>();
+        downloadCompleteContexts = new HashMap<>();
     }
+
+
 
 
     @Override
@@ -127,12 +163,26 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
                         UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
                         entryStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL],
                         entryStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], entryId));
+                    downloadIdToEntryIdHashmap.remove(downloadId);
+                    entryIdToDownloadIdHashmap.remove(entryId);
                 }
+
             }
         };
 
-        downloadCompleteReceivers.put(listener, completeReceiver);
-        aContext.registerReceiver(completeReceiver, downloadCompleteIntentFilter);
+
+
+        synchronized (downloadCompleteReceivers) {
+            downloadCompleteReceivers.put(listener, completeReceiver);
+            downloadCompleteContexts.put(listener, aContext);
+            aContext.registerReceiver(completeReceiver, downloadCompleteIntentFilter);
+
+        }
+
+        if(updateTimer == null) {
+            updateTimer = new Timer();
+            updateTimer.scheduleAtFixedRate(updateTimerTask, 500, 500);
+        }
     }
 
     @Override
@@ -140,6 +190,16 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
         Context aContext = (Context)context;
         BroadcastReceiver receiver = downloadCompleteReceivers.get(listener);
         aContext.unregisterReceiver(receiver);
-        downloadCompleteReceivers.remove(listener);
+
+        synchronized (downloadCompleteReceivers) {
+            downloadCompleteReceivers.remove(listener);
+            downloadCompleteContexts.remove(listener);
+
+        }
+
+        if(downloadCompleteReceivers.isEmpty()) {
+            updateTimer.cancel();
+            updateTimer = null;
+        }
     }
 }

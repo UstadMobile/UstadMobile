@@ -28,6 +28,8 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
     private UstadJSOPDSFeed entryFeed;
 
+    private int downloadStatusStrId = -1;
+
     public CatalogEntryPresenter(Object context) {
         super(context);
     }
@@ -97,7 +99,12 @@ public class CatalogEntryPresenter extends BaseCatalogController{
     @Override
     public void statusUpdated(AcquisitionStatusEvent event) {
         if(event.getEntryId() != null && event.getEntryId().equals(entry.id)) {
-            catalogEntryView.setProgress(event.getBytesDownloadedSoFar() / event.getTotalBytes());
+            int newStatus = AcquisitionManager.getStringIdForDownloadStatus(event.getStatus());
+            if(newStatus != downloadStatusStrId) {
+                catalogEntryView.setProgressStatusText(UstadMobileSystemImpl.getInstance().getString(newStatus));
+                downloadStatusStrId = newStatus;
+            }
+
             switch(event.getStatus()) {
                 case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
@@ -105,6 +112,10 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, true);
                     catalogEntryView.setProgressVisible(false);
                     registerItemAcquisitionCompleted(event.getEntryId());
+                case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                    catalogEntryView.setProgress(
+                        (float)((double)event.getBytesDownloadedSoFar() / (double)event.getTotalBytes()));
+                    break;
             }
         }
     }

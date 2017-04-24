@@ -1,6 +1,9 @@
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+
+import java.util.HashMap;
 
 /**
  * The acquisition manager takes care of downloading catalog entries as efficiently as possible on
@@ -13,6 +16,22 @@ public abstract class AcquisitionManager {
     private static AcquisitionManager self;
 
     public static final String LINK_REL_DOWNLOAD_DESTINATION = "http://www.ustadmobile.com/namespace/opds/download-dest";
+
+    private static HashMap<Integer, Integer> downloadStatusToStringId = new HashMap<>();
+
+    static {
+        downloadStatusToStringId.put(UstadMobileSystemImpl.DLSTATUS_RUNNING,
+                MessageIDConstants.download_in_progress);
+    }
+
+    public static int getStringIdForDownloadStatus(int status) {
+        Integer strId = downloadStatusToStringId.get(status);
+        if(strId != null)
+            return strId;
+        else
+            return -1;
+    }
+
 
     /**
      * Get a reference to the acquisition manager
