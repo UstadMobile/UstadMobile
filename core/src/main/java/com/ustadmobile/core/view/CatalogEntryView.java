@@ -41,7 +41,7 @@ public interface CatalogEntryView extends UstadView {
 
     void setSize(long downloadSize);
 
-    void setDescription(String description);
+    void setDescription(String description, String contentType);
 
     void setTitle(String title);
 

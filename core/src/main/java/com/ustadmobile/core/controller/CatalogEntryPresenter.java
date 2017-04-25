@@ -51,6 +51,8 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
                 CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
                         CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
+                catalogEntryView.setDescription(entry.content, entry.getContentType());
+
                 if(entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
                 }else {

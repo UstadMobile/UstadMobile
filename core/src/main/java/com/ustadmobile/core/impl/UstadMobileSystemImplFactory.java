@@ -34,11 +34,13 @@ package com.ustadmobile.core.impl;
  *
  * @author mike
  */
-public abstract class UstadMobileSystemImplFactory {
+public class UstadMobileSystemImplFactory {
     
     /**
      * @return 
      */
-    public abstract UstadMobileSystemImpl makeUstadSystemImpl();
+    public static UstadMobileSystemImpl makeSystemImpl() {
+        throw new RuntimeException("The base system impl factory must be overriden");
+    }
     
 }

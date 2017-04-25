@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -63,12 +65,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         setContentView(R.layout.activity_catalog_entry);
         setUMToolbar();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        TextView descTmp = (TextView)findViewById(R.id.activity_catalog_entry_description);
-        String str = "";
-        for(int i = 0; i < 80; i++) {
-            str += "I am a fish. ";
-        }
-        descTmp.setText(str);
 
         Enumeration<Integer> buttonIds = BUTTON_ID_MAP.keys();
         while(buttonIds.hasMoreElements()) {
@@ -172,8 +168,13 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
-    public void setDescription(String description) {
-
+    public void setDescription(String description, String contentType) {
+        TextView descriptionTextView = ((TextView)findViewById(R.id.activity_catalog_entry_description));
+        if(contentType.equals(UstadJSOPDSEntry.CONTENT_TYPE_XHTML)) {
+            descriptionTextView.setText(Html.fromHtml(description));
+        }else {
+            descriptionTextView.setText(description);
+        }
     }
 
     @Override

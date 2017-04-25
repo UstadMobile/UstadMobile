@@ -80,6 +80,7 @@ public class ContainerViewPageSplitter {
     public static final int BYTES_PER_CHAR = 230;
     
     
+    //TODO: convert to use shared logic now in UMUtil
     public static void passThrough(XmlPullParser xpp, XmlSerializer xs) throws IOException, XmlPullParserException{
         int evtType = xpp.getEventType();
         switch(evtType) {

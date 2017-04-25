@@ -179,9 +179,12 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
 
         }
 
-        if(updateTimer == null) {
-            updateTimer = new Timer();
-            updateTimer.scheduleAtFixedRate(updateTimerTask, 500, 500);
+
+        if (updateTimer == null) {
+            synchronized (this) {
+                updateTimer = new Timer();
+                updateTimer.scheduleAtFixedRate(updateTimerTask, 500, 500);
+            }
         }
     }
 
@@ -198,8 +201,10 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
         }
 
         if(downloadCompleteReceivers.isEmpty()) {
-            updateTimer.cancel();
-            updateTimer = null;
+            synchronized (this) {
+                updateTimer.cancel();
+                updateTimer = null;
+            }
         }
     }
 }

@@ -22,7 +22,7 @@ targetCompatibility = "1.7"
 
 jar {
     //Exclude factory classes that are intended to be replaced by platform specific implementations
-    exclude("com/ustadmobile/core/impl/AcquisitionManagerFactory.class")
+    exclude("com/ustadmobile/core/impl/*Factory.class")
 }
 
 repositories {
@@ -39,6 +39,13 @@ dependencies {
     compile 'com.ustadmobile.nanolrs:nanolrs-core:0.1.37'
     testCompile project(":core-tests")
     testCompile group: 'junit', name: 'junit', version: '4.+'
+}
+
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
 }
 
 ext.buildConfigProperties = new Properties()
@@ -167,3 +174,4 @@ task copyTestResources(type: Copy) {
     into "${buildDir}/classes/test"
 }
 processTestResources.dependsOn copyTestResources
+

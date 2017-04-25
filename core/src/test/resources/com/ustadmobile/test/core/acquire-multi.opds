@@ -96,6 +96,41 @@
                         type="application/epub+zip"/>
 
 
+    </entry>
+
+    <entry>
+                <title>Fancy</title>
+
+                <id>4f382c43-1e92-4fe9-bce0-e03b6c1133dd</id>
+                <updated>2015-02-09T18:58:12Z</updated>
+                <author>
+                    <name>Varuna Singh</name>
+                    <uri>/user/2</uri>
+                </author>
+                <content type="xhtml">
+                    <div align="center">
+                        A Small Block about Zombocom
+
+                        <b>Content is HTML</b>
+                    </div>
+                </content>
+
+                <link rel="http://opds-spec.org/acquisition"
+                            hreflang="fa"
+                	        href="big-fa.epub"
+                            type="application/epub+zip"/>
+
+                <link rel="http://opds-spec.org/acquisition"
+                            hreflang="ps"
+                            href="big-ps.epub"
+                            type="application/pdf"/>
+
+                <link rel="http://opds-spec.org/acquisition"
+                            hreflang="en"
+                            href="big-en.epub"
+                            type="application/epub+zip"/>
+
+
         </entry>
 
 
