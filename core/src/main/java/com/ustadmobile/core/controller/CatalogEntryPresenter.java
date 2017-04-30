@@ -77,6 +77,9 @@ public class CatalogEntryPresenter extends BaseCatalogController{
             case CatalogEntryView.BUTTON_REMOVE:
                 handleClickRemove(new UstadJSOPDSEntry[]{entry});
                 break;
+            case CatalogEntryView.BUTTON_OPEN:
+                handleClickOpenEntry(entry);
+                break;
 
         }
     }

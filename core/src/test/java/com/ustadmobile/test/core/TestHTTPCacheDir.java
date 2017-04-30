@@ -41,41 +41,50 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMFileUtil;
-import java.util.Hashtable;
+    import com.ustadmobile.test.core.impl.UstadMobileTestUtil;
+
+    import org.junit.Assert;
+    import org.junit.Before;
+    import org.junit.Test;
+
+    import java.util.Hashtable;
 
 
 /**
  *
  * @author mike
  */
-public abstract class TestHTTPCacheDir extends TestCase {
+public class TestHTTPCacheDir  {
     
     private String httpRoot;
-    
-    protected void setUp() throws Exception {
-        httpRoot = TestUtils.getInstance().getHTTPRoot();
+
+    @Before
+    public void setUp() throws Exception {
+        UstadMobileTestUtil.getInstance().startServer();
+        httpRoot = UstadMobileTestUtil.getInstance().getHttpEndpoint();
     }
-    
+
+    @Test
     public void testHTTPCacheDir() throws Exception {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         //context is not needed when we are asking for the shaerd cache dir
         String cacheDirName = impl.getCacheDir(CatalogController.SHARED_RESOURCE, 
             new Object());
-        HTTPCacheDir cacheDir = new HTTPCacheDir(cacheDirName);
+        HTTPCacheDir cacheDir = new HTTPCacheDir(cacheDirName, null);
         
         String httpURL = UMFileUtil.joinPaths(new String[] {httpRoot, 
             "phonepic-smaller.png"});
         
         //make sure that we can fetch a file
         String cachedFile = cacheDir.get(httpURL);
-        assertTrue("Cached file downloaded", impl.fileExists(cachedFile));
+        Assert.assertTrue("Cached file downloaded", impl.fileExists(cachedFile));
         boolean savedOK = cacheDir.saveIndex();
-        assertTrue("Cache dir can save OK", savedOK);
+        Assert.assertTrue("Cache dir can save OK", savedOK);
         
-        cacheDir = new HTTPCacheDir(cacheDirName);
+        cacheDir = new HTTPCacheDir(cacheDirName, null);
         String fileURI = cacheDir.getCacheFileURIByURL(httpURL);
-        assertNotNull("HTTP URL is known on creating new cache dir object", 
+        Assert.assertNotNull("HTTP URL is known on creating new cache dir object",
             fileURI);
         
         long date1 = HTTPCacheDir.parseHTTPDate("Sun, 06 Nov 1994 08:49:37 GMT");
@@ -84,11 +93,11 @@ public abstract class TestHTTPCacheDir extends TestCase {
         
         //The time in milliseconds between teh date given and the date calculated
         // accurate to within one second
-        assertTrue("Can parse date 1", Math.abs(784111777137L -date1) <= 1000);
-        assertTrue("Can parse date 2", Math.abs(784111777137L -date2) <= 1000);
-        assertTrue("Can parse date 3", Math.abs(784111777137L -date3) <= 1000);
-        
-        assertEquals("Can format HTTP Date", "Sun, 06 Nov 1994 08:49:37 GMT",
+        Assert.assertTrue("Can parse date 1", Math.abs(784111777137L -date1) <= 1000);
+        Assert.assertTrue("Can parse date 2", Math.abs(784111777137L -date2) <= 1000);
+        Assert.assertTrue("Can parse date 3", Math.abs(784111777137L -date3) <= 1000);
+
+        Assert.assertEquals("Can format HTTP Date", "Sun, 06 Nov 1994 08:49:37 GMT",
             HTTPCacheDir.makeHTTPDate(784111777137L));
         
         
@@ -103,18 +112,18 @@ public abstract class TestHTTPCacheDir extends TestCase {
         long calculatedExpiryTime = HTTPCacheDir.calculateExpiryTime(expireHeaders);
         long expectedExpiry = Math.abs(currentTime + (7200L*1000));
         //the cache-control should take precedence
-        assertTrue("Can calculate expires time with both cache control and expires header",
+        Assert.assertTrue("Can calculate expires time with both cache control and expires header",
             Math.abs(expectedExpiry - calculatedExpiryTime) < 1000);
         
         expireHeaders.remove("cache-control");
         calculatedExpiryTime = HTTPCacheDir.calculateExpiryTime(expireHeaders);
-        assertTrue("Can calculate expires time with just expires header",
+        Assert.assertTrue("Can calculate expires time with just expires header",
             Math.abs(expireHeaderTime - calculatedExpiryTime) < 1000);
         
         int numEntriesPreDelete = cacheDir.getNumEntries();
         boolean deletedEntry = cacheDir.deleteEntry(httpURL);
-        assertTrue("Cache dir reports success deleting entry", deletedEntry);
-        assertEquals("Cache dir now one entry smaller", numEntriesPreDelete-1, 
+        Assert.assertTrue("Cache dir reports success deleting entry", deletedEntry);
+        Assert.assertEquals("Cache dir now one entry smaller", numEntriesPreDelete-1,
             cacheDir.getNumEntries());
         
         try { Thread.sleep(1000); }
@@ -124,14 +133,14 @@ public abstract class TestHTTPCacheDir extends TestCase {
         cacheDir.get(httpURL);
         long timeSinceAccess = System.currentTimeMillis() - 
             cacheDir.getEntry(httpURL).getLong(HTTPCacheDir.IDX_LASTACCESSED);
-        assertTrue("Last accessed time is updated", timeSinceAccess < 300);
+        Assert.assertTrue("Last accessed time is updated", timeSinceAccess < 300);
         
         String httpURL2 = UMFileUtil.joinPaths(new String[] {httpRoot, 
             "smallcheck.jpg"});
         cacheDir.get(httpURL2);
         boolean oldestRemoved = cacheDir.removeOldestEntry();
-        assertTrue("Can remove oldest entry", oldestRemoved);
-        assertNotNull("most recently accessed item still in cache", 
+        Assert.assertTrue("Can remove oldest entry", oldestRemoved);
+        Assert.assertNotNull("most recently accessed item still in cache",
             cacheDir.getCacheFileURIByURL(httpURL2));
     }
     

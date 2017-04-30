@@ -11,6 +11,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.ContainerView;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -93,6 +94,19 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
                         CMD_REMOVE_ENTRIES, this);
 
     }
+
+    public void handleClickOpenEntry(UstadJSOPDSEntry entry) {
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
+                CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+        if (entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
+            Hashtable openArgs = new Hashtable();
+            openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
+            openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
+            openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
+            UstadMobileSystemImpl.getInstance().go(ContainerView.VIEW_NAME, openArgs, getContext());
+        }
+    }
+
 
 
     public void appViewChoiceSelected(int commandId, int choice) {

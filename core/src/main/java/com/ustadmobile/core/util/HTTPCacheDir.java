@@ -22,6 +22,8 @@ import java.util.Vector;
  $else$ */
     import org.json.*;
     import java.util.Iterator;
+
+import sun.security.provider.SHA;
 /* $endif$ */
 
 
@@ -33,12 +35,30 @@ import java.util.Vector;
  * @author mike
  */
 public class HTTPCacheDir {
+
+    /**
+     * Constant that represents the shared cache: this is used for any cache item that does not have
+     * private in the cache-control header
+     */
+    public static final int SHARED = 0;
+
+    /**
+     * Constant that represents the private cache: this is used for any resource that has private
+     * in the cache control header
+     */
+    public static final int PRIVATE = 1;
+
+    /**
+     * The number of cache directories that are used here: 2: the shared and the private cache. The
+     * private cache can be null when there is no logged in user etc.
+     */
+    public static final int NUM_DIRS = 2;
+
+    private String[] dirName;
     
-    private String dirName;
+    private String[] indexFileURI;
     
-    private String indexFileURI;
-    
-    private JSONObject cacheIndex;
+    private JSONObject[] cacheIndex;
     
     private static final String INDEX_FILENAME = "cacheindex.json";
     
@@ -53,6 +73,8 @@ public class HTTPCacheDir {
     public static final int IDX_FILENAME = 4;
     
     public static final int IDX_MUSTREVALIDATE = 5;
+
+    public static final int IDX_PRIVATE = 6;
     
     public static final int DEFAULT_EXPIRES = (1000 * 60 * 60);//1hour
     
@@ -74,34 +96,43 @@ public class HTTPCacheDir {
     /**
      * Starts a new HTTP cache directory in the directory given
      * 
-     * @param dirName Directory to use for caching purposes
+     * @param sharedDirName Directory to use for caching purposes
      * @param maxEntries the maximum number of entries to be allowed in the cache
      */
-    public HTTPCacheDir(String dirName, int maxEntries) {
-        this.dirName = dirName;
+    public HTTPCacheDir(String sharedDirName, String privateDirName, int maxEntries) {
+        this.dirName = new String[]{sharedDirName, privateDirName};
+        indexFileURI = new String[NUM_DIRS];
+        cacheIndex = new JSONObject[NUM_DIRS];
+
         this.maxEntries = maxEntries;
         
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        indexFileURI = UMFileUtil.joinPaths(new String[]{ dirName,
-            INDEX_FILENAME});
-        
-        try {
-            impl.makeDirectoryRecursive(dirName);
-            if(impl.fileExists(indexFileURI)) {
-                cacheIndex = new JSONObject(impl.readFileAsText(indexFileURI, 
-                    "UTF-8"));
+
+
+        for(int i = 0; i < 2; i++) {
+            if(dirName[i] == null)
+                continue;
+
+            indexFileURI[i] = UMFileUtil.joinPaths(new String[]{ dirName[i],
+                INDEX_FILENAME});
+            try {
+                impl.makeDirectoryRecursive(dirName[i]);
+                if(impl.fileExists(indexFileURI[i])) {
+                    cacheIndex[i] = new JSONObject(impl.readFileAsText(indexFileURI[i],
+                            "UTF-8"));
+                }
+            }catch(Exception e) {
+                impl.l(UMLog.ERROR, 134, indexFileURI[i], e);
             }
-        }catch(Exception e) {
-            impl.l(UMLog.ERROR, 134, indexFileURI, e);
-        }
-        
-        if(cacheIndex == null) {
-            cacheIndex = new JSONObject();
+
+            if(cacheIndex[i] == null) {
+                cacheIndex[i] = new JSONObject();
+            }
         }
     }
     
-    public HTTPCacheDir(String dirName) {
-        this(dirName, DEFAULT_MAX_ENTRIES);
+    public HTTPCacheDir(String sharedDirName, String privateDirName) {
+        this(sharedDirName, privateDirName, DEFAULT_MAX_ENTRIES);
     }
     
     
@@ -219,15 +250,24 @@ public class HTTPCacheDir {
     
     public boolean saveIndex() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.l(UMLog.DEBUG, 515, indexFileURI);
-        boolean savedOK = false;
-        
-        try {
-            impl.writeStringToFile(cacheIndex.toString(), indexFileURI, "UTF-8");
-            savedOK = true;
-        }catch(Exception e) {
-            impl.l(UMLog.ERROR, 152, indexFileURI, e);
+        boolean savedOK = true;
+
+        for(int i = 0; i < 2; i++) {
+            impl.l(UMLog.DEBUG, 515, indexFileURI[i]);
+
+            if(indexFileURI[i] == null)
+                continue;
+
+            try {
+                impl.writeStringToFile(cacheIndex[i].toString(), indexFileURI[i], "UTF-8");
+                savedOK = true;
+            }catch(Exception e) {
+                impl.l(UMLog.ERROR, 152, indexFileURI[i], e);
+                savedOK = false;
+            }
         }
+
+
         
         return savedOK;
     }
@@ -235,11 +275,13 @@ public class HTTPCacheDir {
     
     private JSONArray getEntryByFilename(String filename) {
         boolean fileExists = false;
-        try {
-            fileExists = UstadMobileSystemImpl.getInstance().fileExists(
-                UMFileUtil.joinPaths(new String[]{dirName, filename}));
-        }catch(IOException e) {
-            
+        for(int i = 0; i < 2 && !fileExists; i++) {
+            try {
+                fileExists = UstadMobileSystemImpl.getInstance().fileExists(
+                        UMFileUtil.joinPaths(new String[]{dirName[i], filename}));
+            }catch(IOException e) {
+
+            }
         }
         
         if(!fileExists) {
@@ -248,14 +290,16 @@ public class HTTPCacheDir {
         
         Enumeration e = getCachedURLs();
         String currentFilename;
-        JSONArray currentEntry;
+        JSONArray currentEntry = null;
         String url;
         while(e.hasMoreElements()) {
             try {
                 url = (String)e.nextElement();
-                currentEntry = cacheIndex.getJSONArray(url);
-                if(filename.equals(currentEntry.getString(IDX_FILENAME))) {
-                    return currentEntry;
+                for(int i = 0; i < NUM_DIRS && cacheIndex[i] != null; i++){
+                    currentEntry = cacheIndex[i].getJSONArray(url);
+                    if(currentEntry != null && filename.equals(currentEntry.getString(IDX_FILENAME))) {
+                        return currentEntry;
+                    }
                 }
             }catch(Exception ex) {
                 //this should never happen - going through a JSON Object with known values
@@ -280,14 +324,12 @@ public class HTTPCacheDir {
      * @param resultBuf Optional: An Array of 1 HTTPResult that in case we do wind
      * up directly fetching the result from the network this will be referenced
      * to the HTTPResult object.
-     * @param fallback Optional: A fallback cache to send the get request to
-     * in case we don't  find the entry in this cache.
      * 
      * @return The file URI path to the cached file
      * 
      * @throws IOException 
      */
-    public String get(String url, String filename, Hashtable headers, HTTPResult[] resultBuf, HTTPCacheDir fallback) throws IOException{
+    public String get(String url, String filename, Hashtable headers, HTTPResult[] resultBuf) throws IOException{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         boolean isValid = false;
         String dataURL = null;
@@ -300,7 +342,14 @@ public class HTTPCacheDir {
         }
         
         //check and see if we have the entry
-        JSONArray entry = cacheIndex.optJSONArray(url);
+        JSONArray entry = null;
+        int cacheNum;
+
+        for(cacheNum = 0; cacheNum < NUM_DIRS && cacheIndex[cacheNum] != null; cacheNum++) {
+            entry = cacheIndex[cacheNum].optJSONArray(url);
+            if(entry != null)
+                break;
+        }
         HTTPResult result = null;
         
         //if the filename is being used for an ID - lets see if that exists...
@@ -333,17 +382,13 @@ public class HTTPCacheDir {
                 
                 if(isValid) {
                     entry.put(IDX_LASTACCESSED, timeNow);
-                    return UMFileUtil.joinPaths(new String[]{ dirName, 
+                    return UMFileUtil.joinPaths(new String[]{ dirName[cacheNum],
                         entry.optString(IDX_FILENAME)});
                 }
             } catch (Exception e) {
                 impl.l(UMLog.ERROR, 130, url, e);
             }
 
-        }else if(fallback != null) {
-            if(fallback.hasCachedURL(url) || (filename != null && fallback.hasCachedFilename(filename))) {
-                return fallback.get(url, filename, headers, resultBuf, null);
-            }
         }
         
         try {
@@ -366,7 +411,7 @@ public class HTTPCacheDir {
         
         //Looks like we are offline... use anything we have unless no-cache / must-revalidate are set
         if(entry != null && !noCache && !mustRevalidate) {
-            return UMFileUtil.joinPaths(new String[]{ dirName, entry.optString(
+            return UMFileUtil.joinPaths(new String[]{ dirName[cacheNum], entry.optString(
                 IDX_FILENAME)});
         }else {
             return null;
@@ -382,7 +427,7 @@ public class HTTPCacheDir {
     }
     
     public String get(String url, String filename) throws IOException {
-        return get(url, filename, null, null, null);
+        return get(url, filename, null, null);
     }
     
     /**
@@ -392,7 +437,7 @@ public class HTTPCacheDir {
      * @throws IOException 
      */
     public String get(String url) throws IOException{
-        return get(url, null, null, null, null);
+        return get(url, null, null, null);
     }
     
     /**
@@ -401,23 +446,33 @@ public class HTTPCacheDir {
      * @return Number of entries in the cache
      */
     public int getNumEntries() {
-        return cacheIndex.length();
+        int count = 0;
+        for(int i = 0; i < NUM_DIRS; i++) {
+            if(cacheIndex[i] == null)
+                continue;
+
+            count += cacheIndex[i].length();
+        }
+        return count;
     }
-    
+
     /**
      * Get the JSON array that represents the cached object
-     * 
+     *
      * @param url The URL to lookup
      * 
      * @return JSONArray with values as per IDX_* constants
      */
     public JSONArray getEntry(String url) {
+        JSONArray cacheEntry = null;
         try {
-            return cacheIndex.optJSONArray(convertIfDataURL(url));
+            for(int i = 0; i < NUM_DIRS && cacheEntry == null; i++) {
+                cacheEntry = cacheIndex[i].optJSONArray(convertIfDataURL(url));
+            }
         }catch(Exception e) {
             //this really would never happen - using the opt method on a prebuilt jsonobject
         }
-        return null;
+        return cacheEntry;
     }
     
     public boolean validateCacheEntry(JSONArray entry, HTTPResult result) {
@@ -453,11 +508,17 @@ public class HTTPCacheDir {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         boolean fileExists = false;
+        int cacheNum;
         try {
-            fileURI = UMFileUtil.joinPaths(new String[]{dirName, filename});
-            fileExists = impl.fileExists(fileURI);
+            for(cacheNum = 0; cacheNum < NUM_DIRS && !fileExists; cacheNum++) {
+                fileURI = UMFileUtil.joinPaths(new String[]{dirName[cacheNum], filename});
+                fileURI = UMFileUtil.joinPaths(new String[]{dirName[cacheNum], filename});
+                fileExists = impl.fileExists(fileURI);
+            }
+
+
         }catch(IOException e) {
-            
+            //TODO: Need to log this
         }
         
         return fileExists ? fileURI : null;
@@ -467,10 +528,17 @@ public class HTTPCacheDir {
         String fileURI = null;
         
         try {
-            JSONArray urlEntry = cacheIndex.optJSONArray(convertIfDataURL(url));
+            JSONArray urlEntry = null;
+            int cacheNum;
+            for(cacheNum = 0; cacheNum < NUM_DIRS && cacheIndex[cacheNum] != null; cacheNum++) {
+                urlEntry = cacheIndex[cacheNum].optJSONArray(convertIfDataURL(url));
+                if(urlEntry != null)
+                    break;
+            }
+
             if(urlEntry != null) {
                 urlEntry.put(IDX_LASTACCESSED, System.currentTimeMillis());
-                fileURI = UMFileUtil.joinPaths(new String[] {dirName,
+                fileURI = UMFileUtil.joinPaths(new String[] {dirName[cacheNum],
                     urlEntry.optString(IDX_FILENAME)});
             }
         }catch(Exception e) {
@@ -482,14 +550,21 @@ public class HTTPCacheDir {
     }
     
     public boolean hasCachedURL(String url) {
-        return cacheIndex.has(convertIfDataURL(url));
+        boolean foundEntry = false;
+        for(int i = 0; i < NUM_DIRS && !foundEntry; i++) {
+            foundEntry = cacheIndex[i].has(convertIfDataURL(url));
+        }
+
+        return foundEntry;
     }
     
     public boolean hasCachedFilename(String filename) {
         boolean exists = false;
         try {
-            exists = UstadMobileSystemImpl.getInstance().fileExists(
-                UMFileUtil.joinPaths(new String[]{dirName, filename}));
+            for(int i = 0; i < NUM_DIRS && !exists; i++) {
+                exists = UstadMobileSystemImpl.getInstance().fileExists(
+                        UMFileUtil.joinPaths(new String[]{dirName[i], filename}));
+            }
         }catch(IOException e) {
             
         }
@@ -534,22 +609,30 @@ public class HTTPCacheDir {
      */
     public boolean deleteEntry(String url) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        boolean result = false;
+        boolean foundInCache = false;
+        boolean deleteResult = true;
         try {
-            JSONArray item  = cacheIndex.optJSONArray(url);
-            if(item != null) {
-                String fileURI = UMFileUtil.joinPaths(new String[] {dirName,
-                    item.getString(IDX_FILENAME)});
-                result = impl.removeFile(fileURI);
-                if(result) {
-                    cacheIndex.remove(url);
+            JSONArray item;
+            int cacheNum;
+            boolean itemDeleted;
+            for(cacheNum = 0; cacheNum < NUM_DIRS && cacheIndex[cacheNum] != null; cacheNum++) {
+                item = cacheIndex[cacheNum].optJSONArray(url);
+                if(item != null) {
+                    foundInCache = true;
+                    String fileURI = UMFileUtil.joinPaths(new String[] {dirName[cacheNum],
+                            item.getString(IDX_FILENAME)});
+                    itemDeleted = impl.removeFile(fileURI);
+                    deleteResult &= itemDeleted;
+                    if(itemDeleted) {
+                        cacheIndex[cacheNum].remove(url);
+                    }
                 }
             }
         }catch(Exception e) {
             impl.l(UMLog.ERROR, 156, url, e);
         }
         
-        return result;
+        return foundInCache && deleteResult;
     }
     
     /**
@@ -562,17 +645,15 @@ public class HTTPCacheDir {
         /* $if umplatform == 2  $
             urls = cacheIndex.keys();
          $else$ */
-            final Iterator urlIterator = cacheIndex.keys();
-            urls = new Enumeration() {
-                public boolean hasMoreElements() {
-                    return urlIterator.hasNext();
-                }
+            final Iterator[] urlIterators = new Iterator[NUM_DIRS];
+            for(int i = 0; i < NUM_DIRS; i++) {
+                if(cacheIndex[i] == null)
+                    continue;
 
-                public Object nextElement() {
-                    return urlIterator.next();
-                }
-                
-            };
+                urlIterators[i] = cacheIndex[i].keys();
+            }
+
+            urls = new IteratorArrayEnumeration(urlIterators);
         /* $endif$ */
         
         return urls;
@@ -593,10 +674,15 @@ public class HTTPCacheDir {
         JSONArray entry;
         String url = null;
         long entryLastAccessed;
+        int cacheNum;
         try {
             while(urls.hasMoreElements()) {
+                entry = null;
                 url = (String)urls.nextElement();
-                entry = cacheIndex.getJSONArray(url);
+                for(cacheNum = 0; cacheNum < NUM_DIRS && entry == null; cacheNum++) {
+                    entry = cacheIndex[cacheNum].getJSONArray(url);
+                }
+
                 entryLastAccessed = entry.getLong(IDX_LASTACCESSED);
                 if(entryLastAccessed < oldestTime) {
                     oldestTime = entryLastAccessed;
@@ -621,6 +707,7 @@ public class HTTPCacheDir {
      * @param url
      * @param result
      * @param filename Optional: if specified use the given filename - can help when storing catalogs by id etc.
+     *
      * @return 
      */
     public String cacheResult(String url, HTTPResult result, String filename) throws IOException {
@@ -644,8 +731,18 @@ public class HTTPCacheDir {
         if(filename  == null && (extension != null && !filename.endsWith(extension))) {
             filename += extension;
         }
-        
-        String cacheFileURI = UMFileUtil.joinPaths(new String[]{dirName, filename});
+
+
+        String cacheControlHeader = result.getHeaderValue("cache-control");
+        int cacheNum = (cacheControlHeader != null && cacheControlHeader.indexOf("private") != -1)
+            ? PRIVATE: SHARED;
+
+        //if the file is private and there is no private cache directory active
+        if(cacheNum == PRIVATE && dirName[PRIVATE] == null) {
+            return null;
+        }
+
+        String cacheFileURI = UMFileUtil.joinPaths(new String[]{dirName[cacheNum], filename});
         OutputStream out = null;
         IOException ioe = null;
         
@@ -665,7 +762,8 @@ public class HTTPCacheDir {
 
         long currentTime = System.currentTimeMillis();
         long expiresTime = calculateExpiryTime(result.getResponseHeaders());
-        
+
+
         if(expiresTime == -1) {
             expiresTime = currentTime + DEFAULT_EXPIRES;
         }
@@ -676,7 +774,8 @@ public class HTTPCacheDir {
             arr.put(IDX_LASTMODIFIED, 0);
             arr.put(IDX_LASTACCESSED, System.currentTimeMillis());
             arr.put(IDX_FILENAME, filename);
-            cacheIndex.put(url, arr);
+            arr.put(IDX_PRIVATE, cacheNum == PRIVATE);
+            cacheIndex[cacheNum].put(url, arr);
         }catch(JSONException e) {
             //this should never happen putting simlpe values in
             impl.l(UMLog.ERROR, 125, url, e);
@@ -690,7 +789,44 @@ public class HTTPCacheDir {
         return cacheResult(url, result, null);
     }
     
-    
-    
+
+    static class IteratorArrayEnumeration implements Enumeration{
+
+        private int iteratorIndex;
+
+        private Iterator[] iterators;
+
+        IteratorArrayEnumeration(Iterator[] iterators) {
+            this.iterators = iterators;
+            this.iteratorIndex = 0;
+        }
+
+        public boolean hasMoreElements(int index) {
+            if(iterators[index] != null && iterators[index].hasNext()) {
+                return true;
+            }else if((index + 1) < iterators.length) {
+                return this.hasMoreElements(index+1);
+            }else{
+                return false;
+            }
+        }
+
+        @Override
+        public boolean hasMoreElements() {
+            return hasMoreElements(iteratorIndex);
+        }
+
+        @Override
+        public Object nextElement() {
+            if(iterators[iteratorIndex] != null && iterators[iteratorIndex].hasNext()) {
+                return iterators[iteratorIndex].next();
+            }else if(iteratorIndex < iterators.length) {
+                iteratorIndex++;
+                return this.nextElement();
+            }else {
+                throw new RuntimeException ("No more elements");
+            }
+        }
+    }
     
 }

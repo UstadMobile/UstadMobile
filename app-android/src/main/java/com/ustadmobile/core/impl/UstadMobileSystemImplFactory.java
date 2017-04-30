@@ -1,5 +1,7 @@
 package com.ustadmobile.core.impl;
 
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
 /**
  * Created by mike on 4/25/17.
  */
@@ -10,7 +12,7 @@ public class UstadMobileSystemImplFactory {
      * @return
      */
     public static UstadMobileSystemImpl makeSystemImpl() {
-        throw new RuntimeException("The base system impl factory must be overriden");
+        return new UstadMobileSystemImplAndroid();
     }
 
 }
