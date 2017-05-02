@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +33,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private static Hashtable<Integer, Integer> BUTTON_ID_MAP =new Hashtable<>();
 
+
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_OPEN, R.id.activity_catalog_entry_open_button);
@@ -60,7 +62,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         }
         setContentView(R.layout.activity_catalog_entry);
-        setUMToolbar();
+        setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         TextView descTmp = (TextView)findViewById(R.id.activity_catalog_entry_description);
         String str = "";
@@ -175,4 +177,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         super.onDestroy();
         mPresenter.onDestroy();
     }
+
+
 }

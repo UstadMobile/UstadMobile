@@ -147,6 +147,8 @@ dependencies {
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha5'
     androidTestCompile 'junit:junit:4.12'
+    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.2.18-SNAPSHOT'
+
 }
 
 

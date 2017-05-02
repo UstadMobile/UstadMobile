@@ -21,19 +21,12 @@ public class NetworkNode {
     private int nodePortNumber;
 
     private int status;
-    private boolean locallyFound=false;
 
 
 
     public NetworkNode(String nodeMacAddress){
-        locallyFound=false;
-        this.nodeMacAddress = nodeMacAddress;
-    }
 
-    public NetworkNode(String nodeIPAddress, int portNumber){
-        locallyFound=true;
-        this.nodeIPAddress=nodeIPAddress;
-        this.nodePortNumber=portNumber;
+        this.nodeMacAddress = nodeMacAddress;
     }
 
 
@@ -99,11 +92,6 @@ public class NetworkNode {
 
     @Override
     public boolean equals(Object object) {
-        if(locallyFound){
-            return object instanceof NetworkNode && ((NetworkNode)object).getNodeIPAddress().equals(this.nodeIPAddress)
-                    && ((NetworkNode)object).getNodePortNumber()==this.nodePortNumber;
-        }else{
-            return object instanceof NetworkNode && ((NetworkNode)object).getNodeMacAddress().equals(this.nodeMacAddress);
-        }
+        return object instanceof NetworkNode && ((NetworkNode)object).getNodeMacAddress().equals(this.nodeMacAddress);
     }
 }

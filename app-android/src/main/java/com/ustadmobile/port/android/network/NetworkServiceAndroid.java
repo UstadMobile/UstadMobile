@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.network;
 
 import android.app.Notification;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -77,12 +78,12 @@ public class NetworkServiceAndroid extends Service{
                                 new WifiP2pManager.ActionListener() {
                               @Override
                               public void onSuccess() {
-                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.serviceData(),null);
+                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.localServiceData(),null);
                               }
 
                               @Override
                               public void onFailure(int i) {
-                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.serviceData(),null);
+                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.localServiceData(),null);
                               }
                           });
 
@@ -157,6 +158,9 @@ public class NetworkServiceAndroid extends Service{
 
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
+            WifiDirectAutoAccept autoAccept=new WifiDirectAutoAccept(
+                    wifiDirectHandler.getWifiDirectP2pManager(),wifiDirectHandler.getWiFiDirectChannel());
+            autoAccept.intercept(true);
             p2pManager = (NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
             p2pManager.init(NetworkServiceAndroid.this,serviceName);
         }
@@ -167,6 +171,22 @@ public class NetworkServiceAndroid extends Service{
             wifiDirectHandler = null;
         }
     };
+
+
+    public boolean isBluetoothEnabled(){
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            Log.e(WifiDirectHandler.TAG,"Device doesn't support bluetooth");
+            return false;
+        } else {
+            if (!mBluetoothAdapter.isEnabled()) {
+                Log.e(WifiDirectHandler.TAG,"Device bluetooth is not enabled");
+                return false;
+            }else{
+                return true;
+            }
+        }
+    }
 
 
 

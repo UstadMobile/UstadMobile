@@ -14,14 +14,14 @@ public abstract class BluetoothTask {
     }
 
 
-    public void setNetworkTaskListener(NetworkTaskListener listener) {
+    public void setBluetoothNetworkListener(NetworkTaskListener listener) {
         this.listener = listener;
     }
 
 
     public void fireTaskEnded() {
         if(listener != null)
-            listener.taskEnded(this);
+            listener.bluetoothTaskEnded(this);
     }
 
     public synchronized void start() {

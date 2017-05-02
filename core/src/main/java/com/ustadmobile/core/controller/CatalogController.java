@@ -1802,8 +1802,11 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         if(downloadUpdateTimer != null) {
             downloadUpdateTimer.cancel();
             downloadUpdateTimer = null;
-            UstadMobileSystemImpl.getInstance().unregisterDownloadCompleteReceiver(
-                    this, getContext());
+           try{
+               UstadMobileSystemImpl.getInstance().unregisterDownloadCompleteReceiver(this, getContext());
+           }catch (IllegalStateException e){
+               e.printStackTrace();
+           }
         }
     }
     

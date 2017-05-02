@@ -5,8 +5,7 @@ package com.ustadmobile.port.sharedse.network;
  */
 
 public interface NetworkTaskListener {
-
-    void taskEnded(P2PTask task);
-    void taskEnded(BluetoothTask task);
+    void downloadTaskEnded(DownloadTask task);
+    void bluetoothTaskEnded(BluetoothTask task);
 
 }

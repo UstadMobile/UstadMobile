@@ -82,6 +82,7 @@
         <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2" />
         <activity android:name="com.ustadmobile.port.android.view.AboutActivity" />
         <activity android:name="com.ustadmobile.port.android.view.CatalogEntryActivity"/>
+        <activity android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"/>
     </application>
 
 

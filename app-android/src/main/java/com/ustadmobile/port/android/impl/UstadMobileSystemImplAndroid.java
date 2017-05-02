@@ -36,7 +36,6 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -54,7 +53,6 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.ustadmobile.core.impl.TinCanQueueListener;
-import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -75,10 +73,8 @@ import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.network.DownloadTaskAndroid;
 import com.ustadmobile.port.android.network.NetworkManagerAndroid;
 import com.ustadmobile.port.android.network.NetworkServiceAndroid;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
@@ -92,9 +88,7 @@ import com.ustadmobile.port.android.view.LoginDialogFragment;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.network.DownloadRequest;
 import com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE;
-import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.port.sharedse.view.ClassManagementView;
 import com.ustadmobile.port.sharedse.view.ClassManagementView2;
 import com.ustadmobile.port.sharedse.view.EnrollStudentView;
@@ -113,8 +107,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.WeakHashMap;
-
-import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 
 /**
@@ -485,13 +477,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public String queueFileDownload(String url, String destFileURI, String entryId, Hashtable headers, Object context) {
-
-        DownloadRequest p2pRequest = new DownloadRequest();
-        p2pRequest.setFileId(entryId);
-        p2pRequest.setFileSource(url);
-        p2pRequest.setFileDestination(destFileURI);
         return null;
-        //return String.valueOf(p2pManager.requestDownload(context, p2pRequest));
     }
 
     @Override
@@ -501,32 +487,18 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public void registerDownloadCompleteReceiver(final UMDownloadCompleteReceiver receiver, final Object context) {
-        IntentFilter downloadCompleteIntentFilter =
-                new IntentFilter(DownloadTaskAndroid.ACTION_DOWNLOAD_COMPLETE);
-        BroadcastReceiver completeReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-               if(intent!=null){
-                   String downloadID = intent.getStringExtra(DownloadTaskAndroid.EXTRA_DOWNLOAD_ID);
-                   String downloadStatus = intent.getStringExtra(DownloadTaskAndroid.EXTRA_DOWNLOAD_STATUS);
-                   String downloadSource = intent.getStringExtra(DownloadTaskAndroid.EXTRA_DOWNLOAD_SOURCE);
-                   Log.d(WifiDirectHandler.TAG,"Download ID:"+downloadID+" Download Status:"
-                           +downloadStatus+" Download Source: "+(Boolean.parseBoolean(downloadSource)?" Cloud":"Local"));
-                   receiver.downloadStatusUpdated(
-                           new UMDownloadCompleteEvent(downloadID,Integer.parseInt(downloadStatus),Integer.parseInt(downloadSource)));
 
-               }
-            }
-        };
-
-        downloadCompleteReceivers.put(receiver, completeReceiver);
-        ((Context)context).registerReceiver(completeReceiver, downloadCompleteIntentFilter);
     }
 
     @Override
     public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
-        ((Context)context).unregisterReceiver(downloadCompleteReceivers.get(receiver));
-        downloadCompleteReceivers.remove(receiver);
+        try{
+            ((Context)context).unregisterReceiver(downloadCompleteReceivers.get(receiver));
+            downloadCompleteReceivers.remove(receiver);
+        }catch (RuntimeException e){
+            e.printStackTrace();
+        }
+
     }
 
 

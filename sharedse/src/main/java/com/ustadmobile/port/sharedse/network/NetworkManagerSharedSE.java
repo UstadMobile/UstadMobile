@@ -1,11 +1,16 @@
 package com.ustadmobile.port.sharedse.network;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.ustadmobile.port.sharedse.network.DownloadTask.DOWNLOAD_STATUS_RUNNING;
 
 /**
  * Created by kileha3 on 05/02/2017.
@@ -19,41 +24,19 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
     public List<NetworkNode> knownNodes =new ArrayList<>();
 
     protected Vector<NetworkNodeListener> networkNodeListeners = new Vector<>();
-    /**
-     * Store the tasks of which will be executed in a FIFO way
-     */
-    public Vector<P2PTask> taskQueue = new Vector<>();
-    public Vector<BluetoothTask> bluetoothQueue=new Vector<>();
 
-    /**
-     * Store the download requests of which will be executed in a FIFO way
-     */
-    public HashMap<Integer,P2PTask> downloadRequests=new HashMap<>();
+    public Vector<BluetoothTask> bluetoothQueue=new Vector<>();
+    public Vector<DownloadTask> downloadTaskQueue=new Vector<>();
+
     /**
      * Store all reference of all locally available files
      * and their respective nodes to get from.
      */
     public HashMap<String,HashMap<String,String>> availableFiles=new HashMap<>();
 
-    private P2PTask currentTask;
     public BluetoothTask currentBluetoothTask;
+    public DownloadTask currentDownloadTask;
 
-    /**
-     * Flags to set where to get file from (Cloud,P2P or Local network)
-     */
-    /**
-     * This will be set if the file will be downloaded from the cloud
-     */
-    public static final int DOWNLOAD_SOURCE_CLOUD =1;
-    /**
-     * This willl be set if the file will be downloaded from peer device
-     */
-    public static final int DOWNLOAD_SOURCE_P2P =2;
-
-    /**
-     * The current download source holder
-     */
-    public int currentDownloadSource =-1;
     public int currentTaskIndex=0;
 
     /**
@@ -137,20 +120,21 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
     public synchronized void checkBluetoothQueue(){
         if(!bluetoothQueue.isEmpty() && currentTaskIndex <=(bluetoothQueue.size()-1)){
             currentBluetoothTask=bluetoothQueue.get(currentTaskIndex);
-            currentBluetoothTask.setNetworkTaskListener(this);
+            currentBluetoothTask.setBluetoothNetworkListener(this);
             currentBluetoothTask.start();
         }
     }
 
 
     @Override
-    public void taskEnded(BluetoothTask task) {
+    public void bluetoothTaskEnded(BluetoothTask task) {
         if(task!=currentBluetoothTask){
             return;
         }
         currentBluetoothTask=null;
         checkBluetoothQueue();
     }
+
 
     /**
      * Cross platform listener method to execute when a new node is discovered
@@ -165,18 +149,6 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
 
 
     /**
-     * Cross platform queuing logic, it check if there are task to execute and if any assign to the
-     * current task and process it by calling currentTask.start() which handles all connection logic
-     *
-     */
-    public synchronized void checkDownloadQueue(){
-        if (currentTask == null && !taskQueue.isEmpty()) {
-            currentTask = taskQueue.remove(0);
-            currentTask.start();
-        }
-    }
-
-    /**
      * Cross platform listener method to execute when a new node is no longer active
      *
      * @param node
@@ -187,23 +159,10 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
         }
     }
 
-    /**
-     * Cross platform method add tasks to the queue
-     *
-     * @param task
-     */
-
-    protected void queueDownloadTask(P2PTask task) {
-        taskQueue.add(task);
-         if(taskQueue.size()==1 && taskQueue.get(0).getDownloadStatus()!=P2PTask.DOWNLOAD_STATUS_RUNNING){
-             checkDownloadQueue();
-         }
-
-    }
-
 
     /**
-     * Start insecure bluetooth service (register services,open socket and listen for the incoming communication)
+     * Start insecure bluetooth service (register services,
+     * open socket and listen for the incoming communication)
      */
     public abstract void startInsecureBluetoothService();
 
@@ -218,5 +177,69 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
      * @return
      */
     protected abstract BluetoothTask makeBlueToothTask(NetworkNode node);
+
+
+    /**
+     * Cross platform file download
+     * @param feed - feed contains file entries
+     * @param context - Application context
+     */
+    public void downloadFile(UstadJSOPDSFeed feed,Object context){
+        queueDownloadTasks(feed);
+    }
+
+    /**
+     * Cross platform method to queue the download tasks as per user selections.
+     * @param feed - Feed to get entry files to download from.
+     */
+    private void queueDownloadTasks(UstadJSOPDSFeed feed){
+        DownloadTask downloadTask=makeDownloadTask(feed);
+        if(!downloadTaskQueue.contains(downloadTask)){
+            downloadTask.setDownloadID((long) new AtomicInteger().incrementAndGet());
+            downloadTaskQueue.add(downloadTask);
+
+            if(currentDownloadTask==null || downloadTaskQueue.size()==1){
+                checkDownloadQueue();
+            }
+        }
+
+    }
+
+    /**
+     * Cross platform method to check the queue if has more task to process
+     * (Download feed entries), otherwise finish it.
+     */
+    private synchronized void checkDownloadQueue(){
+        if(!downloadTaskQueue.isEmpty()){
+
+            if(currentBluetoothTask!=null && downloadTaskQueue.size()>0){
+                return;
+            }
+            currentDownloadTask=downloadTaskQueue.remove(0);
+            currentDownloadTask.setDownloadTaskListener(this);
+            currentDownloadTask.start();
+        }
+    }
+
+    /**
+     * Cross platform method to be fired when feed download task has ended
+     * @param task - current downloading tasking
+     */
+    @Override
+    public void downloadTaskEnded(DownloadTask task) {
+        if(task!=currentDownloadTask){
+            return;
+        }
+        currentDownloadTask=null;
+        checkDownloadQueue();
+    }
+
+
+    /**
+     * Create download task and start download
+     * @param feed feed to download
+     * @return
+     */
+    protected abstract DownloadTask makeDownloadTask(UstadJSOPDSFeed feed);
 
 }

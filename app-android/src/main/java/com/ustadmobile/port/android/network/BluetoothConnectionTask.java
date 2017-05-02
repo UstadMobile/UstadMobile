@@ -23,9 +23,10 @@ public class BluetoothConnectionTask extends BluetoothTask {
 
     @Override
     public synchronized void start() {
-
         String bluetoothAddress=getNode().getNodeBluetoothAddress();
         BluetoothDevice bluetoothDevice=mBluetoothAdapter.getRemoteDevice(bluetoothAddress);
+        bConnectionManager.setBluetoothTaskType(BluetoothConnectionManager.
+                BLUETOOTH_TASK_TYPE_STATUS_CHECK);
         bConnectionManager.connectToBluetoothDevice(bluetoothDevice,false);
 
     }
