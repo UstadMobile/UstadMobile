@@ -29,8 +29,8 @@ import sun.security.provider.SHA;
 
 /**
  *
- * Implements a basic HTTP cache dir to save things like image thumbnails etc.
- * to avoid wasting bandwidth and such that they can be used offline
+ * Implements a basic HTTP cache dir to save things like image thumbnails etc. to avoid wasting
+ * bandwidth and such that they can be used offline
  * 
  * @author mike
  */
@@ -110,32 +110,55 @@ public class HTTPCacheDir {
 
 
         for(int i = 0; i < 2; i++) {
-            if(dirName[i] == null)
-                continue;
-
-            indexFileURI[i] = UMFileUtil.joinPaths(new String[]{ dirName[i],
-                INDEX_FILENAME});
-            try {
-                impl.makeDirectoryRecursive(dirName[i]);
-                if(impl.fileExists(indexFileURI[i])) {
-                    cacheIndex[i] = new JSONObject(impl.readFileAsText(indexFileURI[i],
-                            "UTF-8"));
-                }
-            }catch(Exception e) {
-                impl.l(UMLog.ERROR, 134, indexFileURI[i], e);
-            }
-
-            if(cacheIndex[i] == null) {
-                cacheIndex[i] = new JSONObject();
-            }
+            initCacheDir(i);
         }
     }
     
     public HTTPCacheDir(String sharedDirName, String privateDirName) {
         this(sharedDirName, privateDirName, DEFAULT_MAX_ENTRIES);
     }
-    
-    
+
+    /**
+     *
+     * @param privateDirName
+     */
+    public void setPrivateCacheDir(String privateDirName) {
+        //save the private index here if it exists
+        dirName[PRIVATE] = privateDirName;
+        initCacheDir(PRIVATE);
+    }
+
+    /**
+     * Initialize the given cache directory:
+     *  Make the directory if it does not exist
+     *  Load the cache index json if that does exist, otherwise create a blank new json object for it
+     *
+     * @param cacheNum SHARED or PRIVATE
+     */
+    protected void initCacheDir(int cacheNum) {
+        if(dirName[cacheNum] != null) {
+            indexFileURI[cacheNum] = UMFileUtil.joinPaths(new String[]{ dirName[cacheNum],
+                    INDEX_FILENAME});
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            try {
+                impl.makeDirectoryRecursive(dirName[cacheNum]);
+                if(impl.fileExists(indexFileURI[cacheNum])) {
+                    cacheIndex[cacheNum] = new JSONObject(impl.readFileAsText(indexFileURI[cacheNum],
+                            "UTF-8"));
+                }
+            }catch(Exception e) {
+                impl.l(UMLog.ERROR, 134, indexFileURI[cacheNum], e);
+            }
+
+            if(cacheIndex[cacheNum] == null) {
+                cacheIndex[cacheNum] = new JSONObject();
+            }
+        }else {
+            indexFileURI[cacheNum] = null;
+            cacheIndex[cacheNum] = null;
+        }
+    }
+
     
     
     private static int checkYear(int year) {

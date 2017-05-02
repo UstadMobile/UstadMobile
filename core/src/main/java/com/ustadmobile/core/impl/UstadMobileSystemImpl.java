@@ -246,6 +246,11 @@ public abstract class UstadMobileSystemImpl {
             checkCacheDir(context);
             loadActiveUserInfo(context);
             loadLocale(context);
+            if(getActiveUser(context) != null) {
+                getHTTPCacheDir(context).setPrivateCacheDir(
+                    getCacheDir(CatalogController.USER_RESOURCE, context));
+            }
+
             initRan = true;
         }catch(IOException e) {
             mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
@@ -716,6 +721,7 @@ public abstract class UstadMobileSystemImpl {
             String userCachePath = getCacheDir(CatalogController.USER_RESOURCE, 
                     context);
             String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
+            getHTTPCacheDir(context).setPrivateCacheDir(userCachePath);
             try {
                 boolean dirOK = makeDirectory(userCacheParent) && makeDirectory(userCachePath);
                 getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath 

@@ -92,7 +92,12 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
         String prefix = uriResource.initParameter(0, String.class);
         String resPath = '/' + session.getUri().substring(prefix.length());
         ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(resPath), new Date().getTime());
-        return newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, fileSource);
+        NanoHTTPD.Response response = newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, fileSource, null);
+        if(session.getParameters().containsKey("private")){
+            response.addHeader("Cache-Control", "private");
+        }
+
+        return response;
     }
 
     @Override
