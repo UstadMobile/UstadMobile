@@ -19,7 +19,6 @@ import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -58,7 +57,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
         //bind to the LRS forwarding service
         Intent lrsForwardIntent = new Intent(this, XapiStatementForwardingService.class);
         bindService(lrsForwardIntent, mLrsServiceConnection, Context.BIND_AUTO_CREATE);

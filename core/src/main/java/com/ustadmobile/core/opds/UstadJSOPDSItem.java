@@ -32,12 +32,16 @@ package com.ustadmobile.core.opds;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.Vector;
 
+import org.kxml2.io.KXmlSerializer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -78,6 +82,8 @@ public abstract class UstadJSOPDSItem {
     public static final int ATTR_UPDATED = 9;
     public static final int ATTR_LINK = 10;
     public static final int ATTR_ENTRY = 11;
+    public static final int ATTR_CONTENT = 12;
+    public static final int ATTR_TYPE = 13;
     
     public static final String[] ATTR_NAMES = {
         "rel", //ATTR_REL 
@@ -91,9 +97,26 @@ public abstract class UstadJSOPDSItem {
         "publisher", //ATTR_PUBLISHER
         "updated", //ATTR_UPDATED
         "link", //ATTR_LINK
-        "entry"
+        "entry", //ATTR_ENTRY
+        "content", // ATTR_CONTENT
+        "type" //ATTR_TYPE
     };
-    
+
+    /**
+     * Entry content type - text
+     */
+    public static final String CONTENT_TYPE_TEXT = "text";
+
+    /**
+     * Entry content type - html
+     */
+    public static final String CONTENT_TYPE_XHTML = "xhtml";
+
+    /**
+     * The type attribute of the content tag.
+     */
+    protected String contentType;
+
     /**
      * ATTR_NAMES from 0 to LINK_ATTRS_END are those that are stored in the 
      * String array returned by UstadJSOPDSFeed to represent a link
@@ -110,6 +133,9 @@ public abstract class UstadJSOPDSItem {
     public String updated;
     
     public String summary;
+
+    public String content;
+
     public Vector authors;    
     public String publisher;
     
@@ -366,6 +392,26 @@ public abstract class UstadJSOPDSItem {
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_TITLE], title);
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ID], id);
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_SUMMARY], summary);
+
+
+        serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_CONTENT], content);
+        if(content != null) {
+            if(getContentType().equals(CONTENT_TYPE_TEXT)) {
+                xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_CONTENT])
+                        .attribute(null, ATTR_NAMES[ATTR_TYPE], getContentType());
+                xs.text(content);
+                xs.endTag(NS_ATOM, ATTR_NAMES[ATTR_CONTENT]);
+            }else {
+                try {
+                    XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
+                    parser.setInput(new ByteArrayInputStream(content.getBytes("UTF-8")), "UTF-8");
+                    UMUtil.passXmlThrough(parser, xs, null);//TODO: check depth at which tag ends
+                }catch(XmlPullParserException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_UPDATED], updated);
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_DC, ATTR_NAMES[ATTR_PUBLISHER], publisher);
         
@@ -392,13 +438,15 @@ public abstract class UstadJSOPDSItem {
      * @param ns
      * @param tagName
      * @param tagValue
-     * @throws IOException 
+     * @throws IOException
      */
     private void serializeStringToTag(XmlSerializer xs, String ns, String tagName, String tagValue) throws IOException {
         if(tagValue != null) {
             xs.startTag(ns, tagName).text(tagValue).endTag(ns, tagName);
         }
     }
+
+
 
     protected void serializeStartDoc(XmlSerializer xs) throws IOException {
         xs.startDocument("UTF-8", Boolean.FALSE);
@@ -444,7 +492,6 @@ public abstract class UstadJSOPDSItem {
         String name;
         String[] linkAttrs;
         int i;
-        String content = null;
         boolean isFeed = this instanceof UstadJSOPDSFeed;
         Vector entriesFound = isFeed? new Vector() : null;
 
@@ -469,8 +516,17 @@ public abstract class UstadJSOPDSItem {
                     this.updated = xpp.getText();
                 }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {
                     this.summary = xpp.getText();
-                }else if(name.equals("content") && xpp.next() == XmlPullParser.TEXT) {
-                    content = xpp.getText();
+                }else if(name.equals("content")) {
+                    contentType = xpp.getAttributeValue(null, ATTR_NAMES[ATTR_TYPE]);
+                    if(contentType != null && contentType.equals(CONTENT_TYPE_XHTML)) {
+                        this.content = UMUtil.passXmlThroughToString(xpp, ATTR_NAMES[ATTR_CONTENT]);
+                        //int openContentTagStart = content.indexOf("<content");
+                        //int openContentTagEnd = content.indexOf('>', openContentTagStart+1);
+                        //int closeContentTagStart = content.lastIndexOf("</content");
+                        //this.content = this.content.substring(openContentTagEnd+1, closeContentTagStart);
+                    }else if(xpp.next() == XmlPullParser.TEXT){
+                        this.content = xpp.getText();
+                    }
                 }else if(name.equals("dc:publisher") && xpp.next() == XmlPullParser.TEXT){ // Fix this
                     this.publisher = xpp.getText();
                 }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
@@ -587,6 +643,10 @@ public abstract class UstadJSOPDSItem {
         }
 
         return -2;
+    }
+
+    public String getContentType() {
+        return contentType != null ? contentType: CONTENT_TYPE_TEXT;
     }
 
     public int getBgColor() {

@@ -184,41 +184,13 @@ public abstract class UstadMobileSystemImpl {
     /**
      * The shared HTTPCacheDir
      */
-    protected HTTPCacheDir sharedHttpCacheDir;
-
-    /**
-     * The user specific http cache dir
-     */
-    protected HTTPCacheDir userHttpCacheDir;
+    protected HTTPCacheDir httpCacheDir;
 
     /**
      * The maximum number of sessions to show for the user to be able to resume
      * This is limited both for usability and performance.
      */
     public static final int RESUME_MAX_CHOICES = 5;
-
-    /**
-     * The factory class that is used to create a new implementation : this MUST
-     * be set before the first call to getInstance
-     */
-    public static Class systemImplFactoryClass;
-
-    public static UstadMobileSystemImplFactory systemImplFactory;
-
-    public static void setSystemImplFactoryClass(Class factoryClass) {
-        systemImplFactoryClass  = factoryClass;
-    }
-
-    /**
-     * This method can be used to directly set the System Implementation Factory.
-     * If set there's no need to set the systemImplFactoryClass itself.
-     *
-     * @param factory
-     */
-    public static void setSystemImplFactory(UstadMobileSystemImplFactory factory) {
-        systemImplFactory = factory;
-    }
-
     /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
@@ -227,16 +199,8 @@ public abstract class UstadMobileSystemImpl {
      */
     public static UstadMobileSystemImpl getInstance() {
         if(mainInstance == null) {
-            if(systemImplFactory == null) {
-                try {
-                    systemImplFactory = (UstadMobileSystemImplFactory)systemImplFactoryClass.newInstance();
-                }catch(Exception e) {
-                    System.err.println("Exception creating SystemImpl!");
-                    e.printStackTrace();
-                }
-            }
 
-            mainInstance = systemImplFactory.makeUstadSystemImpl();
+            mainInstance = UstadMobileSystemImplFactory.makeSystemImpl();
         }
 
         return mainInstance;
@@ -414,12 +378,8 @@ public abstract class UstadMobileSystemImpl {
      * Save anything that should be written to disk
      */
     public synchronized void handleSave() {
-        if(userHttpCacheDir != null) {
-            userHttpCacheDir.saveIndex();
-        }
-
-        if(sharedHttpCacheDir != null) {
-            sharedHttpCacheDir.saveIndex();
+        if(httpCacheDir != null) {
+            httpCacheDir.saveIndex();
         }
     }
 
@@ -1020,52 +980,15 @@ public abstract class UstadMobileSystemImpl {
     /**
      *
      * @param context
-     * @param mode
      * @return
      */
-    public HTTPCacheDir getHTTPCacheDir(int mode, Object context) {
-        if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
-            if(userHttpCacheDir == null) {
-                userHttpCacheDir = new HTTPCacheDir(getCacheDir(
-                    CatalogController.USER_RESOURCE, context));
-            }
-
-            return userHttpCacheDir;
-        }else if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            if(sharedHttpCacheDir == null) {
-                sharedHttpCacheDir = new HTTPCacheDir(getCacheDir(
-                    CatalogController.SHARED_RESOURCE, context));
-            }
-
-            return sharedHttpCacheDir;
+    public HTTPCacheDir getHTTPCacheDir(Object context) {
+        if(httpCacheDir == null) {
+            httpCacheDir = new HTTPCacheDir(getCacheDir(CatalogController.SHARED_RESOURCE, context),
+                    getCacheDir(CatalogController.USER_RESOURCE, context));
         }
 
-
-        return null;
-    }
-
-    /**
-     * Get the applicable primary and fallback cache directories
-     *
-     * @param mode
-     * @param context
-     * @return
-     */
-    public HTTPCacheDir[] getCacheDirsByMode(int mode, Object context) {
-        if(mode == CatalogController.SHARED_RESOURCE) {
-            return new HTTPCacheDir[] {
-                getHTTPCacheDir(CatalogController.SHARED_RESOURCE, context), null};
-        }else if(mode == CatalogController.USER_RESOURCE) {
-            return new HTTPCacheDir[] {
-                getHTTPCacheDir(CatalogController.USER_RESOURCE, context), null};
-        }else if(mode == (CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE)) {
-            return new HTTPCacheDir[] {
-                getHTTPCacheDir(CatalogController.USER_RESOURCE, context),
-                getHTTPCacheDir(CatalogController.SHARED_RESOURCE, context)
-            };
-        }else {
-            return null;//invali
-        }
+        return httpCacheDir;
     }
 
     /**

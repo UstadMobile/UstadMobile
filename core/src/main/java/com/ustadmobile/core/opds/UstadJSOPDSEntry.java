@@ -158,6 +158,8 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         this.id = srcItem.id;
         this.updated = srcItem.updated;
         this.summary = srcItem.summary;
+        this.content = srcItem.content;
+        this.contentType = srcItem.getContentType();
         this.authors = new Vector();
         if(srcItem.authors != null) {
             for(int i = 0; i < srcItem.authors.size(); i++) {

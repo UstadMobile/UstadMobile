@@ -40,7 +40,7 @@ import java.io.IOException;
 /* $if umplatform == 2  $
     import com.ustadmobile.test.port.j2me.TestCase;
  $else$ */
-    import junit.framework.TestCase;
+    //import junit.framework.TestCase;
 /* $endif$ */
 
 
@@ -56,7 +56,7 @@ import java.io.IOException;
 /* $if umplatform == 1  $
 public class TestOMR extends ActivityInstrumentationTestCase2<UstadMobileActivity>{
  $else$ */
-public class TestOMR extends TestCase {
+public class TestOMR  {
 /* $endif */
 
     private byte[] imgBytes;

@@ -9,7 +9,9 @@ import org.junit.Test;
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -25,6 +27,7 @@ public class TestUstadJSOPDSFeed {
         parser.setInput(opdsIn, "UTF-8");
         feed.loadFromXpp(parser);
         return feed;
+
     }
 
     @Test
@@ -79,6 +82,25 @@ public class TestUstadJSOPDSFeed {
                 "ps", links[UstadJSOPDSEntry.ATTR_HREFLANG]);
         Assert.assertNotEquals("Prioritizing language weight provides link with less desirable mime type",
                 "application/epub+zip", links[UstadJSOPDSEntry.ATTR_MIMETYPE]);
+    }
+
+    @Test
+    public void testSerialize() throws Exception{
+        UstadJSOPDSFeed feed = loadAcquireMultiFeed();
+        feed.href = "http://www.ustadmobile.com/files/test/acquire-multi.opds";
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        feed.serialize(bout);
+
+        UstadJSOPDSFeed deserializedFeed = new UstadJSOPDSFeed();
+        deserializedFeed.loadFromString(new String(bout.toByteArray(), "UTF-8"));
+        Assert.assertEquals("Serializer set absolute self href", feed.href,
+                deserializedFeed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF]);
+        Assert.assertEquals("Feed loaded with correct id", feed.id, deserializedFeed.id);
+        for(int i = 0; i < feed.getNumEntries(); i++) {
+            Assert.assertEquals("Feed entry " + i + " has same id ", feed.getEntry(i).id,
+                    deserializedFeed.getEntry(i).id);
+        }
+
     }
 
 }

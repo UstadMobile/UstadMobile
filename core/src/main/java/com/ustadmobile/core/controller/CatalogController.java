@@ -536,8 +536,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public void run() {
         UstadJSOPDSFeed feed = model.opdsFeed;
         String[] imageLinks;
-        HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
-            resourceMode, context);
+        HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(context);
             
         String imageURI;
         Vector bgVector;
@@ -976,15 +975,13 @@ public class CatalogController extends BaseCatalogController implements AppViewC
                 String opdsFileURI = null;
                 
                 if(url.startsWith("http://") || url.startsWith("https://")) {
-                    HTTPCacheDir[] cacheDirs = impl.getCacheDirsByMode(resourceMode, 
-                        context);
+                    HTTPCacheDir httpCache = impl.getHTTPCacheDir(context);
                     String filename = null;
                     if(catalogID != null) {
                         filename = getFileNameForOPDSFeedId(catalogID);
                     }
 
-                    opdsFileURI = cacheDirs[0].get(url, filename, headers, 
-                        resultBuf, cacheDirs[1]);
+                    opdsFileURI = httpCache.get(url, filename, headers, resultBuf);
                 }else if(url.startsWith("file://")) {
                     opdsFileURI = url;
                 }
@@ -1234,16 +1231,19 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         String filename = null;
         
         String key = "opds-cache-" + catalogID;
+
+        cacheDir = impl.getHTTPCacheDir(context);
+
         
         if((resourceMode & USER_RESOURCE) == USER_RESOURCE) {
             filename = impl.getUserPref(key, context);
-            cacheDir = impl.getHTTPCacheDir(USER_RESOURCE, context);
+            //cacheDir = impl.getHTTPCacheDir(USER_RESOURCE, context);
             impl.getLogger().l(UMLog.DEBUG, 509, filename);
         }
         
         if(filename == null && (resourceMode & SHARED_RESOURCE) == SHARED_RESOURCE) {
             filename = impl.getAppPref(key, context);
-            cacheDir = impl.getHTTPCacheDir(SHARED_RESOURCE, context);
+            //cacheDir = impl.getHTTPCacheDir(SHARED_RESOURCE, context);
             impl.getLogger().l(UMLog.DEBUG, 510, filename);
         }
 

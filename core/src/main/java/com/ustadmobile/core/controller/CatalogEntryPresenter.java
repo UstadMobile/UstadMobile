@@ -28,6 +28,8 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
     private UstadJSOPDSFeed entryFeed;
 
+    private int downloadStatusStrId = -1;
+
     public CatalogEntryPresenter(Object context) {
         super(context);
     }
@@ -49,6 +51,8 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
                 CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
                         CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
+                catalogEntryView.setDescription(entry.content, entry.getContentType());
+
                 if(entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
                 }else {
@@ -72,6 +76,9 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
             case CatalogEntryView.BUTTON_REMOVE:
                 handleClickRemove(new UstadJSOPDSEntry[]{entry});
+                break;
+            case CatalogEntryView.BUTTON_OPEN:
+                handleClickOpenEntry(entry);
                 break;
 
         }
@@ -97,7 +104,12 @@ public class CatalogEntryPresenter extends BaseCatalogController{
     @Override
     public void statusUpdated(AcquisitionStatusEvent event) {
         if(event.getEntryId() != null && event.getEntryId().equals(entry.id)) {
-            catalogEntryView.setProgress(event.getBytesDownloadedSoFar() / event.getTotalBytes());
+            int newStatus = AcquisitionManager.getStringIdForDownloadStatus(event.getStatus());
+            if(newStatus != downloadStatusStrId) {
+                catalogEntryView.setProgressStatusText(UstadMobileSystemImpl.getInstance().getString(newStatus));
+                downloadStatusStrId = newStatus;
+            }
+
             switch(event.getStatus()) {
                 case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
@@ -105,6 +117,10 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, true);
                     catalogEntryView.setProgressVisible(false);
                     registerItemAcquisitionCompleted(event.getEntryId());
+                case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                    catalogEntryView.setProgress(
+                        (float)((double)event.getBytesDownloadedSoFar() / (double)event.getTotalBytes()));
+                    break;
             }
         }
     }

@@ -61,6 +61,8 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
+import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.CatalogEntryActivity;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
