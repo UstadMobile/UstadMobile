@@ -36,72 +36,14 @@ public class NetworkServiceAndroid extends Service{
     private WifiDirectHandler wifiDirectHandler;
     private final IBinder mBinder = new LocalServiceBinder();
 
-    /**
-     * Fixed length of time to wait if a no prompt network fails
-     */
-    public static final int NOPROMPT_RETRY_WAIT_INTERVAL = 10000;
-
-    public static final int NOPROMPT_RETRY_MAX_RETRIES = 6;
 
     private NetworkManagerAndroid p2pManager;
     private String serviceName=null;
 
 
-
-    /**
-     * Action Listener that will watch for any failure of the no prompt network and recreate it
-     * as required - sometimes group creation will failed with the "BUSY" status if the wifi is
-     * doing other stuff.
-     */
-    protected WifiP2pManager.ActionListener mNoPromptActionListener = new WifiP2pManager.ActionListener() {
-
-        private int retryCount;
-
-        @Override
-        public void onSuccess() {
-            Log.i(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener:onSuccess");
-            retryCount = 0;
-        }
-
-        @Override
-        public void onFailure(int i) {
-            Log.e(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener:onFailure: " +
-                    FailureReason.fromInteger(i));
-            retryCount++;
-            if(retryCount < NOPROMPT_RETRY_MAX_RETRIES) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.i(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener: Retry #"
-                                + retryCount);
-                        getWifiDirectHandlerAPI().removeGroup(
-                                new WifiP2pManager.ActionListener() {
-                              @Override
-                              public void onSuccess() {
-                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.localServiceData(),null);
-                              }
-
-                              @Override
-                              public void onFailure(int i) {
-                                  getWifiDirectHandlerAPI().addLocalService(NetworkServiceAndroid.DEVICE_POLICY_SERVICE,NetworkManagerAndroid.localServiceData(),null);
-                              }
-                          });
-
-                    }
-                }, NOPROMPT_RETRY_WAIT_INTERVAL);
-            }else {
-                Log.e(WifiDirectHandler.TAG, "NetworkServiceAndroid:noPromptActionListener: Exceeded retry counts!");
-
-                retryCount = 0;
-            }
-        }
-    };
-
-
     public NetworkServiceAndroid(){
 
     }
-
 
 
     @Override
@@ -158,9 +100,9 @@ public class NetworkServiceAndroid extends Service{
 
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            WifiDirectAutoAccept autoAccept=new WifiDirectAutoAccept(
+           /* WifiDirectAutoAccept autoAccept=new WifiDirectAutoAccept(
                     wifiDirectHandler.getWifiDirectP2pManager(),wifiDirectHandler.getWiFiDirectChannel());
-            autoAccept.intercept(true);
+            autoAccept.intercept(true);*/
             p2pManager = (NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
             p2pManager.init(NetworkServiceAndroid.this,serviceName);
         }

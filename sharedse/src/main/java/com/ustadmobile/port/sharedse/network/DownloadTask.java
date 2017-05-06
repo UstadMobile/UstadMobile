@@ -31,6 +31,8 @@ public class DownloadTask {
 
     private int downloadTotalBytes;
 
+    private boolean testEnvironment=false;
+
 
     /**
      * Log all entries in their Feed download task
@@ -91,6 +93,7 @@ public class DownloadTask {
         }
     }
 
+
     public int getDownloadTotalBytes() {
         return downloadTotalBytes;
     }
@@ -99,6 +102,13 @@ public class DownloadTask {
         this.downloadTotalBytes = downloadTotalBytes;
     }
 
+    public boolean isTestEnvironment() {
+        return testEnvironment;
+    }
+
+    public void setTestEnvironment(boolean testEnvironment) {
+        this.testEnvironment = testEnvironment;
+    }
 
     public int []  getDownloadStatus() {
         int [] statusVal=new int[3];

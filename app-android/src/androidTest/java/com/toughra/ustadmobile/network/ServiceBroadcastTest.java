@@ -1,4 +1,4 @@
-package com.toughra.ustadmobile.p2p;
+package com.toughra.ustadmobile.network;
 
 import android.content.Context;
 import android.content.Intent;
@@ -32,15 +32,16 @@ import static org.junit.Assert.assertThat;
 
 public class ServiceBroadcastTest {
 
-    private static final int mWaitingTimeForBindService =5000;
-    private static final int mMaxExecutionTime =360000;
+    private static final int mWaitingTimeForBindService =20000;
+    private static final int mMaxExecutionTime =180000;
     public static final String TEST_SERVICE_NAME="ustadServiceTest";
 
     @Rule
     public final ServiceTestRule mServiceRuleWifi = new ServiceTestRule();
-    public final ServiceTestRule mServiceRuleHTTPD = new ServiceTestRule();
+    private final ServiceTestRule mServiceRuleHTTPD = new ServiceTestRule();
     private final Object mLock=new Object();
     private NetworkServiceAndroid networkServiceAndroid =null;
+
 
     @Before
     public void setUp() throws TimeoutException {
@@ -60,7 +61,6 @@ public class ServiceBroadcastTest {
 
 
 
-
     }
 
 
@@ -70,21 +70,20 @@ public class ServiceBroadcastTest {
         synchronized (mLock){
             mLock.wait(mWaitingTimeForBindService);
         }
+
         assertNotNull("Was service bound: ", networkServiceAndroid);
         WifiDirectHandler mWifiDirectHandler = networkServiceAndroid.getWifiDirectHandlerAPI();
+
 
         synchronized (mLock){
             mLock.wait(mMaxExecutionTime);
         }
         assertThat("Was WiFi enabled: ", mWifiDirectHandler.isWifiEnabled(),is(true));
-        assertThat("Was group formed: ", mWifiDirectHandler.isGroupFormed(),is(true));
-        assertThat("Was the group owner: ", mWifiDirectHandler.isGroupOwner(),is(true));
+        assertThat("Was Bluetooth enabled: ", networkServiceAndroid.isBluetoothEnabled(),is(true));
         assertThat("Was service added and broadcast: ",
-                mWifiDirectHandler.getNoPromptServiceStatus(),is(WifiDirectHandler.NOPROMPT_STATUS_ACTIVE));
+                networkServiceAndroid.getWifiDirectHandlerAPI().getServiceStatus(),
+                is(WifiDirectHandler.NORMAL_SERVICE_STATUS_ACTIVE));
 
     }
-
-
-
 
 }

@@ -49,7 +49,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,6 +60,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
@@ -77,17 +77,17 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.network.BluetoothConnectionManager;
+import com.ustadmobile.port.android.network.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.network.FileCheckResponse;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_AVAILABILITY_RESPONSE;
+import static com.ustadmobile.port.android.network.DownloadManagerAndroid.EXTRA_ENTRY_ID;
 
 /**
  * An Android Fragment that implements the CatalogView to show an OPDS Catalog
@@ -186,21 +186,17 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         broadcastReceiver=new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                mSwipeRefreshLayout.setRefreshing(true);
-                if(BluetoothConnectionManager.ACTION_FILE_CHECKING_COMPLETED.equals(intent.getAction())){
-                    mSwipeRefreshLayout.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mSwipeRefreshLayout.setRefreshing(false);
-                            onRefresh();
-                        }
-                    });
+
+                if(BluetoothConnectionManager.ACTION_SINGLE_FILE_CHECKING_COMPLETED.equals(intent.getAction())){
+                    String fileId=intent.getStringExtra(EXTRA_ENTRY_ID);
+                    Toast.makeText(getActivity(),fileId,Toast.LENGTH_LONG).show();
                 }
             }
         };
 
         IntentFilter intentFilter=new IntentFilter();
-        intentFilter.addAction(BluetoothConnectionManager.ACTION_FILE_CHECKING_COMPLETED);
+        intentFilter.addAction(BluetoothConnectionManager.ACTION_FILE_CHECKING_TASK_COMPLETED);
+        intentFilter.addAction(BluetoothConnectionManager.ACTION_SINGLE_FILE_CHECKING_COMPLETED);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver,intentFilter);
 
         return rootContainer;
@@ -706,11 +702,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                     UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().checkLocalFilesAvailability(getActivity(), idList);
                     isRequesting=true;
                 }
+                boolean isAvailableLocally =false;
+                FileCheckResponse response=((NetworkManagerAndroid)UstadMobileSystemImplAndroid.getInstanceAndroid().
+                        getP2PManager()).fileCheckResponse(feed.entries[position].id);
+                if(response!=null){
+                    isAvailableLocally=response.isFileAvailable();
+                }
 
-                boolean isAvailableLocally = UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().
-                        availableFiles.containsKey(feed.entries[position].id) &&
-                        Boolean.parseBoolean(UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().
-                                availableFiles.get(feed.entries[position].id).get(FILE_AVAILABILITY_RESPONSE));
 
                 holder.mEntryCard.setLocalAvailableFile(isAvailableLocally);
                 //set the text line to be visible

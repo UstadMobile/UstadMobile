@@ -21,6 +21,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.network.DownloadTask;
+import com.ustadmobile.port.sharedse.network.FileCheckResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,13 +44,13 @@ import java.util.Vector;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.BLUETOOTH_ADDRESS;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.BLUETOOTH_TASK_TYPE_ACQUIRE;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.COMMAND_TAG_FILE_ACQUIRE_REQUEST;
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_AVAILABILITY_RESPONSE;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_AVAILABLE_COMMAND_SEPARATOR;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_IDS_SEPARATOR;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.STATE_CONNECTED;
+import static com.ustadmobile.port.android.network.BluetoothConnectionManager.TAG;
+import static com.ustadmobile.port.android.network.NetworkManagerAndroid.NETWORK_TYPE_WIFI_DIRECT;
 
 
 /**
@@ -86,7 +87,7 @@ public class DownloadManagerAndroid extends DownloadTask {
      * Extra data flag (entry Download ID) which will passed to the intent
      * for the purpose of updating the UI)
      */
-    public static final String EXTRA_DOWNLOAD_ENTRY_ID ="extra_download_entry_id";
+    public static final String EXTRA_ENTRY_ID ="extra_entry_id";
     /**
      * Extra data flag (Server Address) which will passed to the broadcast intent
      */
@@ -147,6 +148,8 @@ public class DownloadManagerAndroid extends DownloadTask {
     private DownLoadTask downloadTask;
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
+
+    private static int currentNodeIndex=0;
 
     /**
      * Time passed before sending an update to the progressbar
@@ -243,31 +246,39 @@ public class DownloadManagerAndroid extends DownloadTask {
      *          has been made download the file from there
      */
     private void checkDownloadSource(){
-        HashMap<String,HashMap<String,String>> availableFiles=p2pManager.getAvailableFiles();
+
         String fileId=getFeed().entries[currentEntryIndex].id;
+        FileCheckResponse checkResponse=p2pManager.fileCheckResponse(fileId);
+
         //Map entry ID to it's corresponding download ID
         DownloadManagerAndroid.this.entryDownloadLog.put(fileId,getDownloadID());
 
         //If a file can be downloaded locally, establish bluetooth connection and listen
         // for the connection otherwise download from the internet
-            if(availableFiles.keySet().size()>0 && Boolean.parseBoolean(availableFiles.get(fileId).get(FILE_AVAILABILITY_RESPONSE))){
+            if(checkResponse!=null && checkResponse.isFileAvailable()){
 
-                String peerBluetoothAddress=availableFiles.get(fileId).get(BLUETOOTH_ADDRESS);
-                BluetoothAdapter bluetoothAdapter=bConnectionManager.getBluetoothAdapter();
-                BluetoothDevice device=bluetoothAdapter.getRemoteDevice(peerBluetoothAddress);
-                p2pManager.getBluetoothConnectionManager().start();
-                bConnectionManager.setBluetoothTaskType(BLUETOOTH_TASK_TYPE_ACQUIRE);
-                p2pManager.getBluetoothConnectionManager().connectToBluetoothDevice(device,false);
+               if(p2pManager.getNetworkType()!=null &&
+                       p2pManager.getNetworkType().equals(NETWORK_TYPE_WIFI_DIRECT)){
+                   downloadInBackground();
+               }else{
+                   String peerBluetoothAddress=checkResponse.getNodeAddress();
+                   BluetoothAdapter bluetoothAdapter=bConnectionManager.getBluetoothAdapter();
+                   BluetoothDevice device=bluetoothAdapter.getRemoteDevice(peerBluetoothAddress);
+                   p2pManager.getBluetoothConnectionManager().start();
+                   bConnectionManager.setBluetoothTaskType(BLUETOOTH_TASK_TYPE_ACQUIRE);
+                   p2pManager.getBluetoothConnectionManager().connectToBluetoothDevice(device,false);
 
-                IntentFilter filter=new IntentFilter();
-                filter.addAction(BluetoothConnectionManager.ACTION_DEVICE_BLUETOOTH_CONNECTIVITY_CHANGE);
-                filter.addAction(ACTION_DOWNLOAD_STARTING);
-                LocalBroadcastManager.getInstance(context).registerReceiver(mBroadcastReceiver, filter);
-                currentDownloadSource=DOWNLOAD_SOURCE_PEER;
+                   IntentFilter filter=new IntentFilter();
+                   filter.addAction(BluetoothConnectionManager.ACTION_DEVICE_BLUETOOTH_CONNECTIVITY_CHANGE);
+                   filter.addAction(ACTION_DOWNLOAD_STARTING);
+                   LocalBroadcastManager.getInstance(context).registerReceiver(mBroadcastReceiver, filter);
+               }
+
+                p2pManager.setDownloadSource(DOWNLOAD_SOURCE_PEER);
 
 
             }else{
-                currentDownloadSource=DOWNLOAD_SOURCE_CLOUD;
+                p2pManager.setDownloadSource(DOWNLOAD_SOURCE_CLOUD);
                 downloadInBackground();
             }
     }
@@ -278,6 +289,7 @@ public class DownloadManagerAndroid extends DownloadTask {
      */
 
     private void downloadInBackground() {
+        Log.e(TAG,"Connection TYpe: "+p2pManager.getNetworkType());
         downloadTask=new DownLoadTask();
         downloadTask.execute();
     }
@@ -317,8 +329,9 @@ public class DownloadManagerAndroid extends DownloadTask {
                 throw new IllegalArgumentException("No absolute self link on feed - required to resolve links");
 
             String feedHref = selfLink[UstadJSOPDSEntry.LINK_HREF];
-            String downloadUrl = UMFileUtil.resolveLink(feedHref,getFeed().
-                    entries[currentEntryIndex].getFirstAcquisitionLink(null)[UstadJSOPDSEntry.LINK_HREF]);
+            String [] acquisitionLink=getFeed().
+                    entries[currentEntryIndex].getFirstAcquisitionLink(null);
+            String downloadUrl = UMFileUtil.resolveLink(feedHref,acquisitionLink[UstadJSOPDSEntry.LINK_HREF]);
 
             File infoFile=new File(downloadDestDir,UMFileUtil.getFilename(downloadUrl)+INFO_FILE_EXTENSION);
             fileDestination = new File(downloadDestDir,UMFileUtil.getFilename(downloadUrl)+UNFINISHED_FILE_EXTENSION);
@@ -337,7 +350,7 @@ public class DownloadManagerAndroid extends DownloadTask {
 
             try {
 
-                if(currentDownloadSource==DOWNLOAD_SOURCE_CLOUD){
+                if(p2pManager.getDownloadSource()==DOWNLOAD_SOURCE_CLOUD){
                     downloadUri= downloadUrl;
                 }else{
                     downloadUri= UMFileUtil.joinPaths(new String[]{srcfileURL,
@@ -444,14 +457,13 @@ public class DownloadManagerAndroid extends DownloadTask {
                       updateDownloadStatus();
                       Intent downloadCompleted=new Intent(ACTION_DOWNLOAD_COMPLETED);
                       downloadCompleted.putExtra(EXTRA_DOWNLOAD_ID, getDownloadID());
-                      downloadCompleted.putExtra(EXTRA_DOWNLOAD_ENTRY_ID,getFeed().entries[currentEntryIndex].id);
-                       context.sendBroadcast(downloadCompleted);
+                      downloadCompleted.putExtra(EXTRA_ENTRY_ID,
+                              getFeed().entries[currentEntryIndex].id);
+                      LocalBroadcastManager.getInstance(context).sendBroadcast(downloadCompleted);
                        dismissDownloadNotification();
-                      if(currentDownloadSource==DOWNLOAD_SOURCE_PEER){
+                      /*if(currentDownloadSource==DOWNLOAD_SOURCE_PEER){
                           p2pManager.reconnectToThePreviousNetwork();
-                      }
-
-                      //notify Feed download task ended
+                      }*/
                       fireDownloadTaskEnded();
 
                   }

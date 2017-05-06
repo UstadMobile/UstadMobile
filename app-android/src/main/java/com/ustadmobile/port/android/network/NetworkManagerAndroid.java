@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -17,6 +20,7 @@ import com.ustadmobile.core.p2p.P2PManager;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.network.BluetoothTask;
 import com.ustadmobile.port.sharedse.network.DownloadTask;
+import com.ustadmobile.port.sharedse.network.FileCheckResponse;
 import com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE;
 import com.ustadmobile.port.sharedse.network.NetworkNode;
 
@@ -31,16 +35,18 @@ import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
+import static android.content.Context.WIFI_SERVICE;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.BLUETOOTH_ADDRESS;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.BLUETOOTH_TASK_TYPE_ACQUIRE;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.BLUETOOTH_TASK_TYPE_STATUS_CHECK;
-import static com.ustadmobile.port.android.network.BluetoothConnectionManager.COMMAND_TAG_FILE_ACQUIRE_FEEDBACK;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.COMMAND_FILE_AVAILABLE_CHECK_TAG;
+import static com.ustadmobile.port.android.network.BluetoothConnectionManager.COMMAND_TAG_FILE_ACQUIRE_FEEDBACK;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_AVAILABLE_COMMAND_SEPARATOR;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.STATE_CONNECTED;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.ACTION_DOWNLOAD_STARTING;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.COMMUNICATION_PORT;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.EXTRA_DOWNLOAD_SOURCE_ADDRESS;
+import static com.ustadmobile.port.android.network.DownloadManagerAndroid.SERVER_ADDRESS;
 import static edu.rit.se.wifibuddy.WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED;
 
 /**
@@ -63,6 +69,12 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
     public static final String NO_PROMPT_NETWORK_PASS = "passphrase",
             NO_PROMPT_NETWORK_NAME = "networkName";
+
+    public static final String NETWORK_CONNECTION_TYPE="WIFI";
+    public static final String NETWORK_TYPE_WIFI_DIRECT="wifi_direct";
+    public static final String NETWORK_TYPE_NORMAL_WIFI="normal_wifi";
+    public static final String NETWORK_TYPE_UNKNOWN="unknown";
+
     /**
      * Time passed before retrying the connection
      */
@@ -72,6 +84,12 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
      * Time to wait before updating the progressbar
      */
     private final static int WAITING_TIME_TO_RETRY_CONNECTION = 5000;
+
+    /**
+     * Valid file age - greater than this we will need to check the file again.
+     */
+    public static final int AVERAGE_FILE_AGE_BEFORE_CHECK =60000;
+
 
     /**
      * List of all file ID's to be processed (Checking if they are available locally or not)
@@ -99,6 +117,9 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
     public static String DEVICE_BLUETOOTH_ADDRESS =null;
     private int retryCount=0;
     private int currentNetworkId=0;
+    private boolean isGroupInfoSent=false;
+
+    private int downloadSource=-2;
 
     private Context mContext;
 
@@ -124,7 +145,8 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_TIMEOUT_ACTION);
-        filter.addAction(BluetoothConnectionManager.ACTION_FILE_CHECKING_COMPLETED);
+        filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_CREATED_ACTION);
+        filter.addAction(BluetoothConnectionManager.ACTION_FILE_CHECKING_TASK_COMPLETED);
         filter.addAction(BluetoothConnectionManager.ACTION_DEVICE_BLUETOOTH_CONNECTIVITY_CHANGE);
 
         LocalBroadcastManager.getInstance(p2pService).registerReceiver(mBroadcastReceiver, filter);
@@ -209,8 +231,7 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
                     /**
                      * Using WiFi direct group technique (server side device)
                      */
-                    if(wifiDirectHandler.getNoPromptServiceStatus()==WifiDirectHandler.NOPROMPT_STATUS_ACTIVE
-                            && mBluetoothManager.getConnectedDeviceAddress() != null) {
+                    if(wifiDirectHandler.isGroupOwner() && !isGroupInfoSent) {
                         //Send Group information to the client side
                         String ssid = wifiDirectHandler.getNoPromptServiceData().getRecord().get(NO_PROMPT_NETWORK_NAME);
                         String passPhrase = wifiDirectHandler.getNoPromptServiceData().getRecord().get(NO_PROMPT_NETWORK_PASS);
@@ -218,6 +239,7 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
                                     FILE_AVAILABLE_COMMAND_SEPARATOR + COMMAND_TAG_FILE_ACQUIRE_FEEDBACK +
                                     FILE_AVAILABLE_COMMAND_SEPARATOR + ssid + FILE_AVAILABLE_COMMAND_SEPARATOR + passPhrase;
                             mBluetoothManager.sendCommandMessage(sendGroupInformation);
+                        isGroupInfoSent=true;
                         }
 
 
@@ -262,6 +284,9 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
                         wifiDirectHandler.connectToNoPromptService(mBluetoothManager.getTxtRecord());
                         retryCount++;
                     }
+
+                    break;
+                case WifiDirectHandler.Action.NOPROMPT_SERVICE_CREATED_ACTION:
 
             }
         }
@@ -406,7 +431,7 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
     }
 
 
-    public HashMap<String,HashMap<String,String>> getAvailableFiles(){
+    public HashMap<String,List<FileCheckResponse>> getAvailableFiles(){
         return NetworkManagerAndroid.this.availableFiles;
     }
 
@@ -435,17 +460,89 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
    }
 
 
+
    private void setCurrentNetworkId(){
        WifiInfo wifiInfo=getP2pService().getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
-       currentNetworkId=wifiInfo.getNetworkId();
+       if(wifiInfo!=null){
+           currentNetworkId=wifiInfo.getNetworkId();
+       }
    }
 
    public void reconnectToThePreviousNetwork(){
-       WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+       WifiManager wifiManager = (WifiManager) mContext.getSystemService(WIFI_SERVICE);
        wifiManager.enableNetwork(currentNetworkId,true);
        wifiManager.reconnect();
 
    }
+
+    public FileCheckResponse fileCheckResponse(String fileID){
+        List<FileCheckResponse> responses=this.availableFiles.get(fileID);
+        if(responses!=null){
+            long lastChecked=Calendar.getInstance().getTimeInMillis();
+            for(FileCheckResponse checkResponse: responses){
+                if(checkResponse.isFileAvailable() &&
+                        (((int)lastChecked-checkResponse.getLastChecked()) < AVERAGE_FILE_AGE_BEFORE_CHECK)){
+                    return  checkResponse;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get currently connected network TYPE,
+     * This helps to know if the device is already connected on the Wi-Fi direct network or not.
+     * @return
+     */
+
+    public String getNetworkType() {
+
+        ConnectivityManager connectivity = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        WifiManager wManager = (WifiManager) mContext.getSystemService(WIFI_SERVICE);
+        if (connectivity != null) {
+
+            NetworkInfo info = connectivity.getActiveNetworkInfo();
+
+            if (info != null && info.isConnected()) {
+
+                if (info.getState() == NetworkInfo.State.CONNECTED) {
+
+                    if(info.getTypeName().equalsIgnoreCase(NETWORK_CONNECTION_TYPE)){
+
+                        WifiInfo wifiInfo=wManager.getConnectionInfo();
+
+                        String address = Formatter.formatIpAddress(wifiInfo.getIpAddress());
+                        String defaultAddress=SERVER_ADDRESS;
+
+                        String serverAddress[]=address.split("\\.");
+                        String defaultServerAddress[]=defaultAddress.split("\\.");
+
+
+                        if(serverAddress[0].equals(defaultServerAddress[0])
+                                && serverAddress[1].equals(defaultServerAddress[1])
+                                && serverAddress[2].equals(defaultServerAddress[2])){
+                            return NETWORK_TYPE_WIFI_DIRECT;
+                        }else{
+                            return NETWORK_TYPE_NORMAL_WIFI;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return NETWORK_TYPE_UNKNOWN;
+    }
+
+
+    public void setDownloadSource(int source){
+        this.downloadSource=source;
+    }
+
+    public int getDownloadSource(){
+        return this.downloadSource;
+    }
 
 
 }

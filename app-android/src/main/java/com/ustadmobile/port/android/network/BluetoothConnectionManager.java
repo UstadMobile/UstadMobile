@@ -18,11 +18,14 @@ import android.util.Log;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.port.sharedse.network.FileCheckResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,9 +36,10 @@ import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.ACTION_DOWNLOAD_STARTING;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.EXTRA_DOWNLOAD_SOURCE_ADDRESS;
+import static com.ustadmobile.port.android.network.DownloadManagerAndroid.EXTRA_ENTRY_ID;
+import static com.ustadmobile.port.android.network.NetworkManagerAndroid.FILE_IDS_TO_PROCESS;
 import static com.ustadmobile.port.android.network.NetworkManagerAndroid.NO_PROMPT_NETWORK_NAME;
 import static com.ustadmobile.port.android.network.NetworkManagerAndroid.NO_PROMPT_NETWORK_PASS;
-import static edu.rit.se.wifibuddy.WifiDirectHandler.NOPROMPT_STATUS_ACTIVE;
 
 
 /**
@@ -116,9 +120,14 @@ public class BluetoothConnectionManager {
 
     public static final String FILE_AVAILABILITY_RESPONSE = "available";
     /**
-     * Broadcast sent after the file checking process is completed
+     * Broadcast sent after the file checking process is completed (Batch task)
      */
-    public static final String ACTION_FILE_CHECKING_COMPLETED = "action_file_checking_completed";
+    public static final String ACTION_FILE_CHECKING_TASK_COMPLETED = "action_file_checking_task_completed";
+
+    /**
+     * Broadcast sent after the file checking process is completed (Single file)
+     */
+    public static final String ACTION_SINGLE_FILE_CHECKING_COMPLETED = "action_file_checking_completed";
 
     /**
      * Broadcast sent when bluetooth connection state changes
@@ -128,7 +137,8 @@ public class BluetoothConnectionManager {
     /**
      * Extra data tag passed on broadcast intent which is a Bluetooth Address
      */
-    public static final String EXTRA_FILE_CHECKING_TASK_ADDRESS = "extra_file_checking";
+    public static final String EXTRA_FILE_CHECKING_TASK_DEVICE_ADDRESS = "extra_file_checking_device_address";
+
     /**
      * This indicate whether is an acquisition or file checking task
      */
@@ -287,33 +297,36 @@ public class BluetoothConnectionManager {
                                             List<String> requestResponse=stringsToIds(receivedCommand[MESSAGE_DATA_INDEX]);
 
                                             for (int position=0;position<requestResponse.size();position++){
-                                                HashMap<String,String> response=new HashMap<>();
-                                                response.put(BLUETOOTH_ADDRESS,serverBluetoothAddress);
-                                                response.put(FILE_AVAILABILITY_RESPONSE,requestResponse.get(position).replaceAll("\\s+",""));
+                                                updateFileFound(NetworkManagerAndroid.FILE_IDS_TO_PROCESS.get(position));
+                                                long lastChecked= Calendar.getInstance().getTimeInMillis();
+                                                FileCheckResponse response=new FileCheckResponse(serverBluetoothAddress);
+                                                response.setFileAvailable(Boolean.parseBoolean(requestResponse.get(position)));
+                                                response.setLastChecked((int) lastChecked);
+
+
+                                                List<FileCheckResponse> responseList=
+                                                        managerAndroid.getAvailableFiles().get(FILE_IDS_TO_PROCESS.get(position));
+                                                if(responseList==null){
+                                                    responseList=new ArrayList<>();
+                                                }
 
                                                 if(managerAndroid.knownNodes.size()>1 && managerAndroid.getCurrentTaskIndex()
                                                         < managerAndroid.getBluetoothTaskQueue().size()){
+                                                    if(Boolean.parseBoolean(requestResponse.get(position))){
 
-                                                    if(!managerAndroid.getAvailableFiles().containsValue(response)){
-
-                                                        if(Boolean.parseBoolean(requestResponse.get(position))){
-                                                            managerAndroid.getAvailableFiles().put(NetworkManagerAndroid.FILE_IDS_TO_PROCESS.get(position),
-                                                                    response);
-                                                            NetworkManagerAndroid.FILE_IDS_TO_PROCESS.remove(position);
-                                                        }
-                                                    }else if(managerAndroid.getCurrentTaskIndex()
-                                                            == (managerAndroid.getBluetoothTaskQueue().size()-1)){
-
+                                                        responseList.add(response);
                                                         managerAndroid.getAvailableFiles().put(NetworkManagerAndroid.FILE_IDS_TO_PROCESS.get(position),
-                                                                response);
-
+                                                                responseList);
                                                     }
 
                                                 }else{
+                                                    responseList.add(response);
                                                     managerAndroid.getAvailableFiles().put(NetworkManagerAndroid.FILE_IDS_TO_PROCESS.get(position),
-                                                            response);
+                                                            responseList);
 
                                                 }
+
+
 
                                             }
 
@@ -326,9 +339,9 @@ public class BluetoothConnectionManager {
                                         if(managerAndroid.getCurrentTaskIndex()==(managerAndroid.getBluetoothTaskQueue().size()-1)){
                                             managerAndroid.setCurrentTaskIndex(0);
                                             stop();
-                                            Intent taskCompleted=new Intent(ACTION_FILE_CHECKING_COMPLETED);
-                                            taskCompleted.putExtra(EXTRA_FILE_CHECKING_TASK_ADDRESS,serverBluetoothAddress);
-                                            LocalBroadcastManager.getInstance(managerAndroid.getP2pService()).sendBroadcast(taskCompleted);
+                                            Intent taskCompleted=new Intent(ACTION_FILE_CHECKING_TASK_COMPLETED);
+                                            taskCompleted.putExtra(EXTRA_FILE_CHECKING_TASK_DEVICE_ADDRESS,serverBluetoothAddress);
+                                            //LocalBroadcastManager.getInstance(managerAndroid.getP2pService()).sendBroadcast(taskCompleted);
                                             setBluetoothTaskType(null);
 
                                         }else{
@@ -347,6 +360,9 @@ public class BluetoothConnectionManager {
                     }else if(BLUETOOTH_TASK_TYPE_ACQUIRE.equals(receivedCommand[MESSAGE_TASK_TYPE_INDEX])){
 
                         WifiDirectHandler wifiDirectHandler=managerAndroid.getP2pService().getWifiDirectHandlerAPI();
+                        WifiInfo wifiInfo=managerAndroid.getP2pService().getWifiDirectHandlerAPI()
+                                .getCurrentConnectedWifiInfo();
+
                         switch (receivedCommand[MESSAGE_ACTUAL_COMMAND_INDEX]){
 
                             case COMMAND_TAG_FILE_ACQUIRE_REQUEST:
@@ -375,17 +391,22 @@ public class BluetoothConnectionManager {
                                  */
 
                                 //If the group is already created, send the group info otherwise create it
-                                if(wifiDirectHandler.getNoPromptServiceStatus()==NOPROMPT_STATUS_ACTIVE){
-                                    String ssid=wifiDirectHandler.getNoPromptServiceData().getRecord().get(NO_PROMPT_NETWORK_NAME);
-                                    String passPhrase=wifiDirectHandler.getNoPromptServiceData().getRecord().get(NO_PROMPT_NETWORK_PASS);
-                                    String sendGroupInfo= BLUETOOTH_TASK_TYPE_ACQUIRE +
-                                            FILE_AVAILABLE_COMMAND_SEPARATOR+COMMAND_TAG_FILE_ACQUIRE_FEEDBACK +
-                                            FILE_AVAILABLE_COMMAND_SEPARATOR +ssid+FILE_AVAILABLE_COMMAND_SEPARATOR+passPhrase;
+                                if(wifiDirectHandler.getThisDevice().isGroupOwner() ||
+                                        wifiDirectHandler.getWifiP2pGroup()!=null){
+
+                                    String ssid=wifiDirectHandler.getWifiP2pGroup().getNetworkName();
+                                    String passPhrase=wifiDirectHandler.getWifiP2pGroup().getPassphrase();
+
+                                    String sendGroupInfo= BLUETOOTH_TASK_TYPE_ACQUIRE + FILE_AVAILABLE_COMMAND_SEPARATOR
+                                            +COMMAND_TAG_FILE_ACQUIRE_FEEDBACK + FILE_AVAILABLE_COMMAND_SEPARATOR
+                                            +ssid+FILE_AVAILABLE_COMMAND_SEPARATOR+passPhrase;
+
                                     sendCommandMessage(sendGroupInfo);
                                     start();
 
                                 }else{
                                     wifiDirectHandler.setAddLocalServiceAfterGroupCreation(false);
+                                    wifiDirectHandler.removeGroup();
                                     wifiDirectHandler.startAddingNoPromptService(NetworkManagerAndroid.serviceData());
                                 }
 
@@ -407,8 +428,9 @@ public class BluetoothConnectionManager {
                                  */
 
                                 //if the this devices is connected to the group, start downloading the file otherwise connect
-                                WifiInfo wifiInfo=managerAndroid.getP2pService().getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
-                                if(wifiInfo.getSSID().replace("\"","").equalsIgnoreCase(receivedCommand[MESSAGE_DATA_INDEX].replace("\"",""))){
+                                if(wifiInfo!=null && wifiInfo.getSSID().replace("\"","").
+                                        equalsIgnoreCase(receivedCommand[MESSAGE_DATA_INDEX].replace("\"",""))){
+
                                     Intent intent=new Intent(ACTION_DOWNLOAD_STARTING);
                                     intent.putExtra(EXTRA_DOWNLOAD_SOURCE_ADDRESS,"");
                                     LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
@@ -460,6 +482,16 @@ public class BluetoothConnectionManager {
         }
     };
 
+    /**
+     * Method to update UI open file check completion (single)
+     * @param fileID
+     */
+    private void updateFileFound(String fileID) {
+        Intent intent=new Intent(ACTION_SINGLE_FILE_CHECKING_COMPLETED);
+        intent.putExtra(EXTRA_ENTRY_ID,fileID);
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+
+    }
 
 
     private Context mContext;
@@ -468,6 +500,7 @@ public class BluetoothConnectionManager {
         mState = STATE_NONE;
         this.mContext=context;
         this.managerAndroid=managerAndroid;
+
     }
 
     /**

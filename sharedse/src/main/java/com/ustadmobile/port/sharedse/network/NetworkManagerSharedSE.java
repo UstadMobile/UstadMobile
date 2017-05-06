@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.network;
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 
@@ -9,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.ustadmobile.port.sharedse.network.DownloadTask.DOWNLOAD_STATUS_RUNNING;
 
 /**
  * Created by kileha3 on 05/02/2017.
@@ -22,7 +19,6 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
      * List of nodes that we know about around us
      */
     public List<NetworkNode> knownNodes =new ArrayList<>();
-
     protected Vector<NetworkNodeListener> networkNodeListeners = new Vector<>();
 
     public Vector<BluetoothTask> bluetoothQueue=new Vector<>();
@@ -32,7 +28,7 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
      * Store all reference of all locally available files
      * and their respective nodes to get from.
      */
-    public HashMap<String,HashMap<String,String>> availableFiles=new HashMap<>();
+    public HashMap<String,List<FileCheckResponse>> availableFiles=new HashMap<>();
 
     public BluetoothTask currentBluetoothTask;
     public DownloadTask currentDownloadTask;

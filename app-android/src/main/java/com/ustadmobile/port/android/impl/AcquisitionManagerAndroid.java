@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.port.android.network.DownloadManagerAndroid;
 
 import java.io.File;
 import java.util.HashMap;
@@ -149,8 +150,8 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
         BroadcastReceiver completeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0L);
-                String entryId = downloadIdToEntryIdHashmap.get(downloadId);
+
+                String entryId = intent.getStringExtra(DownloadManagerAndroid.EXTRA_ENTRY_ID);
                 if(entryId  != null) {
                     //listener.statusUpdated(new AcquisitionStatusEvent(UstadMobileSystemImpl.DLSTATUS_COM));
                     int[] entryStatus = getEntryStatusById(entryId, aContext);
@@ -158,7 +159,6 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
                             UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
                             entryStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL],
                             entryStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], entryId));
-                    downloadIdToEntryIdHashmap.remove(downloadId);
                     entryIdToDownloadIdHashmap.remove(entryId);
                 }
 
