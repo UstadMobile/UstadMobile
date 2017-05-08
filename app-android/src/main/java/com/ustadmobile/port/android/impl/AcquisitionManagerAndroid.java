@@ -1,46 +1,35 @@
 package com.ustadmobile.port.android.impl;
 
-import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
-import android.net.Uri;
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.AcquisitionStatusEvent;
 import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.android.network.DownloadManagerAndroid;
+import com.ustadmobile.port.android.network.NetworkManagerAndroid;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 
 /**
  * Created by mike on 4/19/17.
  */
 
 public class AcquisitionManagerAndroid extends AcquisitionManager {
-
-    private HashMap<String, Long> entryIdToDownloadIdHashmap;
-
-    private HashMap<Long, String> downloadIdToEntryIdHashmap;
-
-    private HashMap<AcquisitionStatusListener, BroadcastReceiver> downloadCompleteReceivers;
+    private NetworkManagerAndroid managerAndroid;
+    private final HashMap<AcquisitionStatusListener, BroadcastReceiver> downloadCompleteReceivers;
 
     private HashMap<AcquisitionStatusListener, Context> downloadCompleteContexts;
 
     private Timer updateTimer;
+    public static final int DEFAULT_TIMER_UPDATE_INTERVAL = 500;
 
     private TimerTask updateTimerTask = new TimerTask() {
         @Override
@@ -49,8 +38,9 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
                 Iterator<AcquisitionStatusListener> listeners = downloadCompleteReceivers.keySet().iterator();
 
                 while(listeners.hasNext()) {
+
                     AcquisitionStatusListener listener = listeners.next();
-                    Iterator<String> activeEntryIds = entryIdToDownloadIdHashmap.keySet().iterator();
+                    Iterator<String> activeEntryIds = managerAndroid.getEntryIdToDownloadIdHashmap().keySet().iterator();
                     while(activeEntryIds.hasNext()) {
                         String entryId = activeEntryIds.next();
                         int[] downloadStatus = AcquisitionManagerAndroid.getInstance().getEntryStatusById(
@@ -67,10 +57,10 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
     };
 
     public AcquisitionManagerAndroid() {
-        entryIdToDownloadIdHashmap = new HashMap<>();
-        downloadIdToEntryIdHashmap = new HashMap<>();
         downloadCompleteReceivers = new HashMap<>();
         downloadCompleteContexts = new HashMap<>();
+        managerAndroid=(NetworkManagerAndroid)UstadMobileSystemImplAndroid.getInstance()
+                .getP2PManager();
     }
 
 
@@ -78,80 +68,29 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
 
     @Override
     public void acquireCatalogEntries(UstadJSOPDSFeed acquireFeed, Object context) {
-        Vector downloadDestVector = acquireFeed.getLinks(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
-                null);
-        if(downloadDestVector.isEmpty()) {
-            throw new IllegalArgumentException("No download destination in acquisition feed for acquireCatalogEntries");
-        }
-        File downloadDestDir = new File(((String[])downloadDestVector.get(0))[UstadJSOPDSEntry.LINK_HREF]);
-
-        String[] selfLink = acquireFeed.getAbsoluteSelfLink();
-        if(selfLink == null)
-            throw new IllegalArgumentException("No absolute self link on feed - required to resolve links");
-
-        String feedHref = selfLink[UstadJSOPDSEntry.LINK_HREF];
-
-        Context aContext = (Context)context;
-        DownloadManager manager = (DownloadManager)aContext.getSystemService(Context.DOWNLOAD_SERVICE);
-
-        for(int i = 0; i < acquireFeed.entries.length; i++) {
-            String downloadUrl = UMFileUtil.resolveLink(feedHref,
-                    acquireFeed.entries[i].getFirstAcquisitionLink(null)[UstadJSOPDSEntry.LINK_HREF]);
-            String fileName = UMFileUtil.getFilename(downloadUrl);
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
-            File destFile = new File(downloadDestDir, fileName);
-            request.setDestinationUri(Uri.fromFile(destFile));
-            long downloadId = manager.enqueue(request);
-            entryIdToDownloadIdHashmap.put(acquireFeed.entries[i].id, downloadId);
-            downloadIdToEntryIdHashmap.put(downloadId, acquireFeed.entries[i].id);
-
-            CatalogEntryInfo info = new CatalogEntryInfo();
-            info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
-            info.downloadID = String.valueOf(downloadId);
-            info.downloadTotalSize = -1;
-            info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
-            info.fileURI = destFile.getAbsolutePath();
-            info.srcURLs = new String[]{downloadUrl};
-            CatalogController.setEntryInfo(acquireFeed.entries[i].id, info,
-                    CatalogController.SHARED_RESOURCE, context);
-        }
+        managerAndroid.createFileAcquisitionTask(acquireFeed,context);
     }
 
     @Override
     public int[] getEntryStatusById(String entryId, Object context) {
-        Context ctx = (Context)context;
-        Long downloadId = entryIdToDownloadIdHashmap.get(entryId);
+        Long downloadId = managerAndroid.getEntryIdToDownloadIdHashmap().
+                get(entryId);
         if(downloadId == null)
             return null;
-
-        DownloadManager mgr = (DownloadManager)ctx.getSystemService(
-                Context.DOWNLOAD_SERVICE);
-        DownloadManager.Query query = new DownloadManager.Query();
-        query.setFilterById(downloadId);
-
-        Cursor cursor = mgr.query(query);
-        cursor.moveToFirst();
-
-        int[] retVal = new int[3];
-        retVal[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR] = cursor.getInt(cursor.getColumnIndex(
-                DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-        retVal[UstadMobileSystemImpl.IDX_BYTES_TOTAL] = cursor.getInt(cursor.getColumnIndex(
-                DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-        retVal[UstadMobileSystemImpl.IDX_STATUS] = cursor.getInt(cursor.getColumnIndex(
-                DownloadManager.COLUMN_STATUS));
-        return retVal;
+        HashMap<Long,int[]> valStatus=managerAndroid.getDownloadIdToDownloadStatusMap();
+        return valStatus.get(downloadId);
     }
 
     @Override
     public void registerEntryAquisitionStatusListener(final AcquisitionStatusListener listener, Object context) {
         final Context aContext = (Context)context;
         IntentFilter downloadCompleteIntentFilter =
-                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+                new IntentFilter(DownloadManagerAndroid.ACTION_DOWNLOAD_COMPLETED);
         BroadcastReceiver completeReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-
-                String entryId = intent.getStringExtra(DownloadManagerAndroid.EXTRA_ENTRY_ID);
+                Long downloadId = intent.getLongExtra(DownloadManagerAndroid.EXTRA_DOWNLOAD_ID, 0L);
+                String entryId = managerAndroid.getDownloadIdToEntryIdHashmap().get(downloadId);
                 if(entryId  != null) {
                     //listener.statusUpdated(new AcquisitionStatusEvent(UstadMobileSystemImpl.DLSTATUS_COM));
                     int[] entryStatus = getEntryStatusById(entryId, aContext);
@@ -159,7 +98,8 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
                             UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
                             entryStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL],
                             entryStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], entryId));
-                    entryIdToDownloadIdHashmap.remove(entryId);
+                    managerAndroid.getDownloadIdToEntryIdHashmap().remove(downloadId);
+                    managerAndroid.getEntryIdToDownloadIdHashmap().remove(entryId);
                 }
 
             }
@@ -178,7 +118,8 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
         if (updateTimer == null) {
             synchronized (this) {
                 updateTimer = new Timer();
-                updateTimer.scheduleAtFixedRate(updateTimerTask, 500, 500);
+                updateTimer.scheduleAtFixedRate(updateTimerTask,
+                        DEFAULT_TIMER_UPDATE_INTERVAL, DEFAULT_TIMER_UPDATE_INTERVAL);
             }
         }
     }

@@ -2,15 +2,12 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.AcquisitionStatusEvent;
-import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.core.view.CatalogEntryView;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * Created by mike on 4/17/17.
@@ -119,7 +116,7 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                     registerItemAcquisitionCompleted(event.getEntryId());
                 case UstadMobileSystemImpl.DLSTATUS_RUNNING:
                     catalogEntryView.setProgress(
-                        (float)((double)event.getBytesDownloadedSoFar() / (double)event.getTotalBytes()));
+                            (float)((double)event.getBytesDownloadedSoFar() / (double)event.getTotalBytes()));
                     break;
             }
         }

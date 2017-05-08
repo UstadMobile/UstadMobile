@@ -189,7 +189,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
                 if(BluetoothConnectionManager.ACTION_SINGLE_FILE_CHECKING_COMPLETED.equals(intent.getAction())){
                     String fileId=intent.getStringExtra(EXTRA_ENTRY_ID);
-                    Toast.makeText(getActivity(),fileId,Toast.LENGTH_LONG).show();
+                    mRecyclerAdapter.notifyDataSetChanged();
+                    mRecyclerView.invalidate();
                 }
             }
         };

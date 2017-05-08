@@ -34,14 +34,6 @@ public class DownloadTask {
     private boolean testEnvironment=false;
 
 
-    /**
-     * Log all entries in their Feed download task
-     */
-    public Map<String,Long> entryDownloadLog =new HashMap<>();
-    /**
-     * Map all download status according to feed entries
-     */
-    public Map<Long,Map<String,int[]>> feedDownloadStatus=new HashMap<>();
 
     private final Object bytesDownloadedLock = new Object();
 

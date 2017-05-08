@@ -14,7 +14,6 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.network.NetworkManagerAndroid;
 import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 import com.ustadmobile.port.sharedse.network.FileCheckResponse;
@@ -30,7 +29,6 @@ import java.util.concurrent.TimeoutException;
 import static com.toughra.ustadmobile.network.ServiceBroadcastTest.TEST_SERVICE_NAME;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.ACTION_SINGLE_FILE_CHECKING_COMPLETED;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.ACTION_DOWNLOAD_COMPLETED;
-import static com.ustadmobile.port.android.network.DownloadManagerAndroid.DOWNLOAD_SOURCE_CLOUD;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.DOWNLOAD_SOURCE_PEER;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.EXTRA_ENTRY_ID;
 import static com.ustadmobile.port.android.network.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
@@ -77,7 +75,6 @@ public class DiscoverAndDownloadTest{
 
     @Before
     public void setUp() throws TimeoutException {
-        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
         mContext= InstrumentationRegistry.getTargetContext();
         UstadMobileSystemImpl.getInstance().init(mContext);
         UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_SUPERNODE, "false", mContext);
@@ -155,7 +152,7 @@ public class DiscoverAndDownloadTest{
         entry.updated=FEED_ENTRY_UPDATED;
         entry.addLink(ENTRY_LINK_REL,ENTRY_LINK_MIME,ENTRY_LINK_HREF);
         feed.addEntry(entry);
-        managerAndroid.downloadFile(feed,mContext);
+        managerAndroid.createFileAcquisitionTask(feed,mContext);
 
         synchronized (mLock){
             mLock.wait(mWaitingTimeForFileAcquisition);

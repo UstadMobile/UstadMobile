@@ -8,7 +8,6 @@ import android.support.test.rule.ServiceTestRule;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplFactoryAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 
@@ -45,7 +44,6 @@ public class ServiceBroadcastTest {
 
     @Before
     public void setUp() throws TimeoutException {
-        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryAndroid.class);
         Context mContext = InstrumentationRegistry.getTargetContext();
         UstadMobileSystemImpl.getInstance().init(mContext);
         UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_SUPERNODE, "true", mContext);

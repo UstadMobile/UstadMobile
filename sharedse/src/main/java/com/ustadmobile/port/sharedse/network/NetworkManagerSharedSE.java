@@ -7,13 +7,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by kileha3 on 05/02/2017.
  */
 
 public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskListener {
+
+    /**
+     * Map all download IDs to their respective entries
+     */
+    public HashMap<String, Long> entryIdToDownloadIdHashmap=new HashMap<>();
+
+    /**
+     * Map all entries to their respective download ID's
+     */
+    public HashMap<Long, String> downloadIdToEntryIdHashmap=new HashMap<>();
+
+    /**
+     * Map all status to their respective download ID
+     */
+    public HashMap<Long,int[]> downloadIdToDownloadStatusMap=new HashMap<>();
 
     /**
      * List of nodes that we know about around us
@@ -180,18 +194,15 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
      * @param feed - feed contains file entries
      * @param context - Application context
      */
-    public void downloadFile(UstadJSOPDSFeed feed,Object context){
-        queueDownloadTasks(feed);
-    }
+    public abstract void createFileAcquisitionTask(UstadJSOPDSFeed feed, Object context);
 
     /**
      * Cross platform method to queue the download tasks as per user selections.
      * @param feed - Feed to get entry files to download from.
      */
     private void queueDownloadTasks(UstadJSOPDSFeed feed){
-        DownloadTask downloadTask=makeDownloadTask(feed);
+        DownloadTask downloadTask= makeCurrentDownloadTask(feed);
         if(!downloadTaskQueue.contains(downloadTask)){
-            downloadTask.setDownloadID((long) new AtomicInteger().incrementAndGet());
             downloadTaskQueue.add(downloadTask);
 
             if(currentDownloadTask==null || downloadTaskQueue.size()==1){
@@ -236,6 +247,6 @@ public abstract class NetworkManagerSharedSE implements P2PManager, NetworkTaskL
      * @param feed feed to download
      * @return
      */
-    protected abstract DownloadTask makeDownloadTask(UstadJSOPDSFeed feed);
+    protected abstract DownloadTask makeCurrentDownloadTask(UstadJSOPDSFeed feed);
 
 }

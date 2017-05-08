@@ -43,8 +43,9 @@ import static com.ustadmobile.port.android.network.BluetoothConnectionManager.CO
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.COMMAND_TAG_FILE_ACQUIRE_FEEDBACK;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.FILE_AVAILABLE_COMMAND_SEPARATOR;
 import static com.ustadmobile.port.android.network.BluetoothConnectionManager.STATE_CONNECTED;
+import static com.ustadmobile.port.android.network.BluetoothConnectionManager.TAG;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.ACTION_DOWNLOAD_STARTING;
-import static com.ustadmobile.port.android.network.DownloadManagerAndroid.COMMUNICATION_PORT;
+import static com.ustadmobile.port.android.network.DownloadManagerAndroid.PORT_NUMBER;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.EXTRA_DOWNLOAD_SOURCE_ADDRESS;
 import static com.ustadmobile.port.android.network.DownloadManagerAndroid.SERVER_ADDRESS;
 import static edu.rit.se.wifibuddy.WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED;
@@ -135,6 +136,12 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
         currentServiceName =service_name;
         this.p2pService = (NetworkServiceAndroid) context;
         mContext=p2pService.getApplicationContext();
+
+        //Get current connected network
+        WifiInfo wifiInfo=getP2pService().getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
+        if(wifiInfo!=null){
+            currentNetworkId=wifiInfo.getNetworkId();
+        }
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
         filter.addAction(WifiDirectHandler.Action.MESSAGE_RECEIVED);
@@ -153,7 +160,6 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
         boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
                 PREF_KEY_SUPERNODE, "false", context));
         setSuperNodeEnabled(context, isSuperNodeEnabled);
-        setCurrentNetworkId();
     }
 
 
@@ -298,7 +304,7 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
     }
 
     @Override
-    protected DownloadTask makeDownloadTask(UstadJSOPDSFeed feed) {
+    protected DownloadTask makeCurrentDownloadTask(UstadJSOPDSFeed feed) {
         downloadManagerAndroid= new DownloadManagerAndroid(feed,this);
         return downloadManagerAndroid;
     }
@@ -326,7 +332,7 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
         public static ServiceData serviceData(){
             HashMap<String, String> record = new HashMap<>();
             record.put("available", "available");
-            return new ServiceData(currentServiceName, COMMUNICATION_PORT, record, ServiceType.PRESENCE_TCP);
+            return new ServiceData(currentServiceName, PORT_NUMBER, record, ServiceType.PRESENCE_TCP);
         }
 
 
@@ -370,8 +376,12 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
     @Override
     public void checkLocalFilesAvailability(Object context, List<String> fileIds) {
         FILE_IDS_TO_PROCESS =fileIds;
-        mBluetoothManager.start();
-        checkBluetoothQueue();
+        if(mBluetoothManager.getBluetoothAdapter().isEnabled()){
+            mBluetoothManager.start();
+            checkBluetoothQueue();
+        }else{
+            Log.d(TAG,"Bluetooth is not enabled");
+        }
     }
 
 
@@ -405,8 +415,12 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
     @Override
     public void startInsecureBluetoothService() {
         mBluetoothManager =new BluetoothConnectionManager(p2pService.getApplicationContext(),this);
-        DEVICE_BLUETOOTH_ADDRESS =mBluetoothManager.getBluetoothMacAddress();
-        mBluetoothManager.start();
+       if(mBluetoothManager.getBluetoothAdapter().isEnabled()){
+           DEVICE_BLUETOOTH_ADDRESS =mBluetoothManager.getBluetoothMacAddress();
+           mBluetoothManager.start();
+       }else{
+           Log.d(TAG,"Bluetooth adapter is not enabled");
+       }
     }
 
     @Override
@@ -459,15 +473,10 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
        NetworkManagerAndroid.this.currentTaskIndex=index;
    }
 
-
-
-   private void setCurrentNetworkId(){
-       WifiInfo wifiInfo=getP2pService().getWifiDirectHandlerAPI().getCurrentConnectedWifiInfo();
-       if(wifiInfo!=null){
-           currentNetworkId=wifiInfo.getNetworkId();
-       }
-   }
-
+    /**
+     * Reconnect to the previously connected network
+     * after finishing the download process
+     */
    public void reconnectToThePreviousNetwork(){
        WifiManager wifiManager = (WifiManager) mContext.getSystemService(WIFI_SERVICE);
        wifiManager.enableNetwork(currentNetworkId,true);
@@ -491,14 +500,15 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
     }
 
     /**
-     * Get currently connected network TYPE,
+     * Get currently connected network TYPE (WiFi-No prompt or Normal WiFi),
      * This helps to know if the device is already connected on the Wi-Fi direct network or not.
      * @return
      */
 
     public String getNetworkType() {
 
-        ConnectivityManager connectivity = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connectivity = (ConnectivityManager)mContext.getSystemService(
+                Context.CONNECTIVITY_SERVICE);
         WifiManager wManager = (WifiManager) mContext.getSystemService(WIFI_SERVICE);
         if (connectivity != null) {
 
@@ -535,14 +545,30 @@ public class NetworkManagerAndroid extends NetworkManagerSharedSE implements P2P
         return NETWORK_TYPE_UNKNOWN;
     }
 
-
+    /**
+     * Set download source (Peers or cloud source)
+     * @param source
+     */
     public void setDownloadSource(int source){
         this.downloadSource=source;
     }
 
+    /**
+     * Get download source (Peers or cloud source)
+     */
     public int getDownloadSource(){
         return this.downloadSource;
     }
 
+    public HashMap<String,Long> getEntryIdToDownloadIdHashmap(){
+        return this.entryIdToDownloadIdHashmap;
+    }
 
+    public HashMap<Long,String> getDownloadIdToEntryIdHashmap(){
+        return this.downloadIdToEntryIdHashmap;
+    }
+
+    public HashMap<Long,int[]> getDownloadIdToDownloadStatusMap(){
+        return this.downloadIdToDownloadStatusMap;
+    }
 }

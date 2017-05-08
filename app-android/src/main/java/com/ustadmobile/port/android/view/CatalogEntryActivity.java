@@ -123,8 +123,13 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
-    public void setButtonDisplayed(int buttonId, boolean display) {
-        findViewById(BUTTON_ID_MAP.get(buttonId)).setVisibility(display ? View.VISIBLE : View.GONE);
+    public void setButtonDisplayed(final int buttonId, final boolean display) {
+       runOnUiThread(new Runnable() {
+           @Override
+           public void run() {
+               findViewById(BUTTON_ID_MAP.get(buttonId)).setVisibility(display ? View.VISIBLE : View.GONE);
+           }
+       });
     }
 
     @Override
@@ -141,6 +146,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     public void setMode(int mode) {
 
     }
+
 
     @Override
     public void setProgress(float progress) {

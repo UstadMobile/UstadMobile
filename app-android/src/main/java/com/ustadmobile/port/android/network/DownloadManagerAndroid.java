@@ -16,6 +16,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -37,10 +38,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
@@ -149,8 +150,6 @@ public class DownloadManagerAndroid extends DownloadTask {
     private NotificationManager mNotifyManager;
     private NotificationCompat.Builder mBuilder;
 
-    private static int currentNodeIndex=0;
-
     /**
      * Time passed before sending an update to the progressbar
      */
@@ -164,19 +163,16 @@ public class DownloadManagerAndroid extends DownloadTask {
     /**
      * Port on which NanoHTTP server will be listening for the HTTP request
      */
-    public static final int COMMUNICATION_PORT=8001;
+    public static final int PORT_NUMBER = 8001;
 
     /**
      * Keep the current task position - loop through feed entries
      */
     private int currentEntryIndex=0;
 
-    /**
-     * Track current download source as per flags set above.
-     */
-    private int currentDownloadSource;
+
     private static final  int NOTIFICATION_ID=1;
-    private String srcfileURL=null;
+    private String srcFileURL =null;
 
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
@@ -190,8 +186,9 @@ public class DownloadManagerAndroid extends DownloadTask {
                     int state=intent.getIntExtra(BluetoothConnectionManager.EXTRA_DEVICE_BLUETOOTH_CONNECTIVITY_FLAG,
                             BluetoothConnectionManager.STATE_NONE);
 
-                    //Check if the device is connected to server side bluetooth
-                    // and send file acquisition request command
+                    /*Check if the device is connected to server side bluetooth
+                    and send file acquisition request command*/
+
                     if(state==STATE_CONNECTED){
                         String taskType=intent.getStringExtra(BluetoothConnectionManager.EXTRA_BLUETOOTH_TASK_TYPE);
 
@@ -209,16 +206,16 @@ public class DownloadManagerAndroid extends DownloadTask {
                 case ACTION_DOWNLOAD_STARTING:
                     //with  wifi-direct IP address will not be null
                     String ipAddress=intent.getStringExtra(EXTRA_DOWNLOAD_SOURCE_ADDRESS);
-                    //If the IP address is not null then the WiFi direct
-                    // technique is used other wise No-Prompt connection is made
+                   /* If the IP address is not null then the WiFi direct
+                    technique is used other wise No-Prompt connection is made*/
                     if(ipAddress!=null && !ipAddress.isEmpty()){
-                        srcfileURL="http://"+ipAddress+":"+COMMUNICATION_PORT+ SERVER_MAIN_FIL_DIR;
+                        srcFileURL ="http://"+ipAddress+":"+ PORT_NUMBER + SERVER_MAIN_FIL_DIR;
 
                     }else{
-                        srcfileURL="http://"+SERVER_ADDRESS+":"+COMMUNICATION_PORT+ SERVER_MAIN_FIL_DIR;
+                        srcFileURL ="http://"+SERVER_ADDRESS+":"+ PORT_NUMBER + SERVER_MAIN_FIL_DIR;
 
                     }
-                    Log.d(BluetoothConnectionManager.TAG,srcfileURL);
+                    Log.d(BluetoothConnectionManager.TAG, srcFileURL);
                     downloadInBackground();
             }
 
@@ -235,6 +232,7 @@ public class DownloadManagerAndroid extends DownloadTask {
 
     @Override
     public void start() {
+        prepareDownloadIds();
         checkDownloadSource();
     }
 
@@ -246,15 +244,13 @@ public class DownloadManagerAndroid extends DownloadTask {
      *          has been made download the file from there
      */
     private void checkDownloadSource(){
-
         String fileId=getFeed().entries[currentEntryIndex].id;
+        setDownloadID(p2pManager.getEntryIdToDownloadIdHashmap().get(fileId));
         FileCheckResponse checkResponse=p2pManager.fileCheckResponse(fileId);
 
-        //Map entry ID to it's corresponding download ID
-        DownloadManagerAndroid.this.entryDownloadLog.put(fileId,getDownloadID());
+        /*If a file can be downloaded locally, establish bluetooth connection and listen
+        for the connection otherwise download from the internet*/
 
-        //If a file can be downloaded locally, establish bluetooth connection and listen
-        // for the connection otherwise download from the internet
             if(checkResponse!=null && checkResponse.isFileAvailable()){
 
                if(p2pManager.getNetworkType()!=null &&
@@ -283,28 +279,37 @@ public class DownloadManagerAndroid extends DownloadTask {
             }
     }
 
+    private void prepareDownloadIds(){
+        //Map entry ID to it's corresponding download ID
+        for(int position = 0; position < getFeed().entries.length; position++) {
+            long downloadId=(long) new AtomicInteger().incrementAndGet();
+            p2pManager.getEntryIdToDownloadIdHashmap().put(
+                    getFeed().entries[position].id,downloadId);
+            p2pManager.getDownloadIdToEntryIdHashmap().put(downloadId,getFeed().entries[position].id);
+            p2pManager.getDownloadIdToDownloadStatusMap().put(downloadId,new int[3]);
+        }
+    }
+
 
     /**
      * Initialize download task
      */
-
     private void downloadInBackground() {
         Log.e(TAG,"Connection TYpe: "+p2pManager.getNetworkType());
         downloadTask=new DownLoadTask();
         downloadTask.execute();
     }
 
-    private class DownLoadTask extends AsyncTask<String,Integer,Boolean>{
+    private class DownLoadTask extends AsyncTask<String,Long,Boolean>{
 
         private long newFileLength=0;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            currentStatus=DOWNLOAD_STATUS_QUEUED;
+            currentStatus=UstadMobileSystemImpl.DLSTATUS_PENDING;
             setDownloadStatus(currentStatus);
             setDownloadTotalBytes(0);
             updateDownloadStatus();
-            showDownloadNotification();
         }
 
         @Override
@@ -353,18 +358,22 @@ public class DownloadManagerAndroid extends DownloadTask {
                 if(p2pManager.getDownloadSource()==DOWNLOAD_SOURCE_CLOUD){
                     downloadUri= downloadUrl;
                 }else{
-                    downloadUri= UMFileUtil.joinPaths(new String[]{srcfileURL,
+                    downloadUri= UMFileUtil.joinPaths(new String[]{srcFileURL,
                             getFeed().entries[currentEntryIndex].id});
                 }
 
+                //Format and encode URL's
                 URL url = new URL(downloadUri.replaceAll("\\s+","%20"));
                 Log.d(BluetoothConnectionManager.TAG,"Download URL :"+downloadUri);
 
+                //If file was partially downloaded. get information and resume
                 if(infoFile.exists()){
+
                     con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
                     con.connect();
                     fileInfoLastModified=con.getHeaderField(HEADER_LAST_MODIFIED);
+                    existingFileLength=fileDestination.length();
                     infoFromFile= getFileContentFromFile(infoFile);
                     con.disconnect();
                     con=null;
@@ -374,7 +383,6 @@ public class DownloadManagerAndroid extends DownloadTask {
 
                 con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
-                existingFileLength=new File(UMFileUtil.getFilename(downloadUrl)+UNFINISHED_FILE_EXTENSION).length();
                 if(infoFromFile!=null && infoFromFile.get(HEADER_LAST_MODIFIED).equals(fileInfoLastModified)){
                     isFileResuming=true;
                     con.setRequestProperty(HEADER_RANGE,"bytes="+String.valueOf(existingFileLength)+"-");
@@ -387,7 +395,7 @@ public class DownloadManagerAndroid extends DownloadTask {
                 in = con.getInputStream();
                 out = new FileOutputStream(fileDestination,true);
                 byte[] buffer = new byte[10240];
-                int total=0;
+                long total=0L;
                 Map<String,List<String>> headers= con.getHeaderFields();
                 Log.d(BluetoothConnectionManager.TAG,headers.toString());
                 fileInfoLastModified=con.getHeaderField(HEADER_LAST_MODIFIED);
@@ -399,7 +407,7 @@ public class DownloadManagerAndroid extends DownloadTask {
                     currentDownloadFileInfo=infoFile;
                 }
 
-                while ((bytesDownloadedSoFar = in.read(buffer)) > 0 && currentStatus!=DOWNLOAD_STATUS_CANCELLED) {
+                while ((bytesDownloadedSoFar = in.read(buffer)) > 0 && currentStatus!=UstadMobileSystemImpl.DLSTATUS_FAILED) {
                     total+= bytesDownloadedSoFar;
                     out.write(buffer, 0, bytesDownloadedSoFar);
                     publishProgress(total);
@@ -423,16 +431,17 @@ public class DownloadManagerAndroid extends DownloadTask {
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
-            int progress=(int)((values[0]*100)/newFileLength);
+        protected void onProgressUpdate(Long... values) {
+            long progress=((values[0]*100L)/newFileLength);
             Log.d(WifiDirectHandler.TAG,":downloading ="+progress);
+            setBytesDownloadedSoFar(Integer.parseInt(String.valueOf(values[0])));
             updateDownloadNotification(progress);
             super.onProgressUpdate(values);
         }
 
         @Override
         protected void onCancelled() {
-            currentStatus=DOWNLOAD_STATUS_CANCELLED;
+            currentStatus=UstadMobileSystemImpl.DLSTATUS_FAILED;
             setDownloadStatus(currentStatus);
             updateDownloadStatus();
             fireDownloadTaskEnded();
@@ -449,7 +458,7 @@ public class DownloadManagerAndroid extends DownloadTask {
 
               }else{
                   if((getFeed().entries.length-1)==currentEntryIndex){
-                      currentStatus=DOWNLOAD_STATUS_COMPLETED;
+                      currentStatus= UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
                       saveFileWithNewExtension(fileDestination.getAbsolutePath());
                       if(currentDownloadFileInfo!=null){
                           currentDownloadFileInfo.delete();
@@ -457,11 +466,11 @@ public class DownloadManagerAndroid extends DownloadTask {
                       updateDownloadStatus();
                       Intent downloadCompleted=new Intent(ACTION_DOWNLOAD_COMPLETED);
                       downloadCompleted.putExtra(EXTRA_DOWNLOAD_ID, getDownloadID());
-                      downloadCompleted.putExtra(EXTRA_ENTRY_ID,
-                              getFeed().entries[currentEntryIndex].id);
-                      LocalBroadcastManager.getInstance(context).sendBroadcast(downloadCompleted);
-                       dismissDownloadNotification();
-                      /*if(currentDownloadSource==DOWNLOAD_SOURCE_PEER){
+                      context.sendBroadcast(downloadCompleted);
+
+                      /*
+                      dismissDownloadNotification();
+                      if(currentDownloadSource==DOWNLOAD_SOURCE_PEER){
                           p2pManager.reconnectToThePreviousNetwork();
                       }*/
                       fireDownloadTaskEnded();
@@ -471,7 +480,7 @@ public class DownloadManagerAndroid extends DownloadTask {
 
             }else{
                 /*Partial Download: download task was incomplete, possibly it was interrupted or cancelled*/
-                currentStatus=DOWNLOAD_STATUS_FAILED;
+                currentStatus=UstadMobileSystemImpl.DLSTATUS_FAILED;
                 setDownloadStatus(currentStatus);
             }
 
@@ -483,16 +492,17 @@ public class DownloadManagerAndroid extends DownloadTask {
      * Update download percentage on the progress bar
      * @param progress - percentage completed so far
      */
-    private void updateDownloadNotification(int progress){
+    private void updateDownloadNotification(long progress){
         Long time_now = Calendar.getInstance().getTimeInMillis();
          int max_progress_status=100;
         if(((time_now - TIME_PASSED_FOR_PROGRESS_UPDATE) < WAITING_TIME_TO_UPDATE) || (progress < 0 && progress > max_progress_status)) {
             return;
         }
         TIME_PASSED_FOR_PROGRESS_UPDATE = time_now;
-        mBuilder.setProgress(100,Math.abs(progress), false);
-        mNotifyManager.notify(NOTIFICATION_ID, mBuilder.build());
-        currentStatus=DOWNLOAD_STATUS_RUNNING;
+        /*mBuilder.setProgress(100,Math.abs(progress), false);
+        mNotifyManager.notify(NOTIFICATION_ID, mBuilder.build());*/
+        currentStatus=UstadMobileSystemImpl.DLSTATUS_RUNNING;
+        updateDownloadStatus();
         setDownloadStatus(currentStatus);
     }
 
@@ -521,33 +531,12 @@ public class DownloadManagerAndroid extends DownloadTask {
         mNotifyManager.cancel(NOTIFICATION_ID);
     }
 
-    /**
-     * Get all mapped feed status given the download ID
-     * which will be retrieved using entry ID supplied
-     * @return
-     */
-    public Map<Long,Map<String,int[]>> getFeedDownloadStatus(){
-        return this.feedDownloadStatus;
-    }
-
-    /**
-     * Retried download ID given entry ID so that can be used to
-     * retrieve download status of the specific entry
-     * @return
-     */
-    public Map<String,Long> getEntryDownloadLog(){
-        return DownloadManagerAndroid.this.entryDownloadLog;
-    }
-
 
     /**
      * Update download status as the task is running
      */
     private void updateDownloadStatus(){
-        String fileId=getFeed().entries[currentEntryIndex].id;
-        Map<String,int[]> entriesMap=new HashMap<>();
-        entriesMap.put(fileId,getDownloadStatus());
-        this.feedDownloadStatus.put(getDownloadID(),entriesMap);
+        p2pManager.getDownloadIdToDownloadStatusMap().put(getDownloadID(),getDownloadStatus());
     }
 
 
