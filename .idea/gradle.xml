@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-tests" />
             <option value="$PROJECT_DIR$/sharedse" />
+            <option value="$PROJECT_DIR$/sharedse-tests" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

@@ -39,7 +39,7 @@ public class AttendanceListEntry implements ListableEntity {
     }
 
     public void loadDetail() {
-        XapiForwardingStatementManager forwardingMgr = PersistenceManager.getInstance().getForwardingStatementManager();
+        XapiForwardingStatementManager forwardingMgr = PersistenceManager.getInstance().getManager(XapiForwardingStatementManager.class);
         if(forwardingMgr.findStatusByXapiStatement(context, hostedStatement) == XapiForwardingStatement.STATUS_SENT) {
             syncStatus = ListableEntity.STATUSICON_SENT;
         }else {

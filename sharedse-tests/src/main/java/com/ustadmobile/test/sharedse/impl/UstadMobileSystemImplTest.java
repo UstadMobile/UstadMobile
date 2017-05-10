@@ -1,31 +1,19 @@
-package com.ustadmobile.test.core.impl;
+package com.ustadmobile.test.sharedse.impl;
 
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.test.core.impl.se.UMTestLogger;
 
-import org.json.JSONObject;
 import org.kxml2.io.KXmlParser;
-import org.kxml2.io.KXmlSerializer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Hashtable;
 

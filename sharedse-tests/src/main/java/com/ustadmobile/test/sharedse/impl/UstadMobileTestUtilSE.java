@@ -1,4 +1,4 @@
-package com.ustadmobile.test.core.impl.se;
+package com.ustadmobile.test.sharedse.impl;
 
 import com.ustadmobile.test.core.impl.UstadMobileTestUtil;
 
@@ -10,7 +10,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  * Created by mike on 4/27/17.
  */
 
-public class UstadMobileTestUtilSE extends UstadMobileTestUtil {
+public abstract class UstadMobileTestUtilSE extends UstadMobileTestUtil {
 
     private RouterNanoHTTPD httpd;
 
