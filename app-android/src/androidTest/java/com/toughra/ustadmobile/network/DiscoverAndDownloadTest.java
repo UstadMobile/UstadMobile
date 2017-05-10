@@ -14,8 +14,6 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.network.NetworkManagerAndroid;
-import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 import com.ustadmobile.port.sharedse.network.FileCheckResponse;
 
 import org.junit.Before;
@@ -91,7 +89,7 @@ public class DiscoverAndDownloadTest{
     @Test
     public void testDiscoverAndDownload() throws InterruptedException {
         implAndroid = UstadMobileSystemImplAndroid.getInstanceAndroid();
-        managerAndroid=((NetworkManagerAndroid)implAndroid.getP2PManager());
+        managerAndroid=((NetworkManagerAndroid)implAndroid.getNetworkManager());
         notifiedEntryIdAvailable = false;
 
         broadcastReceiver=new BroadcastReceiver() {

@@ -72,14 +72,14 @@ public abstract class AcquisitionManager {
     public abstract int[] getEntryStatusById(String entryId, Object context);
 
     /**
-     * Register a listener to receive entry status updates
+     * Register a managerTaskListener to receive entry status updates
      *
      * @param listener
      */
     public abstract void registerEntryAquisitionStatusListener(AcquisitionStatusListener listener, Object context);
 
     /**
-     * Unregister a listener to receive entry status updates
+     * Unregister a managerTaskListener to receive entry status updates
      *
      * @param listener
      */

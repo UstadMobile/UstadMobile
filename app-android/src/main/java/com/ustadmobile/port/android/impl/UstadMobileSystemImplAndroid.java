@@ -61,10 +61,11 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
-import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
+import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.CatalogEntryActivity;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogView;
@@ -75,8 +76,6 @@ import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.network.NetworkManagerAndroid;
-import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
@@ -90,7 +89,6 @@ import com.ustadmobile.port.android.view.LoginDialogFragment;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.network.NetworkManagerSharedSE;
 import com.ustadmobile.port.sharedse.view.ClassManagementView;
 import com.ustadmobile.port.sharedse.view.ClassManagementView2;
 import com.ustadmobile.port.sharedse.view.EnrollStudentView;
@@ -209,7 +207,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder) {
-                this.iBinder = iBinder;
+            this.iBinder = iBinder;
             if(context instanceof ServiceConnection) {
                 ((ServiceConnection)context).onServiceConnected(name, iBinder);
             }
@@ -335,9 +333,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         Intent intent = new Intent(mContext, HTTPService.class);
         BaseServiceConnection connection = new BaseServiceConnection(mContext, httpServiceConnections);
         mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
-        Intent p2pIntent = new Intent(mContext, NetworkServiceAndroid.class);
+        Intent networkIntent = new Intent(mContext, NetworkServiceAndroid.class);
         connection = new BaseServiceConnection(mContext, p2pServiceConnections);
-        mContext.bindService(p2pIntent, connection, Context.BIND_AUTO_CREATE);
+        mContext.bindService(networkIntent, connection, Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
     }
 
     public void handleActivityStart(Activity mContext) {
@@ -434,7 +432,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     @Override
     public String getUserContentDirectory(String username) {
         File userDir = new File(Environment.getExternalStorageDirectory(),
-            "ustadmobileContent/user-" + username);
+                "ustadmobileContent/user-" + username);
         return userDir.getAbsolutePath();
     }
 
@@ -468,9 +466,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
         */
     }
-    
-    /** 
-     * Use Android assets instead 
+
+    /**
+     * Use Android assets instead
      */
     @Override
     public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
@@ -484,7 +482,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public int[] getFileDownloadStatus(String downloadID, Object context) {
-        return p2pManager.getRequestStatus(context,0);
+        return new int[3];
     }
 
     @Override
@@ -508,7 +506,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private SharedPreferences getAppSharedPreferences(Context context) {
         if(appPreferences == null) {
             appPreferences = context.getSharedPreferences(APP_PREFERENCES_NAME,
-                Context.MODE_PRIVATE);
+                    Context.MODE_PRIVATE);
         }
         return appPreferences;
     }
@@ -715,7 +713,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public NetworkManagerSharedSE getP2PManager() {
+    public NetworkManager getNetworkManager() {
         return p2pManager;
     }
 }

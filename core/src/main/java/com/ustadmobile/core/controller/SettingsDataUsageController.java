@@ -26,7 +26,7 @@ public class SettingsDataUsageController extends UstadBaseController {
 
         UstadMobileSystemImpl.getInstance().setAppPref(PREFKEY_SUPERNODE, String.valueOf(enabled), getContext());
 
-        P2PManager manager = UstadMobileSystemImpl.getInstance().getP2PManager();
+        P2PManager manager = UstadMobileSystemImpl.getInstance().getNetworkManager();
 
         if(manager != null)
             manager.setSuperNodeEnabled(context, enabled);

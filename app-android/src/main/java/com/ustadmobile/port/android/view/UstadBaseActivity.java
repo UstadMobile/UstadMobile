@@ -1,5 +1,4 @@
 package com.ustadmobile.port.android.view;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -19,7 +18,7 @@ import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.network.NetworkServiceAndroid;
+import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.lang.ref.WeakReference;
@@ -49,6 +48,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private String[] appMenuLabels;
 
     private XapiStatementForwardingService mNanoLrsService;
+
     private NetworkServiceAndroid networkServiceAndroid;
 
     private String displayName;
@@ -73,7 +73,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     private ServiceConnection mLrsServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            XapiStatementForwardingService.XapiStatementForwardingBinder binder = (XapiStatementForwardingService.XapiStatementForwardingBinder)iBinder;
+            XapiStatementForwardingService.XapiStatementForwardingBinder binder =
+                    (XapiStatementForwardingService.XapiStatementForwardingBinder)iBinder;
             mNanoLrsService = binder.getService();
         }
 
@@ -82,6 +83,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
             mNanoLrsService = null;
         }
     };
+
+
 
     /**
      * UstadMobileSystemImpl will bind certain services to each activity (e.g. HTTP, P2P services)

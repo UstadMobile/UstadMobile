@@ -33,7 +33,6 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.p2p.P2PManager;
@@ -44,21 +43,22 @@ import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
-import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.LoginView;
+
+import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
-import org.xmlpull.v1.XmlSerializer;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 
@@ -441,13 +441,13 @@ public abstract class UstadMobileSystemImpl {
 
 
     /**
-     * Add a listener to be notified when the tincan queue is updated (items added/sent)
+     * Add a managerTaskListener to be notified when the tincan queue is updated (items added/sent)
      * @param listener Listener to add
      */
     public abstract void addTinCanQueueStatusListener(TinCanQueueListener listener);
 
     /**
-     * Remove a listener from the list to be notified when tincan queue is updated
+     * Remove a managerTaskListener from the list to be notified when tincan queue is updated
      *
      * @param listener
      */
@@ -1051,7 +1051,7 @@ public abstract class UstadMobileSystemImpl {
     }
 
 
-    public P2PManager getP2PManager() {
+    public P2PManager getNetworkManager() {
 
         return null;
     }

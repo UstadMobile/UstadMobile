@@ -9,7 +9,6 @@ import android.support.test.rule.ServiceTestRule;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.impl.http.HTTPService;
-import com.ustadmobile.port.android.network.NetworkServiceAndroid;
 
 import org.junit.Before;
 import org.junit.Rule;

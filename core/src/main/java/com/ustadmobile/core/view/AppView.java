@@ -97,7 +97,7 @@ public interface AppView {
     
     /**
      * Show a list of choices to the user.  When the user has made a selection -
-     * notify the listener provided of the choice number and command id.
+     * notify the managerTaskListener provided of the choice number and command id.
      * 
      * The choice dialog will not just go away when the user makes a choice - 
      * the dismissChoiceDialog method must be called.  
@@ -107,7 +107,7 @@ public interface AppView {
      * 
      * @param title The title for the choice being presented to the user
      * @param choices An array of choices for the user to choose from (e.g. Phone Memory, SD Card, etc)
-     * @param commandId The command ID that will be supplied to the listener
+     * @param commandId The command ID that will be supplied to the managerTaskListener
      * @param listener the Listener to be registered when a choice is selected
      */
     public void showChoiceDialog(String title, String[] choices, int commandId, AppViewChoiceListener listener);

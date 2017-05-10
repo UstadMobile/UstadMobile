@@ -20,14 +20,12 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.network.NetworkManagerAndroid;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.network.NetworkNode;
 import com.ustadmobile.port.sharedse.network.NetworkNodeListener;
 
 import java.util.ArrayList;
-
-import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 
 public class UstadNodesActivity extends UstadBaseActivity implements NetworkNodeListener {
 
@@ -59,7 +57,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements NetworkNode
         final TextView textView = (TextView) snackbarView.findViewById(android.support.design.R.id.snackbar_text);
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
         textView.setTextColor(Color.WHITE);
-        networkManagerAndroid =(NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager();
+        networkManagerAndroid =(NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -77,7 +75,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements NetworkNode
             snackbar.show();
         }
         nodeListAdapter.setNodeList((ArrayList<NetworkNode>) networkManagerAndroid.getNodeList());
-        ((NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).addNodeListener(this);*/
+        ((NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getNetworkManager()).addNodeListener(this);*/
     }
 
 
@@ -108,7 +106,6 @@ public class UstadNodesActivity extends UstadBaseActivity implements NetworkNode
 
     @Override
     public void onDestroy() {
-        ((NetworkManagerAndroid)UstadMobileSystemImplSE.getInstanceSE().getP2PManager()).removeNodeListener(this);
         super.onDestroy();
     }
 
@@ -134,7 +131,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements NetworkNode
         @Override
         public void onBindViewHolder(final NodeListAdapter.NodeHolder holder, int position) {
 
-            holder.nodeAddress.setText(getNodeList().get(holder.getAdapterPosition()).getNodeMacAddress());
+            /*holder.nodeAddress.setText(getNodeList().get(holder.getAdapterPosition()).getNodeMacAddress());
             holder.nodeName.setText(getNodeList().get(holder.getAdapterPosition()).getNetworkSSID());
             holder.nodeStatus.setBackgroundResource(getDeviceStatus(getNodeList().get(holder.getAdapterPosition()).getStatus()));
 
@@ -151,7 +148,7 @@ public class UstadNodesActivity extends UstadBaseActivity implements NetworkNode
                     networkManagerAndroid.getService(getContext()).getWifiDirectHandlerAPI().connectToNoPromptService(nodeRecord);
 
                 }
-            });
+            });*/
         }
 
         void setNodeList(ArrayList<NetworkNode> nodeList) {

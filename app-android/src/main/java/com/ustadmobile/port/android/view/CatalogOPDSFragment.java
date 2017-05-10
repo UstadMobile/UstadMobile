@@ -60,12 +60,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.impl.UMLog;
@@ -75,19 +73,13 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.network.BluetoothConnectionManager;
-import com.ustadmobile.port.android.network.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.sharedse.network.FileCheckResponse;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import static com.ustadmobile.port.android.network.DownloadManagerAndroid.EXTRA_ENTRY_ID;
 
 /**
  * An Android Fragment that implements the CatalogView to show an OPDS Catalog
@@ -183,22 +175,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         loadCatalog();
 
-        broadcastReceiver=new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                if(BluetoothConnectionManager.ACTION_SINGLE_FILE_CHECKING_COMPLETED.equals(intent.getAction())){
-                    String fileId=intent.getStringExtra(EXTRA_ENTRY_ID);
-                    mRecyclerAdapter.notifyDataSetChanged();
-                    mRecyclerView.invalidate();
-                }
-            }
-        };
-
-        IntentFilter intentFilter=new IntentFilter();
-        intentFilter.addAction(BluetoothConnectionManager.ACTION_FILE_CHECKING_TASK_COMPLETED);
-        intentFilter.addAction(BluetoothConnectionManager.ACTION_SINGLE_FILE_CHECKING_COMPLETED);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver,intentFilter);
 
         return rootContainer;
     }
@@ -690,7 +666,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             //check the acquisition status
             int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);
 
-            //if the file is not available - show whether it can be acquired locally
+            /*//if the file is not available - show whether it can be acquired locally
             boolean isAcquisitionEntry = !feed.entries[position].getAcquisitionLinks().isEmpty();
             if(isAcquisitionEntry && entryStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
                 ArrayList<String> idList = new ArrayList<>();
@@ -700,12 +676,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 }
 
                 if(position==(feed.entries.length-1) && !isRequesting){
-                    UstadMobileSystemImplAndroid.getInstanceAndroid().getP2PManager().checkLocalFilesAvailability(getActivity(), idList);
+                    UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager().checkLocalFilesAvailability(getActivity(), idList);
                     isRequesting=true;
                 }
                 boolean isAvailableLocally =false;
                 FileCheckResponse response=((NetworkManagerAndroid)UstadMobileSystemImplAndroid.getInstanceAndroid().
-                        getP2PManager()).fileCheckResponse(feed.entries[position].id);
+                        getNetworkManager()).fileCheckResponse(feed.entries[position].id);
                 if(response!=null){
                     isAvailableLocally=response.isFileAvailable();
                 }
@@ -729,7 +705,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             if(entryStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
                 holder.mEntryCard.setProgressBarVisible(true);
             }
-
+*/
             //Make sure if this entry is being recycled the idToCardMap won't get confused
             if(idToCardMap.containsValue(holder.mEntryCard)) {
                 Iterator<Map.Entry<String, OPDSEntryCard>> iterator = idToCardMap.entrySet().iterator();

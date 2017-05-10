@@ -10,8 +10,8 @@ import com.ustadmobile.core.impl.AcquisitionStatusEvent;
 import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.port.android.network.DownloadManagerAndroid;
-import com.ustadmobile.port.android.network.NetworkManagerAndroid;
+import com.ustadmobile.port.android.netwokmanager.DownloadManagerAndroid;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,7 +40,7 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
                 while(listeners.hasNext()) {
 
                     AcquisitionStatusListener listener = listeners.next();
-                    Iterator<String> activeEntryIds = managerAndroid.getEntryIdToDownloadIdHashmap().keySet().iterator();
+                    Iterator<String> activeEntryIds = managerAndroid.getEntryIdToDownloadIdMap().keySet().iterator();
                     while(activeEntryIds.hasNext()) {
                         String entryId = activeEntryIds.next();
                         int[] downloadStatus = AcquisitionManagerAndroid.getInstance().getEntryStatusById(
@@ -60,7 +60,7 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
         downloadCompleteReceivers = new HashMap<>();
         downloadCompleteContexts = new HashMap<>();
         managerAndroid=(NetworkManagerAndroid)UstadMobileSystemImplAndroid.getInstance()
-                .getP2PManager();
+                .getNetworkManager();
     }
 
 
@@ -68,12 +68,12 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
 
     @Override
     public void acquireCatalogEntries(UstadJSOPDSFeed acquireFeed, Object context) {
-        managerAndroid.createFileAcquisitionTask(acquireFeed,context);
+        managerAndroid.createAcquisitionTask(acquireFeed,context);
     }
 
     @Override
     public int[] getEntryStatusById(String entryId, Object context) {
-        Long downloadId = managerAndroid.getEntryIdToDownloadIdHashmap().
+        Long downloadId = managerAndroid.getEntryIdToDownloadIdMap().
                 get(entryId);
         if(downloadId == null)
             return null;
@@ -90,16 +90,16 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Long downloadId = intent.getLongExtra(DownloadManagerAndroid.EXTRA_DOWNLOAD_ID, 0L);
-                String entryId = managerAndroid.getDownloadIdToEntryIdHashmap().get(downloadId);
+                String entryId = managerAndroid.getDownloadIdToEntryIdMap().get(downloadId);
                 if(entryId  != null) {
-                    //listener.statusUpdated(new AcquisitionStatusEvent(UstadMobileSystemImpl.DLSTATUS_COM));
+                    //managerTaskListener.statusUpdated(new AcquisitionStatusEvent(UstadMobileSystemImpl.DLSTATUS_COM));
                     int[] entryStatus = getEntryStatusById(entryId, aContext);
                     listener.statusUpdated(new AcquisitionStatusEvent(
                             UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
                             entryStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL],
                             entryStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], entryId));
-                    managerAndroid.getDownloadIdToEntryIdHashmap().remove(downloadId);
-                    managerAndroid.getEntryIdToDownloadIdHashmap().remove(entryId);
+                    managerAndroid.getDownloadIdToEntryIdMap().remove(downloadId);
+                    managerAndroid.getEntryIdToDownloadIdMap().remove(entryId);
                 }
 
             }
