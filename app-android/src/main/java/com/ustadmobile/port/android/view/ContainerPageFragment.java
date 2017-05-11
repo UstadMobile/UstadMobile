@@ -191,7 +191,7 @@ public class ContainerPageFragment extends Fragment {
      * @param numPages
      */
     public void showPagePosition(int index, int numPages) {
-        //Toast t = Toast.makeText(getContext(), index + "/" + numPages, Toast.LENGTH_SHORT);
+        //Toast t = Toast.makeText(getTargetContext(), index + "/" + numPages, Toast.LENGTH_SHORT);
         //t.show();
     }
 

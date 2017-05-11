@@ -20,7 +20,7 @@ dependencies {
 }
 
 jar {
-    exclude("com/ustadmobile/test/core/impl/UstadMobileTestUtilFactory.class")
+    exclude("com/ustadmobile/test/core/impl/PlatformTestUtil.class")
 }
 
 sourceCompatibility = "1.7"

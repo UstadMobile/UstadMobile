@@ -146,7 +146,7 @@ public class ClassManagementController extends UstadBaseController {
        ClassManagementController ctrl = new ClassManagementController(view.getContext(), 
             (String)args.get(KEY_CLASSID));
        if (args.containsKey(KEY_UPDATE_STUDENT_LIST)){
-            //ctrl.students = loadClassStudentListFromNet(classID, view.getContext(), view);
+            //ctrl.students = loadClassStudentListFromNet(classID, view.getTargetContext(), view);
             loadClassStudentListFromNet(classID, view.getContext(), view);   
        }
        ctrl.setView(view);

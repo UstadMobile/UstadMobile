@@ -90,7 +90,7 @@ public abstract class TestCatalogView extends TestCase {
     
     
     public void testCatalogView() throws Exception{
-//        Object context = UMContextGetter.getContext(this);
+//        Object context = UMContextGetter.getTargetContext(this);
 //        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 //        impl.setActiveUser(TestConstants.LOGIN_USER, context);
 //        
