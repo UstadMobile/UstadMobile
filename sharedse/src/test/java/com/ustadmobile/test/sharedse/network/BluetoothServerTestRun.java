@@ -13,7 +13,7 @@ public class BluetoothServerTestRun extends BluetoothServerTestSe {
 
     @Before
     public void mockRemoteDevice() {
-        NetworkManagerTest networkManager = (NetworkManagerTest)UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        MockNetworkManager networkManager = (MockNetworkManager)UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         networkManager.setMockBluetoothServer(BluetoothServerTestSe.REMOTE_BLUETOOTH_MAC, new MockBluetoothServer());
     }
 

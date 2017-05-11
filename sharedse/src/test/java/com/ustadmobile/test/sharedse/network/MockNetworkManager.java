@@ -10,20 +10,22 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by kileha3 on 10/05/2017.
  */
 
-public class NetworkManagerTest extends NetworkManager {
+public class MockNetworkManager extends NetworkManager {
 
 
     protected BluetoothServer bluetoothServer;
 
     private HashMap<String, MockBluetoothServer> mockBluetoothServers;
 
-    public NetworkManagerTest() {
-        super();
+
+
+    public MockNetworkManager() {
         mockBluetoothServers = new HashMap<>();
         bluetoothServer = new MockBluetoothServer();
     }
@@ -74,9 +76,10 @@ public class NetworkManagerTest extends NetworkManager {
     }
 
     @Override
-    public NetworkTask createFileStatusTask(String[] entryIds, Object mContext) {
+    public NetworkTask createFileStatusTask(List<String> entryIds, Object mContext) {
         return null;
     }
+
 
     @Override
     public NetworkTask createAcquisitionTask(UstadJSOPDSFeed feed, Object mContext) {
