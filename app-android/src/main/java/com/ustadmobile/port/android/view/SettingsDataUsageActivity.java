@@ -131,8 +131,6 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
 
         if(item.getItemId()==android.R.id.home){
             finish();
-        }else if(item.getItemId()==R.id.p2pDeviceList){
-            startActivity(new Intent(this,UstadNodesActivity.class));
         }
         return true;
     }

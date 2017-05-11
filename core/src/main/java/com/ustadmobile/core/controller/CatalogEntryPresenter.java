@@ -27,6 +27,7 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
     private int downloadStatusStrId = -1;
 
+
     public CatalogEntryPresenter(Object context) {
         super(context);
     }
@@ -56,6 +57,8 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN,false);
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE,false);
                 }
+
+
             }catch(Exception e) {
                 e.printStackTrace();
             }

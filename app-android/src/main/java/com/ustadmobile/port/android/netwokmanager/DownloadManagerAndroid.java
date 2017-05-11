@@ -49,7 +49,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.QUEUE_
 
 public class DownloadManagerAndroid extends AcquisitionTask implements BluetoothConnectionHandler{
 
-    private NetworkManagerAndroid networkManagerAndroid;
+    private NetworkManagerAndroid managerAndroid;
     public static final String TAG="DownloadManagerAndroid";
     private File currentDownloadFileInfo=null;
 
@@ -120,11 +120,13 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
     /**
      * Flag to indicate that file will be downloaded from the cloud
      */
-    public static final int DOWNLOAD_SOURCE_CLOUD=1;
+    public static final int DOWNLOAD_SOURCE_CLOUD=2;
     /**
      * Flag to indicate that the file will be downloaded from the peer device
      */
-    public static final int DOWNLOAD_SOURCE_PEER=0;
+    public static final int DOWNLOAD_SOURCE_PEER_WIFI=0;
+
+    public static final int DOWNLOAD_SOURCE_PEER_WIFI_DIRECT=1;
 
     /**
      * Flag to indicate that the file is resuming
@@ -157,24 +159,9 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
 
     private String srcFileURL =null;
 
-
-    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action=intent.getAction();
-            Log.d(WifiDirectHandler.TAG,"Action Note "+action);
-            switch (action){
-
-
-            }
-
-
-        }
-    };
-
-    public DownloadManagerAndroid(UstadJSOPDSFeed feed, NetworkManagerAndroid networkManagerAndroid, Object context) {
+    public DownloadManagerAndroid(UstadJSOPDSFeed feed, NetworkManagerAndroid managerAndroid, Object context) {
         super(feed);
-        this.networkManagerAndroid = networkManagerAndroid;
+        this.managerAndroid = managerAndroid;
         mContext=(Context) context;
     }
 
@@ -184,27 +171,34 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
         checkDownloadSource();
     }
 
-    /**
-     * In here is where the download manager will decide on where to get the file - cloud or peer device
-     * if source is:-
-     * CLOUD: download directly from cloud server
-     *    PEER: Request peer device a connection once connection
-     *          has been made download the file from there
-     */
     private void checkDownloadSource(){
         setNotificationTitleMessage();
         String fileId=getFeed().entries[currentEntryIndex].id;
-        setDownloadID(networkManagerAndroid.getEntryIdToDownloadIdMap().get(fileId));
-        EntryCheckResponse checkResponse= networkManagerAndroid.entryCheckResponse(fileId);
+        setDownloadID(managerAndroid.getEntryIdToDownloadIdMap().get(fileId));
+        EntryCheckResponse checkResponse= managerAndroid.entryCheckResponse(fileId);
 
         if(checkResponse!=null && checkResponse.isFileAvailable()) {
 
-            String deviceAddress=checkResponse.getNetworkNode().getDeviceBluetoothMacAddress();
-            networkManagerAndroid.connectBluetooth(deviceAddress,this);
-            networkManagerAndroid.setDownloadSource(DOWNLOAD_SOURCE_PEER);
+            String deviceAddress= managerAndroid.getIpAddress();
+            String peerAddress=checkResponse.getNetworkNode().getDeviceIpAddress();
+
+            if(managerAndroid.areOnTheSameNetwork(peerAddress,deviceAddress)){
+
+                srcFileURL="http://"+peerAddress+":"+checkResponse.getNetworkNode().getPort()+"/"
+                        +SERVER_MAIN_FIL_DIR;
+                managerAndroid.setDownloadSource(DOWNLOAD_SOURCE_PEER_WIFI);
+                downloadInBackground();
+            }else{
+                //download from peer using bluetooth handshakes
+                String bluetoothAddress=checkResponse.getNetworkNode().getDeviceBluetoothMacAddress();
+                managerAndroid.connectBluetooth(bluetoothAddress,this);
+                managerAndroid.setDownloadSource(DOWNLOAD_SOURCE_PEER_WIFI_DIRECT);
+            }
+
+
 
         }else {
-            networkManagerAndroid.setDownloadSource(DOWNLOAD_SOURCE_CLOUD);
+            managerAndroid.setDownloadSource(DOWNLOAD_SOURCE_CLOUD);
             downloadInBackground();
         }
     }
@@ -213,18 +207,19 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
 
         for(int position = 0; position < getFeed().entries.length; position++) {
             long downloadId=(long) new AtomicInteger().incrementAndGet();
-            networkManagerAndroid.getEntryIdToDownloadIdMap().put(
+            managerAndroid.getEntryIdToDownloadIdMap().put(
                     getFeed().entries[position].id,downloadId);
-            networkManagerAndroid.getDownloadIdToEntryIdMap().put(downloadId,getFeed().entries[position].id);
-            networkManagerAndroid.getDownloadIdToDownloadStatusMap().put(downloadId,new int[3]);
+            managerAndroid.getDownloadIdToEntryIdMap().put(downloadId,getFeed().entries[position].id);
+            managerAndroid.getDownloadIdToDownloadStatusMap().put(downloadId,new int[3]);
         }
     }
 
 
     private void setNotificationTitleMessage(){
         notificationTitle=getFeed().entries[currentEntryIndex].title;
-        notificationMessage=networkManagerAndroid.getAcquisitionTaskQueue().size()>1
-                ? "Downloading "+((currentEntryIndex+1)/getFeed().entries.length) : "Download in progress";
+        notificationMessage= managerAndroid.getAcquisitionTaskQueue().size()>1
+                ? "Downloading "+((currentEntryIndex+1)/getFeed().entries.length)+" files"
+                : "Download in progress";
     }
 
 
@@ -238,7 +233,6 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
 
     @Override
     public void onConnected(InputStream inputStream, OutputStream outputStream) {
-
         //TODO: handle communication
     }
 
@@ -252,12 +246,12 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
             setDownloadStatus(currentStatus);
             setDownloadTotalBytes(0);
             updateDownloadStatus();
-            if(networkManagerAndroid.isSuperNodeEnabled()){
-                networkManagerAndroid.removeNotification(NOTIFICATION_TYPE_SERVER);
-                networkManagerAndroid.addNotification(QUEUE_ENTRY_ACQUISITION,
+            if(managerAndroid.isSuperNodeEnabled()){
+                managerAndroid.removeNotification(NOTIFICATION_TYPE_SERVER);
+                managerAndroid.addNotification(QUEUE_ENTRY_ACQUISITION,
                         notificationTitle,notificationMessage);
             }else{
-                networkManagerAndroid.addNotification(QUEUE_ENTRY_ACQUISITION,notificationTitle,
+                managerAndroid.addNotification(QUEUE_ENTRY_ACQUISITION,notificationTitle,
                         notificationMessage);
             }
         }
@@ -305,7 +299,7 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
 
             try {
 
-                if(networkManagerAndroid.getDownloadSource()==DOWNLOAD_SOURCE_CLOUD){
+                if(managerAndroid.getDownloadSource()==DOWNLOAD_SOURCE_CLOUD){
                     downloadUri= downloadUrl;
                 }else{
                     downloadUri= UMFileUtil.joinPaths(new String[]{srcFileURL,
@@ -417,12 +411,12 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
                       Intent downloadCompletedIntent=new Intent(ACTION_DOWNLOAD_COMPLETED);
                       downloadCompletedIntent.putExtra(EXTRA_DOWNLOAD_ID, getDownloadID());
                       mContext.sendBroadcast(downloadCompletedIntent);
-                      networkManagerAndroid.removeNotification(QUEUE_ENTRY_ACQUISITION);
+                      managerAndroid.removeNotification(QUEUE_ENTRY_ACQUISITION);
 
                       /*
                       dismissDownloadNotification();
                       if(currentDownloadSource==DOWNLOAD_SOURCE_PEER){
-                          networkManagerAndroid.reconnectToThePreviousNetwork();
+                          managerAndroid.reconnectToThePreviousNetwork();
                       }*/
                       fireAcquisitionTaskCompleted();
 
@@ -454,14 +448,14 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
         updateDownloadStatus();
         setDownloadStatus(currentStatus);
         setNotificationTitleMessage();
-        networkManagerAndroid.updateNotification(QUEUE_ENTRY_ACQUISITION,(int)progress,notificationTitle,notificationMessage);
+        managerAndroid.updateNotification(QUEUE_ENTRY_ACQUISITION,(int)progress,notificationTitle,notificationMessage);
     }
 
     /**
      * Update download status as the task is running
      */
     private void updateDownloadStatus(){
-        networkManagerAndroid.getDownloadIdToDownloadStatusMap().put(getDownloadID(),getDownloadStatus());
+        managerAndroid.getDownloadIdToDownloadStatusMap().put(getDownloadID(),getDownloadStatus());
     }
 
 

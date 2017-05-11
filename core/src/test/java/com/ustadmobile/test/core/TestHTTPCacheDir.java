@@ -41,13 +41,14 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMFileUtil;
-    import com.ustadmobile.test.core.impl.UstadMobileTestUtil;
+import com.ustadmobile.test.core.impl.UstadMobileTestUtil;
 
-    import org.junit.Assert;
-    import org.junit.Before;
-    import org.junit.Test;
+import org.json.JSONArray;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
-    import java.util.Hashtable;
+import java.util.Hashtable;
 
 
 /**
@@ -142,8 +143,22 @@ public class TestHTTPCacheDir  {
         Assert.assertTrue("Can remove oldest entry", oldestRemoved);
         Assert.assertNotNull("most recently accessed item still in cache",
             cacheDir.getCacheFileURIByURL(httpURL2));
+
+        /**
+         * Test caching of private responses
+         */
+        cacheDir.saveIndex();
+        String privateCacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE, new Object());
+        cacheDir.setPrivateCacheDir(privateCacheDir);
+        String httpUrlPrivate = UMFileUtil.joinPaths(new String[]{httpRoot, "smallcheck.jpg?private=true"});
+        String privateCacheFile = cacheDir.get(httpUrlPrivate);
+        JSONArray cachePrivateEntry = cacheDir.getEntry(httpUrlPrivate);
+        Assert.assertTrue("Entry with cache-control private marked as such",
+                cachePrivateEntry.getBoolean(HTTPCacheDir.IDX_PRIVATE));
+        Assert.assertTrue("Entry with cache-control private is in private directory",
+                privateCacheFile.startsWith(privateCacheDir));
     }
-    
+
     protected void runTest() throws Throwable {
         testHTTPCacheDir();
     }

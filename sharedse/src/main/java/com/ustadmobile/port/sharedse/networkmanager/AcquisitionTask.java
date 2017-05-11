@@ -3,11 +3,16 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+
 /**
  * Created by kileha3 on 09/05/2017.
  */
 
-public class AcquisitionTask extends NetworkTask {
+public class AcquisitionTask extends NetworkTask implements BluetoothConnectionHandler{
 
     private UstadJSOPDSFeed feed;
 
@@ -38,6 +43,15 @@ public class AcquisitionTask extends NetworkTask {
      * Start the download task
      */
     public synchronized void start() {
+        //select a node here
+        String bluetoothNodeAddr = "something";
+        networkManager.connectBluetooth(bluetoothNodeAddr, this);
+    }
+
+    @Override
+    public void onConnected(InputStream inputStream, OutputStream outputStream) {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String command = BluetoothServer.CMD_ACQUIRE_ENTRIES;
 
     }
 

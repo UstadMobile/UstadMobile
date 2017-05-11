@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.netwokmanager;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -60,15 +61,6 @@ public class BluetoothServerAndroid extends BluetoothServer {
         bluetoothState=BLUETOOTH_STATE_NONE;
     }
 
-    @Override
-    public void handleNodeConnected(String deviceAddress, DataInputStream inputStream, DataOutputStream outputStream) {
-
-    }
-
-    @Override
-    public void setBluetoothConnectionHandler(BluetoothConnectionHandler handler) {
-        super.setBluetoothConnectionHandler(handler);
-    }
 
     public BluetoothAdapter getBluetoothAdapter() {
         return this.mBluetoothAdapter;
@@ -76,13 +68,6 @@ public class BluetoothServerAndroid extends BluetoothServer {
 
     public boolean isEnabled() {
         return mBluetoothAdapter.isEnabled();
-    }
-
-    public void setBluetoothState(int bluetoothState){
-        this.bluetoothState=bluetoothState;
-    }
-    public int getBluetoothState(){
-        return this.bluetoothState;
     }
 
     public UUID getInsecureUUID(){
@@ -101,42 +86,21 @@ public class BluetoothServerAndroid extends BluetoothServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
             mmServerSocket = tmp;
         }
 
         public void run() {
-            BluetoothSocket socket;
-            while (bluetoothState != BLUETOOTH_STATE_CONNECTED) {
-                try {
-                    socket = mmServerSocket.accept();
-                } catch (IOException e) {
-
-                    break;
+            try {
+                mmServerSocket.accept();
+                boolean connected=mBluetoothAdapter.getProfileConnectionState(BluetoothHeadset.HEADSET)
+                        == BluetoothHeadset.STATE_CONNECTED;
+                if(connected){
+                    Log.d("Server Side ","Connected to "+mBluetoothAdapter.getName());
                 }
 
-                if (socket != null) {
-                    synchronized (this) {
-                        switch (bluetoothState) {
-                            case BLUETOOTH_STATE_CONNECTING:
-
-                                if (mInsecureBluetoothListeningThread != null) {
-                                    mInsecureBluetoothListeningThread.cancel();
-                                    mInsecureBluetoothListeningThread = null;
-                                }
-
-                                new BluetoothConnectionThread(socket).start();
-
-                                break;
-                            case BLUETOOTH_STATE_CONNECTED:
-                                try {
-                                    socket.close();
-                                } catch (IOException e) {
-                                    Log.e(TAG, "Could not close unwanted socket", e);
-                                }
-                                break;
-                        }
-                    }
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
         }
@@ -151,34 +115,5 @@ public class BluetoothServerAndroid extends BluetoothServer {
 
     }
 
-
-
-    private class BluetoothConnectionThread extends Thread {
-
-        public BluetoothConnectionThread(BluetoothSocket socket) {
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
-
-            try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            inputStream = tmpIn;
-            outputStream = tmpOut;
-            bluetoothState=BLUETOOTH_STATE_CONNECTED;
-
-
-        }
-
-        public void run() {
-
-            while (bluetoothState == BLUETOOTH_STATE_CONNECTED) {
-                bluetoothConnectionHandler.onConnected(inputStream,outputStream);
-            }
-        }
-    }
 
 }

@@ -14,6 +14,13 @@ apply plugin: 'java'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":core")
+    compile project(":sharedse")
+    compile 'junit:junit:4.12'
+}
+
+jar {
+    exclude("com/ustadmobile/test/core/impl/UstadMobileTestUtilFactory.class")
 }
 
 sourceCompatibility = "1.7"
@@ -42,5 +49,6 @@ task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfi
     buildConfigField "int", "DEFAULT_NETWORK_INTERVAL", project.ext.buildConfigProperties["test.remote_network_interval"]
     buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", project.ext.buildConfigProperties["test.remote_network_timeout"]
     buildConfigField "String", "REGISTER_URL", project.ext.buildConfigProperties["test.register_url"]
+    buildConfigField "String", "TEST_REMOTE_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.remote_bluetooth_device"]
 }
 compileJava.dependsOn(generateCoreTestConstantsBuildConfig)

@@ -35,4 +35,9 @@ public abstract class UstadMobileTestUtil {
     public abstract String getHttpEndpoint();
 
 
+    /**
+     *
+     */
+    public abstract Object getContext();
+
 }

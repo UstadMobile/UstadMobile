@@ -10,10 +10,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -23,22 +28,24 @@ import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.EntryCheckResponse;
+import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.ServiceType;
@@ -54,11 +61,11 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private Map<Context, ServiceConnection> serviceConnectionMap;
 
-    public HashMap<String, Long> entryIdToDownloadIdMap =new HashMap<>();
+    private HashMap<String, Long> entryIdToDownloadIdMap =new HashMap<>();
 
-    public HashMap<Long, String> downloadIdToEntryIdMap =new HashMap<>();
+    private HashMap<Long, String> downloadIdToEntryIdMap =new HashMap<>();
 
-    public HashMap<Long,int[]> downloadIdToDownloadStatusMap=new HashMap<>();
+    private HashMap<Long,int[]> downloadIdToDownloadStatusMap=new HashMap<>();
 
 
     public static final String SERVICE_NAME = "ustadMobile";
@@ -76,7 +83,12 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     public static final String DEVICE_IP_ADDRESS = "device_ip_address";
 
+    public static final String SERVER_PORT_NUMBER = "server_port_number";
+
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
+
+    public static final String FILE_IDS_SEPARATOR = "@";
+
     private int downloadSource=-2;
 
     private static final String SERVICE_DEVICE_AVAILABILITY = "available";
@@ -93,9 +105,18 @@ public class NetworkManagerAndroid extends NetworkManager{
     private NotificationManager mNotifyManager;
 
     private NotificationCompat.Builder mBuilder;
+
     private NetworkServiceAndroid networkService;
 
+    private static final String serverNotificationTitle="Super Node Active";
+
+    private static final String serverNotificationMessage ="You can share files with other devices";
+
     private Context mContext;
+
+    private WifiManager wifiManager;
+
+    private ConnectivityManager connectivityManager;
 
 
     @Override
@@ -107,18 +128,15 @@ public class NetworkManagerAndroid extends NetworkManager{
         wifiDirectHandler= networkService.getWifiDirectHandlerAPI();
         bluetoothServerAndroid=new BluetoothServerAndroid((Context) context);
 
+        wifiManager= (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        connectivityManager= (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
         //listen for the intents
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
-        filter.addAction(WifiDirectHandler.Action.MESSAGE_RECEIVED);
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
-        filter.addAction(WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_TIMEOUT_ACTION);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_SERVICE_CREATED_ACTION);
 
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
         boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
@@ -131,6 +149,8 @@ public class NetworkManagerAndroid extends NetworkManager{
     private BroadcastReceiver mBroadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            Toast.makeText(mContext,intent.getAction(),Toast.LENGTH_LONG).show();
             switch (intent.getAction()){
 
                 case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
@@ -145,18 +165,19 @@ public class NetworkManagerAndroid extends NetworkManager{
 
                         NetworkNode networkNode=new NetworkNode(deviceMac);
 
-                        int nodeIndex = knownNetworkNodes.indexOf(networkNode);
+                        int nodeIndex = getKnownNodes().indexOf(networkNode);
                         if (nodeIndex >= 0) {
-                            networkNode = knownNetworkNodes.get(nodeIndex);
+                            networkNode = getKnownNodes().get(nodeIndex);
                         }
 
                         networkNode.setDeviceBluetoothMacAddress(txtRecord.getRecord().
-                                get(DEVICE_BLUETOOTH_ADDRESS));
-                        networkNode.setDeviceIpAddress(txtRecord.getRecord().get(DEVICE_IP_ADDRESS));
+                                get(DEVICE_BLUETOOTH_ADDRESS).toString());
+                        networkNode.setDeviceIpAddress(txtRecord.getRecord().get(DEVICE_IP_ADDRESS).toString());
                         networkNode.setDeviceWifiDirectMacAddress(deviceMac);
+                        networkNode.setPort(Integer.parseInt(txtRecord.getRecord().get(SERVER_PORT_NUMBER).toString()));
 
                         if (nodeIndex < 0) {
-                            knownNetworkNodes.add(networkNode);
+                            getKnownNodes().add(networkNode);
                             handleNodeDiscovered(networkNode);
 
                         }
@@ -193,23 +214,32 @@ public class NetworkManagerAndroid extends NetworkManager{
            wifiDirectHandler.addLocalService(currentServiceName, localServiceData(),null);
            Log.d(TAG,"Service Information: "+localServiceData().toString());
            isSuperNodeEnabled=true;
+           addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
        }
     }
 
     @Override
     public void stopSuperNode() {
         if(wifiDirectHandler!=null){
+            if(mBuilder!=null && mNotifyManager!=null){
+                removeNotification(NOTIFICATION_TYPE_SERVER);
+            }
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
             isSuperNodeEnabled=false;
         }
     }
 
-    public  HashMap<String, String> localServiceData(){
+    private  HashMap<String, String> localServiceData(){
         HashMap<String, String> record = new HashMap<>();
         record.put(SERVICE_DEVICE_AVAILABILITY, "available");
         record.put(DEVICE_BLUETOOTH_ADDRESS, getBluetoothMacAddress());
-        record.put(DEVICE_IP_ADDRESS, getIpAddress());
+        record.put(SERVER_PORT_NUMBER,"80001");
+        if(connectivityManager.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI){
+            record.put(DEVICE_IP_ADDRESS, getIpAddress());
+        }else {
+            record.put(DEVICE_IP_ADDRESS, null);
+        }
         return record;
     }
 
@@ -225,23 +255,21 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
-    public void startBluetoothServer() {
-        bluetoothServerAndroid.start();
-    }
-
-    @Override
-    public void stopBluetoothServer() {
-        bluetoothServerAndroid.stop();
+    public BluetoothServer getBluetoothServer() {
+        return null;
     }
 
     @Override
     public boolean isWiFiEnabled() {
-        return wifiDirectHandler.isWifiEnabled();
+        return wifiManager.isWifiEnabled();
     }
 
     @Override
-    public NetworkTask createFileStatusTask(String[] entryIds,Object context) {
-        return null;
+    public NetworkTask createFileStatusTask(List<String> entryIds,Object context) {
+        EntryStatusTask task=new EntryStatusTask(entryIds);
+        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
+        task.start();
+        return task;
     }
 
     @Override
@@ -254,15 +282,25 @@ public class NetworkManagerAndroid extends NetworkManager{
 
 
     @Override
-    public void connectBluetooth(String deviceAddress, BluetoothConnectionHandler handler) {
-        BluetoothAdapter adapter=bluetoothServerAndroid.getBluetoothAdapter();
-        bluetoothServerAndroid.setBluetoothConnectionHandler(handler);
+    public void connectBluetooth(String deviceAddress, final BluetoothConnectionHandler handler) {
+        BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice bluetoothDevice=adapter.getRemoteDevice(deviceAddress);
         try{
-            BluetoothSocket bluetoothSocket=bluetoothDevice.
+            final BluetoothSocket bluetoothSocket=bluetoothDevice.
                     createInsecureRfcommSocketToServiceRecord(bluetoothServerAndroid.getInsecureUUID());
-            bluetoothServerAndroid.setBluetoothState(BluetoothServer.BLUETOOTH_STATE_CONNECTING);
             bluetoothSocket.connect();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        if(bluetoothSocket.isConnected()){
+                            handler.onConnected(bluetoothSocket.getInputStream(), bluetoothSocket.getOutputStream());
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -279,12 +317,12 @@ public class NetworkManagerAndroid extends NetworkManager{
             EntryCheckResponse checkResponse=new EntryCheckResponse(node);
             checkResponse.setFileAvailable(status[position]);
             checkResponse.setLastChecked(time_now);
-            responseList=this.entryResponses.get(fileIds[position]);
+            responseList=getEntryResponses().get(fileIds[position]);
             if(responseList.isEmpty()){
                 responseList=new ArrayList<>();
             }
             responseList.add(checkResponse);
-            this.entryResponses.put(fileIds[position],responseList);
+            getEntryResponses().put(fileIds[position],responseList);
         }
     }
 
@@ -341,7 +379,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     public EntryCheckResponse entryCheckResponse(String fileID){
-        List<EntryCheckResponse> responses=this.entryResponses.get(fileID);
+        List<EntryCheckResponse> responses=getEntryResponses().get(fileID);
         if(responses!=null){
             long lastChecked=Calendar.getInstance().getTimeInMillis();
             for(EntryCheckResponse checkResponse: responses){
@@ -377,9 +415,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         return this.downloadIdToDownloadStatusMap;
     }
 
-    public Vector<AcquisitionTask> getAcquisitionTaskQueue(){
-        return acquisitionTaskQueue;
-    }
 
     public String getBluetoothMacAddress(){
 
@@ -441,6 +476,24 @@ public class NetworkManagerAndroid extends NetworkManager{
             bluetoothServerAndroid.stop();
         }
 
+    }
+
+    public String convertListIdsToString(List<String> fileIds){
+        return TextUtils.join(FILE_IDS_SEPARATOR, fileIds);
+    }
+
+    private List<String> convertStringIdsToList(String fileIds){
+        List<String> fileIdsList=new ArrayList<>();
+        Collections.addAll(fileIdsList, TextUtils.split(fileIds,FILE_IDS_SEPARATOR));
+        return fileIdsList;
+    }
+
+    protected boolean areOnTheSameNetwork(String serverAddress,String clientAddress){
+        String peerIPAddress[]=serverAddress.split("\\.");
+        String deviceIPAddress[]=clientAddress.split("\\.");
+
+        return peerIPAddress[0].equals(deviceIPAddress[0]) && peerIPAddress[1].equals(deviceIPAddress[1])
+                && peerIPAddress[2].equals(deviceIPAddress[2]);
     }
 
 }

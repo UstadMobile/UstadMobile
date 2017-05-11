@@ -16,6 +16,8 @@ dependencies {
     compile "net.sf.kxml:kxml2:2.3.0";
     compile 'org.nanohttpd:nanohttpd:2.3.1'
     compile 'org.nanohttpd:nanohttpd-nanolets:2.3.1';
-    compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
+    compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
     compile project(":core")
+    testCompile project(":sharedse-tests")
+    testCompile project(":core-tests")
 }

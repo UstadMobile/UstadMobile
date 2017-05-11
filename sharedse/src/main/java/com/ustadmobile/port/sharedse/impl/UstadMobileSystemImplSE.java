@@ -18,6 +18,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.port.sharedse.impl.zip.*;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
@@ -390,6 +391,14 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
         return null;
     }
+
+    /**
+     * Return the network manager for this platform
+     *
+     * @return
+     */
+    public abstract NetworkManager getNetworkManager();
+
 
 
 }

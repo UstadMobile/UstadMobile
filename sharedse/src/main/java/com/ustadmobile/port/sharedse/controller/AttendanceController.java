@@ -271,7 +271,7 @@ public class AttendanceController extends UstadBaseController {
         }
 
         boolean statementsPending = false;
-        XapiForwardingStatementManager manager = PersistenceManager.getInstance().getForwardingStatementManager();
+        XapiForwardingStatementManager manager = PersistenceManager.getInstance().getManager(XapiForwardingStatementManager.class);
         for(int i = 0; i < statementList.size(); i++) {
             if(manager.findStatusByXapiStatement(context, statementList.get(i)) != XapiForwardingStatement.STATUS_SENT)
                 return STATUS_ATTENDANCE_TAKEN;

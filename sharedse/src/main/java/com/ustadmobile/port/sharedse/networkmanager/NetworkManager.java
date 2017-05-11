@@ -19,26 +19,31 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final int NOTIFICATION_TYPE_SERVER=0;
     public static final int NOTIFICATION_TYPE_ACQUISITION=1;
     public BluetoothServer bluetoothServer;
+
     private Object mContext;
+
     private final Object bluetoothLock=new Object();
 
 
-    public Vector<NetworkNode> networkNodesMap=new Vector<>();
 
-    public Vector<NetworkNode>  knownNetworkNodes=new Vector<>();
+    private Vector<NetworkNode> knownNetworkNodes=new Vector<>();
 
-    public Vector<AcquisitionTask> acquisitionTaskQueue=new Vector<>();
+    private Vector<AcquisitionTask> acquisitionTaskQueue=new Vector<>();
 
-    public Vector<EntryStatusTask> statusTaskQueue=new Vector<>();
+    private Vector<EntryStatusTask> statusTaskQueue=new Vector<>();
 
-    public Vector<NetworkManagerListener> networkManagerListeners=new Vector<>();
+    private Vector<NetworkManagerListener> networkManagerListeners=new Vector<>();
 
-    public Map<String,List<EntryCheckResponse>> entryResponses =new HashMap<>();
+    private Map<String,List<EntryCheckResponse>> entryResponses =new HashMap<>();
 
 
-    public EntryStatusTask currentEntryStatusTask;
+    private EntryStatusTask currentEntryStatusTask;
 
-    public AcquisitionTask currentEntryAcquisitionTask;
+    private AcquisitionTask currentEntryAcquisitionTask;
+
+    public NetworkManager(Object context) {
+        this.mContext = context;
+    }
 
 
     public abstract void startSuperNode();
@@ -51,9 +56,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public  abstract boolean isBluetoothEnabled();
 
-    public abstract void startBluetoothServer();
 
-    public abstract void stopBluetoothServer();
+    public abstract BluetoothServer getBluetoothServer();
 
     public Object acquireBluetoothLock(Object bluetoothLock){
         synchronized (bluetoothLock){
@@ -71,7 +75,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public abstract boolean isWiFiEnabled();
 
-    public String[] requestFileStatus(String [] entryIds,Object mContext){
+    public List<String> requestFileStatus(List<String> entryIds,Object mContext){
         createFileStatusTask(entryIds,mContext);
         return entryIds;
     }
@@ -83,7 +87,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     }
 
 
-    public abstract NetworkTask createFileStatusTask(String entryIds[],Object mContext);
+    public abstract NetworkTask createFileStatusTask(List<String> entryIds,Object mContext);
 
     public abstract NetworkTask createAcquisitionTask(UstadJSOPDSFeed feed,Object mContext);
 
@@ -132,7 +136,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     }
 
     public void handleNodeDiscovered(NetworkNode node){
-        networkNodesMap.add(node);
+        knownNetworkNodes.add(node);
     }
 
     public void addNetworkManagerListener(NetworkManagerListener listener){
@@ -173,6 +177,22 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         }
 
         checkTaskQueue(task.getTaskType());
+    }
+
+    public List<NetworkNode> getKnownNodes() {
+        return knownNetworkNodes;
+    }
+
+    public Map<String,List<EntryCheckResponse>> getEntryResponses(){
+        return entryResponses;
+    }
+
+    public Vector<AcquisitionTask> getAcquisitionTaskQueue(){
+        return acquisitionTaskQueue;
+    }
+
+    public Object getContext() {
+        return mContext;
     }
 
 

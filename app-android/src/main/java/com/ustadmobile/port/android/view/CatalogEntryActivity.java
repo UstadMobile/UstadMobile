@@ -18,13 +18,21 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.CatalogEntryView;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 
 public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener {
 
@@ -33,6 +41,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     private CollapsingToolbarLayout mCollapsingToolbar;
 
     private RecyclerView seeAlsoRecyclerView;
+
+    private NetworkManagerAndroid managerAndroid;
 
     private static Hashtable<Integer, Integer> BUTTON_ID_MAP =new Hashtable<>();
 
@@ -60,6 +70,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        managerAndroid= (NetworkManagerAndroid) UstadMobileSystemImpl.getInstance().getNetworkManager();
         if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.LOLLIPOP){
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -78,6 +89,25 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mPresenter = new CatalogEntryPresenter(this, this, args);
         mPresenter.onCreate();
+
+        try{
+            UstadJSOPDSFeed feed=new UstadJSOPDSFeed();
+            feed.loadFromString(args.get(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR).toString());
+
+            String entryId=feed.entries[0].id;
+
+            List<String> entries=new ArrayList<>();
+            entries.add(entryId);
+
+            managerAndroid.createFileStatusTask(entries,this);
+
+
+
+        } catch (XmlPullParserException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         seeAlsoRecyclerView = (RecyclerView)findViewById(R.id.activity_catalog_entry_see_also_recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);

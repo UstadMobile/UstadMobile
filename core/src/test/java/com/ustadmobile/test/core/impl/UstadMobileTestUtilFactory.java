@@ -1,6 +1,6 @@
 package com.ustadmobile.test.core.impl;
 
-import com.ustadmobile.test.core.impl.se.UstadMobileTestUtilSE;
+import com.ustadmobile.test.sharedse.impl.UstadMobileTestUtilSE;
 
 /**
  * Created by mike on 4/27/17.
@@ -9,7 +9,7 @@ import com.ustadmobile.test.core.impl.se.UstadMobileTestUtilSE;
 public class UstadMobileTestUtilFactory {
 
     public static UstadMobileTestUtil makeTestUtil() {
-        return new UstadMobileTestUtilSE();
+        return new UstadMobileTestUtilCore();
     }
 
 }

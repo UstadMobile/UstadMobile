@@ -1,4 +1,4 @@
-package com.ustadmobile.test.core.impl.se;
+package com.ustadmobile.test.sharedse.impl;
 
 import com.ustadmobile.core.impl.UMLog;
 

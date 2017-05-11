@@ -19,6 +19,9 @@ plugins {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url "http://devserver2.ustadmobile.com/repo-mvn"
+        }
     }
 }
 
@@ -30,6 +33,7 @@ version = "0.2.4.21"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 90
+    nanoLrsVersion = "0.1.55"
 }
 
 ext.buildConfigProperties = new Properties()

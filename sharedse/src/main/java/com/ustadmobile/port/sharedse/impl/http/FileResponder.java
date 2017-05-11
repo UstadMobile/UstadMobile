@@ -159,9 +159,10 @@ public abstract class FileResponder {
      * @param uriResource uriResource from the request
      * @param session session from the request
      * @param file Interface representing the file or file like source
+     * @param cacheControlHeader The cache control header to put on the response. Optional: can be null for no cache-control header
      * @return An appropriate NanoHTTPD.Response as above for the request
      */
-    public static NanoHTTPD.Response newResponseFromFile(NanoHTTPD.Method method, RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session, IFileSource file) {
+    public static NanoHTTPD.Response newResponseFromFile(NanoHTTPD.Method method, RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session, IFileSource file, String cacheControlHeader) {
         boolean isHeadRequest = method.equals(NanoHTTPD.Method.HEAD);
         try {
             long range[];
@@ -228,7 +229,8 @@ public abstract class FileResponder {
                 r.addHeader("ETag", etag);
                 r.addHeader("Content-Length", String.valueOf(totalLength));
                 r.addHeader("Connection", "close");
-                r.addHeader("Cache-Control", "cache, max-age=86400");
+                if(cacheControlHeader != null)
+                    r.addHeader("Cache-Control", cacheControlHeader);
                 return r;
             }
         }catch(IOException e) {
@@ -236,6 +238,10 @@ public abstract class FileResponder {
             return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
                     "text/plain", isHeadRequest ? null : "Internal exception: " + e.toString());
         }
+    }
+
+    public static NanoHTTPD.Response newResponseFromFile(NanoHTTPD.Method method, RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session, IFileSource file) {
+        return newResponseFromFile(method, uriResource, session, file, "cache, max-age=86400");
     }
 
     public static NanoHTTPD.Response newResponseFromFile(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session, IFileSource file) {

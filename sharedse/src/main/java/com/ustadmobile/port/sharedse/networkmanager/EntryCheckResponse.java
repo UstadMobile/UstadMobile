@@ -1,7 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import java.util.Map;
-
 /**
  * Created by kileha3 on 09/05/2017.
  */
