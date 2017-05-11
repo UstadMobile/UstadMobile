@@ -103,7 +103,7 @@ public abstract class TestContainerController extends TestCase  {
         
         //TODO: Update me for the new ViewFirst model
 //        final Hashtable loadedVals = new Hashtable();
-//        final Object context = UMContextGetter.getContext(this);
+//        final Object context = UMContextGetter.getTargetContext(this);
 //        final String acquireOPDSURL = UMFileUtil.joinPaths(new String[] {
 //            httpRoot, "acquire.opds"});
 //        

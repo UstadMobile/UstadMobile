@@ -232,7 +232,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
             tabTitleView.setTextColor(
                 getResources().getColorStateList(R.color.tabselector));
-            //ContextCompat.getColorStateList(getContext(), R.color.tabselector)
+            //ContextCompat.getColorStateList(getTargetContext(), R.color.tabselector)
             tabTitleView.setTextSize(14);
         }
 
