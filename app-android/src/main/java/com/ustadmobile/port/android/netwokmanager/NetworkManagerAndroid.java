@@ -79,11 +79,11 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private static final String DEFAULT_BLUETOOTH_ADDRESS="02:00:00:00:00:00";
 
-    public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetooth_address";
+    public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetoothMac";
 
-    public static final String DEVICE_IP_ADDRESS = "device_ip_address";
+    public static final String DEVICE_IP_ADDRESS = "ipAddress";
 
-    public static final String SERVER_PORT_NUMBER = "server_port_number";
+    public static final String SERVER_PORT_NUMBER = "port";
 
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
 
@@ -118,6 +118,10 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private ConnectivityManager connectivityManager;
 
+    public NetworkManagerAndroid(Object context) {
+        super(context);
+    }
+
 
     @Override
     public void init(Object context, String serviceName) {
@@ -126,7 +130,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         networkService = getService(context);
         mContext= networkService.getApplicationContext();
         wifiDirectHandler= networkService.getWifiDirectHandlerAPI();
-        bluetoothServerAndroid=new BluetoothServerAndroid((Context) context);
+        bluetoothServerAndroid=new BluetoothServerAndroid(this);
 
         wifiManager= (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         connectivityManager= (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -158,7 +162,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
                     DnsSdTxtRecord txtRecord = networkService.getWifiDirectHandlerAPI().
                             getDnsSdTxtRecordMap().get(deviceMac);
-                    String fullDomain = txtRecord.getFullDomain();
+                    String fullDomain =txtRecord.getFullDomain();
                     String ustadFullDomain = currentServiceName + "." + ServiceType.PRESENCE_TCP + ".local.";
 
                     if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
@@ -174,7 +178,6 @@ public class NetworkManagerAndroid extends NetworkManager{
                                 get(DEVICE_BLUETOOTH_ADDRESS).toString());
                         networkNode.setDeviceIpAddress(txtRecord.getRecord().get(DEVICE_IP_ADDRESS).toString());
                         networkNode.setDeviceWifiDirectMacAddress(deviceMac);
-                        networkNode.setPort(Integer.parseInt(txtRecord.getRecord().get(SERVER_PORT_NUMBER).toString()));
 
                         if (nodeIndex < 0) {
                             getKnownNodes().add(networkNode);
@@ -209,10 +212,11 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public void startSuperNode() {
        if(wifiDirectHandler!=null){
+
            wifiDirectHandler.stopServiceDiscovery();
-           wifiDirectHandler.setStopDiscoveryAfterGroupFormed(true);
-           wifiDirectHandler.addLocalService(currentServiceName, localServiceData(),null);
-           Log.d(TAG,"Service Information: "+localServiceData().toString());
+           wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
+
+           wifiDirectHandler.addLocalService(currentServiceName, localService());
            isSuperNodeEnabled=true;
            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
        }
@@ -228,19 +232,6 @@ public class NetworkManagerAndroid extends NetworkManager{
             wifiDirectHandler.continuouslyDiscoverServices();
             isSuperNodeEnabled=false;
         }
-    }
-
-    private  HashMap<String, String> localServiceData(){
-        HashMap<String, String> record = new HashMap<>();
-        record.put(SERVICE_DEVICE_AVAILABILITY, "available");
-        record.put(DEVICE_BLUETOOTH_ADDRESS, getBluetoothMacAddress());
-        record.put(SERVER_PORT_NUMBER,"80001");
-        if(connectivityManager.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI){
-            record.put(DEVICE_IP_ADDRESS, getIpAddress());
-        }else {
-            record.put(DEVICE_IP_ADDRESS, null);
-        }
-        return record;
     }
 
     @Override
@@ -394,6 +385,20 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
 
+    private HashMap<String,String> localService(){
+        boolean isConnected=connectivityManager.getActiveNetworkInfo().getType()
+                == ConnectivityManager.TYPE_WIFI;
+        String deviceMacAddress=getBluetoothMacAddress();
+        String deviceIpAddress=isConnected ? getIpAddress():"";
+        HashMap<String,String> record=new HashMap<>();
+        record.put(SERVICE_DEVICE_AVAILABILITY,"available");
+        record.put(SERVER_PORT_NUMBER,"8001");
+        record.put(DEVICE_BLUETOOTH_ADDRESS, deviceMacAddress);
+        record.put(DEVICE_IP_ADDRESS, deviceIpAddress);
+        return record;
+    }
+
+
     public void setDownloadSource(int source){
         this.downloadSource=source;
     }
@@ -476,6 +481,10 @@ public class NetworkManagerAndroid extends NetworkManager{
             bluetoothServerAndroid.stop();
         }
 
+    }
+
+    public Context getContext(){
+        return getService(mContext).getApplicationContext();
     }
 
     public String convertListIdsToString(List<String> fileIds){

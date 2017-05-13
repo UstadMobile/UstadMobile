@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -28,18 +29,13 @@ public class BluetoothServerAndroid extends BluetoothServer {
     private static final String NAME_INSECURE = "BluetoothChatInsecure";
     private static final UUID UUID_INSECURE =
             UUID.fromString("ad9e3a05-7d80-4a12-b50b-91c72d442683");
-    private int bluetoothState;
 
     private BluetoothListeningThread mInsecureBluetoothListeningThread;
-    private InputStream inputStream;
-    private OutputStream outputStream;
-    private Context mContext;
 
 
-    BluetoothServerAndroid(Context context) {
-        this.mContext=context;
+    BluetoothServerAndroid(NetworkManager networkManager) {
+        super(networkManager);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        bluetoothState = BLUETOOTH_STATE_NONE;
     }
 
     @Override
@@ -58,7 +54,6 @@ public class BluetoothServerAndroid extends BluetoothServer {
             mInsecureBluetoothListeningThread = null;
         }
 
-        bluetoothState=BLUETOOTH_STATE_NONE;
     }
 
 

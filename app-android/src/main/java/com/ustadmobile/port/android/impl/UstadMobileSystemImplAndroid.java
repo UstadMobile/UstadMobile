@@ -244,7 +244,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         queueStatusListeners = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
-        p2pManager = new NetworkManagerAndroid();
+        p2pManager = new NetworkManagerAndroid(this);
         p2pManager.setServiceConnectionMap(p2pServiceConnections);
     }
 
