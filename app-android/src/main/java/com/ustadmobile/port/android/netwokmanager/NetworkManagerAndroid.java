@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
@@ -34,7 +33,6 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -118,10 +116,6 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private ConnectivityManager connectivityManager;
 
-    public NetworkManagerAndroid(Object context) {
-        super(context);
-    }
-
 
     @Override
     public void init(Object context, String serviceName) {
@@ -158,7 +152,6 @@ public class NetworkManagerAndroid extends NetworkManager{
             switch (intent.getAction()){
 
                 case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
-
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
                     DnsSdTxtRecord txtRecord = networkService.getWifiDirectHandlerAPI().
                             getDnsSdTxtRecordMap().get(deviceMac);
@@ -166,24 +159,12 @@ public class NetworkManagerAndroid extends NetworkManager{
                     String ustadFullDomain = currentServiceName + "." + ServiceType.PRESENCE_TCP + ".local.";
 
                     if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
-
                         NetworkNode networkNode=new NetworkNode(deviceMac);
-
-                        int nodeIndex = getKnownNodes().indexOf(networkNode);
-                        if (nodeIndex >= 0) {
-                            networkNode = getKnownNodes().get(nodeIndex);
-                        }
-
                         networkNode.setDeviceBluetoothMacAddress(txtRecord.getRecord().
                                 get(DEVICE_BLUETOOTH_ADDRESS).toString());
-                        networkNode.setDeviceIpAddress(txtRecord.getRecord().get(DEVICE_IP_ADDRESS).toString());
                         networkNode.setDeviceWifiDirectMacAddress(deviceMac);
-
-                        if (nodeIndex < 0) {
-                            getKnownNodes().add(networkNode);
-                            handleNodeDiscovered(networkNode);
-
-                        }
+                        networkNode.setDeviceIpAddress(txtRecord.getRecord().get(DEVICE_IP_ADDRESS).toString());
+                        handleNodeDiscovered(networkNode);
                     }
 
                     break;
@@ -215,9 +196,9 @@ public class NetworkManagerAndroid extends NetworkManager{
 
            wifiDirectHandler.stopServiceDiscovery();
            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-
            wifiDirectHandler.addLocalService(currentServiceName, localService());
            isSuperNodeEnabled=true;
+           bluetoothServerAndroid.start();
            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
        }
     }
@@ -242,7 +223,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public boolean isBluetoothEnabled() {
-        return bluetoothServerAndroid != null && bluetoothServerAndroid.isEnabled();
+        return BluetoothAdapter.getDefaultAdapter().isEnabled();
     }
 
     @Override
@@ -255,21 +236,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         return wifiManager.isWifiEnabled();
     }
 
-    @Override
-    public NetworkTask createFileStatusTask(List<String> entryIds,Object context) {
-        EntryStatusTask task=new EntryStatusTask(entryIds);
-        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
-        task.start();
-        return task;
-    }
-
-    @Override
-    public NetworkTask createAcquisitionTask(UstadJSOPDSFeed feed,Object context) {
-        AcquisitionTask task= new DownloadManagerAndroid(feed, this, networkService.getApplicationContext());
-        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
-        queueTask(task);
-        return task;
-    }
 
 
     @Override
@@ -278,7 +244,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         BluetoothDevice bluetoothDevice=adapter.getRemoteDevice(deviceAddress);
         try{
             final BluetoothSocket bluetoothSocket=bluetoothDevice.
-                    createInsecureRfcommSocketToServiceRecord(bluetoothServerAndroid.getInsecureUUID());
+                    createInsecureRfcommSocketToServiceRecord(BluetoothServer.SERVICE_UUID);
             bluetoothSocket.connect();
             new Thread(new Runnable() {
                 @Override
@@ -386,7 +352,8 @@ public class NetworkManagerAndroid extends NetworkManager{
 
 
     private HashMap<String,String> localService(){
-        boolean isConnected=connectivityManager.getActiveNetworkInfo().getType()
+        boolean isConnected= connectivityManager!=null &&
+                connectivityManager.getActiveNetworkInfo().getType()
                 == ConnectivityManager.TYPE_WIFI;
         String deviceMacAddress=getBluetoothMacAddress();
         String deviceIpAddress=isConnected ? getIpAddress():"";
@@ -423,11 +390,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     public String getBluetoothMacAddress(){
 
-        if (bluetoothServerAndroid.getBluetoothAdapter() == null) {
-            Log.d(WifiDirectHandler.TAG, "device does not support bluetooth");
-            return null;
-        }
-        String address = bluetoothServerAndroid.getBluetoothAdapter().getAddress();
+        String address = BluetoothAdapter.getDefaultAdapter().getAddress();
         if (address.equals(DEFAULT_BLUETOOTH_ADDRESS)) {
             try {
                 ContentResolver mContentResolver = mContext.getApplicationContext().getContentResolver();

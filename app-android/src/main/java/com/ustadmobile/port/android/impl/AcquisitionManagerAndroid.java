@@ -68,7 +68,7 @@ public class AcquisitionManagerAndroid extends AcquisitionManager {
 
     @Override
     public void acquireCatalogEntries(UstadJSOPDSFeed acquireFeed, Object context) {
-        managerAndroid.createAcquisitionTask(acquireFeed,context);
+        //managerAndroid.createAcquisitionTask(acquireFeed,context);
     }
 
     @Override

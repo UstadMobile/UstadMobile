@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.netwokmanager;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -217,7 +216,7 @@ public class DownloadManagerAndroid extends AcquisitionTask implements Bluetooth
 
     private void setNotificationTitleMessage(){
         notificationTitle=getFeed().entries[currentEntryIndex].title;
-        notificationMessage= managerAndroid.getAcquisitionTaskQueue().size()>1
+        notificationMessage= getFeed().entries.length > 1
                 ? "Downloading "+((currentEntryIndex+1)/getFeed().entries.length)+" files"
                 : "Download in progress";
     }

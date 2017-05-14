@@ -21,12 +21,13 @@ import java.util.ArrayList;
 public class BluetoothServerTestSe implements BluetoothConnectionHandler {
 
     private boolean connectionCalled = false;
+    private static final String ENTRY_ID="31daeq7-617d-402e-a0b0-dba52ef21911";
 
     @Test
     public void testEntryStatus() throws Exception {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         ArrayList<String> entryIds = new ArrayList<>();
-        entryIds.add("someid");
+        entryIds.add(ENTRY_ID);
         manager.requestFileStatus(entryIds, manager.getContext());
         try { Thread.sleep(240000);}
         catch(InterruptedException e) {}
@@ -43,7 +44,7 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
         connectionCalled = false;
 
 
-        manager.connectBluetooth(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE +":00:ff", this);
+        manager.connectBluetooth(manager.getKnownNodes().get(0).getDeviceBluetoothMacAddress(), this);
         try { Thread.sleep(5000); }
         catch(InterruptedException e) {}
         Assert.assertTrue("Device not around not connected", !connectionCalled);

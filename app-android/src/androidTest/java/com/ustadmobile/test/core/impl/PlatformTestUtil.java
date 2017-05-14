@@ -1,6 +1,8 @@
 package com.ustadmobile.test.core.impl;
 
 
+import android.support.test.InstrumentationRegistry;
+
 import com.ustadmobile.test.sharedse.impl.TestContext;
 
 
@@ -15,11 +17,11 @@ public class PlatformTestUtil {
     static TestContext testContext = new TestContext();
 
     public static Object getTargetContext() {
-        return testContext;
+        return InstrumentationRegistry.getTargetContext();
     }
 
     public static Object getTestContext() {
-        return new Object();
+        return InstrumentationRegistry.getContext();
     }
 
 }

@@ -43,6 +43,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      * Start the download task
      */
     public synchronized void start() {
+        //first thing - find out which nodes, if any, have the first entry we are looking for
+
+
         //select a node here
         String bluetoothNodeAddr = "something";
         networkManager.connectBluetooth(bluetoothNodeAddr, this);

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.UUID;
 
 /**
  * Created by kileha3 on 09/05/2017.
@@ -21,6 +22,9 @@ public abstract class BluetoothServer {
     public static final int BLUETOOTH_STATE_CONNECTED=2;
     public static final int BLUETOOTH_STATE_FAILED =0;
 
+    public static final UUID SERVICE_UUID = UUID.fromString("ad9e3a05-7d80-4a12-b50b-91c72d442683");
+
+    public static final String SERVICE_NAME = "UstadMobileBT";
 
     /**
      * Entry status command. The client sends one line commands. For status the command is STATUS

@@ -78,6 +78,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public List<String> requestFileStatus(List<String> entryIds,Object mContext){
         EntryStatusTask task = new EntryStatusTask(entryIds);
+        task.setTaskType(QUEUE_ENTRY_STATUS);
         queueTask(task);
         return entryIds;
     }
@@ -91,7 +92,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public NetworkTask queueTask(NetworkTask task){
         tasksQueues[task.getQueueId()].add(task);
-        checkTaskQueue(task.getQueueId());
+        checkTaskQueue(task.getTaskType());
 
         return task;
     }
@@ -106,6 +107,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     }
 
     public void handleNodeDiscovered(NetworkNode node){
+        //TODO: Avoid registering a duplicate node
         knownNetworkNodes.add(node);
     }
 

@@ -1,20 +1,13 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Vector;
 
 /**

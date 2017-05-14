@@ -99,7 +99,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             List<String> entries=new ArrayList<>();
             entries.add(entryId);
 
-            managerAndroid.createFileStatusTask(entries,this);
+            managerAndroid.requestFileStatus(entries,this);
 
 
 
