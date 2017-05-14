@@ -3,6 +3,7 @@ package com.ustadmobile.test.sharedse.network;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -22,6 +23,9 @@ public class MockRemoteDevice {
 
     protected MockBluetoothServer mockBluetoothServer;
 
+    private RemoteTestServerHttpd mockRemoteDeviceControlHttpd;
+
+
     public MockRemoteDevice(String bluetoothAddr, Object context) {
         this.context = context;
         this.bluetoothAddr = bluetoothAddr;
@@ -29,6 +33,27 @@ public class MockRemoteDevice {
         networkManager.init(context, TestConstants.TEST_NETWORK_SERVICE_NAME);
         mockBluetoothServer = new MockBluetoothServer(networkManager);
     }
+
+
+    public void startTestControlServer() {
+        mockRemoteDeviceControlHttpd = new RemoteTestServerHttpd(0, getNetworkManager());
+        try {
+            mockRemoteDeviceControlHttpd.start();
+        }catch(IOException e) {
+            throw  new RuntimeException(e);
+        }
+    }
+
+    public int getTestControlServerPort() {
+        return mockRemoteDeviceControlHttpd.getListeningPort();
+    }
+
+    public void stopTestControlServer() {
+        if(mockRemoteDeviceControlHttpd != null) {
+            mockRemoteDeviceControlHttpd.stop();
+        }
+    }
+
 
 
     class MockBluetoothServer extends BluetoothServer implements Runnable {
@@ -88,6 +113,10 @@ public class MockRemoteDevice {
 
     public String getBluetoothAddr() {
         return bluetoothAddr;
+    }
+
+    public MockNetworkManager getNetworkManager() {
+        return networkManager;
     }
 
 }

@@ -22,7 +22,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     private int currentNode;
 
-     public EntryStatusTask(List<String> fileIds){
+    public EntryStatusTask(List<String> fileIds){
         this.fileIds=fileIds;
     }
     @Override
@@ -38,14 +38,12 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     }
 
     public void connectNextNode() {
-
         if(currentNode < knownNodes.size()) {
             String bluetoothAddr = knownNodes.get(currentNode).getDeviceBluetoothMacAddress();
             networkManager.connectBluetooth(bluetoothAddr, this);
         }else {
             networkManager.handleTaskCompleted(this);
         }
-
     }
 
 
