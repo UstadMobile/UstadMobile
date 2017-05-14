@@ -1,7 +1,11 @@
 package com.ustadmobile.test.core.impl;
 
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.test.port.sharedse.impl.UstadMobileSystemImplTestSE;
 import com.ustadmobile.test.sharedse.impl.TestContext;
+import com.ustadmobile.test.sharedse.network.MockNetworkManager;
 
 import java.util.Properties;
 
@@ -21,6 +25,11 @@ public class PlatformTestUtil {
 
     public static Object getTestContext() {
         return new Object();
+    }
+
+    public static String getRemoteTestEndpoint() {
+        UstadMobileSystemImplTestSE implTestSE = (UstadMobileSystemImplTestSE)UstadMobileSystemImpl.getInstance();
+        return "http://localhost:" + implTestSE.getMockTestDriver().getTestControlServerPort() + "/";
     }
 
 }

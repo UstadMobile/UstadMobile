@@ -7,6 +7,8 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
+import com.ustadmobile.test.sharedse.impl.TestContext;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -31,7 +33,19 @@ public class MockNetworkManager extends NetworkManager {
     public MockNetworkManager(String bluetoothAddr) {
         mockRemoteDevices = new Vector<>();
         this.mockBluetoothAddr = bluetoothAddr;
+
+
     }
+
+    public MockRemoteDevice addMockTestDriver(String bluetoothAddr) {
+        Object mockRemoteContext = new TestContext();
+        MockRemoteDevice remoteDevice = addMockRemoteDevice(bluetoothAddr, mockRemoteContext);
+        remoteDevice.startTestControlServer();
+
+        return remoteDevice;
+    }
+
+
 
 
     @Override
@@ -115,16 +129,9 @@ public class MockNetworkManager extends NetworkManager {
      * @param bluetoothAddr
      * @param context
      */
-    public void addMockRemoteDevice(String bluetoothAddr, Object context) {
+    public MockRemoteDevice addMockRemoteDevice(String bluetoothAddr, Object context) {
         MockRemoteDevice remoteDevice = new MockRemoteDevice(bluetoothAddr, context);
-        MockNetworkManager remoteNetworkManager = new MockNetworkManager(bluetoothAddr);
-        remoteNetworkManager.init(context, TestConstants.TEST_NETWORK_SERVICE_NAME);
         mockRemoteDevices.add(remoteDevice);
-        NetworkNode mockNode = new NetworkNode("wifidirectmac");
-        mockNode.setDeviceBluetoothMacAddress(bluetoothAddr);
-        handleNodeDiscovered(mockNode);
-
-
-
+        return remoteDevice;
     }
 }
