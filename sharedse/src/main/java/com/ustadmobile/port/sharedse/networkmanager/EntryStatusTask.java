@@ -30,7 +30,11 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         //THIS IS A SNAPSHOT: IT MIGHT CHANGE... HANDLE THIS SCENARIO
         knownNodes = networkManager.getKnownNodes();
         currentNode = 0;
-        connectNextNode();
+        new Thread(new Runnable() {
+            public void run() {
+                connectNextNode();
+            }
+        }).start();
     }
 
     public void connectNextNode() {
@@ -78,7 +82,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public int getQueueId() {
-        return 0;
+        return NetworkManager.QUEUE_ENTRY_STATUS;
     }
 
     @Override

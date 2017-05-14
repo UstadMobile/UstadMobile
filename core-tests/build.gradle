@@ -50,5 +50,8 @@ task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfi
     buildConfigField "int", "DEFAULT_NETWORK_TIMEOUT", project.ext.buildConfigProperties["test.remote_network_timeout"]
     buildConfigField "String", "REGISTER_URL", project.ext.buildConfigProperties["test.register_url"]
     buildConfigField "String", "TEST_REMOTE_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.remote_bluetooth_device"]
+    buildConfigField "String", "TEST_NETWORK_SERVICE_NAME", project.ext.buildConfigProperties['test.network_service_name']
+    buildConfigField "String", "TEST_MOCK_LOCAL_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.mock_local_bluetooth_device"]
 }
+
 compileJava.dependsOn(generateCoreTestConstantsBuildConfig)

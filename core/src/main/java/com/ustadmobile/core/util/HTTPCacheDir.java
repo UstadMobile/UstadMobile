@@ -23,7 +23,6 @@ import java.util.Vector;
     import org.json.*;
     import java.util.Iterator;
 
-import sun.security.provider.SHA;
 /* $endif$ */
 
 

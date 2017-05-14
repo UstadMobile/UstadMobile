@@ -1,6 +1,7 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +18,8 @@ public class MockBluetoothServer extends BluetoothServer {
 
     private HashMap<String, String> availableEntries;
 
-    public MockBluetoothServer() {
+    public MockBluetoothServer(NetworkManager manager) {
+        super(manager);
         availableEntries = new HashMap<>();
     }
 

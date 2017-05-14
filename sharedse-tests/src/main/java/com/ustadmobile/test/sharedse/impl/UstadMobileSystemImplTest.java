@@ -17,6 +17,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * Created by mike on 4/25/17.
@@ -177,17 +180,22 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public String getAppPref(String key, Object context) {
-        return null;
+        return ((TestContext)context).getAppProps().getProperty(key);
     }
 
     @Override
     public String[] getAppPrefKeyList(Object context) {
-        return new String[0];
+        Properties appProps = ((TestContext)context).getAppProps();
+        Set keySet = appProps.keySet();
+        String[] propNames = new String[keySet.size()];
+        keySet.toArray(propNames);
+
+         return propNames;
     }
 
     @Override
     public void setAppPref(String key, String value, Object context) {
-
+        ((TestContext)context).getAppProps().setProperty(key, value);
     }
 
     @Override

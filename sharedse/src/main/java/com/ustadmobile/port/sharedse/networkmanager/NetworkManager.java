@@ -28,21 +28,18 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     private Vector<NetworkNode> knownNetworkNodes=new Vector<>();
 
-    private Vector<AcquisitionTask> acquisitionTaskQueue=new Vector<>();
+    private Vector<NetworkTask>[] tasksQueues = new Vector[] {
+        new Vector<>(), new Vector<>()
+    };
 
-    private Vector<EntryStatusTask> statusTaskQueue=new Vector<>();
 
-    private Vector<NetworkManagerListener> networkManagerListeners=new Vector<>();
+    private Vector<NetworkManagerListener> networkManagerListeners = new Vector<>();
 
     private Map<String,List<EntryCheckResponse>> entryResponses =new HashMap<>();
 
+    private NetworkTask[] currentTasks = new NetworkTask[2];
 
-    private EntryStatusTask currentEntryStatusTask;
-
-    private AcquisitionTask currentEntryAcquisitionTask;
-
-    public NetworkManager(Object context) {
-        this.mContext = context;
+    public NetworkManager() {
     }
 
 
@@ -52,7 +49,11 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public abstract boolean isSuperNodeEnabled();
 
-    public abstract void init(Object mContext,String serviceName);
+    public void init(Object mContext,String serviceName) {
+        this.mContext = mContext;
+
+
+    }
 
     public  abstract boolean isBluetoothEnabled();
 
@@ -76,62 +77,31 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public abstract boolean isWiFiEnabled();
 
     public List<String> requestFileStatus(List<String> entryIds,Object mContext){
-        createFileStatusTask(entryIds,mContext);
+        EntryStatusTask task = new EntryStatusTask(entryIds);
+        queueTask(task);
         return entryIds;
     }
 
 
     public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext){
-        createAcquisitionTask(feed,mContext);
+
         return feed;
     }
 
 
-    public abstract NetworkTask createFileStatusTask(List<String> entryIds,Object mContext);
-
-    public abstract NetworkTask createAcquisitionTask(UstadJSOPDSFeed feed,Object mContext);
-
-
-
     public NetworkTask queueTask(NetworkTask task){
-
-        if(task.getTaskType()==QUEUE_ENTRY_ACQUISITION){
-
-            AcquisitionTask acquisitionTask=(AcquisitionTask)task;
-            if(!acquisitionTaskQueue.contains(acquisitionTask)){
-                acquisitionTaskQueue.add(acquisitionTask);
-            }
-
-            if(currentEntryAcquisitionTask==null || acquisitionTaskQueue.size()==1){
-                checkTaskQueue(acquisitionTask.getTaskType());
-            }
-
-        }else if(task.getTaskType()==QUEUE_ENTRY_STATUS){
-            EntryStatusTask entryStatusTask=(EntryStatusTask)task;
-            statusTaskQueue.add(entryStatusTask);
-        }
+        tasksQueues[task.getQueueId()].add(task);
+        checkTaskQueue(task.getQueueId());
 
         return task;
     }
 
     public synchronized void checkTaskQueue(int queueType){
-
-        if(queueType==QUEUE_ENTRY_ACQUISITION){
-
-            if(!acquisitionTaskQueue.isEmpty()){
-                currentEntryAcquisitionTask =acquisitionTaskQueue.remove(0);
-                currentEntryAcquisitionTask.setNetworkManager(this);
-                currentEntryAcquisitionTask.setNetworkTaskListener(this);
-                currentEntryAcquisitionTask.start();
-            }
-        }else if(queueType==QUEUE_ENTRY_STATUS){
-
-           if(!statusTaskQueue.isEmpty()){
-               currentEntryStatusTask =statusTaskQueue.remove(0);
-               currentEntryStatusTask.setNetworkManager(this);
-               currentEntryStatusTask.setNetworkTaskListener(this);
-               currentEntryStatusTask.start();
-           }
+        if(!tasksQueues[queueType].isEmpty() && currentTasks[queueType] == null) {
+            currentTasks[queueType] = tasksQueues[queueType].get(0);
+            currentTasks[queueType].setNetworkManager(this);
+            currentTasks[queueType].setNetworkTaskListener(this);
+            currentTasks[queueType].start();
         }
     }
 
@@ -161,22 +131,11 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     @Override
     public void handleTaskCompleted(NetworkTask task) {
-
-        if(task.getTaskType()==QUEUE_ENTRY_ACQUISITION){
-
-            if(task!=currentEntryAcquisitionTask){
-                return;
-            }
-            currentEntryAcquisitionTask=null;
-
-        }else if(task.getTaskType()==QUEUE_ENTRY_STATUS){
-
-            if(task!=currentEntryStatusTask){
-                return;
-            }
+        if(task == currentTasks[task.getQueueId()]) {
+            //otherwise - that'd be weird...
+            currentTasks[task.getQueueId()] = null;
+            checkTaskQueue(task.getQueueId());
         }
-
-        checkTaskQueue(task.getTaskType());
     }
 
     public List<NetworkNode> getKnownNodes() {
@@ -185,10 +144,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public Map<String,List<EntryCheckResponse>> getEntryResponses(){
         return entryResponses;
-    }
-
-    public Vector<AcquisitionTask> getAcquisitionTaskQueue(){
-        return acquisitionTaskQueue;
     }
 
     public Object getContext() {

@@ -1,9 +1,12 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.BluetoothServerTestSe;
+import com.ustadmobile.test.sharedse.impl.TestContext;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 /**
  * Created by kileha3 on 10/05/2017.
@@ -11,10 +14,11 @@ import org.junit.Before;
 
 public class BluetoothServerTestRun extends BluetoothServerTestSe {
 
-    @Before
-    public void mockRemoteDevice() {
+    @BeforeClass
+    public static void mockRemoteDevice() {
         MockNetworkManager networkManager = (MockNetworkManager)UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        networkManager.setMockBluetoothServer(BluetoothServerTestSe.REMOTE_BLUETOOTH_MAC, new MockBluetoothServer());
+        TestContext mockRemoteContext = new TestContext();
+        networkManager.addMockRemoteDevice(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE, mockRemoteContext);
     }
 
 }

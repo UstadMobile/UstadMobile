@@ -16,8 +16,10 @@ public class SharedSeTestSuiteRun extends SharedSeTestSuite{
 
     @BeforeClass
     public static void setupMockNetwork() {
+        /*
         MockNetworkManager testNetworkManager = (MockNetworkManager)UstadMobileSystemImplSE.getInstance().getNetworkManager();
         testNetworkManager.setMockBluetoothServer(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
             new MockBluetoothServer());
+        */
     }
 }
