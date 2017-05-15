@@ -49,8 +49,7 @@
             android:label="@string/title_activity_catalog"
             android:theme="@style/Theme.UstadTheme" />
 
-
-        <service android:name="com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid"/>
+        <service android:name="com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid" />
         <service
             android:name="com.ustadmobile.port.android.impl.http.HTTPService"
             android:enabled="true"
@@ -78,9 +77,8 @@
             android:theme="@style/Theme.UstadTheme" />
         <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2" />
         <activity android:name="com.ustadmobile.port.android.view.AboutActivity" />
-        <activity android:name="com.ustadmobile.port.android.view.CatalogEntryActivity"/>
-        <activity android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"/>
+        <activity android:name="com.ustadmobile.port.android.view.CatalogEntryActivity" />
+        <activity android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity" />
     </application>
-
 
 </manifest>

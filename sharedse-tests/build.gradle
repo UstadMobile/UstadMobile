@@ -8,5 +8,10 @@ dependencies {
     compile 'junit:junit:4.12'
 }
 
+
+jar {
+    exclude("com/ustadmobile/test/core/impl/PlatformTestUtil.class")
+}
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"

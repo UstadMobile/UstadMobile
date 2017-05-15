@@ -1,6 +1,5 @@
 package com.ustadmobile.test.sharedse.http;
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import java.util.List;
