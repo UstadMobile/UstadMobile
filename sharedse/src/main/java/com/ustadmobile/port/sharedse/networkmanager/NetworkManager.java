@@ -20,6 +20,10 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final int NOTIFICATION_TYPE_ACQUISITION=1;
     public BluetoothServer bluetoothServer;
 
+    public static final String SD_TXT_KEY_IP_ADDR = "a";
+
+    public static final String SD_TXT_KEY_BT_MAC = "b";
+
     private Object mContext;
 
     private final Object bluetoothLock=new Object();
@@ -106,10 +110,50 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         }
     }
 
-    public void handleNodeDiscovered(NetworkNode node){
-        //TODO: Avoid registering a duplicate node
-        knownNetworkNodes.add(node);
+    protected void handleWifiDirectSdTxtRecordsAvailable(String serviceName, String senderMacAddr, HashMap<String, String> txtRecords) {
+        String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
+        String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
+
+        NetworkNode node = null;
+        boolean newNode = true;
+        if(ipAddr != null) {
+            node = getNodeByIpAddress(ipAddr);
+            newNode = (node == null);
+        }
+
+
+        if(node == null) {
+            node = new NetworkNode(senderMacAddr);
+            node.setDeviceIpAddress(ipAddr);
+        }
+
+        node.setDeviceBluetoothMacAddress(btAddr);
+        node.setDeviceWifiDirectMacAddress(senderMacAddr);
+
+        if(newNode)
+            knownNetworkNodes.add(node);
     }
+
+    /**
+     * Get a known network node by IP address
+     *
+     * @param ipAddr
+     * @return
+     */
+    public NetworkNode getNodeByIpAddress(String ipAddr) {
+        synchronized (knownNetworkNodes) {
+            String nodeIp;
+            for(NetworkNode node : knownNetworkNodes) {
+                nodeIp = node.getDeviceIpAddress();
+                if(nodeIp != null && nodeIp.equals(ipAddr))
+                    return node;
+            }
+        }
+
+        return null;
+    }
+
+
 
     public void addNetworkManagerListener(NetworkManagerListener listener){
         networkManagerListeners.add(listener);
