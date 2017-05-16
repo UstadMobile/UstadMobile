@@ -5,6 +5,8 @@ import android.support.test.InstrumentationRegistry;
 
 import com.ustadmobile.test.sharedse.impl.TestContext;
 
+import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER;
+
 
 /**
  * TestUtil is designed to abstract away the differences between conducting testing on "smart"
@@ -22,6 +24,10 @@ public class PlatformTestUtil {
 
     public static Object getTestContext() {
         return InstrumentationRegistry.getContext();
+    }
+
+    public static String getRemoteTestEndpoint() {
+        return TEST_REMOTE_SLAVE_SERVER;
     }
 
 }

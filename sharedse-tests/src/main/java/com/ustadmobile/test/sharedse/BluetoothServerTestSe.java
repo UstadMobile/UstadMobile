@@ -28,10 +28,10 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
 
     @Test
     public void testEntryStatus() throws Exception {
-        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 
         //enable supernode mode on the remote test device
-        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
+        String enableNodeUrl = "http://"+PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 

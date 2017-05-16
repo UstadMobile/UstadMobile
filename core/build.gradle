@@ -124,6 +124,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     buildConfigField "String", "DEFAULT_PREFERRED_ACQUISITION_FORMATS", project.ext.buildConfigProperties["appPreferredAcquisitionFormats"]
     buildConfigField "int", "ACQUISITION_SELECT_WEIGHT_LANGUAGE", project.ext.buildConfigProperties['appAcquisitionLanguagePrefWeight']
     buildConfigField "int", "ACQUISITION_SELECT_WEIGHT_MIMETYPE", project.ext.buildConfigProperties['appAcquisitionMimeTypeWeight']
+    buildConfigField "String", "NETWORK_SERVICE_NAME", project.ext.buildConfigProperties["appNetworkServiceName"]
 }
 compileJava.dependsOn(generateCoreBuildConfig)
 

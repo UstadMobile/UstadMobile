@@ -3,19 +3,24 @@ package com.ustadmobile.port.android.netwokmanager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
+import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
+import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.SERVICE_NAME;
 
 
@@ -23,8 +28,7 @@ public class NetworkServiceAndroid extends Service{
 
     private WifiDirectHandler wifiDirectHandler;
     private final IBinder mBinder = new LocalServiceBinder();
-    private NetworkManagerAndroid p2pManager;
-    private String serviceName=null;
+    private NetworkManagerAndroid networkManagerAndroid;
 
 
     public NetworkServiceAndroid(){
@@ -37,6 +41,8 @@ public class NetworkServiceAndroid extends Service{
         super.onCreate();
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
         bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
+        networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
+        networkManagerAndroid.init(NetworkServiceAndroid.this);
     }
 
 
@@ -44,9 +50,7 @@ public class NetworkServiceAndroid extends Service{
 
     @Override
     public void onDestroy() {
-        if(p2pManager != null) {
-            p2pManager.onDestroy();
-        }
+        networkManagerAndroid.onDestroy();
 
         if(wifiDirectHandler!=null){
             wifiDirectHandler.removeGroup();
@@ -68,13 +72,6 @@ public class NetworkServiceAndroid extends Service{
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Bundle extra=intent.getExtras();
-        if(extra!=null && extra.containsKey(EXTRA_SERVICE_NAME)){
-            serviceName=intent.getStringExtra(EXTRA_SERVICE_NAME);
-        }else{
-            serviceName=SERVICE_NAME;
-        }
-
         return mBinder;
     }
 
@@ -83,11 +80,13 @@ public class NetworkServiceAndroid extends Service{
     ServiceConnection wifiP2PServiceConnection=new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            p2pManager = (NetworkManagerAndroid) UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-            p2pManager.init(NetworkServiceAndroid.this,serviceName);
+
+            boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
+                    PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));
+            networkManagerAndroid.setSuperNodeEnabled(NetworkServiceAndroid.this.getApplicationContext(),
+                    isSuperNodeEnabled);
         }
 
 

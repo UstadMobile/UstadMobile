@@ -2,6 +2,9 @@ package com.ustadmobile.test.sharedse.http;
 
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 
@@ -27,11 +30,22 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
     public Response serve(IHTTPSession session) {
         Map<String, List<String>> decodedParams = decodeParameters(session.getQueryParameterString());
         String command = decodedParams.containsKey("cmd") ? decodedParams.get("cmd").get(0) : null;
-        if(CMD_SETSUPERNODE_ENABLED.equals(command)) {
-            boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
-            networkManager.setSuperNodeEnabled(networkManager.getContext(), enabled);
-            return newFixedLengthResponse("OK");
+        try {
+            if(CMD_SETSUPERNODE_ENABLED.equals(command)) {
+                boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
+                networkManager.setSuperNodeEnabled(networkManager.getContext(), enabled);
+                return newFixedLengthResponse("OK");
+            }
+        }catch(Exception e) {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            PrintWriter writer = new PrintWriter(new OutputStreamWriter(bout));
+            e.printStackTrace(writer);
+            writer.flush();
+            String exceptionMsg = e.toString()  + "" + new String(bout.toByteArray());
+            return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain",
+                    exceptionMsg);
         }
+
 
         return super.serve(session);
     }

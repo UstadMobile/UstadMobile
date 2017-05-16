@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
+
 /**
  * Created by kileha3 on 08/05/2017.
  */
@@ -53,10 +55,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public abstract boolean isSuperNodeEnabled();
 
-    public void init(Object mContext,String serviceName) {
+    public void init(Object mContext) {
         this.mContext = mContext;
-
-
     }
 
     public  abstract boolean isBluetoothEnabled();
@@ -110,28 +110,30 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         }
     }
 
-    protected void handleWifiDirectSdTxtRecordsAvailable(String serviceName, String senderMacAddr, HashMap<String, String> txtRecords) {
-        String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
-        String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
+    public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
+        if(serviceFullDomain.contains(NETWORK_SERVICE_NAME)){
+            String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
+            String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
 
-        NetworkNode node = null;
-        boolean newNode = true;
-        if(ipAddr != null) {
-            node = getNodeByIpAddress(ipAddr);
-            newNode = (node == null);
+            NetworkNode node = null;
+            boolean newNode = true;
+            if(ipAddr != null) {
+                node = getNodeByIpAddress(ipAddr);
+                newNode = (node == null);
+            }
+
+
+            if(node == null) {
+                node = new NetworkNode(senderMacAddr);
+                node.setDeviceIpAddress(ipAddr);
+            }
+
+            node.setDeviceBluetoothMacAddress(btAddr);
+            node.setDeviceWifiDirectMacAddress(senderMacAddr);
+
+            if(newNode)
+                knownNetworkNodes.add(node);
         }
-
-
-        if(node == null) {
-            node = new NetworkNode(senderMacAddr);
-            node.setDeviceIpAddress(ipAddr);
-        }
-
-        node.setDeviceBluetoothMacAddress(btAddr);
-        node.setDeviceWifiDirectMacAddress(senderMacAddr);
-
-        if(newNode)
-            knownNetworkNodes.add(node);
     }
 
     /**
@@ -153,6 +155,19 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         return null;
     }
 
+    public NetworkNode getNodeByBluetoothAddr(String bluetoothAddr) {
+        synchronized (knownNetworkNodes) {
+            String nodeBtAddr;
+            for(NetworkNode node : knownNetworkNodes) {
+                nodeBtAddr = node.getDeviceIpAddress();
+                if(nodeBtAddr != null && nodeBtAddr.equals(bluetoothAddr))
+                    return node;
+            }
+        }
+
+        return null;
+    }
+
 
 
     public void addNetworkManagerListener(NetworkManagerListener listener){
@@ -167,7 +182,9 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public abstract void connectBluetooth(String deviceAddress,BluetoothConnectionHandler handler);
 
-    public abstract void handleEntriesStatusUpdate(NetworkNode node, String fileIds[],boolean [] status);
+    public void handleEntriesStatusUpdate(NetworkNode node, String fileIds[],boolean [] status) {
+
+    }
 
     public abstract int addNotification(int notificationType,String title,String message);
 

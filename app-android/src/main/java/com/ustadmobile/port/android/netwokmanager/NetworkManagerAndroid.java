@@ -20,17 +20,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.EntryCheckResponse;
-import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -40,6 +37,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -91,14 +89,9 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private static final String SERVICE_DEVICE_AVAILABILITY = "available";
 
-
-    private static String currentServiceName;
-
     private boolean isSuperNodeEnabled=false;
 
     private BluetoothServerAndroid bluetoothServerAndroid;
-
-    private WifiDirectHandler wifiDirectHandler;
 
     private NotificationManager mNotifyManager;
 
@@ -110,24 +103,18 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private static final String serverNotificationMessage ="You can share files with other devices";
 
-    private Context mContext;
-
     private WifiManager wifiManager;
 
     private ConnectivityManager connectivityManager;
 
 
     @Override
-    public void init(Object context, String serviceName) {
-
-        currentServiceName=serviceName;
-        networkService = getService(context);
-        mContext= networkService.getApplicationContext();
-        wifiDirectHandler= networkService.getWifiDirectHandlerAPI();
+    public void init(Object context) {
+        networkService = (NetworkServiceAndroid)context;
         bluetoothServerAndroid=new BluetoothServerAndroid(this);
 
-        wifiManager= (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
-        connectivityManager= (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        connectivityManager= (ConnectivityManager) networkService.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         //listen for the intents
         IntentFilter filter = new IntentFilter();
@@ -137,41 +124,32 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
 
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
-        boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
-                PREF_KEY_SUPERNODE, "false", context));
-        setSuperNodeEnabled(context, isSuperNodeEnabled);
-
     }
 
-
+    /**
+     * Broadcast receiver that simply receives broadcasts and passes to the SharedSE network manager
+     */
     private BroadcastReceiver mBroadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            Toast.makeText(mContext,intent.getAction(),Toast.LENGTH_LONG).show();
+            Toast.makeText(networkService,intent.getAction(),Toast.LENGTH_LONG).show();
             switch (intent.getAction()){
 
                 case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
                     DnsSdTxtRecord txtRecord = networkService.getWifiDirectHandlerAPI().
                             getDnsSdTxtRecordMap().get(deviceMac);
-                    String fullDomain =txtRecord.getFullDomain();
-                    String ustadFullDomain = currentServiceName + "." + ServiceType.PRESENCE_TCP + ".local.";
-
-                    if (ustadFullDomain.equalsIgnoreCase(fullDomain)) {
-                        NetworkNode networkNode=new NetworkNode(deviceMac);
-                        networkNode.setDeviceBluetoothMacAddress(txtRecord.getRecord().
-                                get(DEVICE_BLUETOOTH_ADDRESS).toString());
-                        networkNode.setDeviceWifiDirectMacAddress(deviceMac);
-                        networkNode.setDeviceIpAddress(txtRecord.getRecord().get(DEVICE_IP_ADDRESS).toString());
-                        handleNodeDiscovered(networkNode);
-                    }
+                    handleWifiDirectSdTxtRecordsAvailable(txtRecord.getFullDomain(),deviceMac, (HashMap<String, String>) txtRecord.getRecord());
 
                     break;
             }
 
         }
     };
+
+
+
 
     public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
         this.serviceConnectionMap = serviceConnectionMap;
@@ -192,11 +170,11 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void startSuperNode() {
-       if(wifiDirectHandler!=null){
-
+       if(networkService.getWifiDirectHandlerAPI()!=null){
+           WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
            wifiDirectHandler.stopServiceDiscovery();
            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-           wifiDirectHandler.addLocalService(currentServiceName, localService());
+           wifiDirectHandler.addLocalService(CoreBuildConfig.NETWORK_SERVICE_NAME, localService());
            isSuperNodeEnabled=true;
            bluetoothServerAndroid.start();
            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
@@ -205,6 +183,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void stopSuperNode() {
+        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
         if(wifiDirectHandler!=null){
             if(mBuilder!=null && mNotifyManager!=null){
                 removeNotification(NOTIFICATION_TYPE_SERVER);
@@ -265,6 +244,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     }
 
+    /*
     @Override
     public void handleEntriesStatusUpdate(NetworkNode node, String[] fileIds, boolean[] status) {
 
@@ -281,13 +261,13 @@ public class NetworkManagerAndroid extends NetworkManager{
             responseList.add(checkResponse);
             getEntryResponses().put(fileIds[position],responseList);
         }
-    }
+    }*/
 
     @Override
     public int addNotification(int notificationType, String title, String message) {
 
-        mNotifyManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(mContext);
+        mNotifyManager = (NotificationManager) networkService.getSystemService(Context.NOTIFICATION_SERVICE);
+        mBuilder = new NotificationCompat.Builder(networkService);
         mBuilder.setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.launcher_icon);
@@ -323,18 +303,8 @@ public class NetworkManagerAndroid extends NetworkManager{
         mNotifyManager.cancel(notificationId);
     }
 
-    public NetworkServiceAndroid getService(Object context) {
 
-        if (context instanceof NetworkServiceAndroid) {
-            return (NetworkServiceAndroid) context;
-        } else {
-            UstadMobileSystemImplAndroid.BaseServiceConnection connection =
-                    (UstadMobileSystemImplAndroid.BaseServiceConnection) serviceConnectionMap.get((Context)context);
-            NetworkServiceAndroid.LocalServiceBinder binder = (NetworkServiceAndroid.LocalServiceBinder) connection.getBinder();
-            return binder.getService();
-        }
-    }
-
+    /*
     public EntryCheckResponse entryCheckResponse(String fileID){
         List<EntryCheckResponse> responses=getEntryResponses().get(fileID);
         if(responses!=null){
@@ -348,32 +318,24 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
 
         return null;
-    }
+    }*/
+
 
 
     private HashMap<String,String> localService(){
         boolean isConnected= connectivityManager!=null &&
                 connectivityManager.getActiveNetworkInfo().getType()
                 == ConnectivityManager.TYPE_WIFI;
-        String deviceMacAddress=getBluetoothMacAddress();
+        String deviceBluetoothMacAddress=getBluetoothMacAddress();
         String deviceIpAddress=isConnected ? getIpAddress():"";
         HashMap<String,String> record=new HashMap<>();
         record.put(SERVICE_DEVICE_AVAILABILITY,"available");
         record.put(SERVER_PORT_NUMBER,"8001");
-        record.put(DEVICE_BLUETOOTH_ADDRESS, deviceMacAddress);
+        record.put(DEVICE_BLUETOOTH_ADDRESS, deviceBluetoothMacAddress);
         record.put(DEVICE_IP_ADDRESS, deviceIpAddress);
         return record;
     }
 
-
-    public void setDownloadSource(int source){
-        this.downloadSource=source;
-    }
-
-
-    public int getDownloadSource(){
-        return this.downloadSource;
-    }
 
     public HashMap<String,Long> getEntryIdToDownloadIdMap(){
         return this.entryIdToDownloadIdMap;
@@ -393,7 +355,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         String address = BluetoothAdapter.getDefaultAdapter().getAddress();
         if (address.equals(DEFAULT_BLUETOOTH_ADDRESS)) {
             try {
-                ContentResolver mContentResolver = mContext.getApplicationContext().getContentResolver();
+                ContentResolver mContentResolver = networkService.getApplicationContext().getContentResolver();
                 address = Settings.Secure.getString(mContentResolver, DEVICE_BLUETOOTH_ADDRESS);
                 Log.d(WifiDirectHandler.TAG,"Bluetooth Address - Resolved: " + address);
 
@@ -447,25 +409,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     public Context getContext(){
-        return getService(mContext).getApplicationContext();
-    }
-
-    public String convertListIdsToString(List<String> fileIds){
-        return TextUtils.join(FILE_IDS_SEPARATOR, fileIds);
-    }
-
-    private List<String> convertStringIdsToList(String fileIds){
-        List<String> fileIdsList=new ArrayList<>();
-        Collections.addAll(fileIdsList, TextUtils.split(fileIds,FILE_IDS_SEPARATOR));
-        return fileIdsList;
-    }
-
-    protected boolean areOnTheSameNetwork(String serverAddress,String clientAddress){
-        String peerIPAddress[]=serverAddress.split("\\.");
-        String deviceIPAddress[]=clientAddress.split("\\.");
-
-        return peerIPAddress[0].equals(deviceIPAddress[0]) && peerIPAddress[1].equals(deviceIPAddress[1])
-                && peerIPAddress[2].equals(deviceIPAddress[2]);
+        return networkService.getApplicationContext();
     }
 
 }
