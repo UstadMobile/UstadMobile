@@ -11,7 +11,7 @@ import org.junit.runners.Suite;
 
 @Suite.SuiteClasses({
     BasicTest.class,
-    BluetoothTest.class
+    BluetoothTest.class,
 })
 public abstract class SharedSeTestSuite {
 }

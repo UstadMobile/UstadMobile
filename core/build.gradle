@@ -176,6 +176,7 @@ compileJava.dependsOn(prepareLocale)
  */
 task copyTestResources(type: Copy) {
     from "${projectDir}/src/test/resources"
+    from "${projectDir}/../core-tests/src/main/resources"
     into "${buildDir}/classes/test"
 }
 processTestResources.dependsOn copyTestResources

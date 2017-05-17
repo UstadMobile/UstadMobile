@@ -9,11 +9,11 @@ package com.ustadmobile.test.core.impl;
 public class PlatformTestUtil {
 
     public static Object getTargetContext() {
-        throw new RuntimeException("Must use implementation");
+        throw new RuntimeException("core PlatformTestUtil: Must use implementation");
     }
 
     public static Object getTestContext() {
-        throw new RuntimeException("Must use implementation");
+        throw new RuntimeException("core PlatformTestUtil: Must use implementation");
     }
 
 }
