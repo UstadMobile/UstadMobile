@@ -42,13 +42,18 @@ task startTestSlaveServer(type: Exec) {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
     def sdkPath = properties.getProperty('sdk.dir')
     def adb = sdkPath + "/platform-tools/adb"
-    commandLine "$adb", 'install', '-r', "$projectDir/build/outputs/apk/app-android-localconfig-debug-androidTest.apk"
-    commandLine "$adb",'shell','am','instrument','-w', '-r','-e','debug','false','-e','class com.ustadmobile.test.port.android.StartTestSlaveServer com.toughra.ustadmobile.test/android.support.test.runner.AndroidJUnitRunner'
+    commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'install', '-r', '-s', "$projectDir/build/outputs/apk/app-android-remotetestslave-debug.apk"
+    commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity','-a','android.intent.action.MAIN','-c','android.intent.category.LAUNCHER'
 }
 
-startServer.dependsOn(assembleAndroidTest)
+afterEvaluate {
+    startTestSlaveServer.dependsOn(assembleRemotetestslaveDebug)
+}
+
+
 
 android {
+
     signingConfigs {
         release {
             keyAlias keyStorePropertiesExists ? keystoreProperties['keyAlias'] : "default"
@@ -97,6 +102,12 @@ android {
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile"]
         }
+
+        remotetestslave {
+            applicationId "com.ustadmobile.testslave"
+            manifestPlaceholders = ["appName": "UM Test Server"]
+        }
+
     }
 
     buildTypes {
@@ -151,10 +162,14 @@ dependencies {
     project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
     compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
     compile "com.ustadmobile.nanolrs:nanolrs-android:$nanoLrsVersion"
+
+
+
     androidTestCompile project(":core-tests")
     androidTestCompile project(":sharedse-tests")
 
-
+    remotetestslaveCompile project(":core-tests")
+    remotetestslaveCompile project(":sharedse-tests")
     compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:cardview-v7:25.3.1'
