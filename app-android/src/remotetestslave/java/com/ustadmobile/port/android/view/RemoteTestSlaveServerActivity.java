@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
@@ -26,6 +27,16 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_remote_test_slave_server_acitivity);
+        try {
+            CatalogController.makeDeviceFeed(
+                    UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogController.SHARED_RESOURCE, this),
+                    CatalogController.SHARED_RESOURCE, this);
+            Toast.makeText(this, "Device feed scanned.", Toast.LENGTH_LONG).show();
+        }catch(IOException e) {
+            UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog("Scan error",
+                    "Error calling makeDeviceFeed");
+        }
+
     }
 
     /**

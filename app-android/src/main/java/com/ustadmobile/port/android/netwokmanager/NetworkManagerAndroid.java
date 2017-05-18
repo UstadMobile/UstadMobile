@@ -11,11 +11,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,10 +33,12 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -57,12 +62,6 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private Map<Context, ServiceConnection> serviceConnectionMap;
 
-    private HashMap<String, Long> entryIdToDownloadIdMap =new HashMap<>();
-
-    private HashMap<Long, String> downloadIdToEntryIdMap =new HashMap<>();
-
-    private HashMap<Long,int[]> downloadIdToDownloadStatusMap=new HashMap<>();
-
 
     public static final String SERVICE_NAME = "ustadMobile";
     public static final String EXTRA_SERVICE_NAME="extra_test_service_name";
@@ -71,22 +70,13 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private final static int WAITING_TIME_TO_UPDATE = 500;
 
-    public static final int AVERAGE_FILE_AGE_BEFORE_CHECK =60000;
-
     private static final String DEFAULT_BLUETOOTH_ADDRESS="02:00:00:00:00:00";
 
     public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetoothMac";
 
-    public static final String DEVICE_IP_ADDRESS = "ipAddress";
-
     public static final String SERVER_PORT_NUMBER = "port";
 
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
-
-    public static final String FILE_IDS_SEPARATOR = "@";
-
-    private int downloadSource=-2;
-
     private static final String SERVICE_DEVICE_AVAILABILITY = "available";
 
     private boolean isSuperNodeEnabled=false;
@@ -108,6 +98,12 @@ public class NetworkManagerAndroid extends NetworkManager{
     private ConnectivityManager connectivityManager;
 
 
+    /**
+     * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
+     * method from it's onCreate
+     *
+     * @param context Context object: on Android always the NetworkServiceAndroid instance
+     */
     @Override
     public void init(Object context) {
         networkService = (NetworkServiceAndroid)context;
@@ -244,25 +240,6 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     }
 
-    /*
-    @Override
-    public void handleEntriesStatusUpdate(NetworkNode node, String[] fileIds, boolean[] status) {
-
-        List<EntryCheckResponse> responseList=null;
-        Long time_now=Calendar.getInstance().getTimeInMillis();
-        for (int position=0;position<fileIds.length;position++){
-            EntryCheckResponse checkResponse=new EntryCheckResponse(node);
-            checkResponse.setFileAvailable(status[position]);
-            checkResponse.setLastChecked(time_now);
-            responseList=getEntryResponses().get(fileIds[position]);
-            if(responseList.isEmpty()){
-                responseList=new ArrayList<>();
-            }
-            responseList.add(checkResponse);
-            getEntryResponses().put(fileIds[position],responseList);
-        }
-    }*/
-
     @Override
     public int addNotification(int notificationType, String title, String message) {
 
@@ -304,51 +281,19 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
 
-    /*
-    public EntryCheckResponse entryCheckResponse(String fileID){
-        List<EntryCheckResponse> responses=getEntryResponses().get(fileID);
-        if(responses!=null){
-            long lastChecked=Calendar.getInstance().getTimeInMillis();
-            for(EntryCheckResponse checkResponse: responses){
-                if(checkResponse.isFileAvailable() &&
-                        (((int)lastChecked-checkResponse.getLastChecked()) < AVERAGE_FILE_AGE_BEFORE_CHECK)){
-                    return  checkResponse;
-                }
-            }
-        }
-
-        return null;
-    }*/
-
-
-
     private HashMap<String,String> localService(){
         boolean isConnected= connectivityManager!=null &&
                 connectivityManager.getActiveNetworkInfo().getType()
                 == ConnectivityManager.TYPE_WIFI;
         String deviceBluetoothMacAddress=getBluetoothMacAddress();
-        String deviceIpAddress=isConnected ? getIpAddress():"";
+        String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
         HashMap<String,String> record=new HashMap<>();
         record.put(SERVICE_DEVICE_AVAILABILITY,"available");
         record.put(SERVER_PORT_NUMBER,"8001");
-        record.put(DEVICE_BLUETOOTH_ADDRESS, deviceBluetoothMacAddress);
-        record.put(DEVICE_IP_ADDRESS, deviceIpAddress);
+        record.put(SD_TXT_KEY_BT_MAC, deviceBluetoothMacAddress);
+        record.put(SD_TXT_KEY_IP_ADDR, deviceIpAddress);
         return record;
     }
-
-
-    public HashMap<String,Long> getEntryIdToDownloadIdMap(){
-        return this.entryIdToDownloadIdMap;
-    }
-
-    public HashMap<Long,String> getDownloadIdToEntryIdMap(){
-        return this.downloadIdToEntryIdMap;
-    }
-
-    public HashMap<Long,int[]> getDownloadIdToDownloadStatusMap(){
-        return this.downloadIdToDownloadStatusMap;
-    }
-
 
     public String getBluetoothMacAddress(){
 
@@ -370,35 +315,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
 
-    public String getIpAddress(){
-        try {
-            for (Enumeration<NetworkInterface> enumInterface = NetworkInterface.getNetworkInterfaces();
-                 enumInterface.hasMoreElements();) {
 
-                NetworkInterface networkInterface = enumInterface.nextElement();
-                for (Enumeration<InetAddress> enumIPAddress = networkInterface.getInetAddresses();
-                     enumIPAddress.hasMoreElements();) {
-                    InetAddress inetAddress = enumIPAddress.nextElement();
-                    if (!inetAddress.isLoopbackAddress()) {
-                        String ipAddress ="";
-                        if (inetAddress instanceof Inet4Address) {
-
-                            for (int i=0; i<inetAddress.getAddress().length; i++) {
-                                if (i > 0) {
-                                    ipAddress += ".";
-                                }
-                                ipAddress += inetAddress.getAddress()[i]&0xFF;
-                            }
-                            return ipAddress;
-                        }
-                    }
-                }
-            }
-        } catch (SocketException | NullPointerException ex) {
-            ex.printStackTrace();
-        }
-        return null;
-    }
 
     public void onDestroy() {
         LocalBroadcastManager.getInstance(networkService).unregisterReceiver(mBroadcastReceiver);
@@ -410,6 +327,43 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     public Context getContext(){
         return networkService.getApplicationContext();
+    }
+
+    @Override
+    public String getDeviceIPAddress() {
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info != null && info.isConnected()){
+            if(info.getTypeName().equalsIgnoreCase("WIFI")) {
+                try {
+                    for (Enumeration<NetworkInterface> enumInterface = NetworkInterface.getNetworkInterfaces();
+                         enumInterface.hasMoreElements();) {
+
+                        NetworkInterface networkInterface = enumInterface.nextElement();
+                        for (Enumeration<InetAddress> enumIPAddress = networkInterface.getInetAddresses();
+                             enumIPAddress.hasMoreElements();) {
+                            InetAddress inetAddress = enumIPAddress.nextElement();
+                            if (!inetAddress.isLoopbackAddress()) {
+                                String ipAddress ="";
+                                if (inetAddress instanceof Inet4Address) {
+
+                                    for (int i=0; i<inetAddress.getAddress().length; i++) {
+                                        if (i > 0) {
+                                            ipAddress += ".";
+                                        }
+                                        ipAddress += inetAddress.getAddress()[i]&0xFF;
+                                    }
+                                    return ipAddress;
+                                }
+                            }
+                        }
+                    }
+                } catch (SocketException | NullPointerException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        return null;
     }
 
 }
