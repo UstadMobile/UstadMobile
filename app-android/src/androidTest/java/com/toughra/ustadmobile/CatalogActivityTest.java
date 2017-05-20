@@ -18,7 +18,7 @@ import java.util.Locale;
 /**
  * Created by mike on 9/22/15.
  */
-public class CatalogActivityTest extends ActivityInstrumentationTestCase2<CatalogActivity> {
+public abstract class CatalogActivityTest extends ActivityInstrumentationTestCase2<CatalogActivity> {
 
     public static final int SLEEP_AFTER = 10000;
 

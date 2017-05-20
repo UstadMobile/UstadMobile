@@ -10,5 +10,5 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     TestHTTPCacheDir.class
 })
-public class CoreTestSuite {
+public abstract class CoreTestSuite {
 }

@@ -16,7 +16,7 @@ import com.ustadmobile.port.android.view.ContainerActivity;
 /**
  * Created by mike on 9/23/15.
  */
-public class ContainerActivityTest extends ActivityInstrumentationTestCase2<ContainerActivity> {
+public abstract class ContainerActivityTest extends ActivityInstrumentationTestCase2<ContainerActivity> {
 
 
     public static final int TIMEOUT = 2* 60 * 1000;
