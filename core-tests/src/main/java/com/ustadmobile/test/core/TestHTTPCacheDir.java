@@ -104,6 +104,7 @@ public class TestHTTPCacheDir  {
         String fileURI = cacheDir.getCacheFileURIByURL(httpURL);
         Assert.assertNotNull("HTTP URL is known on creating new cache dir object",
             fileURI);
+        Assert.assertTrue("Cached file URI exists", impl.fileExists(fileURI));
         
         long date1 = HTTPCacheDir.parseHTTPDate("Sun, 06 Nov 1994 08:49:37 GMT");
         long date2 = HTTPCacheDir.parseHTTPDate("Sunday, 06-Nov-94 08:49:37 GMT");
