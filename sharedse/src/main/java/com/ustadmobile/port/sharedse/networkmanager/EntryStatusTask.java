@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Pack200;
 
 /**
  * Created by kileha3 on 09/05/2017.
@@ -16,19 +16,19 @@ import java.util.jar.Pack200;
 
 public class EntryStatusTask extends NetworkTask implements BluetoothConnectionHandler{
 
-    private List<String> fileIds;
-
-    private List<NetworkNode> knownNodes;
+    private List<String> entryIdList;
+    private static final String FILE_ID_SEPARATOR=";";
+    private List<NetworkNode> networkNodeList;
 
     private int currentNode;
 
-    public EntryStatusTask(List<String> fileIds){
-        this.fileIds=fileIds;
+    public EntryStatusTask(List<String> entryIdList, List<NetworkNode> networkNodeList, NetworkManager networkManager){
+        super(networkManager);
+        this.entryIdList = entryIdList;
+        this.networkNodeList = networkNodeList;
     }
     @Override
     public void start() {
-        //THIS IS A SNAPSHOT: IT MIGHT CHANGE... HANDLE THIS SCENARIO
-        knownNodes = networkManager.getKnownNodes();
         currentNode = 0;
         new Thread(new Runnable() {
             public void run() {
@@ -38,12 +38,13 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     }
 
     public void connectNextNode() {
-        if(currentNode < knownNodes.size()) {
-            String bluetoothAddr = knownNodes.get(currentNode).getDeviceBluetoothMacAddress();
+        if(currentNode < networkNodeList.size()) {
+            String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
             networkManager.connectBluetooth(bluetoothAddr, this);
         }else {
             networkManager.handleTaskCompleted(this);
         }
+
     }
 
 
@@ -55,12 +56,13 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     @Override
     public void onConnected(InputStream inputStream, OutputStream outputStream) {
         String queryStr = BluetoothServer.CMD_ENTRY_STATUS_QUERY + ' ';
-        for(int i = 0; i < fileIds.size(); i++){
-            try { queryStr += URLEncoder.encode(fileIds.get(i), "UTF-8"); }
+        List<Boolean> entryIdStatusList=new ArrayList<>();
+        for(int i = 0; i < entryIdList.size(); i++){
+            try { queryStr += URLEncoder.encode(entryIdList.get(i), "UTF-8"); }
             catch(UnsupportedEncodingException e) {}//what device doesn't have UTF-8?
 
-            if(i < fileIds.size() - 1)
-                queryStr += ';';
+            if(i < entryIdList.size() - 1)
+                queryStr += FILE_ID_SEPARATOR;
         }
 
         queryStr += '\n';
@@ -68,13 +70,23 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             outputStream.write(queryStr.getBytes());
             String response = reader.readLine();
-            if(response.startsWith("200")) {
+            if(response.startsWith(BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK)) {
+                response=response.substring((BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK.length()+1),response.length());
+
+                for(String status: response.split(FILE_ID_SEPARATOR)){
+                    boolean responseStatus= status.equals("1");
+                    entryIdStatusList.add(responseStatus);
+                }
+
+                networkManager.handleEntriesStatusUpdate(networkNodeList.get(currentNode), entryIdList,entryIdStatusList);
+                managerTaskListener.handleTaskCompleted(this);
+                currentNode++;
 
             }else {
-
+                System.out.print("Feedback "+response);
             }
         }catch(IOException e) {
-
+            e.printStackTrace();
         }
     }
 
@@ -92,4 +104,5 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     public int getTaskType() {
         return 0;
     }
+
 }

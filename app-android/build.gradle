@@ -20,11 +20,6 @@ buildscript {
 
 repositories {
     mavenCentral()
-
-    maven {
-        url "/Volumes/ImportantWorks/AndroidLibsBuild/repo"
-    }
-
     maven {
         url "http://devserver2.ustadmobile.com/repo-mvn"
     }

@@ -10,6 +10,7 @@ import com.ustadmobile.test.sharedse.impl.TestContext;
 
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -28,6 +29,16 @@ public class MockNetworkManager extends NetworkManager {
         this.mockBluetoothAddr = bluetoothAddr;
 
 
+    }
+
+    @Override
+    public void init(Object mContext) {
+        super.init(mContext);
+    }
+
+    @Override
+    public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds, List<Boolean> status) {
+        super.handleEntriesStatusUpdate(node, fileIds, status);
     }
 
     public MockRemoteDevice addMockTestDriver(String bluetoothAddr) {
@@ -61,10 +72,7 @@ public class MockNetworkManager extends NetworkManager {
         return false;
     }
 
-    @Override
-    public void init(Object mContext, String serviceName) {
-        super.init(mContext, serviceName);
-    }
+
 
     @Override
     public boolean isBluetoothEnabled() {
@@ -96,10 +104,7 @@ public class MockNetworkManager extends NetworkManager {
         }
     }
 
-    @Override
-    public void handleEntriesStatusUpdate(NetworkNode node, String[] fileIds, boolean[] status) {
 
-    }
 
     @Override
     public int addNotification(int notificationType, String title, String message) {

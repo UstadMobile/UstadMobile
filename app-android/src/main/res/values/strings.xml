@@ -34,4 +34,5 @@
     <string name="language">Language preference</string>
     <string name="logout">Logout</string>
     <string name="supernodeOption">Set super node enabled</string>
+    <string name="title_activity_remote_test_slave_server">RemoteTestSlaveServer</string>
 </resources>

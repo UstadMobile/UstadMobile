@@ -17,11 +17,6 @@ import java.util.UUID;
 
 public abstract class BluetoothServer {
 
-    public static final int BLUETOOTH_STATE_NONE=-1;
-    public static final int BLUETOOTH_STATE_CONNECTING=1;
-    public static final int BLUETOOTH_STATE_CONNECTED=2;
-    public static final int BLUETOOTH_STATE_FAILED =0;
-
     public static final UUID SERVICE_UUID = UUID.fromString("ad9e3a05-7d80-4a12-b50b-91c72d442683");
 
     public static final String SERVICE_NAME = "UstadMobileBT";
@@ -39,14 +34,14 @@ public abstract class BluetoothServer {
      */
     public static final String CMD_ENTRY_STATUS_QUERY = "STATUS";
 
-    public static final String CMD_PING = "PING";
-
 
     /**
      *
      * ACQUIRE id1;id2;id3
      */
     public static final String CMD_ACQUIRE_ENTRIES = "ACQUIRE";
+
+    public static final String CMD_ENTRY_STATUS_FEEDBACK = "STATUS_FEEDBACK";
 
     protected NetworkManager networkManager;
 
@@ -67,7 +62,7 @@ public abstract class BluetoothServer {
             String[] entryIds = clientInput.substring(CMD_ENTRY_STATUS_QUERY.length()+1).split(";");
             boolean[] results = new boolean[entryIds.length];
             CatalogEntryInfo info;
-            String response = "200 ";
+            String response = CMD_ENTRY_STATUS_FEEDBACK+" ";
             for(int i = 0; i < entryIds.length; i++) {
                 info = CatalogController.getEntryInfo(URLDecoder.decode(entryIds[i], "UTF-8"),
                         CatalogController.SHARED_RESOURCE, networkManager.getContext());
@@ -78,8 +73,9 @@ public abstract class BluetoothServer {
             }
             response += '\n';
             outputStream.write(response.getBytes());
+            outputStream.flush();
         }else if(clientInput.startsWith(CMD_ACQUIRE_ENTRIES)) {
-
+            //start no-prompt network
         }
     }
 

@@ -3,6 +3,8 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,9 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final int QUEUE_ENTRY_ACQUISITION=1;
     public static final int NOTIFICATION_TYPE_SERVER=0;
     public static final int NOTIFICATION_TYPE_ACQUISITION=1;
+    public static final int DOWNLOAD_SOURCE_CLOUD=1;
+    public static final int DOWNLOAD_SOURCE_PEER_SAME_NETWORK=2;
+    public static final int DOWNLOAD_SOURCE_PEER_DIFFERENT_NETWORK=3;
     public BluetoothServer bluetoothServer;
 
     public static final String SD_TXT_KEY_IP_ADDR = "a";
@@ -27,10 +32,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final String SD_TXT_KEY_BT_MAC = "b";
 
     private Object mContext;
-
-    private final Object bluetoothLock=new Object();
-
-
 
     private Vector<NetworkNode> knownNetworkNodes=new Vector<>();
 
@@ -48,7 +49,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public NetworkManager() {
     }
 
-
     public abstract void startSuperNode();
 
     public abstract void stopSuperNode();
@@ -64,24 +64,19 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public abstract BluetoothServer getBluetoothServer();
 
-    public Object acquireBluetoothLock(Object bluetoothLock){
-        synchronized (bluetoothLock){
-
-        }
-
-        return bluetoothLock;
-    }
-
-    public void releaseBluetoothLock(Object bluetoothLock){
-        if(bluetoothLock!=null){
-
-        }
-    }
-
     public abstract boolean isWiFiEnabled();
 
-    public List<String> requestFileStatus(List<String> entryIds,Object mContext){
-        EntryStatusTask task = new EntryStatusTask(entryIds);
+    public boolean isFileAvailable(String entryId){
+        for(EntryCheckResponse response:entryResponses.get(entryId)){
+            if(response.isFileAvailable()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<String> requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList){
+        EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
         task.setTaskType(QUEUE_ENTRY_STATUS);
         queueTask(task);
         return entryIds;
@@ -89,13 +84,15 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
 
     public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext){
-
+        AcquisitionTask task=new AcquisitionTask(feed,this);
+        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
+        queueTask(task);
         return feed;
     }
 
 
     public NetworkTask queueTask(NetworkTask task){
-        tasksQueues[task.getQueueId()].add(task);
+        tasksQueues[task.getTaskType()].add(task);
         checkTaskQueue(task.getTaskType());
 
         return task;
@@ -103,7 +100,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public synchronized void checkTaskQueue(int queueType){
         if(!tasksQueues[queueType].isEmpty() && currentTasks[queueType] == null) {
-            currentTasks[queueType] = tasksQueues[queueType].get(0);
+            currentTasks[queueType] = tasksQueues[queueType].remove(0);
             currentTasks[queueType].setNetworkManager(this);
             currentTasks[queueType].setNetworkTaskListener(this);
             currentTasks[queueType].start();
@@ -111,7 +108,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     }
 
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
-        if(serviceFullDomain.contains(NETWORK_SERVICE_NAME)){
+        if(serviceFullDomain.contains(NETWORK_SERVICE_NAME.toLowerCase())){
             String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
             String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
 
@@ -133,6 +130,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
             if(newNode)
                 knownNetworkNodes.add(node);
+                fireNetworkNodeDiscovered(node);
         }
     }
 
@@ -159,7 +157,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         synchronized (knownNetworkNodes) {
             String nodeBtAddr;
             for(NetworkNode node : knownNetworkNodes) {
-                nodeBtAddr = node.getDeviceIpAddress();
+                nodeBtAddr = node.getDeviceBluetoothMacAddress();
                 if(nodeBtAddr != null && nodeBtAddr.equals(bluetoothAddr))
                     return node;
             }
@@ -167,8 +165,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
         return null;
     }
-
-
 
     public void addNetworkManagerListener(NetworkManagerListener listener){
         networkManagerListeners.add(listener);
@@ -182,10 +178,82 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public abstract void connectBluetooth(String deviceAddress,BluetoothConnectionHandler handler);
 
-    public void handleEntriesStatusUpdate(NetworkNode node, String fileIds[],boolean [] status) {
+    public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds,List<Boolean> status) {
+        List<EntryCheckResponse> responseList;
+        EntryCheckResponse checkResponse;
+        long timeNow = Calendar.getInstance().getTimeInMillis();
+        for (int position=0;position<fileIds.size();position++){
+            checkResponse = getEntryResponse(fileIds.get(position), node);
 
+            responseList=getEntryResponses().get(fileIds.get(position));
+            if(responseList==null){
+                responseList=new ArrayList<>();
+                entryResponses.put(fileIds.get(position),responseList);
+            }
+
+            if(checkResponse == null) {
+                checkResponse = new EntryCheckResponse(node);
+                responseList.add(checkResponse);
+            }
+
+            checkResponse.setFileAvailable(status.get(position));
+            checkResponse.setLastChecked(timeNow);
+        }
+
+        fireFileStatusCheckInformationAvailable(fileIds);
     }
 
+    public EntryCheckResponse getEntryResponse(String fileId, NetworkNode node) {
+        List<EntryCheckResponse> responseList = getEntryResponses().get(fileId);
+        if(responseList == null)
+            return null;
+
+        for(int responseNum = 0; responseNum < responseList.size(); responseNum++) {
+            if(responseList.get(responseNum).getNetworkNode().equals(node)) {
+                return responseList.get(responseNum);
+            }
+        }
+
+        return null;
+    }
+
+    public void handleFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource){
+        fireFileAcquisitionInformationAvailable(entryId,downloadId,downloadSource);
+    }
+
+
+    protected void fireFileStatusCheckInformationAvailable(List<String> fileIds) {
+        synchronized (networkManagerListeners) {
+            for(NetworkManagerListener listener : networkManagerListeners){
+                listener.fileStatusCheckInformationAvailable(fileIds);
+            }
+        }
+    }
+
+
+    protected void fireFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource) {
+        synchronized (networkManagerListeners) {
+            for(NetworkManagerListener listener : networkManagerListeners){
+                listener.fileAcquisitionInformationAvailable(entryId,downloadId,downloadSource);
+            }
+        }
+    }
+
+    protected void fireNetworkNodeDiscovered(NetworkNode node) {
+        synchronized (networkManagerListeners) {
+            for(NetworkManagerListener listener : networkManagerListeners){
+                listener.networkNodeDiscovered(node);
+            }
+        }
+    }
+
+    protected void fireEntryStatusCheckCompleted(NetworkTask task){
+        synchronized (networkManagerListeners) {
+            for(NetworkManagerListener listener : networkManagerListeners){
+                listener.entryStatusCheckCompleted(task);
+            }
+        }
+    }
     public abstract int addNotification(int notificationType,String title,String message);
 
     public abstract void updateNotification(int notificationId,int progress,String title,String message);
@@ -194,11 +262,12 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     @Override
     public void handleTaskCompleted(NetworkTask task) {
-        if(task == currentTasks[task.getQueueId()]) {
-            //otherwise - that'd be weird...
-            currentTasks[task.getQueueId()] = null;
-            checkTaskQueue(task.getQueueId());
+        if(task == currentTasks[task.getTaskType()]) {
+            currentTasks[task.getTaskType()] = null;
+            checkTaskQueue(task.getTaskType());
         }
+
+        fireEntryStatusCheckCompleted(task);
     }
 
     public List<NetworkNode> getKnownNodes() {
@@ -212,6 +281,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public Object getContext() {
         return mContext;
     }
+
+    public abstract String getDeviceIPAddress();
 
 
 

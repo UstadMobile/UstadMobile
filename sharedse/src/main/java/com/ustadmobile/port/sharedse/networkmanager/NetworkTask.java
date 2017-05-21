@@ -6,6 +6,10 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 public abstract class NetworkTask {
 
+    public NetworkTask(NetworkManager networkManager) {
+        this.networkManager = networkManager;
+    }
+
     public NetworkManagerTaskListener managerTaskListener;
     protected NetworkManager networkManager;
     public int queueId;

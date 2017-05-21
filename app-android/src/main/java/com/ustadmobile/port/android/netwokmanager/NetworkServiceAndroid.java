@@ -29,6 +29,7 @@ public class NetworkServiceAndroid extends Service{
     private WifiDirectHandler wifiDirectHandler;
     private final IBinder mBinder = new LocalServiceBinder();
     private NetworkManagerAndroid networkManagerAndroid;
+    public static final int SERVICE_REBROADCASTING_TIMER=30000;
 
 
     public NetworkServiceAndroid(){
@@ -82,6 +83,7 @@ public class NetworkServiceAndroid extends Service{
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
+            wifiDirectHandler.setServiceDiscoveryRebroadcastingTime(SERVICE_REBROADCASTING_TIMER);
 
             boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
                     PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));

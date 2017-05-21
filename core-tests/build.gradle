@@ -54,6 +54,7 @@ task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfi
     buildConfigField "String", "TEST_MOCK_LOCAL_BLUETOOTH_DEVICE", project.ext.buildConfigProperties["test.mock_local_bluetooth_device"]
     buildConfigField "int", "TEST_REMOTE_SLAVE_SERVER_PORT", project.ext.buildConfigProperties["test.remote_slave_server_port"]
     buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER", project.ext.buildConfigProperties["test.remote_slave_server"]
+    buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER_SERIAL", project.ext.buildConfigProperties["test.remote_slave_server_serial"]
 }
 
 compileJava.dependsOn(generateCoreTestConstantsBuildConfig)
