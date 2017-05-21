@@ -108,7 +108,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     }
 
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
-        if(serviceFullDomain.contains(NETWORK_SERVICE_NAME.toLowerCase())){
+        if(serviceFullDomain.contains(NETWORK_SERVICE_NAME)){
             String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
             String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
 

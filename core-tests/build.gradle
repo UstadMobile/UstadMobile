@@ -58,3 +58,13 @@ task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfi
 }
 
 compileJava.dependsOn(generateCoreTestConstantsBuildConfig)
+
+/*
+ * When running in test mode we use getClass.getResource to load assets.
+ */
+task copyCoreResources(type: Copy) {
+    from "${projectDir}/../core/src/main/assets"
+    into "${buildDir}/classes/main/res"
+}
+
+processResources.dependsOn(copyCoreResources)

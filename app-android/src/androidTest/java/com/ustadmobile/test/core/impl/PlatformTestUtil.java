@@ -6,6 +6,7 @@ import android.support.test.InstrumentationRegistry;
 import com.ustadmobile.test.sharedse.impl.TestContext;
 
 import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER;
+import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER_PORT;
 
 
 /**
@@ -27,7 +28,7 @@ public class PlatformTestUtil {
     }
 
     public static String getRemoteTestEndpoint() {
-        return TEST_REMOTE_SLAVE_SERVER;
+        return "http://" + TEST_REMOTE_SLAVE_SERVER + ":" + TEST_REMOTE_SLAVE_SERVER_PORT + "/";
     }
 
 }

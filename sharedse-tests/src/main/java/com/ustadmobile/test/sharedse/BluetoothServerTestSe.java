@@ -6,6 +6,8 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 
 import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -18,7 +20,7 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
     private boolean connectionCalled = false;
     private static final String ENTRY_ID="31daeq7-617d-402e-a0b0-dba52ef21911";
 
-    //@Test
+    @Test
     public void testBluetoothConnect() throws Exception {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 

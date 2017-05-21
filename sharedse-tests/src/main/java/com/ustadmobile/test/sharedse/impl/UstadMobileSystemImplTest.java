@@ -42,6 +42,7 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     public UstadMobileSystemImplTest() {
         cacheDirs = new HashMap<>();
         testSystemBaseDir = makeTempDir("umTestSystemDir", "");
+        testSystemBaseDir = makeTempDir("umTestSystemDir", "");
         testLogger = new UMTestLogger();
     }
 
@@ -115,7 +116,7 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public String getSharedContentDir() {
-        return null;
+        return testSystemBaseDir.getAbsolutePath();
     }
 
     @Override

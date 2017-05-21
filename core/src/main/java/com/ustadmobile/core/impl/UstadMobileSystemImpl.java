@@ -1062,6 +1062,16 @@ public abstract class UstadMobileSystemImpl {
         return null;
     }
 
+    /**
+     * Returns whether or not the init method has already been run
+     *
+     * @return true if init has been called with a first context used to load certain resources,
+     * false otherwise
+     */
+    protected boolean isInitialized() {
+        return initRan;
+    }
+
 
 
 
