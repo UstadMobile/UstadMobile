@@ -29,9 +29,9 @@ public class TestEntryStatusTask{
 
 
 
-    private static final String ENTRY_ID="202b10fe-b028-4b84-9b84-852aa766607d";
+    public static final String ENTRY_ID="202b10fe-b028-4b84-9b84-852aa766607d";
 
-    private static final String ENTRY_ID_NOT_PRESENT = "202b10fe-b028-4b84-9b84-852aa766607dx";
+    public static final String ENTRY_ID_NOT_PRESENT = "202b10fe-b028-4b84-9b84-852aa766607dx";
 
     public static final String[] ENTRY_IDS = new String[]{ENTRY_ID, ENTRY_ID_NOT_PRESENT};
 
@@ -92,8 +92,7 @@ public class TestEntryStatusTask{
         };
         manager.addNetworkManagerListener(responseListener);
         //enable supernode mode on the remote test device
-        String enableNodeUrl = "http://"+ PlatformTestUtil.getRemoteTestEndpoint() +":"
-                + TEST_REMOTE_SLAVE_SERVER_PORT + "/?cmd=SUPERNODE&enabled=true";
+        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
@@ -115,8 +114,7 @@ public class TestEntryStatusTask{
         }
 
         //disable supernode mode on the remote test device
-        String disableNodeUrl = "http://"+ PlatformTestUtil.getRemoteTestEndpoint() +":"
-                + TEST_REMOTE_SLAVE_SERVER_PORT + "/?cmd=SUPERNODE&enabled=false";
+        String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 

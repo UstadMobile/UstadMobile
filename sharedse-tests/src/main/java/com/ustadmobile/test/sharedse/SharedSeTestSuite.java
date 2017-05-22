@@ -11,7 +11,8 @@ import org.junit.runners.Suite;
 
 @Suite.SuiteClasses({
     BasicTest.class,
-    TestNetworkManager.class
+    TestNetworkManager.class,
+    TestEntryStatusTask.class
 })
 
 public abstract class SharedSeTestSuite {
