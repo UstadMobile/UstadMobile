@@ -58,9 +58,10 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private static final String DEFAULT_BLUETOOTH_ADDRESS="02:00:00:00:00:00";
 
-    public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetoothMac";
+    public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetooth_address";
 
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
+
     private static final String SERVICE_DEVICE_AVAILABILITY = "av";
 
     private boolean isSuperNodeEnabled=false;
