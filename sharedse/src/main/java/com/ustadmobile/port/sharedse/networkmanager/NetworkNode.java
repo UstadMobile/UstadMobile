@@ -8,8 +8,9 @@ public class NetworkNode {
     private String deviceBluetoothMacAddress;
     private String deviceIpAddress;
     private String deviceWifiDirectMacAddress;
+    private long wifiDirectLastUpdated;
+    private long networkServiceLastUpdated;
     private int port;
-    private long lastUpdated;
 
     public NetworkNode(String deviceWifiDirectMacAddress,String deviceIpAddress){
         this.deviceWifiDirectMacAddress=deviceWifiDirectMacAddress;
@@ -49,17 +50,26 @@ public class NetworkNode {
         this.port = port;
     }
 
-    public long getLastUpdated() {
-        return lastUpdated;
+    public long getWifiDirectLastUpdated() {
+        return wifiDirectLastUpdated;
     }
 
-    public void setLastUpdated(long lastUpdated) {
-        this.lastUpdated = lastUpdated;
+    public void setWifiDirectLastUpdated(long wifiDirectLastUpdated) {
+        this.wifiDirectLastUpdated = wifiDirectLastUpdated;
+    }
+
+    public long getNetworkServiceLastUpdated() {
+        return networkServiceLastUpdated;
+    }
+
+    public void setNetworkServiceLastUpdated(long networkServiceLastUpdated) {
+        this.networkServiceLastUpdated = networkServiceLastUpdated;
     }
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof NetworkNode && (getDeviceWifiDirectMacAddress().equals(deviceWifiDirectMacAddress)
-                || getDeviceIpAddress().equals(deviceIpAddress));
+        return object instanceof NetworkNode &&
+                ((deviceWifiDirectMacAddress!=null && getDeviceWifiDirectMacAddress().equals(deviceWifiDirectMacAddress))
+                || ( deviceIpAddress!=null && getDeviceIpAddress().equals(deviceIpAddress)));
     }
 }

@@ -32,12 +32,18 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         currentNode = 0;
         new Thread(new Runnable() {
             public void run() {
-                connectNextNode();
+                if(isUseBluetooth()){
+                    connectNextBluetoothNode();
+                }
+
+                if(isUseHttp()){
+                    connectNextHttpNode();
+                }
             }
         }).start();
     }
 
-    public void connectNextNode() {
+    private void connectNextBluetoothNode() {
         if(currentNode < networkNodeList.size()) {
             String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
             networkManager.connectBluetooth(bluetoothAddr, this);
@@ -45,6 +51,10 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             networkManager.handleTaskCompleted(this);
         }
 
+    }
+
+    private void connectNextHttpNode(){
+        //TODO: handle all http status check
     }
 
 
@@ -59,7 +69,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         List<Boolean> entryIdStatusList=new ArrayList<>();
         for(int i = 0; i < entryIdList.size(); i++){
             try { queryStr += URLEncoder.encode(entryIdList.get(i), "UTF-8"); }
-            catch(UnsupportedEncodingException e) {}//what device doesn't have UTF-8?
+            catch(UnsupportedEncodingException ignored) {}//what device doesn't have UTF-8?
 
             if(i < entryIdList.size() - 1)
                 queryStr += FILE_ID_SEPARATOR;

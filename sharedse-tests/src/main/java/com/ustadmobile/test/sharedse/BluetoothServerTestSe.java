@@ -4,8 +4,10 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -23,6 +25,8 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
     @Test
     public void testBluetoothConnect() throws Exception {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        Assume.assumeTrue("Network test wifi and bluetooth enabled",
+                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         manager.connectBluetooth(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE, this);
         try { Thread.sleep(5000); }

@@ -92,9 +92,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public List<String> requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
         EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
         task.setTaskType(QUEUE_ENTRY_STATUS);
-
-        //TODO: set parameters for task
-
+        task.setUseBluetooth(useBluetooth);
+        task.setUseHttp(useHttp);
         queueTask(task);
         return entryIds;
     }
@@ -162,13 +161,14 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
             node.setDeviceBluetoothMacAddress(btAddr);
             node.setDeviceWifiDirectMacAddress(senderMacAddr);
             node.setPort(port);
-            node.setLastUpdated(Calendar.getInstance().getTimeInMillis());
+            node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
 
             if(newNode){
                 knownNetworkNodes.add(node);
                 fireNetworkNodeDiscovered(node);
             }else{
                 knownNetworkNodes.set(position,node);
+                fireNetworkNodeUpdated(node);
             }
 
         }
@@ -194,7 +194,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
                 position=knownNetworkNodes.indexOf(node);
             }
 
-            node.setLastUpdated(Calendar.getInstance().getTimeInMillis());
+            node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
             node.setPort(port);
 
             if(newNode){
@@ -202,6 +202,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
                 fireNetworkNodeDiscovered(node);
             }else{
                 knownNetworkNodes.set(position,node);
+                fireNetworkNodeUpdated(node);
             }
         }
     }
@@ -316,6 +317,14 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
                 listener.networkNodeDiscovered(node);
+            }
+        }
+    }
+
+    protected void fireNetworkNodeUpdated(NetworkNode node){
+        synchronized (networkManagerListeners) {
+            for(NetworkManagerListener listener : networkManagerListeners){
+                listener.networkNodeUpdated(node);
             }
         }
     }

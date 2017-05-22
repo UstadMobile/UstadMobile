@@ -11,13 +11,15 @@ import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 
 import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE;
-import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER_PORT;
+import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Created by kileha3 on 16/05/2017.
@@ -25,15 +27,13 @@ import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SL
 
 public class TestNetworkManager {
 
-    public static final int NODE_DISCOVERY_TIMEOUT =(2*60 * 1000)+2000;//2min2sec in ms
-
+    public   static final int NODE_DISCOVERY_TIMEOUT =(2*60 * 1000)+2000;//2min2sec in ms
 
     @Test
     public void testWifiDirectDiscovery() throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-
-        Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
-        Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());
+        Assume.assumeTrue("Network test wifi and bluetooth enabled",
+                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         final Object nodeDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
@@ -49,12 +49,17 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceBluetoothMacAddress().equals(
+                if(node.getDeviceBluetoothMacAddress()!=null && node.getDeviceBluetoothMacAddress().equals(
                         TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
                     synchronized (nodeDiscoveryLock){
                         nodeDiscoveryLock.notify();
                     }
                 }
+            }
+
+            @Override
+            public void networkNodeUpdated(NetworkNode node) {
+
             }
 
             @Override
@@ -92,6 +97,70 @@ public class TestNetworkManager {
                 manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE));
 
     }
+
+
+    @Test
+    public void testNetworkServiceDiscovery() throws IOException{
+        NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+
+        Assume.assumeTrue("Network test wifi and bluetooth enabled",
+                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+
+        final Object nodeNSDiscoveryLock = new Object();
+        NetworkManagerListener responseListener = new NetworkManagerListener() {
+            @Override
+            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+
+            }
+
+            @Override
+            public void entryStatusCheckCompleted(NetworkTask task) {
+
+            }
+
+            @Override
+            public void networkNodeDiscovered(NetworkNode node) {
+                if(node.getDeviceIpAddress().equals(TestConstants.TEST_REMOTE_SLAVE_SERVER)){
+                    synchronized (nodeNSDiscoveryLock){
+                        nodeNSDiscoveryLock.notify();
+                    }
+                }
+            }
+
+            @Override
+            public void networkNodeUpdated(NetworkNode node) {
+
+            }
+
+            @Override
+            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
+
+            }
+
+            @Override
+            public void wifiConnectionChanged(String ssid) {
+
+            }
+        };
+        manager.addNetworkManagerListener(responseListener);
+
+        if(manager.getNodeByIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER) == null) {
+            synchronized (nodeNSDiscoveryLock) {
+                try { nodeNSDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
+                catch(InterruptedException e ) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        NetworkNode node=manager.getNodeByIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER);
+        Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
+        boolean isWithinDiscoveryTimeRange=
+                (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;
+        Assert.assertThat("Was node discovered withing time range",isWithinDiscoveryTimeRange,is(true));
+
+    }
+
+
 
 
 }

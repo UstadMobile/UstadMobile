@@ -7,15 +7,15 @@ package com.ustadmobile.test.core.impl;
 public class PlatformTestUtil {
 
     public static Object getTargetContext() {
-        throw new RuntimeException("PlatformTestUtil: Must use implementation");
+        throw new RuntimeException("PlatformTestUtil sharedse: Must use implementation");
     }
 
     public static Object getTestContext() {
-        throw new RuntimeException("PlatformTestUtil: Must use implementation");
+        throw new RuntimeException("PlatformTestUtil sharedse: Must use implementation");
     }
 
     public static String getRemoteTestEndpoint() {
-        throw new RuntimeException("PlatformTestUtil: Must use implementation");
+        throw new RuntimeException("PlatformTestUtil sharedse: Must use implementation");
     }
 
 }

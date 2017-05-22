@@ -11,6 +11,7 @@ import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +42,8 @@ public class TestEntryStatusTask{
     @Test
     public void testEntryStatusBluetooth() throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        Assume.assumeTrue("Network test wifi and bluetooth enabled",
+                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
         Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
         Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());
 
@@ -75,6 +78,11 @@ public class TestEntryStatusTask{
                        nodeDiscoveryLock.notify();
                    }
                 }
+            }
+
+            @Override
+            public void networkNodeUpdated(NetworkNode node) {
+
             }
 
             @Override
@@ -119,7 +127,7 @@ public class TestEntryStatusTask{
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
-        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList);
+        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList,true,false);
         synchronized (statusRequestLock){
             statusRequestLock.wait(DEFAULT_WAIT_TIME*6);
         }
