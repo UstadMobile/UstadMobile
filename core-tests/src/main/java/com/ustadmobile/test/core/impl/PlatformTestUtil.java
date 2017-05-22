@@ -13,7 +13,7 @@ public class PlatformTestUtil {
     }
 
     public static Object getTestContext() {
-        throw new RuntimeException("PlatformTestUtil: Must use implementation");
+        throw new RuntimeException("core PlatformTestUtil: Must use implementation");
     }
 
     public static String getRemoteTestEndpoint() {

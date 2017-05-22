@@ -14,7 +14,7 @@ import java.util.Hashtable;
  *
  * Created by mike on 9/22/15.
  */
-public class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginActivity>{
+public abstract class LoginActivityTest extends ActivityInstrumentationTestCase2<LoginActivity>{
 
 
 

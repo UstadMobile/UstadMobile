@@ -1,7 +1,5 @@
 package com.ustadmobile.test.port.android;
 
-import android.app.ActivityManager;
-import android.content.Context;
 
 import org.junit.Before;
 

@@ -644,7 +644,8 @@ public class HTTPCacheDir {
                     String fileURI = UMFileUtil.joinPaths(new String[] {dirName[cacheNum],
                             item.getString(IDX_FILENAME)});
                     itemDeleted = impl.removeFile(fileURI);
-                    deleteResult &= itemDeleted;
+                    //NOTE: If the file was somehow already removed - that's still OK
+                    deleteResult &= !impl.fileExists(fileURI);
                     if(itemDeleted) {
                         cacheIndex[cacheNum].remove(url);
                     }

@@ -28,5 +28,4 @@ public class PlatformTestUtil {
         UstadMobileSystemImplTestSE implTestSE = (UstadMobileSystemImplTestSE)UstadMobileSystemImpl.getInstance();
         return "http://localhost:" + implTestSE.getMockTestDriver().getTestControlServerPort() + "/";
     }
-
 }

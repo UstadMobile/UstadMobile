@@ -39,14 +39,19 @@ package com.ustadmobile.test.core;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.test.core.impl.PlatformTestUtil;
+    import com.ustadmobile.test.core.impl.ClassResourcesResponder;
 
-import org.json.JSONArray;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
-import java.util.Hashtable;
+    import org.json.JSONArray;
+    import org.junit.AfterClass;
+    import org.junit.Assert;
+    import org.junit.BeforeClass;
+    import org.junit.Test;
+
+    import java.io.IOException;
+    import java.util.Hashtable;
+
+    import fi.iki.elonen.router.RouterNanoHTTPD;
 
 
 /**
@@ -55,15 +60,29 @@ import java.util.Hashtable;
  */
 public class TestHTTPCacheDir  {
     
-    private String httpRoot;
+    private static String httpRoot;
 
-    @Before
-    public void setUp() throws Exception {
-        //PlatformTestUtil.getInstance().startServer();
-        httpRoot = "";//TODO : Fix this : was PlatformTestUtil.getInstance().getHttpEndpoint();
+    private static RouterNanoHTTPD resourcesHttpd;
+
+    @BeforeClass
+    public static void startHttpResourcesServer() throws IOException {
+        if(resourcesHttpd == null) {
+            resourcesHttpd = new RouterNanoHTTPD(0);
+            resourcesHttpd.addRoute("/res/(.*)", ClassResourcesResponder.class, "/res/");
+            resourcesHttpd.start();
+            httpRoot = "http://localhost:" + resourcesHttpd.getListeningPort() + "/res/";
+        }
     }
 
-    //@Test
+    @AfterClass
+    public static void stopHttpResourcesServer() throws IOException {
+        if(resourcesHttpd != null) {
+            resourcesHttpd.stop();
+            resourcesHttpd = null;
+        }
+    }
+
+    @Test
     public void testHTTPCacheDir() throws Exception {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
@@ -85,6 +104,7 @@ public class TestHTTPCacheDir  {
         String fileURI = cacheDir.getCacheFileURIByURL(httpURL);
         Assert.assertNotNull("HTTP URL is known on creating new cache dir object",
             fileURI);
+        Assert.assertTrue("Cached file URI exists", impl.fileExists(fileURI));
         
         long date1 = HTTPCacheDir.parseHTTPDate("Sun, 06 Nov 1994 08:49:37 GMT");
         long date2 = HTTPCacheDir.parseHTTPDate("Sunday, 06-Nov-94 08:49:37 GMT");
