@@ -15,6 +15,7 @@ import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -51,8 +52,8 @@ public class TestAcquisitionTask{
 
     public void testAcquisition() throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
-        Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());
+        Assume.assumeTrue("Network test wifi and bluetooth enabled",
+            manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         final boolean[] fileAvailable = new boolean[ENTRY_IDS.length];
         final Object nodeDiscoveryLock = new Object();

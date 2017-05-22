@@ -11,6 +11,8 @@ import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -27,10 +29,11 @@ public class TestNetworkManager {
 
     public static final int NODE_DISCOVERY_TIMEOUT =(2*60 * 1000)+2000;//2min2sec in ms
 
-
     @Test
     public void testWifiDirectDiscovery() throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        Assume.assumeTrue("Network test is enabled: wifi and bluetooth enabled",
+            manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
         Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());

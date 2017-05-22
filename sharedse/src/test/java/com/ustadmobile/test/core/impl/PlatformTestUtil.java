@@ -2,10 +2,8 @@ package com.ustadmobile.test.core.impl;
 
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.test.port.sharedse.impl.UstadMobileSystemImplTestSE;
 import com.ustadmobile.test.sharedse.impl.TestContext;
-import com.ustadmobile.test.sharedse.network.MockNetworkManager;
 
 
 /**

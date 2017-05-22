@@ -18,6 +18,10 @@ This is a normal gradle build and should open fine with Android studio. It inclu
 
 ### To test
 
+Network tests require bluetooth and wifi hardware with a running test slave server to 
+communicate with. If bluetooth or wifi are disabled tests requiring that functionality 
+will not run on Android.
+
 To test network functionality two devices are required. 
 One to run the tests and a second "slave" device that
 is communicated with.

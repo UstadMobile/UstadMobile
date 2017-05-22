@@ -207,7 +207,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public boolean isBluetoothEnabled() {
-        return BluetoothAdapter.getDefaultAdapter().isEnabled();
+        return BluetoothAdapter.getDefaultAdapter() != null && BluetoothAdapter.getDefaultAdapter().isEnabled();
     }
 
     @Override
