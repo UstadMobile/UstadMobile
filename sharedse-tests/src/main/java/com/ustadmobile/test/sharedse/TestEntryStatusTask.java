@@ -80,6 +80,11 @@ public class TestEntryStatusTask{
 
             }
 
+            @Override
+            public void wifiConnectionChanged(String ssid) {
+
+            }
+
 
         };
         manager.addNetworkManagerListener(responseListener);

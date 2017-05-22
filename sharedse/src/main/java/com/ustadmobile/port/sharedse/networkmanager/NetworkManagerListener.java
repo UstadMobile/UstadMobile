@@ -11,4 +11,5 @@ public interface NetworkManagerListener {
     void entryStatusCheckCompleted(NetworkTask task);
     void networkNodeDiscovered(NetworkNode node);
     void fileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource);
+    void wifiConnectionChanged(String ssid);
 }

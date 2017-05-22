@@ -61,6 +61,11 @@ public class TestNetworkManager {
             public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
 
             }
+
+            @Override
+            public void wifiConnectionChanged(String ssid) {
+
+            }
         };
         manager.addNetworkManagerListener(responseListener);
 

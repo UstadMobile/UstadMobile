@@ -5,6 +5,7 @@ import com.ustadmobile.core.p2p.P2PManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final String SD_TXT_KEY_IP_ADDR = "a";
 
     public static final String SD_TXT_KEY_BT_MAC = "b";
+
+    public static final String SD_TXT_KEY_PORT = "port";
 
     private Object mContext;
 
@@ -111,8 +114,10 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         if(serviceFullDomain.contains(NETWORK_SERVICE_NAME.toLowerCase())){
             String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
             String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
+            int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
 
             NetworkNode node = null;
+            int position=-1;
             boolean newNode = true;
             if(ipAddr != null) {
                 node = getNodeByIpAddress(ipAddr);
@@ -121,16 +126,56 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
 
             if(node == null) {
-                node = new NetworkNode(senderMacAddr);
+                node = new NetworkNode(senderMacAddr,ipAddr);
                 node.setDeviceIpAddress(ipAddr);
+            }else{
+                position=knownNetworkNodes.indexOf(node);
             }
 
             node.setDeviceBluetoothMacAddress(btAddr);
             node.setDeviceWifiDirectMacAddress(senderMacAddr);
+            node.setPort(port);
+            node.setLastUpdated(Calendar.getInstance().getTimeInMillis());
 
-            if(newNode)
+            if(newNode){
                 knownNetworkNodes.add(node);
                 fireNetworkNodeDiscovered(node);
+            }else{
+                knownNetworkNodes.set(position,node);
+            }
+
+        }
+    }
+
+
+
+
+    public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
+        if(serviceName.contains(NETWORK_SERVICE_NAME)){
+            NetworkNode node = null;
+            int position=-1;
+            boolean newNode = true;
+            if(ipAddress != null) {
+                node = getNodeByIpAddress(ipAddress);
+                newNode = (node == null);
+            }
+
+
+            if(node == null) {
+                node = new NetworkNode("",ipAddress);
+            }else{
+                position=knownNetworkNodes.indexOf(node);
+            }
+
+            node.setLastUpdated(Calendar.getInstance().getTimeInMillis());
+            node.setPort(port);
+
+            if(newNode){
+                knownNetworkNodes.add(node);
+                fireNetworkNodeDiscovered(node);
+            }else{
+                knownNetworkNodes.set(position,node);
+            }
         }
     }
 
@@ -220,6 +265,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public void handleFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource){
         fireFileAcquisitionInformationAvailable(entryId,downloadId,downloadSource);
     }
+
 
 
     protected void fireFileStatusCheckInformationAvailable(List<String> fileIds) {

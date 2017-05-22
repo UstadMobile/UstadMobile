@@ -103,6 +103,11 @@ public class TestAcquisitionTask{
                 }
             }
 
+            @Override
+            public void wifiConnectionChanged(String ssid) {
+
+            }
+
 
         };
         manager.addNetworkManagerListener(responseListener);

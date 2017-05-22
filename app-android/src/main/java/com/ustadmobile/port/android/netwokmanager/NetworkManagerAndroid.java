@@ -12,45 +12,32 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
-import android.text.TextUtils;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
-import com.ustadmobile.port.sharedse.networkmanager.EntryCheckResponse;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
-import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
+
+import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
  * Created by kileha3 on 09/05/2017.
@@ -63,23 +50,22 @@ public class NetworkManagerAndroid extends NetworkManager{
     private Map<Context, ServiceConnection> serviceConnectionMap;
 
 
-    public static final String SERVICE_NAME = "ustadMobile";
-    public static final String EXTRA_SERVICE_NAME="extra_test_service_name";
-
     private static  Long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
 
     private final static int WAITING_TIME_TO_UPDATE = 500;
+
+    public static final int SERVICE_PORT=8001;
 
     private static final String DEFAULT_BLUETOOTH_ADDRESS="02:00:00:00:00:00";
 
     public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetoothMac";
 
-    public static final String SERVER_PORT_NUMBER = "port";
-
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
-    private static final String SERVICE_DEVICE_AVAILABILITY = "available";
+    private static final String SERVICE_DEVICE_AVAILABILITY = "av";
 
     private boolean isSuperNodeEnabled=false;
+
+    private boolean enableNetworkServiceDiscovery=true;
 
     private BluetoothServerAndroid bluetoothServerAndroid;
 
@@ -97,6 +83,9 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private ConnectivityManager connectivityManager;
 
+    private NSDHelperAndroid nsdHelperAndroid;
+
+
 
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
@@ -108,6 +97,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void init(Object context) {
         networkService = (NetworkServiceAndroid)context;
         bluetoothServerAndroid=new BluetoothServerAndroid(this);
+        nsdHelperAndroid=new NSDHelperAndroid(this);
 
         wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         connectivityManager= (ConnectivityManager) networkService.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -120,6 +110,15 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
 
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
+    }
+
+    /**
+     * Start network service discovery enabled or not when supernode mode is enabled.
+     * @param enableNetworkServiceDiscovery when true=Network Service discovery will be enabled,
+     *                                      false= Disabling it, by default is true.
+     */
+    public void setNetworkServiceDiscoveryEnabled(boolean enableNetworkServiceDiscovery){
+        this.enableNetworkServiceDiscovery=enableNetworkServiceDiscovery;
     }
 
     /**
@@ -170,9 +169,15 @@ public class NetworkManagerAndroid extends NetworkManager{
            WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
            wifiDirectHandler.stopServiceDiscovery();
            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-           wifiDirectHandler.addLocalService(CoreBuildConfig.NETWORK_SERVICE_NAME, localService());
+           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
            isSuperNodeEnabled=true;
            bluetoothServerAndroid.start();
+           if(enableNetworkServiceDiscovery){
+               if(nsdHelperAndroid.isDiscoveringNetworkService()){
+                   nsdHelperAndroid.stopNSDiscovery();
+               }
+               nsdHelperAndroid.registerNSDService();
+           }
            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
        }
     }
@@ -186,9 +191,13 @@ public class NetworkManagerAndroid extends NetworkManager{
             }
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
+           if(enableNetworkServiceDiscovery){
+               nsdHelperAndroid.startNSDiscovery();
+           }
             isSuperNodeEnabled=false;
         }
     }
+
 
     @Override
     public boolean isSuperNodeEnabled() {
@@ -289,7 +298,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
         HashMap<String,String> record=new HashMap<>();
         record.put(SERVICE_DEVICE_AVAILABILITY,"available");
-        record.put(SERVER_PORT_NUMBER,"8001");
+        record.put(SD_TXT_KEY_PORT,String.valueOf(SERVICE_PORT));
         record.put(SD_TXT_KEY_BT_MAC, deviceBluetoothMacAddress);
         record.put(SD_TXT_KEY_IP_ADDR, deviceIpAddress);
         return record;
@@ -321,6 +330,10 @@ public class NetworkManagerAndroid extends NetworkManager{
         LocalBroadcastManager.getInstance(networkService).unregisterReceiver(mBroadcastReceiver);
         if(bluetoothServerAndroid !=null){
             bluetoothServerAndroid.stop();
+        }
+
+        if(nsdHelperAndroid!=null){
+            nsdHelperAndroid.unregisterNSDService();
         }
 
     }
@@ -365,5 +378,8 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         return null;
     }
+
+
+
 
 }

@@ -3,25 +3,17 @@ package com.ustadmobile.port.android.netwokmanager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
-
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
-import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.EXTRA_SERVICE_NAME;
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
-import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.SERVICE_NAME;
 
 
 public class NetworkServiceAndroid extends Service{
@@ -43,7 +35,9 @@ public class NetworkServiceAndroid extends Service{
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
         bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
         networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
+        networkManagerAndroid.setNetworkServiceDiscoveryEnabled(true);
         networkManagerAndroid.init(NetworkServiceAndroid.this);
+
     }
 
 

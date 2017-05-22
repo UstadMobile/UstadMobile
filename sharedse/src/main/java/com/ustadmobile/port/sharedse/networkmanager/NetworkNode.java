@@ -9,9 +9,11 @@ public class NetworkNode {
     private String deviceIpAddress;
     private String deviceWifiDirectMacAddress;
     private int port;
+    private long lastUpdated;
 
-    public NetworkNode(String deviceWifiDirectMacAddress){
+    public NetworkNode(String deviceWifiDirectMacAddress,String deviceIpAddress){
         this.deviceWifiDirectMacAddress=deviceWifiDirectMacAddress;
+        this.deviceIpAddress=deviceIpAddress;
     }
 
 
@@ -47,9 +49,17 @@ public class NetworkNode {
         this.port = port;
     }
 
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof NetworkNode && getDeviceWifiDirectMacAddress().equals(deviceWifiDirectMacAddress);
+        return object instanceof NetworkNode && (getDeviceWifiDirectMacAddress().equals(deviceWifiDirectMacAddress)
+                || getDeviceIpAddress().equals(deviceIpAddress));
     }
 }
