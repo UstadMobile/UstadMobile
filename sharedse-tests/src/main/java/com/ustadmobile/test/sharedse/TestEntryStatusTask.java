@@ -119,7 +119,7 @@ public class TestEntryStatusTask{
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
-        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList);
+        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
         synchronized (statusRequestLock){
             statusRequestLock.wait(DEFAULT_WAIT_TIME*6);
         }
