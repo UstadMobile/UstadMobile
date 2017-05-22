@@ -79,6 +79,11 @@ public class TestEntryStatusTask{
             }
 
             @Override
+            public void networkNodeUpdated(NetworkNode node) {
+
+            }
+
+            @Override
             public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
 
             }

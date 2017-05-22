@@ -15,6 +15,8 @@ public abstract class NetworkTask {
     public int queueId;
     public int taskId;
     public int taskType;
+    public boolean useBluetooth;
+    public boolean useHttp;
 
     public abstract void start();
     public abstract void cancel();
@@ -31,6 +33,19 @@ public abstract class NetworkTask {
         this.managerTaskListener =listener;
     }
 
+    public boolean isUseBluetooth() {
+        return useBluetooth;
+    }
 
+    public void setUseBluetooth(boolean useBluetooth) {
+        this.useBluetooth = useBluetooth;
+    }
 
+    public boolean isUseHttp() {
+        return useHttp;
+    }
+
+    public void setUseHttp(boolean useHttp) {
+        this.useHttp = useHttp;
+    }
 }

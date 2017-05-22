@@ -58,14 +58,13 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private static final String DEFAULT_BLUETOOTH_ADDRESS="02:00:00:00:00:00";
 
-    public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetoothMac";
+    public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetooth_address";
 
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
+
     private static final String SERVICE_DEVICE_AVAILABILITY = "av";
 
     private boolean isSuperNodeEnabled=false;
-
-    private boolean enableNetworkServiceDiscovery=true;
 
     private BluetoothServerAndroid bluetoothServerAndroid;
 
@@ -112,14 +111,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
     }
 
-    /**
-     * Start network service discovery enabled or not when supernode mode is enabled.
-     * @param enableNetworkServiceDiscovery when true=Network Service discovery will be enabled,
-     *                                      false= Disabling it, by default is true.
-     */
-    public void setNetworkServiceDiscoveryEnabled(boolean enableNetworkServiceDiscovery){
-        this.enableNetworkServiceDiscovery=enableNetworkServiceDiscovery;
-    }
 
     /**
      * Broadcast receiver that simply receives broadcasts and passes to the SharedSE network manager
@@ -172,12 +163,10 @@ public class NetworkManagerAndroid extends NetworkManager{
            wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
            isSuperNodeEnabled=true;
            bluetoothServerAndroid.start();
-           if(enableNetworkServiceDiscovery){
-               if(nsdHelperAndroid.isDiscoveringNetworkService()){
-                   nsdHelperAndroid.stopNSDiscovery();
-               }
-               nsdHelperAndroid.registerNSDService();
+           if(nsdHelperAndroid.isDiscoveringNetworkService()){
+               nsdHelperAndroid.stopNSDiscovery();
            }
+           nsdHelperAndroid.registerNSDService();
            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
        }
     }
@@ -191,9 +180,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             }
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
-           if(enableNetworkServiceDiscovery){
-               nsdHelperAndroid.startNSDiscovery();
-           }
+            nsdHelperAndroid.startNSDiscovery();
             isSuperNodeEnabled=false;
         }
     }

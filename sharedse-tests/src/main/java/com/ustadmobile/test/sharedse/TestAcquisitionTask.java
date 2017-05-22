@@ -88,6 +88,11 @@ public class TestAcquisitionTask{
             }
 
             @Override
+            public void networkNodeUpdated(NetworkNode node) {
+
+            }
+
+            @Override
             public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int source) {
                 for(String entry:ENTRY_IDS){
                     if(entryId.equals(entry)){

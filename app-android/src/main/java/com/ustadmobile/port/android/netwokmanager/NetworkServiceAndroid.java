@@ -35,7 +35,6 @@ public class NetworkServiceAndroid extends Service{
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
         bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
         networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
-        networkManagerAndroid.setNetworkServiceDiscoveryEnabled(true);
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
     }

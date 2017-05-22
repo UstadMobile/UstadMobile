@@ -10,6 +10,7 @@ public interface NetworkManagerListener {
     void fileStatusCheckInformationAvailable(List<String> fileIds);
     void entryStatusCheckCompleted(NetworkTask task);
     void networkNodeDiscovered(NetworkNode node);
+    void networkNodeUpdated(NetworkNode node);
     void fileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource);
     void wifiConnectionChanged(String ssid);
 }
