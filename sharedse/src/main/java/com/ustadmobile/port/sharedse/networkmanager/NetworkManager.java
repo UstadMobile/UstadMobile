@@ -78,13 +78,40 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         return false;
     }
 
-    public List<String> requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList){
+    /**
+     * Request the status of given entryIds to see if they are available locally or not
+     *
+     * @param entryIds EntryIDs (e.g. as per an OPDS catalog) to look for
+     * @param mContext System context
+     * @param nodeList
+     * @param useBluetooth If true - use bluetooth addresses that were discovered using WiFi direct to ask for availability
+     * @param useHttp If true - use HTTP to talk with nodes discovered which are reachable using HTTP (e.g. nodes already connected to the same wifi network)
+     *
+     * @return
+     */
+    public List<String> requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
         EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
         task.setTaskType(QUEUE_ENTRY_STATUS);
+
+        //TODO: set parameters for task
+
         queueTask(task);
         return entryIds;
     }
 
+    /**
+     * Request the status of given entryIds to see if they are available locally or not. By default
+     * use both bluetooth and http
+     *
+     * @param entryIds EntryIDs (e.g. as per an OPDS catalog) to look for
+     * @param mContext System context
+     * @param nodeList
+     *
+     * @return
+     */
+    public List<String> requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList) {
+        return requestFileStatus(entryIds, mContext, nodeList, true, true);
+    }
 
     public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext){
         AcquisitionTask task=new AcquisitionTask(feed,this);

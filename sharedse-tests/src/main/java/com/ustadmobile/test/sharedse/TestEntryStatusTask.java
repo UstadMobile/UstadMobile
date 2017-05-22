@@ -39,7 +39,7 @@ public class TestEntryStatusTask{
 
 
     @Test
-    public void testEntryStatus() throws IOException, InterruptedException {
+    public void testEntryStatusBluetooth() throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
         Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());
@@ -67,9 +67,11 @@ public class TestEntryStatusTask{
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceBluetoothMacAddress().equals(
-                        TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
-                   synchronized (nodeDiscoveryLock){
+                if(node.getDeviceBluetoothMacAddress() != null &&
+                    node.getDeviceBluetoothMacAddress().equals(
+                    TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
+
+                    synchronized (nodeDiscoveryLock){
                        nodeDiscoveryLock.notify();
                    }
                 }
