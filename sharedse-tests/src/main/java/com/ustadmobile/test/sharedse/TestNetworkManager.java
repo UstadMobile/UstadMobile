@@ -26,14 +26,17 @@ import static org.hamcrest.CoreMatchers.is;
  */
 
 public class TestNetworkManager {
-
-    public   static final int NODE_DISCOVERY_TIMEOUT =(2*60 * 1000)+2000;//2min2sec in ms
+    public static final int NODE_DISCOVERY_TIMEOUT =(2*60 * 1000)+2000;//2min2sec in ms
 
     @Test
     public void testWifiDirectDiscovery() throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        Assume.assumeTrue("Network test wifi and bluetooth enabled",
-                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+
+        Assume.assumeTrue("Network test is enabled: wifi and bluetooth enabled",
+            manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+
+        Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
+        Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());
 
         final Object nodeDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {

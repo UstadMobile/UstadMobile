@@ -4,6 +4,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
 import org.junit.Assume;

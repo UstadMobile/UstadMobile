@@ -7,6 +7,7 @@ if (keyStorePropertiesExists) {
 }
 
 apply plugin: 'com.android.application'
+apply plugin: "jacoco"
 
 buildscript {
     repositories {
@@ -33,10 +34,7 @@ if (project.file("buildconfig.local.properties").exists()) {
 }
 
 task startTestSlaveServer(type: Exec) {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    def sdkPath = properties.getProperty('sdk.dir')
-    def adb = sdkPath + "/platform-tools/adb"
+    def adb = android.getAdbExe().getAbsolutePath()
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'install', '-r', '-s', "$projectDir/build/outputs/apk/app-android-remotetestslave-debug.apk"
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity','-a','android.intent.action.MAIN','-c','android.intent.category.LAUNCHER'
 }
@@ -110,6 +108,10 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+        }
+
+        debug {
+            testCoverageEnabled = true
         }
     }
 

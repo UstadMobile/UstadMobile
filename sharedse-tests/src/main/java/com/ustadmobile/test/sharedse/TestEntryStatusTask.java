@@ -44,8 +44,6 @@ public class TestEntryStatusTask{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
-        Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
-        Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());
 
         final boolean[] fileAvailable = new boolean[ENTRY_IDS.length];
         final Object nodeDiscoveryLock = new Object();
@@ -127,7 +125,7 @@ public class TestEntryStatusTask{
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
-        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList,true,false);
+        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
         synchronized (statusRequestLock){
             statusRequestLock.wait(DEFAULT_WAIT_TIME*6);
         }
