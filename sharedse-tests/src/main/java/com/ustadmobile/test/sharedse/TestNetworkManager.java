@@ -70,13 +70,13 @@ public class TestNetworkManager {
         manager.addNetworkManagerListener(responseListener);
 
         //enable supernode mode on the remote test device
-        String enableNodeUrl = "http://"+ PlatformTestUtil.getRemoteTestEndpoint() +":"+ TEST_REMOTE_SLAVE_SERVER_PORT + "/?cmd=SUPERNODE&enabled=true";
+        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
         if(manager.getNodeByBluetoothAddr(TEST_REMOTE_BLUETOOTH_DEVICE) == null) {
             synchronized (nodeDiscoveryLock) {
-                try { nodeDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT); }
+                try { nodeDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
                 catch(InterruptedException e ) {
                     e.printStackTrace();
                 }
@@ -84,8 +84,7 @@ public class TestNetworkManager {
         }
 
         //disable supernode mode on the remote test device
-        String disableNodeUrl = "http://"+ PlatformTestUtil.getRemoteTestEndpoint() +":"
-                + TEST_REMOTE_SLAVE_SERVER_PORT + "/?cmd=SUPERNODE&enabled=false";
+        String disableNodeUrl =PlatformTestUtil.getRemoteTestEndpoint()+  "?cmd=SUPERNODE&enabled=false";
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 

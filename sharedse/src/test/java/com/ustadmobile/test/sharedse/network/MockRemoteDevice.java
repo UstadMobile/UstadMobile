@@ -25,13 +25,14 @@ public class MockRemoteDevice {
 
     private RemoteTestServerHttpd mockRemoteDeviceControlHttpd;
 
-
-    public MockRemoteDevice(String bluetoothAddr, Object context) {
+    public MockRemoteDevice(String bluetoothAddr, MockWirelessArea wirelessArea, MockNetworkManager networkManager, Object context) {
         this.context = context;
         this.bluetoothAddr = bluetoothAddr;
-        networkManager = new MockNetworkManager(bluetoothAddr);
-        networkManager.init(context, TestConstants.TEST_NETWORK_SERVICE_NAME);
+        this.networkManager = networkManager;
+        networkManager.init(context);
         mockBluetoothServer = new MockBluetoothServer(networkManager);
+        if(wirelessArea != null)
+            wirelessArea.addDevice(this);
     }
 
 

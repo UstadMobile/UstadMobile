@@ -10,6 +10,18 @@ repositories {
     }
 }
 
+/*
+ * Added to overcome limitation on Android studio as per:
+ *  http://tools.android.com/knownissues#TOC-JUnit-tests-missing-resources-in-classpath-when-run-from-Studio
+ */
+task copyTestResources(type: Copy) {
+    from "${projectDir}/src/test/resources"
+    from "${projectDir}/../core-tests/src/main/resources"
+    into "${buildDir}/classes/test"
+}
+processTestResources.dependsOn copyTestResources
+
+
 dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
     compile "org.json:json:20160212";

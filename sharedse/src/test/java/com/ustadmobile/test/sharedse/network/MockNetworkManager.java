@@ -1,5 +1,6 @@
 package com.ustadmobile.test.sharedse.network;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -10,7 +11,10 @@ import com.ustadmobile.test.sharedse.impl.TestContext;
 
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 
 /**
@@ -23,12 +27,38 @@ public class MockNetworkManager extends NetworkManager {
 
     private String mockBluetoothAddr;
 
+    private String mockIpAddr;
 
-    public MockNetworkManager(String bluetoothAddr) {
+    private MockWirelessArea wirelessArea;
+
+    private Timer wifiDirectBroadcastTimer;
+
+    public static final int WIFI_DIRECT_BROADCAST_INTERVAL = (30*1000);//Broadcast service records every 30s
+
+    public static final int WIFI_DIRECT_BROADCAST_DELAY = 1000;
+
+    public static final String TMP_MOCK_WIFIDIRECT_MAC = "01:00:00:00:00:00";
+
+
+    class WifiDirectBroadcastTimerTask extends TimerTask{
+
+        private HashMap<String, String> txtRecords;
+
+        WifiDirectBroadcastTimerTask(HashMap<String, String> txtRecords) {
+            this.txtRecords = txtRecords;
+        }
+
+        @Override
+        public void run() {
+            MockNetworkManager.this.wirelessArea.sendSdTxtRecords(CoreBuildConfig.NETWORK_SERVICE_NAME,
+                    txtRecords, MockNetworkManager.this);
+        }
+    };
+
+    public MockNetworkManager(String bluetoothAddr, MockWirelessArea wirelessArea) {
         mockRemoteDevices = new Vector<>();
         this.mockBluetoothAddr = bluetoothAddr;
-
-
+        this.wirelessArea = wirelessArea;
     }
 
     @Override
@@ -43,7 +73,9 @@ public class MockNetworkManager extends NetworkManager {
 
     public MockRemoteDevice addMockTestDriver(String bluetoothAddr) {
         Object mockRemoteContext = new TestContext();
-        MockRemoteDevice remoteDevice = addMockRemoteDevice(bluetoothAddr, mockRemoteContext);
+        MockNetworkManager driverNetworkManager = new MockNetworkManager(bluetoothAddr, wirelessArea);
+        MockRemoteDevice remoteDevice = addMockRemoteDevice(bluetoothAddr, driverNetworkManager,
+                mockRemoteContext);
         remoteDevice.startTestControlServer();
 
         return remoteDevice;
@@ -54,29 +86,44 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
-
+        if(enabled && wifiDirectBroadcastTimer == null) {
+            startSuperNode();
+        }else if(!enabled && wifiDirectBroadcastTimer != null) {
+            stopSuperNode();
+        }
     }
 
     @Override
-    public void startSuperNode() {
-
+    public synchronized void startSuperNode() {
+        if(wifiDirectBroadcastTimer == null) {
+            HashMap<String, String> txtRecords = new HashMap<>();
+            txtRecords.put(NetworkManager.SD_TXT_KEY_BT_MAC, mockBluetoothAddr);
+            txtRecords.put(NetworkManager.SD_TXT_KEY_IP_ADDR,
+                    MockNetworkManager.this.getDeviceIPAddress());
+            wifiDirectBroadcastTimer = new Timer();
+            wifiDirectBroadcastTimer.scheduleAtFixedRate(new WifiDirectBroadcastTimerTask(txtRecords),
+                    WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
+        }
     }
 
     @Override
-    public void stopSuperNode() {
-
+    public synchronized void stopSuperNode() {
+        if(wifiDirectBroadcastTimer != null) {
+            wifiDirectBroadcastTimer.cancel();
+            wifiDirectBroadcastTimer = null;
+        }
     }
 
     @Override
-    public boolean isSuperNodeEnabled() {
-        return false;
+    public synchronized boolean isSuperNodeEnabled() {
+        return wifiDirectBroadcastTimer != null;
     }
 
 
 
     @Override
     public boolean isBluetoothEnabled() {
-        return false;
+        return true;
     }
 
     @Override
@@ -86,7 +133,7 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public boolean isWiFiEnabled() {
-        return false;
+        return true;
     }
 
     @Override
@@ -121,15 +168,36 @@ public class MockNetworkManager extends NetworkManager {
 
     }
 
+    @Override
+    public String getDeviceIPAddress() {
+        return mockIpAddr;
+    }
+
+
+    public void setMockDeviceIpAddress(String mockIpAddr) {
+        this.mockIpAddr = mockIpAddr;
+    }
 
     /**
      *
      * @param bluetoothAddr
      * @param context
      */
-    public MockRemoteDevice addMockRemoteDevice(String bluetoothAddr, Object context) {
-        MockRemoteDevice remoteDevice = new MockRemoteDevice(bluetoothAddr, context);
+    public MockRemoteDevice addMockRemoteDevice(String bluetoothAddr, MockNetworkManager manager, Object context) {
+        MockRemoteDevice remoteDevice = new MockRemoteDevice(bluetoothAddr, wirelessArea, manager, context);
         mockRemoteDevices.add(remoteDevice);
         return remoteDevice;
+    }
+
+    public MockWirelessArea getWirelessArea() {
+        return wirelessArea;
+    }
+
+    public void setWirelessArea(MockWirelessArea wirelessArea) {
+        this.wirelessArea = wirelessArea;
+    }
+
+    public String getWifiDirectMacAddr() {
+        return TMP_MOCK_WIFIDIRECT_MAC;
     }
 }
