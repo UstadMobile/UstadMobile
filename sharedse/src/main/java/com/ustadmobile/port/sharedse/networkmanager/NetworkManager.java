@@ -154,8 +154,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
             if(node == null) {
                 node = new NetworkNode(senderMacAddr,ipAddr);
                 node.setDeviceIpAddress(ipAddr);
-            }else{
-                position=knownNetworkNodes.indexOf(node);
             }
 
             node.setDeviceBluetoothMacAddress(btAddr);
@@ -167,7 +165,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
                 knownNetworkNodes.add(node);
                 fireNetworkNodeDiscovered(node);
             }else{
-                knownNetworkNodes.set(position,node);
                 fireNetworkNodeUpdated(node);
             }
 
@@ -190,8 +187,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
             if(node == null) {
                 node = new NetworkNode("",ipAddress);
-            }else{
-                position=knownNetworkNodes.indexOf(node);
             }
 
             node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
@@ -201,7 +196,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
                 knownNetworkNodes.add(node);
                 fireNetworkNodeDiscovered(node);
             }else{
-                knownNetworkNodes.set(position,node);
                 fireNetworkNodeUpdated(node);
             }
         }
