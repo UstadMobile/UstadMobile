@@ -29,7 +29,7 @@ public class TestNetworkManager {
 
 
     @Test
-    public void testDiscovery() throws IOException{
+    public void testWifiDirectDiscovery() throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 
         Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
