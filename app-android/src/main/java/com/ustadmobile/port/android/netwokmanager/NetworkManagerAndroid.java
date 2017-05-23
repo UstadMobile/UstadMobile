@@ -12,7 +12,12 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
@@ -36,9 +41,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
+import edu.rit.se.wifibuddy.ServiceData;
+import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
+import static edu.rit.se.wifibuddy.WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED;
 
 /**
  * Created by kileha3 on 09/05/2017.
@@ -54,8 +62,6 @@ public class NetworkManagerAndroid extends NetworkManager{
     private static  Long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
 
     private final static int WAITING_TIME_TO_UPDATE = 500;
-
-    public static final int SERVICE_PORT=8001;
 
     private static final String DEFAULT_BLUETOOTH_ADDRESS="02:00:00:00:00:00";
 
@@ -85,6 +91,8 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private NSDHelperAndroid nsdHelperAndroid;
 
+    private int currentWifiDirectGroupStatus=-1;
+
 
 
     /**
@@ -108,7 +116,8 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
-
+        filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
+        filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -130,6 +139,20 @@ public class NetworkManagerAndroid extends NetworkManager{
                     handleWifiDirectSdTxtRecordsAvailable(txtRecord.getFullDomain(),deviceMac, (HashMap<String, String>) txtRecord.getRecord());
 
                     break;
+                case WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION:
+                    boolean isConnected=intent.getBooleanExtra(EXTRA_NOPROMPT_NETWORK_SUCCEEDED,false);
+                    if(isConnected){
+                        handleWifiDirectConnectionChanged(wifiManager.getConnectionInfo().getSSID());
+                    }
+                    break;
+                case WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION:
+                    boolean informationAvailable=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup().isGroupOwner();
+                    if(informationAvailable){
+                        currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
+                        WifiP2pGroup wifiP2pGroup=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
+                        handleWifiDirectGroupCreated(new WiFiDirectGroup(wifiP2pGroup.getNetworkName(),
+                                wifiP2pGroup.getPassphrase()));
+                    }
             }
 
         }
@@ -157,6 +180,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void startSuperNode() {
+
        if(networkService.getWifiDirectHandlerAPI()!=null){
            WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
            wifiDirectHandler.stopServiceDiscovery();
@@ -368,27 +392,71 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
+    public void connectWifi(String SSID, String passPhrase) {
+        WifiConfiguration configuration = new WifiConfiguration();
+        configuration.SSID = "\"" + SSID + "\"";
+        configuration.preSharedKey = "\"" + passPhrase + "\"";
+        int netId = wifiManager.addNetwork(configuration);
+        wifiManager.disconnect();
+        wifiManager.enableNetwork(netId, true);
+        wifiManager.reconnect();
+    }
+
+    @Override
     public void createWifiDirectGroup() {
+
+        networkService.getWifiDirectHandlerAPI().setAddLocalServiceAfterGroupCreation(false);
+        ServiceData serviceData= new ServiceData(NETWORK_SERVICE_NAME,SERVICE_PORT,
+                new HashMap<String,String>() ,ServiceType.PRESENCE_TCP);
+        networkService.getWifiDirectHandlerAPI().startAddingNoPromptService(serviceData, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION;
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+            }
+        });
 
     }
 
     @Override
     public void removeWiFiDirectGroup() {
+        networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                handleWifiDirectGroupRemoved(true);
+                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+            }
 
+            @Override
+            public void onFailure(int reason) {
+                handleWifiDirectGroupRemoved(false);
+            }
+        });
     }
 
     @Override
     public WiFiDirectGroup getWifiDirectGroup() {
-        return null;
+        WifiP2pGroup groupInfo=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
+        if(groupInfo!=null){
+
+           return new WiFiDirectGroup(groupInfo.getNetworkName(), groupInfo.getPassphrase());
+        }else{
+            return null;
+        }
     }
 
     @Override
     public String getWifiDirectIpAddress() {
-        return null;
+        WifiP2pInfo wifiP2pInfo=networkService.getWifiDirectHandlerAPI().getWifiP2pInfo();
+        return String.valueOf(wifiP2pInfo.groupOwnerAddress);
     }
 
     @Override
     public int getWifiDirectGroupStatus() {
-        return 0;
+        return currentWifiDirectGroupStatus;
     }
 }

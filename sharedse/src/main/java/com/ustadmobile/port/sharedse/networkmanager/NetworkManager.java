@@ -5,7 +5,6 @@ import com.ustadmobile.core.p2p.P2PManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +22,10 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final int QUEUE_ENTRY_ACQUISITION=1;
     public static final int NOTIFICATION_TYPE_SERVER=0;
     public static final int NOTIFICATION_TYPE_ACQUISITION=1;
-    public static final int DOWNLOAD_SOURCE_CLOUD=1;
-    public static final int DOWNLOAD_SOURCE_PEER_SAME_NETWORK=2;
-    public static final int DOWNLOAD_SOURCE_PEER_DIFFERENT_NETWORK=3;
+    public static final int DOWNLOAD_FROM_CLOUD =1;
+    public static final int DOWNLOAD_FROM_PEER_ON_SAME_NETWORK =2;
+    public static final int DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK =3;
+    public static final int SERVICE_PORT=8001;
     public BluetoothServer bluetoothServer;
 
     public static final String SD_TXT_KEY_IP_ADDR = "a";
@@ -299,8 +299,24 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         return null;
     }
 
+    public EntryCheckResponse getEntryResponseWithLocalFile(String entryId){
+        List<EntryCheckResponse> responseList=getEntryResponses().get(entryId);
+        if(responseList!=null &&!responseList.isEmpty()){
+            for(EntryCheckResponse response: responseList){
+                if(response.isFileAvailable()){
+                    return response;
+                }
+            }
+        }
+        return null;
+    }
+
     public void handleFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource){
         fireFileAcquisitionInformationAvailable(entryId,downloadId,downloadSource);
+    }
+
+    public void handleWifiDirectConnectionChanged(String ssid){
+        fireWiFiDirectConnectionChanged(ssid);
     }
 
 
@@ -345,6 +361,14 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
             }
         }
     }
+
+    protected void fireWiFiDirectConnectionChanged(String ssid){
+        synchronized (networkManagerListeners) {
+            for(NetworkManagerListener listener : networkManagerListeners){
+                listener.wifiConnectionChanged(ssid);
+            }
+        }
+    }
     public abstract int addNotification(int notificationType,String title,String message);
 
     public abstract void updateNotification(int notificationId,int progress,String title,String message);
@@ -376,6 +400,18 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public abstract String getDeviceIPAddress();
 
 
+    public void handleWifiDirectGroupCreated(WiFiDirectGroup wiFiDirectGroup){
+        fireWifiDirectGroupCreated(wiFiDirectGroup,null);
+    }
+
+    public void handleWifiDirectGroupRemoved(boolean isGroupRemoved){
+        fireWifiDirectGroupRemoved(isGroupRemoved,null);
+    }
+
+
+
+    public abstract void connectWifi(String SSID,String passPhrase);
+
     /**
      * Create a new WiFi direct group on this device. A WiFi direct group
      * will create a new SSID and passphrase other devices can use to connect in "legacy" mode.
@@ -400,6 +436,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
      * @return The active WiFi direct group (if any) - otherwise null
      */
     public abstract WiFiDirectGroup getWifiDirectGroup();
+
 
 
     /**

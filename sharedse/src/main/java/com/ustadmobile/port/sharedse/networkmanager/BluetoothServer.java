@@ -39,9 +39,12 @@ public abstract class BluetoothServer {
      *
      * ACQUIRE id1;id2;id3
      */
-    public static final String CMD_ACQUIRE_ENTRIES = "ACQUIRE";
+    public static final String CMD_ACQUIRE_ENTRY = "ACQUIRE";
+
+    public static final String CMD_SEPARATOR =";";
 
     public static final String CMD_ENTRY_STATUS_FEEDBACK = "STATUS_FEEDBACK";
+    public static final String CMD_ACQUIRE_ENTRY_FEEDBACK = "ACQUIRE_FEEDBACK";
 
     protected NetworkManager networkManager;
 
@@ -54,8 +57,8 @@ public abstract class BluetoothServer {
     public abstract void start();
     public abstract void stop();
 
-    public void handleNodeConnected(String deviceAddress,InputStream inputStream,
-                                             OutputStream outputStream) throws IOException {
+    public void handleNodeConnected(String deviceAddress, InputStream inputStream,
+                                    final OutputStream outputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String clientInput = reader.readLine();
         if(clientInput.startsWith(CMD_ENTRY_STATUS_QUERY)) {
@@ -69,13 +72,48 @@ public abstract class BluetoothServer {
                 results[i] = info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED;
                 response += results[i] ? '1' : '0';
                 if(i < entryIds.length - 1)
-                    response += ';';
+                    response += CMD_SEPARATOR;
             }
             response += '\n';
             outputStream.write(response.getBytes());
             outputStream.flush();
-        }else if(clientInput.startsWith(CMD_ACQUIRE_ENTRIES)) {
-            //start no-prompt network
+        }else if(clientInput.startsWith(CMD_ACQUIRE_ENTRY)) {
+            WiFiDirectGroup group=networkManager.getWifiDirectGroup();
+
+           if(group!=null){
+
+               try{
+                   String acquireFeedback=CMD_ACQUIRE_ENTRY_FEEDBACK+" "+group.getSsid()+CMD_SEPARATOR
+                           +group.getPassphrase()+CMD_SEPARATOR+networkManager.getWifiDirectIpAddress()+"\n";
+                   outputStream.write(acquireFeedback.getBytes());
+                   outputStream.flush();
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
+           }else{
+               WiFiDirectGroupListener listener=new WiFiDirectGroupListener() {
+                   @Override
+                   public void groupCreated(WiFiDirectGroup group, Exception err) {
+                       if(err==null){
+                           try{
+                               String acquireFeedback=CMD_ACQUIRE_ENTRY_FEEDBACK+" "+group.getSsid()+CMD_SEPARATOR
+                                       +group.getPassphrase()+CMD_SEPARATOR+networkManager.getWifiDirectIpAddress()+"\n";
+                               outputStream.write(acquireFeedback.getBytes());
+                               outputStream.flush();
+                           } catch (IOException e) {
+                               e.printStackTrace();
+                           }
+                       }
+                   }
+
+                   @Override
+                   public void groupRemoved(boolean successful, Exception err) {
+
+                   }
+               };
+               networkManager.addWifiDirectGroupListener(listener);
+               networkManager.createWifiDirectGroup();
+           }
         }
     }
 

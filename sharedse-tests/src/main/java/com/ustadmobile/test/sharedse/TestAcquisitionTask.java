@@ -43,17 +43,17 @@ public class TestAcquisitionTask{
     private static final String ENTRY_LINK_REL="http://opds-spec.org/acquisition";
     private static final String ENTRY_LINK_MIME="application/epub+zip";
     private static final String ENTRY_LINK_HREF="/media/eXeUpload/d3288c3b-89b3-4541-a1f0-13ccf0b0eacc.um.TheLittleChicks.epub";
-    private static final String ENTRY_ID="202b10fe-b028-4b84-9b84-852aa766607d";
+    private static final String ENTRY_ID_PRESENT ="202b10fe-b028-4b84-9b84-852aa766607d";
     private static final String ENTRY_ID_NOT_PRESENT = "202b10fe-b028-4b84-9b84-852aa766607dx";
-    public static final String[] ENTRY_IDS = new String[]{ENTRY_ID, ENTRY_ID_NOT_PRESENT};
+    public static final String[] ENTRY_IDS = new String[]{ENTRY_ID_PRESENT,ENTRY_ID_NOT_PRESENT};
 
-    ArrayList<HashMap<String,Integer>> downloadSources=new ArrayList<>();
+    private ArrayList<HashMap<String,Integer>> downloadSources=new ArrayList<>();
 
-
+    @Test
     public void testAcquisition() throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
-            manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         final boolean[] fileAvailable = new boolean[ENTRY_IDS.length];
         final Object nodeDiscoveryLock = new Object();
@@ -71,7 +71,6 @@ public class TestAcquisitionTask{
 
             @Override
             public void entryStatusCheckCompleted(NetworkTask task) {
-                //TODO; Notify here
                 synchronized (statusRequestLock){
                     statusRequestLock.notify();
                 }
@@ -79,8 +78,10 @@ public class TestAcquisitionTask{
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceBluetoothMacAddress().equals(
-                        TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
+                if(node.getDeviceBluetoothMacAddress() != null &&
+                        node.getDeviceBluetoothMacAddress().equals(
+                                TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
+
                     synchronized (nodeDiscoveryLock){
                         nodeDiscoveryLock.notify();
                     }
@@ -93,19 +94,17 @@ public class TestAcquisitionTask{
             }
 
             @Override
-            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int source) {
-                for(String entry:ENTRY_IDS){
-                    if(entryId.equals(entry)){
-                        HashMap<String,Integer> map=new HashMap<>();
-                        map.put(entryId,source);
-                        if(!downloadSources.contains(map)){
-                            downloadSources.add(map);
-                        }
-                    }
+            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int sources) {
+                HashMap<String,Integer> sourceData=new HashMap<>();
+                sourceData.put(entryId,sources);
+                if(!downloadSources.contains(sourceData)){
+                    downloadSources.add(sourceData);
                 }
 
-                if(downloadSources.size()==2){
-                    acquisitionLock.notify();
+                if(downloadSources.size()>=1){
+                    synchronized (acquisitionLock){
+                       acquisitionLock.notify();
+                    }
                 }
             }
 
@@ -118,8 +117,7 @@ public class TestAcquisitionTask{
         };
         manager.addNetworkManagerListener(responseListener);
         //enable supernode mode on the remote test device
-        String enableNodeUrl = "http://"+ PlatformTestUtil.getRemoteTestEndpoint() +":"
-                + TEST_REMOTE_SLAVE_SERVER_PORT + "/?cmd=SUPERNODE&enabled=true";
+        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
@@ -139,26 +137,23 @@ public class TestAcquisitionTask{
         Collections.addAll(entryLIst, ENTRY_IDS);
 
         //disable supernode mode on the remote test device
-        String disableNodeUrl = "http://"+ PlatformTestUtil.getRemoteTestEndpoint() +":"
-                + TEST_REMOTE_SLAVE_SERVER_PORT + "/?cmd=SUPERNODE&enabled=false";
+        String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
-        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList);
+        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
         synchronized (statusRequestLock){
-            statusRequestLock.wait(DEFAULT_WAIT_TIME*6);
+            statusRequestLock.wait(DEFAULT_WAIT_TIME*2);
         }
 
         Assert.assertTrue("Available entry reported as locally available", fileAvailable[0]);
-        Assert.assertFalse("Unavailable entry reported as not available", fileAvailable[1]);
-
+        Assert.assertFalse("Unavailable entry reported as not available",  fileAvailable[1]);
         //Create a feed manually
-        UstadJSOPDSFeed feed=new UstadJSOPDSFeed(FEED_SRC_URL,FEED_TITLE,ENTRY_ID);
+        UstadJSOPDSFeed feed=new UstadJSOPDSFeed(FEED_SRC_URL,FEED_TITLE, ENTRY_ID_PRESENT);
         feed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
                 FEED_LINK_MIME, FEED_LINK_HREF);
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
-                "http://"+ PlatformTestUtil.getRemoteTestEndpoint() +":"
-                        + TEST_REMOTE_SLAVE_SERVER_PORT +"/catalog/acquire.opds");
+                PlatformTestUtil.getRemoteTestEndpoint()+"/catalog/acquire.opds");
         UstadJSOPDSEntry entry=new UstadJSOPDSEntry(feed);
 
         for (String entryId : ENTRY_IDS) {
@@ -166,17 +161,17 @@ public class TestAcquisitionTask{
             entry.title = FEED_TITLE;
             entry.updated = FEED_ENTRY_UPDATED;
             entry.addLink(ENTRY_LINK_REL, ENTRY_LINK_MIME, ENTRY_LINK_HREF);
+            feed.addEntry(entry);
         }
 
-        feed.addEntry(entry);
         manager.requestAcquisition(feed,manager.getContext());
 
         synchronized (acquisitionLock){
-            acquisitionLock.wait(DEFAULT_WAIT_TIME*6);
+            acquisitionLock.wait(DEFAULT_WAIT_TIME*3);
         }
         Assert.assertThat("Available entry reported,can be downloaded locally",
-                downloadSources.get(0).get(ENTRY_IDS[0]),is(NetworkManager.DOWNLOAD_SOURCE_PEER_SAME_NETWORK));
+                downloadSources.get(0).get(ENTRY_IDS[0]),is(NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK));
         Assert.assertThat("Unavailable entry reported,can be downloaded from cloud",
-                downloadSources.get(1).get(ENTRY_IDS[1]),is(NetworkManager.DOWNLOAD_SOURCE_CLOUD));
+                downloadSources.get(1).get(ENTRY_IDS[1]),is(NetworkManager.DOWNLOAD_FROM_CLOUD));
     }
 }

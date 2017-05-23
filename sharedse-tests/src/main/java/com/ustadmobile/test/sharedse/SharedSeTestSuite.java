@@ -10,9 +10,11 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-    BasicTest.class,
-    TestNetworkManager.class,
-    TestEntryStatusTask.class
+        BluetoothServerTestSe.class,
+        TestNetworkManager.class,
+        TestEntryStatusTask.class,
+        TestAcquisitionTask.class
+
 })
 
 public abstract class SharedSeTestSuite {

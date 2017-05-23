@@ -10,6 +10,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_SEPARATOR;
+
 /**
  * Created by kileha3 on 09/05/2017.
  */
@@ -17,7 +19,6 @@ import java.util.List;
 public class EntryStatusTask extends NetworkTask implements BluetoothConnectionHandler{
 
     private List<String> entryIdList;
-    private static final String FILE_ID_SEPARATOR=";";
     private List<NetworkNode> networkNodeList;
 
     private int currentNode;
@@ -72,7 +73,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             catch(UnsupportedEncodingException ignored) {}//what device doesn't have UTF-8?
 
             if(i < entryIdList.size() - 1)
-                queryStr += FILE_ID_SEPARATOR;
+                queryStr += CMD_SEPARATOR;
         }
 
         queryStr += '\n';
@@ -83,7 +84,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             if(response.startsWith(BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK)) {
                 response=response.substring((BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK.length()+1),response.length());
 
-                for(String status: response.split(FILE_ID_SEPARATOR)){
+                for(String status: response.split(CMD_SEPARATOR)){
                     boolean responseStatus= status.equals("1");
                     entryIdStatusList.add(responseStatus);
                 }
