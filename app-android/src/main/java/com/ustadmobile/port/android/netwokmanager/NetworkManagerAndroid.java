@@ -23,6 +23,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -366,7 +367,28 @@ public class NetworkManagerAndroid extends NetworkManager{
         return null;
     }
 
+    @Override
+    public void createWifiDirectGroup() {
 
+    }
 
+    @Override
+    public void removeWiFiDirectGroup() {
 
+    }
+
+    @Override
+    public WiFiDirectGroup getWifiDirectGroup() {
+        return null;
+    }
+
+    @Override
+    public String getWifiDirectIpAddress() {
+        return null;
+    }
+
+    @Override
+    public int getWifiDirectGroupStatus() {
+        return 0;
+    }
 }
