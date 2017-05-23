@@ -143,7 +143,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
             int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
 
             NetworkNode node = null;
-            int position=-1;
             boolean newNode = true;
             if(ipAddr != null) {
                 node = getNodeByIpAddress(ipAddr);
@@ -177,7 +176,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
         if(serviceName.contains(NETWORK_SERVICE_NAME)){
             NetworkNode node = null;
-            int position=-1;
             boolean newNode = true;
             if(ipAddress != null) {
                 node = getNodeByIpAddress(ipAddress);
