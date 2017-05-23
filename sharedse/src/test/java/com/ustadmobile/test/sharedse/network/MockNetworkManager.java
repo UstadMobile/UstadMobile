@@ -5,6 +5,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
+import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 import com.ustadmobile.test.sharedse.impl.TestContext;
@@ -201,5 +202,30 @@ public class MockNetworkManager extends NetworkManager {
 
     public String getWifiDirectMacAddr() {
         return TMP_MOCK_WIFIDIRECT_MAC;
+    }
+
+    @Override
+    public void createWifiDirectGroup() {
+
+    }
+
+    @Override
+    public void removeWiFiDirectGroup() {
+
+    }
+
+    @Override
+    public WiFiDirectGroup getWifiDirectGroup() {
+        return null;
+    }
+
+    @Override
+    public String getWifiDirectIpAddress() {
+        return null;
+    }
+
+    @Override
+    public int getWifiDirectGroupStatus() {
+        return 0;
     }
 }

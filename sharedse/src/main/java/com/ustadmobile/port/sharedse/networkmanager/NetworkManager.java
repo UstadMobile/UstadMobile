@@ -34,6 +34,21 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public static final String SD_TXT_KEY_PORT = "port";
 
+    /**
+     * Flag to indicate wifi direct group is inactive and it is not under creation
+     */
+    public static final int WIFI_DIRECT_GROUP_STATUS_INACTIVE = 0;
+
+    /**
+     * Flag to indicate Wifi direct group is being created now
+     */
+    public static final int WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION = 1;
+
+    /**
+     * Flag to indicate Wifi direct group is active
+     */
+    public static final int WIFI_DIRECT_GROUP_STATUS_ACTIVE = 2;
+
     private Object mContext;
 
     private Vector<NetworkNode> knownNetworkNodes=new Vector<>();
@@ -48,6 +63,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     private Map<String,List<EntryCheckResponse>> entryResponses =new HashMap<>();
 
     private NetworkTask[] currentTasks = new NetworkTask[2];
+
+    private Vector<WiFiDirectGroupListener> wifiDirectGroupListeners = new Vector<>();
 
     public NetworkManager() {
     }
@@ -359,5 +376,80 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public abstract String getDeviceIPAddress();
 
 
+    /**
+     * Create a new WiFi direct group on this device. A WiFi direct group
+     * will create a new SSID and passphrase other devices can use to connect in "legacy" mode.
+     *
+     * The process is asynchronous and the WifiDirectGroupListener should be used to listen for
+     * group creation.
+     *
+     * If a WiFi direct group is already under creation this method has no effect.
+     */
+    public abstract void createWifiDirectGroup();
+
+
+    /**
+     * Stop the WiFi direct group if it is active. If there is no group this method will have no effect.
+     */
+    public abstract void removeWiFiDirectGroup();
+
+
+    /**
+     * Gets the current active WiFi Direct group (if any)
+     *
+     * @return The active WiFi direct group (if any) - otherwise null
+     */
+    public abstract WiFiDirectGroup getWifiDirectGroup();
+
+
+    /**
+     * Add a WiFiDirectGroupListener to receive notifications for group
+     * creation and removal
+     *
+     * @param listener Listener to add
+     */
+    public void addWifiDirectGroupListener(WiFiDirectGroupListener listener) {
+        wifiDirectGroupListeners.add(listener);
+    }
+
+    /**
+     * Remove the given WifiDirectGroupListener
+     *
+     * @param listener Listener to remove
+     */
+    public void removeWifiDirectGroupListener(WiFiDirectGroupListener listener) {
+        wifiDirectGroupListeners.remove(listener);
+    }
+
+    protected void fireWifiDirectGroupCreated(WiFiDirectGroup group, Exception error) {
+        synchronized (wifiDirectGroupListeners) {
+            for(int i = 0; i < wifiDirectGroupListeners.size(); i++) {
+                wifiDirectGroupListeners.get(i).groupCreated(group, error);
+            }
+        }
+    }
+
+    protected void fireWifiDirectGroupRemoved(boolean successful, Exception error) {
+        synchronized (wifiDirectGroupListeners) {
+            for(int i = 0; i < wifiDirectGroupListeners.size(); i++) {
+                wifiDirectGroupListeners.get(i).groupRemoved(successful, error);
+            }
+        }
+    }
+
+    /**
+     * Returns the IP address of this device as used on Wifi Direct connections.
+     *
+     * @return The Wifi Direct IP address, or null if none
+     */
+    public abstract String getWifiDirectIpAddress();
+
+    /**
+     * Gets the current status of the Wifi direct group.  Will return
+     * one of the WIFIDIRECT_GROUP_STATUS_  constants
+     *
+     * @return Wifi direct group status as per the constants
+     */
+    public abstract int getWifiDirectGroupStatus();
 
 }

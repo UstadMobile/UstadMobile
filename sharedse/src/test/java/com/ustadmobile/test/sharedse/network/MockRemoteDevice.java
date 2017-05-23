@@ -120,4 +120,8 @@ public class MockRemoteDevice {
         return networkManager;
     }
 
+    public Object getContext() {
+        return context;
+    }
+
 }
