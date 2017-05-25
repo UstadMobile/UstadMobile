@@ -167,7 +167,7 @@ public class TestAcquisitionTask{
         manager.requestAcquisition(feed,manager.getContext());
 
         synchronized (acquisitionLock){
-            acquisitionLock.wait(DEFAULT_WAIT_TIME*100000);
+            acquisitionLock.wait(DEFAULT_WAIT_TIME*10);
         }
         Assert.assertThat("Available entry reported,can be downloaded locally",
                 downloadSources.get(0).get(ENTRY_IDS[0]),is(NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK));

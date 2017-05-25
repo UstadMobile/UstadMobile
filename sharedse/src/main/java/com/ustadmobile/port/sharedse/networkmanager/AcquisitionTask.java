@@ -42,7 +42,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
 
 public class AcquisitionTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
-
     private UstadJSOPDSFeed feed;
     protected NetworkManagerTaskListener listener;
     private static final int FILE_DESTINATION_INDEX=1;
@@ -89,7 +88,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         }
     };
 
-
     public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
         super(networkManager);
         this.feed=feed;
@@ -101,6 +99,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     public synchronized void start() {
         currentEntryIdIndex =0;
+        synchronized (this){
+            if(updateTimer==null){
+                updateTimer=new Timer();
+                updateTimer.scheduleAtFixedRate(updateTimerTask,DOWNLOAD_TASK_UPDATE_TIME,
+                        DOWNLOAD_TASK_UPDATE_TIME);
+            }
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -121,8 +126,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private void acquireNextFile(){
       currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_PENDING;
         //TODO: Move hardcoded strings to locale constants
-        message=getFeed().entries.length>1 ? "Downloading "+(currentEntryIdIndex+1)+"/"
-                +getFeed().entries.length+" Files":"Downloading File";
+        message=getFeed().entries.length>1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
+                +getFeed().entries.length+" files":"Downloading file";
         networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,getFeed().entries[currentEntryIdIndex].title,message);
         if(currentEntryIdIndex < feed.entries.length) {
             currentDownloadId= new AtomicInteger().incrementAndGet();
@@ -156,13 +161,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
 
     private void downloadCurrentFile(final String fileUrl) {
-        synchronized (this){
-            if(updateTimer==null){
-                updateTimer=new Timer();
-                updateTimer.scheduleAtFixedRate(updateTimerTask,DOWNLOAD_TASK_UPDATE_TIME,
-                        DOWNLOAD_TASK_UPDATE_TIME);
-            }
-        }
         entryAcquisitionThread =new Thread(new Runnable() {
             @Override
             public void run() {
@@ -189,7 +187,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 info.srcURLs = new String[]{fileUrl};
                 CatalogController.setEntryInfo(getFeed().entries[currentEntryIdIndex].id, info,
                         CatalogController.SHARED_RESOURCE, networkManager.getContext());
-
                 try {
                     URL url = new URL(fileUrl);
                     if (infoFile.exists()) {
@@ -243,21 +240,39 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         saveFileWithNewExtension(fileDestination.getAbsolutePath());
                         if(currentDownloadFileInfo!=null){
                             currentDownloadFileInfo.delete();
-                        }
-                        currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
+                            currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
 
-                        if(currentEntryIdIndex==(getFeed().entries.length-1)){
-                            updateTimer.cancel();
-                            updateTimer=null;
-                            networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
+                            if(currentEntryIdIndex==(getFeed().entries.length-1)){
+                                networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
+                                if(updateTimer!=null){
+                                    updateTimer.cancel();
+                                    updateTimerTask.cancel();
+                                    updateTimerTask =null;
+                                    updateTimer=null;
+                                }
+                            }else{
+                                networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
+                                        getFeed().entries[currentEntryIdIndex].title,message);
+                            }
+                            totalBytesToDownload=0L;
+                            totalBytesDownloadedSoFar=0L;
+                            currentEntryIdIndex++;
+                            entryAcquisitionThread =null;
+
+                            acquireNextFile();
                         }
-                        currentDownloadId++;
-                        entryAcquisitionThread =null;
-                        acquireNextFile();
+
                     }
                 } catch (IOException | JSONException e) {
-                    e.printStackTrace();
+                    currentEntryAcquisitionTaskStatus=UstadMobileSystemImpl.DLSTATUS_FAILED;
+                    if(updateTimer!=null){
+                        updateTimer.cancel();
+                        updateTimerTask.cancel();
+                        updateTimerTask =null;
+                        updateTimer=null;
+                    }
                 } finally {
+
                     UMIOUtils.closeOutputStream(out);
                     UMIOUtils.closeInputStream(in);
                     if (con != null)
@@ -305,7 +320,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         return new String[]{UMFileUtil.resolveLink(feedHref,acquisitionLink[UstadJSOPDSEntry.LINK_HREF]),
                 downloadDestDir.getAbsolutePath()};
     }
-
 
     /**
      * Create a temporally file to store current partial file information.
@@ -377,6 +391,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 networkManager.connectWifi(groupInfo[0],groupInfo[1]);
             }
         }catch(IOException e) {
+            e.printStackTrace();
+        }finally {
             if(response!=null){
                 UMIOUtils.closeInputStream(inputStream);
                 UMIOUtils.closeOutputStream(outputStream);
@@ -390,6 +406,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         entryAcquisitionThread.interrupt();
         if(entryAcquisitionThread.isInterrupted()){
             currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_FAILED;
+            if(updateTimer!=null){
+                updateTimer.cancel();
+                updateTimerTask.cancel();
+                updateTimerTask =null;
+                updateTimer=null;
+            }
         }
     }
 
@@ -469,4 +491,5 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         statusVal[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR]= (int)totalBytesDownloadedSoFar;
         return statusVal;
     }
+
 }
