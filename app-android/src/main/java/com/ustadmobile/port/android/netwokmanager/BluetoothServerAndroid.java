@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.netwokmanager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.util.Log;
 
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
@@ -46,18 +47,15 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        OutputStream out = null;
-                        InputStream in  = null;
+                        OutputStream out;
+                        InputStream in;
                         try{
                             out = clientSocket.getOutputStream();
                             in = clientSocket.getInputStream();
-                            handleNodeConnected(clientSocket.getRemoteDevice().getAddress(),
-                                    in, out);
+                            handleNodeConnected(clientSocket.getRemoteDevice().getAddress(), in, out);
+                            Log.d(TAG,"Connected to "+clientSocket.getRemoteDevice().getName());
                         } catch (IOException e) {
                             e.printStackTrace();
-                        }finally {
-                            UMIOUtils.closeInputStream(in);
-                            UMIOUtils.closeOutputStream(out);
                         }
                     }
                 }).start();

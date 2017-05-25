@@ -120,7 +120,6 @@ public class TestAcquisitionTask{
         String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
-
         if(manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)==null){
             synchronized (nodeDiscoveryLock){
                 nodeDiscoveryLock.wait(TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
@@ -148,6 +147,7 @@ public class TestAcquisitionTask{
 
         Assert.assertTrue("Available entry reported as locally available", fileAvailable[0]);
         Assert.assertFalse("Unavailable entry reported as not available",  fileAvailable[1]);
+
         //Create a feed manually
         UstadJSOPDSFeed feed=new UstadJSOPDSFeed(FEED_SRC_URL,FEED_TITLE, ENTRY_ID_PRESENT);
         feed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
@@ -167,11 +167,11 @@ public class TestAcquisitionTask{
         manager.requestAcquisition(feed,manager.getContext());
 
         synchronized (acquisitionLock){
-            acquisitionLock.wait(DEFAULT_WAIT_TIME*3);
+            acquisitionLock.wait(DEFAULT_WAIT_TIME*100000);
         }
         Assert.assertThat("Available entry reported,can be downloaded locally",
                 downloadSources.get(0).get(ENTRY_IDS[0]),is(NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK));
-        Assert.assertThat("Unavailable entry reported,can be downloaded from cloud",
+       Assert.assertThat("Unavailable entry reported,can be downloaded from cloud",
                 downloadSources.get(1).get(ENTRY_IDS[1]),is(NetworkManager.DOWNLOAD_FROM_CLOUD));
     }
 }

@@ -81,4 +81,11 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
     public void onServiceDisconnected(ComponentName name) {
         super.onServiceDisconnected(name);
     }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        serverHttpd.stop();
+    }
 }

@@ -1,5 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.util.UMIOUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,10 +79,11 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         }
 
         queryStr += '\n';
+        String response=null;
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             outputStream.write(queryStr.getBytes());
-            String response = reader.readLine();
+            response = reader.readLine();
             if(response.startsWith(BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK)) {
                 response=response.substring((BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK.length()+1),response.length());
 
@@ -98,6 +101,12 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             }
         }catch(IOException e) {
             e.printStackTrace();
+        }finally {
+            if(response!=null){
+                UMIOUtils.closeInputStream(inputStream);
+                UMIOUtils.closeOutputStream(outputStream);
+                networkManager.disconnectBluetooth();
+            }
         }
     }
 

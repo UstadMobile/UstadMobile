@@ -13,7 +13,6 @@ import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
@@ -35,9 +34,12 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
@@ -46,7 +48,6 @@ import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
-import static edu.rit.se.wifibuddy.WifiDirectHandler.EXTRA_NOPROMPT_NETWORK_SUCCEEDED;
 
 /**
  * Created by kileha3 on 09/05/2017.
@@ -92,6 +93,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     private NSDHelperAndroid nsdHelperAndroid;
 
     private int currentWifiDirectGroupStatus=-1;
+    private BluetoothSocket bluetoothSocket=null;
 
 
 
@@ -117,8 +119,17 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
+
+        networkService.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                if(info.isConnected()){
+                    handleWifiDirectConnectionChanged(wifiManager.getConnectionInfo().getSSID());
+                }
+            }
+        },new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
     }
 
 
@@ -139,12 +150,6 @@ public class NetworkManagerAndroid extends NetworkManager{
                     handleWifiDirectSdTxtRecordsAvailable(txtRecord.getFullDomain(),deviceMac, (HashMap<String, String>) txtRecord.getRecord());
 
                     break;
-                case WifiDirectHandler.Action.NOPROMPT_NETWORK_CONNECTIVITY_ACTION:
-                    boolean isConnected=intent.getBooleanExtra(EXTRA_NOPROMPT_NETWORK_SUCCEEDED,false);
-                    if(isConnected){
-                        handleWifiDirectConnectionChanged(wifiManager.getConnectionInfo().getSSID());
-                    }
-                    break;
                 case WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION:
                     boolean informationAvailable=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup().isGroupOwner();
                     if(informationAvailable){
@@ -157,8 +162,6 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         }
     };
-
-
 
 
     public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
@@ -239,8 +242,9 @@ public class NetworkManagerAndroid extends NetworkManager{
         BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice bluetoothDevice=adapter.getRemoteDevice(deviceAddress);
         try{
-            final BluetoothSocket bluetoothSocket=bluetoothDevice.
+            bluetoothSocket=bluetoothDevice.
                     createInsecureRfcommSocketToServiceRecord(BluetoothServer.SERVICE_UUID);
+
             bluetoothSocket.connect();
             new Thread(new Runnable() {
                 @Override
@@ -255,11 +259,30 @@ public class NetworkManagerAndroid extends NetworkManager{
                 }
             }).start();
         } catch (IOException e) {
-            e.printStackTrace();
+            if(bluetoothSocket!=null){
+                try {
+                    bluetoothSocket.close();
+                    bluetoothSocket=null;
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
         }
 
 
     }
+
+    @Override
+    public void disconnectBluetooth() {
+        try {
+           if(bluetoothSocket!=null){
+               bluetoothSocket.close();
+           }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Override
     public int addNotification(int notificationType, String title, String message) {
@@ -302,6 +325,10 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
 
+    /**
+     * This constructs a map of DNS-Text records to be associated with the service
+     * @return
+     */
     private HashMap<String,String> localService(){
         boolean isConnected= connectivityManager!=null &&
                 connectivityManager.getActiveNetworkInfo().getType()
@@ -316,8 +343,13 @@ public class NetworkManagerAndroid extends NetworkManager{
         return record;
     }
 
+    /**
+     * Get bluetooth address of the device, in android 6 and above this tends to return
+     * default bluetooth address which is referenced as DEFAULT_BLUETOOTH_ADDRESS.
+     * After getting this we have to resolve it to get the real bluetooth Address.
+     * @return
+     */
     public String getBluetoothMacAddress(){
-
         String address = BluetoothAdapter.getDefaultAdapter().getAddress();
         if (address.equals(DEFAULT_BLUETOOTH_ADDRESS)) {
             try {
@@ -334,9 +366,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
         return address;
     }
-
-
-
 
     public void onDestroy() {
         LocalBroadcastManager.getInstance(networkService).unregisterReceiver(mBroadcastReceiver);
@@ -393,13 +422,31 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void connectWifi(String SSID, String passPhrase) {
-        WifiConfiguration configuration = new WifiConfiguration();
-        configuration.SSID = "\"" + SSID + "\"";
-        configuration.preSharedKey = "\"" + passPhrase + "\"";
-        int netId = wifiManager.addNetwork(configuration);
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.SSID = "\""+ SSID +"\"";
+        wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
+        wifiConfig.preSharedKey = "\""+ passPhrase +"\"";
+        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        int netId = wifiManager.addNetwork(wifiConfig);
         wifiManager.disconnect();
         wifiManager.enableNetwork(netId, true);
         wifiManager.reconnect();
+    }
+
+    /**
+     * Get maximum priority assigned to a network configuration.
+     * This helps to prioritize which network to connect to.
+     * @param wifiManager
+     * @return
+     */
+    private int getMaxConfigurationPriority(final WifiManager wifiManager) {
+        final List<WifiConfiguration> configurations = wifiManager.getConfiguredNetworks();
+        List<Integer> configPriorities=new ArrayList<>();
+        for(final WifiConfiguration config : configurations) {
+            configPriorities.add(config.priority);
+        }
+        Collections.sort(configPriorities);
+        return configPriorities.get((configPriorities.size()-1));
     }
 
     @Override

@@ -201,7 +201,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
 
             if(node == null) {
-                node = new NetworkNode("",ipAddress);
+                node = new NetworkNode(null,ipAddress);
             }
 
             node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
@@ -259,6 +259,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     }
 
     public abstract void connectBluetooth(String deviceAddress,BluetoothConnectionHandler handler);
+
+    public abstract void disconnectBluetooth();
 
     public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds,List<Boolean> status) {
         List<EntryCheckResponse> responseList;

@@ -14,7 +14,6 @@ import org.junit.runners.Suite;
         TestNetworkManager.class,
         TestEntryStatusTask.class,
         TestAcquisitionTask.class
-
 })
 
 public abstract class SharedSeTestSuite {
