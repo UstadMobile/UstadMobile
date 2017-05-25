@@ -9,6 +9,7 @@ public class EntryCheckResponse {
     private long lastChecked;
     private boolean isFileAvailable;
     private NetworkNode networkNode;
+    private boolean isOnSameNetwork;
 
     public EntryCheckResponse(NetworkNode networkNode){
         this.networkNode=networkNode;
@@ -36,6 +37,14 @@ public class EntryCheckResponse {
 
     public void setNetworkNode(NetworkNode networkNode) {
         this.networkNode = networkNode;
+    }
+
+    public boolean isOnSameNetwork() {
+        return isOnSameNetwork;
+    }
+
+    public void setOnSameNetwork(boolean onSameNetwork) {
+        isOnSameNetwork = onSameNetwork;
     }
 
     @Override

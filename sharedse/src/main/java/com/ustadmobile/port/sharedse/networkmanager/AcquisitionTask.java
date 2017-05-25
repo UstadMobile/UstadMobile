@@ -35,7 +35,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLO
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFICATION_TYPE_ACQUISITION;
-import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SERVICE_PORT;
 
 /**
  * Created by kileha3 on 09/05/2017.
@@ -43,7 +42,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SERVIC
 
 public class AcquisitionTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
-    private static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT =2 * 60 * 1000;
+
     private UstadJSOPDSFeed feed;
     protected NetworkManagerTaskListener listener;
     private static final int FILE_DESTINATION_INDEX=1;
@@ -65,6 +64,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private Timer updateTimer=null;
     private Thread entryAcquisitionThread =null;
     private String message=null;
+    private EntryCheckResponse entryCheckResponse;
 
     /**
      * Monitor file acquisition task progress and report it.
@@ -80,7 +80,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         (progress < 0 && progress > progressLimit)) {
                     return;
                 }
-                System.out.print("Downloading "+progress);
                 TIME_PASSED_FOR_PROGRESS_UPDATE = currentTime;
                 currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_RUNNING;
                 networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,progress,
@@ -128,27 +127,20 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         if(currentEntryIdIndex < feed.entries.length) {
             currentDownloadId= new AtomicInteger().incrementAndGet();
             String entryId = feed.entries[currentEntryIdIndex].id;
-
-            EntryCheckResponse entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
+            entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
 
             if(entryCheckResponse!=null){
-                NetworkNode node=entryCheckResponse.getNetworkNode();
-                if(node.getNetworkServiceLastUpdated() < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+                if(entryCheckResponse.isOnSameNetwork()){
                     networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
                             DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
-                    String fileURI="http://"+node.getDeviceIpAddress()+":"+SERVICE_PORT+"/catalog/entry/"+entryId;
+                    String fileURI="http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
+                            +entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
                     downloadCurrentFile(fileURI);
                 }else{
-                    if(node.getWifiDirectLastUpdated() < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                        networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
-                                DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
-                        networkManager.connectBluetooth(node.getDeviceBluetoothMacAddress(),this);
-                    }else{
-                        networkManager.handleFileAcquisitionInformationAvailable(entryId,
-                                currentDownloadId,DOWNLOAD_FROM_CLOUD);
-                        downloadCurrentFile(getFileURIs()[FILE_DOWNLOAD_URL_INDEX]);
-
-                    }
+                    networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
+                            DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+                    networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
+                            ,this);
                 }
             }else{
                 networkManager.handleFileAcquisitionInformationAvailable(entryId,
@@ -158,7 +150,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
 
         }else{
-            listener.handleTaskCompleted(this);
+            networkManager.handleTaskCompleted(this);
         }
     }
 
@@ -205,7 +197,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
                         con.connect();
                         fileInfoLastModified = con.getHeaderField(HEADER_LAST_MODIFIED);
-                        infoFromFile = getFileContentFromFile(infoFile);
+                        infoFromFile = getFileInformationFromFile(infoFile);
                         con.disconnect();
                         con = null;
 
@@ -230,7 +222,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     fileInfoLastModified = con.getHeaderField(HEADER_LAST_MODIFIED);
 
                     if (fileInfoLastModified != null && !isFileResuming) {
-                        currentDownloadFileInfo = saveFileInfoToFile(fileInfoLastModified,fileDestination);
+                        currentDownloadFileInfo = saveFileInformationToFile(fileInfoLastModified,fileDestination);
                     }
                     if (fileInfoLastModified != null && isFileResuming) {
                         currentDownloadFileInfo = infoFile;
@@ -279,7 +271,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     /**
      * Save file with it's original extension after success downloaded
-     * @param fileUri - Current file URL to be saved with new extension
+     * @param fileUri - Current file URI to be saved with new extension
      * @return
      */
     private File saveFileWithNewExtension(String fileUri){
@@ -320,7 +312,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      * @param fileInfoLastModified Header File last-modified
      * @return
      */
-    private File saveFileInfoToFile(String fileInfoLastModified,File fileDestination){
+    private File saveFileInformationToFile(String fileInfoLastModified, File fileDestination){
         String infoLastModified=fileInfoLastModified==null? null:fileInfoLastModified;
         File tempFileInfo=null;
         try{
@@ -342,11 +334,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     /**
-     * Read temporally file content as JSON and get last modified dates
+     * Read temporally file content as JSON and get last it's modified date
      * @param file - temporally file
      * @return
      */
-    private JSONObject getFileContentFromFile(File file){
+    private JSONObject getFileInformationFromFile(File file){
 
         StringBuilder fileText = new StringBuilder();
         try {
@@ -369,12 +361,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     @Override
     public void onConnected(final InputStream inputStream, final OutputStream outputStream) {
         String acquireCommand = BluetoothServer.CMD_ACQUIRE_ENTRY +" "+networkManager.getDeviceIPAddress()+"\n";
+        String response=null;
         try {
             outputStream.write(acquireCommand.getBytes());
             outputStream.flush();
             System.out.print("AcquisitionTask: Sending Command "+acquireCommand);
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String response = reader.readLine();
+            response = reader.readLine();
             if(response.startsWith(BluetoothServer.CMD_ACQUIRE_ENTRY_FEEDBACK)) {
                 System.out.print("AcquisitionTask: Receive Response "+response);
                 String [] groupInfo=response.substring((BluetoothServer.CMD_ACQUIRE_ENTRY_FEEDBACK.length()+1),
@@ -382,12 +375,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 currentGroupIPAddress =groupInfo[2].replace("/","");
                 currentGroupSSID =groupInfo[0];
                 networkManager.connectWifi(groupInfo[0],groupInfo[1]);
+            }
+        }catch(IOException e) {
+            if(response!=null){
                 UMIOUtils.closeInputStream(inputStream);
                 UMIOUtils.closeOutputStream(outputStream);
                 networkManager.disconnectBluetooth();
             }
-        }catch(IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -455,7 +449,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     @Override
     public void wifiConnectionChanged(String ssid) {
         if(currentGroupSSID.equals(ssid)){
-            String fileUrl="http://"+ currentGroupIPAddress +":"+SERVICE_PORT+"/catalog/entry/"
+            String fileUrl="http://"+ currentGroupIPAddress +":"+
+                    entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
                     +getFeed().entries[currentEntryIdIndex].id;
             downloadCurrentFile(fileUrl);
         }

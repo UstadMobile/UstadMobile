@@ -47,8 +47,8 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        OutputStream out;
-                        InputStream in;
+                        OutputStream out = null;
+                        InputStream in = null;
                         try{
                             out = clientSocket.getOutputStream();
                             in = clientSocket.getInputStream();
@@ -56,6 +56,9 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                             Log.d(TAG,"Connected to "+clientSocket.getRemoteDevice().getName());
                         } catch (IOException e) {
                             e.printStackTrace();
+                        }finally {
+                            UMIOUtils.closeInputStream(in);
+                            UMIOUtils.closeOutputStream(out);
                         }
                     }
                 }).start();

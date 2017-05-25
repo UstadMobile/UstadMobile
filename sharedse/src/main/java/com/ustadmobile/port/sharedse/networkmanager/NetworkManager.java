@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.sun.org.apache.bcel.internal.generic.RET;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
 
@@ -27,6 +28,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final int DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK =3;
     public static final int SERVICE_PORT=8001;
     public BluetoothServer bluetoothServer;
+    private static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT =2 * 60 * 1000;
 
     public static final String SD_TXT_KEY_IP_ADDR = "a";
 
@@ -301,12 +303,31 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         return null;
     }
 
+    /**
+     * Get response from response list which contains a file we a looking for and can be downloaded locally,
+     * first priority is given to node on the same network.
+     * If no matching node then check for the node on different network.
+     * @param entryId
+     * @return
+     */
+
     public EntryCheckResponse getEntryResponseWithLocalFile(String entryId){
         List<EntryCheckResponse> responseList=getEntryResponses().get(entryId);
+        EntryCheckResponse entryCheckResponse=null;
         if(responseList!=null &&!responseList.isEmpty()){
             for(EntryCheckResponse response: responseList){
-                if(response.isFileAvailable()){
-                    return response;
+                if(response.isFileAvailable() && response.getNetworkNode().getNetworkServiceLastUpdated()
+                        < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+                    entryCheckResponse= response;
+                    entryCheckResponse.setOnSameNetwork(true);
+                    return entryCheckResponse;
+                }else{
+                    if(response.isFileAvailable() && response.getNetworkNode().getWifiDirectLastUpdated()
+                            < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+                        entryCheckResponse=response;
+                        entryCheckResponse.setOnSameNetwork(false);
+                        return entryCheckResponse;
+                    }
                 }
             }
         }
