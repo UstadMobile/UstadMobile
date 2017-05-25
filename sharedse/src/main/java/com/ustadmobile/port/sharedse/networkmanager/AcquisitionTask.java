@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -22,8 +23,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,6 +34,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_S
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_CLOUD;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFICATION_TYPE_ACQUISITION;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SERVICE_PORT;
 
 /**
@@ -38,30 +42,63 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SERVIC
  */
 
 public class AcquisitionTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
-    private static final int MAX_DISCOVERY_DURATION=2 * 60 * 1000;
+
+    private static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT =2 * 60 * 1000;
     private UstadJSOPDSFeed feed;
     protected NetworkManagerTaskListener listener;
-    private int currentEntryIdIndex;
-    private String groupIpAddress,networkSSID;
     private static final int FILE_DESTINATION_INDEX=1;
     private static final int FILE_DOWNLOAD_URL_INDEX=0;
-
+    private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
+    private int currentEntryAcquisitionTaskStatus =-1;
+    private int currentEntryIdIndex;
     private static final String INFO_FILE_EXTENSION=".dlinfo";
     private static final String UNFINISHED_FILE_EXTENSION=".part";
     private static final String HEADER_RANGE="Range";
     private static final String HEADER_LAST_MODIFIED ="Last-Modified";
     private static final String DOWNLOAD_REQUEST_METHOD="GET";
+    private String currentGroupIPAddress;
+    private String currentGroupSSID;
+    private static long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
     private long currentDownloadId=0L;
+    private long totalBytesDownloadedSoFar =0L;
+    private long totalBytesToDownload =0L;
+    private Timer updateTimer=null;
+    private Thread entryAcquisitionThread =null;
+    private String message=null;
 
+    /**
+     * Monitor file acquisition task progress and report it.
+     */
+    private TimerTask updateTimerTask =new TimerTask() {
+        @Override
+        public void run() {
+            if(totalBytesToDownload>0L){
+                int progress=(int)((totalBytesDownloadedSoFar*100)/ totalBytesToDownload);
+                long currentTime = Calendar.getInstance().getTimeInMillis();
+                int progressLimit=100;
+                if(((currentTime - TIME_PASSED_FOR_PROGRESS_UPDATE) < DOWNLOAD_TASK_UPDATE_TIME) ||
+                        (progress < 0 && progress > progressLimit)) {
+                    return;
+                }
+                System.out.print("Downloading "+progress);
+                TIME_PASSED_FOR_PROGRESS_UPDATE = currentTime;
+                currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_RUNNING;
+                networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,progress,
+                        getFeed().entries[currentEntryIdIndex].title,message);
+
+            }
+        }
+    };
 
 
     public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
         super(networkManager);
         this.feed=feed;
+        networkManager.addNetworkManagerListener(this);
     }
 
     /**
-     * Start the download task
+     * Start file acquisition task
      */
     public synchronized void start() {
         currentEntryIdIndex =0;
@@ -75,15 +112,19 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     /**
      * Determine where to download the file from
-     * (Cloud, Peer on the same network or Peer on the different network)
+     * (Cloud, Peer on the same network or Peer on different network)
      *
-     * if is from Cloud: initiate download
-     *            Peer on the same network: initiate download
+     * if is from Cloud: initiate download task
+     *            Peer on the same network: initiate download task
      *            Peer on different network: initiate bluetooth connection in order to trigger
-     *            WiFi-Direct group formation on the host device
+     *            WiFi-Direct group creation on the host device
      */
     private void acquireNextFile(){
-
+      currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_PENDING;
+        //TODO: Move hardcoded strings to locale constants
+        message=getFeed().entries.length>1 ? "Downloading "+(currentEntryIdIndex+1)+"/"
+                +getFeed().entries.length+" Files":"Downloading File";
+        networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,getFeed().entries[currentEntryIdIndex].title,message);
         if(currentEntryIdIndex < feed.entries.length) {
             currentDownloadId= new AtomicInteger().incrementAndGet();
             String entryId = feed.entries[currentEntryIdIndex].id;
@@ -92,41 +133,51 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
             if(entryCheckResponse!=null){
                 NetworkNode node=entryCheckResponse.getNetworkNode();
-                if(node.getNetworkServiceLastUpdated() < MAX_DISCOVERY_DURATION){
+                if(node.getNetworkServiceLastUpdated() < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                     networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
                             DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
                     String fileURI="http://"+node.getDeviceIpAddress()+":"+SERVICE_PORT+"/catalog/entry/"+entryId;
-                    acquireEntry(fileURI);
+                    downloadCurrentFile(fileURI);
                 }else{
-                    if(node.getWifiDirectLastUpdated() < MAX_DISCOVERY_DURATION){
+                    if(node.getWifiDirectLastUpdated() < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                         networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
                                 DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
                         networkManager.connectBluetooth(node.getDeviceBluetoothMacAddress(),this);
                     }else{
-                        networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,DOWNLOAD_FROM_CLOUD);
-                        acquireEntry(getFileURIs()[FILE_DOWNLOAD_URL_INDEX]);
+                        networkManager.handleFileAcquisitionInformationAvailable(entryId,
+                                currentDownloadId,DOWNLOAD_FROM_CLOUD);
+                        downloadCurrentFile(getFileURIs()[FILE_DOWNLOAD_URL_INDEX]);
 
                     }
                 }
             }else{
-                networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,DOWNLOAD_FROM_CLOUD);
-                acquireEntry(getFileURIs()[FILE_DOWNLOAD_URL_INDEX]);
+                networkManager.handleFileAcquisitionInformationAvailable(entryId,
+                        currentDownloadId,DOWNLOAD_FROM_CLOUD);
+                downloadCurrentFile(getFileURIs()[FILE_DOWNLOAD_URL_INDEX]);
             }
 
+
         }else{
-            networkManager.handleTaskCompleted(this);
+            listener.handleTaskCompleted(this);
         }
     }
 
 
-    private void acquireEntry(final String fileUrl) {
-        new Thread(new Runnable() {
+    private void downloadCurrentFile(final String fileUrl) {
+        synchronized (this){
+            if(updateTimer==null){
+                updateTimer=new Timer();
+                updateTimer.scheduleAtFixedRate(updateTimerTask,DOWNLOAD_TASK_UPDATE_TIME,
+                        DOWNLOAD_TASK_UPDATE_TIME);
+            }
+        }
+        entryAcquisitionThread =new Thread(new Runnable() {
             @Override
             public void run() {
                 InputStream in = null;
                 HttpURLConnection con = null;
                 OutputStream out = null;
-                long existingFileLength,newFileLength;
+                long existingFileLength;
                 String fileInfoLastModified = null;
                 JSONObject infoFromFile = null;
                 int bytesDownloadedSoFar;
@@ -148,7 +199,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         CatalogController.SHARED_RESOURCE, networkManager.getContext());
 
                 try {
-                    URL url = new URL(URLEncoder.encode(fileUrl, "UTF-8"));
+                    URL url = new URL(fileUrl);
                     if (infoFile.exists()) {
                         con = (HttpURLConnection) url.openConnection();
                         con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
@@ -171,11 +222,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         isFileResuming = false;
                     }
                     con.connect();
-                    newFileLength = con.getContentLength();
+                    totalBytesToDownload = con.getContentLength();
                     in = con.getInputStream();
                     out = new FileOutputStream(fileDestination, true);
                     byte[] buffer = new byte[10240];
-                    int total = 0;
+                    long total = 0;
                     fileInfoLastModified = con.getHeaderField(HEADER_LAST_MODIFIED);
 
                     if (fileInfoLastModified != null && !isFileResuming) {
@@ -184,18 +235,16 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     if (fileInfoLastModified != null && isFileResuming) {
                         currentDownloadFileInfo = infoFile;
                     }
-
                     while ((bytesDownloadedSoFar = in.read(buffer)) > 0) {
                         total += bytesDownloadedSoFar;
                         out.write(buffer, 0, bytesDownloadedSoFar);
-                        //TODO: handle download update
-
+                        totalBytesDownloadedSoFar=total;
                     }
 
                     if(isFileResuming){
                         isFileDownloaded= fileDestination.exists();
                     }else{
-                        isFileDownloaded=fileDestination.exists() && fileDestination.length()>=newFileLength;
+                        isFileDownloaded=fileDestination.exists() && fileDestination.length()>= totalBytesToDownload;
                     }
 
                     if(isFileDownloaded){
@@ -203,7 +252,15 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         if(currentDownloadFileInfo!=null){
                             currentDownloadFileInfo.delete();
                         }
+                        currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
+
+                        if(currentEntryIdIndex==(getFeed().entries.length-1)){
+                            updateTimer.cancel();
+                            updateTimer=null;
+                            networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
+                        }
                         currentDownloadId++;
+                        entryAcquisitionThread =null;
                         acquireNextFile();
                     }
                 } catch (IOException | JSONException e) {
@@ -215,7 +272,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         con.disconnect();
                 }
             }
-        }).start();
+        });
+        entryAcquisitionThread.start();
     }
 
 
@@ -258,7 +316,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
 
     /**
-     * Create a temporally file to store file info.
+     * Create a temporally file to store current partial file information.
      * @param fileInfoLastModified Header File last-modified
      * @return
      */
@@ -284,7 +342,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     /**
-     * Read the temporally (.dinfo) file content as JSON
+     * Read temporally file content as JSON and get last modified dates
      * @param file - temporally file
      * @return
      */
@@ -309,28 +367,36 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
 
     @Override
-    public void onConnected(InputStream inputStream, OutputStream outputStream) {
-        String acquireCommand = BluetoothServer.CMD_ACQUIRE_ENTRY +"\n";
+    public void onConnected(final InputStream inputStream, final OutputStream outputStream) {
+        String acquireCommand = BluetoothServer.CMD_ACQUIRE_ENTRY +" "+networkManager.getDeviceIPAddress()+"\n";
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             outputStream.write(acquireCommand.getBytes());
+            outputStream.flush();
+            System.out.print("AcquisitionTask: Sending Command "+acquireCommand);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             String response = reader.readLine();
-            if(response.startsWith(BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK)) {
-               String [] groupInfo=response.substring((BluetoothServer.CMD_ACQUIRE_ENTRY_FEEDBACK.length()+1),
-                       response.length()).split(CMD_SEPARATOR);
-                groupIpAddress=groupInfo[2];
-                networkSSID=groupInfo[0];
+            if(response.startsWith(BluetoothServer.CMD_ACQUIRE_ENTRY_FEEDBACK)) {
+                System.out.print("AcquisitionTask: Receive Response "+response);
+                String [] groupInfo=response.substring((BluetoothServer.CMD_ACQUIRE_ENTRY_FEEDBACK.length()+1),
+                        response.length()).split(CMD_SEPARATOR);
+                currentGroupIPAddress =groupInfo[2].replace("/","");
+                currentGroupSSID =groupInfo[0];
                 networkManager.connectWifi(groupInfo[0],groupInfo[1]);
+                UMIOUtils.closeInputStream(inputStream);
+                UMIOUtils.closeOutputStream(outputStream);
+                networkManager.disconnectBluetooth();
             }
         }catch(IOException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
     public void cancel() {
-
+        entryAcquisitionThread.interrupt();
+        if(entryAcquisitionThread.isInterrupted()){
+            currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_FAILED;
+        }
     }
 
     @Override
@@ -346,10 +412,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     @Override
     public int getTaskType() {
         return this.taskType;
-    }
-
-    public synchronized boolean stop(){
-        return false;
     }
 
     public UstadJSOPDSFeed getFeed() {
@@ -392,9 +454,24 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public void wifiConnectionChanged(String ssid) {
-        if(networkSSID.equals(ssid)){
-            String fileUrl="http://"+groupIpAddress+":"+SERVICE_PORT+"/catalog/entry/"+getFeed().entries[currentEntryIdIndex].id;
-            acquireEntry(fileUrl);
+        if(currentGroupSSID.equals(ssid)){
+            String fileUrl="http://"+ currentGroupIPAddress +":"+SERVICE_PORT+"/catalog/entry/"
+                    +getFeed().entries[currentEntryIdIndex].id;
+            downloadCurrentFile(fileUrl);
         }
+    }
+
+    /**
+     * Get entry acquisition task status values of which contain amount of bytes downloaded so far,
+     * total bytes to be downloaded and the current status
+     * @return
+     */
+
+    public int [] getEntryAcquisitionStatus(){
+        int statusVal[]=new int[3];
+        statusVal[UstadMobileSystemImpl.IDX_BYTES_TOTAL]=(int) totalBytesToDownload;
+        statusVal[UstadMobileSystemImpl.IDX_STATUS]= currentEntryAcquisitionTaskStatus;
+        statusVal[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR]= (int)totalBytesDownloadedSoFar;
+        return statusVal;
     }
 }
