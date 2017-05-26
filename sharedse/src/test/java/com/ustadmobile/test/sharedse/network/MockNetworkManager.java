@@ -6,10 +6,10 @@ import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
-import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 import com.ustadmobile.test.sharedse.impl.TestContext;
 
+import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.HashMap;
@@ -17,14 +17,16 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * MockNetworkManager can represent the device running the tests itself AND other devices on a
+ * mock network.
+ *
  * Created by kileha3 on 10/05/2017.
  */
 
 public class MockNetworkManager extends NetworkManager {
-
-    protected Vector<MockRemoteDevice> mockRemoteDevices;
 
     private String mockBluetoothAddr;
 
@@ -39,6 +41,16 @@ public class MockNetworkManager extends NetworkManager {
     public static final int WIFI_DIRECT_BROADCAST_DELAY = 1000;
 
     public static final String TMP_MOCK_WIFIDIRECT_MAC = "01:00:00:00:00:00";
+
+    private static AtomicInteger ipAddrCounter = new AtomicInteger(2);
+
+    public static final String MOCK_WIRELESS_DEFAULT_WIRELESS_SSID = "mocknet";
+
+    public static final String MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE = "mock";
+
+    private RemoteTestServerHttpd mockRemoteDeviceControlHttpd;
+
+    private MockBluetoothServer mockBluetoothServer;
 
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
@@ -57,9 +69,10 @@ public class MockNetworkManager extends NetworkManager {
     };
 
     public MockNetworkManager(String bluetoothAddr, MockWirelessArea wirelessArea) {
-        mockRemoteDevices = new Vector<>();
         this.mockBluetoothAddr = bluetoothAddr;
         this.wirelessArea = wirelessArea;
+        mockBluetoothServer = new MockBluetoothServer(this);
+        wirelessArea.addDevice(this);
     }
 
     @Override
@@ -67,23 +80,57 @@ public class MockNetworkManager extends NetworkManager {
         super.init(mContext);
     }
 
+    public void startTestControlServer() {
+        mockRemoteDeviceControlHttpd = new RemoteTestServerHttpd(0, this);
+        try {
+            mockRemoteDeviceControlHttpd.start();
+        }catch(IOException e) {
+            throw  new RuntimeException(e);
+        }
+    }
+
+    public int getTestControlServerPort() {
+        return mockRemoteDeviceControlHttpd.getListeningPort();
+    }
+
+    public void stopTestControlServer() {
+        if(mockRemoteDeviceControlHttpd != null) {
+            mockRemoteDeviceControlHttpd.stop();
+        }
+    }
+
+    public MockBluetoothServer getMockBluetoothServer() {
+        return mockBluetoothServer;
+    }
+
+    /**
+     * Utility method to generate mock ip addresses which are unique: but in reality are all loopback
+     * IP addresses.
+     *
+     * @return A new unique IP address somewhere on the between 127.0.0.2 and 127.254.254.254
+     */
+    public static String makeNextMockIpAddr() {
+        int nextInt = ipAddrCounter.getAndIncrement();
+        int[] ipSections = new int[3];
+        int remainder = nextInt;
+        int colVal;
+        String ipAddr = "127.";
+        for(int i = ipSections.length; i > 0; i--) {
+            colVal = 255^i;
+            ipSections[i] = remainder / colVal;
+            remainder %= colVal;
+            ipAddr += ipSections[i];
+            if(i > 0)
+                ipAddr += '.';
+        }
+
+        return ipAddr;
+    }
+
     @Override
     public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds, List<Boolean> status) {
         super.handleEntriesStatusUpdate(node, fileIds, status);
     }
-
-    public MockRemoteDevice addMockTestDriver(String bluetoothAddr) {
-        Object mockRemoteContext = new TestContext();
-        MockNetworkManager driverNetworkManager = new MockNetworkManager(bluetoothAddr, wirelessArea);
-        MockRemoteDevice remoteDevice = addMockRemoteDevice(bluetoothAddr, driverNetworkManager,
-                mockRemoteContext);
-        remoteDevice.startTestControlServer();
-
-        return remoteDevice;
-    }
-
-
-
 
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
@@ -140,16 +187,14 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void connectBluetooth(String deviceAddress, BluetoothConnectionHandler handler) {
-        for(int i = 0; i < mockRemoteDevices.size(); i++) {
-            if(mockRemoteDevices.get(i).getBluetoothAddr().equals(deviceAddress)) {
-                //"connect" to this
-                PipedOutputStream outToServer = new PipedOutputStream();
-                PipedInputStream inFromServer = new PipedInputStream();
-                mockRemoteDevices.get(i).getMockBluetoothServer().connectMockClient(mockBluetoothAddr,
-                        inFromServer, outToServer);
-                handler.onConnected(inFromServer, outToServer);
-                return;
-            }
+        MockNetworkManager remoteDevice = wirelessArea.getDeviceByBluetoothAddr(deviceAddress);
+        if(remoteDevice != null){
+            PipedOutputStream outToServer = new PipedOutputStream();
+            PipedInputStream inFromServer = new PipedInputStream();
+            remoteDevice.getMockBluetoothServer().connectMockClient(mockBluetoothAddr,
+                    inFromServer, outToServer);
+            handler.onConnected(inFromServer, outToServer);
+            return;
         }
     }
 
@@ -180,16 +225,7 @@ public class MockNetworkManager extends NetworkManager {
         this.mockIpAddr = mockIpAddr;
     }
 
-    /**
-     *
-     * @param bluetoothAddr
-     * @param context
-     */
-    public MockRemoteDevice addMockRemoteDevice(String bluetoothAddr, MockNetworkManager manager, Object context) {
-        MockRemoteDevice remoteDevice = new MockRemoteDevice(bluetoothAddr, wirelessArea, manager, context);
-        mockRemoteDevices.add(remoteDevice);
-        return remoteDevice;
-    }
+
 
     public MockWirelessArea getWirelessArea() {
         return wirelessArea;
@@ -237,4 +273,60 @@ public class MockNetworkManager extends NetworkManager {
     public void connectWifi(String SSID, String passPhrase) {
 
     }
+
+    public String getMockBluetoothAddr() {
+        return mockBluetoothAddr;
+    }
+
+
+    class MockBluetoothServer extends BluetoothServer implements Runnable {
+
+        private PipedInputStream serverIn;
+
+        private PipedOutputStream serverOut;
+
+        private String remoteAddr;
+
+        public MockBluetoothServer(NetworkManager manager) {
+            super(manager);
+        }
+
+        protected void connectMockClient(String remoteAddr, PipedInputStream clientIn, PipedOutputStream clientOut) {
+            try {
+                serverIn = new PipedInputStream();
+                serverIn.connect(clientOut);
+                serverOut = new PipedOutputStream();
+                serverOut.connect(clientIn);
+                this.remoteAddr = remoteAddr;
+                new Thread(this).start();
+            }catch(IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        @Override
+        public void start() {
+
+        }
+
+        public void run() {
+            try {
+                handleNodeConnected(remoteAddr, serverIn, serverOut);
+                serverIn.close();
+                serverOut.close();
+                remoteAddr = null;
+            }catch(IOException e) {
+
+            }
+        }
+
+
+        @Override
+        public void stop() {
+
+        }
+
+    }
+
 }

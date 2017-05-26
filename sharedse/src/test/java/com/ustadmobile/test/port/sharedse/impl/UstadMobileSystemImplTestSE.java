@@ -4,12 +4,11 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
-import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.TestEntryStatusTask;
 import com.ustadmobile.test.sharedse.impl.TestContext;
 import com.ustadmobile.test.sharedse.impl.UstadMobileSystemImplTest;
 import com.ustadmobile.test.sharedse.network.MockNetworkManager;
-import com.ustadmobile.test.sharedse.network.MockRemoteDevice;
+import com.ustadmobile.test.sharedse.network.MockWifiNetwork;
 import com.ustadmobile.test.sharedse.network.MockWirelessArea;
 
 /**
@@ -21,9 +20,11 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
 
     private MockNetworkManager networkManager;
 
-    private MockRemoteDevice testDriver;
+    private MockNetworkManager testDriver;
 
     private MockWirelessArea wirelessArea;
+
+    private TestContext testDriverContext;
 
 
     public UstadMobileSystemImplTestSE() {
@@ -32,7 +33,12 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
         networkManager = new MockNetworkManager(TestConstants.TEST_MOCK_LOCAL_BLUETOOTH_DEVICE,
                 wirelessArea);
         networkManager.setMockDeviceIpAddress("127.0.0.1");
-        testDriver = networkManager.addMockTestDriver(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        //testDriver = networkManager.addMockTestDriver(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        testDriver = new MockNetworkManager(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
+            wirelessArea);
+        testDriverContext = new TestContext();
+        testDriver.init(testDriverContext);
+        testDriver.startTestControlServer();
     }
 
     /**
@@ -46,8 +52,7 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
         if(!isInitialized()) {
             super.init(context);
             networkManager.init(context);
-            new MockRemoteDevice(TestConstants.TEST_MOCK_LOCAL_BLUETOOTH_DEVICE, wirelessArea,
-                networkManager, context);//add the "main" device to the wireless area
+
             CatalogEntryInfo testEntryInfo = new CatalogEntryInfo();
             testEntryInfo.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
             testEntryInfo.srcURLs = new String[]{"http://foo.com/bar.epub"};
@@ -55,10 +60,28 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
             testEntryInfo.mimeType = "application/zip+epub";
             CatalogController.setEntryInfo(TestEntryStatusTask.ENTRY_ID, testEntryInfo,
                 CatalogController.SHARED_RESOURCE, testDriver.getContext());
+
+            //Setup the default mock wifi
+            MockWifiNetwork defaultMockNetwork = new MockWifiNetwork(
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE);
+            wirelessArea.addWifiNetwork(defaultMockNetwork);
+
+            String selfIpAddr = "127.0.0.2";//TODO: set from test constant
+            /*
+            self.getNetworkManager().mockWifiConnect(self,
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE, selfIpAddr);
+
+            testDriver.getNetworkManager().mockWifiConnect(self,
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE,
+                TestConstants.TEST_REMOTE_SLAVE_SERVER);
+            */
         }
     }
 
-    public MockRemoteDevice getMockTestDriver() {
+    public MockNetworkManager getMockTestDriver() {
         return testDriver;
     }
 
