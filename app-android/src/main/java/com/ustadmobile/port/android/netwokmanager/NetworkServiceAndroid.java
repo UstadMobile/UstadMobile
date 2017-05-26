@@ -16,6 +16,12 @@ import edu.rit.se.wifibuddy.WifiDirectHandler;
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 
 
+/**
+ * NetworkServiceAndroid is effectively a wrapper for NetworkManager. A service is required as this
+ * encapsulates network discovery processes and the http server that should continue running
+ * regardless of which activity is active.
+ *
+ */
 public class NetworkServiceAndroid extends Service{
 
     private WifiDirectHandler wifiDirectHandler;
@@ -39,9 +45,6 @@ public class NetworkServiceAndroid extends Service{
 
     }
 
-
-
-
     @Override
     public void onDestroy() {
         networkManagerAndroid.onDestroy();
@@ -56,6 +59,10 @@ public class NetworkServiceAndroid extends Service{
 
 
         super.onDestroy();
+    }
+
+    public NetworkManagerAndroid getNetworkManager() {
+        return  networkManagerAndroid;
     }
 
     @Override

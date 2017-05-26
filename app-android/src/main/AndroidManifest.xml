@@ -50,10 +50,6 @@
             android:theme="@style/Theme.UstadTheme" />
 
         <service android:name="com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid" />
-        <service
-            android:name="com.ustadmobile.port.android.impl.http.HTTPService"
-            android:enabled="true"
-            android:exported="true" />
 
         <activity
             android:name="com.ustadmobile.port.android.view.ContainerActivity"

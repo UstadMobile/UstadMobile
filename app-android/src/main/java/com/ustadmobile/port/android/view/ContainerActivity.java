@@ -2,8 +2,6 @@ package com.ustadmobile.port.android.view;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.IBinder;
@@ -19,12 +17,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
@@ -43,12 +39,11 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.port.android.impl.http.HTTPService;
+import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -74,7 +69,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private String mMimeType;
 
-    private HTTPService mHttpService;
+    private NetworkServiceAndroid mNetworkService;
 
     private boolean mBound = false;
 
@@ -187,25 +182,29 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     @Override
     public void onServiceConnected(ComponentName name, IBinder iBinder) {
         super.onServiceConnected(name, iBinder);
-        if(name.getClassName().equals(HTTPService.class.getName())) {
-            mHttpService = ((HTTPService.HTTPBinder) iBinder).getService();
-            onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__", mHttpService.getAssetsBaseURL());
+        if(name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
+            mNetworkService = ((NetworkServiceAndroid.LocalServiceBinder)iBinder).getService();
+            onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__",
+                mNetworkService.getNetworkManager().getHttpAndroidAssetsUrl());
             ContainerActivity.this.initContent();
         }
     }
 
     @Override
     public void onServiceDisconnected(ComponentName name) {
-        if(name.getClassName().equals(HTTPService.class.getName())) {
-            mHttpService = null;
+        if(name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
+            mNetworkService = null;
         }
+
         super.onServiceDisconnected(name);
     }
 
 
     public void initContent() {
-        mMountedPath = mHttpService.mountZIP(ContainerActivity.this.mContainerURI, mSavedMountPoint);
-        mBaseURL = UMFileUtil.joinPaths(new String[]{mHttpService.getBaseURL(), mMountedPath});
+        mMountedPath = mNetworkService.getNetworkManager().mountZipOnHttp(
+                ContainerActivity.this.mContainerURI, mSavedMountPoint);
+        mBaseURL = UMFileUtil.joinPaths(new String[]{
+                mNetworkService.getNetworkManager().getLocalHttpUrl(), mMountedPath});
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
         UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + "on " + mBaseURL + " type "
                 + mMimeType);
@@ -467,7 +466,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     public void onDestroy() {
         if(mMountedPath != null) {
-            mHttpService.ummountZIP(mMountedPath);
+            mNetworkService.getNetworkManager().unmountZipFromHttp(mMountedPath);
         }
 
         mContainerURI = null;

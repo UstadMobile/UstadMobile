@@ -63,9 +63,6 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                 e.printStackTrace();
             }
         }
-
-        AcquisitionManager.getInstance().registerEntryAquisitionStatusListener(this, context);
-
     }
 
     public void handleClickButton(int buttonId) {
@@ -103,7 +100,8 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
     @Override
     public void statusUpdated(AcquisitionStatusEvent event) {
-        if(event.getEntryId() != null && event.getEntryId().equals(entry.id)) {
+        //TODO: Rework to use the networkmanager instead of acquisition manager
+        /*if(event.getEntryId() != null && event.getEntryId().equals(entry.id)) {
             int newStatus = AcquisitionManager.getStringIdForDownloadStatus(event.getStatus());
             if(newStatus != downloadStatusStrId) {
                 catalogEntryView.setProgressStatusText(UstadMobileSystemImpl.getInstance().getString(newStatus));
@@ -122,10 +120,9 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                             (float)((double)event.getBytesDownloadedSoFar() / (double)event.getTotalBytes()));
                     break;
             }
-        }
+        }*/
     }
 
     public void onDestroy() {
-        AcquisitionManager.getInstance().unregisterEntryAquisitionStatusListener(this, context);
     }
 }

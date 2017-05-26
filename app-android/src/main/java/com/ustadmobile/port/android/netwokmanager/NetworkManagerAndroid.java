@@ -24,6 +24,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -34,9 +36,11 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -95,6 +99,11 @@ public class NetworkManagerAndroid extends NetworkManager{
     private int currentWifiDirectGroupStatus=-1;
     private BluetoothSocket bluetoothSocket=null;
 
+    /**
+     * Assets are served over http that are used to interact with the content (e.g. to inject a
+     * javascript into the content that handles autoplay).
+     */
+    private String httpAndroidAssetsPath;
 
 
     /**
@@ -105,6 +114,7 @@ public class NetworkManagerAndroid extends NetworkManager{
      */
     @Override
     public void init(Object context) {
+        super.init(context);
         networkService = (NetworkServiceAndroid)context;
         bluetoothServerAndroid=new BluetoothServerAndroid(this);
         nsdHelperAndroid=new NSDHelperAndroid(this);
@@ -130,6 +140,9 @@ public class NetworkManagerAndroid extends NetworkManager{
                 }
             }
         },new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+
+        httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
+        httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
     }
 
 
@@ -367,6 +380,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         return address;
     }
 
+    @Override
     public void onDestroy() {
         LocalBroadcastManager.getInstance(networkService).unregisterReceiver(mBroadcastReceiver);
         if(bluetoothServerAndroid !=null){
@@ -376,6 +390,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         if(nsdHelperAndroid!=null){
             nsdHelperAndroid.unregisterNSDService();
         }
+        super.onDestroy();
 
     }
 
@@ -505,5 +520,10 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public int getWifiDirectGroupStatus() {
         return currentWifiDirectGroupStatus;
+    }
+
+    public String getHttpAndroidAssetsUrl() {
+        return UMFileUtil.joinPaths(new String[]{"http://127.0.0.1:" + httpd.getListeningPort()
+            + "/" + httpAndroidAssetsPath});
     }
 }

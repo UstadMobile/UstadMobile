@@ -39,10 +39,15 @@ task startTestSlaveServer(type: Exec) {
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity','-a','android.intent.action.MAIN','-c','android.intent.category.LAUNCHER'
 }
 
-afterEvaluate {
-    startTestSlaveServer.dependsOn(assembleRemotetestslaveDebug)
-}
+//afterEvaluate {
+//    startTestSlaveServer.dependsOn(assembleRemotetestslaveDebug)
+//}
 
+tasks.whenTaskAdded { task ->
+    if(task.name == "assembleRemotetestslaveDebug"){
+        startTestSlaveServer.dependsOn task
+    }
+}
 
 
 android {

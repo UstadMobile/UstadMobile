@@ -75,7 +75,6 @@ import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
-import com.ustadmobile.port.android.impl.http.HTTPService;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
@@ -164,8 +163,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     private UMLogAndroid logger;
 
-    private HashMap<Object, HTTPService> activityToHttpServiceMap;
-
     public static final String START_USERNAME = "START_USERNAME";
 
     public static final String START_AUTH = "START_AUTH";
@@ -227,25 +224,24 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
     }
 
-    private HashMap<Context, ServiceConnection> httpServiceConnections = new HashMap<>();
+    //private HashMap<Context, ServiceConnection> httpServiceConnections = new HashMap<>();
 
-    private HashMap<Context, ServiceConnection> p2pServiceConnections = new HashMap<>();
+    private HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
-    private NetworkManagerAndroid p2pManager;
+    private NetworkManagerAndroid networkManagerAndroid;
 
     /**
      @deprecated
      */
     public UstadMobileSystemImplAndroid() {
         logger = new UMLogAndroid();
-        activityToHttpServiceMap = new HashMap<>();
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
         queueStatusListeners = new HashMap<>();
         knownMimeToExtensionMap = new HashMap<>();
         knownMimeToExtensionMap.put("application/epub+zip", "epub");
-        p2pManager = new NetworkManagerAndroid();
-        p2pManager.setServiceConnectionMap(p2pServiceConnections);
+        networkManagerAndroid = new NetworkManagerAndroid();
+        networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
     }
 
     /**
@@ -330,11 +326,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      */
     public void handleActivityCreate(Activity mContext, Bundle savedInstanceState) {
         init(mContext);
-        Intent intent = new Intent(mContext, HTTPService.class);
-        BaseServiceConnection connection = new BaseServiceConnection(mContext, httpServiceConnections);
-        mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
         Intent networkIntent = new Intent(mContext, NetworkServiceAndroid.class);
-        connection = new BaseServiceConnection(mContext, p2pServiceConnections);
+        BaseServiceConnection connection = new BaseServiceConnection(mContext, networkServiceConnections);
         mContext.bindService(networkIntent, connection, Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
     }
 
@@ -348,8 +341,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     public void handleActivityDestroy(Activity mContext) {
-        mContext.unbindService(httpServiceConnections.get(mContext));
-        mContext.unbindService(p2pServiceConnections.get(mContext));
+        mContext.unbindService(networkServiceConnections.get(mContext));
     }
 
 
@@ -714,6 +706,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public NetworkManager getNetworkManager() {
-        return p2pManager;
+        return networkManagerAndroid;
     }
 }

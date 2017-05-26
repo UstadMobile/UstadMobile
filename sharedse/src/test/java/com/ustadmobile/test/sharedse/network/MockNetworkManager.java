@@ -228,4 +228,14 @@ public class MockNetworkManager extends NetworkManager {
     public int getWifiDirectGroupStatus() {
         return 0;
     }
+
+    @Override
+    public void disconnectBluetooth() {
+
+    }
+
+    @Override
+    public void connectWifi(String SSID, String passPhrase) {
+
+    }
 }

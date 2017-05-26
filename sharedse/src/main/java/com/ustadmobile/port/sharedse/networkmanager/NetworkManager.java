@@ -1,14 +1,26 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.p2p.P2PManager;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
+import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
+import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.WeakHashMap;
+import java.util.regex.Pattern;
+
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
@@ -66,6 +78,8 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     private Vector<WiFiDirectGroupListener> wifiDirectGroupListeners = new Vector<>();
 
+    protected EmbeddedHTTPD httpd;
+
     public NetworkManager() {
     }
 
@@ -75,8 +89,27 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
 
     public abstract boolean isSuperNodeEnabled();
 
-    public void init(Object mContext) {
+    /**
+     * Do the main initialization of the NetworkManager : set the context and start the http manager
+     * This will have no effect if called twice
+     *
+     * @param mContext The context to use for the network manager
+     */
+    public synchronized void init(Object mContext) {
+        if(this.mContext != null)
+            return;
+
         this.mContext = mContext;
+
+        try {
+            httpd = new EmbeddedHTTPD(0);
+            httpd.addRoute("/catalog/(.)+", CatalogUriResponder.class, this, new WeakHashMap());
+            NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, this, "/xapi/");
+            httpd.start();
+        }catch(IOException e) {
+            UstadMobileSystemImpl.l(UMLog.CRITICAL, 1, "Failed to start http server");
+            throw new RuntimeException("Failed to start http server", e);
+        }
     }
 
     public  abstract boolean isBluetoothEnabled();
@@ -490,5 +523,63 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
      * @return Wifi direct group status as per the constants
      */
     public abstract int getWifiDirectGroupStatus();
+
+    /**
+     * Clean up the network manager for shutdown
+     */
+    public void onDestroy() {
+        if(httpd != null) {
+            httpd.stop();
+        }
+    }
+
+    /**
+     * Mount a Zip File to the http server.  Optionally specify a preferred mount point (useful if
+     * the activity is being created from a saved state)
+     *
+     * @param zipPath Path to the zip that should be mounted (mandatory)
+     * @param mountName Directory name that this should be mounted as e.g. something.epub-timestamp
+     *
+     * @return The mountname that was used - the ocntent will then be accessible on getZipMountURL()/return value
+     */
+    public String mountZipOnHttp(String zipPath, String mountName) {
+        UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
+                + this + "httpd server = " + httpd);
+        String extension = UMFileUtil.getExtension(zipPath);
+        HashMap<String, List<MountedZipHandler.MountedZipFilter>> filterMap = null;
+
+        if(extension != null && extension.endsWith("epub")) {
+            filterMap = new HashMap<>();
+            List<MountedZipHandler.MountedZipFilter> xhtmlFilterList = new ArrayList<>();
+            MountedZipHandler.MountedZipFilter autoplayFilter = new MountedZipHandler.MountedZipFilter(
+                    Pattern.compile("autoplay(\\s?)=(\\s?)([\"'])autoplay", Pattern.CASE_INSENSITIVE),
+                    "data-autoplay$1=$2$3autoplay");
+            xhtmlFilterList.add(autoplayFilter);
+            filterMap.put("xhtml", xhtmlFilterList);
+        }
+
+
+        mountName = httpd.mountZip(zipPath, mountName, filterMap);
+        return mountName;
+    }
+
+    public void unmountZipFromHttp(String mountName) {
+        httpd.unmountZip(mountName);
+    }
+
+    public int getHttpListeningPort() {
+        return httpd.getListeningPort();
+    }
+
+    /**
+     * Get the local HTTP server url with the URL as it is to be used for access over the loopback
+     * interface
+     *
+     * @return Local http server url e.g. http://127.0.0.1:PORT/
+     */
+    public String getLocalHttpUrl() {
+        return "http://127.0.0.1:" + getHttpListeningPort() + "/";
+    }
+
 
 }
