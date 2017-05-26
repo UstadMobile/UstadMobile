@@ -350,7 +350,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
         HashMap<String,String> record=new HashMap<>();
         record.put(SERVICE_DEVICE_AVAILABILITY,"available");
-        record.put(SD_TXT_KEY_PORT,String.valueOf(SERVICE_PORT));
+        record.put(SD_TXT_KEY_PORT,String.valueOf(getHttpListeningPort()));
         record.put(SD_TXT_KEY_BT_MAC, deviceBluetoothMacAddress);
         record.put(SD_TXT_KEY_IP_ADDR, deviceIpAddress);
         return record;
@@ -468,7 +468,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void createWifiDirectGroup() {
 
         networkService.getWifiDirectHandlerAPI().setAddLocalServiceAfterGroupCreation(false);
-        ServiceData serviceData= new ServiceData(NETWORK_SERVICE_NAME,SERVICE_PORT,
+        ServiceData serviceData= new ServiceData(NETWORK_SERVICE_NAME, getHttpListeningPort(),
                 new HashMap<String,String>() ,ServiceType.PRESENCE_TCP);
         networkService.getWifiDirectHandlerAPI().startAddingNoPromptService(serviceData, new WifiP2pManager.ActionListener() {
             @Override

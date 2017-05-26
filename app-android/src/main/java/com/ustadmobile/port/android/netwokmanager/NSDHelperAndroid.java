@@ -6,7 +6,6 @@ import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
-import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.SERVICE_PORT;
 
 /**
  * Created by kileha3 on 21/05/2017.
@@ -124,7 +123,7 @@ public class NSDHelperAndroid {
         NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setServiceName(networkServiceName);
         serviceInfo.setServiceType(SERVICE_TYPE);
-        serviceInfo.setPort(SERVICE_PORT);
+        serviceInfo.setPort(managerAndroid.getHttpListeningPort());
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD,networkRegistrationListener);
         Log.d(NetworkManagerAndroid.TAG,"Registering network service "+networkServiceName);
     }

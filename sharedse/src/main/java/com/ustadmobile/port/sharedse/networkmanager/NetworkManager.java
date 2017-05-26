@@ -37,7 +37,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     public static final int DOWNLOAD_FROM_CLOUD =1;
     public static final int DOWNLOAD_FROM_PEER_ON_SAME_NETWORK =2;
     public static final int DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK =3;
-    public static final int SERVICE_PORT=8001;
+
     public BluetoothServer bluetoothServer;
     private static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT =2 * 60 * 1000;
 
