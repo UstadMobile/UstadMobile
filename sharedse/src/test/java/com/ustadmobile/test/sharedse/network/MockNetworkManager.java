@@ -101,8 +101,7 @@ public class MockNetworkManager extends NetworkManager {
             txtRecords.put(NetworkManager.SD_TXT_KEY_BT_MAC, mockBluetoothAddr);
             txtRecords.put(NetworkManager.SD_TXT_KEY_IP_ADDR,
                     MockNetworkManager.this.getDeviceIPAddress());
-            //TODO: Fix this to use actual port of the real HTTP service
-            txtRecords.put(NetworkManager.SD_TXT_KEY_PORT, "0");
+            txtRecords.put(NetworkManager.SD_TXT_KEY_PORT, String.valueOf(getHttpListeningPort()));
             wifiDirectBroadcastTimer = new Timer();
             wifiDirectBroadcastTimer.scheduleAtFixedRate(new WifiDirectBroadcastTimerTask(txtRecords),
                     WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
