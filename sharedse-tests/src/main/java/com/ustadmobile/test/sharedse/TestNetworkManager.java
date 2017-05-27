@@ -62,7 +62,12 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeUpdated(NetworkNode node) {
-
+                if(node.getDeviceBluetoothMacAddress()!=null && node.getDeviceBluetoothMacAddress().equals(
+                        TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
+                    synchronized (nodeDiscoveryLock){
+                        nodeDiscoveryLock.notify();
+                    }
+                }
             }
 
             @Override
@@ -132,7 +137,11 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeUpdated(NetworkNode node) {
-
+                if(node.getDeviceIpAddress().equals(TestConstants.TEST_REMOTE_SLAVE_SERVER)){
+                    synchronized (nodeNSDiscoveryLock){
+                        nodeNSDiscoveryLock.notify();
+                    }
+                }
             }
 
             @Override
