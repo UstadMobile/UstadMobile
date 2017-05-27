@@ -102,7 +102,7 @@ public class TestNetworkManager {
     }
 
 
-    //@Test
+    @Test
     public void testNetworkServiceDiscovery() throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 

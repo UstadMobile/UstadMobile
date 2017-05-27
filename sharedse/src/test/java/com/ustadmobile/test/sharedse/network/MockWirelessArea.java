@@ -1,17 +1,17 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Vector;
 
 /**
+ * This class represents a wireless area (e.g. range). It keeps a list of bluetooth addresses of
+ * mock network manager instances around, sends out Wifi direct service advertisements and
+ * has keeps a list of wireless networks.
+ *
  * Created by mike on 5/14/17.
  */
-
 public class MockWirelessArea {
 
     private Vector<MockNetworkManager> devices;
@@ -48,19 +48,25 @@ public class MockWirelessArea {
         mockWifiNetworks.remove(network.getSsid());
     }
 
+    public MockWifiNetwork getWifiNetwork(String ssid) {
+        return mockWifiNetworks.get(ssid);
+    }
+
     /**
-     * "Connect"
+     * Handle a device that wants to "connect" to a wireless network in this range.
      *
-     * @param device
-     * @param ssid
-     * @param passphrase
-     * @param staticIp
+     * @param device Device that wants to connect
+     * @param ssid SSID it wants to connect to
+     * @param passphrase Passphrase it is using to connect
      *
      * @return
      */
-    public String connectDeviceToWifiNetwork(MockNetworkManager device, String ssid, String passphrase, String staticIp) {
+    public String connectDeviceToWifiNetwork(MockNetworkManager device, String ssid, String passphrase) {
         MockWifiNetwork network = mockWifiNetworks.get(ssid);
-        return network.connect(device, ssid, passphrase, staticIp);
+        if(network == null)
+            return null;
+
+        return network.connect(device, ssid, passphrase);
     }
 
     public MockNetworkManager getDeviceByBluetoothAddr(String bluetoothAddr) {

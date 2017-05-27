@@ -33,7 +33,6 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
         networkManager = new MockNetworkManager(TestConstants.TEST_MOCK_LOCAL_BLUETOOTH_DEVICE,
                 wirelessArea);
         networkManager.setMockDeviceIpAddress("127.0.0.1");
-        //testDriver = networkManager.addMockTestDriver(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         testDriver = new MockNetworkManager(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
             wirelessArea);
         testDriverContext = new TestContext();
@@ -68,16 +67,16 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
             wirelessArea.addWifiNetwork(defaultMockNetwork);
 
             String selfIpAddr = "127.0.0.2";//TODO: set from test constant
-            /*
-            self.getNetworkManager().mockWifiConnect(self,
-                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
-                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE, selfIpAddr);
 
-            testDriver.getNetworkManager().mockWifiConnect(self,
-                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
-                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE,
-                TestConstants.TEST_REMOTE_SLAVE_SERVER);
-            */
+            networkManager.connectWifi(MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE);
+            defaultMockNetwork.setDeviceIpAddr(networkManager, selfIpAddr);
+            networkManager.setMockDeviceIpAddress(selfIpAddr);
+
+            testDriver.connectWifi(MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
+                MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE);
+            defaultMockNetwork.setDeviceIpAddr(testDriver, TestConstants.TEST_REMOTE_SLAVE_SERVER);
+            testDriver.setMockDeviceIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER);
         }
     }
 

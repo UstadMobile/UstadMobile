@@ -7,7 +7,6 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
-import com.ustadmobile.test.sharedse.impl.TestContext;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -25,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * Created by kileha3 on 10/05/2017.
  */
-
 public class MockNetworkManager extends NetworkManager {
 
     private String mockBluetoothAddr;
@@ -36,13 +33,15 @@ public class MockNetworkManager extends NetworkManager {
 
     private Timer wifiDirectBroadcastTimer;
 
+    private Timer wifiNetworkServiceBroadcastTimer;
+
     public static final int WIFI_DIRECT_BROADCAST_INTERVAL = (30*1000);//Broadcast service records every 30s
 
     public static final int WIFI_DIRECT_BROADCAST_DELAY = 1000;
 
     public static final String TMP_MOCK_WIFIDIRECT_MAC = "01:00:00:00:00:00";
 
-    private static AtomicInteger ipAddrCounter = new AtomicInteger(2);
+    private static AtomicInteger ipAddrCounter = new AtomicInteger(10);
 
     public static final String MOCK_WIRELESS_DEFAULT_WIRELESS_SSID = "mocknet";
 
@@ -51,6 +50,10 @@ public class MockNetworkManager extends NetworkManager {
     private RemoteTestServerHttpd mockRemoteDeviceControlHttpd;
 
     private MockBluetoothServer mockBluetoothServer;
+
+    private MockWifiNetwork connectedWifiNetwork;
+
+    private final Object wifiLockObj = new Object();
 
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
@@ -67,6 +70,19 @@ public class MockNetworkManager extends NetworkManager {
                     txtRecords, MockNetworkManager.this);
         }
     };
+
+    class WifiNetworkBroadcastTimer extends TimerTask {
+        public void run() {
+            synchronized (wifiLockObj) {
+                if (MockNetworkManager.this.connectedWifiNetwork != null) {
+                    MockNetworkManager.this.connectedWifiNetwork.sendWirelessServiceBroadcast(
+                        CoreBuildConfig.NETWORK_SERVICE_NAME, MockNetworkManager.this.getDeviceIPAddress(),
+                        MockNetworkManager.this.getHttpListeningPort());
+                }
+            }
+        }
+    }
+
 
     public MockNetworkManager(String bluetoothAddr, MockWirelessArea wirelessArea) {
         this.mockBluetoothAddr = bluetoothAddr;
@@ -115,8 +131,8 @@ public class MockNetworkManager extends NetworkManager {
         int remainder = nextInt;
         int colVal;
         String ipAddr = "127.";
-        for(int i = ipSections.length; i > 0; i--) {
-            colVal = 255^i;
+        for(int i = ipSections.length-1; i >= 0; i--) {
+            colVal = (int)Math.pow(255, i);
             ipSections[i] = remainder / colVal;
             remainder %= colVal;
             ipAddr += ipSections[i];
@@ -271,7 +287,21 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void connectWifi(String SSID, String passPhrase) {
+        synchronized (wifiLockObj) {
+            if(connectedWifiNetwork != null) {
+                connectedWifiNetwork.disconnect(this);
+                wifiDirectBroadcastTimer.cancel();
+                wifiDirectBroadcastTimer = null;
+            }
 
+            mockIpAddr = wirelessArea.connectDeviceToWifiNetwork(this, SSID, passPhrase);
+            if(mockIpAddr != null) {
+                connectedWifiNetwork = wirelessArea.getWifiNetwork(SSID);
+                wifiNetworkServiceBroadcastTimer = new Timer();
+                wifiNetworkServiceBroadcastTimer.scheduleAtFixedRate(new WifiNetworkBroadcastTimer(),
+                    WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
+            }
+        }
     }
 
     public String getMockBluetoothAddr() {
