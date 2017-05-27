@@ -2,6 +2,7 @@ package com.ustadmobile.test.port.sharedse.impl;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.TestEntryStatusTask;
@@ -10,6 +11,11 @@ import com.ustadmobile.test.sharedse.impl.UstadMobileSystemImplTest;
 import com.ustadmobile.test.sharedse.network.MockNetworkManager;
 import com.ustadmobile.test.sharedse.network.MockWifiNetwork;
 import com.ustadmobile.test.sharedse.network.MockWirelessArea;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Created by kileha3 on 10/05/2017.
@@ -55,7 +61,29 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
             CatalogEntryInfo testEntryInfo = new CatalogEntryInfo();
             testEntryInfo.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
             testEntryInfo.srcURLs = new String[]{"http://foo.com/bar.epub"};
-            testEntryInfo.fileURI = "/path/to/file";
+
+            File sharedStorageDir = new File(getStorageDirs(CatalogController.SHARED_RESOURCE,
+                testDriver.getContext())[0].getDirURI());
+            File testDriverEntryFile = new File(sharedStorageDir, "thelittlechicks.epub");
+            InputStream entryIn = null;
+            FileOutputStream fout = null;
+            IOException ioe = null;
+            try {
+                entryIn = getClass().getResourceAsStream("/com/ustadmobile/test/sharedse/thelittlechicks.epub");
+                fout = new FileOutputStream(testDriverEntryFile);
+                UMIOUtils.readFully(entryIn, fout, 1024);
+                fout.flush();
+            }catch(IOException e) {
+                ioe = e;
+            }finally {
+                UMIOUtils.closeInputStream(entryIn);
+                UMIOUtils.closeOutputStream(fout);
+                if(ioe != null) {
+                    throw new RuntimeException(ioe);
+                }
+            }
+
+            testEntryInfo.fileURI = testDriverEntryFile.getAbsolutePath();
             testEntryInfo.mimeType = "application/zip+epub";
             CatalogController.setEntryInfo(TestEntryStatusTask.ENTRY_ID, testEntryInfo,
                 CatalogController.SHARED_RESOURCE, testDriver.getContext());

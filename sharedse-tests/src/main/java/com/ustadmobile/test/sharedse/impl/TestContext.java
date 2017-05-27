@@ -14,9 +14,6 @@ public class TestContext {
 
     private Properties userPrefs;
 
-    private NetworkManager networkManager;
-
-
     public TestContext() {
         appProps = new Properties();
         userPrefs = new Properties();
@@ -31,11 +28,5 @@ public class TestContext {
         return userPrefs;
     }
 
-    public NetworkManager getNetworkManager() {
-        return networkManager;
-    }
 
-    public void setNetworkManager(NetworkManager networkManager) {
-        this.networkManager = networkManager;
-    }
 }

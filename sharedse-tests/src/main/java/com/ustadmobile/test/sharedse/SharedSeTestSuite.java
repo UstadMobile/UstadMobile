@@ -13,7 +13,7 @@ import org.junit.runners.Suite;
         //BluetoothServerTestSe.class,
         TestNetworkManager.class,
         TestEntryStatusTask.class,
-        //TestAcquisitionTask.class
+        TestAcquisitionTask.class
 })
 
 public abstract class SharedSeTestSuite {

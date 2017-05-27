@@ -39,13 +39,13 @@ public class EntryCheckResponse {
         this.networkNode = networkNode;
     }
 
-    public boolean isOnSameNetwork() {
-        return isOnSameNetwork;
-    }
+    //public boolean isOnSameNetwork() {
+    //    return isOnSameNetwork;
+    //}
 
-    public void setOnSameNetwork(boolean onSameNetwork) {
-        isOnSameNetwork = onSameNetwork;
-    }
+    //public void setOnSameNetwork(boolean onSameNetwork) {
+    //    isOnSameNetwork = onSameNetwork;
+    //}
 
     @Override
     public boolean equals(Object object) {

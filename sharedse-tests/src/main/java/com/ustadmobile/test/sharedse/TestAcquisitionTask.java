@@ -1,28 +1,36 @@
 package com.ustadmobile.test.sharedse;
 
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.core.impl.ClassResourcesResponder;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER_PORT;
 import static org.hamcrest.CoreMatchers.is;
@@ -43,14 +51,41 @@ public class TestAcquisitionTask{
     private static final String ENTRY_LINK_REL="http://opds-spec.org/acquisition";
     private static final String ENTRY_LINK_MIME="application/epub+zip";
     private static final String ENTRY_LINK_HREF="/media/eXeUpload/d3288c3b-89b3-4541-a1f0-13ccf0b0eacc.um.TheLittleChicks.epub";
+
+
     private static final String ENTRY_ID_PRESENT ="202b10fe-b028-4b84-9b84-852aa766607d";
-    private static final String ENTRY_ID_NOT_PRESENT = "202b10fe-b028-4b84-9b84-852aa766607dx";
+    private static final String ENTRY_ID_NOT_PRESENT = "b649852e-2bf9-45ab-839e-ec5bb00ca19d";
     public static final String[] ENTRY_IDS = new String[]{ENTRY_ID_PRESENT,ENTRY_ID_NOT_PRESENT};
 
     private ArrayList<HashMap<String,Integer>> downloadSources=new ArrayList<>();
 
+    private static RouterNanoHTTPD resourcesHttpd;
+
+    /**
+     * The resources server can be used as the "cloud"
+     */
+    private static String httpRoot;
+
+    @BeforeClass
+    public static void startHttpResourcesServer() throws IOException {
+        if(resourcesHttpd == null) {
+            resourcesHttpd = new RouterNanoHTTPD(0);
+            resourcesHttpd.addRoute("/res/(.*)", ClassResourcesResponder.class, "/res/");
+            resourcesHttpd.start();
+            httpRoot = "http://localhost:" + resourcesHttpd.getListeningPort() + "/res/";
+        }
+    }
+
+    @AfterClass
+    public static void stopHttpResourcesServer() throws IOException {
+        if(resourcesHttpd != null) {
+            resourcesHttpd.stop();
+            resourcesHttpd = null;
+        }
+    }
+
     @Test
-    public void testAcquisition() throws IOException, InterruptedException {
+    public void testAcquisition() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
@@ -103,7 +138,7 @@ public class TestAcquisitionTask{
 
                 if(downloadSources.size()>=1){
                     synchronized (acquisitionLock){
-                       acquisitionLock.notify();
+                       //acquisitionLock.notify();
                     }
                 }
             }
@@ -149,20 +184,15 @@ public class TestAcquisitionTask{
         Assert.assertFalse("Unavailable entry reported as not available",  fileAvailable[1]);
 
         //Create a feed manually
-        UstadJSOPDSFeed feed=new UstadJSOPDSFeed(FEED_SRC_URL,FEED_TITLE, ENTRY_ID_PRESENT);
-        feed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
-                FEED_LINK_MIME, FEED_LINK_HREF);
-        feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
-                PlatformTestUtil.getRemoteTestEndpoint()+"/catalog/acquire.opds");
-        UstadJSOPDSEntry entry=new UstadJSOPDSEntry(feed);
+        String catalogUrl = UMFileUtil.joinPaths(new String[]{
+                httpRoot, "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds"});
+        UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(catalogUrl,
+            CatalogController.SHARED_RESOURCE, null, null, 0, PlatformTestUtil.getTargetContext());
 
-        for (String entryId : ENTRY_IDS) {
-            entry.id = entryId;
-            entry.title = FEED_TITLE;
-            entry.updated = FEED_ENTRY_UPDATED;
-            entry.addLink(ENTRY_LINK_REL, ENTRY_LINK_MIME, ENTRY_LINK_HREF);
-            feed.addEntry(entry);
-        }
+        feed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
+            FEED_LINK_MIME, FEED_LINK_HREF);
+        feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
+            catalogUrl);
 
         manager.requestAcquisition(feed,manager.getContext());
 

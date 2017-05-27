@@ -134,8 +134,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             String entryId = feed.entries[currentEntryIdIndex].id;
             entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
 
-            if(entryCheckResponse!=null){
-                if(entryCheckResponse.isOnSameNetwork()){
+
+            if(entryCheckResponse != null){
+                if(Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                     networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
                             DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
                     String fileURI="http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
