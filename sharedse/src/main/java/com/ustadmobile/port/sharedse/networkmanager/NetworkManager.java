@@ -161,9 +161,12 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
 
-    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext){
+    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext,
+                                              boolean localNetworkEnabled, boolean wifiDirectEnabled){
         AcquisitionTask task=new AcquisitionTask(feed,this);
         task.setTaskType(QUEUE_ENTRY_ACQUISITION);
+        task.setLocalNetworkDownloadEnabled(localNetworkEnabled);
+        task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
         queueTask(task);
         return feed;
     }
