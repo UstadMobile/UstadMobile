@@ -179,6 +179,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX],
                         UMFileUtil.getFilename(fileUrl) + UNFINISHED_FILE_EXTENSION);
 
+                /*
                 CatalogEntryInfo info = new CatalogEntryInfo();
                 info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
                 info.downloadID = String.valueOf(currentDownloadId);
@@ -188,6 +189,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 info.srcURLs = new String[]{fileUrl};
                 CatalogController.setEntryInfo(getFeed().entries[currentEntryIdIndex].id, info,
                         CatalogController.SHARED_RESOURCE, networkManager.getContext());
+                */
+
                 try {
                     URL url = new URL(fileUrl);
                     if (infoFile.exists()) {

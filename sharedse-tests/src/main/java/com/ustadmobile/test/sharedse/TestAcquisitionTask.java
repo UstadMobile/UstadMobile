@@ -24,6 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,22 +37,15 @@ import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SL
 import static org.hamcrest.CoreMatchers.is;
 
 /**
+ * Test the acquisition task. The OPDS feed on which the acquisition is based and the EPUBs are in
+ * the resources of the sharedse-tests module.
+ *
  * Created by kileha3 on 17/05/2017.
  */
-
 public class TestAcquisitionTask{
     private static final int DEFAULT_WAIT_TIME =20000;
-    private static final String FEED_SRC_URL ="opds:///com.ustadmobile.app.devicefeed";
-    private static final String FEED_TITLE="The Little Chicks";
-    private static final String FEED_ENTRY_UPDATED="2016-11-04T13:38:49Z";
 
     private static final String FEED_LINK_MIME ="application/dir";
-    private static final String FEED_LINK_HREF ="/storage/emulated/0/ustadmobileContent";
-
-    private static final String ENTRY_LINK_REL="http://opds-spec.org/acquisition";
-    private static final String ENTRY_LINK_MIME="application/epub+zip";
-    private static final String ENTRY_LINK_HREF="/media/eXeUpload/d3288c3b-89b3-4541-a1f0-13ccf0b0eacc.um.TheLittleChicks.epub";
-
 
     private static final String ENTRY_ID_PRESENT ="202b10fe-b028-4b84-9b84-852aa766607d";
     private static final String ENTRY_ID_NOT_PRESENT = "b649852e-2bf9-45ab-839e-ec5bb00ca19d";
@@ -189,8 +183,10 @@ public class TestAcquisitionTask{
         UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(catalogUrl,
             CatalogController.SHARED_RESOURCE, null, null, 0, PlatformTestUtil.getTargetContext());
 
+        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
+            CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         feed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
-            FEED_LINK_MIME, FEED_LINK_HREF);
+            FEED_LINK_MIME, destinationDir);
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
             catalogUrl);
 
@@ -201,7 +197,7 @@ public class TestAcquisitionTask{
         }
         Assert.assertThat("Available entry reported,can be downloaded locally",
                 downloadSources.get(0).get(ENTRY_IDS[0]),is(NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK));
-       Assert.assertThat("Unavailable entry reported,can be downloaded from cloud",
+        Assert.assertThat("Unavailable entry reported,can be downloaded from cloud",
                 downloadSources.get(1).get(ENTRY_IDS[1]),is(NetworkManager.DOWNLOAD_FROM_CLOUD));
     }
 }
