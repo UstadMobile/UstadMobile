@@ -130,7 +130,7 @@ public class TestAcquisitionTask{
 
                 if(downloadSources.size()>=1){
                     synchronized (acquisitionLock){
-                       //acquisitionLock.notify();
+                       acquisitionLock.notify();
                     }
                 }
             }

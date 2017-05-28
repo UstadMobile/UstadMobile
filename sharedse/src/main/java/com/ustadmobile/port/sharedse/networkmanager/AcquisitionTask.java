@@ -59,7 +59,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private TimerTask updateTimerTask =new TimerTask() {
         @Override
         public void run() {
-            if(httpDownload.getTotalSize()>0L){
+            if(httpDownload != null && httpDownload.getTotalSize()>0L){
                 int progress=(int)((httpDownload.getDownloadedSoFar()*100)/ httpDownload.getTotalSize());
                 long currentTime = Calendar.getInstance().getTimeInMillis();
                 int progressLimit=100;
