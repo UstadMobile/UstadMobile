@@ -297,6 +297,7 @@ public class MockNetworkManager extends NetworkManager {
                 mockWifiDirectIpAddr = MockNetworkManager.makeNextMockIpAddr();
                 mockWifiDirectGroupNetwork = new MockWifiNetwork(wirelessId,passphrase);
                 mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_ACTIVE;
+                wirelessArea.addWifiNetwork(mockWifiDirectGroupNetwork);
 
                 fireWifiDirectGroupCreated(MockNetworkManager.this.mockWifiDirectGroup, null);
             }
@@ -345,8 +346,8 @@ public class MockNetworkManager extends NetworkManager {
         synchronized (wifiLockObj) {
             if(connectedWifiNetwork != null) {
                 connectedWifiNetwork.disconnect(this);
-                wifiDirectBroadcastTimer.cancel();
-                wifiDirectBroadcastTimer = null;
+                wifiNetworkServiceBroadcastTimer.cancel();
+                wifiNetworkServiceBroadcastTimer = null;
             }
 
             mockIpAddr = wirelessArea.connectDeviceToWifiNetwork(this, SSID, passPhrase);

@@ -116,8 +116,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         //TODO: Move hardcoded strings to locale constants
         message=getFeed().entries.length>1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
                 +getFeed().entries.length+" files":"Downloading file";
-        networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,getFeed().entries[currentEntryIdIndex].title,message);
         if(currentEntryIdIndex < feed.entries.length) {
+            networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
+                    getFeed().entries[currentEntryIdIndex].title,message);
             currentDownloadId= new AtomicInteger().incrementAndGet();
             String entryId = feed.entries[currentEntryIdIndex].id;
             entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
