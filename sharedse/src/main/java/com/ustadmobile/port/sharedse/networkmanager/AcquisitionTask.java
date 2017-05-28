@@ -182,113 +182,44 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         entryAcquisitionThread =new Thread(new Runnable() {
             @Override
             public void run() {
-                InputStream in = null;
-                HttpURLConnection con = null;
-                OutputStream out = null;
-                long existingFileLength;
-                String fileInfoLastModified = null;
-                JSONObject infoFromFile = null;
-                int bytesDownloadedSoFar;
-                boolean isFileResuming,isFileDownloaded;
-                File currentDownloadFileInfo = null;
-                File infoFile = new File(getFileURIs()[FILE_DESTINATION_INDEX],
-                        UMFileUtil.getFilename(fileUrl) + INFO_FILE_EXTENSION);
+
                 File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX],
                         UMFileUtil.getFilename(fileUrl) + UNFINISHED_FILE_EXTENSION);
 
-                CatalogEntryInfo info = new CatalogEntryInfo();
-                info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
-                info.downloadID = String.valueOf(currentDownloadId);
-                info.downloadTotalSize = -1;
-                info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS;
-                info.fileURI = fileDestination.getAbsolutePath();
-                info.srcURLs = new String[]{fileUrl};
-                CatalogController.setEntryInfo(getFeed().entries[currentEntryIdIndex].id, info,
-                        CatalogController.SHARED_RESOURCE, networkManager.getContext());
+
                 try {
-                    URL url = new URL(fileUrl);
-                    if (infoFile.exists()) {
-                        con = (HttpURLConnection) url.openConnection();
-                        con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
-                        con.connect();
-                        fileInfoLastModified = con.getHeaderField(HEADER_LAST_MODIFIED);
-                        infoFromFile = getFileInformationFromFile(infoFile);
-                        con.disconnect();
-                        con = null;
+                    ResumableHttpDownload httpDownload=new ResumableHttpDownload("https://wolperapp.hartmanntrader.com/files/videos/Video_Test.mp4",fileDestination.getAbsolutePath());
+                    boolean isDownloadCompleted=httpDownload.download();
+                    if(isDownloadCompleted){
+                        currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
 
-                    }
-
-                    con = (HttpURLConnection) url.openConnection();
-                    con.setRequestMethod(DOWNLOAD_REQUEST_METHOD);
-                    existingFileLength = new File(UMFileUtil.getFilename(getFileURIs()[FILE_DESTINATION_INDEX])
-                            + UNFINISHED_FILE_EXTENSION).length();
-                    if (infoFromFile != null && infoFromFile.get(HEADER_LAST_MODIFIED).equals(fileInfoLastModified)) {
-                        isFileResuming = true;
-                        con.setRequestProperty(HEADER_RANGE, "bytes=" + String.valueOf(existingFileLength) + "-");
-                    } else {
-                        isFileResuming = false;
-                    }
-                    con.connect();
-                    totalBytesToDownload = con.getContentLength();
-                    in = con.getInputStream();
-                    out = new FileOutputStream(fileDestination, true);
-                    byte[] buffer = new byte[10240];
-                    long total = 0;
-                    fileInfoLastModified = con.getHeaderField(HEADER_LAST_MODIFIED);
-
-                    if (fileInfoLastModified != null && !isFileResuming) {
-                        currentDownloadFileInfo = saveFileInformationToFile(fileInfoLastModified,fileDestination);
-                    }
-                    if (fileInfoLastModified != null && isFileResuming) {
-                        currentDownloadFileInfo = infoFile;
-                    }
-                    while ((bytesDownloadedSoFar = in.read(buffer)) > 0) {
-                        total += bytesDownloadedSoFar;
-                        out.write(buffer, 0, bytesDownloadedSoFar);
-                        totalBytesDownloadedSoFar=total;
-                    }
-
-                    if(isFileResuming){
-                        isFileDownloaded= fileDestination.exists();
-                    }else{
-                        isFileDownloaded=fileDestination.exists() && fileDestination.length()>= totalBytesToDownload;
-                    }
-
-                    if(isFileDownloaded){
-                        saveFileWithNewExtension(fileDestination.getAbsolutePath());
-                        if(currentDownloadFileInfo!=null){
-                            currentDownloadFileInfo.delete();
-                            currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
-
-                            if(currentEntryIdIndex==(getFeed().entries.length-1)){
-                                networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
-                                if(updateTimer!=null){
-                                    updateTimer.cancel();
-                                    updateTimerTask.cancel();
-                                    updateTimerTask =null;
-                                    updateTimer=null;
-                                }
-
-                                if(retryTimer!=null){
-                                    retryEntryDownload.cancel();
-                                    retryTimer.cancel();
-                                    retryEntryDownload=null;
-                                    retryTimer=null;
-                                }
-                            }else{
-                                networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
-                                        getFeed().entries[currentEntryIdIndex].title,message);
+                        if(currentEntryIdIndex==(getFeed().entries.length-1)){
+                            networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
+                            if(updateTimer!=null){
+                                updateTimer.cancel();
+                                updateTimerTask.cancel();
+                                updateTimerTask =null;
+                                updateTimer=null;
                             }
-                            totalBytesToDownload=0L;
-                            totalBytesDownloadedSoFar=0L;
-                            currentEntryIdIndex++;
-                            entryAcquisitionThread =null;
 
-                            acquireNextFile();
+                            if(retryTimer!=null){
+                                retryEntryDownload.cancel();
+                                retryTimer.cancel();
+                                retryEntryDownload=null;
+                                retryTimer=null;
+                            }
+                        }else{
+                            networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
+                                    getFeed().entries[currentEntryIdIndex].title,message);
                         }
+                        totalBytesToDownload=0L;
+                        totalBytesDownloadedSoFar=0L;
+                        currentEntryIdIndex++;
+                        entryAcquisitionThread =null;
 
+                        acquireNextFile();
                     }
-                } catch (IOException | JSONException e) {
+                } catch (IOException e) {
                     currentEntryAcquisitionTaskStatus=UstadMobileSystemImpl.DLSTATUS_FAILED;
                     if(updateTimer!=null){
                         updateTimer.cancel();
@@ -296,12 +227,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         updateTimerTask =null;
                         updateTimer=null;
                     }
-                } finally {
-
-                    UMIOUtils.closeOutputStream(out);
-                    UMIOUtils.closeInputStream(in);
-                    if (con != null)
-                        con.disconnect();
                 }
                if(currentEntryAcquisitionTaskStatus==UstadMobileSystemImpl.DLSTATUS_FAILED && retryCount < MAXIMUM_RETRY_COUNT){
                    TIME_PASSED_FOR_DOWNLOAD_RETRY=Calendar.getInstance().getTimeInMillis();
@@ -314,7 +239,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                        }
                    }
                }else{
-                   if(!isEntryAcquisitionTaskCancelled){
+                   if(!isEntryAcquisitionTaskCancelled &&
+                           currentEntryAcquisitionTaskStatus==UstadMobileSystemImpl.DLSTATUS_FAILED){
                        cancel();
                    }
                }
@@ -322,22 +248,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             }
         });
         entryAcquisitionThread.start();
-    }
-
-
-    /**
-     * Save file with it's original extension after success downloaded
-     * @param fileUri - Current file URI to be saved with new extension
-     * @return
-     */
-    private File saveFileWithNewExtension(String fileUri){
-        File oldFile=new File(fileUri);
-        File newFile=new File(fileUri.substring(0,fileUri.length()-UNFINISHED_FILE_EXTENSION.length()));
-        boolean success=oldFile.renameTo(newFile);
-        if(success){
-            return newFile;
-        }
-        return null;
     }
 
     /**
@@ -362,55 +272,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 downloadDestDir.getAbsolutePath()};
     }
 
-    /**
-     * Create a temporally file to store current partial file information.
-     * @param fileInfoLastModified Header File last-modified
-     * @return
-     */
-    private File saveFileInformationToFile(String fileInfoLastModified, File fileDestination){
-        String infoLastModified=fileInfoLastModified==null? null:fileInfoLastModified;
-        File tempFileInfo=null;
-        try{
-            String destinationPath=fileDestination.getAbsolutePath();
-            tempFileInfo=new File(destinationPath.substring(0,
-                    destinationPath.length()-UNFINISHED_FILE_EXTENSION.length())+INFO_FILE_EXTENSION);
-            FileWriter writer = new FileWriter(tempFileInfo.getAbsolutePath());
-            JSONObject fileObject=new JSONObject();
-            fileObject.put(HEADER_LAST_MODIFIED,infoLastModified);
-            writer.append(fileObject.toString());
-            writer.flush();
-            writer.close();
-        } catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-
-        return tempFileInfo;
-
-    }
-
-    /**
-     * Read temporally file content as JSON and get last it's modified date
-     * @param file - temporally file
-     * @return
-     */
-    private JSONObject getFileInformationFromFile(File file){
-
-        StringBuilder fileText = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file.getAbsolutePath()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                fileText.append(line);
-                fileText.append('\n');
-            }
-            reader.close() ;
-            return new JSONObject(fileText.toString());
-        }catch (IOException | JSONException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 
 
     @Override
@@ -525,20 +386,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     +getFeed().entries[currentEntryIdIndex].id;
             downloadCurrentFile(fileUrl);
         }
-    }
-
-    /**
-     * Get entry acquisition task status values of which contain amount of bytes downloaded so far,
-     * total bytes to be downloaded and the current status
-     * @return
-     */
-
-    public int [] getEntryAcquisitionStatus(){
-        int statusVal[]=new int[3];
-        statusVal[UstadMobileSystemImpl.IDX_BYTES_TOTAL]=(int) totalBytesToDownload;
-        statusVal[UstadMobileSystemImpl.IDX_STATUS]= currentEntryAcquisitionTaskStatus;
-        statusVal[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR]= (int)totalBytesDownloadedSoFar;
-        return statusVal;
     }
 
 }
