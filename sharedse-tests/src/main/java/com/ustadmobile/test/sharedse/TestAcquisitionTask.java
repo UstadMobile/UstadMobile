@@ -188,7 +188,7 @@ public class TestAcquisitionTask{
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
             catalogUrl);
 
-        manager.requestAcquisition(feed,manager.getContext());
+        manager.requestAcquisition(feed,manager.getContext(),false,true);
 
         synchronized (acquisitionLock){
             acquisitionLock.wait(DEFAULT_WAIT_TIME*10);
