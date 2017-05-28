@@ -128,7 +128,7 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceIpAddress().equals(TestConstants.TEST_REMOTE_SLAVE_SERVER)){
+                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER)){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
                     }
@@ -137,7 +137,7 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeUpdated(NetworkNode node) {
-                if(node.getDeviceIpAddress().equals(TestConstants.TEST_REMOTE_SLAVE_SERVER)){
+                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER)){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
                     }
@@ -156,7 +156,7 @@ public class TestNetworkManager {
         };
         manager.addNetworkManagerListener(responseListener);
 
-        if(manager.getNodeByIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER) == null) {
+        if(manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER) == null) {
             synchronized (nodeNSDiscoveryLock) {
                 try { nodeNSDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
                 catch(InterruptedException e ) {
@@ -164,7 +164,7 @@ public class TestNetworkManager {
                 }
             }
         }
-        NetworkNode node=manager.getNodeByIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER);
+        NetworkNode node=manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
         Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;

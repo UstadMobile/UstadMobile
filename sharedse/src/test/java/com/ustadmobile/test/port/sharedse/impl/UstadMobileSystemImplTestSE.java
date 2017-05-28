@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.sharedse.SharedSeTestSuite;
 import com.ustadmobile.test.sharedse.TestEntryStatusTask;
 import com.ustadmobile.test.sharedse.impl.TestContext;
 import com.ustadmobile.test.sharedse.impl.UstadMobileSystemImplTest;
@@ -103,8 +104,10 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
 
             testDriver.connectWifi(MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
                 MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE);
-            defaultMockNetwork.setDeviceIpAddr(testDriver, TestConstants.TEST_REMOTE_SLAVE_SERVER);
-            testDriver.setMockDeviceIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER);
+            SharedSeTestSuite.REMOTE_SLAVE_SERVER = TestConstants.TEST_REMOTE_MOCK_SLAVE_SERVER;
+
+            defaultMockNetwork.setDeviceIpAddr(testDriver, SharedSeTestSuite.REMOTE_SLAVE_SERVER);
+            testDriver.setMockDeviceIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
         }
     }
 
