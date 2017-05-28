@@ -37,10 +37,10 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
         super();
         wirelessArea = new MockWirelessArea();
         networkManager = new MockNetworkManager(TestConstants.TEST_MOCK_LOCAL_BLUETOOTH_DEVICE,
-                wirelessArea);
+                wirelessArea, "MockMainTestDevice");
         networkManager.setMockDeviceIpAddress("127.0.0.1");
         testDriver = new MockNetworkManager(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
-            wirelessArea);
+            wirelessArea, "MockTestDriver");
         testDriverContext = new TestContext();
         testDriver.init(testDriverContext);
         testDriver.startTestControlServer();
