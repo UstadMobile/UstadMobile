@@ -41,6 +41,10 @@ public class ResumableHttpDownload {
 
     private boolean overwriteDestination = true;
 
+    private long totalSize = -1;
+
+    private long downloadedSoFar;
+
 
     public ResumableHttpDownload(String httpSrc, String destinationFile){
         this.httpSrc = httpSrc;
@@ -126,6 +130,10 @@ public class ResumableHttpDownload {
                 dlInfoProperties.setProperty(HTTP_HEADER_LAST_MODIFIED,
                 con.getHeaderField(HTTP_HEADER_LAST_MODIFIED));
 
+            synchronized (this) {
+                totalSize = con.getContentLength();
+            }
+
             propertiesOut = new FileOutputStream(dlInfoFile);
             dlInfoProperties.store(propertiesOut, "UTF-8");
             propertiesOut.close();
@@ -134,6 +142,9 @@ public class ResumableHttpDownload {
             int responseCode = con.getResponseCode();
             boolean appendToPartFileOutput = responseCode == HttpURLConnection.HTTP_PARTIAL;
             fileOut = new FileOutputStream(dlPartFile, appendToPartFileOutput);
+            synchronized (this) {
+                downloadedSoFar = appendToPartFileOutput ? dlPartFileSize : 0L;
+            }
 
             byte[] buf = new byte[bufferSize];
             int bytesRead;
@@ -141,6 +152,9 @@ public class ResumableHttpDownload {
 
             while((bytesRead = httpIn.read(buf)) != -1) {
                 fileOut.write(buf, 0, bytesRead);
+                synchronized (this) {
+                    downloadedSoFar += bytesRead;
+                }
             }
             fileOut.flush();
 
@@ -175,6 +189,24 @@ public class ResumableHttpDownload {
         UMIOUtils.throwIfNotNullIO(ioe);
 
         return completed;
+    }
+
+    /**
+     * The total in bytes downloaded so far. Includes 'resumed' bytes from previous attempts
+     *
+     * @return
+     */
+    public synchronized long getDownloadedSoFar() {
+        return downloadedSoFar;
+    }
+
+    /**
+     * The total size of the download if known in bytes,or -1 if that's not yet known
+     *
+     * @return
+     */
+    public synchronized long getTotalSize() {
+        return totalSize;
     }
 
 }
