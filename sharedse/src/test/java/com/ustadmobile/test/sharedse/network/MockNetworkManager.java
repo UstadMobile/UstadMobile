@@ -4,6 +4,7 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
@@ -11,6 +12,8 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -29,6 +32,8 @@ public class MockNetworkManager extends NetworkManager {
 
     private String mockIpAddr;
 
+    private String mockWifiDirectIpAddr;
+
     private MockWirelessArea wirelessArea;
 
     private Timer wifiDirectBroadcastTimer;
@@ -38,6 +43,10 @@ public class MockNetworkManager extends NetworkManager {
     public static final int WIFI_DIRECT_BROADCAST_INTERVAL = (30*1000);//Broadcast service records every 30s
 
     public static final int WIFI_DIRECT_BROADCAST_DELAY = 1000;
+
+    public static final int MOCK_GROUP_CREATION_DELAY = 1000;
+
+    public static final int MOCK_GROUP_REMOVAL_DELAY = 1000;
 
     public static final String TMP_MOCK_WIFIDIRECT_MAC = "01:00:00:00:00:00";
 
@@ -54,6 +63,20 @@ public class MockNetworkManager extends NetworkManager {
     private MockWifiNetwork connectedWifiNetwork;
 
     private final Object wifiLockObj = new Object();
+
+    private static AtomicInteger mockNameCounter = new AtomicInteger();
+
+    private String mockDeviceName;
+
+    private AtomicInteger mockNetworkCounter = new AtomicInteger();
+
+    private static SecureRandom passphraseSecureRandom = new SecureRandom();
+
+    private WiFiDirectGroup mockWifiDirectGroup;
+
+    private MockWifiNetwork mockWifiDirectGroupNetwork;
+
+    private int mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
@@ -84,11 +107,17 @@ public class MockNetworkManager extends NetworkManager {
     }
 
 
-    public MockNetworkManager(String bluetoothAddr, MockWirelessArea wirelessArea) {
+    public MockNetworkManager(String bluetoothAddr, MockWirelessArea wirelessArea, String mockDeviceName) {
+        this.mockDeviceName = mockDeviceName != null ? mockDeviceName : "MockDevice-" +
+                mockNameCounter.getAndIncrement();
         this.mockBluetoothAddr = bluetoothAddr;
         this.wirelessArea = wirelessArea;
         mockBluetoothServer = new MockBluetoothServer(this);
         wirelessArea.addDevice(this);
+    }
+
+    public MockNetworkManager(String bluetoothAddr, MockWirelessArea wirelessArea) {
+        this(bluetoothAddr, wirelessArea, null);
     }
 
     @Override
@@ -257,27 +286,53 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void createWifiDirectGroup() {
+        mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String wirelessId = MockNetworkManager.this.mockDeviceName + '-' +
+                    MockNetworkManager.this.mockNetworkCounter.getAndIncrement();
+                String passphrase = new BigInteger(130, passphraseSecureRandom).toString(32);
+                mockWifiDirectGroup = new WiFiDirectGroup(wirelessId, passphrase);
+                mockWifiDirectIpAddr = MockNetworkManager.makeNextMockIpAddr();
+                mockWifiDirectGroupNetwork = new MockWifiNetwork(wirelessId,passphrase);
+                mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_ACTIVE;
 
+                fireWifiDirectGroupCreated(MockNetworkManager.this.mockWifiDirectGroup, null);
+            }
+        }).start();
     }
 
     @Override
     public void removeWiFiDirectGroup() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(MockNetworkManager.this.mockWifiDirectGroup != null) {
+                    //TODO: disconnect all clients of this network if there are any left
+                    wirelessArea.removeWifiNetwork(mockWifiDirectGroupNetwork);
+                    mockWifiDirectGroup = null;
+                    mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
+                    fireWifiDirectGroupRemoved(true, null);
+                }
+            }
+        }).start();
     }
 
     @Override
     public WiFiDirectGroup getWifiDirectGroup() {
-        return null;
+        return mockWifiDirectGroup;
     }
 
     @Override
     public String getWifiDirectIpAddress() {
-        return null;
+        return mockWifiDirectIpAddr;
     }
 
     @Override
     public int getWifiDirectGroupStatus() {
-        return 0;
+        return mockWifiDirectStatus;
     }
 
     @Override
@@ -300,6 +355,7 @@ public class MockNetworkManager extends NetworkManager {
                 wifiNetworkServiceBroadcastTimer = new Timer();
                 wifiNetworkServiceBroadcastTimer.scheduleAtFixedRate(new WifiNetworkBroadcastTimer(),
                     WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
+                fireWiFiConnectionChanged(SSID);
             }
         }
     }
@@ -332,7 +388,6 @@ public class MockNetworkManager extends NetworkManager {
             }catch(IOException e) {
                 e.printStackTrace();
             }
-
         }
 
         @Override

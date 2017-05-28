@@ -20,8 +20,6 @@ import java.util.Vector;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
-import fi.iki.elonen.router.RouterNanoHTTPD;
-
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
@@ -370,7 +368,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
     }
 
     public void handleWifiDirectConnectionChanged(String ssid){
-        fireWiFiDirectConnectionChanged(ssid);
+        fireWiFiConnectionChanged(ssid);
     }
 
 
@@ -416,7 +414,7 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
         }
     }
 
-    protected void fireWiFiDirectConnectionChanged(String ssid){
+    protected void fireWiFiConnectionChanged(String ssid){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
                 listener.wifiConnectionChanged(ssid);

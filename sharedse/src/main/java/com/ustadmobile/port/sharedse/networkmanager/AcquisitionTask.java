@@ -1,7 +1,4 @@
 package com.ustadmobile.port.sharedse.networkmanager;
-
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -9,27 +6,18 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_SEPARATOR;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_CLOUD;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
@@ -49,17 +37,10 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
     private int currentEntryAcquisitionTaskStatus =-1;
     private int currentEntryIdIndex;
-    private static final String INFO_FILE_EXTENSION=".dlinfo";
-    private static final String UNFINISHED_FILE_EXTENSION=".part";
-    private static final String HEADER_RANGE="Range";
-    private static final String HEADER_LAST_MODIFIED ="Last-Modified";
-    private static final String DOWNLOAD_REQUEST_METHOD="GET";
     private String currentGroupIPAddress;
     private String currentGroupSSID;
     private static long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
     private long currentDownloadId=0L;
-    private long totalBytesDownloadedSoFar =0L;
-    private long totalBytesToDownload =0L;
     private Timer updateTimer=null;
     private Timer retryTimer=null;
     private Thread entryAcquisitionThread =null;
@@ -70,6 +51,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private long TIME_PASSED_FOR_DOWNLOAD_RETRY=0L;
     private int retryCount=0;
     private boolean isEntryAcquisitionTaskCancelled =false;
+    private ResumableHttpDownload httpDownload=null;
 
     /**
      * Monitor file acquisition task progress and report it.
@@ -77,8 +59,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private TimerTask updateTimerTask =new TimerTask() {
         @Override
         public void run() {
-            if(totalBytesToDownload>0L){
-                int progress=(int)((totalBytesDownloadedSoFar*100)/ totalBytesToDownload);
+            if(httpDownload.getTotalSize()>0L){
+                int progress=(int)((httpDownload.getDownloadedSoFar()*100)/ httpDownload.getTotalSize());
                 long currentTime = Calendar.getInstance().getTimeInMillis();
                 int progressLimit=100;
                 if(((currentTime - TIME_PASSED_FOR_PROGRESS_UPDATE) < DOWNLOAD_TASK_UPDATE_TIME) ||
@@ -184,11 +166,10 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             public void run() {
 
                 File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX],
-                        UMFileUtil.getFilename(fileUrl) + UNFINISHED_FILE_EXTENSION);
-
+                        UMFileUtil.getFilename(fileUrl));
 
                 try {
-                    ResumableHttpDownload httpDownload=new ResumableHttpDownload("https://wolperapp.hartmanntrader.com/files/videos/Video_Test.mp4",fileDestination.getAbsolutePath());
+                    httpDownload=new ResumableHttpDownload(fileUrl,fileDestination.getAbsolutePath());
                     boolean isDownloadCompleted=httpDownload.download();
                     if(isDownloadCompleted){
                         currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
@@ -212,8 +193,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                             networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
                                     getFeed().entries[currentEntryIdIndex].title,message);
                         }
-                        totalBytesToDownload=0L;
-                        totalBytesDownloadedSoFar=0L;
                         currentEntryIdIndex++;
                         entryAcquisitionThread =null;
 
@@ -386,6 +365,20 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     +getFeed().entries[currentEntryIdIndex].id;
             downloadCurrentFile(fileUrl);
         }
+    }
+
+    /**
+     * Get entry acquisition task status values of which contain amount of bytes downloaded so far,
+     * total bytes to be downloaded and the current status
+     * @return
+     */
+
+    public int [] getEntryAcquisitionStatus(){
+        int statusVal[]=new int[3];
+        statusVal[UstadMobileSystemImpl.IDX_BYTES_TOTAL]=(int) httpDownload.getTotalSize();
+        statusVal[UstadMobileSystemImpl.IDX_STATUS]= currentEntryAcquisitionTaskStatus;
+        statusVal[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR]= (int)httpDownload.getDownloadedSoFar();
+        return statusVal;
     }
 
 }
