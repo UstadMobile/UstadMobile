@@ -161,6 +161,11 @@ public abstract class UstadMobileSystemImpl {
     public static final int DLSTATUS_FAILED = 16;
 
     /**
+     * Flag to indicate a download requested is retrying
+     */
+    public static final int DLSTATUS_RETRYING = 20;
+
+    /**
      * Flag to indicate download is pending
      *
      * Same value as android.app.DownloadManager.STATUS_PENDING

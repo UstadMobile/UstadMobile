@@ -61,9 +61,15 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private long totalBytesDownloadedSoFar =0L;
     private long totalBytesToDownload =0L;
     private Timer updateTimer=null;
+    private Timer retryTimer=null;
     private Thread entryAcquisitionThread =null;
     private String message=null;
     private EntryCheckResponse entryCheckResponse;
+    private static final int MAXIMUM_RETRY_COUNT = 5;
+    private static final int WAITING_TIME_BEFORE_RETRY =10 * 1000;
+    private long TIME_PASSED_FOR_DOWNLOAD_RETRY=0L;
+    private int retryCount=0;
+    private boolean isEntryAcquisitionTaskCancelled =false;
 
     /**
      * Monitor file acquisition task progress and report it.
@@ -85,6 +91,19 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         getFeed().entries[currentEntryIdIndex].title,message);
 
             }
+        }
+    };
+
+    private TimerTask retryEntryDownload=new TimerTask() {
+        @Override
+        public void run() {
+            long timeToRetry=Calendar.getInstance().getTimeInMillis();
+            if(retryCount > MAXIMUM_RETRY_COUNT && (timeToRetry-TIME_PASSED_FOR_DOWNLOAD_RETRY) < WAITING_TIME_BEFORE_RETRY
+                    && currentEntryAcquisitionTaskStatus !=UstadMobileSystemImpl.DLSTATUS_RETRYING){
+                return;
+            }
+            retryCount++;
+            acquireNextFile();
         }
     };
 
@@ -134,7 +153,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             String entryId = feed.entries[currentEntryIdIndex].id;
             entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
 
-
             if(entryCheckResponse != null){
                 if(Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                     networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
@@ -153,7 +171,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         currentDownloadId,DOWNLOAD_FROM_CLOUD);
                 downloadCurrentFile(getFileURIs()[FILE_DOWNLOAD_URL_INDEX]);
             }
-
 
         }else{
             networkManager.handleTaskCompleted(this);
@@ -251,6 +268,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                                     updateTimerTask =null;
                                     updateTimer=null;
                                 }
+
+                                if(retryTimer!=null){
+                                    retryEntryDownload.cancel();
+                                    retryTimer.cancel();
+                                    retryEntryDownload=null;
+                                    retryTimer=null;
+                                }
                             }else{
                                 networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
                                         getFeed().entries[currentEntryIdIndex].title,message);
@@ -279,6 +303,22 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     if (con != null)
                         con.disconnect();
                 }
+               if(currentEntryAcquisitionTaskStatus==UstadMobileSystemImpl.DLSTATUS_FAILED && retryCount < MAXIMUM_RETRY_COUNT){
+                   TIME_PASSED_FOR_DOWNLOAD_RETRY=Calendar.getInstance().getTimeInMillis();
+                   synchronized (this){
+                       if(retryTimer==null){
+                           currentEntryAcquisitionTaskStatus=UstadMobileSystemImpl.DLSTATUS_RETRYING;
+                           retryTimer=new Timer();
+                           retryTimer.scheduleAtFixedRate(retryEntryDownload,WAITING_TIME_BEFORE_RETRY,
+                                   WAITING_TIME_BEFORE_RETRY);
+                       }
+                   }
+               }else{
+                   if(!isEntryAcquisitionTaskCancelled){
+                       cancel();
+                   }
+               }
+
             }
         });
         entryAcquisitionThread.start();
@@ -406,12 +446,20 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     public void cancel() {
         entryAcquisitionThread.interrupt();
         if(entryAcquisitionThread.isInterrupted()){
+            isEntryAcquisitionTaskCancelled =true;
             currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_FAILED;
+            networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
             if(updateTimer!=null){
                 updateTimer.cancel();
                 updateTimerTask.cancel();
                 updateTimerTask =null;
                 updateTimer=null;
+            }
+            if(retryTimer!=null){
+                retryEntryDownload.cancel();
+                retryTimer.cancel();
+                retryEntryDownload=null;
+                retryTimer=null;
             }
         }
     }

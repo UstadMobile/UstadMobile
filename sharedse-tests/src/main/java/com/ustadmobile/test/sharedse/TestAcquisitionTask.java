@@ -41,16 +41,9 @@ import static org.hamcrest.CoreMatchers.is;
 
 public class TestAcquisitionTask{
     private static final int DEFAULT_WAIT_TIME =20000;
-    private static final String FEED_SRC_URL ="opds:///com.ustadmobile.app.devicefeed";
-    private static final String FEED_TITLE="The Little Chicks";
-    private static final String FEED_ENTRY_UPDATED="2016-11-04T13:38:49Z";
 
     private static final String FEED_LINK_MIME ="application/dir";
     private static final String FEED_LINK_HREF ="/storage/emulated/0/ustadmobileContent";
-
-    private static final String ENTRY_LINK_REL="http://opds-spec.org/acquisition";
-    private static final String ENTRY_LINK_MIME="application/epub+zip";
-    private static final String ENTRY_LINK_HREF="/media/eXeUpload/d3288c3b-89b3-4541-a1f0-13ccf0b0eacc.um.TheLittleChicks.epub";
 
 
     private static final String ENTRY_ID_PRESENT ="202b10fe-b028-4b84-9b84-852aa766607d";
