@@ -42,13 +42,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private static long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
     private long currentDownloadId=0L;
     private Timer updateTimer=null;
-    private Timer retryTimer=null;
+
     private Thread entryAcquisitionThread =null;
     private String message=null;
     private EntryCheckResponse entryCheckResponse;
     private static final int MAXIMUM_RETRY_COUNT = 5;
     private static final int WAITING_TIME_BEFORE_RETRY =10 * 1000;
-    private long TIME_PASSED_FOR_DOWNLOAD_RETRY=0L;
+
     private int retryCount=0;
     private boolean isEntryAcquisitionTaskCancelled =false;
     private ResumableHttpDownload httpDownload=null;
@@ -76,19 +76,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         }
     };
 
-    private TimerTask retryEntryDownload=new TimerTask() {
-        @Override
-        public void run() {
-            long timeToRetry=Calendar.getInstance().getTimeInMillis();
-            if(retryCount > MAXIMUM_RETRY_COUNT && (timeToRetry-TIME_PASSED_FOR_DOWNLOAD_RETRY) < WAITING_TIME_BEFORE_RETRY
-                    && currentEntryAcquisitionTaskStatus !=UstadMobileSystemImpl.DLSTATUS_RETRYING){
-                return;
-            }
-            retryCount++;
-            acquireNextFile();
-        }
-    };
-
     public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
         super(networkManager);
         this.feed=feed;
@@ -107,12 +94,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         DOWNLOAD_TASK_UPDATE_TIME);
             }
         }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                acquireNextFile();
-            }
-        }).start();
+
+        acquireNextFile();
     }
 
     /**
@@ -125,7 +108,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      *            WiFi-Direct group creation on the host device
      */
     private void acquireNextFile(){
-      currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_PENDING;
+        currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_PENDING;
         //TODO: Move hardcoded strings to locale constants
         message=getFeed().entries.length>1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
                 +getFeed().entries.length+" files":"Downloading file";
@@ -145,6 +128,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 }else{
                     networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
                             DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+                    //TODO: Network manager bluetooth needs to be 100% async
                     networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
                             ,this);
                 }
@@ -155,6 +139,16 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             }
 
         }else{
+            //All entries complete
+            networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
+
+            if(updateTimer!=null){
+                updateTimer.cancel();
+                updateTimerTask.cancel();
+                updateTimerTask =null;
+                updateTimer=null;
+            }
+
             networkManager.handleTaskCompleted(this);
         }
     }
@@ -164,64 +158,35 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         entryAcquisitionThread =new Thread(new Runnable() {
             @Override
             public void run() {
-
                 File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX],
                         UMFileUtil.getFilename(fileUrl));
 
+                boolean downloadCompleted = false;
                 try {
+                    networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
+                            getFeed().entries[currentEntryIdIndex].title,message);
                     httpDownload=new ResumableHttpDownload(fileUrl,fileDestination.getAbsolutePath());
-                    boolean isDownloadCompleted=httpDownload.download();
-                    if(isDownloadCompleted){
-                        currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
-
-                        if(currentEntryIdIndex==(getFeed().entries.length-1)){
-                            networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
-                            if(updateTimer!=null){
-                                updateTimer.cancel();
-                                updateTimerTask.cancel();
-                                updateTimerTask =null;
-                                updateTimer=null;
-                            }
-
-                            if(retryTimer!=null){
-                                retryEntryDownload.cancel();
-                                retryTimer.cancel();
-                                retryEntryDownload=null;
-                                retryTimer=null;
-                            }
-                        }else{
-                            networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
-                                    getFeed().entries[currentEntryIdIndex].title,message);
-                        }
-                        currentEntryIdIndex++;
-                        entryAcquisitionThread =null;
-
-                        acquireNextFile();
-                    }
+                    downloadCompleted = httpDownload.download();
                 } catch (IOException e) {
                     currentEntryAcquisitionTaskStatus=UstadMobileSystemImpl.DLSTATUS_FAILED;
-                    if(updateTimer!=null){
-                        updateTimer.cancel();
-                        updateTimerTask.cancel();
-                        updateTimerTask =null;
-                        updateTimer=null;
-                    }
                 }
-               if(currentEntryAcquisitionTaskStatus==UstadMobileSystemImpl.DLSTATUS_FAILED && retryCount < MAXIMUM_RETRY_COUNT){
-                   TIME_PASSED_FOR_DOWNLOAD_RETRY=Calendar.getInstance().getTimeInMillis();
-                   synchronized (this){
-                       if(retryTimer==null){
-                           currentEntryAcquisitionTaskStatus=UstadMobileSystemImpl.DLSTATUS_RETRYING;
-                           retryTimer=new Timer();
-                           retryTimer.scheduleAtFixedRate(retryEntryDownload,WAITING_TIME_BEFORE_RETRY,
-                                   WAITING_TIME_BEFORE_RETRY);
-                       }
-                   }
+
+                if(downloadCompleted){
+                    currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
+                    currentEntryIdIndex++;
+                    retryCount = 0;
+                    entryAcquisitionThread =null;
+
+                    acquireNextFile();
+                }else if(!downloadCompleted && retryCount < MAXIMUM_RETRY_COUNT){
+                   try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
+                   catch(InterruptedException e) {}
+                   retryCount++;
+                   acquireNextFile();
                }else{
-                   if(!isEntryAcquisitionTaskCancelled &&
-                           currentEntryAcquisitionTaskStatus==UstadMobileSystemImpl.DLSTATUS_FAILED){
-                       cancel();
-                   }
+                    //retry count exceeded
+                   currentEntryIdIndex++;
+                    acquireNextFile();
                }
 
             }
@@ -294,12 +259,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 updateTimerTask.cancel();
                 updateTimerTask =null;
                 updateTimer=null;
-            }
-            if(retryTimer!=null){
-                retryEntryDownload.cancel();
-                retryTimer.cancel();
-                retryEntryDownload=null;
-                retryTimer=null;
             }
         }
     }
