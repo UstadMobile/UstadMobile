@@ -53,6 +53,10 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private boolean isEntryAcquisitionTaskCancelled =false;
     private ResumableHttpDownload httpDownload=null;
 
+    private boolean localNetworkDownloadEnabled = true;
+
+    private boolean wifiDirectDownloadEnabled = true;
+
     /**
      * Monitor file acquisition task progress and report it.
      */
@@ -118,20 +122,18 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             String entryId = feed.entries[currentEntryIdIndex].id;
             entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
 
-            if(entryCheckResponse != null){
-                if(Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                    networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
-                            DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
-                    String fileURI="http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
-                            +entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
-                    downloadCurrentFile(fileURI);
-                }else{
-                    networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
-                            DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
-                    //TODO: Network manager bluetooth needs to be 100% async
-                    networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
-                            ,this);
-                }
+            if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+                networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
+                        DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
+                String fileURI="http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
+                        +entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
+                downloadCurrentFile(fileURI);
+            }else if(wifiDirectDownloadEnabled && entryCheckResponse != null){
+                networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
+                        DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+                //TODO: Network manager bluetooth needs to be 100% async
+                networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
+                        ,this);
             }else{
                 networkManager.handleFileAcquisitionInformationAvailable(entryId,
                         currentDownloadId,DOWNLOAD_FROM_CLOUD);
@@ -340,4 +342,33 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         return statusVal;
     }
 
+
+    /**
+     * If enabled the task will attempt to acquire the requested entries from another node on the same
+     * wifi network directly (nodes discovered using Network Service Discovery - NSD).
+     *
+     * @return True if enabled, false otherwise
+     */
+    public boolean isLocalNetworkDownloadEnabled() {
+        return localNetworkDownloadEnabled;
+    }
+
+    public void setLocalNetworkDownloadEnabled(boolean localNetworkDownloadEnabled) {
+        this.localNetworkDownloadEnabled = localNetworkDownloadEnabled;
+    }
+
+    /**
+     * If enabled the task will attempt to acquire the requested entries from another node using
+     * wifi direct. The node will be contacted using bluetooth and then a wifi group connection
+     * will be created.
+     *
+     * @return True if enabled, false otherwise
+     */
+    public boolean isWifiDirectDownloadEnabled() {
+        return wifiDirectDownloadEnabled;
+    }
+
+    public void setWifiDirectDownloadEnabled(boolean wifiDirectDownloadEnabled) {
+        this.wifiDirectDownloadEnabled = wifiDirectDownloadEnabled;
+    }
 }
