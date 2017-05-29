@@ -20,6 +20,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_SEPARATOR;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_CLOUD;
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
@@ -33,26 +34,36 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
 public class AcquisitionTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
     private UstadJSOPDSFeed feed;
+
     protected NetworkManagerTaskListener listener;
+
     private static final int FILE_DESTINATION_INDEX=1;
+
     private static final int FILE_DOWNLOAD_URL_INDEX=0;
+
     private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
-    private int currentEntryAcquisitionTaskStatus =-1;
+
     private int currentEntryIdIndex;
+
     private String currentGroupIPAddress;
+
     private String currentGroupSSID;
+
     private static long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
-    private long currentDownloadId=0L;
     private Timer updateTimer=null;
 
     private Thread entryAcquisitionThread =null;
+
     private String message=null;
+
     private EntryCheckResponse entryCheckResponse;
+
     private static final int MAXIMUM_RETRY_COUNT = 5;
+
     private static final int WAITING_TIME_BEFORE_RETRY =10 * 1000;
 
     private int retryCount=0;
-    private boolean isEntryAcquisitionTaskCancelled =false;
+
     private ResumableHttpDownload httpDownload=null;
 
     private boolean localNetworkDownloadEnabled = true;
@@ -61,8 +72,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     protected Map<String, Status> statusMap = new Hashtable<>();
 
+    private Status acquisitionStatus=null;
+
+    private boolean isWifiDirectActive=false;
+
+
     /**
-     * Monitor file acquisition task progress and report it.
+     * Monitor file acquisition task progress and report it to the rest of the app.
      */
     private TimerTask updateTimerTask =new TimerTask() {
         @Override
@@ -76,7 +92,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     return;
                 }
                 TIME_PASSED_FOR_PROGRESS_UPDATE = currentTime;
-                currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_RUNNING;
+                acquisitionStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
+                acquisitionStatus.setTotalSize(httpDownload.getTotalSize());
+                acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_RUNNING);
+                statusMap.put(getFeed().entries[currentEntryIdIndex].id,acquisitionStatus);
+
+                networkManager.handleAcquisitionProgressUpdate(getFeed().entries[currentEntryIdIndex].id);
                 networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,progress,
                         getFeed().entries[currentEntryIdIndex].title,message);
 
@@ -126,6 +147,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
         super(networkManager);
         this.feed=feed;
+        acquisitionStatus=new Status();
         networkManager.addNetworkManagerListener(this);
     }
 
@@ -155,25 +177,35 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      *            WiFi-Direct group creation on the host device
      */
     private void acquireNextFile(){
-        currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_PENDING;
-        //TODO: Move hardcoded strings to locale constants
-        message=getFeed().entries.length>1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
-                +getFeed().entries.length+" files":"Downloading file";
+
         if(currentEntryIdIndex < feed.entries.length) {
+            networkManager.getEntryAcquisitionTaskMap().put(getFeed().entries[currentEntryIdIndex].id,this);
+            if(httpDownload!=null){
+                acquisitionStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
+                acquisitionStatus.setTotalSize(httpDownload.getTotalSize());
+            }
+            acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_PENDING);
+            statusMap.put(getFeed().entries[currentEntryIdIndex].id,acquisitionStatus);
+            networkManager.handleAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id);
+
+            //TODO: Move hardcoded strings to locale constants
+            message=getFeed().entries.length>1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
+                    +getFeed().entries.length+" files":"Downloading file";
+
             networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
                     getFeed().entries[currentEntryIdIndex].title,message);
-            currentDownloadId= new AtomicInteger().incrementAndGet();
+            long currentDownloadId = new AtomicInteger().incrementAndGet();
             String entryId = feed.entries[currentEntryIdIndex].id;
             entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
 
             if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
+                networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
                         DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
                 String fileURI="http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
                         +entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
                 downloadCurrentFile(fileURI);
             }else if(wifiDirectDownloadEnabled && entryCheckResponse != null){
-                networkManager.handleFileAcquisitionInformationAvailable(entryId,currentDownloadId,
+                networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
                         DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
                 //TODO: Network manager bluetooth needs to be 100% async
                 networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
@@ -211,17 +243,26 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 try {
                     networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
                             getFeed().entries[currentEntryIdIndex].title,message);
+                    statusMap.put(getFeed().entries[currentEntryIdIndex].id,acquisitionStatus);
                     httpDownload=new ResumableHttpDownload(fileUrl,fileDestination.getAbsolutePath());
+                    acquisitionStatus.setTotalSize(httpDownload.getTotalSize());
                     downloadCompleted = httpDownload.download();
                 } catch (IOException e) {
-                    currentEntryAcquisitionTaskStatus=UstadMobileSystemImpl.DLSTATUS_FAILED;
+                    acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
+                    networkManager.handleAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id);
                 }
 
                 if(downloadCompleted){
-                    currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL;
+                    acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
+                    networkManager.handleAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id);
                     currentEntryIdIndex++;
                     retryCount = 0;
                     entryAcquisitionThread =null;
+
+                    if(isWifiDirectActive){
+                        networkManager.reconnectPreviousNetwork();
+                        isWifiDirectActive=false;
+                    }
 
                     acquireNextFile();
                 }else if(!downloadCompleted && retryCount < MAXIMUM_RETRY_COUNT){
@@ -240,10 +281,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         entryAcquisitionThread.start();
     }
 
-    /**
-     * Get file download absolute URI's (Download destination & File URL)
-     * @return
-     */
+
     private String []  getFileURIs(){
         Vector downloadDestVector = getFeed().getLinks(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
                 null);
@@ -297,8 +335,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     public void cancel() {
         entryAcquisitionThread.interrupt();
         if(entryAcquisitionThread.isInterrupted()){
-            isEntryAcquisitionTaskCancelled =true;
-            currentEntryAcquisitionTaskStatus =UstadMobileSystemImpl.DLSTATUS_FAILED;
+            acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
+            networkManager.handleAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id);
             networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
             if(updateTimer!=null){
                 updateTimer.cancel();
@@ -310,8 +348,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     public Status getStatusByEntryId(String entryId) {
-        //TODO: complete me
-        return null;
+        return statusMap.get(entryId);
     }
 
     @Override
@@ -370,25 +407,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     @Override
     public void wifiConnectionChanged(String ssid) {
         if(currentGroupSSID.equals(ssid)){
+            isWifiDirectActive=true;
             String fileUrl="http://"+ currentGroupIPAddress +":"+
                     entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
                     +getFeed().entries[currentEntryIdIndex].id;
             downloadCurrentFile(fileUrl);
         }
-    }
-
-    /**
-     * Get entry acquisition task status values of which contain amount of bytes downloaded so far,
-     * total bytes to be downloaded and the current status
-     * @return
-     */
-
-    public int [] getEntryAcquisitionStatus(){
-        int statusVal[]=new int[3];
-        statusVal[UstadMobileSystemImpl.IDX_BYTES_TOTAL]=(int) httpDownload.getTotalSize();
-        statusVal[UstadMobileSystemImpl.IDX_STATUS]= currentEntryAcquisitionTaskStatus;
-        statusVal[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR]= (int)httpDownload.getDownloadedSoFar();
-        return statusVal;
     }
 
 
