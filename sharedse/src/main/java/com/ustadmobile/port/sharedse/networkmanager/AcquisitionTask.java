@@ -157,8 +157,10 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         for(int i = 0; i < feed.entries.length; i++) {
             CatalogEntryInfo info = CatalogController.getEntryInfo(feed.entries[i].id,
                     CatalogController.SHARED_RESOURCE,networkManager.getContext());
+
             if(info == null) {
                 info = new CatalogEntryInfo();
+                info.acquisitionStatus = CatalogController.STATUS_NOT_ACQUIRED;
             }
 
             if(info.acquisitionStatus == CatalogController.STATUS_NOT_ACQUIRED) {
@@ -282,6 +284,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         feed.entries[currentEntryIdIndex].id, CatalogController.SHARED_RESOURCE,
                         networkManager.getContext());
                     info.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
+                    info.fileURI = fileDestination.getAbsolutePath();
+                    info.mimeType = feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(
+                            null)[UstadJSOPDSEntry.LINK_MIMETYPE];
                     CatalogController.setEntryInfo(feed.entries[currentEntryIdIndex].id, info,
                             CatalogController.SHARED_RESOURCE, networkManager.getContext());
                     acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);

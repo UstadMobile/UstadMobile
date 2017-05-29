@@ -29,9 +29,6 @@ public class CatalogEntryPresenter extends BaseCatalogController{
 
     private UstadJSOPDSFeed entryFeed;
 
-    private int downloadStatusStrId = -1;
-
-
     public CatalogEntryPresenter(Object context) {
         super(context);
     }
