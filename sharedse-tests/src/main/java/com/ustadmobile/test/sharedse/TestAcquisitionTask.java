@@ -101,6 +101,12 @@ public class TestAcquisitionTask{
         final Object acquireSameNetworkLock=new Object();
         final Object acquireDifferentNetworkLock=new Object();
 
+        //make sure we don't have any of the entries in question already
+        CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
+            PlatformTestUtil.getTargetContext());
+        CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
+
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
             public void fileStatusCheckInformationAvailable(List<String> fileIds) {
