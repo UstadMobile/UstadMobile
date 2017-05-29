@@ -13,7 +13,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Calendar;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -57,6 +59,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     private boolean wifiDirectDownloadEnabled = true;
 
+    protected Map<String, Status> statusMap = new Hashtable<>();
+
     /**
      * Monitor file acquisition task progress and report it.
      */
@@ -79,6 +83,45 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             }
         }
     };
+
+
+    public static class Status {
+
+        long downloadedSoFar;
+
+        long totalSize;
+
+        int status;
+
+        public Status() {
+
+        }
+
+        public synchronized long getDownloadedSoFar() {
+            return downloadedSoFar;
+        }
+
+        protected synchronized void setDownloadedSoFar(long downloadedSoFar) {
+            this.downloadedSoFar = downloadedSoFar;
+        }
+
+        public long getTotalSize() {
+            return totalSize;
+        }
+
+        protected synchronized void setTotalSize(long totalSize) {
+            this.totalSize = totalSize;
+        }
+
+        public int getStatus() {
+            return status;
+        }
+
+        protected synchronized void setStatus(int status) {
+            this.status = status;
+        }
+    }
+
 
     public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
         super(networkManager);
@@ -264,6 +307,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 updateTimer=null;
             }
         }
+    }
+
+    public Status getStatusByEntryId(String entryId) {
+        //TODO: complete me
+        return null;
     }
 
     @Override

@@ -343,7 +343,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
      * @param entryId
      * @return
      */
-
     public EntryCheckResponse getEntryResponseWithLocalFile(String entryId){
         List<EntryCheckResponse> responseList=getEntryResponses().get(entryId);
         EntryCheckResponse entryCheckResponse=null;
@@ -351,7 +350,6 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
             for(EntryCheckResponse response: responseList){
                 if(response.isFileAvailable() && Calendar.getInstance().getTimeInMillis() - response.getNetworkNode().getNetworkServiceLastUpdated() < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                     entryCheckResponse= response;
-                    //entryCheckResponse.setOnSameNetwork(true);
                     return entryCheckResponse;
                 }else{
                     if(response.isFileAvailable() && response.getNetworkNode().getWifiDirectLastUpdated()
@@ -528,6 +526,18 @@ public abstract class NetworkManager implements P2PManager,NetworkManagerTaskLis
             }
         }
     }
+
+    /**
+     * Find the acquisition task for the given entry id
+     *
+     * @param entryId Entry ID to find
+     * @return The task carrying out acquisition of this entry, or null if it's not being acquired
+     */
+    public AcquisitionTask getAcquisitionTaskByEntryId(String entryId) {
+
+        return null;
+    }
+
 
     /**
      * Returns the IP address of this device as used on Wifi Direct connections.
