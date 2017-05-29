@@ -115,9 +115,10 @@
                         android:layout_height="wrap_content">
 
                         <ImageView
+                            android:id="@+id/activity_catalog_entry_icon_img"
                             android:src="@drawable/tmp_entryicon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            android:layout_width="@dimen/dimen_70dp"
+                            android:layout_height="@dimen/dimen_70dp" />
 
                         <RelativeLayout
                             android:padding="@dimen/dimen_10dp"

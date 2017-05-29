@@ -68,7 +68,12 @@ public class TestResumableHttpDownload {
         File tmpDownloadFile = File.createTempFile("testresuambledownload", ".epub");
         ResumableHttpDownload resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
                 tmpDownloadFile.getAbsolutePath());
-        boolean result = resumableDownload.download();
+        boolean result = false;
+        try {
+            result = resumableDownload.download();
+        }catch(IOException e) {
+            System.err.println("Eexception on attempting download without interruption");
+        }
         Assert.assertTrue("Download reported as OK", result);
         Assert.assertEquals("Download size matches expected length", resLength, tmpDownloadFile.length());
 
@@ -91,7 +96,9 @@ public class TestResumableHttpDownload {
             httpDownloadUrl = httpRoot + "com/ustadmobile/test/sharedse/thelittlechicks.epub?cutoffafter=100000";
             resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
                 tmpDownloadFile.getAbsolutePath());
-            result = resumableDownload.download();
+            try {
+                result = resumableDownload.download();
+            }catch(IOException e) {}
         }
 
         bout = new ByteArrayOutputStream();

@@ -3,7 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.p2p.P2PManager;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
@@ -26,7 +26,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * Created by kileha3 on 08/05/2017.
  */
 
-public abstract class NetworkManager implements P2PManager,NetworkManagerTaskListener {
+public abstract class NetworkManager implements NetworkManagerCore,NetworkManagerTaskListener {
 
     public static final int QUEUE_ENTRY_STATUS=0;
     public static final int QUEUE_ENTRY_ACQUISITION=1;

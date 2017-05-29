@@ -216,6 +216,13 @@ public abstract class UstadJSOPDSItem {
     */
     public static String LINK_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
 
+    /**
+     * Ustad Mobile's own cover image
+     * @type String
+     */
+    public static String LINK_COVER_IMAGE = "http://www.ustadmobile.com/ns/opds/cover-image";
+
+
 
     public UstadJSOPDSItem() {
         this.linkVector = new Vector();

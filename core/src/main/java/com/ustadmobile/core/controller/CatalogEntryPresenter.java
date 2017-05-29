@@ -5,9 +5,13 @@ import com.ustadmobile.core.impl.AcquisitionStatusEvent;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogEntryView;
 
+import java.io.IOException;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Created by mike on 4/17/17.
@@ -58,11 +62,58 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                     catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE,false);
                 }
 
-
+                loadImages();
             }catch(Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void loadImages() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Load the image icon
+                Vector thumbnails = entry.getThumbnails();
+                if(thumbnails != null && thumbnails.size() > 0) {
+                    try {
+                        String thumbnailUrl = UMFileUtil.resolveLink(
+                                entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
+                                ((String[])thumbnails.get(0))[UstadJSOPDSItem.ATTR_HREF]);
+                        final String thumbnailFileUri = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
+                                getContext()).get(thumbnailUrl);
+
+                        catalogEntryView.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                catalogEntryView.setIcon(thumbnailFileUri);
+                            }
+                        });
+                    }catch(IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Vector coverImages = entry.getLinks(UstadJSOPDSItem.LINK_COVER_IMAGE, null);
+                if(coverImages != null && coverImages.size() > 0) {
+                    try {
+                        String coverImageUrl = UMFileUtil.resolveLink(
+                            entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
+                                ((String[])coverImages.get(0))[UstadJSOPDSItem.ATTR_HREF]);
+                        final String coverImageFileUri = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
+                                getContext()).get(coverImageUrl);
+                        catalogEntryView.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                catalogEntryView.setHeader(coverImageFileUri);
+                            }
+                        });
+                    }catch(IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     public void handleClickButton(int buttonId) {

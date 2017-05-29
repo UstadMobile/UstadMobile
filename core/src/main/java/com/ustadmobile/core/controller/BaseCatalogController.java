@@ -54,7 +54,7 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
 
     public void onCreate(Hashtable savedState) {
-        AcquisitionManager.getInstance().registerEntryAquisitionStatusListener(this, context);
+        //AcquisitionManager.getInstance().registerEntryAquisitionStatusListener(this, context);
     }
 
     /**
@@ -119,7 +119,10 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
                 acquisitionFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
                         "application/dir", getAcquisitionStorageDir());
 
-                AcquisitionManager.getInstance().acquireCatalogEntries(acquisitionFeed, context);
+
+                UstadMobileSystemImpl.getInstance().getNetworkManager().requestAcquisition(
+                    acquisitionFeed, getContext(), true, true);
+                //AcquisitionManager.getInstance().acquireCatalogEntries(acquisitionFeed, context);
                 onDownloadStarted();
                 break;
 

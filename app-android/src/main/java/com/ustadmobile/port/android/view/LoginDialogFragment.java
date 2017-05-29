@@ -20,6 +20,9 @@ import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.LoginView;
 
+import java.util.Iterator;
+import java.util.Vector;
+
 /**
  * An Android Dialog Fragment that implements the LoginView.
  */
@@ -33,6 +36,7 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
 
     private DialogResultListener mResultListener;
 
+    private Vector<Runnable> runOnAttach = new Vector<>();
 
     public LoginDialogFragment() {
         //Required empty public constructor
@@ -113,6 +117,13 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
             if(mLoginController != null)
                 mLoginController.setResultListener(mResultListener);
         }
+
+        Iterator<Runnable> runnables = runOnAttach.iterator();
+        while(runnables.hasNext()) {
+            Runnable current = runnables.next();
+            current.run();
+            runnables.remove();
+        }
     }
 
     @Override
@@ -158,5 +169,14 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
     @Override
     public void setUIStrings() {
 
+    }
+
+
+    public void runOnUiThread(Runnable r) {
+        if(getActivity() != null) {
+            getActivity().runOnUiThread(r);
+        }else {
+            runOnAttach.add(r);
+        }
     }
 }
