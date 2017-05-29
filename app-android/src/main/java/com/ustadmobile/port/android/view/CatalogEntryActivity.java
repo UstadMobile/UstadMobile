@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -164,12 +165,14 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setHeader(String headerFileUri) {
-
+        ((ImageView)findViewById(R.id.activity_catalog_entry_header_img)).setImageBitmap(
+            BitmapFactory.decodeFile(headerFileUri));
     }
 
     @Override
     public void setIcon(String iconFileUri) {
-
+        ((ImageView)findViewById(R.id.activity_catalog_entry_icon_img)).setImageBitmap(
+            BitmapFactory.decodeFile(iconFileUri));
     }
 
     @Override

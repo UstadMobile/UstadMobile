@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.p2p.P2PManager;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UstadView;
 
@@ -26,7 +26,7 @@ public class SettingsDataUsageController extends UstadBaseController {
 
         UstadMobileSystemImpl.getInstance().setAppPref(PREFKEY_SUPERNODE, String.valueOf(enabled), getContext());
 
-        P2PManager manager = UstadMobileSystemImpl.getInstance().getNetworkManager();
+        NetworkManagerCore manager = UstadMobileSystemImpl.getInstance().getNetworkManager();
 
         if(manager != null)
             manager.setSuperNodeEnabled(context, enabled);

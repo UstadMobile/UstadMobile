@@ -17,6 +17,7 @@ import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.zip.*;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
@@ -123,6 +124,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         int bytesReadTotal = 0;
 
         //do not read more bytes than is available in the stream
+        //TODO: The above will be wrong when gzip is in use
         int bytesToRead = Math.min(buf.length, contentLen != -1 ? contentLen : buf.length);
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         if(!method.equalsIgnoreCase("HEAD")) {
@@ -131,7 +133,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             }
         }
 
-        in.close();
+        UMIOUtils.closeInputStream(in);
 
         Hashtable responseHeaders = new Hashtable();
         Iterator<String> headerIterator = conn.getHeaderFields().keySet().iterator();

@@ -35,7 +35,7 @@ import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
-import com.ustadmobile.core.p2p.P2PManager;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.LocaleUtil;
@@ -1062,7 +1062,7 @@ public abstract class UstadMobileSystemImpl {
     }
 
 
-    public P2PManager getNetworkManager() {
+    public NetworkManagerCore getNetworkManager() {
 
         return null;
     }
