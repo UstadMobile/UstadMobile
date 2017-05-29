@@ -4,9 +4,11 @@ import com.ustadmobile.port.sharedse.impl.http.FileResponder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
@@ -23,6 +25,9 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
 
 
     public static Hashtable LAST_MODIFIED_TIMES = new Hashtable();
+
+    public static long loadedTime = Calendar.getInstance().getTimeInMillis();
+
 
     public static class ResourceFileSource implements FileResponder.IFileSource {
 
@@ -91,11 +96,27 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
         String prefix = uriResource.initParameter(0, String.class);
         String resPath = '/' + session.getUri().substring(prefix.length());
-        ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(resPath), new Date().getTime());
+
+        long cutOffAfter = session.getParameters().containsKey("cutoffafter") ?
+                Long.parseLong(session.getParameters().get("cutoffafter").get(0)) : 0L;
+        int speedLimit = session.getParameters().containsKey("speedlimit") ?
+                Integer.parseInt(session.getParameters().get("speedlimit").get(0)): 0;
+
+        ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(resPath),
+            loadedTime);
+
         NanoHTTPD.Response response = newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, fileSource, null);
+
+
+        if(cutOffAfter > 0 || speedLimit > 0){
+            DodgyInputStream din = new DodgyInputStream(response.getData(), speedLimit, (int)cutOffAfter);
+            response.setData(din);
+        }
+
         if(session.getParameters().containsKey("private")){
             response.addHeader("Cache-Control", "private");
         }
+
 
         return response;
     }
@@ -117,6 +138,20 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
 
     @Override
     public NanoHTTPD.Response other(String method, RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-        return null;
+        if(NanoHTTPD.Method.HEAD.toString().equals(method)) {
+            ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(getResourcePathFromRequest(uriResource, session)),
+                    loadedTime);
+
+            return newResponseFromFile(NanoHTTPD.Method.HEAD, uriResource, session, fileSource, null);
+        }
+
+        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.METHOD_NOT_ALLOWED,
+                "text/plain", "Method not supoprted");
+    }
+
+    private String getResourcePathFromRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.IHTTPSession session){
+        String prefix = uriResource.initParameter(0, String.class);
+        String resPath = '/' + session.getUri().substring(prefix.length());
+        return resPath;
     }
 }

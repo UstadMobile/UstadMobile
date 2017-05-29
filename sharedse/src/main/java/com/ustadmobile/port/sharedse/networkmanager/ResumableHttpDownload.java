@@ -31,6 +31,8 @@ public class ResumableHttpDownload {
 
     private static final String HTTP_HEADER_ETAG = "etag";
 
+    private static final String HTTP_HEADER_CONTENT_RANGE = "content-range";
+
     public static final String HTTP_HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 
     public static final String HTTP_ENCODING_IDENTITY = "identity";
@@ -83,7 +85,7 @@ public class ResumableHttpDownload {
              * and we must have a last modified date and/or etag to validate the download against
              */
             if(dlPartFileExists && dlPartFileSize > 0 && (dlInfoProperties.containsKey(HTTP_HEADER_LAST_MODIFIED)
-                    || dlInfoProperties.containsKey(HTTP_HEADER_LAST_MODIFIED))) {
+                    || dlInfoProperties.containsKey(HTTP_HEADER_ETAG))) {
                 con = (HttpURLConnection) url.openConnection();
                 con.setRequestMethod("HEAD");
                 con.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, HTTP_ENCODING_IDENTITY);
@@ -131,8 +133,18 @@ public class ResumableHttpDownload {
                 dlInfoProperties.setProperty(HTTP_HEADER_LAST_MODIFIED,
                 con.getHeaderField(HTTP_HEADER_LAST_MODIFIED));
 
+            String contentRangeResponse = con.getHeaderField(HTTP_HEADER_CONTENT_RANGE);
+
             synchronized (this) {
-                totalSize = con.getContentLength();
+                if(contentRangeResponse != null && con.getResponseCode() == HttpURLConnection.HTTP_PARTIAL) {
+                    contentRangeResponse = contentRangeResponse.substring(contentRangeResponse.indexOf('/')+1).trim();
+                    if(!contentRangeResponse.equals("*")) {
+                        totalSize = Long.parseLong(contentRangeResponse);
+                    }
+                }else {
+                    totalSize = con.getContentLength();
+                }
+
             }
 
             propertiesOut = new FileOutputStream(dlInfoFile);
@@ -159,7 +171,7 @@ public class ResumableHttpDownload {
             }
             fileOut.flush();
 
-            completed = true;
+            completed = downloadedSoFar == totalSize;
         }catch(IOException e) {
             ioe = e;
         }finally {

@@ -1,5 +1,6 @@
 package com.ustadmobile.test.sharedse;
 
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.networkmanager.ResumableHttpDownload;
 import com.ustadmobile.test.core.impl.ClassResourcesResponder;
 
@@ -8,8 +9,15 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -45,13 +53,58 @@ public class TestResumableHttpDownload {
      *
      */
     @Test
-    public void testResumableDownload() throws IOException{
+    public void testResumableDownload() throws IOException, NoSuchAlgorithmException{
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        InputStream resIn = getClass().getResourceAsStream("/com/ustadmobile/test/sharedse/thelittlechicks.epub");
+        DigestInputStream din = new DigestInputStream(resIn, md);
+
+        UMIOUtils.readFully(din, bout, 1024*16);
+        din.close();
+        long resLength = bout.toByteArray().length;
+        byte[] resMd5 = md.digest();
+
         String httpDownloadUrl = httpRoot + "com/ustadmobile/test/sharedse/thelittlechicks.epub";
         File tmpDownloadFile = File.createTempFile("testresuambledownload", ".epub");
         ResumableHttpDownload resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
                 tmpDownloadFile.getAbsolutePath());
         boolean result = resumableDownload.download();
         Assert.assertTrue("Download reported as OK", result);
+        Assert.assertEquals("Download size matches expected length", resLength, tmpDownloadFile.length());
+
+
+        bout = new ByteArrayOutputStream();
+        md = MessageDigest.getInstance("MD5");
+        din = new DigestInputStream(new FileInputStream(tmpDownloadFile), md);
+        UMIOUtils.readFully(din, bout, 1024*16);
+        din.close();
+        bout.close();
+
+        Assert.assertTrue("MD5 digest matches", Arrays.equals(resMd5, md.digest()));
+        Assert.assertTrue("Deleted tmp download file for retry", tmpDownloadFile.delete());
+
+
+        result = false;
+        int retryLimit = 15;
+        tmpDownloadFile = File.createTempFile("testresumabledownload-retry", ".epub");
+        for(int i = 0; i < retryLimit && !result; i++) {
+            httpDownloadUrl = httpRoot + "com/ustadmobile/test/sharedse/thelittlechicks.epub?cutoffafter=100000";
+            resumableDownload = new ResumableHttpDownload(httpDownloadUrl,
+                tmpDownloadFile.getAbsolutePath());
+            result = resumableDownload.download();
+        }
+
+        bout = new ByteArrayOutputStream();
+        md = MessageDigest.getInstance("MD5");
+        din = new DigestInputStream(new FileInputStream(tmpDownloadFile), md);
+        UMIOUtils.readFully(din, bout, 1024*16);
+        din.close();
+        bout.close();
+
+        Assert.assertTrue("MD5 digest matches on resumed file download", Arrays.equals(resMd5, md.digest()));
+        Assert.assertEquals("Download size matches expected length", resLength, tmpDownloadFile.length());
+        Assert.assertTrue("Download reported as OK", result);
+        Assert.assertTrue("Deleted tmp download file for retry", tmpDownloadFile.delete());
     }
 
 }
