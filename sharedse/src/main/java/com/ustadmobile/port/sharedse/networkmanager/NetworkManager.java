@@ -71,11 +71,15 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
     private Vector<NetworkManagerListener> networkManagerListeners = new Vector<>();
 
+    private Vector<AcquisitionListener> acquisitionListeners=new Vector<>();
+
     private Map<String,List<EntryCheckResponse>> entryResponses =new HashMap<>();
 
     private NetworkTask[] currentTasks = new NetworkTask[2];
 
     private Vector<WiFiDirectGroupListener> wifiDirectGroupListeners = new Vector<>();
+
+    private Map<String,AcquisitionTask> entryAcquisitionTaskMap=new HashMap<>();
 
     protected EmbeddedHTTPD httpd;
 
@@ -527,6 +531,61 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
+
+    public void addAcquisitionTaskListener(AcquisitionListener listener){
+        acquisitionListeners.add(listener);
+    }
+
+
+    public void removeAcquisitionTaskListener(AcquisitionListener listener){
+        acquisitionListeners.remove(listener);
+    }
+
+    /**
+     * Trigger acquisition status change event
+     * @param entryId
+     */
+    public void handleAcquisitionStatusChanged(String entryId){
+        fireAcquisitionStatusChanged(entryId);
+    }
+
+
+    /**
+     * Trigger acquisition progress update event
+     * @param entryId
+     */
+    public void handleAcquisitionProgressUpdate(String entryId){
+        fireAcquisitionProgressUpdate(entryId);
+    }
+
+    /**
+     * Fire acquisition progress updates to the listening part of the app
+     * @param entryId
+     */
+
+    private void fireAcquisitionProgressUpdate(String entryId){
+        synchronized (acquisitionListeners) {
+            for(AcquisitionListener listener : acquisitionListeners){
+                AcquisitionTask acquisitionTask=getAcquisitionTaskByEntryId(entryId);
+                listener.acquisitionProgressUpdate(entryId,acquisitionTask.getStatusByEntryId(entryId));
+            }
+        }
+    }
+
+
+    /**
+     * Fire acquisition status change to all listening parts of the app
+     * @param entryId
+     */
+    private void fireAcquisitionStatusChanged(String entryId){
+        synchronized (acquisitionListeners) {
+            for(AcquisitionListener listener : acquisitionListeners){
+                AcquisitionTask acquisitionTask=getAcquisitionTaskByEntryId(entryId);
+                listener.acquisitionStatusChanged(entryId,acquisitionTask.getStatusByEntryId(entryId));
+            }
+        }
+    }
+
     /**
      * Find the acquisition task for the given entry id
      *
@@ -534,8 +593,16 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @return The task carrying out acquisition of this entry, or null if it's not being acquired
      */
     public AcquisitionTask getAcquisitionTaskByEntryId(String entryId) {
+        return getEntryAcquisitionTaskMap().get(entryId);
+    }
 
-        return null;
+    /**
+     * Return the Entry ID to AcquisitionTask map
+     * @return
+     */
+
+    public Map<String,AcquisitionTask> getEntryAcquisitionTaskMap(){
+        return entryAcquisitionTaskMap;
     }
 
 
@@ -553,6 +620,12 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @return Wifi direct group status as per the constants
      */
     public abstract int getWifiDirectGroupStatus();
+
+    /**
+     * Reconnect the previous connected wifi after Wifi-Direct
+     * acquisitionTask completion.
+     */
+    public abstract void reconnectPreviousNetwork();
 
     /**
      * Clean up the network manager for shutdown

@@ -1,14 +1,16 @@
 package com.ustadmobile.test.sharedse;
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.port.sharedse.networkmanager.AcquisitionListener;
+import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
@@ -26,6 +28,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +37,6 @@ import java.util.List;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
-import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER_PORT;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -52,6 +55,16 @@ public class TestAcquisitionTask{
     private ArrayList<HashMap<String,Integer>> downloadSources=new ArrayList<>();
 
     private static RouterNanoHTTPD resourcesHttpd;
+
+    private boolean fileDownloadedFromPeer =false;
+
+    private boolean fileDownloadedFromCloud =false;
+
+    private boolean localNetworkEnabled=false;
+
+    private boolean wifiDirectEnabled=false;
+
+    private boolean isFromCloud=false;
 
     /**
      * The resources server can be used as the "cloud"
@@ -85,7 +98,9 @@ public class TestAcquisitionTask{
         final boolean[] fileAvailable = new boolean[ENTRY_IDS.length];
         final Object nodeDiscoveryLock = new Object();
         final Object statusRequestLock=new Object();
-        final Object acquisitionLock=new Object();
+        final Object acquireSameNetworkLock=new Object();
+        final Object acquireDifferentNetworkLock=new Object();
+
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
             public void fileStatusCheckInformationAvailable(List<String> fileIds) {
@@ -127,12 +142,6 @@ public class TestAcquisitionTask{
                 if(!downloadSources.contains(sourceData)){
                     downloadSources.add(sourceData);
                 }
-
-                if(downloadSources.size()>=1){
-                    synchronized (acquisitionLock){
-                       acquisitionLock.notify();
-                    }
-                }
             }
 
             @Override
@@ -153,7 +162,7 @@ public class TestAcquisitionTask{
             }
         }
 
-        NetworkNode networkNode=manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        final NetworkNode networkNode=manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         Assert.assertNotNull("Remote test slave node discovered", networkNode);
 
         List<NetworkNode> nodeList=new ArrayList<>();
@@ -166,7 +175,6 @@ public class TestAcquisitionTask{
         String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
-
         manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
         synchronized (statusRequestLock){
             statusRequestLock.wait(DEFAULT_WAIT_TIME*2);
@@ -188,18 +196,66 @@ public class TestAcquisitionTask{
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
             catalogUrl);
 
-        manager.requestAcquisition(feed,manager.getContext(),false,true);
+        AcquisitionListener acquisitionListener=new AcquisitionListener() {
+            @Override
+            public void acquisitionProgressUpdate(String entryId, AcquisitionTask.Status status) {
 
-        synchronized (acquisitionLock){
-            acquisitionLock.wait(DEFAULT_WAIT_TIME*10);
+            }
+
+            @Override
+            public void acquisitionStatusChanged(String entryId, AcquisitionTask.Status status) {
+                if(status.getStatus()==UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL){
+                    try{
+                        CatalogEntryInfo info=CatalogController.getEntryInfo(URLDecoder.decode(entryId, "UTF-8"),
+                                CatalogController.SHARED_RESOURCE, manager.getContext());
+                        if(ENTRY_ID_PRESENT.equals(entryId)){
+                            fileDownloadedFromPeer =(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED);
+                        }else if(ENTRY_ID_NOT_PRESENT.equals(entryId)){
+                            isFromCloud=true;
+                            fileDownloadedFromCloud =(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED);
+                        }
+                        new File(info.fileURI).delete();
+
+                        if(localNetworkEnabled && isFromCloud){
+                            synchronized (acquireSameNetworkLock){
+                                acquireSameNetworkLock.notifyAll();
+                            }
+                        }
+
+                        if(wifiDirectEnabled && isFromCloud){
+                           synchronized (acquireDifferentNetworkLock){
+                               acquireDifferentNetworkLock.notifyAll();
+                           }
+                        }
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        manager.addAcquisitionTaskListener(acquisitionListener);
+
+        localNetworkEnabled=true;
+        wifiDirectEnabled=false;
+        isFromCloud=false;
+        manager.requestAcquisition(feed,manager.getContext(),localNetworkEnabled,wifiDirectEnabled);
+        synchronized (acquireSameNetworkLock){
+            acquireSameNetworkLock.wait(DEFAULT_WAIT_TIME*6);
         }
+        Assert.assertThat("File was downloaded successfully from node on same network", fileDownloadedFromPeer,is(true));
+        Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));
 
-        //TODO: This need to check for the file being actually present
-        /*
-        Assert.assertThat("Available entry reported,can be downloaded locally",
-                downloadSources.get(0).get(ENTRY_IDS[0]),is(NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK));
-        Assert.assertThat("Unavailable entry reported,can be downloaded from cloud",
-                downloadSources.get(1).get(ENTRY_IDS[1]),is(NetworkManager.DOWNLOAD_FROM_CLOUD));
-        */
+        localNetworkEnabled=false;
+        wifiDirectEnabled=true;
+        isFromCloud=false;
+        manager.requestAcquisition(feed,manager.getContext(),localNetworkEnabled,wifiDirectEnabled);
+        synchronized (acquireDifferentNetworkLock){
+            acquireDifferentNetworkLock.wait(DEFAULT_WAIT_TIME*10);
+        }
+        Assert.assertThat("File was downloaded successfully from node on different network", fileDownloadedFromPeer,is(true));
+        Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));
+
+
     }
 }

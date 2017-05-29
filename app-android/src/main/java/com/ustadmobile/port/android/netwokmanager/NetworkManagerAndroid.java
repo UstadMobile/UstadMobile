@@ -101,7 +101,10 @@ public class NetworkManagerAndroid extends NetworkManager{
     private NSDHelperAndroid nsdHelperAndroid;
 
     private int currentWifiDirectGroupStatus=-1;
+
     private BluetoothSocket bluetoothSocket=null;
+
+    private int previousConnectedNetId=-1;
 
     /**
      * Assets are served over http that are used to interact with the content (e.g. to inject a
@@ -125,6 +128,13 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         connectivityManager= (ConnectivityManager) networkService.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        //check if the device is currently connected to the WiFi and get network ID
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info != null && info.isConnected()) {
+            if (info.getTypeName().equalsIgnoreCase("WIFI")) {
+                previousConnectedNetId=wifiManager.getConnectionInfo().getNetworkId();
+            }
+        }
 
         //listen for the intents
         IntentFilter filter = new IntentFilter();
@@ -524,6 +534,15 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public int getWifiDirectGroupStatus() {
         return currentWifiDirectGroupStatus;
+    }
+
+    @Override
+    public void reconnectPreviousNetwork() {
+        if(previousConnectedNetId!=-1){
+            wifiManager.enableNetwork(previousConnectedNetId, true);
+            wifiManager.reconnect();
+        }
+
     }
 
     public String getHttpAndroidAssetsUrl() {
