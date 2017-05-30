@@ -32,6 +32,8 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.AcquisitionStatusEvent;
+import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -41,6 +43,8 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
+import com.ustadmobile.core.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -96,7 +100,7 @@ import org.xmlpull.v1.XmlSerializer;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable {
+public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable, AcquisitionListener {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -336,6 +340,11 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public CatalogController(CatalogModel model, Object context){
         this(context);
         this.model=model;
+
+        //if a model is set at time of construction: this is not being used just to make another catalog
+        //it is a catalog - therefor add acquisition status listeners
+        //TODO: this should be refactored - it's an untidy approach
+        UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
     }
     
     /**
@@ -2094,5 +2103,35 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     @Override
     protected void onEntriesRemoved() {
 
+    }
+
+    public void onDestroy() {
+        if(this.model != null)
+            UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
+    }
+
+    @Override
+    public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
+        UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
+        if(entry != null) {
+            view.updateDownloadEntryProgress(entryId, (int)status.getDownloadedSoFar(), (int)status.getTotalSize());
+        }
+
+    }
+
+    @Override
+    public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
+        UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
+        if(entry == null)
+            return;
+
+        switch(status.getStatus()){
+            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                setViewEntryProgressVisible(new UstadJSOPDSEntry[]{entry}, true);
+                break;
+            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
+                setViewEntryProgressVisible(new UstadJSOPDSEntry[]{entry}, false);
+                break;
+        }
     }
 }

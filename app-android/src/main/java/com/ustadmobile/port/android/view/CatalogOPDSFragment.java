@@ -176,6 +176,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         return rootContainer;
     }
 
+
     /**
      * Load the catalog from the arguments given
      */
@@ -338,6 +339,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             isRequesting=false;
             LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(broadcastReceiver);
         }
+
+        if(mCatalogController != null)
+            mCatalogController.onDestroy();
     }
 
     public void toggleEntrySelected(OPDSEntryCard card) {
