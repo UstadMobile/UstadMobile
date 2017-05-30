@@ -173,14 +173,14 @@ public interface CatalogView extends UstadView{
      *
      * @param buttonVisible true to make it visible; false otherwise
      */
-    public void setBrowseButtonVisible(boolean buttonVisible);
+    public void setFooterButtonVisible(boolean buttonVisible);
 
     /**
      * Sets the label for the browse button
      *
      * @param browseButtonLabel Text label for the browse button
      */
-    public void setBrowseButtonLabel(String browseButtonLabel);
+    public void setFooterButtonLabel(String browseButtonLabel);
 
     public void setDeleteOptionAvailable(boolean deleteOptionAvailable);
 

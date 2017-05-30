@@ -35,10 +35,7 @@ package com.ustadmobile.port.android.view;
 
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -165,7 +162,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 R.id.fragment_catalog_swiperefreshview);
         mSwipeRefreshLayout.setOnRefreshListener(this);
         mSwipeRefreshLayout.setRefreshing(true);
-        rootContainer.findViewById(R.id.fragment_catalog_browsebutton).setOnClickListener(this);
+        rootContainer.findViewById(R.id.fragment_catalog_footer_button).setOnClickListener(this);
 
         mRecyclerView = (RecyclerView)rootContainer.findViewById(R.id.fragment_catalog_recyclerview);
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
@@ -383,8 +380,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
 
         switch(view.getId()) {
-            case R.id.fragment_catalog_browsebutton:
-                mCatalogController.handleClickBrowseButton();
+            case R.id.fragment_catalog_footer_button:
+                mCatalogController.handleClickFooterButton();
                 break;
             case R.id.fragment_catalog_addbutton:
                 mCatalogController.handleClickAdd();
@@ -537,14 +534,14 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void setBrowseButtonVisible(boolean buttonVisible) {
-        this.rootContainer.findViewById(R.id.fragment_catalog_browsebutton).setVisibility(
+    public void setFooterButtonVisible(boolean buttonVisible) {
+        this.rootContainer.findViewById(R.id.fragment_catalog_footer_button).setVisibility(
                 buttonVisible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void setBrowseButtonLabel(String browseButtonLabel) {
-        ((Button)this.rootContainer.findViewById(R.id.fragment_catalog_browsebutton)).setText(browseButtonLabel);
+    public void setFooterButtonLabel(String browseButtonLabel) {
+        ((Button)this.rootContainer.findViewById(R.id.fragment_catalog_footer_button)).setText(browseButtonLabel);
     }
 
     @Override
