@@ -2085,9 +2085,4 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     protected void onEntriesRemoved() {
 
     }
-
-    @Override
-    public void statusUpdated(AcquisitionStatusEvent event) {
-
-    }
 }

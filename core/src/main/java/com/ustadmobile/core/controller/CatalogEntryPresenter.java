@@ -2,7 +2,10 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.AcquisitionStatusEvent;
+import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -17,7 +20,7 @@ import java.util.Vector;
  * Created by mike on 4/17/17.
  */
 
-public class CatalogEntryPresenter extends BaseCatalogController{
+public class CatalogEntryPresenter extends BaseCatalogController implements AcquisitionListener{
 
     private CatalogEntryView catalogEntryView;
 
@@ -52,19 +55,31 @@ public class CatalogEntryPresenter extends BaseCatalogController{
                         CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
                 catalogEntryView.setDescription(entry.content, entry.getContentType());
 
-                if(entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
-                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
-                }else {
-                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN,false);
-                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE,false);
-                }
+                updateButtonsByStatus(entryInfo != null ? entryInfo.acquisitionStatus :
+                        CatalogController.STATUS_NOT_ACQUIRED);
 
                 loadImages();
             }catch(Exception e) {
                 e.printStackTrace();
             }
         }
+        UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
     }
+
+    /**
+     * Update which buttons are shown according to the acquisition status
+     *
+     * @param acquisitionStatus
+     */
+    protected void updateButtonsByStatus(int acquisitionStatus) {
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD,
+                acquisitionStatus != CatalogController.STATUS_ACQUIRED);
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN,
+                acquisitionStatus == CatalogController.STATUS_ACQUIRED);
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE,
+                acquisitionStatus == CatalogController.STATUS_ACQUIRED);
+    }
+
 
     public void loadImages() {
         new Thread(new Runnable() {
@@ -147,30 +162,37 @@ public class CatalogEntryPresenter extends BaseCatalogController{
     }
 
     @Override
-    public void statusUpdated(AcquisitionStatusEvent event) {
-        //TODO: Rework to use the networkmanager instead of acquisition manager
-        /*if(event.getEntryId() != null && event.getEntryId().equals(entry.id)) {
-            int newStatus = AcquisitionManager.getStringIdForDownloadStatus(event.getStatus());
-            if(newStatus != downloadStatusStrId) {
-                catalogEntryView.setProgressStatusText(UstadMobileSystemImpl.getInstance().getString(newStatus));
-                downloadStatusStrId = newStatus;
-            }
+    public void acquisitionProgressUpdate(String entryId, final AcquisitionTaskStatus status) {
+        if(entry != null && entryId.equals(entry.id)) {
+            catalogEntryView.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if(status.getTotalSize() == -1)
+                        catalogEntryView.setProgress(-1);
+                    else
+                        catalogEntryView.setProgress((float)status.getDownloadedSoFar() / (float)status.getTotalSize());
+                }
+            });
+        }
+    }
 
-            switch(event.getStatus()) {
-                case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
-                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, false);
-                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE, true);
-                    catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, true);
-                    catalogEntryView.setProgressVisible(false);
-                    registerItemAcquisitionCompleted(event.getEntryId());
-                case UstadMobileSystemImpl.DLSTATUS_RUNNING:
-                    catalogEntryView.setProgress(
-                            (float)((double)event.getBytesDownloadedSoFar() / (double)event.getTotalBytes()));
-                    break;
-            }
-        }*/
+    @Override
+    public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
+        switch(status.getStatus()) {
+            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
+                catalogEntryView.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        catalogEntryView.setProgressVisible(false);
+                        updateButtonsByStatus(CatalogController.STATUS_ACQUIRED);
+                    }
+                });
+                break;
+            //TODO: handle show download failed
+        }
     }
 
     public void onDestroy() {
+        UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 }

@@ -20,7 +20,7 @@ import java.util.Vector;
  * Created by mike on 4/20/17.
  */
 
-public abstract class BaseCatalogController extends UstadBaseController implements AppViewChoiceListener, AcquisitionStatusListener {
+public abstract class BaseCatalogController extends UstadBaseController implements AppViewChoiceListener  {
 
     public static final int CMD_CHOOSE_LANG = 52;
 
