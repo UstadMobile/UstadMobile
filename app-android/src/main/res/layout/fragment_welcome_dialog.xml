@@ -1,0 +1,47 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:background="@android:color/white"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    tools:context="com.ustadmobile.port.android.view.LoginDialogFragment">
+
+    <TextView
+        android:textColor="@android:color/white"
+        android:background="@color/primary"
+        android:id="@+id/fragment_welcome_title_text"
+        android:gravity="center"
+        android:textSize="@dimen/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen_70dp" />
+    <ScrollView
+        android:layout_below="@+id/fragment_welcome_title_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:background="@color/background_light"
+                android:padding="@dimen/dimen_16dp"
+                android:gravity="center"
+                android:id="@+id/text_top_quote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+
+            </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+
+
+</LinearLayout>

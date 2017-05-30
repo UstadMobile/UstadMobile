@@ -36,7 +36,7 @@ if (project.file("buildconfig.local.properties").exists()) {
 task startTestSlaveServer(type: Exec) {
     def adb = android.getAdbExe().getAbsolutePath()
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'install', '-r', '-s', "$projectDir/build/outputs/apk/app-android-remotetestslave-debug.apk"
-    commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity','-a','android.intent.action.MAIN','-c','android.intent.category.LAUNCHER'
+    commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity', '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.LAUNCHER'
 }
 
 //afterEvaluate {
@@ -44,7 +44,7 @@ task startTestSlaveServer(type: Exec) {
 //}
 
 tasks.whenTaskAdded { task ->
-    if(task.name == "assembleRemotetestslaveDebug"){
+    if (task.name == "assembleRemotetestslaveDebug") {
         startTestSlaveServer.dependsOn task
     }
 }

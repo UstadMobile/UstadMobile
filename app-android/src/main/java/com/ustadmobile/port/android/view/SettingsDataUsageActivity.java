@@ -1,10 +1,6 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.support.annotation.RequiresApi;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,7 +15,6 @@ import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.SettingsDataUsageController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SettingsDataUsageView;
-import com.ustadmobile.port.android.util.P2PAndroidUtils;
 
 public class SettingsDataUsageActivity extends UstadBaseActivity implements SettingsDataUsageView, CompoundButton.OnCheckedChangeListener, View.OnClickListener {
 

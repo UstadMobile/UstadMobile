@@ -241,7 +241,7 @@ public class TestAcquisitionTask{
         isFromCloud=false;
         manager.requestAcquisition(feed,manager.getContext(),localNetworkEnabled,wifiDirectEnabled);
         synchronized (acquireSameNetworkLock){
-            acquireSameNetworkLock.wait(DEFAULT_WAIT_TIME*6);
+            acquireSameNetworkLock.wait(DEFAULT_WAIT_TIME* 6);
         }
         Assert.assertThat("File was downloaded successfully from node on same network", fileDownloadedFromPeer,is(true));
         Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));

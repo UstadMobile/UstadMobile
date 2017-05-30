@@ -179,6 +179,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private void acquireNextFile(){
 
         if(currentEntryIdIndex < feed.entries.length) {
+
             networkManager.getEntryAcquisitionTaskMap().put(getFeed().entries[currentEntryIdIndex].id,this);
             if(httpDownload!=null){
                 acquisitionStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
