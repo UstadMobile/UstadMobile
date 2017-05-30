@@ -40,11 +40,15 @@
     <dimen name="catalog_entry_see_also_icon_size">150dp</dimen>
 
     <dimen name="dimen_2dp">2dp</dimen>
+    <dimen name="dimen_4dp">4dp</dimen>
     <dimen name="dimen_8dp">8dp</dimen>
     <dimen name="dimen_10dp">10dp</dimen>
     <dimen name="dimen_12dp">12dp</dimen>
     <dimen name="dimen_16dp">16dp</dimen>
     <dimen name="dimen_20dp">20dp</dimen>
+    <dimen name="dimen_25dp">25dp</dimen>
+    <dimen name="dimen_30dp">30dp</dimen>
+    <dimen name="dimen_40dp">40dp</dimen>
     <dimen name="dimen_50dp">50dp</dimen>
     <dimen name="dimen_70dp">70dp</dimen>
     <dimen name="text_hint">16sp</dimen>
