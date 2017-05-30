@@ -25,23 +25,19 @@
         android:layout_marginBottom="4dp"
         >
 
+        <ImageView
+            android:layout_width="@dimen/dimen_70dp"
+            android:layout_height="@dimen/dimen_70dp"
+            android:scaleType="centerInside"
+            android:id="@+id/opds_item_thumbnail"
+            android:width="@dimen/dimen_70dp"
+            android:height="@dimen/dimen_70dp"
+            android:maxWidth="@dimen/dimen_70dp"
+            android:maxHeight="@dimen/dimen_50dp"
+            android:minWidth="@dimen/dimen_70dp"
+            android:minHeight="@dimen/dimen_70dp">
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/opds_item_thumbnail_container"
-            android:minWidth="80dp"
-            android:minHeight="80dp">
-            <ImageView
-                android:layout_centerInParent="true"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/opds_item_thumbnail"
-                android:minWidth="32dp"
-                android:minHeight="32dp"
-                android:maxWidth="80dp"
-                android:maxHeight="80dp" />
-        </RelativeLayout>
+        </ImageView>
 
         <TextView
             android:layout_width="wrap_content"
@@ -50,8 +46,8 @@
             android:text="Large Text"
             android:id="@+id/opdsitem_title_text"
             android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/opds_item_thumbnail_container"
-            android:layout_toEndOf="@+id/opds_item_thumbnail_container"/>
+            android:layout_toRightOf="@+id/opds_item_thumbnail"
+            android:layout_toEndOf="@+id/opds_item_thumbnail"/>
 
         <TextView
             android:layout_marginTop="10dp"
@@ -70,8 +66,8 @@
             android:layout_height="wrap_content"
             android:id="@+id/opds_item_progressbar"
             android:layout_below="@+id/opds_item_detail_text"
-            android:layout_toRightOf="@+id/opds_item_thumbnail_container"
-            android:layout_toEndOf="@+id/opds_item_thumbnail_container"
+            android:layout_toRightOf="@+id/opds_item_thumbnail"
+            android:layout_toEndOf="@+id/opds_item_thumbnail"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:max="100"
