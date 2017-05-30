@@ -229,7 +229,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     @Override
     public void setProgressVisible(boolean visible) {
         findViewById(R.id.activity_catalog_entry_download_status_layout).setVisibility(
-                visible? View.VISIBLE : View.INVISIBLE);
+                visible? View.VISIBLE : View.GONE);
     }
 
     @Override
