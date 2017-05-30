@@ -210,4 +210,12 @@ public class MessageIDConstants {
     public static final int settingsAccountLabel=125;
     public static final int settingsDataUsageLabel=126;
     public static final int settingsLanguageLabel=127;
+    public static final int welcomeTitle=128;
+    public static final int topQuoteMessage=129;
+    public static final int downloadTextContent=130;
+    public static final int learnTextContent=131;
+    public static final int inpersonClassesTextContent=132;
+    public static final int languageSelectionNote=133;
+    public static final int neverShowThisNextTime=134;
+    public static final int acceptButton=135;
 }
