@@ -35,31 +35,28 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         currentNode = 0;
         new Thread(new Runnable() {
             public void run() {
-                if(isUseBluetooth()){
-                    connectNextBluetoothNode();
-                }
-
-                if(isUseHttp()){
-                    connectNextHttpNode();
-                }
+                connectNextNode(0);
             }
         }).start();
     }
 
-    private void connectNextBluetoothNode() {
-        if(currentNode < networkNodeList.size()) {
-            String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
-            networkManager.connectBluetooth(bluetoothAddr, this);
+    private void connectNextNode(int index) {
+        if(index < networkNodeList.size()) {
+            currentNode = index;
+            if(isUseBluetooth() && networkNodeList.get(currentNode).getDeviceBluetoothMacAddress() != null) {
+                String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
+                networkManager.connectBluetooth(bluetoothAddr, this);
+            }else if(isUseHttp() && networkNodeList.get(currentNode).getDeviceIpAddress() != null) {
+                //TODO: Handle status acquisition over http
+                connectNextNode(index+1);
+            }else {
+                //skip it - not possible to query this node with the current setup
+                connectNextNode(index+1);
+            }
         }else {
             networkManager.handleTaskCompleted(this);
         }
-
     }
-
-    private void connectNextHttpNode(){
-        //TODO: handle all http status check
-    }
-
 
     @Override
     public void cancel() {
@@ -80,8 +77,9 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
         queryStr += '\n';
         String response=null;
+        BufferedReader reader = null;
         try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            reader = new BufferedReader(new InputStreamReader(inputStream));
             outputStream.write(queryStr.getBytes());
             response = reader.readLine();
             if(response.startsWith(BluetoothServer.CMD_ENTRY_STATUS_FEEDBACK)) {
@@ -93,21 +91,22 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
                 }
 
                 networkManager.handleEntriesStatusUpdate(networkNodeList.get(currentNode), entryIdList,entryIdStatusList);
-                managerTaskListener.handleTaskCompleted(this);
-                currentNode++;
-
             }else {
                 System.out.print("Feedback "+response);
             }
         }catch(IOException e) {
             e.printStackTrace();
         }finally {
-            if(response!=null){
-                UMIOUtils.closeInputStream(inputStream);
-                UMIOUtils.closeOutputStream(outputStream);
-                networkManager.disconnectBluetooth();
+            if(reader != null){
+                try {reader.close();}
+                catch(IOException e){}
             }
+            UMIOUtils.closeInputStream(inputStream);
+            UMIOUtils.closeOutputStream(outputStream);
+            networkManager.disconnectBluetooth();
         }
+
+        connectNextNode(currentNode+1);
     }
 
     @Override

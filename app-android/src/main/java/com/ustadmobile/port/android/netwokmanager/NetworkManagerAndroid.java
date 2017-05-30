@@ -80,6 +80,14 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private static final String SERVICE_DEVICE_AVAILABILITY = "av";
 
+    private int nodeStatus = -1;
+
+    private static final int NODE_STATUS_NOT_STARTED = -1;
+
+    private static final int NODE_STATUS_SUPERNODE_RUNNING = 1;
+
+    private static final int NODE_STATUS_CLIENT_RUNNING = 2;
+
     private boolean isSuperNodeEnabled=false;
 
     private BluetoothServerAndroid bluetoothServerAndroid;
@@ -198,9 +206,9 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         if(isBluetoothEnabled() && isWiFiEnabled()){
-            if(enabled){
+            if(enabled && nodeStatus != NODE_STATUS_SUPERNODE_RUNNING){
                 startSuperNode();
-            }else{
+            }else if(!enabled && nodeStatus != NODE_STATUS_CLIENT_RUNNING){
                 stopSuperNode();
             }
         }else{
@@ -210,19 +218,19 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void startSuperNode() {
-
        if(networkService.getWifiDirectHandlerAPI()!=null){
            WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
            wifiDirectHandler.stopServiceDiscovery();
            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
            wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
-           isSuperNodeEnabled=true;
            bluetoothServerAndroid.start();
            if(nsdHelperAndroid.isDiscoveringNetworkService()){
                nsdHelperAndroid.stopNSDiscovery();
            }
            nsdHelperAndroid.registerNSDService();
            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
+           isSuperNodeEnabled=true;
+           nodeStatus = NODE_STATUS_SUPERNODE_RUNNING;
        }
     }
 
@@ -236,7 +244,9 @@ public class NetworkManagerAndroid extends NetworkManager{
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
             nsdHelperAndroid.startNSDiscovery();
+            bluetoothServerAndroid.stop();
             isSuperNodeEnabled=false;
+            nodeStatus = NODE_STATUS_CLIENT_RUNNING;
         }
     }
 
