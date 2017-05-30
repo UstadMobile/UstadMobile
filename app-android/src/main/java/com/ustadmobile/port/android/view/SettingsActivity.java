@@ -8,8 +8,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.view.UserSettingsView2;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements UserSettingsView2{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,4 +29,33 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void setActiveLanguage(String language) {
+
+    }
+
+    @Override
+    public Object getContext() {
+        return null;
+    }
+
+    @Override
+    public int getDirection() {
+        return 0;
+    }
+
+    @Override
+    public void setDirection(int dir) {
+
+    }
+
+    @Override
+    public void setAppMenuCommands(String[] labels, int[] ids) {
+
+    }
+
+    @Override
+    public void setUIStrings() {
+
+    }
 }

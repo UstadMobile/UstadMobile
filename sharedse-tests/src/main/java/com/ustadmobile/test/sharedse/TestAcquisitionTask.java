@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -204,12 +205,12 @@ public class TestAcquisitionTask{
 
         AcquisitionListener acquisitionListener=new AcquisitionListener() {
             @Override
-            public void acquisitionProgressUpdate(String entryId, AcquisitionTask.Status status) {
+            public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
 
             }
 
             @Override
-            public void acquisitionStatusChanged(String entryId, AcquisitionTask.Status status) {
+            public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
                 if(status.getStatus()==UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL){
                     try{
                         CatalogEntryInfo info=CatalogController.getEntryInfo(URLDecoder.decode(entryId, "UTF-8"),
@@ -229,15 +230,17 @@ public class TestAcquisitionTask{
                         }
 
                         if(wifiDirectEnabled && isFromCloud){
-                           synchronized (acquireDifferentNetworkLock){
-                               acquireDifferentNetworkLock.notifyAll();
-                           }
+                            synchronized (acquireDifferentNetworkLock){
+                                acquireDifferentNetworkLock.notifyAll();
+                            }
                         }
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
                 }
             }
+
+
         };
 
         manager.addAcquisitionTaskListener(acquisitionListener);
