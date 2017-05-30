@@ -66,7 +66,7 @@ import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.CatalogEntryActivity;
-import com.ustadmobile.port.android.view.SettingsActivity;
+import com.ustadmobile.port.android.view.UserSettingsActivity2;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
@@ -150,7 +150,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(AboutView.VIEW_NAME, AboutActivity.class);
         viewNameToAndroidImplMap.put(AttendanceView.VIEW_NAME, AttendanceActivity.class);
         viewNameToAndroidImplMap.put(CatalogEntryView.VIEW_NAME, CatalogEntryActivity.class);
-        viewNameToAndroidImplMap.put(UserSettingsView2.VIEW_NAME, SettingsActivity.class);
+        viewNameToAndroidImplMap.put(UserSettingsView2.VIEW_NAME, UserSettingsActivity2.class);
     }
 
 

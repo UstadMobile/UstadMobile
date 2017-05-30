@@ -76,7 +76,7 @@
         <activity android:name="com.ustadmobile.port.android.view.CatalogEntryActivity" />
         <activity android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity" />
         <activity
-            android:name="com.ustadmobile.port.android.view.SettingsActivity"
+            android:name="com.ustadmobile.port.android.view.UserSettingsActivity2"
             android:label="@string/title_activity_settings"
             android:theme="@style/Theme.UstadTheme"></activity>
     </application>

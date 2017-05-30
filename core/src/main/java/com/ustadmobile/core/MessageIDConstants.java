@@ -189,9 +189,6 @@ public class MessageIDConstants {
 
     public static final int students = 108;
 
-    public static final int people = 109;
-    public static final int connection_use_any = 131;
-
     public static final int superNode = 132;
     public static final int connection = 123;
     public static final int dataUsage = 109;
@@ -210,4 +207,7 @@ public class MessageIDConstants {
 
     public static final int forgot_password = 111;
 
+    public static final int settingsAccountLabel=125;
+    public static final int settingsDataUsageLabel=126;
+    public static final int settingsLanguageLabel=127;
 }
