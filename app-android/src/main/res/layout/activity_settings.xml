@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <include
+            android:id="@+id/setting_tool_bar"
             layout="@layout/layout_toolbar"/>
     </android.support.design.widget.AppBarLayout>
    <ScrollView

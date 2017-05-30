@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -23,6 +24,11 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         mController = new UserSettingsController2(this);
+        setUMToolbar(R.id.setting_tool_bar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((TextView)findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.settings));
+
         accountSection= (FrameLayout) findViewById(R.id.account_section_holder);
         dataUsageSection= (FrameLayout) findViewById(R.id.data_usage_section_holder);
         languageSection= (FrameLayout) findViewById(R.id.language_section_holder);
@@ -100,5 +106,15 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
             new WelcomeDialogFragment().show(getSupportFragmentManager(),"");
         }
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

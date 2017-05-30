@@ -41,7 +41,7 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         mobileLayoutWrapper = (LinearLayout) findViewById(R.id.mobileWrapper);
         wifiLayoutWrapper = (LinearLayout) findViewById(R.id.wifiWrapper);
 
-        ((TextView) findViewById(R.id.set_super_node_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.superNode));
+        ((TextView) findViewById(R.id.set_super_node_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.enableSuperNode));
 
         ((TextView) findViewById(R.id.connectionLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.connection));
         ((TextView) findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.dataUsage));

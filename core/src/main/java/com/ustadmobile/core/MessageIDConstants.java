@@ -189,7 +189,6 @@ public class MessageIDConstants {
 
     public static final int students = 108;
 
-    public static final int superNode = 132;
     public static final int connection = 123;
     public static final int dataUsage = 109;
     public static final int dataUsageLabel =124;
@@ -218,4 +217,5 @@ public class MessageIDConstants {
     public static final int languageSelectionNote=133;
     public static final int neverShowThisNextTime=134;
     public static final int acceptButton=135;
+    public static final int enableSuperNode=136;
 }
