@@ -183,13 +183,15 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setProgress(float progress) {
-        final int progressSize = Math.round(progress * 100);
         final ProgressBar progressBar = (ProgressBar)findViewById(R.id.activity_catalog_entry_progress_bar);
-        runOnUiThread(new Runnable() {
-            public void run() {
-                progressBar.setProgress(progressSize);
-            }
-        });
+        if(progress == -1) {
+            progressBar.setIndeterminate(true);
+        }else {
+            progressBar.setIndeterminate(false);
+            final int progressSize = Math.round(progress * 100);
+            progressBar.setProgress(progressSize);
+        }
+
     }
 
     @Override
@@ -227,7 +229,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     @Override
     public void setProgressVisible(boolean visible) {
         findViewById(R.id.activity_catalog_entry_download_status_layout).setVisibility(
-                visible? View.VISIBLE : View.INVISIBLE);
+                visible? View.VISIBLE : View.GONE);
     }
 
     @Override

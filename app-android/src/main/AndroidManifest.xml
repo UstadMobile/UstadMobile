@@ -21,7 +21,7 @@
         android:required="false" />
 
     <application
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme">
         <activity

@@ -1,6 +1,9 @@
 package com.ustadmobile.port.sharedse.networkmanager;
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -106,7 +109,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     };
 
 
-    public static class Status {
+    public static class Status implements AcquisitionTaskStatus{
 
         long downloadedSoFar;
 
@@ -149,6 +152,30 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         this.feed=feed;
         acquisitionStatus=new Status();
         networkManager.addNetworkManagerListener(this);
+
+        //mark entries as about to be acquired
+        String[] entryAcquireLink;
+        for(int i = 0; i < feed.entries.length; i++) {
+            CatalogEntryInfo info = CatalogController.getEntryInfo(feed.entries[i].id,
+                    CatalogController.SHARED_RESOURCE,networkManager.getContext());
+
+            if(info == null) {
+                info = new CatalogEntryInfo();
+                info.acquisitionStatus = CatalogController.STATUS_NOT_ACQUIRED;
+            }
+
+            if(info.acquisitionStatus == CatalogController.STATUS_NOT_ACQUIRED) {
+                entryAcquireLink = feed.entries[i].getFirstAcquisitionLink(null);
+                info.acquisitionStatus = CatalogController.STATUS_ACQUISITION_IN_PROGRESS;
+                info.mimeType = entryAcquireLink[UstadJSOPDSEntry.LINK_MIMETYPE];
+                info.srcURLs = new String[]{UMFileUtil.resolveLink(
+                    feed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF],
+                    entryAcquireLink[UstadJSOPDSEntry.LINK_HREF])};
+            }
+
+            CatalogController.setEntryInfo(feed.entries[i].id, info, CatalogController.SHARED_RESOURCE,
+                networkManager.getContext());
+        }
     }
 
     /**
@@ -254,6 +281,16 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 }
 
                 if(downloadCompleted){
+                    //TODO : Needs to set the entry status with CatalogController
+                    CatalogEntryInfo info = CatalogController.getEntryInfo(
+                        feed.entries[currentEntryIdIndex].id, CatalogController.SHARED_RESOURCE,
+                        networkManager.getContext());
+                    info.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
+                    info.fileURI = fileDestination.getAbsolutePath();
+                    info.mimeType = feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(
+                            null)[UstadJSOPDSEntry.LINK_MIMETYPE];
+                    CatalogController.setEntryInfo(feed.entries[currentEntryIdIndex].id, info,
+                            CatalogController.SHARED_RESOURCE, networkManager.getContext());
                     acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
                     networkManager.handleAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id);
                     currentEntryIdIndex++;
@@ -407,7 +444,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public void wifiConnectionChanged(String ssid) {
-        if(currentGroupSSID.equals(ssid)){
+        if(currentGroupSSID != null && currentGroupSSID.equals(ssid)){
             isWifiDirectActive=true;
             String fileUrl="http://"+ currentGroupIPAddress +":"+
                     entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"

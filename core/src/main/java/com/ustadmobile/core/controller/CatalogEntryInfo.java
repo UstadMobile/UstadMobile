@@ -61,10 +61,12 @@ public class CatalogEntryInfo {
         //Changed to support J2ME:
         StringBuffer sb = new StringBuffer();
         sb.append(acquisitionStatus).append(':');
-        for(int i = 0; i < srcURLs.length; i++) {
-            sb.append(URLTextUtil.urlEncodeUTF8(srcURLs[i]));
-            if(i < srcURLs.length-1) {
-                sb.append(',');
+        if(srcURLs != null) {
+            for(int i = 0; i < srcURLs.length; i++) {
+                sb.append(URLTextUtil.urlEncodeUTF8(srcURLs[i]));
+                if(i < srcURLs.length-1) {
+                    sb.append(',');
+                }
             }
         }
         sb.append(':');

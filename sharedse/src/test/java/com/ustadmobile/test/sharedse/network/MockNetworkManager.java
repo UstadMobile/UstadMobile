@@ -415,4 +415,8 @@ public class MockNetworkManager extends NetworkManager {
 
     }
 
+    @Override
+    public void reconnectPreviousNetwork() {
+        //TODO: implement this.test
+    }
 }

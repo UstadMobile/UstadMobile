@@ -9,7 +9,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
@@ -100,6 +100,12 @@ public class TestAcquisitionTask{
         final Object statusRequestLock=new Object();
         final Object acquireSameNetworkLock=new Object();
         final Object acquireDifferentNetworkLock=new Object();
+
+        //make sure we don't have any of the entries in question already
+        CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
+            PlatformTestUtil.getTargetContext());
+        CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
 
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override

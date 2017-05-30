@@ -12,4 +12,8 @@ public interface NetworkManagerCore {
 
     UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, Object mContext, boolean localNetworkEnabled, boolean wifiDirectEnabled);
 
+    void addAcquisitionTaskListener(AcquisitionListener listener);
+
+    void removeAcquisitionTaskListener(AcquisitionListener listener);
+
 }
