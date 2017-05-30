@@ -212,7 +212,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 acquisitionStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
                 acquisitionStatus.setTotalSize(httpDownload.getTotalSize());
             }
-            acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_PENDING);
+            acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_RUNNING);
             statusMap.put(getFeed().entries[currentEntryIdIndex].id,acquisitionStatus);
             networkManager.handleAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id);
 

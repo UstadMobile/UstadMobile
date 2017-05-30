@@ -122,7 +122,6 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
                 UstadMobileSystemImpl.getInstance().getNetworkManager().requestAcquisition(
                     acquisitionFeed, getContext(), true, true);
-                //AcquisitionManager.getInstance().acquireCatalogEntries(acquisitionFeed, context);
                 onDownloadStarted();
                 break;
 

@@ -86,6 +86,10 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
             }
         });
 
+        if(!classListVisible) {
+            tabs.setVisibility(View.GONE);
+        }
+
         mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
         mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
         mDrawerNavigationView.setNavigationItemSelectedListener(this);

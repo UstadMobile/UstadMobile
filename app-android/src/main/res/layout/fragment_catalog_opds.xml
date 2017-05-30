@@ -8,7 +8,7 @@
 
 
     <FrameLayout
-        android:layout_above="@+id/fragment_catalog_browsebutton"
+        android:layout_above="@+id/fragment_catalog_footer_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -37,11 +37,10 @@
     </FrameLayout>
 
     <Button
-        android:background="@color/accent"
+        android:background="@color/primary"
         android:textColor="@color/primary_text"
-        android:drawableLeft="@drawable/ic_local_library_white_24dp"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/fragment_catalog_browsebutton"
+        android:id="@+id/fragment_catalog_footer_button"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

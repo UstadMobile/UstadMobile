@@ -33,6 +33,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.AcquisitionStatusEvent;
+import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -42,6 +43,8 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
+import com.ustadmobile.core.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -51,11 +54,9 @@ import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
-import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -99,7 +100,7 @@ import org.xmlpull.v1.XmlSerializer;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable {
+public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable, AcquisitionListener {
     
     public static final int STATUS_ACQUIRED = 0;
     
@@ -322,7 +323,14 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      */
     public static final String OPDS_ENTRY_BACKGROUND_LINKREL = "http://www.ustadmobile.com/catalog/image/background";
 
-    private String browseButtonURL;
+    /**
+     * Constant that can be used in the buildconfig to set the bottom button to be a download all
+     * button instead of a link to any other catalog
+     */
+    public static final String FOOTER_BUTTON_DOWNLOADALL = "downloadall";
+
+
+    private String footerButtonUrl;
 
     public CatalogController(Object context) {
         super(context);
@@ -332,6 +340,11 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public CatalogController(CatalogModel model, Object context){
         this(context);
         this.model=model;
+
+        //if a model is set at time of construction: this is not being used just to make another catalog
+        //it is a catalog - therefor add acquisition status listeners
+        //TODO: this should be refactored - it's an untidy approach
+        UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
     }
     
     /**
@@ -392,18 +405,18 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      *
      * @return The OPDS URL for the browse button; null if there is none (default)
      */
-    public String getBrowseButtonURL() {
-        return browseButtonURL;
+    public String getFooterButtonUrl() {
+        return footerButtonUrl;
     }
 
     /**
      * Catalog can have a browse button at the bottom: e.g. when the user is on the donwloaded
      * items page the browse button can take them to their feed list or a preset catalog URL directly
      *
-     * @param browseButtonURL OPDS URL for the browse button: null for none (default)
+     * @param footerButtonUrl OPDS URL for the browse button: null for none (default)
      */
-    public void setBrowseButtonURL(String browseButtonURL) {
-        this.browseButtonURL = browseButtonURL;
+    public void setFooterButtonUrl(String footerButtonUrl) {
+        this.footerButtonUrl = footerButtonUrl;
     }
 
     //shows the view
@@ -421,7 +434,9 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         CatalogView cView = (CatalogView)view;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         cView.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
-        cView.setBrowseButtonLabel(impl.getString(MessageIDConstants.browse_feeds));
+        cView.setFooterButtonLabel(FOOTER_BUTTON_DOWNLOADALL.equals(footerButtonUrl) ?
+                impl.getString(MessageIDConstants.download_all) : impl.getString(MessageIDConstants.browse_feeds));
+
         if(model != null && model.opdsFeed != null && model.opdsFeed.isAcquisitionFeed()) {
             cView.setDeleteOptionAvailable(true);
         }
@@ -493,7 +508,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public static void makeControllerForView(final CatalogView view, Hashtable args, final ControllerReadyListener listener) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         CatalogController controller = new CatalogController(view.getContext());
-        view.setBrowseButtonVisible(args.containsKey(KEY_BROWSE_BUTTON_URL));
+        view.setFooterButtonVisible(args.containsKey(KEY_BROWSE_BUTTON_URL));
 
         String url = (String)args.get(KEY_URL);
         if(url.equals(OPDS_PROTO_USER_FEEDLIST)) {
@@ -509,7 +524,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         CatalogController newController = makeControllerByArgsTable(args, ctx);
 
         if(args.containsKey(KEY_BROWSE_BUTTON_URL)) {
-            newController.setBrowseButtonURL((String)args.get(KEY_BROWSE_BUTTON_URL));
+            newController.setFooterButtonUrl((String)args.get(KEY_BROWSE_BUTTON_URL));
         }
         
         newController.initEntryStatusCheck();
@@ -849,8 +864,12 @@ public class CatalogController extends BaseCatalogController implements AppViewC
                 getContext());
     }
 
-    public void handleClickBrowseButton() {
-        handleCatalogSelected(browseButtonURL);
+    public void handleClickFooterButton() {
+        if(FOOTER_BUTTON_DOWNLOADALL.equals(footerButtonUrl)) {
+            handleClickDownloadAll();
+        }else {
+            handleCatalogSelected(footerButtonUrl);
+        }
     }
 
     /**
@@ -2084,5 +2103,35 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     @Override
     protected void onEntriesRemoved() {
 
+    }
+
+    public void onDestroy() {
+        if(this.model != null)
+            UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
+    }
+
+    @Override
+    public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
+        UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
+        if(entry != null) {
+            view.updateDownloadEntryProgress(entryId, (int)status.getDownloadedSoFar(), (int)status.getTotalSize());
+        }
+
+    }
+
+    @Override
+    public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
+        UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
+        if(entry == null)
+            return;
+
+        switch(status.getStatus()){
+            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                setViewEntryProgressVisible(new UstadJSOPDSEntry[]{entry}, true);
+                break;
+            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
+                setViewEntryProgressVisible(new UstadJSOPDSEntry[]{entry}, false);
+                break;
+        }
     }
 }
