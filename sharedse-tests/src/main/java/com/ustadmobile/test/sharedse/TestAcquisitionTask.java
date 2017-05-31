@@ -178,15 +178,11 @@ public class TestAcquisitionTask{
 
         List<String> entryLIst=new ArrayList<>();
         Collections.addAll(entryLIst, ENTRY_IDS);
-
-        //disable supernode mode on the remote test device
-        String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
-        result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
         manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
         synchronized (statusRequestLock){
             statusRequestLock.wait(DEFAULT_WAIT_TIME*2);
         }
+
 
         Assert.assertTrue("Available entry reported as locally available", fileAvailable[0]);
         Assert.assertFalse("Unavailable entry reported as not available",  fileAvailable[1]);
@@ -267,5 +263,8 @@ public class TestAcquisitionTask{
         Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));
 
 
+        String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
+        result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
+        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
     }
 }
