@@ -37,6 +37,8 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public static final int DOWNLOAD_FROM_PEER_ON_SAME_NETWORK =2;
     public static final int DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK =3;
 
+    public static final int WAITING_TIME_BEFORE_RETRY =10 * 1000;
+
     public BluetoothServer bluetoothServer;
     public  static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT =2 * 60 * 1000;
 
@@ -45,6 +47,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public static final String SD_TXT_KEY_BT_MAC = "b";
 
     public static final String SD_TXT_KEY_PORT = "port";
+
+    public static final int PREVIOUS_NETWORK_SSID=0;
+
+    public static final int PREVIOUS_NETWORK_ID=1;
 
     /**
      * Flag to indicate wifi direct group is inactive and it is not under creation
@@ -627,6 +633,9 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * acquisitionTask completion.
      */
     public abstract void reconnectPreviousNetwork();
+
+
+    public abstract String [] getPreviousNetworkData();
 
     /**
      * Clean up the network manager for shutdown

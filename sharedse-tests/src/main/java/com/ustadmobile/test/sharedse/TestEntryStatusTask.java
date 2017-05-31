@@ -29,8 +29,6 @@ import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SL
 
 public class TestEntryStatusTask{
 
-
-
     public static final String ENTRY_ID="202b10fe-b028-4b84-9b84-852aa766607d";
 
     public static final String ENTRY_ID_NOT_PRESENT = "202b10fe-b028-4b84-9b84-852aa766607dx";
