@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -165,7 +166,7 @@ public class TestAcquisitionTask{
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
         if(manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)==null){
             synchronized (nodeDiscoveryLock){
-                nodeDiscoveryLock.wait(TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+                nodeDiscoveryLock.wait(NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT);
             }
         }
 
