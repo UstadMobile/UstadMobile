@@ -103,7 +103,6 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             }
             UMIOUtils.closeInputStream(inputStream);
             UMIOUtils.closeOutputStream(outputStream);
-            networkManager.disconnectBluetooth();
         }
 
         connectNextNode(currentNode+1);

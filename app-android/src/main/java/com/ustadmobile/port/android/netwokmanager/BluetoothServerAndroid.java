@@ -91,6 +91,7 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                mServerSocket = null;
             }
         }
     }

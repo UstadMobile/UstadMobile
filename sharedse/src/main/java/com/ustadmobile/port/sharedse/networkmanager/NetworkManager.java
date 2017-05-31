@@ -299,9 +299,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
     public abstract void connectBluetooth(String deviceAddress,BluetoothConnectionHandler handler);
-
-    public abstract void disconnectBluetooth();
-
+    
     public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds,List<Boolean> status) {
         List<EntryCheckResponse> responseList;
         EntryCheckResponse checkResponse;

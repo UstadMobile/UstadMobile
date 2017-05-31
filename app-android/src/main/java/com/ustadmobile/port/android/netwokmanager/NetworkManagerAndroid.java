@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.j256.ormlite.dao.ForeignCollection;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.nanolrs.core.model.XapiUser;
 import com.ustadmobile.nanolrs.ormlite.generated.model.XapiUserEntity;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
@@ -35,6 +36,8 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -109,8 +112,6 @@ public class NetworkManagerAndroid extends NetworkManager{
     private NSDHelperAndroid nsdHelperAndroid;
 
     private int currentWifiDirectGroupStatus=-1;
-
-    private BluetoothSocket bluetoothSocket=null;
 
     private int previousConnectedNetId=-1;
 
@@ -275,51 +276,46 @@ public class NetworkManagerAndroid extends NetworkManager{
 
 
     @Override
-    public void connectBluetooth(String deviceAddress, final BluetoothConnectionHandler handler) {
-        BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
-        BluetoothDevice bluetoothDevice=adapter.getRemoteDevice(deviceAddress);
-        try{
-            bluetoothSocket=bluetoothDevice.
-                    createInsecureRfcommSocketToServiceRecord(BluetoothServer.SERVICE_UUID);
+    public void connectBluetooth(final String deviceAddress, final BluetoothConnectionHandler handler) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
+                BluetoothDevice bluetoothDevice= null;
 
-            bluetoothSocket.connect();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try{
-                        if(bluetoothSocket.isConnected()){
-                            handler.onConnected(bluetoothSocket.getInputStream(), bluetoothSocket.getOutputStream());
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                InputStream in = null;
+                OutputStream out = null;
+                BluetoothSocket socket = null;
+                boolean connected = false;
+
+                try {
+                    bluetoothDevice = adapter.getRemoteDevice(deviceAddress);
+                    socket=bluetoothDevice.
+                            createInsecureRfcommSocketToServiceRecord(BluetoothServer.SERVICE_UUID);
+                    socket.connect();
+                    if(socket.isConnected()) {
+                        in = socket.getInputStream();
+                        out = socket.getOutputStream();
+                        connected = true;
+                        handler.onConnected(socket.getInputStream(), socket.getOutputStream());
+
+                    }
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }finally {
+                    UMIOUtils.closeOutputStream(out);
+                    UMIOUtils.closeInputStream(in);
+                    if(socket != null) {
+                        try { socket.close(); }
+                        catch(IOException e) {e.printStackTrace();}
                     }
                 }
-            }).start();
-        } catch (IOException e) {
-            if(bluetoothSocket!=null){
-                try {
-                    bluetoothSocket.close();
-                    bluetoothSocket=null;
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
+
+                //TODO: call handler on fail method here
+
             }
-        }
-
-
+        }).start();
     }
-
-    @Override
-    public void disconnectBluetooth() {
-        try {
-           if(bluetoothSocket!=null){
-               bluetoothSocket.close();
-           }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     @Override
     public int addNotification(int notificationType, String title, String message) {

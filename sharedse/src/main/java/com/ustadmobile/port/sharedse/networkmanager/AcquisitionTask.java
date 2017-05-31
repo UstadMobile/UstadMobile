@@ -364,7 +364,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             if(response!=null){
                 UMIOUtils.closeInputStream(inputStream);
                 UMIOUtils.closeOutputStream(outputStream);
-                networkManager.disconnectBluetooth();
             }
         }
     }

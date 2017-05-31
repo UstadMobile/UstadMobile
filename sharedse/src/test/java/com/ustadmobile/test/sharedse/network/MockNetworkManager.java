@@ -337,11 +337,6 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     @Override
-    public void disconnectBluetooth() {
-
-    }
-
-    @Override
     public void connectWifi(String SSID, String passPhrase) {
         synchronized (wifiLockObj) {
             if(connectedWifiNetwork != null) {
