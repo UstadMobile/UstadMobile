@@ -53,4 +53,16 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
            bluetoothNodeLock.notify();
        }
     }
+
+    @Override
+    public void onConnectionFailed(String bluetoothAddress) {
+        isConnectionCalled = false;
+        synchronized (bluetoothLock){
+            bluetoothLock.notify();
+        }
+
+        synchronized (bluetoothNodeLock){
+            bluetoothNodeLock.notify();
+        }
+    }
 }

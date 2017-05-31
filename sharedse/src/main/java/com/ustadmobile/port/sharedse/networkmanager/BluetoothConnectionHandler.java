@@ -8,4 +8,5 @@ import java.io.OutputStream;
 
 public interface BluetoothConnectionHandler {
     void onConnected(InputStream inputStream, OutputStream outputStream);
+    void onConnectionFailed(String bluetoothAddress);
 }

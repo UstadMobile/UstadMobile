@@ -63,7 +63,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     private static final int MAXIMUM_RETRY_COUNT = 5;
 
-    private static final int WAITING_TIME_BEFORE_RETRY =10 * 1000;
+    private static final int MAXIMUM_CONNECTION_RETY_COUNT=1;
+
 
     private int retryCount=0;
 
@@ -78,6 +79,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private Status acquisitionStatus=null;
 
     private boolean isWifiDirectActive=false;
+
+    private int bluetoothConnectionRetryCount=0;
 
 
     /**
@@ -296,15 +299,18 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     currentEntryIdIndex++;
                     retryCount = 0;
                     entryAcquisitionThread =null;
-
-                    if(isWifiDirectActive){
+                    EntryCheckResponse response=networkManager.getEntryResponseWithLocalFile(getFeed().entries[currentEntryIdIndex+1].id);
+                    if(isWifiDirectActive && response!=null &&
+                            Calendar.getInstance().getTimeInMillis() - response.getNetworkNode().getNetworkServiceLastUpdated() > NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                         networkManager.reconnectPreviousNetwork();
                         isWifiDirectActive=false;
+                    }else{
+                        acquireNextFile();
                     }
 
-                    acquireNextFile();
+
                 }else if(!downloadCompleted && retryCount < MAXIMUM_RETRY_COUNT){
-                   try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
+                   try { Thread.sleep(NetworkManager.WAITING_TIME_BEFORE_RETRY); }
                    catch(InterruptedException e) {}
                    retryCount++;
                    acquireNextFile();
@@ -366,6 +372,23 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 UMIOUtils.closeOutputStream(outputStream);
                 networkManager.disconnectBluetooth();
             }
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(String bluetoothAddress) {
+        if(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress().equals(bluetoothAddress) && bluetoothConnectionRetryCount < MAXIMUM_CONNECTION_RETY_COUNT){
+            //TODO: Network manager bluetooth needs to be 100% async
+            bluetoothConnectionRetryCount++;
+            try{
+                Thread.sleep(NetworkManager.WAITING_TIME_BEFORE_RETRY);
+            } catch (InterruptedException e) {}
+            networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
+                    ,this);
+        }else{
+            bluetoothConnectionRetryCount=0;
+            currentEntryIdIndex++;
+            acquireNextFile();
         }
     }
 
@@ -450,6 +473,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
                     +getFeed().entries[currentEntryIdIndex].id;
             downloadCurrentFile(fileUrl);
+        }else if(networkManager.getPreviousNetworkData()[NetworkManager.PREVIOUS_NETWORK_SSID].equals(ssid)){
+            acquireNextFile();
         }
     }
 
