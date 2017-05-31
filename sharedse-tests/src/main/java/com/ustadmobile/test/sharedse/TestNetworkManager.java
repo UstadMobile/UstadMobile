@@ -128,7 +128,8 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER)){
+                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
+                    (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
                     }
@@ -137,7 +138,8 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeUpdated(NetworkNode node) {
-                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER)){
+                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
+                    (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
                     }
