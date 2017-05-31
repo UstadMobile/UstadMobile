@@ -50,7 +50,7 @@
             android:layout_toEndOf="@+id/opds_item_thumbnail"/>
 
         <TextView
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -73,6 +73,34 @@
             android:max="100"
             android:progress="0"
             android:visibility="invisible" />
+
+        <LinearLayout
+            android:id="@+id/opds_item_status_layout"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/opds_item_detail_text"
+            android:visibility="gone">
+
+            <Space
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="0dp"/>
+
+            <ImageView
+                android:id="@+id/opds_item_status_icon"
+                android:src="@drawable/ic_done_black_16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            <TextView
+                android:text="Downloaded"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+
+
+        </LinearLayout>
 
     </RelativeLayout>
 </com.ustadmobile.port.android.view.OPDSEntryCard>

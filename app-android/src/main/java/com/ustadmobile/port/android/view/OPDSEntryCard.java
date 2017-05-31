@@ -135,12 +135,26 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     }
 
     public void setOPDSEntryOverlay(int overlay) {
+        switch(overlay) {
+            case CatalogController.STATUS_ACQUIRED:
+                findViewById(R.id.opds_item_progressbar).setVisibility(View.GONE);
+                findViewById(R.id.opds_item_status_layout).setVisibility(View.VISIBLE);
+                break;
+            case CatalogController.STATUS_ACQUISITION_IN_PROGRESS:
+            case CatalogController.STATUS_NOT_ACQUIRED:
+                findViewById(R.id.opds_item_status_layout).setVisibility(View.GONE);
+                break;
+
+        }
+        /*
         if(overlay == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
             opdsStatusOverlay = getResources().getDrawable(R.drawable.opds_item_overlay_acquired);
         }else {
             opdsStatusOverlay = null;
         }
+
         invalidate();
+        */
     }
 
     /**

@@ -666,6 +666,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
             //check the acquisition status
             int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);
+            holder.mEntryCard.setOPDSEntryOverlay(entryStatus);
 
             /*//if the file is not available - show whether it can be acquired locally
             boolean isAcquisitionEntry = !feed.entries[position].getAcquisitionLinks().isEmpty();

@@ -2127,10 +2127,12 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
         switch(status.getStatus()){
             case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                view.setEntryStatus(entryId, CatalogController.STATUS_ACQUISITION_IN_PROGRESS);
                 setViewEntryProgressVisible(new UstadJSOPDSEntry[]{entry}, true);
                 break;
             case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
                 setViewEntryProgressVisible(new UstadJSOPDSEntry[]{entry}, false);
+                view.setEntryStatus(entryId, CatalogController.STATUS_ACQUIRED);
                 break;
         }
     }

@@ -24,6 +24,8 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
 
     private BluetoothServerSocket mServerSocket;
 
+    private Thread serverAcceptThread;
+
     private boolean running;
 
     BluetoothServerAndroid(NetworkManager networkManager) {
@@ -33,8 +35,11 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
 
     @Override
     public void start() {
-        running = true;
-        new Thread(this).start();
+        if(serverAcceptThread == null) {
+            running = true;
+            serverAcceptThread = new Thread(this);
+            serverAcceptThread.start();
+        }
     }
 
     public void run() {
@@ -59,6 +64,12 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                         }finally {
                             UMIOUtils.closeInputStream(in);
                             UMIOUtils.closeOutputStream(out);
+                            if(clientSocket != null){
+                                try { clientSocket.close(); }
+                                catch(IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                     }
                 }).start();
@@ -71,12 +82,17 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
 
     @Override
     public void stop() {
-       try{
-           mServerSocket.close();
-       } catch (IOException e) {
-           e.printStackTrace();
-       }
-
+        if(serverAcceptThread != null) {
+            running = false;
+            serverAcceptThread = null;
+            if(mServerSocket != null) {
+                try{
+                    mServerSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 }
