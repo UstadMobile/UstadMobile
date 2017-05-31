@@ -134,8 +134,7 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeUpdated(NetworkNode node) {
-                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
-                (Calendar.getInstance().getTimeInMillis() - node.getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT)){
+                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER)){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
                     }
