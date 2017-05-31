@@ -23,8 +23,11 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.j256.ormlite.dao.ForeignCollection;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.nanolrs.core.model.XapiUser;
+import com.ustadmobile.nanolrs.ormlite.generated.model.XapiUserEntity;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
@@ -39,6 +42,7 @@ import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -108,10 +112,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private BluetoothSocket bluetoothSocket=null;
 
-    private String [] previousConnectedNetworkData =new String[2];
-
-    private boolean isBluetoothConnected=false;
-
+    private int previousConnectedNetId=-1;
 
     /**
      * Assets are served over http that are used to interact with the content (e.g. to inject a
@@ -139,8 +140,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isConnected()) {
             if (info.getTypeName().equalsIgnoreCase("WIFI")) {
-                previousConnectedNetworkData[PREVIOUS_NETWORK_ID]=String.valueOf(wifiManager.getConnectionInfo().getNetworkId());
-                previousConnectedNetworkData[PREVIOUS_NETWORK_SSID]=wifiManager.getConnectionInfo().getSSID();
+                previousConnectedNetId=wifiManager.getConnectionInfo().getNetworkId();
             }
         }
 
@@ -278,7 +278,6 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void connectBluetooth(String deviceAddress, final BluetoothConnectionHandler handler) {
         BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice bluetoothDevice=adapter.getRemoteDevice(deviceAddress);
-        isBluetoothConnected=false;
         try{
             bluetoothSocket=bluetoothDevice.
                     createInsecureRfcommSocketToServiceRecord(BluetoothServer.SERVICE_UUID);
@@ -289,7 +288,6 @@ public class NetworkManagerAndroid extends NetworkManager{
                 public void run() {
                     try{
                         if(bluetoothSocket.isConnected()){
-                            isBluetoothConnected=true;
                             handler.onConnected(bluetoothSocket.getInputStream(), bluetoothSocket.getOutputStream());
                         }
                     } catch (IOException e) {
@@ -298,14 +296,10 @@ public class NetworkManagerAndroid extends NetworkManager{
                 }
             }).start();
         } catch (IOException e) {
-            isBluetoothConnected=false;
-            e.printStackTrace();
-        }finally {
-            if(bluetoothSocket!=null && !isBluetoothConnected){
+            if(bluetoothSocket!=null){
                 try {
                     bluetoothSocket.close();
                     bluetoothSocket=null;
-                    handler.onConnectionFailed(bluetoothDevice.getAddress());
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
@@ -554,16 +548,11 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void reconnectPreviousNetwork() {
-        if(previousConnectedNetworkData !=null){
-            wifiManager.enableNetwork(Integer.parseInt(previousConnectedNetworkData[PREVIOUS_NETWORK_ID]), true);
+        if(previousConnectedNetId!=-1){
+            wifiManager.enableNetwork(previousConnectedNetId, true);
             wifiManager.reconnect();
         }
 
-    }
-
-    @Override
-    public String[] getPreviousNetworkData() {
-        return previousConnectedNetworkData;
     }
 
     public String getHttpAndroidAssetsUrl() {
