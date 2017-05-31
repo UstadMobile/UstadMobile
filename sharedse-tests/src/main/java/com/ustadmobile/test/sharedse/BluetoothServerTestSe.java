@@ -4,6 +4,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
 import org.junit.Assume;
@@ -12,6 +13,7 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import static com.ustadmobile.test.sharedse.TestNetworkManager.NODE_DISCOVERY_TIMEOUT;
 
 /**
  * Created by mike on 5/10/17.
@@ -30,13 +32,13 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
 
         manager.connectBluetooth(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE, this);
         synchronized (bluetoothLock){
-            bluetoothLock.wait(NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT);
+            bluetoothLock.wait(NODE_DISCOVERY_TIMEOUT);
         }
         Assert.assertTrue("Device connected", isConnectionCalled);
         isConnectionCalled = false;
 
         synchronized (bluetoothNodeLock){
-            bluetoothNodeLock.wait(NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT);
+            bluetoothNodeLock.wait(NODE_DISCOVERY_TIMEOUT);
         }
         manager.connectBluetooth(manager.getKnownNodes().get(0).getDeviceBluetoothMacAddress(), this);
         Assert.assertTrue("Device not around not connected", !isConnectionCalled);

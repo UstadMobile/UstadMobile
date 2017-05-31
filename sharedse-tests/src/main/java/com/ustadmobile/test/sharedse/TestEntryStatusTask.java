@@ -17,8 +17,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 
 import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER_PORT;
@@ -105,7 +103,7 @@ public class TestEntryStatusTask{
 
         if(manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)==null){
             synchronized (nodeDiscoveryLock){
-                nodeDiscoveryLock.wait(NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT);
+                nodeDiscoveryLock.wait(TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
             }
         }
 
@@ -116,7 +114,9 @@ public class TestEntryStatusTask{
         nodeList.add(networkNode);
 
         List<String> entryLIst=new ArrayList<>();
-        Collections.addAll(entryLIst, ENTRY_IDS);
+        for(int i = 0; i < ENTRY_IDS.length; i++) {
+            entryLIst.add(ENTRY_IDS[i]);
+        }
 
         manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
         synchronized (statusRequestLock){
