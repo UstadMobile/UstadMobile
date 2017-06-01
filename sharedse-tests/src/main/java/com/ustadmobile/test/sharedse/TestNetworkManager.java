@@ -158,7 +158,8 @@ public class TestNetworkManager {
         };
         manager.addNetworkManagerListener(responseListener);
 
-        if(manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER) == null) {
+        NetworkNode node =manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
+        if(node != null && (Calendar.getInstance().getTimeInMillis() - node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT) {
             synchronized (nodeNSDiscoveryLock) {
                 try { nodeNSDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
                 catch(InterruptedException e ) {
@@ -166,7 +167,8 @@ public class TestNetworkManager {
                 }
             }
         }
-        NetworkNode node=manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
+
+        node=manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
         Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;
