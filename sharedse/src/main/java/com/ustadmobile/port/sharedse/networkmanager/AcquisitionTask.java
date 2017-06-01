@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +81,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     private boolean isWifiDirectActive=false;
 
+    private Map<String, List<AcquisitionTaskHistoryEntry>> acquisitionHistoryMap = new HashMap<>();
 
     /**
      * Monitor file acquisition task progress and report it to the rest of the app.
@@ -232,7 +235,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
                 String fileURI="http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
                         +entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
-                downloadCurrentFile(fileURI);
+                downloadCurrentFile(fileURI, DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
             }else if(wifiDirectDownloadEnabled && entryCheckResponse != null){
                 networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
                         DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
@@ -241,7 +244,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             }else{
                 networkManager.handleFileAcquisitionInformationAvailable(entryId,
                         currentDownloadId,DOWNLOAD_FROM_CLOUD);
-                downloadCurrentFile(getFileURIs()[FILE_DOWNLOAD_URL_INDEX]);
+                downloadCurrentFile(getFileURIs()[FILE_DOWNLOAD_URL_INDEX], DOWNLOAD_FROM_CLOUD);
             }
 
         }else{
@@ -260,7 +263,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
 
-    private void downloadCurrentFile(final String fileUrl) {
+    private void downloadCurrentFile(final String fileUrl, final int mode) {
         entryAcquisitionThread =new Thread(new Runnable() {
             @Override
             public void run() {
@@ -268,6 +271,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         UMFileUtil.getFilename(fileUrl));
 
                 boolean downloadCompleted = false;
+                AcquisitionTaskHistoryEntry historyEntry = new AcquisitionTaskHistoryEntry(fileUrl,
+                        mode, Calendar.getInstance().getTimeInMillis());
                 try {
                     networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
                             getFeed().entries[currentEntryIdIndex].title,message);
@@ -280,6 +285,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     networkManager.fireAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id,
                         AcquisitionTask.this);
                 }
+
+                historyEntry.setTimeEnded(Calendar.getInstance().getTimeInMillis());
+                List<AcquisitionTaskHistoryEntry> entryHistoryList = acquisitionHistoryMap.get(feed.entries[currentEntryIdIndex].id);
+                if(entryHistoryList == null) {
+                    entryHistoryList = new ArrayList<>();
+                    acquisitionHistoryMap.put(feed.entries[currentEntryIdIndex].id, entryHistoryList);
+                }
+                entryHistoryList.add(historyEntry);
 
                 if(downloadCompleted){
                     //TODO : Needs to set the entry status with CatalogController
@@ -303,14 +316,17 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         isWifiDirectActive=false;
                     }
 
+                    historyEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
                     acquireFile(currentEntryIdIndex + 1);
                 }else if(!downloadCompleted && retryCount < MAXIMUM_RETRY_COUNT){
                    try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
                    catch(InterruptedException e) {}
                    retryCount++;
+                   historyEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_PENDING);
                    acquireFile(currentEntryIdIndex);
                }else{
                     //retry count exceeded
+                    historyEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
                     acquireFile(currentEntryIdIndex + 1);
                }
 
@@ -448,7 +464,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             String fileUrl="http://"+ currentGroupIPAddress +":"+
                     entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
                     +getFeed().entries[currentEntryIdIndex].id;
-            downloadCurrentFile(fileUrl);
+            downloadCurrentFile(fileUrl, DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
         }
     }
 
@@ -480,5 +496,17 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     public void setWifiDirectDownloadEnabled(boolean wifiDirectDownloadEnabled) {
         this.wifiDirectDownloadEnabled = wifiDirectDownloadEnabled;
+    }
+
+    /**
+     * Gets the AcquisitionTaskHistory of a particular entry. The history is a list of
+     * AcquisitionTaskHistoryEntry from the first activity to the last activity (e.g. most recent).
+     *
+     * @param entryId OPDS Entry ID to check on
+     * @return List of AcquisitionTaskHisotryEntry if this entry is part of the task and activity
+     * has taken place, null otherwise.
+     */
+    public List<AcquisitionTaskHistoryEntry> getAcquisitionHistoryByEntryId(String entryId) {
+        return acquisitionHistoryMap.get(entryId);
     }
 }

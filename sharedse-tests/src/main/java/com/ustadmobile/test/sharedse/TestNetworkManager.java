@@ -107,6 +107,16 @@ public class TestNetworkManager {
     }
 
 
+    /**
+     * Test using the standard network service discovery.
+     *
+     * Devices *MUST* be on the same network to be able to receive udp broadcasts from each other.
+     *
+     * Some older versions of Android have buggy implementations of Network Service Discovery; see
+     *  https://issuetracker.google.com/issues/36952181
+     *
+     * @throws IOException
+     */
     @Test
     public void testNetworkServiceDiscovery() throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();

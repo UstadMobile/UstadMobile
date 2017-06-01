@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
+import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTaskHistoryEntry;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkNode;
@@ -57,15 +58,9 @@ public class TestAcquisitionTask{
 
     private static RouterNanoHTTPD resourcesHttpd;
 
-    private boolean fileDownloadedFromPeer =false;
-
-    private boolean fileDownloadedFromCloud =false;
-
     private boolean localNetworkEnabled=false;
 
     private boolean wifiDirectEnabled=false;
-
-    private boolean isFromCloud=false;
 
     /**
      * The resources server can be used as the "cloud"
@@ -207,50 +202,56 @@ public class TestAcquisitionTask{
 
             @Override
             public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-                if(status.getStatus()==UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL){
-                    try{
-                        CatalogEntryInfo info=CatalogController.getEntryInfo(URLDecoder.decode(entryId, "UTF-8"),
-                                CatalogController.SHARED_RESOURCE, manager.getContext());
-                        if(ENTRY_ID_PRESENT.equals(entryId)){
-                            fileDownloadedFromPeer =(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED);
-                        }else if(ENTRY_ID_NOT_PRESENT.equals(entryId)){
-                            isFromCloud=true;
-                            fileDownloadedFromCloud =(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED);
+                if (status.getStatus() == UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL) {
+                    //The entries are downloaded in the order in which they are requested -
+                    // which is ENTRY_ID, ENTRY_ID_NOT_PRESENT
+                    //Therefor when we receive the complete event for the latter we can notify the
+                    //thread to continue.
+                    if (localNetworkEnabled && entryId.equals(ENTRY_ID_NOT_PRESENT)) {
+                        synchronized (acquireSameNetworkLock) {
+                            acquireSameNetworkLock.notifyAll();
                         }
-                        new File(info.fileURI).delete();
-
-                        if(localNetworkEnabled && isFromCloud){
-                            synchronized (acquireSameNetworkLock){
-                                acquireSameNetworkLock.notifyAll();
-                            }
-                        }
-
-                        if(wifiDirectEnabled && isFromCloud){
-                            synchronized (acquireDifferentNetworkLock){
-                                acquireDifferentNetworkLock.notifyAll();
-                            }
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
                     }
+
                 }
             }
-
-
         };
 
         manager.addAcquisitionTaskListener(acquisitionListener);
 
         localNetworkEnabled=true;
         wifiDirectEnabled=false;
-        isFromCloud=false;
         manager.requestAcquisition(feed,manager.getContext(),localNetworkEnabled,wifiDirectEnabled);
+        AcquisitionTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
+        Assert.assertNotNull("Task created for acquisition", task);
         synchronized (acquireSameNetworkLock){
             acquireSameNetworkLock.wait(DEFAULT_WAIT_TIME* 6);
         }
-        Assert.assertThat("File was downloaded successfully from node on same network", fileDownloadedFromPeer,is(true));
-        Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));
 
+        List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
+        for(AcquisitionTaskHistoryEntry entryHistory : entryHistoryList) {
+            Assert.assertTrue("Task reported as being downloaded from same network",
+                    entryHistory.getMode() == NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
+        }
+
+        CatalogEntryInfo localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
+                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        Assert.assertEquals("File was downloaded successfully from node on same network",
+            CatalogController.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
+        Assert.assertTrue("File downloaded via local network is present",
+                new File(localEntryInfo.fileURI).exists());
+
+        CatalogEntryInfo cloudEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_NOT_PRESENT,
+                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        Assert.assertEquals("File was downloaded successfully from cloud",
+                CatalogController.STATUS_ACQUIRED, cloudEntryInfo.acquisitionStatus);
+        Assert.assertTrue("File downloaded via cloud is present",
+                new File(cloudEntryInfo.fileURI).exists());
+
+        CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
+        CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
         /*
         localNetworkEnabled=false;
         wifiDirectEnabled=true;

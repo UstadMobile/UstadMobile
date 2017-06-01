@@ -158,6 +158,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             @Override
             public void onReceive(Context context, Intent intent) {
                 NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                //TODO: handle when this has failed: this will result in info.isConnected being false
                 if(info.isConnected()){
                     handleWifiDirectConnectionChanged(wifiManager.getConnectionInfo().getSSID());
                 }
