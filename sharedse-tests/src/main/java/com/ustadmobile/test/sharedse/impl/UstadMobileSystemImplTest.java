@@ -195,7 +195,13 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public void setAppPref(String key, String value, Object context) {
-        ((TestContext)context).getAppProps().setProperty(key, value);
+        TestContext tContext = (TestContext)context;
+        if(value != null) {
+            tContext.getAppProps().setProperty(key, value);
+        }else {
+            tContext.getAppProps().remove(key);
+        }
+
     }
 
     @Override
