@@ -295,7 +295,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     acquisitionStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
                     networkManager.fireAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id,
                             AcquisitionTask.this);
-                    currentEntryIdIndex++;
                     retryCount = 0;
                     entryAcquisitionThread =null;
 
