@@ -33,6 +33,7 @@ if (project.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
 }
 
+//TODO: Should copy expected epubs (e.g. as per TestAcquisitionTask)
 task startTestSlaveServer(type: Exec) {
     def adb = android.getAdbExe().getAbsolutePath()
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'install', '-r', '-s', "$projectDir/build/outputs/apk/app-android-remotetestslave-debug.apk"

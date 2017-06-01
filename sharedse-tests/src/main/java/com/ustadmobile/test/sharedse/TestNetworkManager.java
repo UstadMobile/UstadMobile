@@ -159,7 +159,7 @@ public class TestNetworkManager {
         manager.addNetworkManagerListener(responseListener);
 
         NetworkNode node =manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
-        if(node != null && (Calendar.getInstance().getTimeInMillis() - node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT) {
+        if(node == null || (Calendar.getInstance().getTimeInMillis() - node.getNetworkServiceLastUpdated()) > NODE_DISCOVERY_TIMEOUT) {
             synchronized (nodeNSDiscoveryLock) {
                 try { nodeNSDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
                 catch(InterruptedException e ) {

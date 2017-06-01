@@ -199,7 +199,7 @@ public class TestAcquisitionTask{
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
             catalogUrl);
 
-        AcquisitionListener acquisitionListener=new AcquisitionListener() {
+        AcquisitionListener acquisitionListener =new AcquisitionListener() {
             @Override
             public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
 
@@ -251,6 +251,7 @@ public class TestAcquisitionTask{
         Assert.assertThat("File was downloaded successfully from node on same network", fileDownloadedFromPeer,is(true));
         Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));
 
+        /*
         localNetworkEnabled=false;
         wifiDirectEnabled=true;
         isFromCloud=false;
@@ -260,7 +261,7 @@ public class TestAcquisitionTask{
         }
         Assert.assertThat("File was downloaded successfully from node on different network", fileDownloadedFromPeer,is(true));
         Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));
-
+        */
 
         String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);

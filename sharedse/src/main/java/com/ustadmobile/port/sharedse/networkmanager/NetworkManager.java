@@ -199,26 +199,30 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
             int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
 
+            boolean newNode;
             NetworkNode node = null;
-            boolean newNode = true;
-            if(ipAddr != null) {
-                node = getNodeByIpAddress(ipAddr);
-                newNode = (node == null);
+            synchronized (knownNetworkNodes) {
+                newNode = true;
+                if(ipAddr != null) {
+                    node = getNodeByIpAddress(ipAddr);
+                    newNode = (node == null);
+                }
+
+
+                if(node == null) {
+                    node = new NetworkNode(senderMacAddr,ipAddr);
+                    node.setDeviceIpAddress(ipAddr);
+                    knownNetworkNodes.add(node);
+                }
+
+                node.setDeviceBluetoothMacAddress(btAddr);
+                node.setDeviceWifiDirectMacAddress(senderMacAddr);
+                node.setPort(port);
+                node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
             }
 
-
-            if(node == null) {
-                node = new NetworkNode(senderMacAddr,ipAddr);
-                node.setDeviceIpAddress(ipAddr);
-            }
-
-            node.setDeviceBluetoothMacAddress(btAddr);
-            node.setDeviceWifiDirectMacAddress(senderMacAddr);
-            node.setPort(port);
-            node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
 
             if(newNode){
-                knownNetworkNodes.add(node);
                 fireNetworkNodeDiscovered(node);
             }else{
                 fireNetworkNodeUpdated(node);
@@ -233,22 +237,26 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
         if(serviceName.contains(NETWORK_SERVICE_NAME)){
             NetworkNode node = null;
-            boolean newNode = true;
-            if(ipAddress != null) {
-                node = getNodeByIpAddress(ipAddress);
-                newNode = (node == null);
+            boolean newNode = false;
+            synchronized (knownNetworkNodes) {
+                newNode = true;
+                if(ipAddress != null) {
+                    node = getNodeByIpAddress(ipAddress);
+                    newNode = (node == null);
+                }
+
+
+                if(node == null) {
+                    node = new NetworkNode(null,ipAddress);
+                    knownNetworkNodes.add(node);
+                }
+
+                node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
+                node.setPort(port);
             }
 
-
-            if(node == null) {
-                node = new NetworkNode(null,ipAddress);
-            }
-
-            node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
-            node.setPort(port);
 
             if(newNode){
-                knownNetworkNodes.add(node);
                 fireNetworkNodeDiscovered(node);
             }else{
                 fireNetworkNodeUpdated(node);
@@ -541,32 +549,14 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
     /**
-     * Trigger acquisition status change event
-     * @param entryId
-     */
-    public void handleAcquisitionStatusChanged(String entryId){
-        fireAcquisitionStatusChanged(entryId);
-    }
-
-
-    /**
-     * Trigger acquisition progress update event
-     * @param entryId
-     */
-    public void handleAcquisitionProgressUpdate(String entryId){
-        fireAcquisitionProgressUpdate(entryId);
-    }
-
-    /**
      * Fire acquisition progress updates to the listening part of the app
      * @param entryId
      */
 
-    private void fireAcquisitionProgressUpdate(String entryId){
+    protected void fireAcquisitionProgressUpdate(String entryId, AcquisitionTask task){
         synchronized (acquisitionListeners) {
             for(AcquisitionListener listener : acquisitionListeners){
-                AcquisitionTask acquisitionTask=getAcquisitionTaskByEntryId(entryId);
-                listener.acquisitionProgressUpdate(entryId,acquisitionTask.getStatusByEntryId(entryId));
+                listener.acquisitionProgressUpdate(entryId, task.getStatusByEntryId(entryId));
             }
         }
     }
@@ -576,11 +566,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Fire acquisition status change to all listening parts of the app
      * @param entryId
      */
-    private void fireAcquisitionStatusChanged(String entryId){
+    protected void fireAcquisitionStatusChanged(String entryId, AcquisitionTask task){
         synchronized (acquisitionListeners) {
             for(AcquisitionListener listener : acquisitionListeners){
-                AcquisitionTask acquisitionTask=getAcquisitionTaskByEntryId(entryId);
-                listener.acquisitionStatusChanged(entryId,acquisitionTask.getStatusByEntryId(entryId));
+                listener.acquisitionStatusChanged(entryId, task.getStatusByEntryId(entryId));
             }
         }
     }
