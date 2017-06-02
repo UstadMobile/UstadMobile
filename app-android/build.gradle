@@ -33,16 +33,21 @@ if (project.file("buildconfig.local.properties").exists()) {
     ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.local.properties")))
 }
 
-//TODO: Should copy expected epubs (e.g. as per TestAcquisitionTask)
 task startTestSlaveServer(type: Exec) {
     def adb = android.getAdbExe().getAbsolutePath()
-    commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'install', '-r', '-s', "$projectDir/build/outputs/apk/app-android-remotetestslave-debug.apk"
+    doFirst {
+        //Install test slave variant app on the device with the test slave serial
+        exec {
+            commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'install', '-r', "$projectDir/build/outputs/apk/app-android-remotetestslave-debug.apk"
+        }
+        //Copy the epub expected to be presetned on the test slave device for testing with p2p transfers
+        exec {
+            commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'push', "$projectDir/../sharedse-tests/src/main/resources/com/ustadmobile/test/sharedse/thelittlechicks.epub", "/sdcard/ustadMobileContent/"
+        }
+    }
+
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity', '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.LAUNCHER'
 }
-
-//afterEvaluate {
-//    startTestSlaveServer.dependsOn(assembleRemotetestslaveDebug)
-//}
 
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {

@@ -111,7 +111,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private NSDHelperAndroid nsdHelperAndroid;
 
-    private int currentWifiDirectGroupStatus=-1;
+    private int currentWifiDirectGroupStatus= WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
     private int previousConnectedNetId=-1;
 
@@ -463,9 +463,9 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void connectWifi(String ssid, String passPhrase) {
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
-        wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
+        //wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
         wifiConfig.preSharedKey = "\""+ passPhrase +"\"";
-        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        //wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         int netId = wifiManager.addNetwork(wifiConfig);
         Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passPhrase +"'");
         wifiManager.disconnect();
@@ -490,39 +490,46 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
-    public void createWifiDirectGroup() {
+    public synchronized void createWifiDirectGroup() {
+        if(currentWifiDirectGroupStatus == WIFI_DIRECT_GROUP_STATUS_INACTIVE) {
+            currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION;
 
-        networkService.getWifiDirectHandlerAPI().setAddLocalServiceAfterGroupCreation(false);
-        ServiceData serviceData= new ServiceData(NETWORK_SERVICE_NAME, getHttpListeningPort(),
-                new HashMap<String,String>() ,ServiceType.PRESENCE_TCP);
-        networkService.getWifiDirectHandlerAPI().startAddingNoPromptService(serviceData, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION;
-            }
+            networkService.getWifiDirectHandlerAPI().setAddLocalServiceAfterGroupCreation(false);
+            ServiceData serviceData= new ServiceData(NETWORK_SERVICE_NAME, getHttpListeningPort(),
+                    new HashMap<String,String>() ,ServiceType.PRESENCE_TCP);
+            networkService.getWifiDirectHandlerAPI().startAddingNoPromptService(serviceData, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
 
-            @Override
-            public void onFailure(int reason) {
-                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
-            }
-        });
+                }
 
+                @Override
+                public void onFailure(int reason) {
+                    currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+                }
+            });
+        }
     }
 
+    //TODO: Add a status flag for removal requested
     @Override
-    public void removeWiFiDirectGroup() {
-        networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                handleWifiDirectGroupRemoved(true);
-                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
-            }
+    public synchronized void removeWiFiDirectGroup() {
+        if(currentWifiDirectGroupStatus == WIFI_DIRECT_GROUP_STATUS_ACTIVE) {
+            networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+                    handleWifiDirectGroupRemoved(true);
+                }
 
-            @Override
-            public void onFailure(int reason) {
-                handleWifiDirectGroupRemoved(false);
-            }
-        });
+                @Override
+                public void onFailure(int reason) {
+                    handleWifiDirectGroupRemoved(false);
+                }
+            });
+        }
+
     }
 
     @Override
