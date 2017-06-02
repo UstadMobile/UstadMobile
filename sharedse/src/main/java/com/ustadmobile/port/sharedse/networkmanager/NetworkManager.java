@@ -469,7 +469,14 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
 
-
+    /**
+     * Connect to the given wifi network. Use NetworkManagerListener.wifiConnectionChanged to
+     * listen for a successful connection.  There is not necessarily any event for a failed connection
+     * : tasks using this may have to use a timeout approach to detect failure.
+     *
+     * @param SSID SSID to connect to
+     * @param passPhrase Passphrase to use
+     */
     public abstract void connectWifi(String SSID,String passPhrase);
 
     /**

@@ -154,6 +154,9 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
 
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+
         networkService.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -161,7 +164,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                 boolean isConnected = info.isConnected();
                 boolean isConnecting = info.isConnectedOrConnecting();
                 String ssid = wifiManager.getConnectionInfo() != null ?
-                    wifiManager.getConnectionInfo().getSSID().replace("\"", "") : null;
+                        wifiManager.getConnectionInfo().getSSID().replace("\"", "") : null;
                 //TODO: handle when this has failed: this will result in info.isConnected being false
                 Log.i(NetworkManagerAndroid.TAG, "Network State Changed Action - ssid: " + ssid +
                         " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
@@ -170,7 +173,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                     handleWifiDirectConnectionChanged(ssid);
                 }
             }
-        },new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
+        }, intentFilter);
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
