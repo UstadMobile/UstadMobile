@@ -124,6 +124,12 @@ public class TestNetworkManager {
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
+        //enable supernode mode on the remote test device
+        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
+        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
+        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
+
+
         final Object nodeNSDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
@@ -169,7 +175,8 @@ public class TestNetworkManager {
         manager.addNetworkManagerListener(responseListener);
 
         NetworkNode node =manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
-        if(node == null || (Calendar.getInstance().getTimeInMillis() - node.getNetworkServiceLastUpdated()) > NODE_DISCOVERY_TIMEOUT) {
+        long timeSinceNsd =(Calendar.getInstance().getTimeInMillis() - (node != null ? node.getNetworkServiceLastUpdated() : 0));
+        if(node == null || timeSinceNsd > NODE_DISCOVERY_TIMEOUT) {
             synchronized (nodeNSDiscoveryLock) {
                 try { nodeNSDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
                 catch(InterruptedException e ) {

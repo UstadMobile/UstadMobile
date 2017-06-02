@@ -158,9 +158,12 @@ public class NetworkManagerAndroid extends NetworkManager{
             @Override
             public void onReceive(Context context, Intent intent) {
                 NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                boolean isConnected = info.isConnected();
+                boolean isConnecting = info.isConnectedOrConnecting();
+                String ssid = wifiManager.getConnectionInfo() != null ? wifiManager.getConnectionInfo().getSSID() : null;
                 //TODO: handle when this has failed: this will result in info.isConnected being false
-                if(info.isConnected()){
-                    handleWifiDirectConnectionChanged(wifiManager.getConnectionInfo().getSSID());
+                if(isConnected){
+                    handleWifiDirectConnectionChanged(ssid);
                 }
             }
         },new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION));
@@ -457,13 +460,14 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
-    public void connectWifi(String SSID, String passPhrase) {
+    public void connectWifi(String ssid, String passPhrase) {
         WifiConfiguration wifiConfig = new WifiConfiguration();
-        wifiConfig.SSID = "\""+ SSID +"\"";
+        wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
         wifiConfig.preSharedKey = "\""+ passPhrase +"\"";
         wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         int netId = wifiManager.addNetwork(wifiConfig);
+        Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passPhrase +"'");
         wifiManager.disconnect();
         wifiManager.enableNetwork(netId, true);
         wifiManager.reconnect();

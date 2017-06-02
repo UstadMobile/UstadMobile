@@ -1,6 +1,11 @@
 package com.ustadmobile.test.sharedse.http;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
+import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
+
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
@@ -17,6 +22,10 @@ import fi.iki.elonen.NanoHTTPD;
 public class RemoteTestServerHttpd extends NanoHTTPD {
 
     public static final String CMD_SETSUPERNODE_ENABLED = "SUPERNODE";
+
+    public static final String CMD_CREATEGROUP = "CREATEGROUP";
+
+    public static final int GROUP_CREATION_TIMEOUT = 60*1000;
 
 
     protected NetworkManager networkManager;
@@ -35,8 +44,61 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
                 boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
                 networkManager.setSuperNodeEnabled(networkManager.getContext(), enabled);
                 return newFixedLengthResponse("OK");
+            }else if(CMD_CREATEGROUP.equals(command)) {
+                int groupStatus = networkManager.getWifiDirectGroupStatus();
+                final Object groupLock = new Object();
+                WiFiDirectGroup group = null;
+                Response response = null;
+                WiFiDirectGroupListener groupListener = new WiFiDirectGroupListener() {
+                    @Override
+                    public void groupCreated(WiFiDirectGroup group, Exception err) {
+                        synchronized (groupLock) {
+                            groupLock.notify();
+                        }
+                    }
+
+                    @Override
+                    public void groupRemoved(boolean successful, Exception err) {
+
+                    }
+                };
+                networkManager.addWifiDirectGroupListener(groupListener);
+
+                try {
+                    switch(groupStatus) {
+                        case NetworkManager.WIFI_DIRECT_GROUP_STATUS_INACTIVE:
+                            networkManager.createWifiDirectGroup();
+                        case NetworkManager.WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION:
+                            synchronized (groupLock){
+                                try { groupLock.wait(10000); }
+                                catch(InterruptedException e) {}
+                            }
+                            break;
+                    }
+
+                    group = networkManager.getWifiDirectGroup();
+                    JSONObject jsonResponse = new JSONObject();
+                    if(group != null) {
+                        jsonResponse.put("ssid", group.getSsid());
+                        jsonResponse.put("passphrase", group.getPassphrase());
+                        response = newFixedLengthResponse(Response.Status.OK, "application/json",
+                                jsonResponse.toString());
+                    }else {
+                        response = newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain",
+                                "wifi direct gruop not created");
+                    }
+                }catch(Exception e) {
+                    e.printStackTrace();
+                    response = newFixedLengthResponse(Response.Status.INTERNAL_ERROR, "text/plain",
+                            "wifi direct gruop not created: exception" + e.toString());
+                }finally {
+                    networkManager.removeWifiDirectGroupListener(groupListener);
+                }
+
+                return response;
             }
         }catch(Exception e) {
+            e.printStackTrace();
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             PrintWriter writer = new PrintWriter(new OutputStreamWriter(bout));
             e.printStackTrace(writer);

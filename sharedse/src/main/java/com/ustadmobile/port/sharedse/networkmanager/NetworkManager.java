@@ -356,18 +356,14 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      */
     public EntryCheckResponse getEntryResponseWithLocalFile(String entryId){
         List<EntryCheckResponse> responseList=getEntryResponses().get(entryId);
-        EntryCheckResponse entryCheckResponse=null;
         if(responseList!=null &&!responseList.isEmpty()){
             for(EntryCheckResponse response: responseList){
                 if(response.isFileAvailable() && Calendar.getInstance().getTimeInMillis() - response.getNetworkNode().getNetworkServiceLastUpdated() < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                    entryCheckResponse= response;
-                    return entryCheckResponse;
+                    return response;
                 }else{
                     if(response.isFileAvailable() && response.getNetworkNode().getWifiDirectLastUpdated()
                             < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                        entryCheckResponse=response;
-                        //entryCheckResponse.setOnSameNetwork(false);
-                        return entryCheckResponse;
+                        return response;
                     }
                 }
             }

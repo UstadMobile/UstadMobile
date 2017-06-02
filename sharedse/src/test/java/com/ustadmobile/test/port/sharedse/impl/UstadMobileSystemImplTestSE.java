@@ -18,6 +18,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.ustadmobile.test.sharedse.network.MockNetworkManager.MOCK_WIFI_CONNECTION_DELAY;
+
 /**
  * Created by kileha3 on 10/05/2017.
  */
@@ -99,15 +101,22 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
 
             networkManager.connectWifi(MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
                 MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE);
-            defaultMockNetwork.setDeviceIpAddr(networkManager, selfIpAddr);
-            networkManager.setMockDeviceIpAddress(selfIpAddr);
+
+
 
             testDriver.connectWifi(MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_SSID,
                 MockNetworkManager.MOCK_WIRELESS_DEFAULT_WIRELESS_PASSPHRASE);
+
+            try { Thread.sleep(MOCK_WIFI_CONNECTION_DELAY + 200); }
+            catch(InterruptedException e) {}
+
             SharedSeTestSuite.REMOTE_SLAVE_SERVER = TestConstants.TEST_REMOTE_MOCK_SLAVE_SERVER;
 
             defaultMockNetwork.setDeviceIpAddr(testDriver, SharedSeTestSuite.REMOTE_SLAVE_SERVER);
             testDriver.setMockDeviceIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
+
+            defaultMockNetwork.setDeviceIpAddr(networkManager, selfIpAddr);
+            networkManager.setMockDeviceIpAddress(selfIpAddr);
         }
     }
 

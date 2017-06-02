@@ -78,6 +78,8 @@ public class MockNetworkManager extends NetworkManager {
 
     private int mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
+    public static final int MOCK_WIFI_CONNECTION_DELAY = 1000;
+
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
 
@@ -337,23 +339,32 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     @Override
-    public void connectWifi(String SSID, String passPhrase) {
-        synchronized (wifiLockObj) {
-            if(connectedWifiNetwork != null) {
-                connectedWifiNetwork.disconnect(this);
-                wifiNetworkServiceBroadcastTimer.cancel();
-                wifiNetworkServiceBroadcastTimer = null;
-            }
+    public void connectWifi(final String SSID, final String passPhrase) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try { Thread.sleep(MOCK_WIFI_CONNECTION_DELAY ); }
+                catch(InterruptedException e) {}
+                synchronized (wifiLockObj) {
+                    if(connectedWifiNetwork != null) {
+                        connectedWifiNetwork.disconnect(MockNetworkManager.this);
+                        wifiNetworkServiceBroadcastTimer.cancel();
+                        wifiNetworkServiceBroadcastTimer = null;
+                    }
 
-            mockIpAddr = wirelessArea.connectDeviceToWifiNetwork(this, SSID, passPhrase);
-            if(mockIpAddr != null) {
-                connectedWifiNetwork = wirelessArea.getWifiNetwork(SSID);
-                wifiNetworkServiceBroadcastTimer = new Timer();
-                wifiNetworkServiceBroadcastTimer.scheduleAtFixedRate(new WifiNetworkBroadcastTimer(),
-                    WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
-                fireWiFiConnectionChanged(SSID);
+                    mockIpAddr = wirelessArea.connectDeviceToWifiNetwork(MockNetworkManager.this,
+                            SSID, passPhrase);
+                    if(mockIpAddr != null) {
+                        connectedWifiNetwork = wirelessArea.getWifiNetwork(SSID);
+                        wifiNetworkServiceBroadcastTimer = new Timer();
+                        wifiNetworkServiceBroadcastTimer.scheduleAtFixedRate(new WifiNetworkBroadcastTimer(),
+                                WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
+                        fireWiFiConnectionChanged(SSID);
+                    }
+                }
             }
-        }
+        }).start();
+
     }
 
     public String getMockBluetoothAddr() {

@@ -12,7 +12,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-        //BluetoothServerTestSe.class,
         TestNetworkManager.class,
         TestEntryStatusTask.class,
         TestAcquisitionTask.class,
