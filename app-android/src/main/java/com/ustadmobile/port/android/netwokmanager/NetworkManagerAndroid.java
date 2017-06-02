@@ -160,9 +160,13 @@ public class NetworkManagerAndroid extends NetworkManager{
                 NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                 boolean isConnected = info.isConnected();
                 boolean isConnecting = info.isConnectedOrConnecting();
-                String ssid = wifiManager.getConnectionInfo() != null ? wifiManager.getConnectionInfo().getSSID() : null;
+                String ssid = wifiManager.getConnectionInfo() != null ?
+                    wifiManager.getConnectionInfo().getSSID().replace("\"", "") : null;
                 //TODO: handle when this has failed: this will result in info.isConnected being false
+                Log.i(NetworkManagerAndroid.TAG, "Network State Changed Action - ssid: " + ssid +
+                        " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
                 if(isConnected){
+                    Log.i(NetworkManagerAndroid.TAG, "Handle connection changed");
                     handleWifiDirectConnectionChanged(ssid);
                 }
             }
@@ -463,30 +467,40 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void connectWifi(String ssid, String passPhrase) {
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
-        //wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
+        wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
         wifiConfig.preSharedKey = "\""+ passPhrase +"\"";
-        //wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        wifiConfig.priority = getMaxConfigurationPriority(wifiManager);
+
         int netId = wifiManager.addNetwork(wifiConfig);
-        Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passPhrase +"'");
-        wifiManager.disconnect();
-        wifiManager.enableNetwork(netId, true);
-        wifiManager.reconnect();
+
+        /*
+         * Note: calling disconnect or reconnect is not required! enableNetwork(net, true)
+         * second parameter is defined as boolean enableNetwork (int netId, boolean attemptConnect).
+         * Calling disconnect and reconnect leads to extra connection changed broadcasts that
+         * become more difficult to track.
+         */
+        boolean successful = wifiManager.enableNetwork(netId, true);
+        Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passPhrase +"', " +
+                "successful?"  + successful +  " priority = " + wifiConfig.priority);
     }
 
     /**
      * Get maximum priority assigned to a network configuration.
      * This helps to prioritize which network to connect to.
+     *
      * @param wifiManager
      * @return
      */
     private int getMaxConfigurationPriority(final WifiManager wifiManager) {
         final List<WifiConfiguration> configurations = wifiManager.getConfiguredNetworks();
-        List<Integer> configPriorities=new ArrayList<>();
+        int maxPriority = 0;
         for(final WifiConfiguration config : configurations) {
-            configPriorities.add(config.priority);
+            if(config.priority > maxPriority)
+                maxPriority = config.priority;
         }
-        Collections.sort(configPriorities);
-        return configPriorities.get((configPriorities.size()-1));
+
+        return maxPriority;
     }
 
     @Override
