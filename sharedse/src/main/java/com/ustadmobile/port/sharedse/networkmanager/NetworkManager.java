@@ -358,13 +358,14 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         List<EntryCheckResponse> responseList=getEntryResponses().get(entryId);
         if(responseList!=null &&!responseList.isEmpty()){
             for(EntryCheckResponse response: responseList){
-                if(response.isFileAvailable() && Calendar.getInstance().getTimeInMillis() - response.getNetworkNode().getNetworkServiceLastUpdated() < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+                if(!response.isFileAvailable())
+                    continue;
+
+                long timeNow = Calendar.getInstance().getTimeInMillis();
+                if(timeNow - response.getNetworkNode().getNetworkServiceLastUpdated() <= ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                     return response;
-                }else{
-                    if(response.isFileAvailable() && response.getNetworkNode().getWifiDirectLastUpdated()
-                            < ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                        return response;
-                    }
+                }else if(timeNow - response.getNetworkNode().getWifiDirectLastUpdated() <= ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+                    return response;
                 }
             }
         }

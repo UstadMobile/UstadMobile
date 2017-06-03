@@ -360,6 +360,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     public void onConnected(final InputStream inputStream, final OutputStream outputStream) {
         String acquireCommand = BluetoothServer.CMD_ACQUIRE_ENTRY +" "+networkManager.getDeviceIPAddress()+"\n";
         String response=null;
+        String passphrase = null;
         try {
             outputStream.write(acquireCommand.getBytes());
             outputStream.flush();
@@ -372,7 +373,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         response.length()).split(CMD_SEPARATOR);
                 currentGroupIPAddress =groupInfo[2].replace("/","");
                 currentGroupSSID =groupInfo[0];
-                networkManager.connectWifi(groupInfo[0],groupInfo[1]);
+                passphrase = groupInfo[1];
             }
         }catch(IOException e) {
             e.printStackTrace();
@@ -382,6 +383,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 UMIOUtils.closeOutputStream(outputStream);
             }
         }
+
+        if(currentGroupSSID != null && passphrase != null)
+            networkManager.connectWifi(currentGroupSSID,passphrase);
     }
 
     @Override

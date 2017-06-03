@@ -81,7 +81,6 @@ public class TestWifiDirectGroupConnection {
             }
         };
         manager.addNetworkManagerListener(listener);
-
         manager.connectWifi(ssid, passphrase);
         synchronized (connectionLock) {
             try {connectionLock.wait(CONNECTION_TIMEOUT);}

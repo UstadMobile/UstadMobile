@@ -17,6 +17,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
@@ -121,7 +122,6 @@ public class NetworkManagerAndroid extends NetworkManager{
      */
     private String httpAndroidAssetsPath;
 
-
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
      * method from it's onCreate
@@ -164,7 +164,8 @@ public class NetworkManagerAndroid extends NetworkManager{
                 boolean isConnected = info.isConnected();
                 boolean isConnecting = info.isConnectedOrConnecting();
                 String ssid = wifiManager.getConnectionInfo() != null ?
-                        wifiManager.getConnectionInfo().getSSID().replace("\"", "") : null;
+                        wifiManager.getConnectionInfo().getSSID() : null;
+                ssid = ssid != null ? ssid.replace("\"", "") : null;
                 //TODO: handle when this has failed: this will result in info.isConnected being false
                 Log.i(NetworkManagerAndroid.TAG, "Network State Changed Action - ssid: " + ssid +
                         " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
@@ -255,6 +256,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             }
             wifiDirectHandler.removeService();
             wifiDirectHandler.continuouslyDiscoverServices();
+
             nsdHelperAndroid.startNSDiscovery();
             bluetoothServerAndroid.stop();
             isSuperNodeEnabled=false;
@@ -468,6 +470,30 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void connectWifi(String ssid, String passPhrase) {
+        /*
+         * Android 4.4 has been observed on Samsung Galaxy Ace (Andriod 4.4.2 - SM-G313F) to refuse to connect
+         * to any wifi access point after wifi direct service discovery has started. It will connect
+         * again only after wifi has been disabled, and then re-enabled.
+         *
+         * Our workaround is to programmatically disable and then re-enable the wifi on Android
+         * versions that could be effected.
+         */
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT && networkService.getWifiDirectHandlerAPI() != null){
+            networkService.getWifiDirectHandlerAPI().stopServiceDiscovery();
+
+            wifiManager.setWifiEnabled(false);
+            try { Thread.sleep(100); }
+            catch(InterruptedException e) {}
+
+            wifiManager.setWifiEnabled(true);
+            long waitTime = 0;
+            do{
+                try {Thread.sleep(300); }
+                catch(InterruptedException e) {}
+            }while(waitTime < 10000 && wifiManager.getConfiguredNetworks() == null);
+        }
+
+
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
@@ -478,14 +504,19 @@ public class NetworkManagerAndroid extends NetworkManager{
         int netId = wifiManager.addNetwork(wifiConfig);
 
         /*
-         * Note: calling disconnect or reconnect is not required! enableNetwork(net, true)
+         * Note: calling disconnect or reconnect should not be required. enableNetwork(net, true)
          * second parameter is defined as boolean enableNetwork (int netId, boolean attemptConnect).
-         * Calling disconnect and reconnect leads to extra connection changed broadcasts that
-         * become more difficult to track.
+         *
+         * It is however required on certain devices and does not seem to cause any harm to the connection
+         * process on other devices.
          */
+        wifiManager.disconnect();
         boolean successful = wifiManager.enableNetwork(netId, true);
+        wifiManager.reconnect();
         Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passPhrase +"', " +
                 "successful?"  + successful +  " priority = " + wifiConfig.priority);
+
+        System.out.println("connectwifi");
     }
 
     /**

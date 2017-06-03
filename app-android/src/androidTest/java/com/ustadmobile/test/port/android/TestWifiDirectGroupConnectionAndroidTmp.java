@@ -26,5 +26,4 @@ public class TestWifiDirectGroupConnectionAndroidTmp extends TestWifiDirectGroup
         Intent serviceIntent = new Intent(context, NetworkServiceAndroid.class);
         mServiceRule.bindService(serviceIntent);
     }
-
 }
