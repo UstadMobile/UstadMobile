@@ -1,7 +1,11 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 /**
+ * <h1>WiFiDirectGroupListener</h1>
+ *
  * Interface to listen for WiFi Direct group creation and removal
+ *
+ * @author mike
  */
 
 public interface WiFiDirectGroupListener {

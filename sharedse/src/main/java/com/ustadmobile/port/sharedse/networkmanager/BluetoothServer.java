@@ -13,13 +13,27 @@ import java.net.URLDecoder;
 import java.util.UUID;
 
 /**
- * Created by kileha3 on 09/05/2017.
+ * <h1>BluetoothServer</h1>
+ *
+ * This is a cross platform class which handles all bluetooth connections,
+ * It is responsible to send and received commands depending on whether the
+ * device is in client or super node mode.
+ *
+ * @see com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener
+ *
+ * @author kileha3
  */
 
 public abstract class BluetoothServer implements WiFiDirectGroupListener{
 
+    /**
+     * Application universally unique identifier for bluetooth connections.
+     */
     public static final UUID SERVICE_UUID = UUID.fromString("ad9e3a05-7d80-4a12-b50b-91c72d442683");
 
+    /**
+     * Application bluetooth name.
+     */
     public static final String SERVICE_NAME = "UstadMobileBT";
 
     /**
@@ -37,31 +51,59 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
 
 
     /**
-     *
-     * ACQUIRE id1;id2;id3
+     *String command tag, indicate that the stream carry Entry acquisition request.
+     * When server side receive this, it will create a group and send back group
+     * information (SSID and passphrase)
      */
     public static final String CMD_ACQUIRE_ENTRY = "ACQUIRE";
 
+    /**
+     * Separators which used to separate entry ID's when represented as String.
+     */
     public static final String CMD_SEPARATOR =";";
 
+    /**
+     * String command tag, indicates that the stream carry feedback of entry status
+     */
     public static final String CMD_ENTRY_STATUS_FEEDBACK = "STATUS_FEEDBACK";
+
+    /**
+     * String command tag, indicated that the stream carry feedback of entry
+     * acquisition which is Wi-Fi Direct Group SSI and Passphrase
+     */
     public static final String CMD_ACQUIRE_ENTRY_FEEDBACK = "ACQUIRE_FEEDBACK";
 
     private NetworkManager networkManager;
 
     private final Object bluetoothLock=new Object();
 
+    /**
+     * Maximum time to wait for the group information after creating a group.
+     */
     public static final int GROUP_INFO_AVAILABLE_WAITING_TIME =60 * 1000;
 
     public BluetoothServer(NetworkManager networkManager) {
         this.networkManager = networkManager;
     }
 
-
-
+    /**
+     * Method which is responsible to start all bluetooth operations.
+     */
     public abstract void start();
+
+    /**
+     * Method which is responsible to stop all bluetooth operations.
+     */
     public abstract void stop();
 
+    /**
+     * Method invoked when bluetooth connection is successfully made.
+     * @param deviceAddress Peer bluetooth address which will be talking to it.
+     * @param inputStream InputStream to read data from (Commands and data sent
+     *                    from peer device)
+     * @param outputStream OutputStream to write data on to peer device
+     * @throws IOException
+     */
     public void handleNodeConnected(String deviceAddress, InputStream inputStream,
                                     final OutputStream outputStream) throws IOException{
 
@@ -112,7 +154,11 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
         }
     }
 
-
+    /**
+     * Method to write data to the stream as Entry acquisition feedback
+     * @param outputStream OutputStream to write to.
+     * @param group WiFiDirectGroup information.
+     */
     private void writeToStream(OutputStream outputStream,WiFiDirectGroup group){
         try{
             String acquireFeedback=CMD_ACQUIRE_ENTRY_FEEDBACK+" "+group.getSsid()+CMD_SEPARATOR
@@ -125,13 +171,22 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
         }
     }
 
-
+    /**
+     * @param group The group created or null if it was not created due to an error
+     * @param err The exception if any occurred attempting to create the group,
+     */
     @Override
     public void groupCreated(WiFiDirectGroup group, Exception err) {
         synchronized (bluetoothLock){
             bluetoothLock.notifyAll();
         }
     }
+
+    /**
+     *
+     * @param successful True if the group was successfully removed
+     * @param err The exception if any
+     */
 
     @Override
     public void groupRemoved(boolean successful, Exception err) {

@@ -24,26 +24,75 @@ import java.util.regex.Pattern;
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
- * Created by kileha3 on 08/05/2017.
+ * <h1>NetworkManager</h1>
+ *
+ * This is the class which defines all cross platform. It is responsible to register all network listeners,
+ * register all services, getting right device address like MAC address and IP address, handle bluetooth
+ * and WiFi direct connections e.t.c
+ *
+ * @author kileha3
+ *
+ * @see com.ustadmobile.port.sharedse.networkmanager.NetworkManagerTaskListener
+ * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
 
 public abstract class NetworkManager implements NetworkManagerCore,NetworkManagerTaskListener {
 
+    /**
+     * Flag to indicate queue type status
+     */
     public static final int QUEUE_ENTRY_STATUS=0;
+
+    /**
+     * Flag to indicate queue type acquisition.
+     */
     public static final int QUEUE_ENTRY_ACQUISITION=1;
+
+    /**
+     * Flag to indicate type of notification used when supernode is active
+     */
     public static final int NOTIFICATION_TYPE_SERVER=0;
+
+    /**
+     * Flag to indicate type of notification used during file acquisition
+     */
     public static final int NOTIFICATION_TYPE_ACQUISITION=1;
+
+    /**
+     * Flag to indicate file acquisition source is from cloud.
+     */
     public static final int DOWNLOAD_FROM_CLOUD =1;
+
+    /**
+     * Flag to indicate file acquisition source is peer on the same network
+     */
     public static final int DOWNLOAD_FROM_PEER_ON_SAME_NETWORK =2;
+
+    /**
+     * Flag to indicate file acquisition source is peer on different network
+     */
     public static final int DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK =3;
 
     public BluetoothServer bluetoothServer;
+
+    /**
+     * Maximum time for the device to wait other peer services to be discovered.
+     */
     public  static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT =2 * 60 * 1000;
 
+    /**
+     * Tag to hold device IP address value in DNS-Text record
+     */
     public static final String SD_TXT_KEY_IP_ADDR = "a";
 
+    /**
+     * Tag to hold device bluetooth address value in DNS-Text record
+     */
     public static final String SD_TXT_KEY_BT_MAC = "b";
 
+    /**
+     * Tag to hold device service port value in DNS-Text record
+     */
     public static final String SD_TXT_KEY_PORT = "port";
 
     /**
@@ -87,10 +136,21 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public NetworkManager() {
     }
 
+    /**
+     * Method used to enable super node
+     */
     public abstract void startSuperNode();
 
+    /**
+     * Method used to disable supper node
+     */
     public abstract void stopSuperNode();
 
+
+    /**
+     * Method used to check if super node is enabled.
+     * @return boolean: TRUE if enabled and FALSE otherwise
+     */
     public abstract boolean isSuperNodeEnabled();
 
     /**
@@ -116,13 +176,30 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
+    /**
+     * Method which tell if bluetooth is enabled or disabled on the device.
+     * @return boolean: TRUE, if bluetooth is enabled and FALSE otherwise
+     */
     public  abstract boolean isBluetoothEnabled();
 
 
+    /**
+     * Method which is used to get make refrence to the BluetoothServer
+     * @return BluetoothServer
+     */
     public abstract BluetoothServer getBluetoothServer();
 
+    /**
+     * Method to tell if Wi-Fi is enabled or disabled on the device
+     * @return boolean: TRUE, if enabled otherwise FALSE.
+     */
     public abstract boolean isWiFiEnabled();
 
+    /**
+     * Method which tells if the file can be downloaded locally or not.
+     * @param entryId File Entry ID
+     * @return boolean: TRUE, if is available locally otherwise FALSE.
+     */
     public boolean isFileAvailable(String entryId){
         for(EntryCheckResponse response:entryResponses.get(entryId)){
             if(response.isFileAvailable()){
@@ -137,7 +214,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      *
      * @param entryIds EntryIDs (e.g. as per an OPDS catalog) to look for
      * @param mContext System context
-     * @param nodeList
+     * @param nodeList List of all peer nodes discovered
      * @param useBluetooth If true - use bluetooth addresses that were discovered using WiFi direct to ask for availability
      * @param useHttp If true - use HTTP to talk with nodes discovered which are reachable using HTTP (e.g. nodes already connected to the same wifi network)
      *
@@ -166,6 +243,16 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
 
+    /**
+     * Method which invoked when making file acquisition request.
+     * @param feed OPDS file feed
+     * @param mContext application context
+     * @param localNetworkEnabled Whether to involve local network as means of acquiring,
+     *                            TRUE if yes, FALSE otherwise.
+     * @param wifiDirectEnabled Whether to involve Wi-Fi direct group as means of acquiring,
+     *                          TRUE if yes , otherwise FALSE.
+     * @return
+     */
     public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext,
                                               boolean localNetworkEnabled, boolean wifiDirectEnabled){
         AcquisitionTask task=new AcquisitionTask(feed,this);
@@ -176,7 +263,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return feed;
     }
 
-
+    /**
+     * Creating task que as per request received.
+     * @param task Network task to be queued
+     * @return NetworkTask: Queued NetworkTask
+     */
     public NetworkTask queueTask(NetworkTask task){
         tasksQueues[task.getTaskType()].add(task);
         checkTaskQueue(task.getTaskType());
@@ -184,6 +275,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return task;
     }
 
+    /**
+     * Method which check the queue and manage it,
+     * if there is any task to be executed will be executed.
+     * @param queueType Queue type, whether is queue of Acquisition task or EntryStatus task
+     */
     public synchronized void checkTaskQueue(int queueType){
         if(!tasksQueues[queueType].isEmpty() && currentTasks[queueType] == null) {
             currentTasks[queueType] = tasksQueues[queueType].remove(0);
@@ -193,6 +289,12 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
+    /**
+     * Method which is invoked when new node has been found from Wi-Fi Direct discovery service.
+     * @param serviceFullDomain Combination of application service record and protocol used
+     * @param senderMacAddr Host device MAC address
+     * @param txtRecords Map of DNS-Text records
+     */
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
         if(serviceFullDomain.contains(NETWORK_SERVICE_NAME)){
             String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
@@ -231,9 +333,12 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
-
-
-
+    /**
+     * Method which will be invoked when new node is found using network service discovery
+     * @param serviceName application service name
+     * @param ipAddress Host device IP address
+     * @param port Service port on host device
+     */
     public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
         if(serviceName.contains(NETWORK_SERVICE_NAME)){
             NetworkNode node = null;
@@ -265,10 +370,9 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
     /**
-     * Get a known network node by IP address
-     *
-     * @param ipAddr
-     * @return
+     * Get known network node using it's IP address
+     * @param ipAddr Node's IP address to search for.
+     * @return NetworkNode object
      */
     public NetworkNode getNodeByIpAddress(String ipAddr) {
         synchronized (knownNetworkNodes) {
@@ -283,6 +387,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return null;
     }
 
+    /**
+     * Get known network node using it's bluetooth address
+     * @param bluetoothAddr Node's bluetooth address to search for.
+     * @return NetworkNode object
+     */
     public NetworkNode getNodeByBluetoothAddr(String bluetoothAddr) {
         synchronized (knownNetworkNodes) {
             String nodeBtAddr;
@@ -296,18 +405,37 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return null;
     }
 
+    /**
+     * Method which used to register NetworkManagerListener to listen for Network events.
+     * @param listener NetworkManagerListener instance.
+     */
     public void addNetworkManagerListener(NetworkManagerListener listener){
         networkManagerListeners.add(listener);
     }
 
+    /**
+     * Method which used to remove NetworkManagerListener after being registered.
+     * @param listener NetworkManagerListener to be removed
+     */
     public void removeNetworkManagerListener(NetworkManagerListener listener){
         if(listener!=null){
             networkManagerListeners.remove(listener);
         }
     }
 
+    /**
+     * Method invoked when device request bluetooth connection.
+     * @param deviceAddress Peer device bluetooth address to connect to.
+     * @param handler BluetoothConnectionHandler which listen for connection events.
+     */
     public abstract void connectBluetooth(String deviceAddress,BluetoothConnectionHandler handler);
 
+    /**
+     * Method which invoked when entry status responses is are received
+     * @param node NetworkNode on which entry status check task was executed on.
+     * @param fileIds List of all entries
+     * @param status List of all entries status
+     */
     public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds,List<Boolean> status) {
         List<EntryCheckResponse> responseList;
         EntryCheckResponse checkResponse;
@@ -332,6 +460,13 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
         fireFileStatusCheckInformationAvailable(fileIds);
     }
+
+    /**
+     * Method which get particular entry status response on a specific node from list of responses.
+     * @param fileId Entry Id to look for the status
+     * @param node NetworkNode to request response from.
+     * @return EntryCheckResponse object
+     */
 
     public EntryCheckResponse getEntryResponse(String fileId, NetworkNode node) {
         List<EntryCheckResponse> responseList = getEntryResponses().get(fileId);
@@ -372,16 +507,30 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return null;
     }
 
+    /**
+     * Method which will be called to fire all events when file acquisition information is available
+     * @param entryId Entry Id under processing
+     * @param downloadId Id assigned to the acquisition task
+     * @param downloadSource File source, which might be from cloud,
+     *                       peer on the same network or peer on different network
+     */
     public void handleFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource){
         fireFileAcquisitionInformationAvailable(entryId,downloadId,downloadSource);
     }
 
-    public void handleWifiDirectConnectionChanged(String ssid){
-        fireWiFiConnectionChanged(ssid);
+    /**
+     * Method which will be called to fire all Wi-Fi Direct connection events
+     * @param ssid SSID of the current connected Wi-Fi Direct group.
+     */
+    public void handleWifiDirectConnectionChanged(String ssid,boolean isWiFiConnected){
+        fireWiFiConnectionChanged(ssid,isWiFiConnected);
     }
 
-
-
+    /**
+     * Method which will be called to fire all events when entry status check
+     * is completed and information is there to process
+     * @param fileIds List of entry ID's which were processed
+     */
     protected void fireFileStatusCheckInformationAvailable(List<String> fileIds) {
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
@@ -390,8 +539,15 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
-
-    protected void fireFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource) {
+    /**
+     * Method firing event to all listening part of the app
+     * when file acquisition information is available.
+     * @param entryId Entry Id under processing
+     * @param downloadId Id assigned to the acquisition task
+     * @param downloadSource File source, which might be from cloud,
+     *                       peer on the same network or peer on different network
+     */
+    private void fireFileAcquisitionInformationAvailable(String entryId,long downloadId,int downloadSource) {
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
                 listener.fileAcquisitionInformationAvailable(entryId,downloadId,downloadSource);
@@ -399,6 +555,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
+    /**
+     * Method which fire event to all listening part of the
+     * app when new node has been found.
+     * @param node NetworkNode object which contain all node information
+     */
     protected void fireNetworkNodeDiscovered(NetworkNode node) {
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
@@ -407,6 +568,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
+    /**
+     * Method which will be firing events to notify other part of the app that node
+     * information has been updated.
+     * @param node NetworkNode object
+     */
     protected void fireNetworkNodeUpdated(NetworkNode node){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
@@ -415,6 +581,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
+    /**
+     * Method which will be firing events to notify the listening parts of the app that the
+     * entry status check task has been completed.
+     * @param task Entry status check NetworkTask
+     */
     protected void fireEntryStatusCheckCompleted(NetworkTask task){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
@@ -423,18 +594,46 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
-    protected void fireWiFiConnectionChanged(String ssid){
+    /**
+     * Method which will be firing events to all listening part ot the app to notify
+     * that Wi-Fi state connection has been changed.
+     * @param ssid Currently connected Wi-Fi network SSID
+     * @param isWifiConnected :Current connection state (TRUE, if connected and FALSE otherwise)
+     */
+    protected void fireWiFiConnectionChanged(String ssid, boolean isWifiConnected){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
-                listener.wifiConnectionChanged(ssid);
+                listener.wifiConnectionChanged(ssid,isWifiConnected);
             }
         }
     }
+
+    /**
+     * Method which will be used to add notification as user feedback when super node is
+     * activated or during entry acquisition execution
+     * @param notificationType Type of notification (File acquisition or Super node notification)
+     * @param title Notification title
+     * @param message Notification message which provide more information about the notification
+     * @return int: Type of notification
+     */
     public abstract int addNotification(int notificationType,String title,String message);
 
-    public abstract void updateNotification(int notificationId,int progress,String title,String message);
+    /**
+     * Method which is responsible for updating the notification information especially
+     * when the notification type is Acquisition
+     * @param notificationType Type of notification (File acquisition or Super node notification)
+     * @param progress File acquisition progress status
+     * @param title Notification title
+     * @param message Notification message which provide more information about the notification
+     */
+    public abstract void updateNotification(int notificationType,int progress,String title,String message);
 
-    public abstract void removeNotification(int notificationId);
+    /**
+     * Method which will be responsible for removing notification when file acquisition task
+     * is completed or Super node mode was deactivated.
+     * @param notificationType Type of notification to be removed (File acquisition or Super node notification)
+     */
+    public abstract void removeNotification(int notificationType);
 
     @Override
     public void handleTaskCompleted(NetworkTask task) {
@@ -458,6 +657,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return mContext;
     }
 
+    /**
+     * Getting the current device IP address from the current connected network.
+     * @return String: Current device IP address
+     */
     public abstract String getDeviceIPAddress();
 
 
@@ -518,7 +721,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
     /**
-     * Remove the given WifiDirectGroupListener
+     * Remove a given WifiDirectGroupListener
      *
      * @param listener Listener to remove
      */
@@ -526,6 +729,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         wifiDirectGroupListeners.remove(listener);
     }
 
+    /**
+     * Method which will be firing event to all listening part of the app upon successful Wi-Fi Direct group creation.
+     * @param group WiFiDirectGroup wrapper  with more information about the group
+     * @param error Exception thrown.
+     */
     protected void fireWifiDirectGroupCreated(WiFiDirectGroup group, Exception error) {
         synchronized (wifiDirectGroupListeners) {
             for(int i = 0; i < wifiDirectGroupListeners.size(); i++) {
@@ -534,6 +742,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
     }
 
+    /**
+     * Method which will be firing event to all listening part of the app upon successful removal of the Wi-Fi Direct group
+     * @param successful removal status (If removed TRUE, otherwise FALSE)
+     * @param error
+     */
     protected void fireWifiDirectGroupRemoved(boolean successful, Exception error) {
         synchronized (wifiDirectGroupListeners) {
             for(int i = 0; i < wifiDirectGroupListeners.size(); i++) {
@@ -543,11 +756,18 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     }
 
 
+    /**
+     * Method which is responsible for adding all acquisition listeners.
+     * @param listener AcquisitionListener to listen to and fire events accordingly
+     */
     public void addAcquisitionTaskListener(AcquisitionListener listener){
         acquisitionListeners.add(listener);
     }
 
-
+    /**
+     * Method which is responsible for removing all listeners added
+     * @param listener
+     */
     public void removeAcquisitionTaskListener(AcquisitionListener listener){
         acquisitionListeners.remove(listener);
     }
@@ -556,7 +776,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Fire acquisition progress updates to the listening part of the app
      * @param entryId
      */
-
     protected void fireAcquisitionProgressUpdate(String entryId, AcquisitionTask task){
         synchronized (acquisitionListeners) {
             for(AcquisitionListener listener : acquisitionListeners){
@@ -592,7 +811,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Return the Entry ID to AcquisitionTask map
      * @return
      */
-
     public Map<String,AcquisitionTask> getEntryAcquisitionTaskMap(){
         return entryAcquisitionTaskMap;
     }
@@ -653,15 +871,22 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             filterMap.put("xhtml", xhtmlFilterList);
         }
 
-
         mountName = httpd.mountZip(zipPath, mountName, filterMap);
         return mountName;
     }
 
+    /**
+     * Method which is responsible for unmounting zipped file from HTTP
+     * @param mountName File mount name
+     */
     public void unmountZipFromHttp(String mountName) {
         httpd.unmountZip(mountName);
     }
 
+    /**
+     * Method which is used to get HTTP service listening port.
+     * @return int: Listening port
+     */
     public int getHttpListeningPort() {
         return httpd.getListeningPort();
     }

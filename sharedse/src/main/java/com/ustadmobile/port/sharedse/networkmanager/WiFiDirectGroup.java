@@ -1,7 +1,11 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 /**
- * Created by mike on 5/23/17.
+ * <h1>WiFiDirectGroup</h1>
+ *
+ * This is a class which define Wi-Fi Direct group in a cross platform way.
+ *
+ * @author mike
  */
 
 public class WiFiDirectGroup {
@@ -10,15 +14,28 @@ public class WiFiDirectGroup {
 
     private String passphrase;
 
+    /**
+     * Create Wi-Fi Direct group
+     * @param ssid Group SSID
+     * @param passphrase Group passphrase
+     */
     public WiFiDirectGroup(String ssid, String passphrase) {
         this.ssid = ssid;
         this.passphrase = passphrase;
     }
 
+    /**
+     * Method which is used to get Group SSID
+     * @return String: Group SSID
+     */
     public String getSsid() {
         return ssid;
     }
 
+    /**
+     * Method which is used to get group pasp
+     * @return String: group passphrase
+     */
     public String getPassphrase() {
         return passphrase;
     }

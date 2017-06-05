@@ -17,9 +17,15 @@ import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.P
 
 
 /**
+ * <h1>NetworkServiceAndroid</h1>
+ *
  * NetworkServiceAndroid is effectively a wrapper for NetworkManager. A service is required as this
  * encapsulates network discovery processes and the http server that should continue running
  * regardless of which activity is active.
+ *
+ * @see android.app.Service
+ *
+ * @author kileha3
  *
  */
 public class NetworkServiceAndroid extends Service{
@@ -27,6 +33,10 @@ public class NetworkServiceAndroid extends Service{
     private WifiDirectHandler wifiDirectHandler;
     private final IBinder mBinder = new LocalServiceBinder();
     private NetworkManagerAndroid networkManagerAndroid;
+
+    /**
+     * Default time interval for Wi-Fi Direct service rebroadcasting.
+     */
     public static final int SERVICE_REBROADCASTING_TIMER=30000;
 
 
@@ -61,6 +71,10 @@ public class NetworkServiceAndroid extends Service{
         super.onDestroy();
     }
 
+    /**
+     *
+     * @return NetworkManagerAndroid : NetworkManagerAndroid class reference
+     */
     public NetworkManagerAndroid getNetworkManager() {
         return  networkManagerAndroid;
     }
@@ -76,8 +90,15 @@ public class NetworkServiceAndroid extends Service{
         return mBinder;
     }
 
-
-
+    /**
+     *This is an interface for monitoring the state of an application service.
+     * it defines callbacks for service binding, passed to bindService().
+     * Either of the two methods will be invoked:
+     * <p>
+     *     <b>onServiceConnected</b>: Invoked when service successfully connected
+     *     <b>onServiceDisconnected</b>: Invoked when service connection failed.
+     * </p>
+     */
     ServiceConnection wifiP2PServiceConnection=new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -98,9 +119,10 @@ public class NetworkServiceAndroid extends Service{
         }
     };
 
-
-
-
+    /**
+     * Class used for the client Binder.  Because we know this service always
+     * runs in the same process as its clients, we won't be dealing with IPC.
+     */
     public class LocalServiceBinder extends Binder {
         public NetworkServiceAndroid getService(){
             return NetworkServiceAndroid.this;
@@ -109,8 +131,7 @@ public class NetworkServiceAndroid extends Service{
     }
 
     /**
-     *
-     * @return instance of the WifiDirectHandler API
+     * @return WifiDirectHandler: Instance of the WifiDirectHandler from Wi-Fi buddy API
      */
     public WifiDirectHandler getWifiDirectHandlerAPI(){
         return wifiDirectHandler;

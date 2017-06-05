@@ -14,7 +14,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Created by kileha3 on 09/05/2017.
+ * <h1>BluetoothServerAndroid</h1>
+ *
+ * This is a wrapper class which does all the work for setting up and managing Bluetooth
+ * connections with other devices in android platform. It has a thread that listens for
+ * incoming connections.
+ *
+ * @see com.ustadmobile.port.sharedse.networkmanager.BluetoothServer
+ *
+ *
+ * @author kileha3
  */
 
 public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
@@ -26,7 +35,7 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
 
     private Thread serverAcceptThread;
 
-    private boolean running;
+    private boolean running=false;
 
     BluetoothServerAndroid(NetworkManager networkManager) {
         super(networkManager);
@@ -42,6 +51,10 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
         }
     }
 
+    /**
+     * Method which listen for the incoming connection
+     * @exception IOException
+     */
     public void run() {
 
         try {
@@ -79,7 +92,9 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
         }
     }
 
-
+    /**
+     * @exception IOException
+     */
     @Override
     public void stop() {
         if(serverAcceptThread != null) {

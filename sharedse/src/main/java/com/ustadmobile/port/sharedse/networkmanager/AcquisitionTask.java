@@ -33,17 +33,34 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.DOWNLO
 import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFICATION_TYPE_ACQUISITION;
 
 /**
- * Created by kileha3 on 09/05/2017.
+ * <h1>AcquisitionTask</h1>
+ *
+ * Class which handles all file acquisition tasks.Also, it is responsible to decide where to
+ * download a file whether is from the cloud, peer on the same network or peer on different network.
+ *
+ * Apart from that, this class is responsible to initiate bluetooth connection when file to be downloaded
+ * is on peer from different network.
+ *
+ * @see com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler
+ * @see com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener
+ * @see com.ustadmobile.port.sharedse.networkmanager.NetworkTask
+ *
+ * @author kileha3
  */
-
 public class AcquisitionTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
     private UstadJSOPDSFeed feed;
 
     protected NetworkManagerTaskListener listener;
 
+    /**
+     * Flag to indicate file destination index in array.
+     */
     private static final int FILE_DESTINATION_INDEX=1;
 
+    /**
+     * Flag to indicate file download URL index in array
+     */
     private static final int FILE_DOWNLOAD_URL_INDEX=0;
 
     private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
@@ -55,6 +72,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private String currentGroupSSID;
 
     private static long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
+
     private Timer updateTimer=null;
 
     private Thread entryAcquisitionThread =null;
@@ -75,16 +93,32 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     private boolean wifiDirectDownloadEnabled = true;
 
+    private int bluetoothRetryCount=0;
+
+    private static final int BLUETOOTH_CONNECTION_RETRY_COUNT=1;
+
+    /**
+     * Map all entry download statuses to their entry ID.
+     * Useful when retrieving current status of entry acquisition task.
+     */
     protected Map<String, Status> statusMap = new Hashtable<>();
 
     private Status acquisitionStatus=null;
 
     private boolean isWifiDirectActive=false;
 
+    /**
+     * Map all AcquisitionTaskHistoryEntry to their respective entry IDs
+     */
     private Map<String, List<AcquisitionTaskHistoryEntry>> acquisitionHistoryMap = new HashMap<>();
 
     /**
-     * Monitor file acquisition task progress and report it to the rest of the app.
+     * Monitor file acquisition task progress and report it to the rest of the app (UI).
+     * <p>
+     *     Status will be updated only if the progress
+     *     status is less than maximum progress which is 100,
+     *     and time passed is less than DOWNLOAD_TASK_UPDATE_TIME
+     * </p>
      */
     private TimerTask updateTimerTask =new TimerTask() {
         @Override
@@ -120,37 +154,67 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         long totalSize;
 
         int status;
-
         public Status() {
 
         }
 
+        /**
+         * Get all the bytes downloaded so far from the source file.
+         * @return long: Total bytes downloaded so far
+         */
         public synchronized long getDownloadedSoFar() {
             return downloadedSoFar;
         }
 
+        /**
+         * Set all the bytes downloaded so far from the source file
+         * @param downloadedSoFar long: Total bytes downloaded so far
+         *
+         */
         protected synchronized void setDownloadedSoFar(long downloadedSoFar) {
             this.downloadedSoFar = downloadedSoFar;
         }
 
+        /**
+         * Get file size (Total bytes in the file)
+         * @return long: File size
+         */
         public long getTotalSize() {
             return totalSize;
         }
 
+        /**
+         * Set total file size.
+         * @param totalSize long: total bytes in the file.
+         */
         protected synchronized void setTotalSize(long totalSize) {
             this.totalSize = totalSize;
         }
 
+
+        /**
+         * Get file acquisition status
+         * @return
+         */
         public int getStatus() {
             return status;
         }
 
+        /**
+         * Set file acquisition status
+         * @param status int:
+         */
         protected synchronized void setStatus(int status) {
             this.status = status;
         }
     }
 
 
+    /**
+     * Create file acquisition task
+     * @param feed OPDS feed
+     * @param networkManager NetworkManager reference which handle all network operations.
+     */
     public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
         super(networkManager);
         this.feed=feed;
@@ -183,7 +247,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     /**
-     * Start file acquisition task
+     * Method which start file acquisition task
      */
     public synchronized void start() {
         currentEntryIdIndex =0;
@@ -199,13 +263,15 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     /**
-     * Determine where to download the file from
+     * Method determine where to download the file from
      * (Cloud, Peer on the same network or Peer on different network)
      *
-     * if is from Cloud: initiate download task
+     * <p>
+     *     If is from Cloud: initiate download task
      *            Peer on the same network: initiate download task
      *            Peer on different network: initiate bluetooth connection in order to trigger
      *            WiFi-Direct group creation on the host device
+     * </p>
      */
     private void acquireFile(int index){
         if(index < feed.entries.length) {
@@ -262,7 +328,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         }
     }
 
-
+    /**
+     * Method which start file acquisition from the specified source.
+     * @param fileUrl : File source URL
+     * @param mode: Mode in which the file will be acquired as DOWNLOAD_FROM_CLOUD,
+     *            DOWNLOAD_FROM_PEER_ON_SAME_NETWORK and DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK
+     *
+     * @exception InterruptedException
+     */
     private void downloadCurrentFile(final String fileUrl, final int mode) {
         entryAcquisitionThread =new Thread(new Runnable() {
             @Override
@@ -336,6 +409,10 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
 
+    /**
+     * Method used to get file destination (Destination directory) and File source URL.
+     * @return String [] : Array of file URLS;
+     */
     private String []  getFileURIs(){
         Vector downloadDestVector = getFeed().getLinks(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
                 null);
@@ -355,7 +432,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
 
-
+    /**
+     * @exception  IOException
+     * @param inputStream InputStream to read data from.
+     * @param outputStream OutputStream to write data to.
+     */
     @Override
     public void onConnected(final InputStream inputStream, final OutputStream outputStream) {
         String acquireCommand = BluetoothServer.CMD_ACQUIRE_ENTRY +" "+networkManager.getDeviceIPAddress()+"\n";
@@ -388,6 +469,28 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             networkManager.connectWifi(currentGroupSSID,passphrase);
     }
 
+    /**
+     * @exception InterruptedException
+     * @param bluetoothAddress Bluetooth address which was trying to connect to.
+     */
+    @Override
+    public void onConnectionFailed(String bluetoothAddress) {
+        if(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress().equals(bluetoothAddress) && bluetoothRetryCount < BLUETOOTH_CONNECTION_RETRY_COUNT){
+            bluetoothRetryCount++;
+            try{
+                Thread.sleep(WAITING_TIME_BEFORE_RETRY);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
+                    ,this);
+
+        }else{
+            acquireFile(currentEntryIdIndex+1);
+        }
+    }
+
+
     @Override
     public void cancel() {
         entryAcquisitionThread.interrupt();
@@ -404,6 +507,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         }
     }
 
+    /**
+     * Get specific entry status.
+     * @param entryId: Entry Id which identifies an Entry
+     * @return Status: Status object in which extra information
+     *                 for the particular entry acquisition
+     *                 can be found
+     */
     public Status getStatusByEntryId(String entryId) {
         return statusMap.get(entryId);
     }
@@ -462,8 +572,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     @Override
-    public void wifiConnectionChanged(String ssid) {
-        if(currentGroupSSID != null && currentGroupSSID.equals(ssid)){
+    public void wifiConnectionChanged(String ssid, boolean isWifiConnected) {
+        if(currentGroupSSID != null && currentGroupSSID.equals(ssid) && isWifiConnected){
             isWifiDirectActive=true;
             String fileUrl="http://"+ currentGroupIPAddress +":"+
                     entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
@@ -473,11 +583,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
 
+
     /**
      * If enabled the task will attempt to acquire the requested entries from another node on the same
      * wifi network directly (nodes discovered using Network Service Discovery - NSD).
      *
-     * @return True if enabled, false otherwise
+     * @return boolean: True if enabled, false otherwise
      */
     public boolean isLocalNetworkDownloadEnabled() {
         return localNetworkDownloadEnabled;
@@ -492,12 +603,18 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      * wifi direct. The node will be contacted using bluetooth and then a wifi group connection
      * will be created.
      *
-     * @return True if enabled, false otherwise
+     * @return boolean: True if enabled, false otherwise
      */
     public boolean isWifiDirectDownloadEnabled() {
         return wifiDirectDownloadEnabled;
     }
 
+    /**
+     * Method which decide whether Wi-Fi direct should be used as one
+     * of file acquisition mode or not. By default it is allowed but otherwise
+     * it will be disabled hence only other ways can be used to acquire a file.
+     * @param wifiDirectDownloadEnabled: Logical boolean to enable and disable downloading a file using Wi-Fi direct
+     */
     public void setWifiDirectDownloadEnabled(boolean wifiDirectDownloadEnabled) {
         this.wifiDirectDownloadEnabled = wifiDirectDownloadEnabled;
     }
