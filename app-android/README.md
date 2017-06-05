@@ -2,13 +2,13 @@
 
 This is a normal gradle build and should open fine with Android studio. It includes the core and sharedse modules.
 
-###To build
+### To build
 
 (run from root project directory):
 
 > $ ./gradlew ':app-android:assembleDebug'
 
-###To sign :
+### To sign :
 
 (run from root project directory):
 
