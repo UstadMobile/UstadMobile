@@ -9,7 +9,6 @@
       <module fileurl="file://$PROJECT_DIR$/core-tests/core-tests.iml" filepath="$PROJECT_DIR$/core-tests/core-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse/sharedse.iml" filepath="$PROJECT_DIR$/sharedse/sharedse.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" filepath="$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" filepath="$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" />
     </modules>
   </component>
 </project>
