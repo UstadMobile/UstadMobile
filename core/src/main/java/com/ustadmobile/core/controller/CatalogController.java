@@ -1809,8 +1809,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             downloadUpdateTimer = new Timer();
             downloadUpdateTimer.schedule(new UpdateProgressTimerTask(), 
                 DOWNLOAD_UPDATE_INTERVAL, DOWNLOAD_UPDATE_INTERVAL);
-            UstadMobileSystemImpl.getInstance().registerDownloadCompleteReceiver(
-                    this, getContext());
         }
     }
     
@@ -1821,11 +1819,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         if(downloadUpdateTimer != null) {
             downloadUpdateTimer.cancel();
             downloadUpdateTimer = null;
-           try{
-               UstadMobileSystemImpl.getInstance().unregisterDownloadCompleteReceiver(this, getContext());
-           }catch (IllegalStateException e){
-               e.printStackTrace();
-           }
+
         }
     }
     

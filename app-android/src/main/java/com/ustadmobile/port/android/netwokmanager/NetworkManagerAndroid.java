@@ -422,6 +422,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         if(nsdHelperAndroid!=null){
             nsdHelperAndroid.unregisterNSDService();
+            nsdHelperAndroid.stopNSDiscovery();
         }
         super.onDestroy();
 

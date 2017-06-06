@@ -660,13 +660,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract String[] listDirectory(String dirURI) throws IOException;
 
-    public abstract String queueFileDownload(String url, String fileURI, String entryId, Hashtable headers, Object context);
-
     public abstract int[] getFileDownloadStatus(String downloadID, Object context);
-
-    public abstract void registerDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context);
-
-    public abstract void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context);
 
     /**
      * Rename file from/to

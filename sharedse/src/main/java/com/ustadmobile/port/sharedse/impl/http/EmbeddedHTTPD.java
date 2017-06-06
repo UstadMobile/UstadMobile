@@ -73,6 +73,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
                         "mp3		audio/mpeg "+
                         "m3u		audio/mpeg-url " +
                         "mp4		video/mp4 " +
+                        "m4v        video/mp4 " +
                         "ogv		video/ogg " +
                         "flv		video/x-flv " +
                         "mov		video/quicktime " +

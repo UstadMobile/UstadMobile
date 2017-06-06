@@ -36,14 +36,17 @@ public class NSDHelperAndroid {
 
     public NSDHelperAndroid(NetworkManagerAndroid managerAndroid){
         this.managerAndroid=managerAndroid;
-        mNsdManager = (NsdManager) managerAndroid.getContext().getSystemService(Context.NSD_SERVICE);
+    }
 
+    private void lookupNsdManager() {
+        if(mNsdManager == null)
+            mNsdManager = (NsdManager) managerAndroid.getContext().getSystemService(Context.NSD_SERVICE);
     }
 
     /**
      * This method initialize all service discovery listeners,
      * once the service is found it will be resolved so that extra information
-     * like Host IP address and Service name can be obtained.
+     * li   ke Host IP address and Service name can be obtained.
      *
      * <p>
      *     With this listener, different methods will be invoked on right events.
@@ -110,6 +113,7 @@ public class NSDHelperAndroid {
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
                 Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" + errorCode);
+                //TODO: This needs to retry stopping after an interval.
                 mNsdManager.stopServiceDiscovery(this);
             }
         };
@@ -169,12 +173,13 @@ public class NSDHelperAndroid {
         if(networkRegistrationListener!=null){
             unregisterNSDService();
         }
-        String networkServiceName=NETWORK_SERVICE_NAME+"NSD";
+        final String networkServiceName=NETWORK_SERVICE_NAME+"NSD";
         initializeServiceRegistrationListener();
-        NsdServiceInfo serviceInfo  = new NsdServiceInfo();
+        final NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setServiceName(networkServiceName);
         serviceInfo.setServiceType(SERVICE_TYPE);
         serviceInfo.setPort(managerAndroid.getHttpListeningPort());
+        lookupNsdManager();
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD,networkRegistrationListener);
         Log.d(NetworkManagerAndroid.TAG,"Registering network service "+networkServiceName);
     }
@@ -194,6 +199,7 @@ public class NSDHelperAndroid {
     public void startNSDiscovery(){
         stopNSDiscovery();
         initializeServiceDiscoveryListener();
+        lookupNsdManager();
         mNsdManager.discoverServices(
                 SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD,networkDiscoveryListener);
     }
@@ -202,8 +208,8 @@ public class NSDHelperAndroid {
      * This method is responsible for stopping all service discovery operations.
      * After calling it, no other peer device services will be discovered
      */
-    public void stopNSDiscovery(){
-       if(networkDiscoveryListener!=null){
+    public synchronized void stopNSDiscovery(){
+       if(mNsdManager != null && networkDiscoveryListener!=null){
            mNsdManager.stopServiceDiscovery(networkDiscoveryListener);
            networkDiscoveryListener=null;
            nsdServiceInfo=null;

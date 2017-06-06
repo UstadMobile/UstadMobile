@@ -470,32 +470,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return ((Context)context).getAssets().open(resURI);
     }
 
-    @Override
-    public String queueFileDownload(String url, String destFileURI, String entryId, Hashtable headers, Object context) {
-        return null;
-    }
+
 
     @Override
     public int[] getFileDownloadStatus(String downloadID, Object context) {
         return new int[3];
     }
-
-    @Override
-    public void registerDownloadCompleteReceiver(final UMDownloadCompleteReceiver receiver, final Object context) {
-
-    }
-
-    @Override
-    public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
-        try{
-            ((Context)context).unregisterReceiver(downloadCompleteReceivers.get(receiver));
-            downloadCompleteReceivers.remove(receiver);
-        }catch (RuntimeException e){
-            e.printStackTrace();
-        }
-
-    }
-
 
 
     private SharedPreferences getAppSharedPreferences(Context context) {

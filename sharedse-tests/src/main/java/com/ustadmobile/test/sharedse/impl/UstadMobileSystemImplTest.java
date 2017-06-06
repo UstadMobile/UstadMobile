@@ -72,11 +72,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String queueFileDownload(String url, String fileURI, String entryId, Hashtable headers, Object context) {
-        return null;
-    }
-
-    @Override
     public String getCacheDir(int mode, Object context) {
         File tmpDir = cacheDirs.get(mode);
         if(tmpDir == null) {
@@ -133,15 +128,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         return new int[0];
     }
 
-    @Override
-    public void registerDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
-
-    }
-
-    @Override
-    public void unregisterDownloadCompleteReceiver(UMDownloadCompleteReceiver receiver, Object context) {
-
-    }
 
     @Override
     public String getActiveUser(Object context) {
