@@ -72,6 +72,11 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
+    public String getAppSetupFile(Object context) {
+        return null;
+    }
+
+    @Override
     public String queueFileDownload(String url, String fileURI, String entryId, Hashtable headers, Object context) {
         return null;
     }

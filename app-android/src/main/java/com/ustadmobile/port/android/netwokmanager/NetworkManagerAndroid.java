@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
@@ -36,6 +37,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -190,7 +192,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                         " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
                 if(isConnected){
                     Log.i(NetworkManagerAndroid.TAG, "Handle connection changed");
-                    handleWifiDirectConnectionChanged(ssid,isConnected);
+                    handleWifiDirectConnectionChanged(ssid);
                 }
             }
         }, intentFilter);
@@ -349,8 +351,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                     }
                 }
 
-                //TODO: call handler on fail method here
-                handler.onConnectionFailed(bluetoothDevice.getAddress());
+                //TODO:Handle on connection failure here
 
             }
         }).start();
@@ -452,6 +453,15 @@ public class NetworkManagerAndroid extends NetworkManager{
         super.onDestroy();
 
     }
+
+    @Override
+    public void shareSetupFile(String filePath, String shareTitle) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("*/*");
+        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
+        getContext().startActivity(Intent.createChooser(intent,shareTitle));
+    }
+
 
     /**
      * Method to get platform dependent application context

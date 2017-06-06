@@ -32,12 +32,6 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     private int currentNode;
 
-    private int connectionRetryCount=0;
-
-    private int MAXIMUM_RETRY_COUNT=1;
-
-    private int MAXIMUM_WAITING_TIME=1000;
-
     public EntryStatusTask(List<String> entryIdList, List<NetworkNode> networkNodeList, NetworkManager networkManager){
         super(networkManager);
         this.entryIdList = entryIdList;
@@ -124,25 +118,6 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         }
 
         connectNextNode(currentNode+1);
-    }
-
-    /**
-     * @exception InterruptedException
-     * @param bluetoothAddress Bluetooth address which was trying to connect to.
-     */
-    @Override
-    public void onConnectionFailed(String bluetoothAddress) {
-        if(networkNodeList.get(currentNode).getDeviceBluetoothMacAddress().equals(bluetoothAddress) && connectionRetryCount < MAXIMUM_RETRY_COUNT){
-            connectionRetryCount++;
-            try{
-                Thread.sleep(MAXIMUM_WAITING_TIME);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            connectNextNode(currentNode);
-        }else{
-            connectNextNode(currentNode+1);
-        }
     }
 
 

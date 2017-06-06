@@ -425,4 +425,9 @@ public class MockNetworkManager extends NetworkManager {
     public void reconnectPreviousNetwork() {
         //TODO: implement this.test
     }
+
+    @Override
+    public void shareSetupFile(String filePath, String shareTitle) {
+
+    }
 }

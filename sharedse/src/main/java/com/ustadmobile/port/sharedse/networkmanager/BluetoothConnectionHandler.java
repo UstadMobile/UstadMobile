@@ -17,10 +17,4 @@ public interface BluetoothConnectionHandler {
      * @param outputStream OutputStream to write data to.
      */
     void onConnected(InputStream inputStream, OutputStream outputStream);
-
-    /**
-     * Method to be invoked when bluetooth connection fails.
-     * @param bluetoothAddress Bluetooth address which was trying to connect to.
-     */
-    void onConnectionFailed(String bluetoothAddress);
 }

@@ -52,7 +52,6 @@ public interface NetworkManagerListener {
      * ordered by the user or connectWifi.
      *
      * @param ssid The new wifi network connected to.
-     * @param isWifiConnected Connection state
      */
-    void wifiConnectionChanged(String ssid, boolean isWifiConnected);
+    void wifiConnectionChanged(String ssid);
 }

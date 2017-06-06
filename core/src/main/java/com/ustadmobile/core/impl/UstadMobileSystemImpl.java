@@ -1077,8 +1077,12 @@ public abstract class UstadMobileSystemImpl {
         return initRan;
     }
 
-
-
+    /**
+     * Return absolute path of the application setup file.
+     * @param context System context
+     * @return String: file absolute path
+     */
+    public abstract String getAppSetupFile(Object context);
 
 
 }
