@@ -13,6 +13,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * This class is responsible for handling all network service discovery operations within UstadMobile app.
  * It will handle creating network service, discover other instances of the service and stop it when necessary.
  * This service was implemented as per Google's Android documentation.
+ *
  * @link https://developer.android.com/training/connect-devices-wirelessly/nsd.html
  *
  * @author kileha3
@@ -120,8 +121,8 @@ public class NSDHelperAndroid {
     }
 
     /**
-     * This method initializes all service registration listeners which include both registration and un-registration.
-     * This listener is responsible to listen for the registration event:-
+     * This method initializes all service registration listeners
+     * which include both registration and un-registration.
      * <p>
      *     Upon service registration, we do expect two different event outcome;-
      *     <b>onServiceRegistered</b>: This method will be called when service is successfully registered

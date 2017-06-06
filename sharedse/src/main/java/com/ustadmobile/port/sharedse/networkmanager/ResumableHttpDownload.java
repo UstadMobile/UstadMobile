@@ -13,9 +13,12 @@ import java.net.URL;
 import java.util.Properties;
 
 /**
- * This class encapsulates HTTP resume logic.
+ * <h1>ResumableHttpDownload</h1>
  *
- * Created by mike on 5/27/17.
+ * This class encapsulates HTTP resume logic, it is also responsible to download the file from
+ * its source to our application.
+ *
+ * @author mike
  */
 public class ResumableHttpDownload {
 
@@ -23,8 +26,14 @@ public class ResumableHttpDownload {
 
     private String destinationFile;
 
+    /**
+     * Extension of the file which carry file information
+     */
     public static final String DLINFO_EXTENSION = ".dlinfo";
 
+    /**
+     * Extension of the partially downloaded file.
+     */
     public static final String DLPART_EXTENSION = ".dlpart";
 
     private static final String HTTP_HEADER_LAST_MODIFIED ="last-modified";
@@ -33,8 +42,14 @@ public class ResumableHttpDownload {
 
     private static final String HTTP_HEADER_CONTENT_RANGE = "content-range";
 
+    /**
+     * HTTP header accepted encoding type.
+     */
     public static final String HTTP_HEADER_ACCEPT_ENCODING = "Accept-Encoding";
 
+    /**
+     * HTTP encoding identity
+     */
     public static final String HTTP_ENCODING_IDENTITY = "identity";
 
     public static final String HTTP_HEADER_CONTENT_LENGTH = "";
@@ -53,6 +68,11 @@ public class ResumableHttpDownload {
         this.destinationFile = destinationFile;
     }
 
+    /**
+     * Method which download the file from its source.
+     * @return boolean: TRUE, if the file was downloaded successfully otherwise FALSE.
+     * @throws IOException
+     */
     public boolean download() throws IOException{
         File dlInfoFile = new File(destinationFile + DLINFO_EXTENSION);
         File dlPartFile = new File(destinationFile + DLPART_EXTENSION);
@@ -207,7 +227,7 @@ public class ResumableHttpDownload {
     /**
      * The total in bytes downloaded so far. Includes 'resumed' bytes from previous attempts
      *
-     * @return
+     * @return long: Total bytes downloaded
      */
     public synchronized long getDownloadedSoFar() {
         return downloadedSoFar;
@@ -216,7 +236,7 @@ public class ResumableHttpDownload {
     /**
      * The total size of the download if known in bytes,or -1 if that's not yet known
      *
-     * @return
+     * @return long: Total bytes in a file
      */
     public synchronized long getTotalSize() {
         return totalSize;

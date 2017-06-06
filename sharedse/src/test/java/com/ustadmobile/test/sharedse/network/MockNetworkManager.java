@@ -253,12 +253,12 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     @Override
-    public void updateNotification(int notificationId, int progress, String title, String message) {
+    public void updateNotification(int notificationType, int progress, String title, String message) {
 
     }
 
     @Override
-    public void removeNotification(int notificationId) {
+    public void removeNotification(int notificationType) {
 
     }
 

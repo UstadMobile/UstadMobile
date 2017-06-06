@@ -62,8 +62,20 @@ import edu.rit.se.wifibuddy.WifiDirectHandler;
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
- * Created by kileha3 on 09/05/2017.
+ * <h1>NetworkManagerAndroid</h1>
+ *
+ * This is a class wrapper which defines all the platform dependent operation
+ * on android platform. It is responsible for registering all network listeners, register all services,
+ * getting right device address like MAC address and IP address, handle bluetooth
+ * and WiFi direct connections e.t.c.
+ *
+ * @see com.ustadmobile.port.sharedse.networkmanager.NetworkManager
+ *
+ *
+ * @author kileha3
  */
+
+
 
 public class NetworkManagerAndroid extends NetworkManager{
 
@@ -71,22 +83,26 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private Map<Context, ServiceConnection> serviceConnectionMap;
 
-
     private static  Long TIME_PASSED_FOR_PROGRESS_UPDATE = Calendar.getInstance().getTimeInMillis();
 
     private final static int WAITING_TIME_TO_UPDATE = 500;
 
     private static final String DEFAULT_BLUETOOTH_ADDRESS="02:00:00:00:00:00";
 
+    /**
+     * Tag for the real device bluetooth address from
+     * its adapter when default address is returned.
+     */
     public static final String DEVICE_BLUETOOTH_ADDRESS = "bluetooth_address";
 
+    /**
+     * Shared preference key for the supernode status value.
+     */
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
 
     private static final String SERVICE_DEVICE_AVAILABILITY = "av";
 
     private int nodeStatus = -1;
-
-    private static final int NODE_STATUS_NOT_STARTED = -1;
 
     private static final int NODE_STATUS_SUPERNODE_RUNNING = 1;
 
@@ -111,6 +127,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     private ConnectivityManager connectivityManager;
 
     private NSDHelperAndroid nsdHelperAndroid;
+
 
     private int currentWifiDirectGroupStatus= WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
@@ -137,7 +154,9 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         connectivityManager= (ConnectivityManager) networkService.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        //check if the device is currently connected to the WiFi and get network ID
+
+        /*Check if the device is currently connected to the WiFi ,
+        if yes get network information and notify other part of the app.*/
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
         if (info != null && info.isConnected()) {
             if (info.getTypeName().equalsIgnoreCase("WIFI")) {
@@ -145,7 +164,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             }
         }
 
-        //listen for the intents
+        /*Register all network listeners*/
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
@@ -171,7 +190,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                         " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
                 if(isConnected){
                     Log.i(NetworkManagerAndroid.TAG, "Handle connection changed");
-                    handleWifiDirectConnectionChanged(ssid);
+                    handleWifiDirectConnectionChanged(ssid,isConnected);
                 }
             }
         }, intentFilter);
@@ -211,10 +230,14 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
     };
 
-
+    /**
+     * This method is responsible for setting up the right services connection
+     * @param serviceConnectionMap Map of all services connection made within the app.
+     */
     public void setServiceConnectionMap(Map<Context, ServiceConnection> serviceConnectionMap) {
         this.serviceConnectionMap = serviceConnectionMap;
     }
+
 
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
@@ -287,7 +310,9 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
 
-
+    /**
+     * @exception IOException
+     */
     @Override
     public void connectBluetooth(final String deviceAddress, final BluetoothConnectionHandler handler) {
         new Thread(new Runnable() {
@@ -325,6 +350,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                 }
 
                 //TODO: call handler on fail method here
+                handler.onConnectionFailed(bluetoothDevice.getAddress());
 
             }
         }).start();
@@ -347,7 +373,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
-    public void updateNotification(int notificationId,int progress, String title, String message) {
+    public void updateNotification(int notificationType, int progress, String title, String message) {
         Long time_now = Calendar.getInstance().getTimeInMillis();
         int max_progress_status=100;
         if(((time_now - TIME_PASSED_FOR_PROGRESS_UPDATE) < WAITING_TIME_TO_UPDATE) ||
@@ -359,21 +385,21 @@ public class NetworkManagerAndroid extends NetworkManager{
         mBuilder.setContentTitle(title)
                 .setContentText(message);
         mBuilder.setProgress(100,Math.abs(progress), false);
-        mNotifyManager.notify(notificationId, mBuilder.build());
+        mNotifyManager.notify(notificationType, mBuilder.build());
     }
 
     @Override
-    public void removeNotification(int notificationId) {
+    public void removeNotification(int notificationType) {
         mBuilder.setProgress(0, 0, false);
         mBuilder.setOngoing(false);
-        mNotifyManager.notify(notificationId, mBuilder.build());
-        mNotifyManager.cancel(notificationId);
+        mNotifyManager.notify(notificationType, mBuilder.build());
+        mNotifyManager.cancel(notificationType);
     }
 
 
     /**
      * This constructs a map of DNS-Text records to be associated with the service
-     * @return
+     * @return HashMap : Constructed DNS-Text records.
      */
     private HashMap<String,String> localService(){
         boolean isConnected= connectivityManager!=null &&
@@ -393,7 +419,7 @@ public class NetworkManagerAndroid extends NetworkManager{
      * Get bluetooth address of the device, in android 6 and above this tends to return
      * default bluetooth address which is referenced as DEFAULT_BLUETOOTH_ADDRESS.
      * After getting this we have to resolve it to get the real bluetooth Address.
-     * @return
+     * @return String: Device bluetooth address
      */
     public String getBluetoothMacAddress(){
         String address = BluetoothAdapter.getDefaultAdapter().getAddress();
@@ -428,10 +454,19 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     }
 
+    /**
+     * Method to get platform dependent application context
+     * which may be referenced from different parts of the app.
+     * @return Context: Application context
+     */
     public Context getContext(){
         return networkService.getApplicationContext();
     }
 
+    /**
+     * @exception NullPointerException
+     * @exception SocketException
+     */
     @Override
     public String getDeviceIPAddress() {
         NetworkInfo info = connectivityManager.getActiveNetworkInfo();
@@ -468,6 +503,10 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         return null;
     }
+
+    /**
+     * @exception InterruptedException
+     */
 
     @Override
     public void connectWifi(String ssid, String passPhrase) {
@@ -525,7 +564,7 @@ public class NetworkManagerAndroid extends NetworkManager{
      * This helps to prioritize which network to connect to.
      *
      * @param wifiManager
-     * @return
+     * @return int: Maximum configuration priority number.
      */
     private int getMaxConfigurationPriority(final WifiManager wifiManager) {
         final List<WifiConfiguration> configurations = wifiManager.getConfiguredNetworks();
@@ -612,6 +651,10 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     }
 
+    /**
+     * Method to get HTTP asserts URL.
+     * @return String : Default HTTP android assert URL.
+     */
     public String getHttpAndroidAssetsUrl() {
         return UMFileUtil.joinPaths(new String[]{"http://127.0.0.1:" + httpd.getListeningPort()
             + "/" + httpAndroidAssetsPath});

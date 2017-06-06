@@ -15,7 +15,14 @@ import java.util.List;
 import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_SEPARATOR;
 
 /**
- * Created by kileha3 on 09/05/2017.
+ * <h1>EntryStatusTask</h1>
+ *
+ * This is a class which is responsible to handle all entry status check task.
+ *
+ * @see com.ustadmobile.port.sharedse.networkmanager.NetworkTask
+ * @see com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler
+ *
+ * @author kileha3
  */
 
 public class EntryStatusTask extends NetworkTask implements BluetoothConnectionHandler{
@@ -24,6 +31,12 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     private List<NetworkNode> networkNodeList;
 
     private int currentNode;
+
+    private int connectionRetryCount=0;
+
+    private int MAXIMUM_RETRY_COUNT=1;
+
+    private int MAXIMUM_WAITING_TIME=1000;
 
     public EntryStatusTask(List<String> entryIdList, List<NetworkNode> networkNodeList, NetworkManager networkManager){
         super(networkManager);
@@ -63,6 +76,11 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     }
 
+    /**
+     * @exception IOException
+     * @param inputStream InputStream to read data from.
+     * @param outputStream OutputStream to write data to.
+     */
     @Override
     public void onConnected(InputStream inputStream, OutputStream outputStream) {
         String queryStr = BluetoothServer.CMD_ENTRY_STATUS_QUERY + ' ';
@@ -107,6 +125,26 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
         connectNextNode(currentNode+1);
     }
+
+    /**
+     * @exception InterruptedException
+     * @param bluetoothAddress Bluetooth address which was trying to connect to.
+     */
+    @Override
+    public void onConnectionFailed(String bluetoothAddress) {
+        if(networkNodeList.get(currentNode).getDeviceBluetoothMacAddress().equals(bluetoothAddress) && connectionRetryCount < MAXIMUM_RETRY_COUNT){
+            connectionRetryCount++;
+            try{
+                Thread.sleep(MAXIMUM_WAITING_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            connectNextNode(currentNode);
+        }else{
+            connectNextNode(currentNode+1);
+        }
+    }
+
 
     @Override
     public int getQueueId() {

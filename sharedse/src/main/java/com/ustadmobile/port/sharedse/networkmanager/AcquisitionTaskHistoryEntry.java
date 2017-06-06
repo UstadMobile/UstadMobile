@@ -1,10 +1,13 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
 /**
+ *
+ * <h1>AcquisitionTaskHistoryEntry</h1>
+ *
  * An acquisition can be downloaded in multiple runs (e.g. when the first download fails at first,
  * is then resumed, possibly from another source, etc).
  *
- * Created by mike on 6/1/17.
+ * @author mike
  */
 
 public class AcquisitionTaskHistoryEntry {
