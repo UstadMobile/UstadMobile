@@ -61,6 +61,7 @@ import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
@@ -145,7 +146,7 @@ public class NetworkManagerAndroid extends NetworkManager{
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
      * method from it's onCreate
      *
-     * @param context Context object: on Android always the NetworkServiceAndroid instance
+     * @param context System context
      */
     @Override
     public void init(Object context) {
@@ -455,11 +456,14 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
-    public void shareSetupFile(String filePath, String shareTitle) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
-        getContext().startActivity(Intent.createChooser(intent,shareTitle));
+    public void shareAppSetupFile(String filePath, String shareTitle) {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
+        Intent chooserIntent=Intent.createChooser(shareIntent,shareTitle);
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(chooserIntent);
     }
 
 

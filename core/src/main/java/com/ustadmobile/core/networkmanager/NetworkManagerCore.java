@@ -16,4 +16,6 @@ public interface NetworkManagerCore {
 
     void removeAcquisitionTaskListener(AcquisitionListener listener);
 
+    void shareAppSetupFile(String filePath, String shareTitle);
+
 }

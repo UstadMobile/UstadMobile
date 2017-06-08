@@ -31,18 +31,13 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.MessageIDConstants;
-import com.ustadmobile.core.impl.TinCanQueueEvent;
-import com.ustadmobile.core.impl.TinCanQueueListener;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.UstadView;
-import com.ustadmobile.core.view.UserSettingsView;
+
 import java.util.Hashtable;
-import java.util.Vector;
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -66,12 +61,14 @@ public abstract class UstadBaseController implements UstadController {
     public static final int CMD_LOGOUT = 1003;
     
     public static final int CMD_HOME = 1004;
+
+    public static final int CMD_SHARE_APP=1005;
     
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
-        CMD_ABOUT, CMD_SETTINGS, CMD_LOGOUT};
+        CMD_ABOUT, CMD_SETTINGS, CMD_SHARE_APP,CMD_LOGOUT};
     
     public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageIDConstants.home,
-        MessageIDConstants.about, MessageIDConstants.settings, MessageIDConstants.logout};
+        MessageIDConstants.about, MessageIDConstants.settings,MessageIDConstants.shareAppSetup ,MessageIDConstants.logout};
 
 
     /**
@@ -186,10 +183,13 @@ public abstract class UstadBaseController implements UstadController {
                 UstadMobileSystemImpl.getInstance().go(AboutView.VIEW_NAME, new Hashtable(), context);
                 return true;
             case CMD_SETTINGS:
-                UstadMobileSystemImpl.getInstance().go(SettingsDataUsageView.VIEW_NAME,null, context);
+                UstadMobileSystemImpl.getInstance().go(UserSettingsView2.VIEW_NAME,null, context);
                 return true;
             case CMD_LOGOUT:
                 LoginController.handleLogout(context);
+                return true;
+            case CMD_SHARE_APP:
+                handleClickShareAppSetupFile(context);
                 return true;
         }
         
@@ -220,6 +220,16 @@ public abstract class UstadBaseController implements UstadController {
         String[] labels = new String[STANDARD_APPEMNU_CMDS.length];
         fillStandardMenuOptions(new int[labels.length], labels, 0);
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
+    }
+
+    /**
+     * Method which is responsible for initiating UstadMobile application setup sharing
+     * @param context System context
+     */
+    public static void handleClickShareAppSetupFile(Object context){
+        UstadMobileSystemImpl impl=UstadMobileSystemImpl.getInstance();
+        impl.getNetworkManager().shareAppSetupFile(impl.getAppSetupFile(context),
+                impl.getString(MessageIDConstants.shareAppDialogTitle));
     }
 
 

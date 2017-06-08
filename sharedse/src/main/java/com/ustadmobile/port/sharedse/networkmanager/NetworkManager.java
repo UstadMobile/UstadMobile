@@ -905,7 +905,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param filePath Setup file absolute path
      * @param shareTitle Share dialog title
      */
-    public abstract void shareSetupFile(String filePath,String shareTitle);
+    public abstract void shareAppSetupFile(String filePath, String shareTitle);
 
 
 }

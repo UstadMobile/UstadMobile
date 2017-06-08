@@ -427,7 +427,7 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     @Override
-    public void shareSetupFile(String filePath, String shareTitle) {
-
+    public void shareAppSetupFile(String filePath, String shareTitle) {
+        //TODO: implement this.test
     }
 }
