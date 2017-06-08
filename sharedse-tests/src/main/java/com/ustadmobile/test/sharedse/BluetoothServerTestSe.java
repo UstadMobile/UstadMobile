@@ -55,4 +55,5 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
            bluetoothNodeLock.notify();
        }
     }
+
 }

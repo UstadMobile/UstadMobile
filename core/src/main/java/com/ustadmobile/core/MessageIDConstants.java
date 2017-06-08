@@ -218,4 +218,6 @@ public class MessageIDConstants {
     public static final int neverShowThisNextTime=134;
     public static final int acceptButton=135;
     public static final int enableSuperNode=136;
+    public static final int shareAppSetup=137;
+    public static final int shareAppDialogTitle=138;
 }

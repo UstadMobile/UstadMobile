@@ -691,4 +691,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public NetworkManager getNetworkManager() {
         return networkManagerAndroid;
     }
+
+    @Override
+    public String getAppSetupFile(Object context) {
+        return new File(((Context)context).getApplicationInfo().sourceDir).getAbsolutePath();
+    }
 }

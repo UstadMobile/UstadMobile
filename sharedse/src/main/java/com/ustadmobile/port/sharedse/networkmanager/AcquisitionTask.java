@@ -93,10 +93,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     private boolean wifiDirectDownloadEnabled = true;
 
-    private int bluetoothRetryCount=0;
-
-    private static final int BLUETOOTH_CONNECTION_RETRY_COUNT=1;
-
     /**
      * Map all entry download statuses to their entry ID.
      * Useful when retrieving current status of entry acquisition task.
@@ -469,27 +465,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             networkManager.connectWifi(currentGroupSSID,passphrase);
     }
 
-    /**
-     * @exception InterruptedException
-     * @param bluetoothAddress Bluetooth address which was trying to connect to.
-     */
-    @Override
-    public void onConnectionFailed(String bluetoothAddress) {
-        if(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress().equals(bluetoothAddress) && bluetoothRetryCount < BLUETOOTH_CONNECTION_RETRY_COUNT){
-            bluetoothRetryCount++;
-            try{
-                Thread.sleep(WAITING_TIME_BEFORE_RETRY);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
-                    ,this);
-
-        }else{
-            acquireFile(currentEntryIdIndex+1);
-        }
-    }
-
 
     @Override
     public void cancel() {
@@ -572,8 +547,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     @Override
-    public void wifiConnectionChanged(String ssid, boolean isWifiConnected) {
-        if(currentGroupSSID != null && currentGroupSSID.equals(ssid) && isWifiConnected){
+    public void wifiConnectionChanged(String ssid) {
+        if(currentGroupSSID != null && currentGroupSSID.equals(ssid)){
             isWifiDirectActive=true;
             String fileUrl="http://"+ currentGroupIPAddress +":"+
                     entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"

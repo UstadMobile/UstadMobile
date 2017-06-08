@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
@@ -36,6 +37,7 @@ import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -59,6 +61,7 @@ import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
@@ -143,7 +146,7 @@ public class NetworkManagerAndroid extends NetworkManager{
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
      * method from it's onCreate
      *
-     * @param context Context object: on Android always the NetworkServiceAndroid instance
+     * @param context System context
      */
     @Override
     public void init(Object context) {
@@ -190,7 +193,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                         " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
                 if(isConnected){
                     Log.i(NetworkManagerAndroid.TAG, "Handle connection changed");
-                    handleWifiDirectConnectionChanged(ssid,isConnected);
+                    handleWifiDirectConnectionChanged(ssid);
                 }
             }
         }, intentFilter);
@@ -349,8 +352,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                     }
                 }
 
-                //TODO: call handler on fail method here
-                handler.onConnectionFailed(bluetoothDevice.getAddress());
+                //TODO:Handle on connection failure here
 
             }
         }).start();
@@ -453,6 +455,18 @@ public class NetworkManagerAndroid extends NetworkManager{
         super.onDestroy();
 
     }
+
+    @Override
+    public void shareAppSetupFile(String filePath, String shareTitle) {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("*/*");
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
+        Intent chooserIntent=Intent.createChooser(shareIntent,shareTitle);
+        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(chooserIntent);
+    }
+
 
     /**
      * Method to get platform dependent application context

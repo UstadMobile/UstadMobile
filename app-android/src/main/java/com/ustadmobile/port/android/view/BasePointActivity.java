@@ -57,6 +57,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     private BasePointMenuItem[] mNavigationDrawerItems;
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +101,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         setMenuItems(this.mNavigationDrawerItems);
     }
 
+
+
     @Override
     public void setMenuItems(final BasePointMenuItem[] menuItems) {
         this.mNavigationDrawerItems = menuItems;
@@ -138,6 +142,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         super.onPostCreate(savedInstanceState);
         mDrawerToggle.syncState();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

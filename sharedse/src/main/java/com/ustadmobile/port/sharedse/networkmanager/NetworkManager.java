@@ -522,8 +522,8 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Method which will be called to fire all Wi-Fi Direct connection events
      * @param ssid SSID of the current connected Wi-Fi Direct group.
      */
-    public void handleWifiDirectConnectionChanged(String ssid,boolean isWiFiConnected){
-        fireWiFiConnectionChanged(ssid,isWiFiConnected);
+    public void handleWifiDirectConnectionChanged(String ssid){
+        fireWiFiConnectionChanged(ssid);
     }
 
     /**
@@ -598,12 +598,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Method which will be firing events to all listening part ot the app to notify
      * that Wi-Fi state connection has been changed.
      * @param ssid Currently connected Wi-Fi network SSID
-     * @param isWifiConnected :Current connection state (TRUE, if connected and FALSE otherwise)
      */
-    protected void fireWiFiConnectionChanged(String ssid, boolean isWifiConnected){
+    protected void fireWiFiConnectionChanged(String ssid){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
-                listener.wifiConnectionChanged(ssid,isWifiConnected);
+                listener.wifiConnectionChanged(ssid);
             }
         }
     }
@@ -900,6 +899,13 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public String getLocalHttpUrl() {
         return "http://127.0.0.1:" + getHttpListeningPort() + "/";
     }
+
+    /**
+     * Method which is responsible for sharing application setup file to other devices.
+     * @param filePath Setup file absolute path
+     * @param shareTitle Share dialog title
+     */
+    public abstract void shareAppSetupFile(String filePath, String shareTitle);
 
 
 }
