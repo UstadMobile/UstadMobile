@@ -14,6 +14,7 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import org.json.JSONObject;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,6 +32,8 @@ public class TestWifiDirectGroupConnection {
 
     @Test
     public void testWifiDirectGroupConnection() throws IOException{
+        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        Assume.assumeTrue("WiFi is available and enabled", manager.isWiFiEnabled());
         String createGroupUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd="
                 + RemoteTestServerHttpd.CMD_CREATEGROUP;
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(createGroupUrl, null, null);
@@ -43,7 +46,7 @@ public class TestWifiDirectGroupConnection {
         Assert.assertNotNull("Got ssid", ssid);
         Assert.assertNotNull("Got passphrase", passphrase);
 
-        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+
         final String[] connectedSsid = new String[1];
         final Object connectionLock = new Object();
         NetworkManagerListener listener = new NetworkManagerListener() {
