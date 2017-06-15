@@ -52,6 +52,8 @@ public interface NetworkManagerListener {
      * ordered by the user or connectWifi.
      *
      * @param ssid The new wifi network connected to.
+     * @param connected True if the connection is up and running, false otherwise
+     * @param connectedOrConnecting True if connected or an attempt to connect is in progress
      */
-    void wifiConnectionChanged(String ssid);
+    void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting);
 }

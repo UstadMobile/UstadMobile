@@ -14,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
@@ -25,12 +26,9 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.j256.ormlite.dao.ForeignCollection;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.nanolrs.core.model.XapiUser;
-import com.ustadmobile.nanolrs.ormlite.generated.model.XapiUserEntity;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
@@ -48,11 +46,10 @@ import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +58,6 @@ import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 /**
@@ -143,6 +139,11 @@ public class NetworkManagerAndroid extends NetworkManager{
     private String httpAndroidAssetsPath;
 
     /**
+     * A list of wifi direct ssids that are connected to using connectToWifiDirectGroup
+     */
+    private List<String> temporaryWifiDirectSsids = new ArrayList<>();
+
+    /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
      * method from it's onCreate
      *
@@ -191,10 +192,14 @@ public class NetworkManagerAndroid extends NetworkManager{
                 //TODO: handle when this has failed: this will result in info.isConnected being false
                 Log.i(NetworkManagerAndroid.TAG, "Network State Changed Action - ssid: " + ssid +
                         " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
+                handleWifiConnectionChanged(ssid, isConnected, isConnecting);
+
+                /*
                 if(isConnected){
                     Log.i(NetworkManagerAndroid.TAG, "Handle connection changed");
-                    handleWifiDirectConnectionChanged(ssid);
+                    handleWifiConnectionChanged(ssid);
                 }
+                */
             }
         }, intentFilter);
 
@@ -523,7 +528,7 @@ public class NetworkManagerAndroid extends NetworkManager{
      */
 
     @Override
-    public void connectWifi(String ssid, String passPhrase) {
+    public void connectWifi(String ssid, String passphrase) {
         /*
          * Android 4.4 has been observed on Samsung Galaxy Ace (Andriod 4.4.2 - SM-G313F) to refuse to connect
          * to any wifi access point after wifi direct service discovery has started. It will connect
@@ -551,7 +556,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
-        wifiConfig.preSharedKey = "\""+ passPhrase +"\"";
+        wifiConfig.preSharedKey = "\""+ passphrase +"\"";
         wifiConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
         wifiConfig.priority = getMaxConfigurationPriority(wifiManager);
 
@@ -567,10 +572,62 @@ public class NetworkManagerAndroid extends NetworkManager{
         wifiManager.disconnect();
         boolean successful = wifiManager.enableNetwork(netId, true);
         wifiManager.reconnect();
-        Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passPhrase +"', " +
+        Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passphrase +"', " +
                 "successful?"  + successful +  " priority = " + wifiConfig.priority);
 
         System.out.println("connectwifi");
+    }
+
+    @Override
+    public void connectToWifiDirectGroup(String ssid, String passphrase) {
+        temporaryWifiDirectSsids.add(ssid);
+        super.connectToWifiDirectGroup(ssid, passphrase);
+    }
+
+    private void deleteTemporaryWifiDirectSsids() {
+        List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
+
+        String ssid;
+        for(WifiConfiguration config : configuredNetworks) {
+            if(config.SSID == null)
+                continue;
+
+            ssid = config.SSID.replace("\"", "");
+            if(temporaryWifiDirectSsids.contains(ssid)){
+                boolean removedOk = wifiManager.removeNetwork(config.networkId);
+                if(removedOk)
+                    temporaryWifiDirectSsids.remove(ssid);
+            }
+        }
+    }
+
+    @Override
+    public void restoreWifi() {
+        wifiManager.disconnect();
+        deleteTemporaryWifiDirectSsids();
+        wifiManager.reconnect();
+    }
+
+    @Override
+    public void disconnectWifi() {
+        wifiManager.disconnect();
+        deleteTemporaryWifiDirectSsids();
+    }
+
+    @Override
+    public String getCurrentWifiSsid() {
+        WifiManager wifiManager=(WifiManager)getContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        /*get current connection information (Connection might be Cellular/WiFi)*/
+        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+        if (info != null && info.isConnected()) {
+            /*Check connection if is of type WiFi*/
+            if (info.getTypeName().equalsIgnoreCase("WIFI")) {
+                WifiInfo wifiInfo=wifiManager.getConnectionInfo();    //get connection details using info object.
+                return wifiInfo.getSSID();
+            }
+        }
+
+        return null;
     }
 
     /**

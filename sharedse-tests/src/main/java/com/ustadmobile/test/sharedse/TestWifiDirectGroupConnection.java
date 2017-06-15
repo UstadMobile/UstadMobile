@@ -84,13 +84,24 @@ public class TestWifiDirectGroupConnection {
             }
         };
         manager.addNetworkManagerListener(listener);
-        manager.connectWifi(ssid, passphrase);
+        manager.connectToWifiDirectGroup(ssid, passphrase);
         synchronized (connectionLock) {
             try {connectionLock.wait(CONNECTION_TIMEOUT);}
             catch(InterruptedException e) {}
         }
 
         Assert.assertEquals("Connected to created group ssid", ssid, connectedSsid[0]);
+
+        try { Thread.sleep(10000); }
+        catch(InterruptedException e) {}
+
+        manager.restoreWifi();
+        synchronized (connectionLock) {
+            try { connectionLock.wait(CONNECTION_TIMEOUT); }
+            catch(InterruptedException e) {}
+        }
+
+        Assert.assertNotEquals("Connected back to 'normal' wifi", ssid,connectedSsid[0]);
     }
 
 }

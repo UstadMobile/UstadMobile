@@ -14,7 +14,9 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -79,6 +81,10 @@ public class MockNetworkManager extends NetworkManager {
     private int mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
     public static final int MOCK_WIFI_CONNECTION_DELAY = 1000;
+
+    private List<String> temporaryWifiDirectSsids = new ArrayList<>();
+
+    private HashMap<String, String> savedNetworks = new HashMap<>();
 
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
@@ -292,7 +298,7 @@ public class MockNetworkManager extends NetworkManager {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String wirelessId = MockNetworkManager.this.mockDeviceName + '-' +
+                String wirelessId = "DIRECT-" + MockNetworkManager.this.mockDeviceName + '-' +
                     MockNetworkManager.this.mockNetworkCounter.getAndIncrement();
                 String passphrase = new BigInteger(130, passphraseSecureRandom).toString(32);
                 mockWifiDirectGroup = new WiFiDirectGroup(wirelessId, passphrase);
@@ -355,6 +361,7 @@ public class MockNetworkManager extends NetworkManager {
                     mockIpAddr = wirelessArea.connectDeviceToWifiNetwork(MockNetworkManager.this,
                             SSID, passPhrase);
                     if(mockIpAddr != null) {
+                        savedNetworks.put(SSID, passPhrase);
                         connectedWifiNetwork = wirelessArea.getWifiNetwork(SSID);
                         wifiNetworkServiceBroadcastTimer = new Timer();
                         wifiNetworkServiceBroadcastTimer.scheduleAtFixedRate(new WifiNetworkBroadcastTimer(),
@@ -364,6 +371,48 @@ public class MockNetworkManager extends NetworkManager {
                 }
             }
         }).start();
+    }
+
+    @Override
+    public void connectToWifiDirectGroup(String ssid, String passphrase) {
+        temporaryWifiDirectSsids.add(ssid);
+        super.connectToWifiDirectGroup(ssid, passphrase);
+    }
+
+    @Override
+    public void restoreWifi() {
+        //delete the temporary wifi ssid from the list
+        Iterator<String> ssidIterator = temporaryWifiDirectSsids.iterator();
+        String nextSsid;
+        while(ssidIterator.hasNext()) {
+            nextSsid = ssidIterator.next();
+            savedNetworks.remove(nextSsid);
+            ssidIterator.remove();
+        }
+
+        Iterator<String> knownNetworks = savedNetworks.keySet().iterator();
+        while(knownNetworks.hasNext()) {
+            nextSsid = knownNetworks.next();
+            if(wirelessArea.getWifiNetwork(nextSsid) != null){
+                //try and connect to it
+                connectWifi(nextSsid, savedNetworks.get(nextSsid));
+                return;
+            }
+        }
+    }
+
+    @Override
+    public void disconnectWifi() {
+        //TODO: implement me
+    }
+
+    @Override
+    public String getCurrentWifiSsid() {
+        if(connectedWifiNetwork != null) {
+            return connectedWifiNetwork.getSsid();
+        }else{
+            return null;
+        }
 
     }
 

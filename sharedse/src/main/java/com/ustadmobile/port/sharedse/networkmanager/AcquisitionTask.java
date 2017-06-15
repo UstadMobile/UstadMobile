@@ -109,6 +109,37 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private Map<String, List<AcquisitionTaskHistoryEntry>> acquisitionHistoryMap = new HashMap<>();
 
     /**
+     * The task wants to connect to the "normal" wifi e.g. for download from the cloud or for
+     * download from another peer on the same network
+     */
+    public static final String TARGET_NETWORK_NORMAL = "com.ustadmobile.network.normal";
+
+    /**
+     * The task wants to connect to another node not on the same network
+     */
+    public static final String TARGET_NETWORK_WIFIDIRECT_GROUP = "com.ustadmobile.network.connect";
+
+    /**
+     * The network that this task wants to connect with for the upcoming/current download
+     */
+    private String targetNetwork;
+
+    /**
+     * The url from which we are going to try downloading next.
+     */
+    private String currentDownloadUrl;
+
+    private int currentDownloadMode;
+
+    /**
+     * Indicates if the task is currently waiting for a wifi connection to be established in order
+     * to continue.
+     */
+    private boolean waitingForWifiConnection = true;
+
+
+
+    /**
      * Monitor file acquisition task progress and report it to the rest of the app (UI).
      * <p>
      *     Status will be updated only if the progress
@@ -259,6 +290,24 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     /**
+     * Cleanup: called when all downloads have been attempted and succeeded or permanently failed
+     */
+    protected synchronized void onDone() {
+        //All entries complete
+        networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
+        networkManager.removeNetworkManagerListener(this);
+
+        if(updateTimer!=null){
+            updateTimer.cancel();
+            updateTimerTask.cancel();
+            updateTimerTask =null;
+            updateTimer=null;
+        }
+
+        networkManager.handleTaskCompleted(this);
+    }
+
+    /**
      * Method determine where to download the file from
      * (Cloud, Peer on the same network or Peer on different network)
      *
@@ -272,6 +321,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private void acquireFile(int index){
         if(index < feed.entries.length) {
             currentEntryIdIndex = index;
+            setWaitingForWifiConnection(false);
 
             networkManager.getEntryAcquisitionTaskMap().put(getFeed().entries[currentEntryIdIndex].id,this);
             if(httpDownload!=null){
@@ -292,6 +342,45 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             String entryId = feed.entries[currentEntryIdIndex].id;
             entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
 
+
+            if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+                targetNetwork = TARGET_NETWORK_NORMAL;
+                currentDownloadUrl = "http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
+                        +entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
+                currentDownloadMode = DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
+            }else if(wifiDirectDownloadEnabled && entryCheckResponse != null){//TODO: Check freshness of wifi direct response?
+                targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
+                currentDownloadMode = DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
+            }else {
+                targetNetwork = TARGET_NETWORK_NORMAL;
+                currentDownloadUrl = UMFileUtil.resolveLink(
+                    feed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF],
+                    feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(null)[UstadJSOPDSEntry.LINK_HREF]);
+                currentDownloadMode = DOWNLOAD_FROM_CLOUD;
+            }
+
+            if(targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT_GROUP)) {
+                networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
+                        currentDownloadMode);
+                networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
+                        ,this);
+            }else if(targetNetwork.equals(TARGET_NETWORK_NORMAL)) {
+                String currentSsid = networkManager.getCurrentWifiSsid();
+                boolean isConnectedToWifiDirectGroup = networkManager.isConnectedToWifiDirectGroup();
+
+                if(currentSsid != null && !isConnectedToWifiDirectGroup){
+                    networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
+                            currentDownloadMode);
+                    downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
+                }else if(isConnectedToWifiDirectGroup){
+                    setWaitingForWifiConnection(true);
+                    networkManager.restoreWifi();
+                }
+            }
+
+
+
+            /*
             if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
                         DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
@@ -308,19 +397,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         currentDownloadId,DOWNLOAD_FROM_CLOUD);
                 downloadCurrentFile(getFileURIs()[FILE_DOWNLOAD_URL_INDEX], DOWNLOAD_FROM_CLOUD);
             }
-
+            */
         }else{
-            //All entries complete
-            networkManager.removeNotification(NOTIFICATION_TYPE_ACQUISITION);
-
-            if(updateTimer!=null){
-                updateTimer.cancel();
-                updateTimerTask.cancel();
-                updateTimerTask =null;
-                updateTimer=null;
-            }
-
-            networkManager.handleTaskCompleted(this);
+            onDone();
         }
     }
 
@@ -438,6 +517,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         String acquireCommand = BluetoothServer.CMD_ACQUIRE_ENTRY +" "+networkManager.getDeviceIPAddress()+"\n";
         String response=null;
         String passphrase = null;
+        targetNetwork = null;
         try {
             outputStream.write(acquireCommand.getBytes());
             outputStream.flush();
@@ -451,18 +531,28 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 currentGroupIPAddress =groupInfo[2].replace("/","");
                 currentGroupSSID =groupInfo[0];
                 passphrase = groupInfo[1];
+                currentDownloadUrl = "http://"+ currentGroupIPAddress +":"+
+                        entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
+                        +getFeed().entries[currentEntryIdIndex].id;
             }
         }catch(IOException e) {
             e.printStackTrace();
         }finally {
-            if(response!=null){
-                UMIOUtils.closeInputStream(inputStream);
-                UMIOUtils.closeOutputStream(outputStream);
-            }
+            //if(response!=null){
+            UMIOUtils.closeInputStream(inputStream);
+            UMIOUtils.closeOutputStream(outputStream);
+            //}
         }
 
-        if(currentGroupSSID != null && passphrase != null)
-            networkManager.connectWifi(currentGroupSSID,passphrase);
+        if(currentGroupSSID != null && passphrase != null) {
+            String currentSsid = networkManager.getCurrentWifiSsid();
+            if(currentSsid != null && currentGroupSSID.equals(currentSsid)) {
+                downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
+            }else {
+                setWaitingForWifiConnection(true);
+                networkManager.connectToWifiDirectGroup(currentGroupSSID, passphrase);
+            }
+        }
     }
 
 
@@ -547,17 +637,34 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     @Override
-    public void wifiConnectionChanged(String ssid) {
-        if(currentGroupSSID != null && currentGroupSSID.equals(ssid)){
-            isWifiDirectActive=true;
-            String fileUrl="http://"+ currentGroupIPAddress +":"+
-                    entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
-                    +getFeed().entries[currentEntryIdIndex].id;
-            downloadCurrentFile(fileUrl, DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+    public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+        if(!isWaitingForWifiConnection())
+            return;
+
+        if(connected && targetNetwork != null && targetNetwork.equals(TARGET_NETWORK_NORMAL)) {
+            setWaitingForWifiConnection(false);
+            downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
+        }
+
+        if(connected && currentGroupSSID != null && currentGroupSSID.equals(ssid)){
+            setWaitingForWifiConnection(false);
+            downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
         }
     }
 
+    protected synchronized boolean isWaitingForWifiConnection() {
+        return waitingForWifiConnection;
+    }
 
+    /**
+     * Sometimes this task needs to change the wifi connection in order to continue. It *MUST*
+     * set this flag so that the event listener observing wifi connections will know to continue
+     *
+     * @param waitingForWifiConnection
+     */
+    protected synchronized void setWaitingForWifiConnection(boolean waitingForWifiConnection) {
+        this.waitingForWifiConnection = waitingForWifiConnection;
+    }
 
     /**
      * If enabled the task will attempt to acquire the requested entries from another node on the same

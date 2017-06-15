@@ -1,15 +1,20 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
+import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -133,6 +138,38 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
     protected EmbeddedHTTPD httpd;
 
+    public static final int AFTER_GROUP_CONNECTION_DO_NOTHING = 0;
+
+    public static final int AFTER_GROUP_CONNECTION_DISCONNECT = 1;
+
+    public static final int AFTER_GROUP_CONNECTION_RESTORE = 2;
+
+    /**
+     *
+     */
+    protected int actionRequiredAfterGroupConnection;
+
+    /**
+     * The prefix used on all Wifi Direct group networks as per the spec.
+     */
+    public static final String WIFI_DIRECT_GROUP_SSID_PREFIX = "DIRECT-";
+
+    /**
+     * The http prefix we use for the internal OPDS catalog server
+     */
+    public static final String CATALOG_HTTP_ENDPOINT_PREFIX = "/catalog/";
+
+
+    /**
+     * The uri used for an OPDS feed representing items the user wishes to share locally
+     */
+    public static final String CATALOG_HTTP_SHARED_URI = "/shared/shared.opds";
+
+    /**
+     * The ssid of the last "normal" wifi network connected to, if any
+     */
+    protected String ssidToRestore;
+
     public NetworkManager() {
     }
 
@@ -167,7 +204,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
         try {
             httpd = new EmbeddedHTTPD(0);
-            httpd.addRoute("/catalog/(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
+            httpd.addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
         }catch(IOException e) {
@@ -278,6 +315,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     /**
      * Method which check the queue and manage it,
      * if there is any task to be executed will be executed.
+     *
      * @param queueType Queue type, whether is queue of Acquisition task or EntryStatus task
      */
     public synchronized void checkTaskQueue(int queueType){
@@ -286,6 +324,20 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             currentTasks[queueType].setNetworkManager(this);
             currentTasks[queueType].setNetworkTaskListener(this);
             currentTasks[queueType].start();
+        }
+
+        if(queueType == QUEUE_ENTRY_ACQUISITION && tasksQueues[queueType].isEmpty()) {
+            switch(actionRequiredAfterGroupConnection) {
+                case AFTER_GROUP_CONNECTION_DISCONNECT:
+                    actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
+                    disconnectWifi();
+                    break;
+
+                case AFTER_GROUP_CONNECTION_RESTORE:
+                    actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
+                    restoreWifi();
+                    break;
+            }
         }
     }
 
@@ -522,8 +574,13 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Method which will be called to fire all Wi-Fi Direct connection events
      * @param ssid SSID of the current connected Wi-Fi Direct group.
      */
-    public void handleWifiDirectConnectionChanged(String ssid){
-        fireWiFiConnectionChanged(ssid);
+    public void handleWifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting){
+        if(ssid != null && connected && !ssid.toUpperCase().startsWith("DIRECT-")) {
+            //this is not a wifi direct network
+            actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
+        }
+
+        fireWiFiConnectionChanged(ssid, connected, connectedOrConnecting);
     }
 
     /**
@@ -599,10 +656,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * that Wi-Fi state connection has been changed.
      * @param ssid Currently connected Wi-Fi network SSID
      */
-    protected void fireWiFiConnectionChanged(String ssid){
+    protected void fireWiFiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
-                listener.wifiConnectionChanged(ssid);
+                listener.wifiConnectionChanged(ssid, connected, connectedOrConnecting);
             }
         }
     }
@@ -638,6 +695,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public void handleTaskCompleted(NetworkTask task) {
         if(task == currentTasks[task.getTaskType()]) {
             currentTasks[task.getTaskType()] = null;
+            tasksQueues[task.getTaskType()].remove(task);
             checkTaskQueue(task.getTaskType());
         }
 
@@ -677,10 +735,64 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * listen for a successful connection.  There is not necessarily any event for a failed connection
      * : tasks using this may have to use a timeout approach to detect failure.
      *
-     * @param SSID SSID to connect to
-     * @param passPhrase Passphrase to use
+     * @param ssid SSID to connect to
+     * @param passphrase Passphrase to use
      */
-    public abstract void connectWifi(String SSID,String passPhrase);
+    public abstract void connectWifi(String ssid,String passphrase);
+
+    /**
+     * Called to "restore" the wifi connection to the 'normal' WiFi. Used when we have connected
+     * to a WiFi direct group to restore the connection to the normal WiFi.
+     */
+    public abstract void restoreWifi();
+
+    /**
+     * Called
+     */
+    public abstract void disconnectWifi();
+
+    /**
+     * Connect to the given ssid. This method will mark the connection as a temporary connection.
+     *
+     * This method will
+     *  1. Check the current connectivity status and set a flag for what to do once we are finished
+     *     with this connection (either disconnect if there is currently no active wifi network,
+     *     or restore if there is an active wifi connection)
+     *
+     *  2. Connect to the given network
+     *
+     * @param ssid
+     * @param passphrase
+     */
+    public void connectToWifiDirectGroup(String ssid, String passphrase){
+        if(actionRequiredAfterGroupConnection == AFTER_GROUP_CONNECTION_DO_NOTHING){
+            if(getCurrentWifiSsid() != null) {
+                actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_RESTORE;
+            }else {
+                actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DISCONNECT;
+            }
+        }
+
+        connectWifi(ssid, passphrase);
+    }
+
+    /**
+     * Determine if the device is currently connected to a wifi direct network or not
+     * @return
+     */
+    public boolean isConnectedToWifiDirectGroup() {
+        String ssid = getCurrentWifiSsid();
+        return ssid != null && ssid.toUpperCase().startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX);
+    }
+
+    /**
+     * Gets the currently connected wifi ssid : if any
+     *
+     * @return
+     */
+    public abstract String getCurrentWifiSsid();
+
+
 
     /**
      * Create a new WiFi direct group on this device. A WiFi direct group
@@ -906,6 +1018,42 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param shareTitle Share dialog title
      */
     public abstract void shareAppSetupFile(String filePath, String shareTitle);
+
+    /**
+     * Sets the shared http endpoint catalog.
+     *
+     * @param sharedFeed
+     */
+    public void setSharedFeed(UstadJSOPDSFeed sharedFeed) {
+        httpd.addRoute(CATALOG_HTTP_SHARED_URI, OPDSFeedUriResponder.class, sharedFeed);
+    }
+
+    /**
+     * Set the shared http endpoint catalog using an array of entry ids to be shared
+     *
+     * @param entryIds
+     */
+    public void setSharedFeed(String[] entryIds) {
+        String feedSrcHref = UMFileUtil.joinPaths(new String[] {getLocalHttpUrl(),
+                "/shared/shared.opds"});
+        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(feedSrcHref, "Shared courses",
+                UMUUID.randomUUID().toString());
+        UstadJSOPDSEntry entry;
+        CatalogEntryInfo entryInfo;
+        for(int i = 0; i < entryIds.length; i++) {
+            entryInfo = CatalogController.getEntryInfo(entryIds[i], CatalogController.SHARED_RESOURCE,
+                    getContext());
+
+            if(entryInfo == null || entryInfo.acquisitionStatus != CatalogController.STATUS_ACQUIRED)
+                continue;//cannot be shared if it has not been acquired.
+
+            entry = new UstadJSOPDSEntry(feed, "Shared: " + entryInfo.fileURI, entryIds[i],
+                    UstadJSOPDSFeed.LINK_ACQUIRE, entryInfo.mimeType, CATALOG_HTTP_ENDPOINT_PREFIX);
+            feed.addEntry(entry);
+        }
+
+        setSharedFeed(feed);
+    }
 
 
 }
