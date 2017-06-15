@@ -10,7 +10,8 @@ import org.junit.BeforeClass;
  * Created by mike on 6/2/17.
  */
 
-public class TestWifiDirectGroupConnectionRunTmp extends TestWifiDirectGroupConnection {
+public abstract class TestWifiDirectGroupConnectionRunTmp extends TestWifiDirectGroupConnection {
+
     @BeforeClass
     public static void initSystemImpl(){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
