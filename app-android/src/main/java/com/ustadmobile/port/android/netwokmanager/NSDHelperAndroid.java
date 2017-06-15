@@ -108,6 +108,7 @@ public class NSDHelperAndroid {
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
                 Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" + errorCode);
+                //TODO: this should not be called
                 mNsdManager.stopServiceDiscovery(this);
             }
 

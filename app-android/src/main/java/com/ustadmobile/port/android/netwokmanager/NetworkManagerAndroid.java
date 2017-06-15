@@ -127,10 +127,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private NSDHelperAndroid nsdHelperAndroid;
 
-
     private int currentWifiDirectGroupStatus= WIFI_DIRECT_GROUP_STATUS_INACTIVE;
-
-    private int previousConnectedNetId=-1;
 
     /**
      * Assets are served over http that are used to interact with the content (e.g. to inject a
@@ -159,15 +156,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         connectivityManager= (ConnectivityManager) networkService.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        /*Check if the device is currently connected to the WiFi ,
-        if yes get network information and notify other part of the app.*/
-        NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-        if (info != null && info.isConnected()) {
-            if (info.getTypeName().equalsIgnoreCase("WIFI")) {
-                previousConnectedNetId=wifiManager.getConnectionInfo().getNetworkId();
-            }
-        }
-
         /*Register all network listeners*/
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiDirectHandler.Action.SERVICE_CONNECTED);
@@ -188,7 +176,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                 boolean isConnecting = info.isConnectedOrConnecting();
                 String ssid = wifiManager.getConnectionInfo() != null ?
                         wifiManager.getConnectionInfo().getSSID() : null;
-                ssid = ssid != null ? ssid.replace("\"", "") : null;
+                ssid = normalizeAndroidWifiSsid(ssid);
                 //TODO: handle when this has failed: this will result in info.isConnected being false
                 Log.i(NetworkManagerAndroid.TAG, "Network State Changed Action - ssid: " + ssid +
                         " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
@@ -205,6 +193,20 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
+    }
+
+    /**
+     * Android normally but not always surrounds an SSID with quotes on it's configuration objects.
+     * This method simply removes the quotes, if they are there. Will also handle null safely.
+     *
+     * @param ssid
+     * @return
+     */
+    public static String normalizeAndroidWifiSsid(String ssid) {
+        if(ssid == null)
+            return ssid;
+        else
+            return ssid.replace("\"", "");
     }
 
 
@@ -592,7 +594,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             if(config.SSID == null)
                 continue;
 
-            ssid = config.SSID.replace("\"", "");
+            ssid = normalizeAndroidWifiSsid(config.SSID);
             if(temporaryWifiDirectSsids.contains(ssid)){
                 boolean removedOk = wifiManager.removeNetwork(config.networkId);
                 if(removedOk)
@@ -603,6 +605,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void restoreWifi() {
+        //TODO: An improvement would be to note the network connected to before and connect to exactly that one : this may or may not be allowed by Android security on recent versions
         wifiManager.disconnect();
         deleteTemporaryWifiDirectSsids();
         wifiManager.reconnect();
@@ -623,7 +626,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             /*Check connection if is of type WiFi*/
             if (info.getTypeName().equalsIgnoreCase("WIFI")) {
                 WifiInfo wifiInfo=wifiManager.getConnectionInfo();    //get connection details using info object.
-                return wifiInfo.getSSID();
+                return normalizeAndroidWifiSsid(wifiInfo.getSSID());
             }
         }
 
@@ -713,14 +716,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         return currentWifiDirectGroupStatus;
     }
 
-    @Override
-    public void reconnectPreviousNetwork() {
-        if(previousConnectedNetId!=-1){
-            wifiManager.enableNetwork(previousConnectedNetId, true);
-            wifiManager.reconnect();
-        }
-
-    }
 
     /**
      * Method to get HTTP asserts URL.

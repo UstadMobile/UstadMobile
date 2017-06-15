@@ -319,13 +319,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param queueType Queue type, whether is queue of Acquisition task or EntryStatus task
      */
     public synchronized void checkTaskQueue(int queueType){
-        if(!tasksQueues[queueType].isEmpty() && currentTasks[queueType] == null) {
-            currentTasks[queueType] = tasksQueues[queueType].remove(0);
-            currentTasks[queueType].setNetworkManager(this);
-            currentTasks[queueType].setNetworkTaskListener(this);
-            currentTasks[queueType].start();
-        }
-
         if(queueType == QUEUE_ENTRY_ACQUISITION && tasksQueues[queueType].isEmpty()) {
             switch(actionRequiredAfterGroupConnection) {
                 case AFTER_GROUP_CONNECTION_DISCONNECT:
@@ -339,6 +332,15 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
                     break;
             }
         }
+
+        if(!tasksQueues[queueType].isEmpty() && currentTasks[queueType] == null) {
+            currentTasks[queueType] = tasksQueues[queueType].remove(0);
+            currentTasks[queueType].setNetworkManager(this);
+            currentTasks[queueType].setNetworkTaskListener(this);
+            currentTasks[queueType].start();
+        }
+
+
     }
 
     /**
@@ -695,7 +697,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public void handleTaskCompleted(NetworkTask task) {
         if(task == currentTasks[task.getTaskType()]) {
             currentTasks[task.getTaskType()] = null;
-            tasksQueues[task.getTaskType()].remove(task);
             checkTaskQueue(task.getTaskType());
         }
 
@@ -941,12 +942,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @return Wifi direct group status as per the constants
      */
     public abstract int getWifiDirectGroupStatus();
-
-    /**
-     * Reconnect the previous connected wifi after Wifi-Direct
-     * acquisitionTask completion.
-     */
-    public abstract void reconnectPreviousNetwork();
 
     /**
      * Clean up the network manager for shutdown
