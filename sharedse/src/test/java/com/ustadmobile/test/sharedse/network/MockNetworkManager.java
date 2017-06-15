@@ -366,7 +366,7 @@ public class MockNetworkManager extends NetworkManager {
                         wifiNetworkServiceBroadcastTimer = new Timer();
                         wifiNetworkServiceBroadcastTimer.scheduleAtFixedRate(new WifiNetworkBroadcastTimer(),
                                 WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
-                        fireWiFiConnectionChanged(SSID);
+                        fireWiFiConnectionChanged(SSID, true, true);
                     }
                 }
             }

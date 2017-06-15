@@ -76,10 +76,12 @@ public class TestWifiDirectGroupConnection {
             }
 
             @Override
-            public void wifiConnectionChanged(String ssid) {
-                connectedSsid[0] = ssid;
-                synchronized (connectionLock) {
-                    connectionLock.notify();
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+                if(connected) {
+                    connectedSsid[0] = ssid;
+                    synchronized (connectionLock) {
+                        connectionLock.notify();
+                    }
                 }
             }
         };

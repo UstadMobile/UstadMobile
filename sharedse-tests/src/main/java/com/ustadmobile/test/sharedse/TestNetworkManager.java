@@ -76,7 +76,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void wifiConnectionChanged(String ssid) {
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
         };
@@ -168,7 +168,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void wifiConnectionChanged(String ssid) {
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
         };
