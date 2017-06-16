@@ -20,10 +20,11 @@ public interface NetworkManagerListener {
     void fileStatusCheckInformationAvailable(List<String> fileIds);
 
     /**
-     * Indicate that entry status check task is over
+     * Indicate that given network task (entry status task or acquisition task) has completed
+     *
      * @param task Task which was executed.
      */
-    void entryStatusCheckCompleted(NetworkTask task);
+    void networkTaskCompleted(NetworkTask task);
 
     /**
      * Indicate that new NetworkNode has been discovered

@@ -1,6 +1,8 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -85,6 +87,8 @@ public class MockNetworkManager extends NetworkManager {
     private List<String> temporaryWifiDirectSsids = new ArrayList<>();
 
     private HashMap<String, String> savedNetworks = new HashMap<>();
+
+    private static final AtomicInteger connectionChangeAtomicInteger = new AtomicInteger();
 
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
@@ -345,13 +349,20 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     @Override
-    public void connectWifi(final String SSID, final String passPhrase) {
+    public void connectWifi(final String connectSsid, final String passPhrase) {
+        final int connectNum = connectionChangeAtomicInteger.getAndIncrement();
+        UstadMobileSystemImpl.l(UMLog.INFO, 323, "Mock network manager: ("+connectNum+") request connection to: " +
+                connectSsid + " passphrase " + passPhrase);
         new Thread(new Runnable() {
             @Override
             public void run() {
+                UstadMobileSystemImpl.l(UMLog.INFO, 323, "Mock network manager: ("+connectNum+") request connection to: " +
+                        connectSsid + " passphrase " + passPhrase+ " ... waiting");
                 try { Thread.sleep(MOCK_WIFI_CONNECTION_DELAY ); }
                 catch(InterruptedException e) {}
                 synchronized (wifiLockObj) {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 323, "Mock network manager: ("+connectNum+") request connection to: " +
+                            connectSsid + " passphrase " + passPhrase+ " ... continue");
                     if(connectedWifiNetwork != null) {
                         connectedWifiNetwork.disconnect(MockNetworkManager.this);
                         wifiNetworkServiceBroadcastTimer.cancel();
@@ -359,14 +370,18 @@ public class MockNetworkManager extends NetworkManager {
                     }
 
                     mockIpAddr = wirelessArea.connectDeviceToWifiNetwork(MockNetworkManager.this,
-                            SSID, passPhrase);
+                            connectSsid, passPhrase);
+                    UstadMobileSystemImpl.l(UMLog.INFO, 324, "Mock network manager ("+connectNum+") got IP address: "
+                            + mockIpAddr + " on network: " + connectSsid);
                     if(mockIpAddr != null) {
-                        savedNetworks.put(SSID, passPhrase);
-                        connectedWifiNetwork = wirelessArea.getWifiNetwork(SSID);
+                        UstadMobileSystemImpl.l(UMLog.INFO, 322, "Mock network manager ("+connectNum+") connected to: " +
+                                connectSsid);
+                        savedNetworks.put(connectSsid, passPhrase);
+                        connectedWifiNetwork = wirelessArea.getWifiNetwork(connectSsid);
                         wifiNetworkServiceBroadcastTimer = new Timer();
                         wifiNetworkServiceBroadcastTimer.scheduleAtFixedRate(new WifiNetworkBroadcastTimer(),
                                 WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
-                        fireWiFiConnectionChanged(SSID, true, true);
+                        handleWifiConnectionChanged(connectSsid, true, true);
                     }
                 }
             }

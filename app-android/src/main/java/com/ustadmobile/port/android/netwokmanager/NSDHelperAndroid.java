@@ -109,14 +109,14 @@ public class NSDHelperAndroid {
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
                 Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" + errorCode);
                 //TODO: this should not be called
-                mNsdManager.stopServiceDiscovery(this);
+                //mNsdManager.stopServiceDiscovery(this);
             }
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
                 Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" + errorCode);
                 //TODO: This needs to retry stopping after an interval.
-                mNsdManager.stopServiceDiscovery(this);
+                //mNsdManager.stopServiceDiscovery(this);
             }
         };
     }

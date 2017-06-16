@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -114,9 +115,31 @@ public class TestAcquisitionTask{
             }
 
             @Override
-            public void entryStatusCheckCompleted(NetworkTask task) {
+            public void networkTaskCompleted(NetworkTask task) {
                 synchronized (statusRequestLock){
                     statusRequestLock.notify();
+                }
+
+
+                if(task instanceof AcquisitionTask) {
+                    AcquisitionTask acquisitionTask = (AcquisitionTask)task;
+                    if(((AcquisitionTask) task).taskIncludesEntry(ENTRY_ID_NOT_PRESENT)) {
+                        //The entries are downloaded in the order in which they are requested -
+                        // which is ENTRY_ID, ENTRY_ID_NOT_PRESENT
+                        //Therefor when we receive the complete event for the latter we can notify the
+                        //thread to continue.
+                        if (localNetworkEnabled) {
+                            synchronized (acquireSameNetworkLock) {
+                                UstadMobileSystemImpl.l(UMLog.INFO, 328, "Test acquisition task: localnetworkenabled: notify");
+                                acquireSameNetworkLock.notifyAll();
+                            }
+                        }else if(wifiDirectEnabled) {
+                            synchronized (acquireDifferentNetworkLock) {
+                                UstadMobileSystemImpl.l(UMLog.INFO, 329, "Test acquisition task: wifidirect enabled: notify");
+                                acquireDifferentNetworkLock.notifyAll();
+                            }
+                        }
+                    }
                 }
             }
 
@@ -202,22 +225,11 @@ public class TestAcquisitionTask{
 
             @Override
             public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-                if (status.getStatus() == UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL) {
-                    //The entries are downloaded in the order in which they are requested -
-                    // which is ENTRY_ID, ENTRY_ID_NOT_PRESENT
-                    //Therefor when we receive the complete event for the latter we can notify the
-                    //thread to continue.
-                    if (localNetworkEnabled && entryId.equals(ENTRY_ID_NOT_PRESENT)) {
-                        synchronized (acquireSameNetworkLock) {
-                            acquireSameNetworkLock.notifyAll();
-                        }
-                    }
+                UstadMobileSystemImpl.l(UMLog.INFO, 335, "acquisition status changed: " + entryId +
+                        " : " +status.getStatus());
 
-                    if(wifiDirectEnabled && entryId.equals(ENTRY_ID_NOT_PRESENT)) {
-                        synchronized (acquireDifferentNetworkLock) {
-                            acquireDifferentNetworkLock.notifyAll();
-                        }
-                    }
+                if (status.getStatus() == UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL) {
+
 
                 }
             }
@@ -237,8 +249,8 @@ public class TestAcquisitionTask{
 
         List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
         for(AcquisitionTaskHistoryEntry entryHistory : entryHistoryList) {
-            Assert.assertTrue("Task reported as being downloaded from same network",
-                    entryHistory.getMode() == NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
+            Assert.assertEquals("Task reported as being downloaded from same network",
+                    NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, entryHistory.getMode());
         }
 
         CatalogEntryInfo localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
@@ -270,17 +282,18 @@ public class TestAcquisitionTask{
             acquireDifferentNetworkLock.wait(DEFAULT_WAIT_TIME*10);
         }
 
+        UstadMobileSystemImpl.l(UMLog.INFO, 337, "TestAcquisitionTask: task id = " + task.getTaskId());
         /*List<AcquisitionTaskHistoryEntry> */entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
         for(AcquisitionTaskHistoryEntry entryHistory : entryHistoryList) {
-            Assert.assertTrue("Task reported as being downloaded from same network",
-                    entryHistory.getMode() == NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+            Assert.assertEquals("Task reported as being downloaded from different network",
+                    NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK, entryHistory.getMode());
         }
 
         /*CatalogEntryInfo */localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
                 CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-        Assert.assertEquals("File was downloaded successfully from node on same network",
+        Assert.assertEquals("File was downloaded successfully from node on different network",
                 CatalogController.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
-        Assert.assertTrue("File downloaded via local network is present",
+        Assert.assertTrue("File downloaded from different network present",
                 new File(localEntryInfo.fileURI).exists());
 
         //Assert.assertThat("File was downloaded successfully from node on different network", fileDownloadedFromPeer,is(true));
@@ -291,5 +304,7 @@ public class TestAcquisitionTask{
         String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
         result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
         Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
+        manager.removeNetworkManagerListener(responseListener);
+        manager.removeAcquisitionTaskListener(acquisitionListener);
     }
 }

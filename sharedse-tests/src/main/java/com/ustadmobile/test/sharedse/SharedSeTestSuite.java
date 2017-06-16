@@ -15,7 +15,8 @@ import org.junit.runners.Suite;
         TestNetworkManager.class,
         TestEntryStatusTask.class,
         TestAcquisitionTask.class,
-        TestResumableHttpDownload.class
+        TestResumableHttpDownload.class,
+        TestWifiDirectGroupConnection.class
 })
 
 public abstract class SharedSeTestSuite {

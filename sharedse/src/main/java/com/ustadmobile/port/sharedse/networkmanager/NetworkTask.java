@@ -1,5 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * <h1>NetworkTask</h1>
  *
@@ -11,8 +13,11 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 public abstract class NetworkTask {
 
+    private static final AtomicInteger taskIdAtomicInteger = new AtomicInteger();
+
     public NetworkTask(NetworkManager networkManager) {
         this.networkManager = networkManager;
+        this.taskId = taskIdAtomicInteger.getAndIncrement();
     }
 
     public NetworkManagerTaskListener managerTaskListener;

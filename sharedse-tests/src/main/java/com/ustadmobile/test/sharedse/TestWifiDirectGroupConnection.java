@@ -1,6 +1,7 @@
 package com.ustadmobile.test.sharedse;
 
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -34,6 +35,7 @@ public class TestWifiDirectGroupConnection {
     public void testWifiDirectGroupConnection() throws IOException{
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assume.assumeTrue("WiFi is available and enabled", manager.isWiFiEnabled());
+        UstadMobileSystemImpl.l(UMLog.INFO, 324, "TestWifiDirectGroupConnection: start");
         String createGroupUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd="
                 + RemoteTestServerHttpd.CMD_CREATEGROUP;
         HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(createGroupUrl, null, null);
@@ -56,7 +58,7 @@ public class TestWifiDirectGroupConnection {
             }
 
             @Override
-            public void entryStatusCheckCompleted(NetworkTask task) {
+            public void networkTaskCompleted(NetworkTask task) {
 
             }
 
@@ -94,7 +96,7 @@ public class TestWifiDirectGroupConnection {
 
         Assert.assertEquals("Connected to created group ssid", ssid, connectedSsid[0]);
 
-        try { Thread.sleep(10000); }
+        try { Thread.sleep(2000); }
         catch(InterruptedException e) {}
 
         manager.restoreWifi();
