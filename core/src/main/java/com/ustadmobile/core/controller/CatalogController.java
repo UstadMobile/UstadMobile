@@ -62,6 +62,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Timer;
@@ -328,6 +329,15 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      * button instead of a link to any other catalog
      */
     public static final String FOOTER_BUTTON_DOWNLOADALL = "downloadall";
+
+
+    public static final String PREFKEY_STORAGE_DIR_CHECKTIME = "storagedir_lastchecked";
+
+    /**
+     * When an initEntryStatusCheck is done this will trigger a scan of the library directories to
+     * see if files were manually added
+     */
+    public static final long STORAGE_DIR_CHECK_AGAIN_AFTER = 1 * 60 * 1000;
 
 
     private String footerButtonUrl;
@@ -1754,7 +1764,19 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         CatalogEntryInfo info;
         UstadJSOPDSFeed feed = getModel().opdsFeed;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        
+
+        String lastCheckedDir = UstadMobileSystemImpl.getInstance().getAppPref(PREFKEY_STORAGE_DIR_CHECKTIME,
+            getContext());
+        long timeNow = Calendar.getInstance().getTimeInMillis();
+        if(lastCheckedDir == null || timeNow - Long.parseLong(lastCheckedDir) > 500) {
+            try {
+                makeDeviceFeed(impl.getStorageDirs(resourceMode, context), resourceMode, context);
+            } catch (IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 79, null, e);
+            }
+        }
+
+
         for(int i = 0; i< feed.entries.length; i++) {
             info = getEntryInfo(feed.entries[i].id, determineSearchMode(), getContext());
             if(info == null) {
