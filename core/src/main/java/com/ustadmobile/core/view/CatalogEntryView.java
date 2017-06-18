@@ -18,6 +18,14 @@ public interface CatalogEntryView extends UstadView {
 
     int BUTTON_OPEN = 2;
 
+    int LOCAL_STATUS_IN_PROGRESS  = 0;
+
+    int LOCAL_STATUS_NOT_AVAILABLE = 1;
+
+    int LOCAL_STATUS_AVAILABLE = 2;
+
+
+
 
     String VIEW_NAME = "CatalogEntry";
 
@@ -37,7 +45,7 @@ public interface CatalogEntryView extends UstadView {
 
     void setMode(int mode);
 
-
+    void setLocallyAvailableStatus(int status);
 
     void setSize(long downloadSize);
 

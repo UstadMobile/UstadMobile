@@ -35,7 +35,9 @@
     <dimen name="catalog_entry_iconimg_height">90dp</dimen>
 
     <!-- Size of icon on catalog entry view for indicating if the course is available locally -->
-    <dimen name="catalog_entry_local_availability_icon_size">24dp</dimen>
+    <dimen name="catalog_entry_local_availability_icon_size">16dp</dimen>
+    <dimen name="catalog_entry_local_availability_icon_margin">4dp</dimen>
+    <dimen name="catalog_entry_local_availability_icon_size_plus_margin">20dp</dimen>
 
     <dimen name="catalog_entry_see_also_icon_size">150dp</dimen>
 

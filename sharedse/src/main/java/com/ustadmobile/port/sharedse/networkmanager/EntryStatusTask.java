@@ -1,5 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.BufferedReader;
@@ -19,7 +21,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_S
  *
  * This is a class which is responsible to handle all entry status check task.
  *
- * @see com.ustadmobile.port.sharedse.networkmanager.NetworkTask
+ * @see NetworkTask
  * @see com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler
  *
  * @author kileha3
@@ -32,8 +34,11 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     private int currentNode;
 
+    protected NetworkManager networkManager;
+
     public EntryStatusTask(List<String> entryIdList, List<NetworkNode> networkNodeList, NetworkManager networkManager){
         super(networkManager);
+        this.networkManager = networkManager;
         this.entryIdList = entryIdList;
         this.networkNodeList = networkNodeList;
     }
@@ -127,11 +132,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     }
 
     @Override
-    public int getTaskId() {
-        return 0;
-    }
-
-    @Override
+    //TODO: fix this return type
     public int getTaskType() {
         return 0;
     }

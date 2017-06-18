@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager;
+package com.ustadmobile.core.networkmanager;
 
 /**
  * <h1>NetworkManagerTaskListener</h1>

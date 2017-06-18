@@ -18,4 +18,12 @@ public interface NetworkManagerCore {
 
     void shareAppSetupFile(String filePath, String shareTitle);
 
+    long requestFileStatus(String[] entryIds, boolean useBluetooth, boolean useHttp);
+
+    void addNetworkManagerListener(NetworkManagerListener listener);
+
+    void removeNetworkManagerListener(NetworkManagerListener listener);
+
+    EntryCheckResponse getEntryResponseWithLocalFile(String entryId);
+
 }

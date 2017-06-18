@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager;
+package com.ustadmobile.core.networkmanager;
 
 import java.util.List;
 

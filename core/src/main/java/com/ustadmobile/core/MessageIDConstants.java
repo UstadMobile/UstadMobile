@@ -220,4 +220,7 @@ public class MessageIDConstants {
     public static final int enableSuperNode=136;
     public static final int shareAppSetup=137;
     public static final int shareAppDialogTitle=138;
+
+    public static final int internet_download = 139;
+
 }

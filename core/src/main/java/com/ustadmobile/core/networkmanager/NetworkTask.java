@@ -1,4 +1,5 @@
-package com.ustadmobile.port.sharedse.networkmanager;
+package com.ustadmobile.core.networkmanager;
+
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,13 +16,13 @@ public abstract class NetworkTask {
 
     private static final AtomicInteger taskIdAtomicInteger = new AtomicInteger();
 
-    public NetworkTask(NetworkManager networkManager) {
-        this.networkManager = networkManager;
+    public NetworkTask(NetworkManagerCore networkManager) {
+        this.networkManagerCore = networkManager;
         this.taskId = taskIdAtomicInteger.getAndIncrement();
     }
 
     public NetworkManagerTaskListener managerTaskListener;
-    protected NetworkManager networkManager;
+    protected NetworkManagerCore networkManagerCore;
     public int queueId;
     public int taskId;
     public int taskType;
@@ -48,7 +49,9 @@ public abstract class NetworkTask {
      * Method which used to get task ID
      * @return int: Task ID
      */
-    public abstract int getTaskId();
+    public int getTaskId() {
+        return taskId;
+    }
 
     /**
      * Method which used to get TAsk type, it might be entry AcquisitionTask
@@ -64,8 +67,8 @@ public abstract class NetworkTask {
      * Method which is used to set network manager to manage network operation on the task.
      * @param networkManager NetworkManager instance.
      */
-    public void setNetworkManager(NetworkManager networkManager){
-        this.networkManager=networkManager;
+    public void setNetworkManager(NetworkManagerCore networkManager){
+        this.networkManagerCore = networkManager;
     }
 
     /**

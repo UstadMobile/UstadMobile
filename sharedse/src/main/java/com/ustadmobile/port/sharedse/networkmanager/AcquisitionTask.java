@@ -5,6 +5,11 @@ import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
+import com.ustadmobile.core.networkmanager.EntryCheckResponse;
+import com.ustadmobile.core.networkmanager.NetworkManagerListener;
+import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
+import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -43,8 +48,8 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
  * is on peer from different network.
  *
  * @see com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler
- * @see com.ustadmobile.port.sharedse.networkmanager.NetworkManagerListener
- * @see com.ustadmobile.port.sharedse.networkmanager.NetworkTask
+ * @see NetworkManagerListener
+ * @see NetworkTask
  *
  * @author kileha3
  */
@@ -136,6 +141,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     private boolean waitingForWifiConnection = true;
 
+    protected NetworkManager networkManager;
 
 
     /**
@@ -242,6 +248,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
         super(networkManager);
+        this.networkManager = networkManager;
+
         this.feed=feed;
         networkManager.addNetworkManagerListener(this);
 
@@ -584,11 +592,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     @Override
     public int getQueueId() {
         return this.queueId;
-    }
-
-    @Override
-    public int getTaskId() {
-        return this.taskId;
     }
 
     @Override

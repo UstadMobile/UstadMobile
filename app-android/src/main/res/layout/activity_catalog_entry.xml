@@ -134,7 +134,7 @@
                             android:layout_height="@dimen/dimen_70dp" />
 
                         <RelativeLayout
-                            android:padding="@dimen/dimen_10dp"
+                            android:padding="@dimen/dimen_8dp"
                             android:orientation="vertical"
                             android:layout_width="0dp"
                             android:layout_weight="1"
@@ -149,19 +149,23 @@
                                 android:layout_height="wrap_content" />
 
                             <ImageView
-                                android:id="@+id/activity_catalog_entry_local_availability_text"
-                                android:src="@drawable/ic_done_white_24dp"
+                                android:id="@+id/activity_catalog_entry_local_availability_icon"
+                                android:src="@drawable/ic_done_black_16dp"
                                 android:tint="@android:color/black"
                                 android:layout_below="@+id/activity_catalog_entry_size_text"
+                                android:paddingRight="@dimen/catalog_entry_local_availability_icon_margin"
                                 android:layout_width="@dimen/catalog_entry_local_availability_icon_size"
                                 android:layout_height="@dimen/catalog_entry_local_availability_icon_size" />
 
                             <TextView
+                                android:id="@+id/activity_catalog_entry_local_availability_text"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
+                                android:maxLines="3"
+                                android:scrollHorizontally="false"
                                 android:text="AVAILABLE"
-                                android:layout_toEndOf="@+id/activity_catalog_entry_local_availability_text"
-                                android:layout_toRightOf="@+id/activity_catalog_entry_local_availability_text"
+                                android:layout_toEndOf="@+id/activity_catalog_entry_local_availability_icon"
+                                android:layout_toRightOf="@+id/activity_catalog_entry_local_availability_icon"
                                 android:layout_below="@+id/activity_catalog_entry_size_text"
                                 />
 
