@@ -84,6 +84,8 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     public void setOPDSEntry(UstadJSOPDSEntry entry) {
         this.entry = entry;
         ((TextView)findViewById(R.id.opdsitem_title_text)).setText(entry.title);
+        ((TextView)findViewById(R.id.opds_item_detail_text)).setText(
+            entry.summary != null ? entry.summary : "");
     }
 
     public UstadJSOPDSEntry getEntry() {
@@ -146,15 +148,6 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
                 break;
 
         }
-        /*
-        if(overlay == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
-            opdsStatusOverlay = getResources().getDrawable(R.drawable.opds_item_overlay_acquired);
-        }else {
-            opdsStatusOverlay = null;
-        }
-
-        invalidate();
-        */
     }
 
     /**
