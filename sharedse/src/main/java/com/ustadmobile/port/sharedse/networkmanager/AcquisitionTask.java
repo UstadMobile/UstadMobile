@@ -416,8 +416,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             public void run() {
                 UstadMobileSystemImpl.l(UMLog.INFO, 317, "AcquisitionTask:"+ getTaskId()+ ":downloadCurrentFile: from "
                         + fileUrl + " mode: " + mode);
-                File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX],
-                        UMFileUtil.getFilename(fileUrl));
+                String entryMimeType = feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(
+                        null)[UstadJSOPDSEntry.LINK_MIMETYPE];
+                String filename = UMFileUtil.appendExtensionToFilenameIfNeeded(UMFileUtil.getFilename(fileUrl),
+                        entryMimeType);
+
+                File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX], filename);
 
                 boolean downloadCompleted = false;
                 AcquisitionTaskHistoryEntry historyEntry = new AcquisitionTaskHistoryEntry(fileUrl,

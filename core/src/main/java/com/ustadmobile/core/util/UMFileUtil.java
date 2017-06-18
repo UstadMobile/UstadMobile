@@ -30,6 +30,8 @@
  */
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -268,7 +270,32 @@ public class UMFileUtil {
         
         return url;
     }
-    
+
+    /**
+     * Ensure that the given filename has the correct extension on it. If the filename given already
+     * includes the correct file extension for the given mime type it will be returned as is. Otherewise
+     * the correct extension will be added. If the appropriate extension is unknown, the filename
+     * will not be changed.
+     *
+     * @param filename The filename as given
+     * @param mimeType The mimetype of the file
+     *
+     * @return The filename with the correct extension for the mime type as above.
+     */
+    public static String appendExtensionToFilenameIfNeeded(String filename, String mimeType) {
+        String expectedExtension = UstadMobileSystemImpl.getInstance().getExtensionFromMimeType(
+            mimeType);
+
+        if(expectedExtension == null)
+            return filename;
+
+        if(!filename.endsWith('.' + expectedExtension)) {
+            filename += '.' + expectedExtension;
+        }
+
+        return filename;
+    }
+
     /**
      * Parse a deliminated string with keys and values like Content-Type parameters
      * and cache-control headers.  Keys can be present on their own e.g.
