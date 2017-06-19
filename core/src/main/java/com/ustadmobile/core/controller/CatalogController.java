@@ -1635,7 +1635,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
     /**
      * Sets the OPDS entry for the given entry id. This is to be used as a replacement for setEntryInfo
-     * 
+     *
      * @param entryId
      * @param resourceMode
      * @param context
