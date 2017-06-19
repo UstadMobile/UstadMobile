@@ -1595,6 +1595,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      * @param entryID The OPDS ID in question
      * @param resourceMode BitMask - valid values are USER_RESOURCE and SHARED_RESOURCE
      * eg. to get both - use USER_RESOURCE | SHARED_RESOURCE
+     * @deprecated
      * @return CatalogEntryInfo for the given ID, or null if not found
      */
     public static CatalogEntryInfo getEntryInfo(String entryID, int resourceMode, Object context) {
@@ -1616,6 +1617,33 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             return null;
         }
     }
+
+    /**
+     * Returns an OPDS Entry representing the status of the given entry. This is to be used as a
+     * replacement for getEntryInfo
+     *
+     * @param entryId
+     * @param resourceMode
+     * @param context
+     * @return
+     */
+    public static UstadJSOPDSEntry getEntryStatus(String entryId, int resourceMode, Object context) {
+
+
+        return null;
+    }
+
+    /**
+     * Sets the OPDS entry for the given entry id. This is to be used as a replacement for setEntryInfo
+     * 
+     * @param entryId
+     * @param resourceMode
+     * @param context
+     */
+    public void setEntryInfoOpds(String entryId, int resourceMode, Object context) {
+
+    }
+
     
     /**
      * Filter the given vector of acquisition links by the x-umprofile parameter
