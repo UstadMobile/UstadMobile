@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
-import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE;
 import static org.hamcrest.CoreMatchers.is;
 
 /**
@@ -30,13 +29,25 @@ public class TestNetworkManager {
 
     @Test
     public void testWifiDirectDiscovery() throws IOException{
+        //enable supernode mode on the remote test device
+        Assert.assertTrue("Supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+        testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE, NODE_DISCOVERY_TIMEOUT);
+        Assert.assertTrue("Supernode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+    }
+
+
+    /**
+     * Test discovery over WiFi direct and ensure that the given WiFi direct device has been discovered
+     *
+     * @param bluetoothAddr Bluetooth address of wifi direct device to discover
+     * @param timeout Timeout to wait for discovery to occur
+     * @throws IOException
+     */
+    public static void testWifiDirectDiscovery(final String bluetoothAddr, final int timeout) throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 
         Assume.assumeTrue("Network test is enabled: wifi and bluetooth enabled",
-            manager.isBluetoothEnabled() && manager.isWiFiEnabled());
-
-        Assert.assertTrue("Bluetooth enabled : required to test discovery", manager.isBluetoothEnabled());
-        Assert.assertTrue("WiFi enabled: required to test discovery", manager.isWiFiEnabled());
+                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         final Object nodeDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
@@ -53,7 +64,7 @@ public class TestNetworkManager {
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
                 if(node.getDeviceBluetoothMacAddress()!=null && node.getDeviceBluetoothMacAddress().equals(
-                        TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
+                        bluetoothAddr)){
                     synchronized (nodeDiscoveryLock){
                         nodeDiscoveryLock.notify();
                     }
@@ -63,7 +74,7 @@ public class TestNetworkManager {
             @Override
             public void networkNodeUpdated(NetworkNode node) {
                 if(node.getDeviceBluetoothMacAddress()!=null && node.getDeviceBluetoothMacAddress().equals(
-                        TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
+                        bluetoothAddr)){
                     synchronized (nodeDiscoveryLock){
                         nodeDiscoveryLock.notify();
                     }
@@ -79,32 +90,24 @@ public class TestNetworkManager {
             public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
+
+
         };
         manager.addNetworkManagerListener(responseListener);
 
-        //enable supernode mode on the remote test device
-        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
-        if(manager  .getNodeByBluetoothAddr(TEST_REMOTE_BLUETOOTH_DEVICE) == null) {
+        if(manager.getNodeByBluetoothAddr(bluetoothAddr) == null) {
             synchronized (nodeDiscoveryLock) {
-                try { nodeDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
+                try { nodeDiscoveryLock.wait(timeout ); }
                 catch(InterruptedException e ) {
                     e.printStackTrace();
                 }
             }
         }
 
-        //disable supernode mode on the remote test device
-        String disableNodeUrl =PlatformTestUtil.getRemoteTestEndpoint()+  "?cmd=SUPERNODE&enabled=false";
-        result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
-
-        Assert.assertNotNull("Remote test slave node discovered",
-                manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE));
+        Assert.assertNotNull("Remote wifi direct device discovered",
+                manager.getNodeByBluetoothAddr(bluetoothAddr));
         manager.removeNetworkManagerListener(responseListener);
-
     }
 
 
@@ -146,7 +149,7 @@ public class TestNetworkManager {
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
                 if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
-                    (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
+                        (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
                     }
@@ -156,7 +159,7 @@ public class TestNetworkManager {
             @Override
             public void networkNodeUpdated(NetworkNode node) {
                 if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
-                    (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
+                        (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
                     }
@@ -172,6 +175,7 @@ public class TestNetworkManager {
             public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
+
         };
         manager.addNetworkManagerListener(responseListener);
 

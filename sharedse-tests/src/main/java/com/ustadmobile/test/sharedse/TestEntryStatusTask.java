@@ -1,14 +1,11 @@
 package com.ustadmobile.test.sharedse;
 
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
-import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.Assert;
 import org.junit.Assume;
@@ -16,12 +13,13 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
  * Created by kileha3 on 16/05/2017.
  */
-
 public class TestEntryStatusTask{
 
 
@@ -38,20 +36,48 @@ public class TestEntryStatusTask{
 
     @Test
     public void testEntryStatusBluetooth() throws IOException, InterruptedException {
+        Hashtable entryTable = new Hashtable();
+        entryTable.put(ENTRY_ID, Boolean.TRUE);
+        entryTable.put(ENTRY_ID_NOT_PRESENT, Boolean.FALSE);
+        Assert.assertTrue("Test slave supernode enabled",
+                TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+        TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
+                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+        testEntryStatusBluetooth(entryTable, TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        Assert.assertTrue("Supernod disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+    }
+
+    /**
+     * Test using entry status checking over bluetooth. Communicate only with the given deice with
+     * the specified bluetooth mac address. Before running this test the given remote device should
+     * already have been discovered.
+     *
+     * This method takes a Hashtable specifying the results that should be obtained from the entry
+     * status task (e.g. whether a given file is reported as available or unavailable). e.g.
+     *  hashtable.put("entry-id-available", Boolean.TRUE)
+     *  hashtable.put("entry-id-unavailable", Boolean.FALSE)
+     *
+     * The method will assert that the availability found matches each entry for expected availability.
+     *
+     * @param expectedAvailability Hashtable in the form of file id -> boolean specifying the expected availability to assert.
+     * @param remoteBluetoothAddr The bluetooth address of the device to check for entry status
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public static void testEntryStatusBluetooth(Hashtable expectedAvailability, String remoteBluetoothAddr) throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
-        final boolean[] fileAvailable = new boolean[ENTRY_IDS.length];
-        final Object nodeDiscoveryLock = new Object();
         final Object statusRequestLock=new Object();
+        final Hashtable actualAvailability = new Hashtable();
+
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
             public void fileStatusCheckInformationAvailable(List<String> fileIds) {
-                for(int i = 0; i < ENTRY_IDS.length; i++){
-                    if(fileIds.contains(ENTRY_IDS[i])) {
-                        fileAvailable[i] = manager.isFileAvailable(ENTRY_IDS[i]);
-                    }
+                for(int i = 0; i < fileIds.size(); i++) {
+                    actualAvailability.put(fileIds.get(i), manager.isFileAvailable(fileIds.get(i)));
                 }
             }
 
@@ -65,14 +91,6 @@ public class TestEntryStatusTask{
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceBluetoothMacAddress() != null &&
-                    node.getDeviceBluetoothMacAddress().equals(
-                    TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
-
-                    synchronized (nodeDiscoveryLock){
-                       nodeDiscoveryLock.notify();
-                   }
-                }
             }
 
             @Override
@@ -93,20 +111,8 @@ public class TestEntryStatusTask{
 
         };
         manager.addNetworkManagerListener(responseListener);
-        //enable supernode mode on the remote test device
-        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
-        if(manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)==null){
-            synchronized (nodeDiscoveryLock){
-                nodeDiscoveryLock.wait(TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
-            }
-        }
-
-        NetworkNode networkNode=manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-        Assert.assertNotNull("Remote test slave node discovered", networkNode);
-
+        NetworkNode networkNode=manager.getNodeByBluetoothAddr(remoteBluetoothAddr);
         List<NetworkNode> nodeList=new ArrayList<>();
         nodeList.add(networkNode);
 
@@ -120,13 +126,17 @@ public class TestEntryStatusTask{
             statusRequestLock.wait(DEFAULT_WAIT_TIME*6);
         }
 
-        Assert.assertTrue("Available entry reported as locally available", fileAvailable[0]);
-        Assert.assertFalse("Unavailable entry reported as not available", fileAvailable[1]);
+        Enumeration expectedKeysEnumeration = expectedAvailability.keys();
+        Object currentIdKey;
+        while(expectedKeysEnumeration.hasMoreElements()) {
+            currentIdKey = expectedKeysEnumeration.nextElement();
+            String message = currentIdKey + " expected availability : " +
+                    expectedAvailability.get(currentIdKey);
+            Assert.assertEquals(message, expectedAvailability.get(currentIdKey),
+                    actualAvailability.get(currentIdKey));
+        }
 
-        //disable supernode mode on the remote test device when done
-        String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
-        result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as disabled", 200, result.getStatus());
+
         manager.removeNetworkManagerListener(responseListener);
     }
 
