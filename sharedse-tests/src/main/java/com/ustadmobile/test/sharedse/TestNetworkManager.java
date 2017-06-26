@@ -111,6 +111,14 @@ public class TestNetworkManager {
     }
 
 
+    @Test
+    public void testNetworkServiceDiscovery() throws IOException{
+        Assert.assertTrue("Test slave supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+        testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER, NODE_DISCOVERY_TIMEOUT);
+        Assert.assertTrue("Test slave supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+    }
+
+
     /**
      * Test using the standard network service discovery.
      *
@@ -119,20 +127,19 @@ public class TestNetworkManager {
      * Some older versions of Android have buggy implementations of Network Service Discovery; see
      *  https://issuetracker.google.com/issues/36952181
      *
+     * @param ipAddress IP address to be discovered
      * @throws IOException
      */
-    @Test
-    public void testNetworkServiceDiscovery() throws IOException{
+    public static void testNetworkServiceDiscovery(String ipAddress, int timeout) {
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         //enable supernode mode on the remote test device
-        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
-
+//        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
+//        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
+//        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
 
         final Object nodeNSDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
@@ -179,18 +186,18 @@ public class TestNetworkManager {
         };
         manager.addNetworkManagerListener(responseListener);
 
-        NetworkNode node =manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
+        NetworkNode node =manager.getNodeByIpAddress(ipAddress);
         long timeSinceNsd =(Calendar.getInstance().getTimeInMillis() - (node != null ? node.getNetworkServiceLastUpdated() : 0));
         if(node == null || timeSinceNsd > NODE_DISCOVERY_TIMEOUT) {
             synchronized (nodeNSDiscoveryLock) {
-                try { nodeNSDiscoveryLock.wait(NODE_DISCOVERY_TIMEOUT ); }
+                try { nodeNSDiscoveryLock.wait(timeout ); }
                 catch(InterruptedException e ) {
                     e.printStackTrace();
                 }
             }
         }
 
-        node=manager.getNodeByIpAddress(SharedSeTestSuite.REMOTE_SLAVE_SERVER);
+        node=manager.getNodeByIpAddress(ipAddress);
         Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;

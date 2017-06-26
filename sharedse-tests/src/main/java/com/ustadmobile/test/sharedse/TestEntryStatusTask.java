@@ -32,18 +32,22 @@ public class TestEntryStatusTask{
 
     private static final int DEFAULT_WAIT_TIME =10000;
 
+    public static final Hashtable EXPECTED_AVAILABILITY = new Hashtable();
+
+    static {
+        EXPECTED_AVAILABILITY.put(ENTRY_ID, Boolean.TRUE);
+        EXPECTED_AVAILABILITY.put(ENTRY_ID_NOT_PRESENT, Boolean.FALSE);
+    }
+
 
 
     @Test
     public void testEntryStatusBluetooth() throws IOException, InterruptedException {
-        Hashtable entryTable = new Hashtable();
-        entryTable.put(ENTRY_ID, Boolean.TRUE);
-        entryTable.put(ENTRY_ID_NOT_PRESENT, Boolean.FALSE);
         Assert.assertTrue("Test slave supernode enabled",
                 TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
                 TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
-        testEntryStatusBluetooth(entryTable, TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        testEntryStatusBluetooth(EXPECTED_AVAILABILITY, TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         Assert.assertTrue("Supernod disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
 

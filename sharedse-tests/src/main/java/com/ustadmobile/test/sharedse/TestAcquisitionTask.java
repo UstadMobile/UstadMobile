@@ -53,7 +53,7 @@ public class TestAcquisitionTask{
     private static final String ENTRY_ID_NOT_PRESENT = "b649852e-2bf9-45ab-839e-ec5bb00ca19d";
     public static final String[] ENTRY_IDS = new String[]{ENTRY_ID_PRESENT,ENTRY_ID_NOT_PRESENT};
 
-    private ArrayList<HashMap<String,Integer>> downloadSources=new ArrayList<>();
+    //private ArrayList<HashMap<String,Integer>> downloadSources=new ArrayList<>();
 
     private static RouterNanoHTTPD resourcesHttpd;
 
@@ -90,9 +90,6 @@ public class TestAcquisitionTask{
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
-        final boolean[] fileAvailable = new boolean[ENTRY_IDS.length];
-        final Object nodeDiscoveryLock = new Object();
-        final Object statusRequestLock=new Object();
         final Object acquireSameNetworkLock=new Object();
         final Object acquireDifferentNetworkLock=new Object();
 
@@ -102,25 +99,16 @@ public class TestAcquisitionTask{
         CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
 
+
+
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
             public void fileStatusCheckInformationAvailable(List<String> fileIds) {
-                for(int i = 0; i < ENTRY_IDS.length; i++){
-                    if(fileIds.contains(ENTRY_IDS[i])) {
-                        fileAvailable[i] = manager.isFileAvailable(ENTRY_IDS[i]);
-                    }
-                }
             }
 
             @Override
             public void networkTaskCompleted(NetworkTask task) {
-                synchronized (statusRequestLock){
-                    statusRequestLock.notify();
-                }
-
-
                 if(task instanceof AcquisitionTask) {
-                    AcquisitionTask acquisitionTask = (AcquisitionTask)task;
                     if(((AcquisitionTask) task).taskIncludesEntry(ENTRY_ID_NOT_PRESENT)) {
                         //The entries are downloaded in the order in which they are requested -
                         // which is ENTRY_ID, ENTRY_ID_NOT_PRESENT
@@ -143,14 +131,6 @@ public class TestAcquisitionTask{
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceBluetoothMacAddress() != null &&
-                        node.getDeviceBluetoothMacAddress().equals(
-                                TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)){
-
-                    synchronized (nodeDiscoveryLock){
-                        nodeDiscoveryLock.notify();
-                    }
-                }
             }
 
             @Override
@@ -160,11 +140,6 @@ public class TestAcquisitionTask{
 
             @Override
             public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int sources) {
-                HashMap<String,Integer> sourceData=new HashMap<>();
-                sourceData.put(entryId,sources);
-                if(!downloadSources.contains(sourceData)){
-                    downloadSources.add(sourceData);
-                }
             }
 
             @Override
@@ -175,32 +150,12 @@ public class TestAcquisitionTask{
 
         };
         manager.addNetworkManagerListener(responseListener);
-        //enable supernode mode on the remote test device
-        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
-        if(manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)==null){
-            synchronized (nodeDiscoveryLock){
-                nodeDiscoveryLock.wait(TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
-            }
-        }
+        Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+        TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
+                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+        TestEntryStatusTask.testEntryStatusBluetooth(TestEntryStatusTask.EXPECTED_AVAILABILITY,
+                TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
 
-        final NetworkNode networkNode=manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-        Assert.assertNotNull("Remote test slave node discovered", networkNode);
-
-        List<NetworkNode> nodeList=new ArrayList<>();
-        nodeList.add(networkNode);
-
-        List<String> entryLIst=new ArrayList<>();
-        Collections.addAll(entryLIst, ENTRY_IDS);
-        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
-        synchronized (statusRequestLock){
-            statusRequestLock.wait(DEFAULT_WAIT_TIME*2);
-        }
-
-
-        Assert.assertTrue("Available entry reported as locally available", fileAvailable[0]);
-        Assert.assertFalse("Unavailable entry reported as not available",  fileAvailable[1]);
 
         //Create a feed manually
         String catalogUrl = UMFileUtil.joinPaths(new String[]{
@@ -225,11 +180,6 @@ public class TestAcquisitionTask{
             public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
                 UstadMobileSystemImpl.l(UMLog.INFO, 335, "acquisition status changed: " + entryId +
                         " : " +status.getStatus());
-
-                if (status.getStatus() == UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL) {
-
-
-                }
             }
         };
 
@@ -294,14 +244,7 @@ public class TestAcquisitionTask{
         Assert.assertTrue("File downloaded from different network present",
                 new File(localEntryInfo.fileURI).exists());
 
-        //Assert.assertThat("File was downloaded successfully from node on different network", fileDownloadedFromPeer,is(true));
-        //Assert.assertThat("File was downloaded successfully from cloud", fileDownloadedFromCloud,is(true));
-
-
-
-        String disableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=false";
-        result = UstadMobileSystemImpl.getInstance().makeRequest(disableNodeUrl, null, null);
-        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
+        Assert.assertTrue("Disabled supernode", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
         manager.removeNetworkManagerListener(responseListener);
         manager.removeAcquisitionTaskListener(acquisitionListener);
     }
