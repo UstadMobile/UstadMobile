@@ -3,7 +3,6 @@ package com.ustadmobile.test.sharedse;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
-import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -13,7 +12,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
-import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTaskHistoryEntry;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -31,9 +30,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -52,8 +48,6 @@ public class TestAcquisitionTask{
     private static final String ENTRY_ID_PRESENT ="202b10fe-b028-4b84-9b84-852aa766607d";
     private static final String ENTRY_ID_NOT_PRESENT = "b649852e-2bf9-45ab-839e-ec5bb00ca19d";
     public static final String[] ENTRY_IDS = new String[]{ENTRY_ID_PRESENT,ENTRY_ID_NOT_PRESENT};
-
-    //private ArrayList<HashMap<String,Integer>> downloadSources=new ArrayList<>();
 
     private static RouterNanoHTTPD resourcesHttpd;
 
@@ -151,11 +145,16 @@ public class TestAcquisitionTask{
         };
         manager.addNetworkManagerListener(responseListener);
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+        TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
+                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
         TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
                 TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
         TestEntryStatusTask.testEntryStatusBluetooth(TestEntryStatusTask.EXPECTED_AVAILABILITY,
                 TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
 
+
+        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        int numAcquisitions = remoteNode.getAcquisitionHistory() != null ? remoteNode.getAcquisitionHistory().size() : 0;
 
         //Create a feed manually
         String catalogUrl = UMFileUtil.joinPaths(new String[]{
@@ -201,6 +200,14 @@ public class TestAcquisitionTask{
                     NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, entryHistory.getMode());
         }
 
+        //check history was recorded on the node
+        //Assertion has failed 27/06/17 - not able to reproduce again.
+        Assert.assertNotNull("Remote node has acquisition history", remoteNode.getAcquisitionHistory());
+        Assert.assertEquals("Remote node has one additional acquisition history entry",
+                numAcquisitions + 1, remoteNode.getAcquisitionHistory().size());
+        numAcquisitions = remoteNode.getAcquisitionHistory().size();
+
+
         CatalogEntryInfo localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
                 CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
         Assert.assertEquals("File was downloaded successfully from node on same network",
@@ -236,6 +243,9 @@ public class TestAcquisitionTask{
             Assert.assertEquals("Task reported as being downloaded from different network",
                     NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK, entryHistory.getMode());
         }
+        Assert.assertEquals("Number of acquisitions from node increased by one after wifi direct download",
+                numAcquisitions + 1, remoteNode.getAcquisitionHistory().size());
+
 
         /*CatalogEntryInfo */localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
                 CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());

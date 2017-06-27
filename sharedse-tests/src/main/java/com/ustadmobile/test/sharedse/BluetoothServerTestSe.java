@@ -45,7 +45,7 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
     }
 
     @Override
-    public void onConnected(InputStream inputStream, OutputStream outputStream) {
+    public void onBluetoothConnected(InputStream inputStream, OutputStream outputStream) {
         isConnectionCalled = true;
        synchronized (bluetoothLock){
            bluetoothLock.notify();
@@ -56,4 +56,8 @@ public class BluetoothServerTestSe implements BluetoothConnectionHandler {
        }
     }
 
+    @Override
+    public void onBluetoothConnectionFailed(Exception exception) {
+
+    }
 }

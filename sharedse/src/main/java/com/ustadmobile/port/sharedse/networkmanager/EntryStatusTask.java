@@ -81,7 +81,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
      * @param outputStream OutputStream to write data to.
      */
     @Override
-    public void onConnected(InputStream inputStream, OutputStream outputStream) {
+    public void onBluetoothConnected(InputStream inputStream, OutputStream outputStream) {
         String queryStr = BluetoothServer.CMD_ENTRY_STATUS_QUERY + ' ';
         List<Boolean> entryIdStatusList=new ArrayList<>();
         for(int i = 0; i < entryIdList.size(); i++){
@@ -125,6 +125,10 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         connectNextNode(currentNode+1);
     }
 
+    @Override
+    public void onBluetoothConnectionFailed(Exception exception) {
+
+    }
 
     @Override
     public int getQueueId() {

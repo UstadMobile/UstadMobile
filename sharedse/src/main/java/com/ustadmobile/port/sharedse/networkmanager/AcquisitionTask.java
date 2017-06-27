@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
@@ -87,11 +88,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     private EntryCheckResponse entryCheckResponse;
 
-    private static final int MAXIMUM_RETRY_COUNT = 5;
+    private static final int MAXIMUM_ATTEMPT_COUNT = 5;
 
     private static final int WAITING_TIME_BEFORE_RETRY =10 * 1000;
 
-    private int retryCount=0;
+    private int attemptCount = 0;
 
     private ResumableHttpDownload httpDownload=null;
 
@@ -142,6 +143,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     private boolean waitingForWifiConnection = true;
 
     protected NetworkManager networkManager;
+
+    private AcquisitionTaskHistoryEntry currentHistoryEntry;
 
 
     /**
@@ -331,6 +334,16 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         if(index < feed.entries.length) {
             currentEntryIdIndex = index;
             currentEntryStatus = statusMap.get(feed.entries[index].id);
+            currentHistoryEntry = new AcquisitionTaskHistoryEntry(feed.entries[index].id);
+            attemptCount++;
+
+            List<AcquisitionTaskHistoryEntry> entryHistoryList = acquisitionHistoryMap.get(
+                    feed.entries[currentEntryIdIndex].id);
+            if(entryHistoryList == null) {
+                entryHistoryList = new ArrayList<>();
+                acquisitionHistoryMap.put(feed.entries[currentEntryIdIndex].id, entryHistoryList);
+            }
+            entryHistoryList.add(currentHistoryEntry);
 
             UstadMobileSystemImpl.l(UMLog.INFO, 303, "AcquisitionTask:"+ getTaskId()+ ": acquireFile: file:" + index + " id: "
                     + feed.entries[currentEntryIdIndex].id);
@@ -371,6 +384,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(null)[UstadJSOPDSEntry.LINK_HREF]);
                 currentDownloadMode = DOWNLOAD_FROM_CLOUD;
             }
+
+            currentHistoryEntry.setMode(currentDownloadMode);
+            currentHistoryEntry.setUrl(currentDownloadUrl);
+            if(entryCheckResponse != null)
+                entryCheckResponse.getNetworkNode().addAcquisitionHistoryEntry(currentHistoryEntry);
 
             UstadMobileSystemImpl.l(UMLog.INFO, 336, "AcquisitionTask:"+ getTaskId()+ ": acquire item " + index +
                     "  id " + feed.entries[index].id + " Mode = " + currentDownloadMode
@@ -424,8 +442,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 File fileDestination = new File(getFileURIs()[FILE_DESTINATION_INDEX], filename);
 
                 boolean downloadCompleted = false;
-                AcquisitionTaskHistoryEntry historyEntry = new AcquisitionTaskHistoryEntry(fileUrl,
-                        mode, Calendar.getInstance().getTimeInMillis());
+                currentHistoryEntry.setTimeStarted(Calendar.getInstance().getTimeInMillis());
+
                 try {
                     networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
                             getFeed().entries[currentEntryIdIndex].title,message);
@@ -439,13 +457,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         currentEntryStatus);
                 }
 
-                historyEntry.setTimeEnded(Calendar.getInstance().getTimeInMillis());
-                List<AcquisitionTaskHistoryEntry> entryHistoryList = acquisitionHistoryMap.get(feed.entries[currentEntryIdIndex].id);
-                if(entryHistoryList == null) {
-                    entryHistoryList = new ArrayList<>();
-                    acquisitionHistoryMap.put(feed.entries[currentEntryIdIndex].id, entryHistoryList);
-                }
-                entryHistoryList.add(historyEntry);
+                currentHistoryEntry.setTimeEnded(Calendar.getInstance().getTimeInMillis());
+
 
                 if(downloadCompleted){
                     //TODO : Needs to set the entry status with CatalogController
@@ -463,20 +476,19 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
                     networkManager.fireAcquisitionStatusChanged(feed.entries[currentEntryIdIndex].id,
                             currentEntryStatus);
-                    retryCount = 0;
+                    attemptCount = 0;
                     entryAcquisitionThread =null;
 
-                    historyEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
+                    currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
                     acquireFile(currentEntryIdIndex + 1);
-                }else if(!downloadCompleted && retryCount < MAXIMUM_RETRY_COUNT){
+                }else if(!downloadCompleted && attemptCount < MAXIMUM_ATTEMPT_COUNT){
                    try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
                    catch(InterruptedException e) {}
-                   retryCount++;
-                   historyEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_PENDING);
+                   currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
                    acquireFile(currentEntryIdIndex);
                }else{
                     //retry count exceeded
-                    historyEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
+                    currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
                     acquireFile(currentEntryIdIndex + 1);
                }
 
@@ -515,7 +527,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      * @param outputStream OutputStream to write data to.
      */
     @Override
-    public void onConnected(final InputStream inputStream, final OutputStream outputStream) {
+    public void onBluetoothConnected(final InputStream inputStream, final OutputStream outputStream) {
         UstadMobileSystemImpl.l(UMLog.INFO, 317, "AcquisitionTask:"+ getTaskId()+ ": bluetooth connected");
         String acquireCommand = BluetoothServer.CMD_ACQUIRE_ENTRY +" "+networkManager.getDeviceIPAddress()+"\n";
         String response=null;
@@ -562,8 +574,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 networkManager.connectToWifiDirectGroup(currentGroupSSID, passphrase);
             }
         }
+
+        //TODO: Handle when the server fails to provide a hotspot
     }
 
+    @Override
+    public void onBluetoothConnectionFailed(Exception exception) {
+
+    }
 
     @Override
     public void cancel() {

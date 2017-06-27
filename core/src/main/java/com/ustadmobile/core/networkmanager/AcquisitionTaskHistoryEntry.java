@@ -1,4 +1,4 @@
-package com.ustadmobile.port.sharedse.networkmanager;
+package com.ustadmobile.core.networkmanager;
 
 /**
  *
@@ -22,6 +22,8 @@ public class AcquisitionTaskHistoryEntry {
 
     private int status;
 
+    private String entryId;
+
     /**
      * Creates a new entry
      *
@@ -31,7 +33,8 @@ public class AcquisitionTaskHistoryEntry {
      * @param timeEnded Time the download finished
      * @param status Status at the end of the run (e.g. successful, fail, etc) flag as per UstadMobileSystemImpl.DLSTATUS_*
      */
-    public AcquisitionTaskHistoryEntry(String url, int mode, long timeStarted, long timeEnded, int status) {
+    public AcquisitionTaskHistoryEntry(String entryId, String url, int mode, long timeStarted, long timeEnded, int status) {
+        this.entryId = entryId;
         this.url = url;
         this.mode = mode;
         this.timeStarted = timeStarted;
@@ -46,11 +49,17 @@ public class AcquisitionTaskHistoryEntry {
      * @param mode flag as per NetworkManager.DOWNLOAD_FROM flags
      * @param timeStarted Time the download started
      */
-    public AcquisitionTaskHistoryEntry(String url, int mode, long timeStarted) {
+    public AcquisitionTaskHistoryEntry(String entryId, String url, int mode, long timeStarted) {
+        this.entryId = entryId;
         this.url = url;
         this.mode = mode;
         this.timeStarted = timeStarted;
     }
+
+    public AcquisitionTaskHistoryEntry(String entryId) {
+        this.entryId = entryId;
+    }
+
 
     /**
      * Gets the URL this was downloaded from : in case this was a local peer it will be the address
@@ -60,6 +69,10 @@ public class AcquisitionTaskHistoryEntry {
      */
     public String getUrl() {
         return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     /**
@@ -72,6 +85,10 @@ public class AcquisitionTaskHistoryEntry {
         return mode;
     }
 
+    public void setMode(int mode) {
+        this.mode = mode;
+    }
+
     /**
      * The time the download was started in ms since the epoch.
      *
@@ -79,6 +96,10 @@ public class AcquisitionTaskHistoryEntry {
      */
     public long getTimeStarted() {
         return timeStarted;
+    }
+
+    public void setTimeStarted(long timeStarted){
+        this.timeStarted = timeStarted;
     }
 
     /**
@@ -90,11 +111,11 @@ public class AcquisitionTaskHistoryEntry {
         return timeEnded;
     }
 
-    protected void setTimeEnded(long timeEnded) {
+    public void setTimeEnded(long timeEnded) {
         this.timeEnded = timeEnded;
     }
 
-    protected void setStatus(int status) {
+    public void setStatus(int status) {
         this.status = status;
     }
 

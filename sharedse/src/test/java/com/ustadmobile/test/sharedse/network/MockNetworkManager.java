@@ -249,7 +249,7 @@ public class MockNetworkManager extends NetworkManager {
             PipedInputStream inFromServer = new PipedInputStream();
             remoteDevice.getMockBluetoothServer().connectMockClient(mockBluetoothAddr,
                     inFromServer, outToServer);
-            handler.onConnected(inFromServer, outToServer);
+            handler.onBluetoothConnected(inFromServer, outToServer);
             return;
         }
     }

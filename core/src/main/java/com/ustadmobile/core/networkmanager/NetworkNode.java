@@ -1,21 +1,36 @@
 package com.ustadmobile.core.networkmanager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <h1>NetworkNode</h1>
  *
  * This is a class which defines a single NetworkNode which is an actual representation of a peer device.
  *
- *
  * @author kileha3
  */
 
 public class NetworkNode {
+
     private String deviceBluetoothMacAddress;
+
     private String deviceIpAddress;
+
     private String deviceWifiDirectMacAddress;
+
     private long wifiDirectLastUpdated;
+
     private long networkServiceLastUpdated;
+
     private int port;
+
+    /**
+     * List of acquisition operations that have been performed from this node - used by the
+     * acquisition task to determine how successful a node has been and avoid nodes that frequently
+     * fail
+     */
+    private List<AcquisitionTaskHistoryEntry> acquisitionTaskHistory;
 
     /**
      * Creating a NetworkNode
@@ -132,4 +147,28 @@ public class NetworkNode {
                 ((deviceWifiDirectMacAddress!=null && getDeviceWifiDirectMacAddress().equals(deviceWifiDirectMacAddress))
                 || ( deviceIpAddress!=null && getDeviceIpAddress().equals(deviceIpAddress)));
     }
+
+    /**
+     * Add the given acqusition history entry to the list of entries acquired from this node.
+     *
+     * @param entry
+     */
+    public void addAcquisitionHistoryEntry(AcquisitionTaskHistoryEntry entry) {
+        if(acquisitionTaskHistory == null)
+            acquisitionTaskHistory = new ArrayList<>();
+
+        acquisitionTaskHistory.add(entry);
+    }
+
+    /**
+     * Returns the history of acquisition entries downloaded from this node. If no entries have
+     * been dowonloaded this will be null.
+     *
+     * @return List of AcquisitionTaskHistoryEntry downloaded from this node, null if no entries exist
+     */
+    public List<AcquisitionTaskHistoryEntry> getAcquisitionHistory() {
+        return acquisitionTaskHistory;
+    }
+
+
 }

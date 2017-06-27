@@ -16,5 +16,12 @@ public interface BluetoothConnectionHandler {
      * @param inputStream InputStream to read data from.
      * @param outputStream OutputStream to write data to.
      */
-    void onConnected(InputStream inputStream, OutputStream outputStream);
+    void onBluetoothConnected(InputStream inputStream, OutputStream outputStream);
+
+    /**
+     * Method to be invoked when a connection attempt is made however the connection fails.
+     *
+     * @param exception
+     */
+    void onBluetoothConnectionFailed(Exception exception);
 }

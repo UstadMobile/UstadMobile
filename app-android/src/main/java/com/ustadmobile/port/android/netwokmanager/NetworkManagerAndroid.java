@@ -49,7 +49,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -216,10 +215,9 @@ public class NetworkManagerAndroid extends NetworkManager{
     private BroadcastReceiver mBroadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
-            Toast.makeText(networkService,intent.getAction(),Toast.LENGTH_LONG).show();
+            //Toast.makeText(networkService,intent.getAction(),Toast.LENGTH_LONG).show();
+            //TODO: add logs instead
             switch (intent.getAction()){
-
                 case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
                     DnsSdTxtRecord txtRecord = networkService.getWifiDirectHandlerAPI().
@@ -345,7 +343,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                         in = socket.getInputStream();
                         out = socket.getOutputStream();
                         connected = true;
-                        handler.onConnected(socket.getInputStream(), socket.getOutputStream());
+                        handler.onBluetoothConnected(socket.getInputStream(), socket.getOutputStream());
 
                     }
                 }catch(IOException e) {
