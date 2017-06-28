@@ -3,6 +3,7 @@ package com.ustadmobile.test.sharedse;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
+import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import java.io.IOException;
 
@@ -20,9 +21,17 @@ public class TestUtilsSE {
      * @return True if successful, false otherwise
      */
     public static boolean setRemoteTestSlaveSupernodeEnabled(boolean enabled) throws IOException{
-        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled="
-                + String.valueOf(enabled);
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
+        return sendBooleanCommand(RemoteTestServerHttpd.CMD_SETSUPERNODE_ENABLED, enabled);
+    }
+
+    public static boolean setRemoteTestMangleBluetooth(boolean enabled) throws IOException {
+        return sendBooleanCommand(RemoteTestServerHttpd.CMD_MANGLE_BLUETOOTH, enabled);
+    }
+
+    private static boolean sendBooleanCommand(String command, boolean value) throws IOException{
+        String url = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + command + "&enabled="
+                + String.valueOf(value);
+        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(url, null, null);
         return result.getStatus() == 200;
     }
 

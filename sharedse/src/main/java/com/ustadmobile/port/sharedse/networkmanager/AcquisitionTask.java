@@ -24,8 +24,11 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -145,6 +148,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     protected NetworkManager networkManager;
 
     private AcquisitionTaskHistoryEntry currentHistoryEntry;
+
+    public static final int SAME_NET_SCORE = 600;
+    public static final int WIFI_DIRECT_SCORE = 500;
+    public static final int FAILED_NODE_SCORE = -400;
+    public static final float FAILURE_MEMORY_TIME = 20 * 60 * 1000;
 
 
     /**
@@ -366,8 +374,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     getFeed().entries[currentEntryIdIndex].title,message);
             long currentDownloadId = new AtomicInteger().incrementAndGet();
             String entryId = feed.entries[currentEntryIdIndex].id;
-            entryCheckResponse=networkManager.getEntryResponseWithLocalFile(entryId);
-
+            entryCheckResponse = selectEntryCheckResponse(feed.entries[index],
+                    networkManager.getEntryResponsesWithLocalFile(feed.entries[index].id));
 
             if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 targetNetwork = TARGET_NETWORK_NORMAL;
@@ -481,20 +489,26 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
                     currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
                     acquireFile(currentEntryIdIndex + 1);
-                }else if(!downloadCompleted && attemptCount < MAXIMUM_ATTEMPT_COUNT){
-                   try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
-                   catch(InterruptedException e) {}
-                   currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
-                   acquireFile(currentEntryIdIndex);
-               }else{
-                    //retry count exceeded
-                    currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
-                    acquireFile(currentEntryIdIndex + 1);
-               }
+                }else {
+                    handleAttemptFailed();
+                }
 
             }
         });
         entryAcquisitionThread.start();
+    }
+
+    protected void handleAttemptFailed() {
+        currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
+        if(attemptCount < MAXIMUM_ATTEMPT_COUNT){
+            try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
+            catch(InterruptedException e) {}
+            acquireFile(currentEntryIdIndex);
+        }else {
+            //retry count exceeded - move on to next file
+            acquireFile(currentEntryIdIndex + 1);
+        }
+
     }
 
 
@@ -580,7 +594,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public void onBluetoothConnectionFailed(Exception exception) {
-
+        handleAttemptFailed();
     }
 
     @Override
@@ -751,5 +765,71 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     public boolean taskIncludesEntry(String entryId) {
         return feed.getEntryById(entryId) != null;
     }
+
+    /**
+     * Selects the optimal entry check response to download if any
+     *
+     * @param responses
+     * @return
+     */
+    public EntryCheckResponse selectEntryCheckResponse(UstadJSOPDSEntry entry, List<EntryCheckResponse> responses) {
+        if(responses == null || responses.size() == 0) {
+            return null;
+        }
+
+        if(responses.size() == 1) {
+            return scoreEntryCheckResponse(responses.get(0)) > 0 ? responses.get(0) : null;
+        }
+
+        final HashMap<EntryCheckResponse, Integer> entryCheckScores = new HashMap<>();
+
+        ArrayList<EntryCheckResponse> listToSort = new ArrayList<>(responses);
+        Collections.sort(listToSort, new Comparator<EntryCheckResponse>() {
+            @Override
+            public int compare(EntryCheckResponse response1, EntryCheckResponse response2) {
+                if(!entryCheckScores.containsKey(response1))
+                    entryCheckScores.put(response1, scoreEntryCheckResponse(response1));
+
+                if(!entryCheckScores.containsKey(response2))
+                    entryCheckScores.put(response2, scoreEntryCheckResponse(response2));
+
+                return entryCheckScores.get(response2) - entryCheckScores.get(response1);
+            }
+        });
+
+        EntryCheckResponse bestResponse = listToSort.get(0);
+        return bestResponse != null && entryCheckScores.get(bestResponse) >0 ? bestResponse : null;
+    }
+
+    private int scoreEntryCheckResponse(EntryCheckResponse response) {
+        if(!response.isFileAvailable())
+            return 0;
+
+        int score = 0;
+        NetworkNode node = response.getNetworkNode();
+        long timeNow = Calendar.getInstance().getTimeInMillis();
+        if(timeNow - response.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
+            score += SAME_NET_SCORE;
+        }else if(timeNow - response.getNetworkNode().getWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
+            score += WIFI_DIRECT_SCORE;
+        }
+
+
+        if(node.getAcquisitionHistory() != null) {
+            Iterator<AcquisitionTaskHistoryEntry> historyIterator = node.getAcquisitionHistory().iterator();
+            AcquisitionTaskHistoryEntry entry;
+            while(historyIterator.hasNext()) {
+                entry = historyIterator.next();
+                if(entry.getStatus() == UstadMobileSystemImpl.DLSTATUS_FAILED) {
+                    long timeSinceFail = Calendar.getInstance().getTimeInMillis() - entry.getTimeEnded();
+                    score += (1 - Math.min((float)timeSinceFail / FAILURE_MEMORY_TIME, 1)) * FAILED_NODE_SCORE;
+                }
+            }
+        }
+
+        return score;
+    }
+
+
 
 }

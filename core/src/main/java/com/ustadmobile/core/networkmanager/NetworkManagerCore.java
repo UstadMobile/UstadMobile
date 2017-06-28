@@ -2,6 +2,8 @@ package com.ustadmobile.core.networkmanager;
 
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 
+import java.util.List;
+
 /**
  * Created by kileha3 on 13/02/2017.
  */
@@ -24,6 +26,6 @@ public interface NetworkManagerCore {
 
     void removeNetworkManagerListener(NetworkManagerListener listener);
 
-    EntryCheckResponse getEntryResponseWithLocalFile(String entryId);
+    List<EntryCheckResponse> getEntryResponsesWithLocalFile(String entryId);
 
 }

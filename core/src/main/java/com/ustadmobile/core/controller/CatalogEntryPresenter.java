@@ -75,7 +75,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
                 //TODO: as this is bound to the activity - this might not be ready - lifecycle implication needs handled
                 NetworkManagerCore manager  = UstadMobileSystemImpl.getInstance().getNetworkManager();
-                EntryCheckResponse fileResponse = manager.getEntryResponseWithLocalFile(entry.id);
+                List<EntryCheckResponse> fileResponse = manager.getEntryResponsesWithLocalFile(entry.id);
                 if(fileResponse != null) {
                     catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_AVAILABLE);
                 }else {
@@ -223,7 +223,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     @Override
     public void fileStatusCheckInformationAvailable(List<String> fileIds) {
         if(fileIds.contains(entry.id)) {
-            final boolean available = manager.getEntryResponseWithLocalFile(entry.id) != null;
+            final boolean available = manager.getEntryResponsesWithLocalFile(entry.id) != null;
             updateViewLocallyAvailableStatus(available ?
                     CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
         }
@@ -233,7 +233,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     public void networkTaskCompleted(NetworkTask task) {
         if(task.getTaskId() == entryCheckTaskId) {
             boolean available =
-                UstadMobileSystemImpl.getInstance().getNetworkManager().getEntryResponseWithLocalFile(entry.id) != null;
+                UstadMobileSystemImpl.getInstance().getNetworkManager().getEntryResponsesWithLocalFile(entry.id) != null;
             updateViewLocallyAvailableStatus(available ?
                 CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
         }

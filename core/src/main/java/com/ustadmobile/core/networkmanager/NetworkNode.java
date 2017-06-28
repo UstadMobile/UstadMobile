@@ -1,6 +1,9 @@
 package com.ustadmobile.core.networkmanager;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -168,6 +171,23 @@ public class NetworkNode {
      */
     public List<AcquisitionTaskHistoryEntry> getAcquisitionHistory() {
         return acquisitionTaskHistory;
+    }
+
+    public int getNumFailures() {
+        if(acquisitionTaskHistory == null)
+            return 0;
+
+        int numFailures = 0;
+        Iterator<AcquisitionTaskHistoryEntry> historyIterator = acquisitionTaskHistory.iterator();
+        AcquisitionTaskHistoryEntry entry;
+        while(historyIterator.hasNext()) {
+            entry = historyIterator.next();
+            if(entry.getStatus() == UstadMobileSystemImpl.DLSTATUS_FAILED)
+                numFailures++;
+
+        }
+
+        return numFailures;
     }
 
 

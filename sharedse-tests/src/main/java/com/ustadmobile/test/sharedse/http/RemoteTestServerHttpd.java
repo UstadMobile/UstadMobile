@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,8 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
     public static final String CMD_SETSUPERNODE_ENABLED = "SUPERNODE";
 
     public static final String CMD_CREATEGROUP = "CREATEGROUP";
+
+    public static final String CMD_MANGLE_BLUETOOTH = "MANGLEBLUETOOTH";
 
     public static final int GROUP_CREATION_TIMEOUT = 60*1000;
 
@@ -43,6 +46,10 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
             if(CMD_SETSUPERNODE_ENABLED.equals(command)) {
                 boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
                 networkManager.setSuperNodeEnabled(networkManager.getContext(), enabled);
+                return newFixedLengthResponse("OK");
+            }else if(CMD_MANGLE_BLUETOOTH.equals(command)) {
+                boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
+                networkManager.setMangleBluetoothAddr(enabled);
                 return newFixedLengthResponse("OK");
             }else if(CMD_CREATEGROUP.equals(command)) {
                 int groupStatus = networkManager.getWifiDirectGroupStatus();

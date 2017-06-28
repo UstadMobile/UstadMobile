@@ -181,6 +181,8 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      */
     private boolean mangleWifiSsid = false;
 
+    private boolean mangleBluetoothAddr = false;
+
     public NetworkManager() {
     }
 
@@ -568,8 +570,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param entryId
      * @return
      */
-    public EntryCheckResponse getEntryResponseWithLocalFile(String entryId){
+    public List<EntryCheckResponse> getEntryResponsesWithLocalFile(String entryId){
         List<EntryCheckResponse> responseList=getEntryResponses().get(entryId);
+        return responseList;
+
+        /*
         if(responseList!=null &&!responseList.isEmpty()){
             for(EntryCheckResponse response: responseList){
                 if(!response.isFileAvailable())
@@ -583,7 +588,9 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
                 }
             }
         }
+
         return null;
+        */
     }
 
     /**
@@ -778,13 +785,15 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public abstract void disconnectWifi();
 
     /**
-     * This method is really here for testing purposes only. When enabled any call to connectWifi
-     * will connect to the given ssid postfixed by "-mangle" - meaning the connection will fail.
+     * WARNING: This method is really here for testing purposes only. When enabled any call to the
+     * getWifiDirectGroup method will provide an invalid ssid. The actual ssid will be postfixed
+     * with "-mangle". Unfortunately putting this in the test package would require overriding
+     * UstadMobileSystemImplFactory
      *
      * @hide
      * @param mangleWifiSsid
      */
-    protected void setMangleWifiSsid(boolean mangleWifiSsid) {
+    public void setMangleWifiDirectGroup(boolean mangleWifiSsid) {
         this.mangleWifiSsid = mangleWifiSsid;
     }
 
@@ -792,8 +801,17 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @hide
      * @return
      */
-    protected boolean isMangleWifiSsid() {
+    protected boolean isMangleWifiDirectGroup() {
         return this.mangleWifiSsid;
+    }
+
+
+    public void setMangleBluetoothAddr(boolean mangleBluetoothAddr) {
+        this.mangleBluetoothAddr = mangleBluetoothAddr;
+    }
+
+    protected boolean isMangleBluetoothAddr() {
+        return mangleBluetoothAddr;
     }
 
 

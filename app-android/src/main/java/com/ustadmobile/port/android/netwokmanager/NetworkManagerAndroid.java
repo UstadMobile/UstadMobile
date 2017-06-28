@@ -555,10 +555,6 @@ public class NetworkManagerAndroid extends NetworkManager{
             }while(waitTime < 10000 && wifiManager.getConfiguredNetworks() == null);
         }
 
-        if(isMangleWifiSsid()){
-            ssid += "-mangled";
-        }
-
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
@@ -701,12 +697,16 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public WiFiDirectGroup getWifiDirectGroup() {
         WifiP2pGroup groupInfo=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
+        WiFiDirectGroup group = null;
         if(groupInfo!=null){
+            String groupSsid = groupInfo.getNetworkName();
+            if(isMangleWifiDirectGroup())
+                groupSsid += "-mangle";
 
-           return new WiFiDirectGroup(groupInfo.getNetworkName(), groupInfo.getPassphrase());
-        }else{
-            return null;
+            group = new WiFiDirectGroup(groupSsid, groupInfo.getPassphrase());
         }
+
+        return group;
     }
 
     @Override

@@ -433,7 +433,7 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     public String getMockBluetoothAddr() {
-        return mockBluetoothAddr;
+        return !isMangleBluetoothAddr() ? mockBluetoothAddr : "00:11:22:33:44:55";
     }
 
 
