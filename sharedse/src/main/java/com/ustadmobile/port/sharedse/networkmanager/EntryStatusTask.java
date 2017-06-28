@@ -1,5 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -127,7 +129,8 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public void onBluetoothConnectionFailed(Exception exception) {
-
+        UstadMobileSystemImpl.l(UMLog.WARN, 212, null, exception);
+        connectNextNode(currentNode + 1);
     }
 
     @Override

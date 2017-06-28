@@ -326,6 +326,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         new Thread(new Runnable() {
             @Override
             public void run() {
+                IOException ioe = null;
                 BluetoothAdapter adapter=BluetoothAdapter.getDefaultAdapter();
                 BluetoothDevice bluetoothDevice= null;
 
@@ -347,6 +348,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
                     }
                 }catch(IOException e) {
+                    ioe = e;
                     e.printStackTrace();
                 }finally {
                     UMIOUtils.closeOutputStream(out);
@@ -357,8 +359,9 @@ public class NetworkManagerAndroid extends NetworkManager{
                     }
                 }
 
-                //TODO:Handle on connection failure here
-
+                if(!connected) {
+                    handler.onBluetoothConnectionFailed(ioe);
+                }
             }
         }).start();
     }
@@ -552,6 +555,9 @@ public class NetworkManagerAndroid extends NetworkManager{
             }while(waitTime < 10000 && wifiManager.getConfiguredNetworks() == null);
         }
 
+        if(isMangleWifiSsid()){
+            ssid += "-mangled";
+        }
 
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";

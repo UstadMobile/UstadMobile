@@ -176,6 +176,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      */
     protected String ssidToRestore;
 
+    /**
+     * Used primarily for testing but cannot be conveniently pushed into test package.
+     */
+    private boolean mangleWifiSsid = false;
+
     public NetworkManager() {
     }
 
@@ -301,7 +306,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      *                          TRUE if yes , otherwise FALSE.
      * @return
      */
-    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext,
+    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext, List<NetworkNode> networkNodes,
                                               boolean localNetworkEnabled, boolean wifiDirectEnabled){
         AcquisitionTask task=new AcquisitionTask(feed,this);
         task.setTaskType(QUEUE_ENTRY_ACQUISITION);
@@ -309,6 +314,11 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
         queueTask(task);
         return feed;
+    }
+
+    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext,
+                                              boolean localNetworkEnabled, boolean wifiDirectEnabled){
+        return requestAcquisition(feed, mContext, getKnownNodes(), localNetworkEnabled, wifiDirectEnabled);
     }
 
     /**
@@ -766,6 +776,26 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * Called
      */
     public abstract void disconnectWifi();
+
+    /**
+     * This method is really here for testing purposes only. When enabled any call to connectWifi
+     * will connect to the given ssid postfixed by "-mangle" - meaning the connection will fail.
+     *
+     * @hide
+     * @param mangleWifiSsid
+     */
+    protected void setMangleWifiSsid(boolean mangleWifiSsid) {
+        this.mangleWifiSsid = mangleWifiSsid;
+    }
+
+    /**
+     * @hide
+     * @return
+     */
+    protected boolean isMangleWifiSsid() {
+        return this.mangleWifiSsid;
+    }
+
 
     /**
      * Connect to the given ssid. This method will mark the connection as a temporary connection.

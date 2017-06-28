@@ -78,22 +78,15 @@ public class TestAcquisitionTask{
         }
     }
 
-    @Test
-    public void testAcquisition() throws IOException, InterruptedException, XmlPullParserException {
+    public static void testAcquisition(NetworkNode remoteNode, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode) throws IOException, InterruptedException,XmlPullParserException{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        Assume.assumeTrue("Network test wifi and bluetooth enabled",
-                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
-
-        final Object acquireSameNetworkLock=new Object();
-        final Object acquireDifferentNetworkLock=new Object();
+        final Object acquireLock = new Object();
 
         //make sure we don't have any of the entries in question already
         CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
-            PlatformTestUtil.getTargetContext());
+                PlatformTestUtil.getTargetContext());
         CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
-
-
 
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
@@ -108,16 +101,8 @@ public class TestAcquisitionTask{
                         // which is ENTRY_ID, ENTRY_ID_NOT_PRESENT
                         //Therefor when we receive the complete event for the latter we can notify the
                         //thread to continue.
-                        if (localNetworkEnabled) {
-                            synchronized (acquireSameNetworkLock) {
-                                UstadMobileSystemImpl.l(UMLog.INFO, 328, "Test acquisition task: localnetworkenabled: notify");
-                                acquireSameNetworkLock.notifyAll();
-                            }
-                        }else if(wifiDirectEnabled) {
-                            synchronized (acquireDifferentNetworkLock) {
-                                UstadMobileSystemImpl.l(UMLog.INFO, 329, "Test acquisition task: wifidirect enabled: notify");
-                                acquireDifferentNetworkLock.notifyAll();
-                            }
+                        synchronized (acquireLock) {
+                            acquireLock.notifyAll();
                         }
                     }
                 }
@@ -153,21 +138,21 @@ public class TestAcquisitionTask{
                 TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
 
 
-        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        //NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         int numAcquisitions = remoteNode.getAcquisitionHistory() != null ? remoteNode.getAcquisitionHistory().size() : 0;
 
         //Create a feed manually
         String catalogUrl = UMFileUtil.joinPaths(new String[]{
                 httpRoot, "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds"});
         UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(catalogUrl,
-            CatalogController.SHARED_RESOURCE, null, null, 0, PlatformTestUtil.getTargetContext());
+                CatalogController.SHARED_RESOURCE, null, null, 0, PlatformTestUtil.getTargetContext());
 
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-            CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         feed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
-            FEED_LINK_MIME, destinationDir);
+                FEED_LINK_MIME, destinationDir);
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
-            catalogUrl);
+                catalogUrl);
 
         AcquisitionListener acquisitionListener =new AcquisitionListener() {
             @Override
@@ -184,20 +169,17 @@ public class TestAcquisitionTask{
 
         manager.addAcquisitionTaskListener(acquisitionListener);
 
-
-        localNetworkEnabled=true;
-        wifiDirectEnabled=false;
         manager.requestAcquisition(feed,manager.getContext(),localNetworkEnabled,wifiDirectEnabled);
         AcquisitionTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
         Assert.assertNotNull("Task created for acquisition", task);
-        synchronized (acquireSameNetworkLock){
-            acquireSameNetworkLock.wait(DEFAULT_WAIT_TIME* 6);
+        synchronized (acquireLock){
+            acquireLock.wait(DEFAULT_WAIT_TIME* 6);
         }
 
         List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
         for(AcquisitionTaskHistoryEntry entryHistory : entryHistoryList) {
             Assert.assertEquals("Task reported as being downloaded from same network",
-                    NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, entryHistory.getMode());
+                    expectedLocalDownloadMode, entryHistory.getMode());
         }
 
         //check history was recorded on the node
@@ -211,7 +193,7 @@ public class TestAcquisitionTask{
         CatalogEntryInfo localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
                 CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
         Assert.assertEquals("File was downloaded successfully from node on same network",
-            CatalogController.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
+                CatalogController.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
         Assert.assertTrue("File downloaded via local network is present",
                 new File(localEntryInfo.fileURI).exists());
 
@@ -222,40 +204,27 @@ public class TestAcquisitionTask{
         Assert.assertTrue("File downloaded via cloud is present",
                 new File(cloudEntryInfo.fileURI).exists());
 
-        CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
-        CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
-
-
-
-        localNetworkEnabled=false;
-        wifiDirectEnabled=true;
-        manager.requestAcquisition(feed,manager.getContext(),localNetworkEnabled,wifiDirectEnabled);
-        /*AcquisitionTask */task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
-        synchronized (acquireDifferentNetworkLock){
-            acquireDifferentNetworkLock.wait(DEFAULT_WAIT_TIME*10);
-        }
-
-        UstadMobileSystemImpl.l(UMLog.INFO, 337, "TestAcquisitionTask: task id = " + task.getTaskId());
-        /*List<AcquisitionTaskHistoryEntry> */entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
-        for(AcquisitionTaskHistoryEntry entryHistory : entryHistoryList) {
-            Assert.assertEquals("Task reported as being downloaded from different network",
-                    NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK, entryHistory.getMode());
-        }
-        Assert.assertEquals("Number of acquisitions from node increased by one after wifi direct download",
-                numAcquisitions + 1, remoteNode.getAcquisitionHistory().size());
-
-
-        /*CatalogEntryInfo */localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-        Assert.assertEquals("File was downloaded successfully from node on different network",
-                CatalogController.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
-        Assert.assertTrue("File downloaded from different network present",
-                new File(localEntryInfo.fileURI).exists());
-
-        Assert.assertTrue("Disabled supernode", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
         manager.removeNetworkManagerListener(responseListener);
         manager.removeAcquisitionTaskListener(acquisitionListener);
     }
+
+
+    @Test
+    public void testAcquisition() throws IOException, InterruptedException, XmlPullParserException {
+        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        Assume.assumeTrue("Network test wifi and bluetooth enabled",
+                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+        Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+        TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
+                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+        TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
+                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+        TestEntryStatusTask.testEntryStatusBluetooth(TestEntryStatusTask.EXPECTED_AVAILABILITY,
+                TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        testAcquisition(remoteNode, true, false, NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
+        testAcquisition(remoteNode, false, true, NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+        Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+    }
+
 }

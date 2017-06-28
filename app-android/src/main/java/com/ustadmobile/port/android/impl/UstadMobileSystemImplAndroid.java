@@ -229,9 +229,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     //private HashMap<Context, ServiceConnection> httpServiceConnections = new HashMap<>();
 
-    private HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
+    protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
-    private NetworkManagerAndroid networkManagerAndroid;
+    protected NetworkManagerAndroid networkManagerAndroid;
 
     /**
      @deprecated

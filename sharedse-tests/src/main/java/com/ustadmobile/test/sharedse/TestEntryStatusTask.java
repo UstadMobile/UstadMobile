@@ -40,7 +40,6 @@ public class TestEntryStatusTask{
     }
 
 
-
     @Test
     public void testEntryStatusBluetooth() throws IOException, InterruptedException {
         Assert.assertTrue("Test slave supernode enabled",
@@ -50,6 +49,25 @@ public class TestEntryStatusTask{
         testEntryStatusBluetooth(EXPECTED_AVAILABILITY, TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         Assert.assertTrue("Supernod disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
+
+    @Test
+    public void testEntryStatusBluetoothOnFailure() throws IOException, InterruptedException {
+        String wrongBluetoothAddr = "00:AA:BB:CC:DD:EE";
+        NetworkNode wrongNode = new NetworkNode(wrongBluetoothAddr, null);
+        wrongNode.setDeviceBluetoothMacAddress(wrongBluetoothAddr);
+        testEntryStatusBluetooth(null, wrongNode);
+    }
+
+    public static void testEntryStatusBluetooth(Hashtable expectedAvailability, String remoteBluetoothAddr) throws IOException, InterruptedException {
+        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        NetworkNode networkNode= manager.getNodeByBluetoothAddr(remoteBluetoothAddr);
+        if(networkNode == null)
+            throw new IllegalArgumentException("testEntryStatuBluetooth Hashtable, String requires the bluetooth address to have been discovered");
+
+        testEntryStatusBluetooth(expectedAvailability, networkNode);
+    }
+
+
 
     /**
      * Test using entry status checking over bluetooth. Communicate only with the given deice with
@@ -64,20 +82,23 @@ public class TestEntryStatusTask{
      * The method will assert that the availability found matches each entry for expected availability.
      *
      * @param expectedAvailability Hashtable in the form of file id -> boolean specifying the expected availability to assert.
-     * @param remoteBluetoothAddr The bluetooth address of the device to check for entry status
+     * @param remoteNode The network node to connect to
      *
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void testEntryStatusBluetooth(Hashtable expectedAvailability, String remoteBluetoothAddr) throws IOException, InterruptedException {
+    public static void testEntryStatusBluetooth(Hashtable expectedAvailability, NetworkNode remoteNode) throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
 
         final Object statusRequestLock=new Object();
         final Hashtable actualAvailability = new Hashtable();
+        final long taskId[] = new long[]{-1};
+        final boolean taskCompleted[] = new boolean[]{false};
 
         NetworkManagerListener responseListener = new NetworkManagerListener() {
+
             @Override
             public void fileStatusCheckInformationAvailable(List<String> fileIds) {
                 for(int i = 0; i < fileIds.size(); i++) {
@@ -87,9 +108,11 @@ public class TestEntryStatusTask{
 
             @Override
             public void networkTaskCompleted(NetworkTask task) {
-                //TODO; Notify here
-                synchronized (statusRequestLock){
-                    statusRequestLock.notify();
+                if(task.getTaskId() == taskId[0]) {
+                    taskCompleted[0] = true;
+                    synchronized (statusRequestLock){
+                        statusRequestLock.notify();
+                    }
                 }
             }
 
@@ -116,19 +139,27 @@ public class TestEntryStatusTask{
         };
         manager.addNetworkManagerListener(responseListener);
 
-        NetworkNode networkNode=manager.getNodeByBluetoothAddr(remoteBluetoothAddr);
         List<NetworkNode> nodeList=new ArrayList<>();
-        nodeList.add(networkNode);
+        nodeList.add(remoteNode);
 
         List<String> entryLIst=new ArrayList<>();
         for(int i = 0; i < ENTRY_IDS.length; i++) {
             entryLIst.add(ENTRY_IDS[i]);
         }
 
-        manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
+        taskId[0] = manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
         synchronized (statusRequestLock){
             statusRequestLock.wait(DEFAULT_WAIT_TIME*6);
         }
+        Assert.assertTrue("Task completed", taskCompleted[0]);
+
+        manager.removeNetworkManagerListener(responseListener);
+
+        if(expectedAvailability == null) {
+            //This test doesn't really expect a particular result - it's done - as long as it completed
+            return;
+        }
+
 
         Enumeration expectedKeysEnumeration = expectedAvailability.keys();
         Object currentIdKey;
@@ -141,7 +172,7 @@ public class TestEntryStatusTask{
         }
 
 
-        manager.removeNetworkManagerListener(responseListener);
+
     }
 
 

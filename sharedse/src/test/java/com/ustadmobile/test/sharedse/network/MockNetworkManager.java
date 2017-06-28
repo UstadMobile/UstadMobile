@@ -251,6 +251,8 @@ public class MockNetworkManager extends NetworkManager {
                     inFromServer, outToServer);
             handler.onBluetoothConnected(inFromServer, outToServer);
             return;
+        }else {
+            handler.onBluetoothConnectionFailed(new IOException("No such mock bluetooth device"));
         }
     }
 
