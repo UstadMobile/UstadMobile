@@ -52,6 +52,7 @@ import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
@@ -390,6 +391,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         return new File(Environment.getExternalStorageDirectory(), "ustadmobileContent").getAbsolutePath();
     }
 
+    @Override
+    public String getCacheDir(int mode, Object context) {
+        Context ctx = (Context)context;
+        File cacheDir = ctx.getCacheDir();
+        if(mode == CatalogController.SHARED_RESOURCE) {
+            return cacheDir.getAbsolutePath();
+        }else {
+            return new File(cacheDir, "user-" + getActiveUser(context)).getAbsolutePath();
+        }
+    }
 
     /**
      * Method to accomplish the surprisingly tricky task of finding the external SD card (if this
