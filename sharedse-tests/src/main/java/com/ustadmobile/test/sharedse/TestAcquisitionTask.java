@@ -14,6 +14,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
+import com.ustadmobile.port.sharedse.networkmanager.LocalMirrorFinder;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -37,8 +38,6 @@ import java.util.Calendar;
 import java.util.List;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
-
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Test the acquisition task. The OPDS feed on which the acquisition is based and the EPUBs are in
@@ -68,6 +67,9 @@ public class TestAcquisitionTask{
             resourcesHttpd.start();
             httpRoot = "http://localhost:" + resourcesHttpd.getListeningPort() + "/res/";
         }
+        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        Assume.assumeTrue("Bluetooth and WiFi enabled", manager.isBluetoothEnabled() &&
+            manager.isWiFiEnabled());
 
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
@@ -87,8 +89,9 @@ public class TestAcquisitionTask{
         }
     }
 
-    public static void testAcquisition(NetworkNode remoteNode, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode) throws IOException, InterruptedException,XmlPullParserException{
+    public static void testAcquisition(NetworkNode remoteNode, LocalMirrorFinder mirrorFinder, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode) throws IOException, InterruptedException,XmlPullParserException{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        manager.clearNetworkNodeAcquisitionHistory();
         final Object acquireLock = new Object();
 
         //make sure we don't have any of the entries in question already
@@ -139,11 +142,8 @@ public class TestAcquisitionTask{
         };
         manager.addNetworkManagerListener(responseListener);
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
-
-        //NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-        int numAcquisitions = remoteNode.getAcquisitionHistory() != null ? remoteNode.getAcquisitionHistory().size() : 0;
-
-
+        int numAcquisitions = remoteNode.getAcquisitionHistory() != null ?
+                remoteNode.getAcquisitionHistory().size() : 0;
 
         AcquisitionListener acquisitionListener =new AcquisitionListener() {
             @Override
@@ -161,7 +161,7 @@ public class TestAcquisitionTask{
         manager.addAcquisitionTaskListener(acquisitionListener);
 
         UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
-        manager.requestAcquisition(feed,manager.getContext(),localNetworkEnabled,wifiDirectEnabled);
+        manager.requestAcquisition(feed, mirrorFinder,localNetworkEnabled,wifiDirectEnabled);
         AcquisitionTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
         Assert.assertNotNull("Task created for acquisition", task);
         synchronized (acquireLock){
@@ -169,18 +169,18 @@ public class TestAcquisitionTask{
         }
 
         List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
-        for(AcquisitionTaskHistoryEntry entryHistory : entryHistoryList) {
-            Assert.assertEquals("Task reported as being downloaded from same network",
-                    expectedLocalDownloadMode, entryHistory.getMode());
-        }
+        Assert.assertEquals("Last history entry was downloaded from expected network", expectedLocalDownloadMode,
+                entryHistoryList.get(entryHistoryList.size()-1).getMode());
+        Assert.assertEquals("Last history entry was successful", UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
+                entryHistoryList.get(entryHistoryList.size()-1).getStatus());
 
         //check history was recorded on the node
         //Assertion has failed 27/06/17 - not able to reproduce again.
-        Assert.assertNotNull("Remote node has acquisition history", remoteNode.getAcquisitionHistory());
-        Assert.assertEquals("Remote node has one additional acquisition history entry",
-                numAcquisitions + 1, remoteNode.getAcquisitionHistory().size());
-        numAcquisitions = remoteNode.getAcquisitionHistory().size();
-
+        if(expectedLocalDownloadMode != NetworkManager.DOWNLOAD_FROM_CLOUD) {
+            Assert.assertNotNull("Remote node has acquisition history", remoteNode.getAcquisitionHistory());
+            Assert.assertTrue("Remote node has at least one additional acquisition history entries",
+                    remoteNode.getAcquisitionHistory().size() > numAcquisitions);
+        }
 
         CatalogEntryInfo localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
                 CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
@@ -218,32 +218,86 @@ public class TestAcquisitionTask{
     }
 
 
+    /**
+     * Main acquisition test: test downloading from the same network (e.g. use with network
+     * service discovery) and test downloading using WiFi direct when not on the same network
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws XmlPullParserException
+     */
     @Test
     public void testAcquisition() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-        testAcquisition(remoteNode, true, false, NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
-        testAcquisition(remoteNode, false, true, NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+        testAcquisition(remoteNode, manager, true, false, NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
+        testAcquisition(remoteNode, manager, false, true, NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
         Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
 
-    //@Test
+    /**
+     * Test what happens with acquisition over WiFi direct when the bluetooth connection to the
+     * remote node fails. After a number of failures the scoring mechanism should result in the
+     * download taking place from the cloud.
+     *
+     * @throws Exception
+     */
+    @Test
     public void testAcquisitionBluetoothFail() throws Exception {
+        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        final NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+
+        final NetworkNode wrongAddressNode = new NetworkNode(remoteNode.getDeviceWifiDirectMacAddress(),
+                null);
+        wrongAddressNode.setDeviceBluetoothMacAddress("00:11:22:33:44:55");
+        wrongAddressNode.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
+        EntryCheckResponse wrongAddressNodeResponse = new EntryCheckResponse(wrongAddressNode);
+        wrongAddressNodeResponse.setFileAvailable(true);
+        wrongAddressNodeResponse.setLastChecked(Calendar.getInstance().getTimeInMillis());
+        final List<EntryCheckResponse> entryCheckResponseList = new ArrayList<>();
+        entryCheckResponseList.add(wrongAddressNodeResponse);
+
+
+        LocalMirrorFinder mirrorFinder= new LocalMirrorFinder() {
+            @Override
+            public List<EntryCheckResponse> getEntryResponsesWithLocalFile(String entryId) {
+                if(entryId.equals(ENTRY_ID_PRESENT))
+                    return entryCheckResponseList;
+                else
+                    return null;
+            }
+        };
+
+        testAcquisition(remoteNode, mirrorFinder, false, true, NetworkManager.DOWNLOAD_FROM_CLOUD);
+    }
+
+    /**
+     * Test what happens with acquisition over WiFi direct when the WiFi connection fails. After a
+     * number of failures the scoring mechanism should result in the download taking place from
+     * the cloud. This is achieved by telling the remote test driver node to mangle the wifi direct
+     * group information. The remote node will return an invalid wifi network, simulating the effect
+     * of the WiFi group connection not working.
+     *
+     * @throws Exception
+     */
+    @Test(timeout = 4 * 60 * 1000)
+    public void testAcquisitionWifiDirectFail() throws Exception{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         Exception e = null;
         try {
-            Assert.assertTrue("Mangle bluetootoh enabled", TestUtilsSE.setRemoteTestMangleBluetooth(true));
-            testAcquisition(remoteNode, false, true, NetworkManager.DOWNLOAD_FROM_CLOUD);
+            Assert.assertTrue("Mangle wifi direct group enabled", TestUtilsSE.setRemoteTestMangleWifi(true));
+            testAcquisition(remoteNode, manager, false, true, NetworkManager.DOWNLOAD_FROM_CLOUD);
         }catch(Exception e2) {
             e = e2;
         }finally {
-            Assert.assertTrue("Mangle bluetootoh disabled", TestUtilsSE.setRemoteTestMangleBluetooth(false));
+            Assert.assertTrue("Mangle wifi direct group disabled", TestUtilsSE.setRemoteTestMangleWifi(false));
         }
 
         if(e != null)
             throw e;
     }
+
 
     @Test
     public void testEntryCheckResponseScoring() throws IOException, XmlPullParserException{

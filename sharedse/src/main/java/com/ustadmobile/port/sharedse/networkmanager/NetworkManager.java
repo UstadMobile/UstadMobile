@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -47,7 +48,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
 
-public abstract class NetworkManager implements NetworkManagerCore,NetworkManagerTaskListener {
+public abstract class NetworkManager implements NetworkManagerCore,NetworkManagerTaskListener, LocalMirrorFinder {
 
     /**
      * Flag to indicate queue type status
@@ -301,16 +302,18 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     /**
      * Method which invoked when making file acquisition request.
      * @param feed OPDS file feed
-     * @param mContext application context
      * @param localNetworkEnabled Whether to involve local network as means of acquiring,
      *                            TRUE if yes, FALSE otherwise.
+     * @param mirrorFinder Normally the NetworkManager itself but can be any other object implementing
+     *                     the interface (e.g. for testing purposes)
      * @param wifiDirectEnabled Whether to involve Wi-Fi direct group as means of acquiring,
      *                          TRUE if yes , otherwise FALSE.
      * @return
      */
-    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext, List<NetworkNode> networkNodes,
+    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, LocalMirrorFinder mirrorFinder,
                                               boolean localNetworkEnabled, boolean wifiDirectEnabled){
         AcquisitionTask task=new AcquisitionTask(feed,this);
+        task.setMirrorFinder(mirrorFinder);
         task.setTaskType(QUEUE_ENTRY_ACQUISITION);
         task.setLocalNetworkDownloadEnabled(localNetworkEnabled);
         task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
@@ -318,9 +321,8 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         return feed;
     }
 
-    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed,Object mContext,
-                                              boolean localNetworkEnabled, boolean wifiDirectEnabled){
-        return requestAcquisition(feed, mContext, getKnownNodes(), localNetworkEnabled, wifiDirectEnabled);
+    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled){
+        return requestAcquisition(feed, this, localNetworkEnabled, wifiDirectEnabled);
     }
 
     /**
@@ -570,27 +572,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @param entryId
      * @return
      */
+    @Override
     public List<EntryCheckResponse> getEntryResponsesWithLocalFile(String entryId){
         List<EntryCheckResponse> responseList=getEntryResponses().get(entryId);
         return responseList;
-
-        /*
-        if(responseList!=null &&!responseList.isEmpty()){
-            for(EntryCheckResponse response: responseList){
-                if(!response.isFileAvailable())
-                    continue;
-
-                long timeNow = Calendar.getInstance().getTimeInMillis();
-                if(timeNow - response.getNetworkNode().getNetworkServiceLastUpdated() <= ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                    return response;
-                }else if(timeNow - response.getNetworkNode().getWifiDirectLastUpdated() <= ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                    return response;
-                }
-            }
-        }
-
-        return null;
-        */
     }
 
     /**
@@ -1129,6 +1114,21 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
         }
 
         setSharedFeed(feed);
+    }
+
+    /**
+     * Reset the acquisition history of all known nodes. History is used to track failures so that
+     * failure prone nodes are avoided as far as possible.
+     *
+     */
+    public void clearNetworkNodeAcquisitionHistory() {
+        Iterator<NetworkNode> nodeIterator = getKnownNodes().iterator();
+        NetworkNode node;
+        while(nodeIterator.hasNext()) {
+            node = nodeIterator.next();
+            if(node.getAcquisitionHistory() != null)
+                node.getAcquisitionHistory().clear();
+        }
     }
 
 

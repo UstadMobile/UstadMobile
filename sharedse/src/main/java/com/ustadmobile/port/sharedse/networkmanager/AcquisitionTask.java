@@ -154,6 +154,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     public static final int FAILED_NODE_SCORE = -400;
     public static final float FAILURE_MEMORY_TIME = 20 * 60 * 1000;
 
+    private Timer wifiConnectTimeoutTimer;
+
+    private TimerTask wifiConnectTimeoutTimerTask;
+
+    private LocalMirrorFinder mirrorFinder;
+
 
     /**
      * Monitor file acquisition task progress and report it to the rest of the app (UI).
@@ -188,6 +194,20 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         }
     };
 
+    private class WifiConnectTimeoutTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            UstadMobileSystemImpl.l(UMLog.WARN, 213, "Acquisition Task wifi connect timeout.");
+            AcquisitionTask.this.handleAttemptFailed();
+        }
+    }
+
+
+    /**
+     * The timeout (in ms) for connecting to a WiFi network. On Android there is no explicit
+     * connection failed event.
+     */
+    public static final int WIFI_CONNECT_TIMEOUT = (45 * 1000);
 
     public static class Status implements AcquisitionTaskStatus{
 
@@ -263,6 +283,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
         this.feed=feed;
         networkManager.addNetworkManagerListener(this);
+        this.mirrorFinder = networkManager;
 
         //mark entries as about to be acquired
         String[] entryAcquireLink;
@@ -375,7 +396,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             long currentDownloadId = new AtomicInteger().incrementAndGet();
             String entryId = feed.entries[currentEntryIdIndex].id;
             entryCheckResponse = selectEntryCheckResponse(feed.entries[index],
-                    networkManager.getEntryResponsesWithLocalFile(feed.entries[index].id));
+                    mirrorFinder.getEntryResponsesWithLocalFile(feed.entries[index].id));
 
             if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 targetNetwork = TARGET_NETWORK_NORMAL;
@@ -417,7 +438,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
                             currentDownloadMode);
                     downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
-                }else if(isConnectedToWifiDirectGroup){
+                }else {
                     UstadMobileSystemImpl.l(UMLog.INFO, 316, "AcquisitionTask:"+ getTaskId()+ ": restore wifi");
                     setWaitingForWifiConnection(true);
                     networkManager.restoreWifi();
@@ -500,6 +521,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     protected void handleAttemptFailed() {
         currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
+        currentHistoryEntry.setTimeEnded(Calendar.getInstance().getTimeInMillis());
+        setWaitingForWifiConnection(false);
         if(attemptCount < MAXIMUM_ATTEMPT_COUNT){
             try { Thread.sleep(WAITING_TIME_BEFORE_RETRY); }
             catch(InterruptedException e) {}
@@ -706,6 +729,19 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     protected synchronized void setWaitingForWifiConnection(boolean waitingForWifiConnection) {
         this.waitingForWifiConnection = waitingForWifiConnection;
+
+        if(wifiConnectTimeoutTimerTask != null) {
+            wifiConnectTimeoutTimerTask.cancel();
+            wifiConnectTimeoutTimerTask = null;
+        }
+
+        if(waitingForWifiConnection) {
+            if(wifiConnectTimeoutTimer == null)
+                wifiConnectTimeoutTimer = new Timer();
+
+            wifiConnectTimeoutTimerTask = new WifiConnectTimeoutTimerTask();
+            wifiConnectTimeoutTimer.schedule(wifiConnectTimeoutTimerTask, WIFI_CONNECT_TIMEOUT);
+        }
     }
 
     /**
@@ -741,6 +777,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     public void setWifiDirectDownloadEnabled(boolean wifiDirectDownloadEnabled) {
         this.wifiDirectDownloadEnabled = wifiDirectDownloadEnabled;
+    }
+
+    public LocalMirrorFinder getMirrorFinder() {
+        return mirrorFinder;
+    }
+
+    public void setMirrorFinder(LocalMirrorFinder mirrorFinder) {
+        this.mirrorFinder = mirrorFinder;
     }
 
     /**

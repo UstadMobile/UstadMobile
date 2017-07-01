@@ -14,7 +14,7 @@ import com.ustadmobile.test.sharedse.impl.TestContext;
 public class PlatformTestUtil {
 
 
-    static TestContext testContext = new TestContext();
+    static TestContext testContext = new TestContext("maindevice");
 
     public static Object getTargetContext() {
         return testContext;

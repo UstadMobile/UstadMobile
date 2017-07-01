@@ -12,7 +12,7 @@ public interface NetworkManagerCore {
 
     void setSuperNodeEnabled(Object context,boolean enabled);
 
-    UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, Object mContext, boolean localNetworkEnabled, boolean wifiDirectEnabled);
+    UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled);
 
     void addAcquisitionTaskListener(AcquisitionListener listener);
 

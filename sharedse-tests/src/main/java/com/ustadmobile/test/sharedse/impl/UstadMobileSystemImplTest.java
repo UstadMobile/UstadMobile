@@ -99,8 +99,9 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    protected String getSystemBaseDir() {
-        return testSystemBaseDir.getAbsolutePath();
+    protected String getSystemBaseDir(Object context) {
+        TestContext ctx = (TestContext)context;
+        return new File(testSystemBaseDir, ctx.getContextName()).getAbsolutePath();
     }
 
     @Override

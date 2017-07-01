@@ -192,11 +192,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
      *
      * @return
      */
-    protected abstract String getSystemBaseDir();
+    protected abstract String getSystemBaseDir(Object context);
+
 
     @Override
     public String getCacheDir(int mode, Object context) {
-        String systemBaseDir = getSystemBaseDir();
+        String systemBaseDir = getSystemBaseDir(context);
         if(mode == CatalogController.SHARED_RESOURCE) {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
         }else {
@@ -208,7 +209,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     @Override
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
-        String systemBaseDir = getSystemBaseDir();
+        String systemBaseDir = getSystemBaseDir(context);
 
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageIDConstants.device), false, true, false));

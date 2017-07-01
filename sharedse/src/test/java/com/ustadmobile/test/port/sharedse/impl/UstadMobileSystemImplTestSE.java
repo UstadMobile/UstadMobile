@@ -2,6 +2,8 @@ package com.ustadmobile.test.port.sharedse.impl;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
@@ -44,7 +46,7 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
         networkManager.setMockDeviceIpAddress("127.0.0.1");
         testDriver = new MockNetworkManager(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
             wirelessArea, "MockTestDriver");
-        testDriverContext = new TestContext();
+        testDriverContext = new TestContext("testdriver");
         testDriver.init(testDriverContext);
         testDriver.startTestControlServer();
     }
@@ -60,6 +62,19 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
         if(!isInitialized()) {
             super.init(context);
             networkManager.init(context);
+
+            //make the context directory
+            TestContext[] testContexts = new TestContext[]{(TestContext)context, testDriverContext};
+            for(int i = 0; i < testContexts.length; i++) {
+                UMStorageDir[] contextDir = getStorageDirs(CatalogController.SHARED_RESOURCE, testContexts[i]);
+                File currentDir;
+                for(int j = 0; j < contextDir.length; j++) {
+                    currentDir = new File(contextDir[j].getDirURI());
+                    if(!currentDir.isDirectory())
+                        currentDir.mkdirs();
+                }
+            }
+
 
             CatalogEntryInfo testEntryInfo = new CatalogEntryInfo();
             testEntryInfo.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
@@ -129,8 +144,5 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
     public NetworkManager getNetworkManager() {
         return networkManager;
     }
-
-
-
 
 }

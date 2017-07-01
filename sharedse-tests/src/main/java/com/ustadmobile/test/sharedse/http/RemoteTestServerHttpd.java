@@ -1,6 +1,5 @@
 package com.ustadmobile.test.sharedse.http;
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
@@ -10,7 +9,6 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +25,8 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
     public static final String CMD_CREATEGROUP = "CREATEGROUP";
 
     public static final String CMD_MANGLE_BLUETOOTH = "MANGLEBLUETOOTH";
+
+    public static final String CMD_MANGLE_WIFI_DIRECT_GROUP = "";
 
     public static final int GROUP_CREATION_TIMEOUT = 60*1000;
 
@@ -50,6 +50,10 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
             }else if(CMD_MANGLE_BLUETOOTH.equals(command)) {
                 boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
                 networkManager.setMangleBluetoothAddr(enabled);
+                return newFixedLengthResponse("OK");
+            }else if(CMD_MANGLE_WIFI_DIRECT_GROUP.equals(command)) {
+                boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
+                networkManager.setMangleWifiDirectGroup(enabled);
                 return newFixedLengthResponse("OK");
             }else if(CMD_CREATEGROUP.equals(command)) {
                 int groupStatus = networkManager.getWifiDirectGroupStatus();

@@ -28,6 +28,10 @@ public class TestUtilsSE {
         return sendBooleanCommand(RemoteTestServerHttpd.CMD_MANGLE_BLUETOOTH, enabled);
     }
 
+    public static boolean setRemoteTestMangleWifi(boolean enabled) throws IOException {
+        return sendBooleanCommand(RemoteTestServerHttpd.CMD_MANGLE_WIFI_DIRECT_GROUP, enabled);
+    }
+
     private static boolean sendBooleanCommand(String command, boolean value) throws IOException{
         String url = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + command + "&enabled="
                 + String.valueOf(value);

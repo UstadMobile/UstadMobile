@@ -336,7 +336,11 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public WiFiDirectGroup getWifiDirectGroup() {
-        return mockWifiDirectGroup;
+        if(!isMangleWifiDirectGroup() || mockWifiDirectGroup == null) {
+            return mockWifiDirectGroup;
+        }else {
+            return new WiFiDirectGroup(mockWifiDirectGroup.getSsid() + "-mangle", mockWifiDirectGroup.getPassphrase());
+        }
     }
 
     @Override
@@ -364,10 +368,14 @@ public class MockNetworkManager extends NetworkManager {
                 synchronized (wifiLockObj) {
                     UstadMobileSystemImpl.l(UMLog.INFO, 323, "Mock network manager: ("+connectNum+") request connection to: " +
                             connectSsid + " passphrase " + passPhrase+ " ... continue");
-                    if(connectedWifiNetwork != null) {
-                        connectedWifiNetwork.disconnect(MockNetworkManager.this);
+
+                    if(wifiNetworkServiceBroadcastTimer != null){
                         wifiNetworkServiceBroadcastTimer.cancel();
                         wifiNetworkServiceBroadcastTimer = null;
+                    }
+
+                    if(connectedWifiNetwork != null) {
+                        connectedWifiNetwork.disconnect(MockNetworkManager.this);
                     }
 
                     mockIpAddr = wirelessArea.connectDeviceToWifiNetwork(MockNetworkManager.this,

@@ -17,8 +17,6 @@ import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SL
 public class PlatformTestUtil {
 
 
-    static TestContext testContext = new TestContext();
-
     public static Object getTargetContext() {
         return InstrumentationRegistry.getTargetContext();
     }

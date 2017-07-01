@@ -387,7 +387,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    protected String getSystemBaseDir() {
+    protected String getSystemBaseDir(Object context) {
         return new File(Environment.getExternalStorageDirectory(), "ustadmobileContent").getAbsolutePath();
     }
 
