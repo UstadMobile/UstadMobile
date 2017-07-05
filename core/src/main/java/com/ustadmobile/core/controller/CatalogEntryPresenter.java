@@ -230,7 +230,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
     @Override
-    public void networkTaskCompleted(NetworkTask task) {
+    public void networkTaskStatusChanged(NetworkTask task) {
         if(task.getTaskId() == entryCheckTaskId) {
             boolean available =
                 UstadMobileSystemImpl.getInstance().getNetworkManager().getEntryResponsesWithLocalFile(entry.id) != null;

@@ -29,6 +29,24 @@ public abstract class NetworkTask {
     public boolean useBluetooth;
     public boolean useHttp;
 
+    private boolean stopped;
+
+
+    public static final int STATUS_WAITING = 0;
+
+    public static final int STATUS_RUNNING = 1;
+
+    public static final int STATUS_RETRY_LATER = 2;
+
+    public static final int STATUS_COMPLETE = 4;
+
+    public static final int STATUS_FAILED = 8;
+
+    public static final int STATUS_STOPPED = 16;
+
+    private int status = STATUS_WAITING;
+
+
     /**
      * Method which initiate network task execution
      */
@@ -37,7 +55,14 @@ public abstract class NetworkTask {
     /**
      * Method which stop the network task execution
      */
-    public abstract void cancel();
+    public synchronized void stop() {
+        stopped = true;
+    }
+
+    public synchronized boolean isStopped() {
+        return stopped;
+    }
+
 
     /**
      * method which is used to get ID of the task on the task queue
@@ -110,4 +135,22 @@ public abstract class NetworkTask {
     public void setUseHttp(boolean useHttp) {
         this.useHttp = useHttp;
     }
+
+    protected synchronized void setStatus(int status) {
+        this.status = status;
+    }
+
+    public synchronized int getStatus() {
+        return this.status;
+    }
+
+    public boolean isFinished() {
+        int status = getStatus();
+        return (status == STATUS_COMPLETE || status == STATUS_FAILED);
+    }
+
+    public boolean isRetryNeeded() {
+        return getStatus() == STATUS_RETRY_LATER;
+    }
+
 }

@@ -33,7 +33,7 @@ public class MockWirelessArea {
 
     public void sendSdTxtRecords(String serviceName, HashMap txtRecords, MockNetworkManager sender) {
         for(int i = 0; i < devices.size(); i++) {
-            if(devices.get(i) != sender) {
+            if(devices.get(i) != sender && devices.get(i).isWifiDirectDiscoveryEnabled()) {
                 devices.get(i).handleWifiDirectSdTxtRecordsAvailable(
                         serviceName, sender.getWifiDirectMacAddr(), txtRecords);
             }

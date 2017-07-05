@@ -251,9 +251,11 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         if(isBluetoothEnabled() && isWiFiEnabled()){
             if(enabled && nodeStatus != NODE_STATUS_SUPERNODE_RUNNING){
+                stopClientMode();
                 startSuperNode();
             }else if(!enabled && nodeStatus != NODE_STATUS_CLIENT_RUNNING){
                 stopSuperNode();
+                startClientMode();
             }
         }else{
             Log.d(TAG,"Either Bluetooth or WiFi is not enabled");
@@ -264,13 +266,9 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void startSuperNode() {
        if(networkService.getWifiDirectHandlerAPI()!=null){
            WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-           wifiDirectHandler.stopServiceDiscovery();
            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
            wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
            bluetoothServerAndroid.start();
-           if(nsdHelperAndroid.isDiscoveringNetworkService()){
-               nsdHelperAndroid.stopNSDiscovery();
-           }
            nsdHelperAndroid.registerNSDService();
            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
            isSuperNodeEnabled=true;
@@ -286,15 +284,29 @@ public class NetworkManagerAndroid extends NetworkManager{
                 removeNotification(NOTIFICATION_TYPE_SERVER);
             }
             wifiDirectHandler.removeService();
-            wifiDirectHandler.continuouslyDiscoverServices();
 
-            nsdHelperAndroid.startNSDiscovery();
             bluetoothServerAndroid.stop();
             isSuperNodeEnabled=false;
             nodeStatus = NODE_STATUS_CLIENT_RUNNING;
         }
     }
 
+    @Override
+    public void startClientMode() {
+        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+        wifiDirectHandler.continuouslyDiscoverServices();
+        if(!nsdHelperAndroid.isDiscoveringNetworkService())
+            nsdHelperAndroid.startNSDiscovery();
+    }
+
+    @Override
+    public void stopClientMode() {
+        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+        wifiDirectHandler.stopServiceDiscovery();
+
+        if(nsdHelperAndroid.isDiscoveringNetworkService())
+            nsdHelperAndroid.stopNSDiscovery();
+    }
 
     @Override
     public boolean isSuperNodeEnabled() {
@@ -308,6 +320,19 @@ public class NetworkManagerAndroid extends NetworkManager{
     }
 
     @Override
+    public boolean setBluetoothEnabled(boolean enabled) {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if(adapter == null)
+            return false;
+
+        if(enabled){
+            return adapter.enable();
+        }else {
+            return adapter.disable();
+        }
+    }
+
+    @Override
     public BluetoothServer getBluetoothServer() {
         return null;
     }
@@ -317,6 +342,10 @@ public class NetworkManagerAndroid extends NetworkManager{
         return wifiManager.isWifiEnabled();
     }
 
+    @Override
+    public boolean setWifiEnabled(boolean enabled) {
+        return wifiManager.setWifiEnabled(enabled);
+    }
 
     /**
      * @exception IOException

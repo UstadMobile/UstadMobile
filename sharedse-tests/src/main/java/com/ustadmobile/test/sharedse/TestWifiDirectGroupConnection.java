@@ -56,7 +56,7 @@ public class TestWifiDirectGroupConnection {
             }
 
             @Override
-            public void networkTaskCompleted(NetworkTask task) {
+            public void networkTaskStatusChanged(NetworkTask task) {
 
             }
 

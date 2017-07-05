@@ -107,7 +107,7 @@ public class TestEntryStatusTask{
             }
 
             @Override
-            public void networkTaskCompleted(NetworkTask task) {
+            public void networkTaskStatusChanged(NetworkTask task) {
                 if(task.getTaskId() == taskId[0]) {
                     taskCompleted[0] = true;
                     synchronized (statusRequestLock){

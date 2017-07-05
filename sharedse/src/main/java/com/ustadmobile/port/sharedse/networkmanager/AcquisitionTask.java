@@ -345,7 +345,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             updateTimer=null;
         }
 
-        networkManager.handleTaskCompleted(this);
+        setStatus(STATUS_COMPLETE);
+        networkManager.networkTaskStatusChanged(this);
     }
 
     /**
@@ -621,7 +622,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     @Override
-    public void cancel() {
+    public void stop() {
         entryAcquisitionThread.interrupt();
         if(entryAcquisitionThread.isInterrupted()){
             currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
@@ -677,7 +678,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     @Override
-    public void networkTaskCompleted(NetworkTask task) {
+    public void networkTaskStatusChanged(NetworkTask task) {
 
     }
 

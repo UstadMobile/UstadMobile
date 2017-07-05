@@ -11,20 +11,13 @@ import java.util.List;
  * @author kileha3
  */
 
-public interface NetworkManagerListener {
+public interface NetworkManagerListener extends NetworkManagerTaskListener{
 
     /**
      * Indicate that entry status check status task has information about the entry.
      * @param fileIds List of all entry under process.
      */
     void fileStatusCheckInformationAvailable(List<String> fileIds);
-
-    /**
-     * Indicate that given network task (entry status task or acquisition task) has completed
-     *
-     * @param task Task which was executed.
-     */
-    void networkTaskCompleted(NetworkTask task);
 
     /**
      * Indicate that new NetworkNode has been discovered

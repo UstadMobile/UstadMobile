@@ -89,6 +89,10 @@ public class MockNetworkManager extends NetworkManager {
 
     private static final AtomicInteger connectionChangeAtomicInteger = new AtomicInteger();
 
+    private boolean wifiDirectDiscoveryEnabled;
+
+    private boolean networkServiecDiscoveryEnabled;
+
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
 
@@ -134,6 +138,7 @@ public class MockNetworkManager extends NetworkManager {
     @Override
     public void init(Object mContext) {
         super.init(mContext);
+        setSuperNodeEnabled(mContext, false);
     }
 
     public void startTestControlServer() {
@@ -191,9 +196,11 @@ public class MockNetworkManager extends NetworkManager {
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         if(enabled && wifiDirectBroadcastTimer == null) {
+            stopClientMode();
             startSuperNode();
-        }else if(!enabled && wifiDirectBroadcastTimer != null) {
+        }else if(!enabled) {
             stopSuperNode();
+            startClientMode();
         }
     }
 
@@ -217,6 +224,18 @@ public class MockNetworkManager extends NetworkManager {
             wifiDirectBroadcastTimer.cancel();
             wifiDirectBroadcastTimer = null;
         }
+    }
+
+    @Override
+    public void startClientMode() {
+        setWifiDirectDiscoveryEnabled(true);
+        setNetworkServiecDiscoveryEnabled(true);
+    }
+
+    @Override
+    public void stopClientMode() {
+        setWifiDirectDiscoveryEnabled(false);
+        setNetworkServiecDiscoveryEnabled(false);
     }
 
     @Override
@@ -494,8 +513,34 @@ public class MockNetworkManager extends NetworkManager {
 
     }
 
+    public boolean isWifiDirectDiscoveryEnabled() {
+        return wifiDirectDiscoveryEnabled;
+    }
+
+    public void setWifiDirectDiscoveryEnabled(boolean wifiDirectDiscoveryEnabled) {
+        this.wifiDirectDiscoveryEnabled = wifiDirectDiscoveryEnabled;
+    }
+
+    public boolean isNetworkServiecDiscoveryEnabled() {
+        return networkServiecDiscoveryEnabled;
+    }
+
+    public void setNetworkServiecDiscoveryEnabled(boolean networkServiecDiscoveryEnabled) {
+        this.networkServiecDiscoveryEnabled = networkServiecDiscoveryEnabled;
+    }
+
     @Override
     public void shareAppSetupFile(String filePath, String shareTitle) {
         //TODO: implement this.test
+    }
+
+    @Override
+    public boolean setBluetoothEnabled(boolean enabled) {
+        return false;
+    }
+
+    @Override
+    public boolean setWifiEnabled(boolean enabled) {
+        return false;
     }
 }

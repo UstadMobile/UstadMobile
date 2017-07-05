@@ -128,7 +128,7 @@ public class MockWifiNetwork {
      */
     public synchronized void sendWirelessServiceBroadcast(String serviceName, String senderIp, int port) {
         for(String currentIp : connectedDevices.keySet()) {
-            if(!currentIp.equals(senderIp))
+            if(!currentIp.equals(senderIp) && connectedDevices.get(currentIp).isNetworkServiecDiscoveryEnabled())
                 connectedDevices.get(currentIp).handleNetworkServerDiscovered(serviceName, senderIp,
                     port);
         }

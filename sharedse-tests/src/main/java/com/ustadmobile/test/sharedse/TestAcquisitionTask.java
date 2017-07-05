@@ -106,8 +106,9 @@ public class TestAcquisitionTask{
             }
 
             @Override
-            public void networkTaskCompleted(NetworkTask task) {
-                if(task instanceof AcquisitionTask) {
+            public void networkTaskStatusChanged(NetworkTask task) {
+                int status = task.getStatus();
+                if(task instanceof AcquisitionTask && (task.isFinished() || task.isRetryNeeded())) {
                     if(((AcquisitionTask) task).taskIncludesEntry(ENTRY_ID_NOT_PRESENT)) {
                         //The entries are downloaded in the order in which they are requested -
                         // which is ENTRY_ID, ENTRY_ID_NOT_PRESENT
@@ -169,8 +170,9 @@ public class TestAcquisitionTask{
         }
 
         List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
+        int networkDownloadedFrom =entryHistoryList.get(entryHistoryList.size()-1).getMode();
         Assert.assertEquals("Last history entry was downloaded from expected network", expectedLocalDownloadMode,
-                entryHistoryList.get(entryHistoryList.size()-1).getMode());
+                networkDownloadedFrom);
         Assert.assertEquals("Last history entry was successful", UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
                 entryHistoryList.get(entryHistoryList.size()-1).getStatus());
 
@@ -242,7 +244,7 @@ public class TestAcquisitionTask{
      *
      * @throws Exception
      */
-    @Test
+    @Test(timeout = 10 * 60 * 1000)//for debugging purposes - should normally complete in 30s
     public void testAcquisitionBluetoothFail() throws Exception {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         final NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
@@ -280,7 +282,7 @@ public class TestAcquisitionTask{
      *
      * @throws Exception
      */
-    @Test(timeout = 4 * 60 * 1000)
+    //@Test(timeout = 4 * 60 * 1000)
     public void testAcquisitionWifiDirectFail() throws Exception{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);

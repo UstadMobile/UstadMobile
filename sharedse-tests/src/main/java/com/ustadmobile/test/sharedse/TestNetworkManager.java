@@ -57,7 +57,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void networkTaskCompleted(NetworkTask task) {
+            public void networkTaskStatusChanged(NetworkTask task) {
 
             }
 
@@ -149,7 +149,7 @@ public class TestNetworkManager {
             }
 
             @Override
-            public void networkTaskCompleted(NetworkTask task) {
+            public void networkTaskStatusChanged(NetworkTask task) {
 
             }
 

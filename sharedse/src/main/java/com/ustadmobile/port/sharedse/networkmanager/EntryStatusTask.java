@@ -47,6 +47,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     @Override
     public void start() {
         currentNode = 0;
+        setStatus(STATUS_RUNNING);
         new Thread(new Runnable() {
             public void run() {
                 connectNextNode(0);
@@ -55,12 +56,14 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     }
 
     private void connectNextNode(int index) {
-        if(index < networkNodeList.size()) {
+        if(isStopped()) {
+            setStatus(STATUS_STOPPED);
+        }if(index < networkNodeList.size()) {
             currentNode = index;
-            if(isUseBluetooth() && networkNodeList.get(currentNode).getDeviceBluetoothMacAddress() != null) {
+            if(networkManager.isBluetoothEnabled() && isUseBluetooth() && networkNodeList.get(currentNode).getDeviceBluetoothMacAddress() != null) {
                 String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
                 networkManager.connectBluetooth(bluetoothAddr, this);
-            }else if(isUseHttp() && networkNodeList.get(currentNode).getDeviceIpAddress() != null) {
+            }else if(networkManager.isWiFiEnabled() && isUseHttp() && networkNodeList.get(currentNode).getDeviceIpAddress() != null) {
                 //TODO: Handle status acquisition over http
                 connectNextNode(index+1);
             }else {
@@ -68,13 +71,9 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
                 connectNextNode(index+1);
             }
         }else {
-            networkManager.handleTaskCompleted(this);
+            setStatus(STATUS_COMPLETE);
+            networkManager.networkTaskStatusChanged(this);
         }
-    }
-
-    @Override
-    public void cancel() {
-
     }
 
     /**

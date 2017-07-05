@@ -14,5 +14,5 @@ public interface NetworkManagerTaskListener {
      * Indicate that Network task execution is finished
      * @param networkTask Network task which was executed.
      */
-    void handleTaskCompleted(NetworkTask networkTask);
+    void networkTaskStatusChanged(NetworkTask networkTask);
 }

@@ -48,7 +48,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
 
-public abstract class NetworkManager implements NetworkManagerCore,NetworkManagerTaskListener, LocalMirrorFinder {
+public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener, LocalMirrorFinder {
 
     /**
      * Flag to indicate queue type status
@@ -137,7 +137,9 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
     private Map<String,List<EntryCheckResponse>> entryResponses =new HashMap<>();
 
-    private NetworkTask[] currentTasks = new NetworkTask[2];
+    //private NetworkTask[] currentTasks = new NetworkTask[2];
+
+    private int[] currentTaskIndex = new int[]{-1, -1};
 
     private Vector<WiFiDirectGroupListener> wifiDirectGroupListeners = new Vector<>();
 
@@ -199,6 +201,18 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
 
 
     /**
+     * Run client services: discover nearby nodes
+     */
+    public abstract void startClientMode();
+
+    /**
+     * Stop client services
+     */
+    public abstract void stopClientMode();
+
+
+
+    /**
      * Method used to check if super node is enabled.
      * @return boolean: TRUE if enabled and FALSE otherwise
      */
@@ -233,6 +247,15 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      */
     public  abstract boolean isBluetoothEnabled();
 
+    /**
+     * Enable or disable bluetooth. Depending on the underlying system and version this may or may
+     * not be supported. Anything depending on bluetooth being disabled or enabled should be handled
+     * in handleBluetoothEnabledChanged
+     *
+     * @return true the request was successfully submitted
+     */
+    public abstract boolean setBluetoothEnabled(boolean enabled);
+
 
     /**
      * Method which is used to get make refrence to the BluetoothServer
@@ -245,6 +268,17 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @return boolean: TRUE, if enabled otherwise FALSE.
      */
     public abstract boolean isWiFiEnabled();
+
+    /**
+     * Method to enable or disable WiFi.
+     *
+     * @param enabled
+     * @return true if the operation is successful, false otherwise
+     */
+    public abstract boolean setWifiEnabled(boolean enabled);
+
+
+
 
     /**
      * Method which tells if the file can be downloaded locally or not.
@@ -331,7 +365,7 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * @return NetworkTask: Queued NetworkTask
      */
     public NetworkTask queueTask(NetworkTask task){
-        tasksQueues[task.getTaskType()].add(task);
+        tasksQueues[task.getTaskType()].addElement(task);
         checkTaskQueue(task.getTaskType());
 
         return task;
@@ -362,14 +396,14 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             }
         }
 
-        if(!tasksQueues[queueType].isEmpty() && currentTasks[queueType] == null) {
-            currentTasks[queueType] = tasksQueues[queueType].remove(0);
-            currentTasks[queueType].setNetworkManager(this);
-            currentTasks[queueType].setNetworkTaskListener(this);
-            currentTasks[queueType].start();
+
+        if(!tasksQueues[queueType].isEmpty() && currentTaskIndex[queueType] == -1) {
+            currentTaskIndex[queueType] = 0;
+            NetworkTask currentTask = tasksQueues[queueType].get(currentTaskIndex[queueType]);
+            currentTask.setNetworkManager(this);
+            currentTask.setNetworkTaskListener(this);
+            currentTask.start();
         }
-
-
     }
 
     /**
@@ -451,6 +485,40 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
             }
         }
     }
+
+    /**
+     * This method must be called by the underlying implementation when this is detected.
+     *
+     * @param enabled
+     */
+    public void handleWifiEnabledChanged(boolean enabled) {
+        if(enabled) {
+            checkTaskQueue(QUEUE_ENTRY_ACQUISITION);
+            if(isSuperNodeEnabled()) {
+                startSuperNode();
+            }else {
+                startClientMode();
+            }
+        }else {
+            stopClientMode();
+            stopSuperNode();
+
+            if(currentTaskIndex[QUEUE_ENTRY_ACQUISITION] != -1) {
+                tasksQueues[QUEUE_ENTRY_ACQUISITION].get(currentTaskIndex[QUEUE_ENTRY_ACQUISITION]).stop();
+                currentTaskIndex[QUEUE_ENTRY_ACQUISITION] = -1;
+            }
+        }
+
+    }
+
+    /**
+     * This method must be called by the underlying implementation when the change is detected.
+     * @param enabled
+     */
+    public void handleBluetoothEnabledChanged(boolean enabled) {
+
+    }
+
 
     /**
      * Get known network node using it's IP address
@@ -662,10 +730,10 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
      * entry status check task has been completed.
      * @param task Entry status check NetworkTask
      */
-    protected void fireEntryStatusCheckCompleted(NetworkTask task){
+    protected void fireNetworkTaskStatusChanged(NetworkTask task){
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
-                listener.networkTaskCompleted(task);
+                listener.networkTaskStatusChanged(task);
             }
         }
     }
@@ -711,13 +779,29 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public abstract void removeNotification(int notificationType);
 
     @Override
-    public void handleTaskCompleted(NetworkTask task) {
-        if(task == currentTasks[task.getTaskType()]) {
-            currentTasks[task.getTaskType()] = null;
-            checkTaskQueue(task.getTaskType());
+    public void networkTaskStatusChanged(NetworkTask task) {
+        int taskType = task.getTaskType();
+        if(task.getTaskId() == tasksQueues[taskType].get(currentTaskIndex[taskType]).getTaskId()){
+            int status = task.getStatus();
+            switch(status) {
+                case NetworkTask.STATUS_COMPLETE:
+                case NetworkTask.STATUS_FAILED:
+                    //task is finished
+                    tasksQueues[taskType].remove(currentTaskIndex[taskType]);
+                    currentTaskIndex[taskType] = -1;
+                    checkTaskQueue(taskType);
+                    break;
+                case NetworkTask.STATUS_RETRY_LATER:
+                    //put task to back of queue
+                    NetworkTask retryTask = tasksQueues[taskType].remove(currentTaskIndex[taskType]);
+                    tasksQueues[taskType].addElement(retryTask);
+                    currentTaskIndex[taskType] = -1;
+                    checkTaskQueue(taskType);
+                    break;
+            }
         }
 
-        fireEntryStatusCheckCompleted(task);
+        fireNetworkTaskStatusChanged(task);
     }
 
     public List<NetworkNode> getKnownNodes() {
@@ -969,12 +1053,6 @@ public abstract class NetworkManager implements NetworkManagerCore,NetworkManage
     public AcquisitionTask getAcquisitionTaskByEntryId(String entryId) {
         synchronized (tasksQueues[QUEUE_ENTRY_ACQUISITION]) {
             AcquisitionTask acquisitionTask;
-            if(currentTasks[QUEUE_ENTRY_ACQUISITION] != null) {
-                acquisitionTask = (AcquisitionTask)currentTasks[QUEUE_ENTRY_ACQUISITION];
-                if(acquisitionTask.taskIncludesEntry(entryId))
-                    return acquisitionTask;
-            }
-
             for(int i = 0; i < tasksQueues[QUEUE_ENTRY_ACQUISITION].size(); i++) {
                 acquisitionTask = (AcquisitionTask)tasksQueues[QUEUE_ENTRY_ACQUISITION].get(i);
                 if(acquisitionTask.taskIncludesEntry(entryId))
