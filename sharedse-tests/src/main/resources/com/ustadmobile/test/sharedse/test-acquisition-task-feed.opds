@@ -23,7 +23,7 @@
     <entry>
         <title>The little chicks</title>
         <link rel="http://opds-spec.org/acquisition"
-            href="thelittlechicks.epub"
+            href="thelittlechicks.epub?speedLimit=128000"
             type="application/epub+zip"/>
 
         <id>202b10fe-b028-4b84-9b84-852aa766607d</id>
@@ -48,7 +48,7 @@
 
         <link rel="http://opds-spec.org/acquisition"
             hreflang="ps"
-            href="icomefromacloud.epub"
+            href="icomefromacloud.epub?speedLimit=128000"
             type="application/epub+zip"/>
 
     </entry>

@@ -44,6 +44,8 @@ public abstract class NetworkTask {
 
     public static final int STATUS_STOPPED = 16;
 
+    public static final int STATUS_WAITING_FOR_NETWORK = 32;
+
     private int status = STATUS_WAITING;
 
 
@@ -55,8 +57,9 @@ public abstract class NetworkTask {
     /**
      * Method which stop the network task execution
      */
-    public synchronized void stop() {
+    public synchronized void stop(int statusAfterStop) {
         stopped = true;
+        setStatus(statusAfterStop);
     }
 
     public synchronized boolean isStopped() {

@@ -52,8 +52,6 @@ public class ResumableHttpDownload {
      */
     public static final String HTTP_ENCODING_IDENTITY = "identity";
 
-    public static final String HTTP_HEADER_CONTENT_LENGTH = "";
-
     private int bufferSize = 10 *1024;//10KB
 
     private boolean overwriteDestination = true;
@@ -62,6 +60,7 @@ public class ResumableHttpDownload {
 
     private long downloadedSoFar;
 
+    private boolean stopped = false;
 
     public ResumableHttpDownload(String httpSrc, String destinationFile){
         this.httpSrc = httpSrc;
@@ -183,7 +182,7 @@ public class ResumableHttpDownload {
             int bytesRead;
             httpIn = con.getInputStream();
 
-            while((bytesRead = httpIn.read(buf)) != -1) {
+            while(!isStopped() && (bytesRead = httpIn.read(buf)) != -1) {
                 fileOut.write(buf, 0, bytesRead);
                 synchronized (this) {
                     downloadedSoFar += bytesRead;
@@ -241,5 +240,14 @@ public class ResumableHttpDownload {
     public synchronized long getTotalSize() {
         return totalSize;
     }
+
+    public synchronized void stop() {
+        stopped = true;
+    }
+
+    protected synchronized boolean isStopped() {
+        return stopped;
+    }
+
 
 }

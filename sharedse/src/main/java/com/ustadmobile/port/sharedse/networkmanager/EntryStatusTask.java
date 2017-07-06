@@ -55,10 +55,16 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         }).start();
     }
 
+    @Override
+    public synchronized void stop(int statusAfterStop) {
+        super.stop(statusAfterStop);
+        networkManager.networkTaskStatusChanged(this);
+    }
+
     private void connectNextNode(int index) {
         if(isStopped()) {
-            setStatus(STATUS_STOPPED);
-        }if(index < networkNodeList.size()) {
+            return;
+        }else if(index < networkNodeList.size()) {
             currentNode = index;
             if(networkManager.isBluetoothEnabled() && isUseBluetooth() && networkNodeList.get(currentNode).getDeviceBluetoothMacAddress() != null) {
                 String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();

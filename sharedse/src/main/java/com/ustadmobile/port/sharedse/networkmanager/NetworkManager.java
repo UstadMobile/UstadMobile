@@ -397,14 +397,39 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
 
 
-        if(!tasksQueues[queueType].isEmpty() && currentTaskIndex[queueType] == -1) {
-            currentTaskIndex[queueType] = 0;
-            NetworkTask currentTask = tasksQueues[queueType].get(currentTaskIndex[queueType]);
-            currentTask.setNetworkManager(this);
-            currentTask.setNetworkTaskListener(this);
-            currentTask.start();
+        if(currentTaskIndex[queueType] == -1) {
+            int nextTaskIndex = selectNextTask(tasksQueues[queueType]);
+
+            if(nextTaskIndex != -1) {
+                currentTaskIndex[queueType] = nextTaskIndex;
+                NetworkTask currentTask = tasksQueues[queueType].get(currentTaskIndex[queueType]);
+                currentTask.setNetworkManager(this);
+                currentTask.setNetworkTaskListener(this);
+                currentTask.start();
+            }
+
         }
     }
+
+    /**
+     * Finds the next task to do as follows:
+     *
+     * 1. Skip any task that has been manually stopped
+     * TODO: handle a task that has a do not start before time on it
+     *
+     * @param tasks
+     *
+     * @return index of the next task to run
+     */
+    protected int selectNextTask(Vector<NetworkTask> tasks) {
+        for(int i = 0; i < tasks.size(); i++){
+            if(tasks.get(i).getStatus() != NetworkTask.STATUS_STOPPED)
+                return i;
+        }
+
+        return -1;
+    }
+
 
     /**
      * Method which is invoked when new node has been found from Wi-Fi Direct discovery service.
@@ -494,9 +519,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public void handleWifiEnabledChanged(boolean enabled) {
         if(enabled) {
             checkTaskQueue(QUEUE_ENTRY_ACQUISITION);
-            if(isSuperNodeEnabled()) {
+            if(isSuperNodeEnabled() && isBluetoothEnabled()) {
                 startSuperNode();
-            }else {
+            }else if(!isSuperNodeEnabled()){
                 startClientMode();
             }
         }else {
@@ -504,7 +529,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             stopSuperNode();
 
             if(currentTaskIndex[QUEUE_ENTRY_ACQUISITION] != -1) {
-                tasksQueues[QUEUE_ENTRY_ACQUISITION].get(currentTaskIndex[QUEUE_ENTRY_ACQUISITION]).stop();
+                tasksQueues[QUEUE_ENTRY_ACQUISITION].get(currentTaskIndex[QUEUE_ENTRY_ACQUISITION]).stop(
+                        NetworkTask.STATUS_WAITING_FOR_NETWORK);
                 currentTaskIndex[QUEUE_ENTRY_ACQUISITION] = -1;
             }
         }
@@ -781,7 +807,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     @Override
     public void networkTaskStatusChanged(NetworkTask task) {
         int taskType = task.getTaskType();
-        if(task.getTaskId() == tasksQueues[taskType].get(currentTaskIndex[taskType]).getTaskId()){
+        if(currentTaskIndex[taskType] != -1 && task.getTaskId() == tasksQueues[taskType].get(currentTaskIndex[taskType]).getTaskId()){
             int status = task.getStatus();
             switch(status) {
                 case NetworkTask.STATUS_COMPLETE:
@@ -792,6 +818,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     checkTaskQueue(taskType);
                     break;
                 case NetworkTask.STATUS_RETRY_LATER:
+                case NetworkTask.STATUS_STOPPED:
                     //put task to back of queue
                     NetworkTask retryTask = tasksQueues[taskType].remove(currentTaskIndex[taskType]);
                     tasksQueues[taskType].addElement(retryTask);
@@ -1062,6 +1089,27 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         return null;
     }
+
+    /**
+     * Get a network task by id and queue type
+     *
+     * @param taskId The task id
+     * @param queueType
+     *
+     * @return
+     */
+    public NetworkTask getNetworkTaskByTaskId(long taskId, int queueType) {
+        synchronized (tasksQueues[queueType]) {
+            for(int i = 0; i < tasksQueues[queueType].size(); i++) {
+                if(tasksQueues[queueType].get(i).getTaskId() == taskId) {
+                    return tasksQueues[queueType].get(i);
+                }
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * Return the Entry ID to AcquisitionTask map

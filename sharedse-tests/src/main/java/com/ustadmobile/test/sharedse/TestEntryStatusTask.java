@@ -1,6 +1,7 @@
 package com.ustadmobile.test.sharedse;
 
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
+import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
@@ -65,6 +67,21 @@ public class TestEntryStatusTask{
             throw new IllegalArgumentException("testEntryStatuBluetooth Hashtable, String requires the bluetooth address to have been discovered");
 
         testEntryStatusBluetooth(expectedAvailability, networkNode);
+    }
+
+    @Test
+    public void testEntryStatusStop() throws IOException, InterruptedException {
+        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        List<NetworkNode> nodeList = new ArrayList<>();
+        nodeList.add(remoteNode);
+        long taskId = manager.requestFileStatus(Arrays.asList(ENTRY_IDS),manager.getContext(),nodeList, true, false);
+        NetworkTask task = manager.getNetworkTaskByTaskId(taskId, NetworkManager.QUEUE_ENTRY_STATUS);
+        task.stop(NetworkTask.STATUS_STOPPED);
+        try { Thread.sleep(1000); }
+        catch(InterruptedException e){}
+        Assert.assertEquals("Task status is stopped", task.getStatus(), NetworkTask.STATUS_STOPPED);
+        Assert.assertTrue("Task is stopped", task.isStopped());
     }
 
 

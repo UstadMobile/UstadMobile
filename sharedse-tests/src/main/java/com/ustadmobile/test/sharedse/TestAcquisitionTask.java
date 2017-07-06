@@ -274,6 +274,42 @@ public class TestAcquisitionTask{
     }
 
     /**
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testAcquisitionStop() throws Exception {
+        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
+        CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
+        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
+        manager.requestAcquisition(feed, manager, false, false);
+        AcquisitionTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
+        try { Thread.sleep(1000); }
+        catch(InterruptedException e){}
+        task.stop(NetworkTask.STATUS_STOPPED);
+        try { Thread.sleep(1000); }
+        catch(InterruptedException e){}
+        //TODO: Fix me - what's happening: Acquisition Task is being restarted when stopped, timer task is null on acquisitiontask.java line 325
+
+        Assert.assertEquals("Task status is stopped", NetworkTask.STATUS_STOPPED, task.getStatus());
+        Assert.assertTrue("Task is stopped", task.isStopped());
+        CatalogEntryInfo presentEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
+                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        Assert.assertEquals("Entry 1 not acquired", CatalogController.STATUS_NOT_ACQUIRED,
+                presentEntryInfo.acquisitionStatus);
+        CatalogEntryInfo notPresentEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_NOT_PRESENT,
+                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        Assert.assertEquals("Entry 2 not acquired", CatalogController.STATUS_NOT_ACQUIRED,
+                notPresentEntryInfo.acquisitionStatus);
+
+    }
+
+
+    /**
      * Test what happens with acquisition over WiFi direct when the WiFi connection fails. After a
      * number of failures the scoring mechanism should result in the download taking place from
      * the cloud. This is achieved by telling the remote test driver node to mangle the wifi direct

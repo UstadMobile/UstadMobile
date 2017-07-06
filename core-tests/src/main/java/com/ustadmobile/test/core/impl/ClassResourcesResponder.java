@@ -99,8 +99,8 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
 
         long cutOffAfter = session.getParameters().containsKey("cutoffafter") ?
                 Long.parseLong(session.getParameters().get("cutoffafter").get(0)) : 0L;
-        int speedLimit = session.getParameters().containsKey("speedlimit") ?
-                Integer.parseInt(session.getParameters().get("speedlimit").get(0)): 0;
+        int speedLimit = session.getParameters().containsKey("speedLimit") ?
+                Integer.parseInt(session.getParameters().get("speedLimit").get(0)): 0;
 
         ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(resPath),
             loadedTime);
