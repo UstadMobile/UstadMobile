@@ -194,32 +194,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         }
     }
 
-    /*
-    private TimerTask updateTimerTask =new TimerTask() {
-        @Override
-        public void run() {
-            if(httpDownload != null && httpDownload.getTotalSize()>0L){
-                int progress=(int)((httpDownload.getDownloadedSoFar()*100)/ httpDownload.getTotalSize());
-                long currentTime = Calendar.getInstance().getTimeInMillis();
-                int progressLimit=100;
-                if(((currentTime - TIME_PASSED_FOR_PROGRESS_UPDATE) < DOWNLOAD_TASK_UPDATE_TIME) ||
-                        (progress < 0 && progress > progressLimit)) {
-                    return;
-                }
-                TIME_PASSED_FOR_PROGRESS_UPDATE = currentTime;
-                currentEntryStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
-                currentEntryStatus.setTotalSize(httpDownload.getTotalSize());
-                currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_RUNNING);
-
-                networkManager.fireAcquisitionProgressUpdate(
-                    getFeed().entries[currentEntryIdIndex].id, AcquisitionTask.this);
-                networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,progress,
-                    getFeed().entries[currentEntryIdIndex].title,message);
-
-            }
-        }
-    };*/
-
     private TimerTask updateTimerTask;
 
     private class WifiConnectTimeoutTimerTask extends TimerTask {
@@ -385,6 +359,13 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             updateTimer=null;
         }
 
+        setWaitingForWifiConnection(false);
+
+        if(wifiConnectTimeoutTimer != null) {
+            wifiConnectTimeoutTimer.cancel();
+            wifiConnectTimeoutTimer = null;
+        }
+
         setStatus(status);
         networkManager.networkTaskStatusChanged(this);
     }
@@ -409,6 +390,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             currentEntryStatus = statusMap.get(feed.entries[index].id);
             currentHistoryEntry = new AcquisitionTaskHistoryEntry(feed.entries[index].id);
             attemptCount++;
+            currentGroupSSID = null;
 
             List<AcquisitionTaskHistoryEntry> entryHistoryList = acquisitionHistoryMap.get(
                     feed.entries[currentEntryIdIndex].id);
@@ -755,10 +737,19 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
         }
 
-        if(connected && currentGroupSSID != null && currentGroupSSID.equals(ssid)){
-            UstadMobileSystemImpl.l(UMLog.INFO, 322, "AcquisitionTask:"+ getTaskId()+ ": requested WiFi direct group connection activated");
-            setWaitingForWifiConnection(false);
-            downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
+        if(connected && currentGroupSSID != null){
+            if(currentGroupSSID.equals(ssid)) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 322, "AcquisitionTask:"+ getTaskId()
+                    + ": requested WiFi direct group connection activated");
+                setWaitingForWifiConnection(false);
+                downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
+            }else {
+                UstadMobileSystemImpl.l(UMLog.INFO, 322, "AcquisitionTask:"+ getTaskId()
+                    + ": requested WiFi direct group connection failed : connected to other network");
+                handleAttemptFailed();
+            }
+
+
         }
     }
 

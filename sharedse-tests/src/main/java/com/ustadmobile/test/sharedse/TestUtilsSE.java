@@ -1,6 +1,7 @@
 package com.ustadmobile.test.sharedse;
 
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
@@ -35,8 +36,19 @@ public class TestUtilsSE {
     private static boolean sendBooleanCommand(String command, boolean value) throws IOException{
         String url = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + command + "&enabled="
                 + String.valueOf(value);
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(url, null, null);
-        return result.getStatus() == 200;
+        HTTPResult result = null;
+        for(int i = 0; result == null && i < 4; i++) {
+            try {
+                result = UstadMobileSystemImpl.getInstance().makeRequest(url, null, null);
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 79, "Error sending command " + command + " to "
+                        + url + "(Attempt #" + (i+1) + ")");
+                try { Thread.sleep(1000); }
+                catch(InterruptedException e2) {}
+            }
+        }
+
+        return result != null && result.getStatus() == 200;
     }
 
 }

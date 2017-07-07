@@ -100,6 +100,7 @@ public class TestAcquisitionTask{
         CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
 
+        final long[] testTaskId = new long[1];
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
             public void fileStatusCheckInformationAvailable(List<String> fileIds) {
@@ -107,16 +108,9 @@ public class TestAcquisitionTask{
 
             @Override
             public void networkTaskStatusChanged(NetworkTask task) {
-                int status = task.getStatus();
-                if(task instanceof AcquisitionTask && (task.isFinished() || task.isRetryNeeded())) {
-                    if(((AcquisitionTask) task).taskIncludesEntry(ENTRY_ID_NOT_PRESENT)) {
-                        //The entries are downloaded in the order in which they are requested -
-                        // which is ENTRY_ID, ENTRY_ID_NOT_PRESENT
-                        //Therefor when we receive the complete event for the latter we can notify the
-                        //thread to continue.
-                        synchronized (acquireLock) {
-                            acquireLock.notifyAll();
-                        }
+                if(task.getTaskId() == testTaskId[0] && (task.isFinished() || task.isRetryNeeded())) {
+                    synchronized (acquireLock) {
+                        acquireLock.notifyAll();
                     }
                 }
             }
@@ -162,15 +156,18 @@ public class TestAcquisitionTask{
         manager.addAcquisitionTaskListener(acquisitionListener);
 
         UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
-        manager.requestAcquisition(feed, mirrorFinder,localNetworkEnabled,wifiDirectEnabled);
-        AcquisitionTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
+        testTaskId[0] = manager.requestAcquisition(feed, mirrorFinder,localNetworkEnabled,wifiDirectEnabled);
+        AcquisitionTask task = (AcquisitionTask)manager.getNetworkTaskByTaskId(testTaskId[0],
+                NetworkManager.QUEUE_ENTRY_ACQUISITION);
         Assert.assertNotNull("Task created for acquisition", task);
         synchronized (acquireLock){
             acquireLock.wait(DEFAULT_WAIT_TIME* 6);
         }
 
         List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
-        int networkDownloadedFrom =entryHistoryList.get(entryHistoryList.size()-1).getMode();
+        int lastIndex = entryHistoryList.size()-1;
+        int networkDownloadedFrom =entryHistoryList.get(lastIndex).getMode();
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 646, "Test task id = " + task.getTaskId());
         Assert.assertEquals("Last history entry was downloaded from expected network", expectedLocalDownloadMode,
                 networkDownloadedFrom);
         Assert.assertEquals("Last history entry was successful", UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
@@ -318,7 +315,7 @@ public class TestAcquisitionTask{
      *
      * @throws Exception
      */
-    //@Test(timeout = 4 * 60 * 1000)
+    @Test(timeout = 4 * 60 * 1000)
     public void testAcquisitionWifiDirectFail() throws Exception{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);

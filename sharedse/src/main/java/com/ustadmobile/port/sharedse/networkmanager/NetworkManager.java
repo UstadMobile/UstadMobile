@@ -344,7 +344,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *                          TRUE if yes , otherwise FALSE.
      * @return
      */
-    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, LocalMirrorFinder mirrorFinder,
+    public long requestAcquisition(UstadJSOPDSFeed feed, LocalMirrorFinder mirrorFinder,
                                               boolean localNetworkEnabled, boolean wifiDirectEnabled){
         AcquisitionTask task=new AcquisitionTask(feed,this);
         task.setMirrorFinder(mirrorFinder);
@@ -352,10 +352,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         task.setLocalNetworkDownloadEnabled(localNetworkEnabled);
         task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
         queueTask(task);
-        return feed;
+        return task.getTaskId();
     }
 
-    public UstadJSOPDSFeed requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled){
+    public long requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled){
         return requestAcquisition(feed, this, localNetworkEnabled, wifiDirectEnabled);
     }
 
