@@ -13,6 +13,7 @@ import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -27,6 +28,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
@@ -139,6 +142,9 @@ public class NetworkManagerAndroid extends NetworkManager{
      */
     private List<String> temporaryWifiDirectSsids = new ArrayList<>();
 
+
+
+
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
      * method from it's onCreate
@@ -166,29 +172,10 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 
-        networkService.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                boolean isConnected = info.isConnected();
-                boolean isConnecting = info.isConnectedOrConnecting();
-                String ssid = wifiManager.getConnectionInfo() != null ?
-                        wifiManager.getConnectionInfo().getSSID() : null;
-                ssid = normalizeAndroidWifiSsid(ssid);
-                //TODO: handle when this has failed: this will result in info.isConnected being false
-                Log.i(NetworkManagerAndroid.TAG, "Network State Changed Action - ssid: " + ssid +
-                        " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
-                handleWifiConnectionChanged(ssid, isConnected, isConnecting);
 
-                /*
-                if(isConnected){
-                    Log.i(NetworkManagerAndroid.TAG, "Handle connection changed");
-                    handleWifiConnectionChanged(ssid);
-                }
-                */
-            }
-        }, intentFilter);
+        networkService.registerReceiver(mWifiBroadcastReceiver, intentFilter);
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
@@ -237,6 +224,36 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         }
     };
+
+    private BroadcastReceiver mWifiBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch(intent.getAction()){
+                case WifiManager.NETWORK_STATE_CHANGED_ACTION:
+                    NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                    boolean isConnected = info.isConnected();
+                    boolean isConnecting = info.isConnectedOrConnecting();
+                    String ssid = wifiManager.getConnectionInfo() != null ?
+                            wifiManager.getConnectionInfo().getSSID() : null;
+                    ssid = normalizeAndroidWifiSsid(ssid);
+                    UstadMobileSystemImpl.l(UMLog.DEBUG, 647, "Network: State Changed Action - ssid: "
+                            + ssid + " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
+                    handleWifiConnectionChanged(ssid, isConnected, isConnecting);
+                    break;
+
+                case WifiManager.SUPPLICANT_STATE_CHANGED_ACTION:
+                    if(intent.hasExtra(WifiManager.EXTRA_SUPPLICANT_ERROR)) {
+                        UstadMobileSystemImpl.l(UMLog.WARN, 214, "Network: Supplicant state change: error");
+                        NetworkInfo info2 = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                        Log.d(TAG, "Network info: " + info2);
+                        SupplicantState errorState = intent.getParcelableExtra(WifiManager.EXTRA_SUPPLICANT_ERROR);
+                        Log.i(NetworkManagerAndroid.TAG, "Supplicant error:" + errorState);
+                    }
+                    break;
+            }
+        }
+    };
+
 
     /**
      * This method is responsible for setting up the right services connection
@@ -489,6 +506,8 @@ public class NetworkManagerAndroid extends NetworkManager{
             nsdHelperAndroid.unregisterNSDService();
             nsdHelperAndroid.stopNSDiscovery();
         }
+
+        networkService.unregisterReceiver(mWifiBroadcastReceiver);
         super.onDestroy();
 
     }
@@ -570,6 +589,7 @@ public class NetworkManagerAndroid extends NetworkManager{
          * versions that could be effected.
          */
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT && networkService.getWifiDirectHandlerAPI() != null){
+            //TODO: check that this is re-enabled
             networkService.getWifiDirectHandlerAPI().stopServiceDiscovery();
 
             wifiManager.setWifiEnabled(false);
@@ -603,10 +623,8 @@ public class NetworkManagerAndroid extends NetworkManager{
         wifiManager.disconnect();
         boolean successful = wifiManager.enableNetwork(netId, true);
         wifiManager.reconnect();
-        Log.i(NetworkManagerAndroid.TAG, "Connecting to wifi: " + ssid + " passphrase: '" + passphrase +"', " +
+        UstadMobileSystemImpl.l(UMLog.INFO, 648, "Network: Connecting to wifi: " + ssid + " passphrase: '" + passphrase +"', " +
                 "successful?"  + successful +  " priority = " + wifiConfig.priority);
-
-        System.out.println("connectwifi");
     }
 
     @Override
