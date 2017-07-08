@@ -211,6 +211,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     public static final int WIFI_CONNECT_TIMEOUT = (45 * 1000);
 
+
     public static class Status implements AcquisitionTaskStatus{
 
         long downloadedSoFar;
@@ -346,6 +347,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[i].id,
                     CatalogController.SHARED_RESOURCE, networkManager.getContext());
             if(entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUISITION_IN_PROGRESS) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 700, "AcquisitionTask : marking entry not acquired: #"
+                        + i + ": " + feed.entries[i].id);
                 entryInfo.acquisitionStatus = CatalogController.STATUS_NOT_ACQUIRED;
                 CatalogController.setEntryInfo(feed.entries[i].id, entryInfo,
                     CatalogController.SHARED_RESOURCE, networkManager.getContext());
@@ -532,12 +535,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     UstadMobileSystemImpl.l(UMLog.INFO, 331, "AcquisitionTask:"+ getTaskId()+ ": item " + currentEntryIdIndex +
                             " id " + feed.entries[currentEntryIdIndex].id + " : Download successful ");
                     currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
+                    currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
+
                     networkManager.fireAcquisitionStatusChanged(feed.entries[currentEntryIdIndex].id,
                             currentEntryStatus);
                     attemptCount = 0;
                     entryAcquisitionThread =null;
-
-                    currentHistoryEntry.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
                     acquireFile(currentEntryIdIndex + 1);
                 }else {
                     handleAttemptFailed();

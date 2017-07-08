@@ -46,7 +46,9 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  * Created by kileha3 on 17/05/2017.
  */
 public class TestAcquisitionTask{
-    private static final int DEFAULT_WAIT_TIME =20000;
+
+    private static final int DEFAULT_ACQUIRE_TIMEOUT = 120000;//default acquire timeout: 2mins
+
     private static final String FEED_LINK_MIME ="application/dir";
     private static final String ENTRY_ID_PRESENT ="202b10fe-b028-4b84-9b84-852aa766607d";
     private static final String ENTRY_ID_NOT_PRESENT = "b649852e-2bf9-45ab-839e-ec5bb00ca19d";
@@ -89,7 +91,7 @@ public class TestAcquisitionTask{
         }
     }
 
-    public static void testAcquisition(NetworkNode remoteNode, LocalMirrorFinder mirrorFinder, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode) throws IOException, InterruptedException,XmlPullParserException{
+    public static void testAcquisition(NetworkNode remoteNode, LocalMirrorFinder mirrorFinder, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode, int acquireTimeout) throws IOException, InterruptedException,XmlPullParserException{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         manager.clearNetworkNodeAcquisitionHistory();
         final Object acquireLock = new Object();
@@ -161,7 +163,7 @@ public class TestAcquisitionTask{
                 NetworkManager.QUEUE_ENTRY_ACQUISITION);
         Assert.assertNotNull("Task created for acquisition", task);
         synchronized (acquireLock){
-            acquireLock.wait(DEFAULT_WAIT_TIME* 6);
+            acquireLock.wait(acquireTimeout);
         }
 
         List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
@@ -197,6 +199,10 @@ public class TestAcquisitionTask{
 
         manager.removeNetworkManagerListener(responseListener);
         manager.removeAcquisitionTaskListener(acquisitionListener);
+    }
+
+    public static void testAcquisition(NetworkNode remoteNode, LocalMirrorFinder mirrorFinder, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode) throws IOException, InterruptedException,XmlPullParserException{
+        testAcquisition(remoteNode, mirrorFinder, localNetworkEnabled, wifiDirectEnabled, expectedLocalDownloadMode, DEFAULT_ACQUIRE_TIMEOUT);
     }
 
     private static UstadJSOPDSFeed makeAcquisitionTestFeed() throws XmlPullParserException, IOException{
@@ -315,14 +321,15 @@ public class TestAcquisitionTask{
      *
      * @throws Exception
      */
-    @Test(timeout = 4 * 60 * 1000)
+    @Test(timeout = 7 * 60 * 1000)
     public void testAcquisitionWifiDirectFail() throws Exception{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         Exception e = null;
         try {
             Assert.assertTrue("Mangle wifi direct group enabled", TestUtilsSE.setRemoteTestMangleWifi(true));
-            testAcquisition(remoteNode, manager, false, true, NetworkManager.DOWNLOAD_FROM_CLOUD);
+            testAcquisition(remoteNode, manager, false, true, NetworkManager.DOWNLOAD_FROM_CLOUD,
+                    (AcquisitionTask.WIFI_CONNECT_TIMEOUT * 5) + 60000);
         }catch(Exception e2) {
             e = e2;
         }finally {
