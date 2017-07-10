@@ -696,6 +696,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         fireWiFiConnectionChanged(ssid, connected, connectedOrConnecting);
     }
 
+
+
+
     /**
      * Method which will be called to fire all events when entry status check
      * is completed and information is there to process

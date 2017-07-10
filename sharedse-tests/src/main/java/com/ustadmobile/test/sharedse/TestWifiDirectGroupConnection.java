@@ -14,6 +14,8 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -31,6 +33,10 @@ public class TestWifiDirectGroupConnection {
 
     private static final int CONNECTION_TEST_COUNT = 3;
 
+    private String groupSsid;
+
+    private String groupPasphrase;
+
     @Test
     public void testWifiDirectGroupConnection() throws IOException{
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
@@ -42,91 +48,97 @@ public class TestWifiDirectGroupConnection {
         Assert.assertEquals("Group created", 200, result.getStatus());
         String resultStr = new String(result.getResponse());
         JSONObject object = new JSONObject(resultStr);
+        groupSsid = object.getString("ssid");
+        groupPasphrase = object.getString("passphrase");
 
-        for (int i = 0; i < CONNECTION_TEST_COUNT; i++) {
-            UstadMobileSystemImpl.l(UMLog.INFO, 0, "Test WiFi direct group connection run #" + i);
-            String ssid = object.getString("ssid");
-            String passphrase = object.getString("passphrase");
-            Assert.assertNotNull("Got ssid", ssid);
-            Assert.assertNotNull("Got passphrase", passphrase);
+        Assert.assertNotNull("Got ssid", groupSsid);
+        Assert.assertNotNull("Got passphrase", groupPasphrase);
 
+        final String[] connectedSsid = new String[1];
+        final Object connectionLock = new Object();
+        NetworkManagerListener listener = new NetworkManagerListener() {
+            @Override
+            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
 
-            final String[] connectedSsid = new String[1];
-            final Object connectionLock = new Object();
-            NetworkManagerListener listener = new NetworkManagerListener() {
-                @Override
-                public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+            }
 
-                }
+            @Override
+            public void networkTaskStatusChanged(NetworkTask task) {
 
-                @Override
-                public void networkTaskStatusChanged(NetworkTask task) {
+            }
 
-                }
+            @Override
+            public void networkNodeDiscovered(NetworkNode node) {
 
-                @Override
-                public void networkNodeDiscovered(NetworkNode node) {
+            }
 
-                }
+            @Override
+            public void networkNodeUpdated(NetworkNode node) {
 
-                @Override
-                public void networkNodeUpdated(NetworkNode node) {
+            }
 
-                }
+            @Override
+            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
 
-                @Override
-                public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
+            }
 
-                }
-
-                @Override
-                public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
-                    if(connected) {
-                        connectedSsid[0] = ssid;
-                        synchronized (connectionLock) {
-                            connectionLock.notify();
-                        }
+            @Override
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+                if(connected) {
+                    connectedSsid[0] = ssid;
+                    synchronized (connectionLock) {
+                        connectionLock.notify();
                     }
                 }
-            };
-            manager.addNetworkManagerListener(listener);
-            manager.connectToWifiDirectGroup(ssid, passphrase);
-
-            synchronized (connectionLock) {
-                try {connectionLock.wait(CONNECTION_TIMEOUT);}
-                catch(InterruptedException e) {}
             }
+        };
+        manager.addNetworkManagerListener(listener);
 
-            try { Thread.sleep(500); }
-            catch(InterruptedException e) {}
+        try {
+            for (int i = 0; i < CONNECTION_TEST_COUNT; i++) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 0, "Test WiFi direct group connection run #" + i);
+                manager.connectToWifiDirectGroup(groupSsid, groupPasphrase);
 
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 700, "Connected to group SSID: " +
-                manager.getCurrentWifiSsid());
-            Assert.assertEquals("Connected to created group ssid: as per getCurrentWifiSsid", ssid,
-                    manager.getCurrentWifiSsid());
-            Assert.assertEquals("Connected to created group ssid: as per ssid passed to event", ssid,
-                    connectedSsid[0]);
+                synchronized (connectionLock) {
+                    try {connectionLock.wait(CONNECTION_TIMEOUT);}
+                    catch(InterruptedException e) {}
+                }
 
-            try { Thread.sleep(2000); }
-            catch(InterruptedException e) {}
-
-            manager.restoreWifi();
-            synchronized (connectionLock) {
-                try { connectionLock.wait(CONNECTION_TIMEOUT); }
+                try { Thread.sleep(500); }
                 catch(InterruptedException e) {}
+
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 700, "Connected to group SSID: " +
+                    manager.getCurrentWifiSsid());
+                Assert.assertEquals("Connected to created group ssid: as per getCurrentWifiSsid", groupSsid,
+                        manager.getCurrentWifiSsid());
+                Assert.assertEquals("Connected to created group ssid: as per ssid passed to event", groupSsid,
+                        connectedSsid[0]);
+
+                try { Thread.sleep(2000); }
+                catch(InterruptedException e) {}
+
+                manager.restoreWifi();
+                synchronized (connectionLock) {
+                    try { connectionLock.wait(CONNECTION_TIMEOUT); }
+                    catch(InterruptedException e) {}
+                }
+
+                try { Thread.sleep(500); }
+                catch(InterruptedException e) {}
+
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 700, "Connected to 'normal' SSID: " +
+                        manager.getCurrentWifiSsid());
+                Assert.assertNotEquals("Connected back to 'normal' wifi as per getCurrentWiFiSsid", groupSsid,
+                        manager.getCurrentWifiSsid());
+                Assert.assertNotEquals("Connected back to 'normal' wifi as per ssid passed to event", groupSsid,
+                        connectedSsid[0]);
+
             }
-
-            try { Thread.sleep(500); }
-            catch(InterruptedException e) {}
-
-            UstadMobileSystemImpl.l(UMLog.DEBUG, 700, "Connected to 'normal' SSID: " +
-                    manager.getCurrentWifiSsid());
-            Assert.assertNotEquals("Connected back to 'normal' wifi as per getCurrentWiFiSsid", ssid,
-                    manager.getCurrentWifiSsid());
-            Assert.assertNotEquals("Connected back to 'normal' wifi as per ssid passed to event", ssid,
-                    connectedSsid[0]);
-
+        } finally {
+            manager.removeNetworkManagerListener(listener);
         }
+
+
     }
 
 }

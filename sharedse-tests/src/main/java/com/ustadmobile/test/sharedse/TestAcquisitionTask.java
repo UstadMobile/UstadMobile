@@ -134,8 +134,6 @@ public class TestAcquisitionTask{
             public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
-
-
         };
         manager.addNetworkManagerListener(responseListener);
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));

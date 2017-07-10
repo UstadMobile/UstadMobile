@@ -50,4 +50,5 @@ public interface NetworkManagerListener extends NetworkManagerTaskListener{
      * @param connectedOrConnecting True if connected or an attempt to connect is in progress
      */
     void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting);
+
 }

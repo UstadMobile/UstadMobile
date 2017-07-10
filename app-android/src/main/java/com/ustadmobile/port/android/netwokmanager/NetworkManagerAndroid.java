@@ -243,11 +243,14 @@ public class NetworkManagerAndroid extends NetworkManager{
 
                 case WifiManager.SUPPLICANT_STATE_CHANGED_ACTION:
                     if(intent.hasExtra(WifiManager.EXTRA_SUPPLICANT_ERROR)) {
-                        UstadMobileSystemImpl.l(UMLog.WARN, 214, "Network: Supplicant state change: error");
-                        NetworkInfo info2 = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-                        Log.d(TAG, "Network info: " + info2);
-                        SupplicantState errorState = intent.getParcelableExtra(WifiManager.EXTRA_SUPPLICANT_ERROR);
-                        Log.i(NetworkManagerAndroid.TAG, "Supplicant error:" + errorState);
+                        int errorState = intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1);
+                        String message = null;
+                        if(errorState != -1) {
+                            message = SupplicantState.values()[errorState].name();
+                        }
+
+                        UstadMobileSystemImpl.l(UMLog.WARN, 214, "Network: Supplicant state change: error:"
+                                + message);
                     }
                     break;
             }
@@ -586,7 +589,7 @@ public class NetworkManagerAndroid extends NetworkManager{
          * again only after wifi has been disabled, and then re-enabled.
          *
          * Our workaround is to programmatically disable and then re-enable the wifi on Android
-         * versions that could be effected.
+         * versions that could be affected.
          */
         if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT && networkService.getWifiDirectHandlerAPI() != null){
             //TODO: check that this is re-enabled
@@ -653,6 +656,7 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public void restoreWifi() {
         //TODO: An improvement would be to note the network connected to before and connect to exactly that one : this may or may not be allowed by Android security on recent versions
+        UstadMobileSystemImpl.l(UMLog.INFO, 339, "NetworkManager: restore wifi");
         wifiManager.disconnect();
         deleteTemporaryWifiDirectSsids();
         wifiManager.reconnect();

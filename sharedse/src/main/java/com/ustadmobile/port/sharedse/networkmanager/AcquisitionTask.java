@@ -551,7 +551,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         entryAcquisitionThread.start();
     }
 
-    protected void handleAttemptFailed() {
+    protected synchronized void handleAttemptFailed() {
         if(isStopped())
             return;
 

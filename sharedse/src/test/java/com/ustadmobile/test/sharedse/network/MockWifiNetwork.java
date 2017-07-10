@@ -2,6 +2,7 @@ package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +44,7 @@ public class MockWifiNetwork {
      *
      * @return The allocated IP address if ssid and passphrase were valid, otherwise null
      */
-    public synchronized String connect(MockNetworkManager device, String ssid, String passphrase) {
+    public synchronized String connect(MockNetworkManager device, String ssid, String passphrase)  {
         if(ssid == null || !ssid.equals(this.ssid))
             return null;
 

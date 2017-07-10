@@ -1,5 +1,6 @@
 package com.ustadmobile.test.sharedse.network;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -59,9 +60,9 @@ public class MockWirelessArea {
      * @param ssid SSID it wants to connect to
      * @param passphrase Passphrase it is using to connect
      *
-     * @return
+     * @return null if no such wifi network exists. Throw an IOException if the network exists but passphrase is invalid
      */
-    public String connectDeviceToWifiNetwork(MockNetworkManager device, String ssid, String passphrase) {
+    public String connectDeviceToWifiNetwork(MockNetworkManager device, String ssid, String passphrase)  {
         MockWifiNetwork network = mockWifiNetworks.get(ssid);
         if(network == null)
             return null;

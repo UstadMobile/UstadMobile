@@ -90,8 +90,6 @@ public class TestNetworkManager {
             public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
             }
-
-
         };
         manager.addNetworkManagerListener(responseListener);
 
