@@ -111,4 +111,9 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
         }
     }
 
+    public boolean isRunning() {
+        return running;
+    }
+
+
 }
