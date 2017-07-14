@@ -105,6 +105,17 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     private int nodeStatus = -1;
 
+    public static final int LOCAL_SERVICE_STATUS_INACTIVE = 0;
+
+    public static final int LOCAL_SERVICE_STATUS_REQUESTED = 1;
+
+    public static final int LOCAL_SERVICE_STATUS_ADDED = 3;
+
+    private int p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
+
+    private int nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
+
+
     private static final int NODE_STATUS_SUPERNODE_RUNNING = 1;
 
     private static final int NODE_STATUS_CLIENT_RUNNING = 2;
@@ -269,14 +280,17 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
+        this.isSuperNodeEnabled = enabled;
         if(isBluetoothEnabled() && isWiFiEnabled()){
-            if(enabled && nodeStatus != NODE_STATUS_SUPERNODE_RUNNING){
-                stopClientMode();
-                startSuperNode();
-            }else if(!enabled && nodeStatus != NODE_STATUS_CLIENT_RUNNING){
-                stopSuperNode();
-                startClientMode();
-            }
+            updateSupernodeServices();
+            updateClientServices();
+//            if(enabled && nodeStatus != NODE_STATUS_SUPERNODE_RUNNING){
+//                stopClientMode();
+//                startSuperNode();
+//            }else if(!enabled && nodeStatus != NODE_STATUS_CLIENT_RUNNING){
+//                stopSuperNode();
+//                startClientMode();
+//            }
         }else{
             Log.d(TAG,"Either Bluetooth or WiFi is not enabled");
         }
@@ -284,48 +298,102 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void startSuperNode() {
-       if(networkService.getWifiDirectHandlerAPI()!=null){
-           WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-           wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
-           bluetoothServerAndroid.start();
-           nsdHelperAndroid.registerNSDService();
-           addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
-           isSuperNodeEnabled=true;
-           nodeStatus = NODE_STATUS_SUPERNODE_RUNNING;
-       }
+//       if(networkService.getWifiDirectHandlerAPI()!=null){
+//           WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+//           wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
+//           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
+//           bluetoothServerAndroid.start();
+//           nsdHelperAndroid.registerNSDService();
+//           addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
+//           isSuperNodeEnabled=true;
+//           nodeStatus = NODE_STATUS_SUPERNODE_RUNNING;
+//       }
     }
 
     @Override
     public void stopSuperNode() {
-        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-        if(wifiDirectHandler!=null){
-            if(mBuilder!=null && mNotifyManager!=null){
-                removeNotification(NOTIFICATION_TYPE_SERVER);
-            }
-            wifiDirectHandler.removeService();
-
-            bluetoothServerAndroid.stop();
-            isSuperNodeEnabled=false;
-            nodeStatus = NODE_STATUS_CLIENT_RUNNING;
-        }
+//        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+//        if(wifiDirectHandler!=null){
+//            if(mBuilder!=null && mNotifyManager!=null){
+//                removeNotification(NOTIFICATION_TYPE_SERVER);
+//            }
+//            wifiDirectHandler.removeService();
+//
+//            bluetoothServerAndroid.stop();
+//            isSuperNodeEnabled=false;
+//            nodeStatus = NODE_STATUS_CLIENT_RUNNING;
+//        }
     }
 
     @Override
     public void startClientMode() {
-        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-        wifiDirectHandler.continuouslyDiscoverServices();
-        if(!nsdHelperAndroid.isDiscoveringNetworkService())
-            nsdHelperAndroid.startNSDiscovery();
+//        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+//        wifiDirectHandler.continuouslyDiscoverServices();
+//        if(!nsdHelperAndroid.isDiscoveringNetworkService())
+//            nsdHelperAndroid.startNSDiscovery();
     }
 
     @Override
     public void stopClientMode() {
-        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-        wifiDirectHandler.stopServiceDiscovery();
+//        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+//        wifiDirectHandler.stopServiceDiscovery();
+//
+//        if(nsdHelperAndroid.isDiscoveringNetworkService())
+//            nsdHelperAndroid.stopNSDiscovery();
+    }
 
-        if(nsdHelperAndroid.isDiscoveringNetworkService())
+    public synchronized void updateClientServices() {
+        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+        boolean clientEnabled = !isSuperNodeEnabled();
+
+        boolean shouldRunWifiP2pDiscovery = clientEnabled && wifiDirectHandler != null && isWiFiEnabled();
+        if(shouldRunWifiP2pDiscovery) {
+            wifiDirectHandler.continuouslyDiscoverServices();
+        }else if(wifiDirectHandler != null) {
+            wifiDirectHandler.stopServiceDiscovery();
+        }
+
+        boolean shouldRunNsdDiscovery = clientEnabled && isWiFiEnabled();
+        if(shouldRunNsdDiscovery && !nsdHelperAndroid.isDiscoveringNetworkService()) {
+            UstadMobileSystemImpl.l(UMLog.INFO, 301, "NetworkManager: start network service discovery");
+            nsdHelperAndroid.startNSDiscovery();
+        }else if(!shouldRunNsdDiscovery && nsdHelperAndroid.isDiscoveringNetworkService()) {
             nsdHelperAndroid.stopNSDiscovery();
+        }
+    }
+
+    public synchronized void updateSupernodeServices() {
+        boolean shouldHaveLocalP2PService = isSuperNodeEnabled() && isWiFiEnabled() && networkService.getWifiDirectHandlerAPI() != null;
+        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
+        if(shouldHaveLocalP2PService && wifiDirectHandler != null && p2pLocalServiceStatus == LOCAL_SERVICE_STATUS_INACTIVE ) {
+            wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
+            wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
+            p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;//TODO: This should only really be changed when the request to add service succeeds
+        }else if(!shouldHaveLocalP2PService && p2pLocalServiceStatus != LOCAL_SERVICE_STATUS_INACTIVE && wifiDirectHandler != null) {
+            networkService.getWifiDirectHandlerAPI().removeService();
+        }
+
+        boolean shouldHaveLocalNsdService = isSuperNodeEnabled() && isWiFiEnabled();
+        if(shouldHaveLocalNsdService && nsdLocalServiceStatus ==LOCAL_SERVICE_STATUS_INACTIVE) {
+            nsdHelperAndroid.registerNSDService();
+            nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;
+        }else if(!shouldHaveLocalNsdService && nsdLocalServiceStatus != LOCAL_SERVICE_STATUS_INACTIVE) {
+            nsdHelperAndroid.unregisterNSDService();
+            nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
+        }
+
+        boolean shouldRunBluetoothServer = isSuperNodeEnabled() && isBluetoothEnabled();
+        if(shouldRunBluetoothServer && !bluetoothServerAndroid.isRunning()) {
+            bluetoothServerAndroid.start();
+        }else if(!shouldRunBluetoothServer && bluetoothServerAndroid.isRunning()) {
+            bluetoothServerAndroid.stop();
+        }
+
+        if(isSuperNodeEnabled()) {
+            addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
+        }else if(mBuilder!=null && mNotifyManager!=null){
+            removeNotification(NOTIFICATION_TYPE_SERVER);
+        }
     }
 
     @Override

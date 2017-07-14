@@ -200,6 +200,7 @@ public class NSDHelperAndroid {
      */
 
     public void startNSDiscovery(){
+        Log.i(NetworkManagerAndroid.TAG, "NSDHelperAndroid: start NS discovery");
         stopNSDiscovery();
         initializeServiceDiscoveryListener();
         lookupNsdManager();
