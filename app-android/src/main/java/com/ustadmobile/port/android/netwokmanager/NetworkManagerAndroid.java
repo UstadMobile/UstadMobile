@@ -282,8 +282,8 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         this.isSuperNodeEnabled = enabled;
         if(isBluetoothEnabled() && isWiFiEnabled()){
-            updateSupernodeServices();
             updateClientServices();
+            updateSupernodeServices();
 //            if(enabled && nodeStatus != NODE_STATUS_SUPERNODE_RUNNING){
 //                stopClientMode();
 //                startSuperNode();
@@ -371,6 +371,7 @@ public class NetworkManagerAndroid extends NetworkManager{
             p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;//TODO: This should only really be changed when the request to add service succeeds
         }else if(!shouldHaveLocalP2PService && p2pLocalServiceStatus != LOCAL_SERVICE_STATUS_INACTIVE && wifiDirectHandler != null) {
             networkService.getWifiDirectHandlerAPI().removeService();
+            p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
         }
 
         boolean shouldHaveLocalNsdService = isSuperNodeEnabled() && isWiFiEnabled();
