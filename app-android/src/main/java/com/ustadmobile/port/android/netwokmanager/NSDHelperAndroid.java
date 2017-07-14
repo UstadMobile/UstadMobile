@@ -192,6 +192,7 @@ public class NSDHelperAndroid {
      */
     public void unregisterNSDService(){
         mNsdManager.unregisterService(networkRegistrationListener);
+        networkRegistrationListener = null;
     }
 
     /**
