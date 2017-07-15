@@ -107,7 +107,8 @@ public class NSDHelperAndroid {
 
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" + errorCode);
+                Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" +
+                        getFailureReasonName(errorCode));
                 //TODO: this should not be called
                 //mNsdManager.stopServiceDiscovery(this);
             }
@@ -149,15 +150,19 @@ public class NSDHelperAndroid {
 
             @Override
             public void onRegistrationFailed(NsdServiceInfo serviceInf, int error) {
-                Log.e(NetworkManagerAndroid.TAG,"Network Service Discovery failed to register "+serviceInf.getServiceName()+" "+error);
+                Log.e(NetworkManagerAndroid.TAG,"Network Service Discovery failed to register "+serviceInf.getServiceName()+" "
+                        +getFailureReasonName(error));
             }
 
             @Override
-            public void onServiceUnregistered(NsdServiceInfo arg0) {
+            public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+                Log.d(NetworkManagerAndroid.TAG, "Network service discovery: successfully unregistered " + serviceInfo.getServiceName());
             }
 
             @Override
             public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                Log.d(NetworkManagerAndroid.TAG, "Network service discovery: failed to unregister "
+                        + serviceInfo.getServiceName() + " error " + getFailureReasonName(errorCode));
             }
 
         };
@@ -239,5 +244,21 @@ public class NSDHelperAndroid {
     public boolean isDiscoveringNetworkService(){
         return isDiscoveringNetworkService;
     }
+
+    public static String getFailureReasonName(int error) {
+        switch(error) {
+            case NsdManager.FAILURE_ALREADY_ACTIVE:
+                return "FAILURE_ALREADY_ACTIVE";
+
+            case NsdManager.FAILURE_INTERNAL_ERROR:
+                return "FAILURE_INTERNAL_ERROR";
+
+            case NsdManager.FAILURE_MAX_LIMIT:
+                return "FAILURE_MAX_LIMIT";
+        }
+
+        return "UNKNOWN";
+    }
+
 
 }

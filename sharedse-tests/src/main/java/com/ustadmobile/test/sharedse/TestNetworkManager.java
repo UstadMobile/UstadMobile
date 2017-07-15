@@ -10,6 +10,7 @@ import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
+import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import org.junit.Assert;
 import org.junit.Assume;
@@ -208,7 +209,7 @@ public class TestNetworkManager {
     /**
      * Test disabling wifi on the client
      */
-    @Test
+    //@Test
     public void testWifiDisabledOnClient() throws IOException {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         final Object nodeUpdateLock = new Object();
@@ -266,6 +267,7 @@ public class TestNetworkManager {
         try {
             Assert.assertTrue("Supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
             testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE, NODE_DISCOVERY_TIMEOUT);
+            testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER, NODE_DISCOVERY_TIMEOUT);
 
             Assume.assumeTrue("Can disable wifi", manager.setWifiEnabled(false));
             UstadMobileSystemImpl.l(UMLog.INFO, 302, "=== wifi disabled===");
@@ -301,6 +303,94 @@ public class TestNetworkManager {
                     catch(InterruptedException e) {}
                 }
             }
+            manager.removeNetworkManagerListener(listener);
+        }
+
+    }
+
+    //@Test
+    public void testWifiDisabledOnServer() throws IOException {
+        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        final Object nodeUpdateLock = new Object();
+        final Object networkConnectedLock = new Object();
+
+        final long[] timeEnabled = new long[]{-1};
+        NetworkManagerListener listener = new NetworkManagerListener() {
+            @Override
+            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+
+            }
+
+            @Override
+            public void networkNodeDiscovered(NetworkNode node) {
+
+            }
+
+            @Override
+            public void networkNodeUpdated(NetworkNode node) {
+                if(timeEnabled[0] == -1)
+                    return;//not ready yet
+
+                if(node.getDeviceBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
+                    long wifiDirectUpdated = node.getWifiDirectLastUpdated();
+                    long nsdUpdated = node.getNetworkServiceLastUpdated();
+                    if(wifiDirectUpdated > timeEnabled[0] && nsdUpdated > timeEnabled[0]) {
+                        synchronized (nodeUpdateLock) {
+                            nodeUpdateLock.notify();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
+
+            }
+
+            @Override
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+
+            }
+
+            @Override
+            public void networkTaskStatusChanged(NetworkTask networkTask) {
+
+            }
+        };
+        manager.addNetworkManagerListener(listener);
+
+
+        try {
+            Assert.assertTrue("Supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+            testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE, NODE_DISCOVERY_TIMEOUT);
+
+            //Create a wifi direct group before disabling wifi
+            String createGroupUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd="
+                    + RemoteTestServerHttpd.CMD_CREATEGROUP;
+            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(createGroupUrl, null, null);
+            Assert.assertEquals("Group created", 200, result.getStatus());
+
+            Assert.assertTrue("Supernode wifi disabled for 20s", TestUtilsSE.disableRemoteWifi(20000));
+            UstadMobileSystemImpl.l(UMLog.INFO, 340, "=== wifi disabled on server ===" );
+            try { Thread.sleep(20000);}
+            catch(InterruptedException e) {}
+            timeEnabled[0] = Calendar.getInstance().getTimeInMillis();
+            UstadMobileSystemImpl.l(UMLog.INFO, 340, "=== wifi enabled (disable timeout) ===" );
+            synchronized (nodeUpdateLock) {
+                try { nodeUpdateLock.wait(NODE_DISCOVERY_TIMEOUT);}
+                catch(InterruptedException e) {}
+            }
+            NetworkNode node = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+            boolean wifiDirectUpdatedAfterWifiDisabled = node.getWifiDirectLastUpdated() > timeEnabled[0];
+            boolean nsdUpdatedAfterWifiDisabled = node.getNetworkServiceLastUpdated() > timeEnabled[0];
+            Assert.assertTrue("Wifi direct last updated after WiFi enabled",
+                    wifiDirectUpdatedAfterWifiDisabled);
+            Assert.assertTrue("Network service discovery last updated after wifi enabled",
+                    nsdUpdatedAfterWifiDisabled);
+
+        }catch(Exception e) {
+            UstadMobileSystemImpl.l(0, 0, "WTF", e);
+        } finally{
             manager.removeNetworkManagerListener(listener);
         }
 

@@ -1,5 +1,7 @@
 package com.ustadmobile.test.sharedse.http;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
@@ -25,6 +27,8 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
     public static final String CMD_CREATEGROUP = "CREATEGROUP";
 
     public static final String CMD_MANGLE_BLUETOOTH = "MANGLEBLUETOOTH";
+
+    public static final String CMD_DISABLE_WIFI = "DISABLEWIFI";
 
     public static final String CMD_MANGLE_WIFI_DIRECT_GROUP = "";
 
@@ -54,6 +58,22 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
             }else if(CMD_MANGLE_WIFI_DIRECT_GROUP.equals(command)) {
                 boolean enabled = Boolean.parseBoolean(decodedParams.get("enabled").get(0));
                 networkManager.setMangleWifiDirectGroup(enabled);
+                return newFixedLengthResponse("OK");
+            }else if(CMD_DISABLE_WIFI.equals(command)) {
+                final int howlong = Integer.parseInt(decodedParams.get("duration").get(0));
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean opSuccess = networkManager.setWifiEnabled(false);
+                        UstadMobileSystemImpl.l(UMLog.INFO, 341, "RemoteTestServer: ===disable wifi=== for "
+                                + howlong + "ms" + (opSuccess ? " succeeded" : " failed"));
+                        try { Thread.sleep(howlong); }
+                        catch(InterruptedException e) {}
+                        opSuccess = networkManager.setWifiEnabled(true);
+                        UstadMobileSystemImpl.l(UMLog.INFO, 341, "RemoteTestServer: ===enable wifi=== "
+                                + (opSuccess ? " succeeded" : " failed"));
+                    }
+                }).start();
                 return newFixedLengthResponse("OK");
             }else if(CMD_CREATEGROUP.equals(command)) {
                 int groupStatus = networkManager.getWifiDirectGroupStatus();

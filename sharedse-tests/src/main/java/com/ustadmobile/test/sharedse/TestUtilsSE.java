@@ -33,15 +33,19 @@ public class TestUtilsSE {
         return sendBooleanCommand(RemoteTestServerHttpd.CMD_MANGLE_WIFI_DIRECT_GROUP, enabled);
     }
 
-    private static boolean sendBooleanCommand(String command, boolean value) throws IOException{
-        String url = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + command + "&enabled="
-                + String.valueOf(value);
+    public static boolean disableRemoteWifi(int duration) {
+        String url = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + RemoteTestServerHttpd.CMD_DISABLE_WIFI
+                + "&duration=" + duration;
+        return sendCommand(url);
+    }
+
+    private static boolean sendCommand(String url) {
         HTTPResult result = null;
         for(int i = 0; result == null && i < 4; i++) {
             try {
                 result = UstadMobileSystemImpl.getInstance().makeRequest(url, null, null);
             }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 79, "Error sending command " + command + " to "
+                UstadMobileSystemImpl.l(UMLog.ERROR, 79, "Error sending command to "
                         + url + "(Attempt #" + (i+1) + ")");
                 try { Thread.sleep(1000); }
                 catch(InterruptedException e2) {}
@@ -49,6 +53,12 @@ public class TestUtilsSE {
         }
 
         return result != null && result.getStatus() == 200;
+    }
+
+    private static boolean sendBooleanCommand(String command, boolean value) {
+        String url = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + command + "&enabled="
+                + String.valueOf(value);
+        return sendCommand(url);
     }
 
 }

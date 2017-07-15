@@ -278,6 +278,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                             cancelUpdateServicesTask();
                             updateClientServices();
                             updateSupernodeServices();
+                            currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
                             break;
 
                         case WifiManager.WIFI_STATE_ENABLED:
