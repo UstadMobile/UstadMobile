@@ -234,8 +234,7 @@ public class TestNetworkManager {
                 if(node.getDeviceBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
                     long wifiDirectUpdated = node.getWifiDirectLastUpdated();
                     long nsdUpdated = node.getNetworkServiceLastUpdated();
-                    //TODO: check both NSD and wifi direct
-                    if(wifiDirectUpdated > timeEnabled[0]) {
+                    if(wifiDirectUpdated > timeEnabled[0] && nsdUpdated > timeEnabled[0]) {
                         synchronized (nodeUpdateLock) {
                             nodeUpdateLock.notify();
                         }
@@ -280,9 +279,6 @@ public class TestNetworkManager {
             UstadMobileSystemImpl.l(UMLog.INFO, 302, "=== wifi enabled===");
             try { Thread.sleep(20000); }
             catch(InterruptedException e) {}
-            //manager.startP2P();
-            //manager.startClientMode();
-            //manager.updateClientServices();
 
 
             synchronized (nodeUpdateLock) {
@@ -291,12 +287,12 @@ public class TestNetworkManager {
             }
 
             NetworkNode node = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-            boolean updatedAfterWifiDisabled = node.getWifiDirectLastUpdated() > timeEnabled[0];
+            boolean wifiDirectUpdatedAfterWifiDisabled = node.getWifiDirectLastUpdated() > timeEnabled[0];
+            boolean nsdUpdatedAfterWifiDisabled = node.getNetworkServiceLastUpdated() > timeEnabled[0];
             Assert.assertTrue("Wifi direct last updated after WiFi enabled",
-                    updatedAfterWifiDisabled);
-            //TODO: check NSD as well
-//            Assert.assertTrue("Network service discovery last updated after wifi enabled",
-//                    node.getNetworkServiceLastUpdated() > timeEnabled[0]);
+                    wifiDirectUpdatedAfterWifiDisabled);
+            Assert.assertTrue("Network service discovery last updated after wifi enabled",
+                    nsdUpdatedAfterWifiDisabled);
         }finally{
             //Assert.assertTrue("Supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
             if(manager.getCurrentWifiSsid() == null) {
