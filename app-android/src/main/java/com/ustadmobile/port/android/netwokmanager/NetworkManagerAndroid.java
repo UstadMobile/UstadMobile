@@ -154,7 +154,11 @@ public class NetworkManagerAndroid extends NetworkManager{
     private List<String> temporaryWifiDirectSsids = new ArrayList<>();
 
 
-
+    /**
+     * The time to wait after WiFi is enabled before attempting to start any discovery or service
+     * broadcasting tasks
+     */
+    public static final int P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT = 25000;
 
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
@@ -184,6 +188,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 
 
         networkService.registerReceiver(mWifiBroadcastReceiver, intentFilter);
@@ -262,6 +267,22 @@ public class NetworkManagerAndroid extends NetworkManager{
 
                         UstadMobileSystemImpl.l(UMLog.WARN, 214, "Network: Supplicant state change: error:"
                                 + message);
+                    }
+                    break;
+
+                case WifiManager.WIFI_STATE_CHANGED_ACTION:
+                    int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                            WifiManager.WIFI_STATE_UNKNOWN);
+                    switch(state) {
+                        case WifiManager.WIFI_STATE_DISABLED:
+                            cancelUpdateServicesTask();
+                            updateClientServices();
+                            updateSupernodeServices();
+                            break;
+
+                        case WifiManager.WIFI_STATE_ENABLED:
+                            submitUpdateServicesTask(P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT);
+                            break;
                     }
                     break;
             }

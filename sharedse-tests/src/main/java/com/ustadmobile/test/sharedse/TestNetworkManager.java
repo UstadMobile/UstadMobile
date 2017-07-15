@@ -282,7 +282,7 @@ public class TestNetworkManager {
             catch(InterruptedException e) {}
             //manager.startP2P();
             //manager.startClientMode();
-            manager.updateClientServices();
+            //manager.updateClientServices();
 
 
             synchronized (nodeUpdateLock) {

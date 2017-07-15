@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
@@ -185,6 +187,19 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     private boolean mangleWifiSsid = false;
 
     private boolean mangleBluetoothAddr = false;
+
+    private Timer updateServicesTimer;
+
+    private TimerTask updateServicesTimerTask;
+
+    private class UpdateTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            NetworkManager.this.updateClientServices();
+            NetworkManager.this.updateSupernodeServices();
+        }
+    }
+
 
     public NetworkManager() {
     }
@@ -539,6 +554,25 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 //            }
 //        }
 
+    }
+
+    protected synchronized void submitUpdateServicesTask(long delay) {
+        cancelUpdateServicesTask();
+        updateServicesTimer = new Timer();
+        updateServicesTimerTask = new UpdateTimerTask();
+        updateServicesTimer.schedule(updateServicesTimerTask, delay);
+    }
+
+    protected synchronized void cancelUpdateServicesTask() {
+        if(updateServicesTimerTask != null){
+            updateServicesTimerTask.cancel();
+            updateServicesTimerTask = null;
+        }
+
+        if(updateServicesTimer != null){
+            updateServicesTimer.cancel();
+            updateServicesTimer = null;
+        }
     }
 
     /**
