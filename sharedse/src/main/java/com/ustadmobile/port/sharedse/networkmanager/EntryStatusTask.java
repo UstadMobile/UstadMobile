@@ -61,19 +61,28 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         networkManager.networkTaskStatusChanged(this);
     }
 
+    private String mkLogPrefix() {
+        return "EntryStatusTask #" + getTaskId();
+    }
+
     private void connectNextNode(int index) {
         if(isStopped()) {
             return;
         }else if(index < networkNodeList.size()) {
+            UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index);
             currentNode = index;
             if(networkManager.isBluetoothEnabled() && isUseBluetooth() && networkNodeList.get(currentNode).getDeviceBluetoothMacAddress() != null) {
                 String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index
+                        + " to bluetooth addr " + bluetoothAddr);
                 networkManager.connectBluetooth(bluetoothAddr, this);
             }else if(networkManager.isWiFiEnabled() && isUseHttp() && networkNodeList.get(currentNode).getDeviceIpAddress() != null) {
                 //TODO: Handle status acquisition over http
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - network - skip");
                 connectNextNode(index+1);
             }else {
                 //skip it - not possible to query this node with the current setup
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - no suitable method to connect");
                 connectNextNode(index+1);
             }
         }else {
@@ -89,6 +98,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
      */
     @Override
     public void onBluetoothConnected(InputStream inputStream, OutputStream outputStream) {
+        UstadMobileSystemImpl.l(UMLog.VERBOSE, 438, mkLogPrefix() + " bluetooth connected");
         String queryStr = BluetoothServer.CMD_ENTRY_STATUS_QUERY + ' ';
         List<Boolean> entryIdStatusList=new ArrayList<>();
         for(int i = 0; i < entryIdList.size(); i++){
@@ -114,12 +124,14 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
                     entryIdStatusList.add(responseStatus);
                 }
 
+                UstadMobileSystemImpl.l(UMLog.DEBUG, 648, mkLogPrefix() + " response: " + response);
+
                 networkManager.handleEntriesStatusUpdate(networkNodeList.get(currentNode), entryIdList,entryIdStatusList);
             }else {
                 System.out.print("Feedback "+response);
             }
         }catch(IOException e) {
-            e.printStackTrace();
+            UstadMobileSystemImpl.l(UMLog.ERROR, 78, mkLogPrefix() + " onBluetoothConnected IO Exception", e);
         }finally {
             if(reader != null){
                 try {reader.close();}
@@ -134,7 +146,8 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public void onBluetoothConnectionFailed(Exception exception) {
-        UstadMobileSystemImpl.l(UMLog.WARN, 212, null, exception);
+        UstadMobileSystemImpl.l(UMLog.WARN, 212, mkLogPrefix() + " bluetooth connection failed",
+                exception);
         connectNextNode(currentNode + 1);
     }
 

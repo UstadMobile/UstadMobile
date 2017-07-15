@@ -218,6 +218,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public abstract boolean isSuperNodeEnabled();
 
+    public abstract void updateSupernodeServices();
+
+    public abstract void updateClientServices();
+
     /**
      * Do the main initialization of the NetworkManager : set the context and start the http manager
      * This will have no effect if called twice

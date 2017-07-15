@@ -1,6 +1,9 @@
 package com.ustadmobile.core.networkmanager;
 
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -60,6 +63,7 @@ public abstract class NetworkTask {
     public synchronized void stop(int statusAfterStop) {
         stopped = true;
         setStatus(statusAfterStop);
+        UstadMobileSystemImpl.l(UMLog.INFO, 370, "NetworkTask #" + getTaskId() + " stopped");
     }
 
     public synchronized boolean isStopped() {
