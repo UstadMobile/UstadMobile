@@ -189,26 +189,26 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public NetworkManager() {
     }
 
-    /**
-     * Method used to enable super node
-     */
-    public abstract void startSuperNode();
-
-    /**
-     * Method used to disable supper node
-     */
-    public abstract void stopSuperNode();
-
-
-    /**
-     * Run client services: discover nearby nodes
-     */
-    public abstract void startClientMode();
-
-    /**
-     * Stop client services
-     */
-    public abstract void stopClientMode();
+//    /**
+//     * Method used to enable super node
+//     */
+//    public abstract void startSuperNode();
+//
+//    /**
+//     * Method used to disable supper node
+//     */
+//    public abstract void stopSuperNode();
+//
+//
+//    /**
+//     * Run client services: discover nearby nodes
+//     */
+//    public abstract void startClientMode();
+//
+//    /**
+//     * Stop client services
+//     */
+//    public abstract void stopClientMode();
 
 
 
@@ -517,23 +517,23 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param enabled
      */
     public void handleWifiEnabledChanged(boolean enabled) {
-        if(enabled) {
-            checkTaskQueue(QUEUE_ENTRY_ACQUISITION);
-            if(isSuperNodeEnabled() && isBluetoothEnabled()) {
-                startSuperNode();
-            }else if(!isSuperNodeEnabled()){
-                startClientMode();
-            }
-        }else {
-            stopClientMode();
-            stopSuperNode();
-
-            if(currentTaskIndex[QUEUE_ENTRY_ACQUISITION] != -1) {
-                tasksQueues[QUEUE_ENTRY_ACQUISITION].get(currentTaskIndex[QUEUE_ENTRY_ACQUISITION]).stop(
-                        NetworkTask.STATUS_WAITING_FOR_NETWORK);
-                currentTaskIndex[QUEUE_ENTRY_ACQUISITION] = -1;
-            }
-        }
+//        if(enabled) {
+//            checkTaskQueue(QUEUE_ENTRY_ACQUISITION);
+//            if(isSuperNodeEnabled() && isBluetoothEnabled()) {
+//                startSuperNode();
+//            }else if(!isSuperNodeEnabled()){
+//                startClientMode();
+//            }
+//        }else {
+//            stopClientMode();
+//            stopSuperNode();
+//
+//            if(currentTaskIndex[QUEUE_ENTRY_ACQUISITION] != -1) {
+//                tasksQueues[QUEUE_ENTRY_ACQUISITION].get(currentTaskIndex[QUEUE_ENTRY_ACQUISITION]).stop(
+//                        NetworkTask.STATUS_WAITING_FOR_NETWORK);
+//                currentTaskIndex[QUEUE_ENTRY_ACQUISITION] = -1;
+//            }
+//        }
 
     }
 

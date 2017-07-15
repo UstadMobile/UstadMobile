@@ -281,23 +281,12 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         this.isSuperNodeEnabled = enabled;
-        if(isBluetoothEnabled() && isWiFiEnabled()){
-            updateClientServices();
-            updateSupernodeServices();
-//            if(enabled && nodeStatus != NODE_STATUS_SUPERNODE_RUNNING){
-//                stopClientMode();
-//                startSuperNode();
-//            }else if(!enabled && nodeStatus != NODE_STATUS_CLIENT_RUNNING){
-//                stopSuperNode();
-//                startClientMode();
-//            }
-        }else{
-            Log.d(TAG,"Either Bluetooth or WiFi is not enabled");
-        }
+        updateClientServices();
+        updateSupernodeServices();
     }
 
-    @Override
-    public void startSuperNode() {
+//    @Override
+//    public void startSuperNode() {
 //       if(networkService.getWifiDirectHandlerAPI()!=null){
 //           WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
 //           wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
@@ -308,10 +297,10 @@ public class NetworkManagerAndroid extends NetworkManager{
 //           isSuperNodeEnabled=true;
 //           nodeStatus = NODE_STATUS_SUPERNODE_RUNNING;
 //       }
-    }
+//    }
 
-    @Override
-    public void stopSuperNode() {
+//    @Override
+//    public void stopSuperNode() {
 //        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
 //        if(wifiDirectHandler!=null){
 //            if(mBuilder!=null && mNotifyManager!=null){
@@ -323,24 +312,24 @@ public class NetworkManagerAndroid extends NetworkManager{
 //            isSuperNodeEnabled=false;
 //            nodeStatus = NODE_STATUS_CLIENT_RUNNING;
 //        }
-    }
+//    }
 
-    @Override
-    public void startClientMode() {
+//    @Override
+//    public void startClientMode() {
 //        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
 //        wifiDirectHandler.continuouslyDiscoverServices();
 //        if(!nsdHelperAndroid.isDiscoveringNetworkService())
 //            nsdHelperAndroid.startNSDiscovery();
-    }
+//    }
 
-    @Override
-    public void stopClientMode() {
+//    @Override
+//    public void stopClientMode() {
 //        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
 //        wifiDirectHandler.stopServiceDiscovery();
 //
 //        if(nsdHelperAndroid.isDiscoveringNetworkService())
 //            nsdHelperAndroid.stopNSDiscovery();
-    }
+//    }
 
     public synchronized void updateClientServices() {
         WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
