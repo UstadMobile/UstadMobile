@@ -128,6 +128,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      */
     public static final String TARGET_NETWORK_WIFIDIRECT_GROUP = "com.ustadmobile.network.connect";
 
+    public static final String TARGET_NETWORK_MOBILE_DATA = "com.ustadmobile.network.mobiledata";
+
     /**
      * The network that this task wants to connect with for the upcoming/current download
      */
@@ -427,20 +429,31 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             entryCheckResponse = selectEntryCheckResponse(feed.entries[index],
                     mirrorFinder.getEntryResponsesWithLocalFile(feed.entries[index].id));
 
-            if(localNetworkDownloadEnabled && entryCheckResponse != null && Calendar.getInstance().getTimeInMillis() - entryCheckResponse.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
+            NetworkNode responseNode = entryCheckResponse != null ? entryCheckResponse.getNetworkNode() : null;
+            String currentSsid = networkManager.getCurrentWifiSsid();
+            if(localNetworkDownloadEnabled && entryCheckResponse != null
+                    && networkManager.getCurrentWifiSsid() != null
+                    && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 targetNetwork = TARGET_NETWORK_NORMAL;
                 currentDownloadUrl = "http://"+entryCheckResponse.getNetworkNode().getDeviceIpAddress()+":"
                         +entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
                 currentDownloadMode = DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
-            }else if(wifiDirectDownloadEnabled && entryCheckResponse != null){//TODO: Check freshness of wifi direct response?
+            }else if(wifiDirectDownloadEnabled && entryCheckResponse != null
+                    && networkManager.isWiFiEnabled()
+                    && responseNode.getTimeSinceWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
                 currentDownloadMode = DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
-            }else {
-                targetNetwork = TARGET_NETWORK_NORMAL;
+            }else if(currentSsid != null || isDownloadOnMobileDataEnabled()){
+                //download from cloud
+                targetNetwork = currentSsid != null ? TARGET_NETWORK_NORMAL : TARGET_NETWORK_MOBILE_DATA;
                 currentDownloadUrl = UMFileUtil.resolveLink(
                     feed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF],
                     feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(null)[UstadJSOPDSEntry.LINK_HREF]);
                 currentDownloadMode = DOWNLOAD_FROM_CLOUD;
+            }else {
+                //we're stuck -
+                cleanup(STATUS_WAITING_FOR_NETWORK);
+                return;
             }
 
             currentHistoryEntry.setMode(currentDownloadMode);
@@ -459,7 +472,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 networkManager.connectBluetooth(entryCheckResponse.getNetworkNode().getDeviceBluetoothMacAddress()
                         ,this);
             }else if(targetNetwork.equals(TARGET_NETWORK_NORMAL)) {
-                String currentSsid = networkManager.getCurrentWifiSsid();
+                //String currentSsid = networkManager.getCurrentWifiSsid();
                 boolean isConnectedToWifiDirectGroup = networkManager.isConnectedToWifiDirectGroup();
 
                 if(currentSsid != null && !isConnectedToWifiDirectGroup){
@@ -472,6 +485,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     setWaitingForWifiConnection(true);
                     networkManager.restoreWifi();
                 }
+            }else if(targetNetwork.equals(TARGET_NETWORK_MOBILE_DATA)){
+                downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
             }
         }else{
             cleanup(STATUS_COMPLETE);
@@ -913,6 +928,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         return score;
     }
 
+    public boolean isDownloadOnMobileDataEnabled() {
+        return false;
+    }
 
 
 }

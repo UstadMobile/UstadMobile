@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-
 /**
  * Created by kileha3 on 16/05/2017.
  */
@@ -201,7 +199,7 @@ public class TestNetworkManager {
         Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;
-        Assert.assertThat("Was node discovered withing time range",isWithinDiscoveryTimeRange,is(true));
+        Assert.assertTrue("Was node discovered withing time range", isWithinDiscoveryTimeRange);
         manager.removeNetworkManagerListener(responseListener);
     }
 
