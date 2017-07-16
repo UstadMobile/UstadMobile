@@ -5,6 +5,8 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
 
@@ -79,20 +81,25 @@ public class NSDHelperAndroid {
 
                 /*Found the right service type, resolve it to get the appropriate details.*/
 
-                mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
-                    @Override
-                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                        Log.d(NetworkManagerAndroid.TAG, "Network Service Resolved Successfully. " + serviceInfo);
+                if(service.getServiceName() != null
+                        && service.getServiceName().contains(CoreBuildConfig.NETWORK_SERVICE_NAME)) {
+                    mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
+                        @Override
+                        public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                            Log.d(NetworkManagerAndroid.TAG, "Network Service Resolved Successfully. " + serviceInfo);
 
-                        managerAndroid.handleNetworkServerDiscovered(serviceInfo.getServiceName(),
-                                serviceInfo.getHost().getHostAddress(),serviceInfo.getPort());
-                    }
+                            managerAndroid.handleNetworkServerDiscovered(serviceInfo.getServiceName(),
+                                    serviceInfo.getHost().getHostAddress(), serviceInfo.getPort());
+                        }
 
-                    @Override
-                    public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        Log.e(NetworkManagerAndroid.TAG, "Network Service Failed to resolve"+service.getServiceName() +" errorCode "+ errorCode);
-                    }
-                });
+                        @Override
+                        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                            Log.e(NetworkManagerAndroid.TAG, "Network Service Failed to resolve"
+                                    + service.getServiceName() + "  error "
+                                    + getFailureReasonName(errorCode));
+                        }
+                    });
+                }
             }
 
             @Override
