@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
+import com.ustadmobile.core.view.WelcomeView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
@@ -58,7 +59,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,7 +101,11 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         setMenuItems(this.mNavigationDrawerItems);
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mBasePointController.onResume();
+    }
 
     @Override
     public void setMenuItems(final BasePointMenuItem[] menuItems) {

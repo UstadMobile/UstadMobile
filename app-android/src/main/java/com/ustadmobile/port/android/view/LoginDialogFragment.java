@@ -27,17 +27,13 @@ import java.util.Vector;
 /**
  * An Android Dialog Fragment that implements the LoginView.
  */
-public class LoginDialogFragment extends android.support.v4.app.DialogFragment implements LoginView, View.OnClickListener, DismissableDialog {
+public class LoginDialogFragment extends UstadDialogFragment implements LoginView, View.OnClickListener, DismissableDialog {
 
     private LoginController mLoginController;
 
     private View mView;
 
     private String mXapiServer;
-
-    private DialogResultListener mResultListener;
-
-    private Vector<Runnable> runOnAttach = new Vector<>();
 
     public LoginDialogFragment() {
         //Required empty public constructor
@@ -114,18 +110,8 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if(context instanceof DialogResultListener) {
-            mResultListener = (DialogResultListener)context;
-            if(mLoginController != null)
-                mLoginController.setResultListener(mResultListener);
-        }
-
-        Iterator<Runnable> runnables = runOnAttach.iterator();
-        while(runnables.hasNext()) {
-            Runnable current = runnables.next();
-            current.run();
-            runnables.remove();
-        }
+        if(mLoginController != null && mResultListener != null)
+            mLoginController.setResultListener(mResultListener);
     }
 
     @Override
@@ -174,11 +160,4 @@ public class LoginDialogFragment extends android.support.v4.app.DialogFragment i
     }
 
 
-    public void runOnUiThread(Runnable r) {
-        if(getActivity() != null) {
-            getActivity().runOnUiThread(r);
-        }else {
-            runOnAttach.add(r);
-        }
-    }
 }

@@ -22,6 +22,7 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.view.WelcomeView;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -66,6 +67,8 @@ public class BasePointController extends UstadBaseController implements DialogRe
     public static final int NUM_CATALOG_TABS = 1;
 
     private Hashtable args;
+
+    private boolean welcomeScreenDisplayed = false;
     
     public BasePointController(Object context) {
         super(context);
@@ -207,4 +210,14 @@ public class BasePointController extends UstadBaseController implements DialogRe
                 break;
         }
     }
+
+    public void onResume() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(!welcomeScreenDisplayed
+                && impl.getAppPref(WelcomeController.PREF_KEY_WELCOME_DONT_SHOW, "false",getContext()).equals("false")) {
+            welcomeScreenDisplayed = true;
+            UstadMobileSystemImpl.getInstance().go(WelcomeView.VIEW_NAME, getContext());
+        }
+    }
+
 }

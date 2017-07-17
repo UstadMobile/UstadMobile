@@ -15,14 +15,18 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.controller.WelcomeController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.WelcomeView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +34,11 @@ import java.util.Arrays;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WelcomeDialogFragment extends DialogFragment implements AdapterView.OnItemSelectedListener {
+public class WelcomeDialogFragment extends UstadDialogFragment implements AdapterView.OnItemSelectedListener, WelcomeView, View.OnClickListener, CheckBox.OnCheckedChangeListener {
+
+    private WelcomeController mController;
+
+    private CheckBox mDontShowAgainCheckbox;
 
     public WelcomeDialogFragment() {
         // Required empty public constructor
@@ -58,7 +66,7 @@ public class WelcomeDialogFragment extends DialogFragment implements AdapterView
         ((TextView)view.findViewById(R.id.inperson_lasses_content_view)).setText(
                 Html.fromHtml(impl.getString(MessageIDConstants.inpersonClassesTextContent)));
         ((TextView)view.findViewById(R.id.never_show_text_label)).setText(impl.getString(MessageIDConstants.neverShowThisNextTime));
-        ((Button)view.findViewById(R.id.accept_button_view)).setText(impl.getString(MessageIDConstants.acceptButton));
+        ((Button)view.findViewById(R.id.welcome_dialog_got_it_button)).setText(impl.getString(MessageIDConstants.acceptButton));
 
         final Spinner languageSpinnerView= (Spinner) view.findViewById(R.id.language_choice_spinner);
         int numLangs = UstadMobileConstants.SUPPORTED_LOCALES.length + 1;
@@ -81,6 +89,13 @@ public class WelcomeDialogFragment extends DialogFragment implements AdapterView
                 languageSpinnerView.performClick();
             }
         });
+        mDontShowAgainCheckbox = (CheckBox)view.findViewById(
+                R.id.fragment_welcome_dont_show_next_time_checkbox);
+        mDontShowAgainCheckbox.setOnCheckedChangeListener(this);
+
+        view.findViewById(R.id.welcome_dialog_got_it_button).setOnClickListener(this);
+
+        mController = new WelcomeController(getContext(), this);
 
         return view;
     }
@@ -104,6 +119,26 @@ public class WelcomeDialogFragment extends DialogFragment implements AdapterView
             return;
         }
         //TODO: implement the language selection logic to the app (position 0 is for "Select language" placeholder
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.welcome_dialog_got_it_button:
+                dismiss();
+                break;
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(mController != null)
+            mController.handleClickHideWelcomeNextTime(isChecked);
+    }
+
+    @Override
+    public void setDontShowAgainChecked(boolean checked) {
+        mDontShowAgainCheckbox.setChecked(checked);
     }
 
     @Override
