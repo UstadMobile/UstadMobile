@@ -1298,5 +1298,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
     }
 
-
+    public int getActionRequiredAfterGroupConnection() {
+        return actionRequiredAfterGroupConnection;
+    }
 }

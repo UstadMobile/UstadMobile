@@ -38,6 +38,8 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     protected NetworkManager networkManager;
 
+    private boolean stopped = false;
+
     public EntryStatusTask(List<String> entryIdList, List<NetworkNode> networkNodeList, NetworkManager networkManager){
         super(networkManager);
         this.networkManager = networkManager;
@@ -57,8 +59,14 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public synchronized void stop(int statusAfterStop) {
-        super.stop(statusAfterStop);
+        stopped = true;
+        setStatus(statusAfterStop);
         networkManager.networkTaskStatusChanged(this);
+    }
+
+    @Override
+    public synchronized boolean isStopped() {
+        return stopped;
     }
 
     private String mkLogPrefix() {

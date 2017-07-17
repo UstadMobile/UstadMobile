@@ -188,7 +188,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        //intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 
 
         networkService.registerReceiver(mWifiBroadcastReceiver, intentFilter);
@@ -275,14 +275,14 @@ public class NetworkManagerAndroid extends NetworkManager{
                             WifiManager.WIFI_STATE_UNKNOWN);
                     switch(state) {
                         case WifiManager.WIFI_STATE_DISABLED:
-                            cancelUpdateServicesTask();
-                            updateClientServices();
-                            updateSupernodeServices();
-                            currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+//                            cancelUpdateServicesTask();
+//                            updateClientServices();
+//                            updateSupernodeServices();
+//                            currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
                             break;
 
                         case WifiManager.WIFI_STATE_ENABLED:
-                            submitUpdateServicesTask(P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT);
+//                            submitUpdateServicesTask(P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT);
                             break;
                     }
                     break;

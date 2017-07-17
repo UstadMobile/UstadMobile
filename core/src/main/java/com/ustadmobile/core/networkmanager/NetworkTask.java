@@ -61,9 +61,13 @@ public abstract class NetworkTask {
      * Method which stop the network task execution
      */
     public synchronized void stop(int statusAfterStop) {
-        stopped = true;
-        setStatus(statusAfterStop);
-        UstadMobileSystemImpl.l(UMLog.INFO, 370, "NetworkTask #" + getTaskId() + " stopped");
+//        stopped = true;
+//        setStatus(statusAfterStop);
+//        UstadMobileSystemImpl.l(UMLog.INFO, 370, "NetworkTask #" + getTaskId() + " stopped");
+    }
+
+    protected synchronized void setStopped(boolean stopped) {
+        this.stopped = stopped;
     }
 
     public synchronized boolean isStopped() {
