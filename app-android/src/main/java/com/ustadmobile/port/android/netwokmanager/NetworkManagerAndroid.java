@@ -188,7 +188,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        //intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 
 
         networkService.registerReceiver(mWifiBroadcastReceiver, intentFilter);
@@ -275,14 +275,14 @@ public class NetworkManagerAndroid extends NetworkManager{
                             WifiManager.WIFI_STATE_UNKNOWN);
                     switch(state) {
                         case WifiManager.WIFI_STATE_DISABLED:
-//                            cancelUpdateServicesTask();
-//                            updateClientServices();
-//                            updateSupernodeServices();
-//                            currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+                            cancelUpdateServicesTask();
+                            updateClientServices();
+                            updateSupernodeServices();
+                            currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_INACTIVE;
                             break;
 
                         case WifiManager.WIFI_STATE_ENABLED:
-//                            submitUpdateServicesTask(P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT);
+                            submitUpdateServicesTask(P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT);
                             break;
                     }
                     break;
@@ -364,7 +364,9 @@ public class NetworkManagerAndroid extends NetworkManager{
             wifiDirectHandler.stopServiceDiscovery();
         }
 
-        boolean shouldRunNsdDiscovery = clientEnabled && isWiFiEnabled();
+        //starting and stopping NSD when the wifi is enabled or disabled was causing issues on 4.4.
+        // For now run discovery as long as client mode is enabled
+        boolean shouldRunNsdDiscovery = clientEnabled;
         if(shouldRunNsdDiscovery && !nsdHelperAndroid.isDiscoveringNetworkService()) {
             UstadMobileSystemImpl.l(UMLog.INFO, 301, "NetworkManager: start network service discovery");
             nsdHelperAndroid.startNSDiscovery();
@@ -385,7 +387,9 @@ public class NetworkManagerAndroid extends NetworkManager{
             p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
         }
 
-        boolean shouldHaveLocalNsdService = isSuperNodeEnabled() && isWiFiEnabled();
+        //Starting/stopping NSD when wifi was enabled or disabled was causing issues for connecting
+        //to networks on Android 4.4.
+        boolean shouldHaveLocalNsdService = isSuperNodeEnabled();
         if(shouldHaveLocalNsdService && nsdLocalServiceStatus ==LOCAL_SERVICE_STATUS_INACTIVE) {
             nsdHelperAndroid.registerNSDService();
             nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;

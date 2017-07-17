@@ -207,7 +207,7 @@ public class TestNetworkManager {
     /**
      * Test disabling wifi on the client
      */
-    //@Test
+    @Test
     public void testWifiDisabledOnClient() throws IOException {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         final Object nodeUpdateLock = new Object();
@@ -279,6 +279,7 @@ public class TestNetworkManager {
             UstadMobileSystemImpl.l(UMLog.INFO, 302, "=== wifi enabled===");
             try { Thread.sleep(20000); }
             catch(InterruptedException e) {}
+            //manager.updateClientServices();
 
 
             synchronized (nodeUpdateLock) {
