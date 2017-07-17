@@ -700,12 +700,14 @@ public class NetworkManagerAndroid extends NetworkManager{
          * Note: calling disconnect or reconnect should not be required. enableNetwork(net, true)
          * second parameter is defined as boolean enableNetwork (int netId, boolean attemptConnect).
          *
-         * It is however required on certain devices and does not seem to cause any harm to the connection
-         * process on other devices.
+         * Testing on Android Moto E (2nd gen) Andriod 6.0 the .reconnect() call would cause it to
+         * reconnect ot the 'normal' wifi because connecting to the group is a bit slow.
+         *
+         * This method works without the .reconnect() as tested on Android 4.4.2 Samsung Galaxy ACE
+         * and Moto E (2nd gen).
          */
         wifiManager.disconnect();
         boolean successful = wifiManager.enableNetwork(netId, true);
-        wifiManager.reconnect();
         UstadMobileSystemImpl.l(UMLog.INFO, 648, "Network: Connecting to wifi: " + ssid + " passphrase: '" + passphrase +"', " +
                 "successful?"  + successful +  " priority = " + wifiConfig.priority);
     }
