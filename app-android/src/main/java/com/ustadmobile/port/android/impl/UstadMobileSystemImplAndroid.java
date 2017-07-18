@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -53,6 +54,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
@@ -272,6 +274,25 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             });
         }
 
+    }
+
+    @Override
+    public void setLocale(String locale, Object context) {
+        super.setLocale(locale, context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences((Context)context);
+        prefs.edit().putString(UserSettingsController.PREFKEY_LANG, locale).apply();
+    }
+
+    @Override
+    public String getLocale(Object context) {
+        String locale = super.getLocale(context);
+        if(locale == null) {
+            locale = PreferenceManager.getDefaultSharedPreferences((Context)context).getString(
+                    UserSettingsController.PREFKEY_LANG, "");
+            super.setLocale(locale, context);
+        }
+
+        return locale;
     }
 
     @Override

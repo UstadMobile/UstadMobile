@@ -215,6 +215,8 @@ buildconfig/*.java
 app-j2me/src/com/ustadmobile/test/core/buildconfig/TestConstants.java
 core-tests/src/main/java/com/ustadmobile/test/core/buildconfig/TestConstants.java
 core/src/main/java/com/ustadmobile/core/buildconfig/CoreBuildConfig.java
+core/src/main/java/com/ustadmobile/core/generated/*
+app-android/src/main/java/com/ustadmobile/port/android/generated/*
 
 #Local buildconfig files
 buildconfig.local.properties

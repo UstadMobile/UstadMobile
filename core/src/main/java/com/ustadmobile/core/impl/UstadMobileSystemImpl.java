@@ -314,13 +314,12 @@ public abstract class UstadMobileSystemImpl {
                 context);
         }
 
-        locale = LocaleUtil.chooseSystemLocale(usersLocale,
-                getSystemLocale(context), UstadMobileConstants.SUPPORTED_LOCALES,
-                UstadMobileConstants.fallbackLocale);
+        if(locale.equals(""))
+            locale = getSystemLocale(context);
 
         InputStream localeIn = null;
         try {
-            localeIn = openResourceInputStream("locale/" +locale + ".properties",
+            localeIn = openResourceInputStream("locale/" +usersLocale + ".properties",
                 context);
             messages = MessagesHashtable.load(localeIn);
             getLogger().l(UMLog.VERBOSE, 423, locale);
@@ -343,9 +342,14 @@ public abstract class UstadMobileSystemImpl {
      *
      * @return The currently active locale
      */
-    public String getLocale() {
+    public String getLocale(Object context) {
         return locale;
     }
+
+    public void setLocale(String locale, Object context) {
+        this.locale = locale;
+    }
+
 
     public abstract boolean loadActiveUserInfo(Object context);
 
@@ -400,10 +404,12 @@ public abstract class UstadMobileSystemImpl {
      *
      * @param msgCode
      * @see MessageIDConstants
+     *
      * @return String if found in current locale, otherwise null
      */
     public String getString(int msgCode) {
-        return messages.get(msgCode);
+        String msg = messages.get(msgCode);
+        return msg != null ? msg : "";
     }
 
     /**

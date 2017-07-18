@@ -3,15 +3,22 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointView;
@@ -24,6 +31,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
@@ -198,7 +206,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     protected void onResume() {
         super.onResume();
         if(handleUIStringsOnResume) {
-            String sysLocale = UstadMobileSystemImpl.getInstance().getLocale();
+            String sysLocale = UstadMobileSystemImpl.getInstance().getLocale(this);
             if(mUILocale != null && !mUILocale.equals(sysLocale)) {
                 //the locale has changed - we need to update the ui
                 baseController.setUIStrings();
@@ -277,7 +285,19 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         super.onBackPressed();
     }
 
-
-
-
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        final Resources res = newBase.getResources();
+        final Configuration config = res.getConfiguration();
+        String languageSetting = UstadMobileSystemImpl.getInstance().getLocale(newBase);
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 652, "Base Activity: set language to  '"
+                + languageSetting + "'");
+        if(!languageSetting.equals("") && Build.VERSION.SDK_INT >= 17) {
+            Locale setLocale =new Locale(languageSetting);
+            config.setLocale(setLocale);
+            super.attachBaseContext(newBase.createConfigurationContext(config));
+        }else {
+            super.attachBaseContext(newBase);
+        }
+    }
 }

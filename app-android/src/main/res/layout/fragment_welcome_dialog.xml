@@ -15,6 +15,7 @@
         android:gravity="center"
         android:textSize="@dimen/text_title"
         android:layout_width="match_parent"
+        android:text="@string/welcome"
         android:layout_height="@dimen/dimen_50dp" />
 
     <ScrollView
@@ -32,6 +33,7 @@
             >
 
             <TextView
+                android:text="@string/welcome_dialog_subheader"
                 android:textSize="@dimen/text_body"
                 android:background="@color/background_light"
                 android:padding="@dimen/dimen_16dp"
@@ -209,6 +211,7 @@
             android:foreground="?attr/selectableItemBackground"
             android:textColor="@color/icons"
             android:textSize="@dimen/text_title_medium"
+            android:text="@string/ok_got_it"
             android:background="@color/primary"
             android:layout_width="match_parent"
             android:layout_height="@dimen/dimen_40dp"/>
@@ -228,10 +231,10 @@
                     android:layout_height="wrap_content" />
                 <TextView
                     android:id="@+id/never_show_text_label"
+                    android:text="@string/dont_show_this_next_time"
                     android:textColor="@color/text_primary"
                     android:layout_marginLeft="@dimen/dimen_10dp"
                     android:layout_marginStart="@dimen/dimen_10dp"
-                    android:text="Don't show this next time"
                     android:gravity="center_vertical"
                     android:textSize="@dimen/text_body_small"
                     android:layout_width="wrap_content"

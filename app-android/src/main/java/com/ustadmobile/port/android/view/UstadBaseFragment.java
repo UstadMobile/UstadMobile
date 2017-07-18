@@ -49,7 +49,7 @@ public class UstadBaseFragment  extends Fragment{
     @Override
     public void onResume() {
         super.onResume();
-        String sysLocale = UstadMobileSystemImpl.getInstance().getLocale();
+        String sysLocale = UstadMobileSystemImpl.getInstance().getLocale(getContext());
         if(mUILocale != null && !mUILocale.equals(sysLocale)) {
             //the locale has changed - we need to update the ui
             baseController.setUIStrings();

@@ -55,23 +55,20 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         UstadMobileSystemImpl impl= UstadMobileSystemImpl.getInstance();
 
-        ((TextView)view.findViewById(R.id.fragment_welcome_title_text)).setText(
-                Html.fromHtml(impl.getString(MessageIDConstants.welcomeTitle)));
-        ((TextView)view.findViewById(R.id.text_top_quote)).setText(
-                Html.fromHtml(impl.getString(MessageIDConstants.topQuoteMessage)));
         ((TextView)view.findViewById(R.id.download_message_view)).setText(
-                Html.fromHtml(impl.getString(MessageIDConstants.downloadTextContent)));
+            Html.fromHtml(getResources().getString(R.string.welcome_dialog_box1)));
         ((TextView)view.findViewById(R.id.learn_content_view)).setText(
-                Html.fromHtml(impl.getString(MessageIDConstants.learnTextContent)));
+                Html.fromHtml(getResources().getString(R.string.welcome_dialog_box2)));
         ((TextView)view.findViewById(R.id.inperson_lasses_content_view)).setText(
-                Html.fromHtml(impl.getString(MessageIDConstants.inpersonClassesTextContent)));
-        ((TextView)view.findViewById(R.id.never_show_text_label)).setText(impl.getString(MessageIDConstants.neverShowThisNextTime));
-        ((Button)view.findViewById(R.id.welcome_dialog_got_it_button)).setText(impl.getString(MessageIDConstants.acceptButton));
+                Html.fromHtml(getResources().getString(R.string.welcome_dialog_box3)));
+        //((TextView)view.findViewById(R.id.never_show_text_label)).setText(impl.getString(MessageIDConstants.neverShowThisNextTime));
+        //((Button)view.findViewById(R.id.welcome_dialog_got_it_button)).setText(impl.getString(MessageIDConstants.acceptButton));
 
         final Spinner languageSpinnerView= (Spinner) view.findViewById(R.id.language_choice_spinner);
         int numLangs = UstadMobileConstants.SUPPORTED_LOCALES.length + 1;
         languageList=new ArrayList<>();
-        languageList.add(impl.getString(MessageIDConstants.languageSelectionNote));
+        //languageList.add(impl.getString(MessageIDConstants.languageSelectionNote));
+        languageList.add(getResources().getString(R.string.select_language));
         for(int i = 1; i < numLangs; i++) {
             languageList.add(UstadMobileConstants.SUPPORTED_LOCALES[i-1][UstadMobileConstants.LOCALE_NAME]);
         }
@@ -145,4 +142,6 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
+
+
 }

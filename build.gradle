@@ -156,6 +156,3 @@ task pullLocalConfig() {
         tasks.copyLocalConfigFromRepoDir.execute()
     }
 }
-
-
-

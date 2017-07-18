@@ -93,6 +93,13 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
 
     @Override
     public void onClick(View view) {
+        switch(view.getId()) {
+            case R.id.language_section_holder:
+                mController.handleClickLanguage();
+                break;
+        }
+
+
         if(view==accountSection){
             //TODO: implement navigation to account settings
         }else if(view==dataUsageSection){
