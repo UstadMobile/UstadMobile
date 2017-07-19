@@ -4,6 +4,7 @@ package com.ustadmobile.port.android.view;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.controller.WelcomeController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
@@ -67,6 +68,13 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         }
         setContentView(R.layout.activity_base_point);
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
+        if(savedInstanceState != null && savedInstanceState.containsKey(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED)) {
+            if(args == null)
+                args = new Hashtable();
+
+            args.put(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED,
+                    savedInstanceState.getString(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED));
+        }
 
         //make OPDS fragments and set them here
         mBasePointController = BasePointController.makeControllerForView(this, args);
@@ -104,6 +112,12 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     protected void onResume() {
         super.onResume();
         mBasePointController.onResume();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED,
+                String.valueOf(mBasePointController.isWelcomeScreenDisplayed()));
     }
 
     @Override

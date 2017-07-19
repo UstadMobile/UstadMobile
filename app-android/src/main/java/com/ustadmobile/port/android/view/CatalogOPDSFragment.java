@@ -223,11 +223,14 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                     impl.getAppView(getActivity()).showAlertDialog(
                             impl.getString(MessageID.error, getContext()), errMsg);
                 } else {
-                    getActivity().setTitle(mCatalogController.getModel().opdsFeed.title);
+                    if(getActivity() != null) {
+                        getActivity().setTitle(mCatalogController.getModel().opdsFeed.title);
+                        getActivity().supportInvalidateOptionsMenu();
+                    }
+
                     mCatalogController.setUIStrings();
                     setSelectedEntries(new UstadJSOPDSEntry[0]);
                     mRecyclerView.setAdapter(mRecyclerAdapter);
-                    getActivity().supportInvalidateOptionsMenu();
                     mCatalogController.loadThumbnails();
                 }
             }
@@ -551,12 +554,15 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void setDeleteOptionAvailable(boolean deleteOptionAvailable) {
         this.mDeleteOptionAvailable = deleteOptionAvailable;
-        getActivity().invalidateOptionsMenu();
+        if(getActivity() != null)
+            getActivity().invalidateOptionsMenu();
     }
 
     @Override
     public void setAddOptionAvailable(final boolean addOptionAvailable) {
         this.mAddOptionAvailable = addOptionAvailable;
+        if(getActivity() == null)
+            return;
         getActivity().runOnUiThread( new Runnable() {
             public void run() {
                 rootContainer.findViewById(R.id.fragment_catalog_addbutton).setVisibility(

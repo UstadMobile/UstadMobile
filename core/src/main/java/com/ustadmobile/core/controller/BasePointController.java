@@ -69,6 +69,8 @@ public class BasePointController extends UstadBaseController implements DialogRe
     private Hashtable args;
 
     private boolean welcomeScreenDisplayed = false;
+
+    public static final String ARG_WELCOME_SCREEN_DISPLAYED = "wsd";
     
     public BasePointController(Object context) {
         super(context);
@@ -77,14 +79,29 @@ public class BasePointController extends UstadBaseController implements DialogRe
     public static BasePointController makeControllerForView(BasePointView view, Hashtable args) {
         BasePointController ctrl = new BasePointController(view.getContext());
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
         if(args == null)
-            args = makeDefaultBasePointArgs(view.getContext());
+            args = new Hashtable();
+
+        Hashtable defaultArgs = makeDefaultBasePointArgs(view.getContext());
+        Enumeration defaultArgsE = defaultArgs.keys();
+        Object defaultKey;
+        while(defaultArgsE.hasMoreElements()){
+            defaultKey = defaultArgsE.nextElement();
+            if(!args.containsKey(defaultKey))
+                args.put(defaultKey, defaultArgs.get(defaultKey));
+        }
 
         ctrl.args = args;
         ctrl.setView(view);
         view.setClassListVisible(ctrl.isUserTeacher());
         view.setMenuItems(impl.getActiveUser(view.getContext()) != null ?
             CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
+
+        if(args.contains(ARG_WELCOME_SCREEN_DISPLAYED)) {
+            ctrl.welcomeScreenDisplayed = args.get(ARG_WELCOME_SCREEN_DISPLAYED).toString().equals("true");
+        }
+
         return ctrl;
     }
     
@@ -220,4 +237,11 @@ public class BasePointController extends UstadBaseController implements DialogRe
         }
     }
 
+    public boolean isWelcomeScreenDisplayed() {
+        return welcomeScreenDisplayed;
+    }
+
+    public void setWelcomeScreenDisplayed(boolean welcomeScreenDisplayed) {
+        this.welcomeScreenDisplayed = welcomeScreenDisplayed;
+    }
 }
