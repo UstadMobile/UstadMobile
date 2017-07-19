@@ -8,6 +8,7 @@
     android:id="@+id/toolbar"
     android:layout_height="60dp">
     <TextView
+        android:text="@string/data_usage"
         android:gravity="center_vertical"
         android:layout_weight="2"
         android:id="@+id/toolbarTitle"

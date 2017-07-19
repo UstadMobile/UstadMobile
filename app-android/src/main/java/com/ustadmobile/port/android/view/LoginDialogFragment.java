@@ -14,8 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
@@ -47,24 +47,13 @@ public class LoginDialogFragment extends UstadDialogFragment implements LoginVie
         mView= inflater.inflate(R.layout.fragment_login_dialog, container, false);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        ((TextView)mView.findViewById(R.id.fragment_login_title_text)).setText(
-                impl.getString(MessageIDConstants.login));
-        ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).setHint(
-                impl.getString(MessageIDConstants.username));
-        ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).setHint(
-                impl.getString(MessageIDConstants.password));
-
         Button forgotPassword= (Button) mView.findViewById(R.id.fragment_login_forgot_password_button);
-        forgotPassword.setText(Html.fromHtml("<u>" + impl.getString(MessageIDConstants.forgot_password) +
-                "</u>"));
+        forgotPassword.setText(Html.fromHtml("<u>"
+                + impl.getString(MessageID.forgot_password, getContext()) + "</u>"));
         forgotPassword.setTransformationMethod(null);
 
         Button loginButton = (Button)mView.findViewById(R.id.fragment_login_dialog_login_button);
         loginButton.setOnClickListener(this);
-        loginButton.setText(impl.getString(MessageIDConstants.login));
-
-        Button registerButton = (Button)mView.findViewById(R.id.fragment_login_dialog_register_button);
-        registerButton.setText(impl.getString(MessageIDConstants.register));
 
         mLoginController = LoginController.makeControllerForView(this);
         mLoginController.setUIStrings();

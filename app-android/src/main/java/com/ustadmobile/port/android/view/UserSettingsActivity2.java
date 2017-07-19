@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,9 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.UserSettingsController2;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.UserSettingsView2;
 
 public class UserSettingsActivity2 extends UstadBaseActivity implements UserSettingsView2,View.OnClickListener{
@@ -27,7 +24,7 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
         setUMToolbar(R.id.setting_tool_bar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((TextView)findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.settings));
+        ((TextView)findViewById(R.id.toolbarTitle)).setText(R.string.settings);
 
         accountSection= (FrameLayout) findViewById(R.id.account_section_holder);
         dataUsageSection= (FrameLayout) findViewById(R.id.data_usage_section_holder);
@@ -43,15 +40,6 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
         ((ImageView) findViewById(R.id.logout_icon)).setColorFilter(defaultIconColor);
 
         ((TextView)findViewById(R.id.user_profile_full_name)).setText("Student/Username");
-        ((TextView)findViewById(R.id.account_section_label)).setText(
-                UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.settingsAccountLabel));
-        ((TextView)findViewById(R.id.data_usage_section_label)).setText(
-                UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.settingsDataUsageLabel));
-        ((TextView)findViewById(R.id.language_section_label)).setText(
-                UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.settingsLanguageLabel));
-        ((TextView)findViewById(R.id.logout_section_label)).setText(
-                UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.logout));
-
 
         accountSection.setOnClickListener(this);
         dataUsageSection.setOnClickListener(this);

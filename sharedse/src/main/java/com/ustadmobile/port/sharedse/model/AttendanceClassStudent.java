@@ -46,7 +46,7 @@ public class AttendanceClassStudent implements ListableEntity {
     }
 
     @Override
-    public String getStatusText() {
+    public String getStatusText(Object context) {
         return "";
     }
 

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 
 import java.util.HashMap;
@@ -21,7 +21,7 @@ public abstract class AcquisitionManager {
 
     static {
         downloadStatusToStringId.put(UstadMobileSystemImpl.DLSTATUS_RUNNING,
-                MessageIDConstants.download_in_progress);
+                MessageID.download_in_progress);
     }
 
     public static int getStringIdForDownloadStatus(int status) {

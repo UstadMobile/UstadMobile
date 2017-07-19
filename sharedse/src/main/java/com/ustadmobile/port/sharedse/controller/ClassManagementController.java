@@ -3,9 +3,9 @@
  */
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.model.AttendanceClass;
@@ -87,9 +87,9 @@ public class ClassManagementController extends UstadBaseController {
      
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        classView.setAttendanceLabel(impl.getString(MessageIDConstants.attendance));
-        classView.setReportsLabel(impl.getString(MessageIDConstants.reports));
-        classView.setExamsLabel(impl.getString(MessageIDConstants.exams));
+        classView.setAttendanceLabel(impl.getString(MessageID.attendance, getContext()));
+        classView.setReportsLabel(impl.getString(MessageID.reports, getContext()));
+        classView.setExamsLabel(impl.getString(MessageID.exams, getContext()));
         classView.setClassName(mClass.name);
     }
     

@@ -105,6 +105,11 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
+    public String getString(int messageCode, Object context) {
+        return "";
+    }
+
+    @Override
     public boolean loadActiveUserInfo(Object context) {
         return false;
     }

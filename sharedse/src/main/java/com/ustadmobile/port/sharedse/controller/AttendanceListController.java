@@ -1,9 +1,9 @@
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.LoadControllerThread;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.model.AttendanceListEntry;
@@ -107,7 +107,7 @@ public class AttendanceListController extends EntityListController implements Xa
                 ((AttendanceListEntry)entityList.get(i)).setSyncStatus(ListableEntity.STATUSICON_SENT);
                 ((AttendanceListView)getView()).updateStatus(event.getStatement().getUuid(),
                     AttendanceController.STATUS_ATTENDANCE_SENT,
-                    UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.sent));
+                    UstadMobileSystemImpl.getInstance().getString(MessageID.sent, getContext()));
             }
         }
     }

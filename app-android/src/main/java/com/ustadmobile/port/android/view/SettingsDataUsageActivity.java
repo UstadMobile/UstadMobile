@@ -11,9 +11,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.SettingsDataUsageController;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 
 public class SettingsDataUsageActivity extends UstadBaseActivity implements SettingsDataUsageView, CompoundButton.OnCheckedChangeListener, View.OnClickListener {
@@ -41,19 +39,8 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         mobileLayoutWrapper = (LinearLayout) findViewById(R.id.mobileWrapper);
         wifiLayoutWrapper = (LinearLayout) findViewById(R.id.wifiWrapper);
 
-        ((TextView) findViewById(R.id.set_super_node_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.enableSuperNode));
-
-        ((TextView) findViewById(R.id.connectionLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.connection));
-        ((TextView) findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.dataUsage));
-        ((TextView) findViewById(R.id.data_usage_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.dataUsageLabel));
-        ((TextView) findViewById(R.id.reset_counter_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.resetCounterLabel));
         ((TextView) findViewById(R.id.reset_counter_data)).setText("Last reset: (Never)");
         ((TextView) findViewById(R.id.data_usage_data)).setText("12KB");
-        ((TextView) findViewById(R.id.dataLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.usageStatistics));
-        ((TextView) findViewById(R.id.mobile_data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.cell_data_label));
-        ((TextView) findViewById(R.id.wifi_data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.wifi_data_label));
-        ((TextView) findViewById(R.id.data_label)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.data_label));
-        ((TextView) findViewById(R.id.p2pConnectionLabel)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.p2pConnectionLabel));
 
         mController.setView(this);
         superNodeSwitch.setOnCheckedChangeListener(this);

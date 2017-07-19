@@ -10,6 +10,7 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:text="@string/login"
             android:textColor="@android:color/white"
             android:background="@color/primary"
             android:id="@+id/fragment_login_title_text"
@@ -39,6 +40,7 @@
                 android:paddingRight="@dimen/dimen_12dp"
                 android:paddingTop="@dimen/dimen_12dp"
                 android:paddingBottom="@dimen/dimen_12dp"
+                android:hint="@string/username"
                 />
 
             <EditText
@@ -56,6 +58,7 @@
                 android:paddingRight="@dimen/dimen_12dp"
                 android:paddingTop="@dimen/dimen_12dp"
                 android:paddingBottom="@dimen/dimen_12dp"
+                android:hint="@string/password"
                 />
 
             <Button
@@ -85,6 +88,7 @@
 
             <Button
                 android:layout_marginBottom="@dimen/dimen_16dp"
+                android:text="@string/register"
                 android:clickable="true"
                 android:id="@+id/fragment_login_dialog_register_button"
                 android:gravity="center"

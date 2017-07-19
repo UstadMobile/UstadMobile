@@ -8,7 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.port.sharedse.controller.ClassManagementController2;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.view.ClassManagementView2;
@@ -55,7 +55,7 @@ public class ClassManagementActivity2 extends UstadBaseActivity implements Class
 
     public class ClassManagementPagerAdapter2 extends FragmentStatePagerAdapter {
 
-        private int[] tabTitles = new int[]{MessageIDConstants.students, MessageIDConstants.attendance};
+        private int[] tabTitles = new int[]{MessageID.students, MessageID.attendance};
 
         private WeakHashMap<Integer, Fragment> fragmentMap;
 
@@ -75,7 +75,8 @@ public class ClassManagementActivity2 extends UstadBaseActivity implements Class
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position]);
+            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position],
+                    ClassManagementActivity2.this);
         }
     }
 }

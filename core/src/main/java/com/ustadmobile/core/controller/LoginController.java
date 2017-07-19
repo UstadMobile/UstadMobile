@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -347,14 +347,16 @@ public class LoginController extends UstadBaseController{
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         if(!userInfoParams.containsKey(LoginController.REGISTER_PHONENUM) || userInfoParams.get(LoginController.REGISTER_PHONENUM).equals("")) {
-            impl.getAppView(getContext()).showAlertDialog(impl.getString(MessageIDConstants.error),
-                    impl.getString(MessageIDConstants.enter_phone_num));
+            impl.getAppView(getContext()).showAlertDialog(
+                    impl.getString(MessageID.error, getContext()),
+                    impl.getString(MessageID.enter_phone_num, getContext()));
             return;
         }
 
         if(!userInfoParams.containsKey(LoginController.REGISTER_NAME) || userInfoParams.get(LoginController.REGISTER_NAME).equals("")) {
-            impl.getAppView(getContext()).showAlertDialog(impl.getString(MessageIDConstants.error),
-                    impl.getString(MessageIDConstants.enter_name));
+            impl.getAppView(getContext()).showAlertDialog(
+                    impl.getString(MessageID.error, getContext()),
+                    impl.getString(MessageID.enter_name, getContext()));
             return;
         }
 
@@ -398,14 +400,16 @@ public class LoginController extends UstadBaseController{
                 }catch(Exception e) {
                     UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
                     UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
-                        UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.err_registering_new_user)
-                        + e.toString(), AppView.LENGTH_LONG);
+                        UstadMobileSystemImpl.getInstance().getString(
+                            MessageID.err_registering_new_user, LoginController.this.getContext())
+                            + e.toString(), AppView.LENGTH_LONG);
                     e.printStackTrace();
                 }
                 
             }
         };
-        impl.getAppView(ctx).showProgressDialog(impl.getString(MessageIDConstants.registering));
+        impl.getAppView(ctx).showProgressDialog(
+                impl.getString(MessageID.registering, getContext()));
         registerThread.start();
     }
     
@@ -474,12 +478,14 @@ public class LoginController extends UstadBaseController{
 
                 if(result == 401 | result == 403) {
                     impl.getAppView(context).dismissProgressDialog();
-                    impl.getAppView(context).showAlertDialog(impl.getString(MessageIDConstants.error),
-                        impl.getString(MessageIDConstants.wrong_user_pass_combo));
+                    impl.getAppView(context).showAlertDialog(
+                            impl.getString(MessageID.error, getContext()),
+                            impl.getString(MessageID.wrong_user_pass_combo, getContext()));
                 }else if(!authPassed) {
                     impl.getAppView(context).dismissProgressDialog();
                     UstadMobileSystemImpl.getInstance().getAppView(context).showAlertDialog(
-                        impl.getString(MessageIDConstants.error), impl.getString(MessageIDConstants.login_network_error));
+                            impl.getString(MessageID.error, getContext()),
+                            impl.getString(MessageID.login_network_error, getContext()));
                 }else {
                     impl.setActiveUser(username, context);
                     impl.setActiveUserAuth(password, context);
@@ -539,7 +545,8 @@ public class LoginController extends UstadBaseController{
             }
         };
         UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 302, null);
-        impl.getAppView(context).showProgressDialog(impl.getString(MessageIDConstants.authenticating));
+        impl.getAppView(context).showProgressDialog(
+                impl.getString(MessageID.authenticating, getContext()));
         loginThread.start();
     }
 

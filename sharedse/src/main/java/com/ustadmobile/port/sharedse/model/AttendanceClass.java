@@ -5,7 +5,7 @@
  */
 package com.ustadmobile.port.sharedse.model;
 
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.port.sharedse.controller.AttendanceController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.ListableEntity;
@@ -49,20 +49,20 @@ public class AttendanceClass implements ListableEntity {
     }
 
     @Override
-    public String getStatusText() {
+    public String getStatusText(Object context) {
         int messageCode = 0;
         switch(syncStatus){
             case AttendanceController.STATUS_ATTENDANCE_NOT_TAKEN:
-                messageCode = MessageIDConstants.not_taken;
+                messageCode = MessageID.not_taken;
                 break;
             case AttendanceController.STATUS_ATTENDANCE_TAKEN:
-                messageCode = MessageIDConstants.sending;
+                messageCode = MessageID.sending;
                 break;
             case AttendanceController.STATUS_ATTENDANCE_SENT:
-                messageCode = MessageIDConstants.sent;
+                messageCode = MessageID.sent;
                 break;
         }
-        return UstadMobileSystemImpl.getInstance().getString(messageCode);
+        return UstadMobileSystemImpl.getInstance().getString(messageCode, context);
     }
 
     @Override

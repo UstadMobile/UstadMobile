@@ -2,15 +2,14 @@ package com.ustadmobile.port.android.view;
 
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
-import com.ustadmobile.core.view.WelcomeView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
@@ -127,7 +126,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 String iconName;
 
                 for(int i = 0; i < menuItems.length; i++) {
-                    item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0, impl.getString(menuItems[i].getTitleStringId()));
+//                    item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0, impl.getString(menuItems[i].getTitleStringId()));
+                    item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0,
+                        impl.getString(menuItems[i].getTitleStringId(), BasePointActivity.this));
                     iconName = menuItems[i].getIconName();
                     if(iconName != null){
                         int resId = getResources().getIdentifier(iconName, "drawable", getPackageName());
@@ -199,7 +200,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 
-        private int[] tabTitles = new int[]{MessageIDConstants.my_resources, MessageIDConstants.classes};
+        private int[] tabTitles = new int[]{MessageID.my_resources, MessageID.classes};
 
         private WeakHashMap<Integer, Fragment> fragmentMap;
 
@@ -239,7 +240,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position]);
+            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position],
+                    BasePointActivity.this);
         }
 
 

@@ -1,10 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="welcome">Welcome</string>
+
+    <string name='dir'>ltr</string>
+    <string name='login'>Login</string>
+    <string name='error'>Error</string>
+    <string name='err_registering_new_user'>Error registering new user:</string>
+    <string name='registering'>Registering</string>
+    <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
+    <string name='login_network_error'>Network error: please check you are online.</string>
+    <string name='authenticating'>Authenticating</string>
+    <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
+    <string name='download_q'>Download?</string>
+    <string name='download_all_q'>Download all %s entries?</string>
+    <string name='ok'>OK</string>
+    <string name='cancel'>Cancel</string>
+    <string name='delete_q'>Delete?</string>
+    <string name='delete_x_entries_from_device'>Delete %s entries from device?</string>
+    <string name='delete'>Delete</string>
+    <string name='error_loading_catalog'>Sorry! Error loading catalog: </string>
+    <string name='loading'>Loading</string>
+    <string name='error_opening_file'>Error opening file: </string>
+    <string name='download_in_progress'>Download in progress...</string>
+    <string name='save_to'>Save to...</string>
+    <string name='all_users'>All users</string>
+    <string name='only_me'>Only me</string>
+    <string name='mycourses'>My courses</string>
+    <string name='onthisdevice'>On this device</string>
+    <string name='logout'>Logout</string>
+    <string name='about'>About</string>
+    <string name='download_for'>Download for...</string>
+    <string name='refresh'>Refresh</string>
+    <string name='download_all'>Download all</string>
+    <string name='nothing_selected'>Nothing selected!</string>
+    <string name='next'>Next</string>
+    <string name='back'>Back</string>
+    <string name='username'>Username</string>
+    <string name='password'>Password</string>
+    <string name='phone_memory'>Phone memory</string>
+    <string name='memory_card'>Memory card</string>
+    <string name='device'>Device</string>
+    <string name='register'>Register</string>
+    <string name='phone_number'>Phone number</string>
+    <string name='name'>Name</string>
+    <string name='male'>Male</string>
+    <string name='female'>Female</string>
+    <string name='could_not_open_file'>Sorry! Could not open file.</string>
+    <string name='settings'>Settings</string>
+    <string name='lang_sys'>System Language</string>
+    <string name='lang_en'>English</string>
+    <string name='lang_ar'>Arabic</string>
+    <string name='my_resources'>My Resources</string>
+    <string name='browse_feeds'>Browse Libraries</string>
+    <string name='choose_format'>Choose Format:</string>
+    <string name='language'>Language</string>
+    <string name='advanced'>Advanced</string>
+    <string name='server'>Server</string>
+    <string name='optional'>Optional</string>
+    <string name='email'>Email</string>
+    <string name='regcode'>Signup Code</string>
+    <string name='home'>Home</string>
+    <string name='my_libraries'>My Libraries</string>
+    <string name='add_library'>Add Library</string>
+    <string name='select_library'>Select Library</string>
+    <string name='add'>Add</string>
+    <string name='library_title'>Library Name e.g. A Library</string>
+    <string name='library_url'>Library OPDS URL e.g. http://..</string>
+    <string name='enter_phone_num'>Please enter phone number</string>
+    <string name='enter_name'>Please enter name</string>
+    <string name='attendance'>Attendance</string>
+    <string name='processing'>Processing</string>
+    <string name='classes'>Classes</string>
+    <string name='exams'>Exams</string>
+    <string name='reports'>Reports</string>
+    <string name='students'>Students</string>
+    <string name='language_preference'>Language Preference</string>
+    <string name='forgot_password'>Logout</string>
+    <string name='connections'>Connection</string>
+    <string name='notifications'>Notifications</string>
+    <string name='reset_counter_label'>Reset data counter</string>
+    <string name='usage_statistics'>Usage statistics</string>
+    <string name='wifi_data_label'>When using mobile data</string>
+    <string name='cell_data_label'>When using WiFi only</string>
+    <string name='data_label'>Send answers, scores and usage information.</string>
+    <string name='p2p_connection_label'>P2P Connections</string>
+    <string name='node_title_list'>Node List</string>
+    <string name='file_available_locally'>Available locally</string>
+    <string name='file_unavailable_locally'>Unavailable locally</string>
+    <string name='connection'>General Connection</string>
+    <string name='data_usage_label'>Total mobile data usage</string>
+    <string name='account'>Account</string>
+    <string name='data_usage'>Data usage</string>
+    <string name='app_interface_language'>App interface language</string>
+    <string name='enable_supernode'>Enable supernode</string>
+    <string name="share_application">Share Application</string>
+    <string name="share_via">Share via...</string>
+    <string name="sent">Sent</string>
+    <string name="sending">Sending</string>
+    <string name="not_taken">Not Taken</string>
+
+
+    <string name="welcome">Welcome!</string>
     <string name="welcome_dialog_subheader">Trying to get a job?\nGet the skills for success here!</string>
-    <string name="welcome_dialog_box1"><![CDATA[<b><font color="#2196f3">Download:</font></b> The modules in this app are <b>FREE!</b> Download them to access their contents. You can use them offline anytime, anywhere!]]></string>
+    <string name="welcome_dialog_box1"><![CDATA[<b><font color="#2196f3">Download:</font></b> The modules in this app are <b>FREE!</b> Download them to access their contents. You can complete them offline anytime, anywhere!]]></string>
     <string name="welcome_dialog_box2"><![CDATA[<b><font color="#2196f3">Learn:</font></b> Interactive videos will teach you CV writing, interview skills, communication skills, and more!]]></string>
-    <string name="welcome_dialog_box3"><![CDATA[<b><font color="#2196f3">In-Person Classes:</font></b> If you are a government university student or recent graduate you can attend in-person classes at USWDP centers FREE after passing the modules in this app.]]></string>
+    <string name="welcome_dialog_box3"><![CDATA[<b><font color="#2196f3">In-Person Classes:</font></b> If you are a government university student or recent graduate, you can attend in-person classes at USWDP centers FREE after passing the modules in this app.]]></string>
     <string name="select_language">Select language</string>
     <string name="ok_got_it">OK, got it!</string>
     <string name="dont_show_this_next_time">Don\'t show this next time</string>

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -79,8 +79,9 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
                     displayLanguages[i] = acquisitionLanguageChoices[i];
             }
 
-            impl.getAppView(context).showChoiceDialog(impl.getString(MessageIDConstants.language),
-                displayLanguages, CMD_CHOOSE_LANG, this);
+            impl.getAppView(context).showChoiceDialog(
+                    impl.getString(MessageID.language, getContext()),
+                    displayLanguages, CMD_CHOOSE_LANG, this);
         }else if(availableLanguages.size() == 1){
             appViewChoiceSelected(CMD_CHOOSE_LANG, 0);
         }
@@ -89,8 +90,9 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
     public void handleClickRemove(UstadJSOPDSEntry[] entries) {
         this.removeEntriesSelected = entries;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.getAppView(context).showChoiceDialog(impl.getString(MessageIDConstants.delete_q),
-                new String[]{impl.getString(MessageIDConstants.ok), impl.getString(MessageIDConstants.cancel)},
+        impl.getAppView(context).showChoiceDialog(impl.getString(MessageID.delete_q, getContext()),
+                new String[]{impl.getString(MessageID.ok, getContext()),
+                        impl.getString(MessageID.cancel, getContext())},
                         CMD_REMOVE_ENTRIES, this);
 
     }

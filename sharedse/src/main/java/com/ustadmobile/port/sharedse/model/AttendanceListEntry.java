@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.model;
 
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.port.sharedse.controller.AttendanceController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.ListableEntity;
@@ -101,10 +101,10 @@ public class AttendanceListEntry implements ListableEntity {
     }
 
     @Override
-    public String getStatusText() {
+    public String getStatusText(Object context) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         return syncStatus == ListableEntity.STATUSICON_SENT ?
-                impl.getString(MessageIDConstants.sent) : impl.getString(MessageIDConstants.sending);
+                impl.getString(MessageID.sent, context) : impl.getString(MessageID.sending, context);
     }
 
     @Override

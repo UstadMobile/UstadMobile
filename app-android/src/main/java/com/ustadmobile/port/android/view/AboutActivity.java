@@ -8,11 +8,9 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.AboutController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
 
 import java.util.Hashtable;
@@ -26,7 +24,7 @@ public class AboutActivity extends UstadBaseActivity implements AboutView, Contr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
         setUMToolbar(R.id.um_toolbar);
-        setTitle(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.about));
+        setTitle(R.string.about);
 
         AboutController.makeControllerForView(new Hashtable(),
                 this, this);

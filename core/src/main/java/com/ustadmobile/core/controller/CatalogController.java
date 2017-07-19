@@ -30,8 +30,8 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AcquisitionStatusEvent;
 import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.HTTPResult;
@@ -444,8 +444,9 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         CatalogView cView = (CatalogView)view;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         cView.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
-        cView.setFooterButtonLabel(FOOTER_BUTTON_DOWNLOADALL.equals(footerButtonUrl) ?
-                impl.getString(MessageIDConstants.download_all) : impl.getString(MessageIDConstants.browse_feeds));
+        cView.setFooterButtonLabel(FOOTER_BUTTON_DOWNLOADALL.equals(footerButtonUrl)
+                ? impl.getString(MessageID.download_all, getContext())
+                : impl.getString(MessageID.browse_feeds, getContext()));
 
         if(model != null && model.opdsFeed != null && model.opdsFeed.isAcquisitionFeed()) {
             cView.setDeleteOptionAvailable(true);
@@ -688,7 +689,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String feedID =  getUserFeedListIdPrefix(context);
         UstadJSOPDSFeed usersFeeds = new UstadJSOPDSFeed(OPDS_PROTO_USER_FEEDLIST,
-                impl.getString(MessageIDConstants.my_libraries),feedID);
+                impl.getString(MessageID.my_libraries, context),feedID);
         JSONArray arr = CatalogController.getUserFeedListArray(context);
         try {
             JSONObject currentFeed;
@@ -807,10 +808,13 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public void handleClickDeleteEntries(UstadJSOPDSEntry[] entries) {
         selectedEntries = entries;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        this.view.showConfirmDialog(impl.getString(MessageIDConstants.delete_q),
-            LocaleUtil.formatMessage(impl.getString(MessageIDConstants.delete_x_entries_from_device),
-                String.valueOf(entries.length)), impl.getString(MessageIDConstants.delete),
-                impl.getString(MessageIDConstants.cancel), CMD_DELETEENTRY);
+        this.view.showConfirmDialog(
+            impl.getString(MessageID.delete_q, getContext()),
+            LocaleUtil.formatMessage(
+                    impl.getString(MessageID.delete_x_entries_from_device, getContext()),
+                    String.valueOf(entries.length)),
+                    impl.getString(MessageID.delete, getContext()),
+                    impl.getString(MessageID.cancel, getContext()), CMD_DELETEENTRY);
     }
     
     public void handleConfirmDeleteEntries() {

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,7 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -34,7 +32,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 
 public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener {
@@ -247,12 +244,14 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
                 statusIconView.setImageDrawable(ContextCompat.getDrawable(this,
                         R.drawable.ic_done_black_16dp));
                 statusIconView.setVisibility(View.VISIBLE);
-                statusTextView.setText(impl.getString(MessageIDConstants.fileAvailableLocally));
+//                statusTextView.setText(impl.getString(MessageIDConstants.fileAvailableLocally));
+                statusTextView.setText(R.string.file_available_locally);
                 break;
             case CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE:
                 statusIconView.setImageDrawable(ContextCompat.getDrawable(this,
                         R.drawable.ic_cloud_download_black_24dp));
-                statusTextView.setText(impl.getString(MessageIDConstants.fileUnAvailableLocally));
+//                statusTextView.setText(impl.getString(MessageIDConstants.fileUnAvailableLocally));
+                statusTextView.setText(R.string.file_unavailable_locally);
                 statusIconView.setVisibility(View.VISIBLE);
                 break;
         }

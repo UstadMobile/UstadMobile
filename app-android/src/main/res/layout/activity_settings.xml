@@ -111,7 +111,7 @@
 
                    <TextView
                        android:id="@+id/account_section_label"
-                       android:text="Account"
+                       android:text="@string/account"
                        android:layout_centerVertical="true"
                        android:layout_toRightOf="@+id/profile_icon_holder"
                        android:layout_toEndOf="@+id/profile_icon_holder"
@@ -160,7 +160,7 @@
 
                    <TextView
                        android:id="@+id/data_usage_section_label"
-                       android:text="Data Usage"
+                       android:text="@string/data_usage"
                        android:layout_centerVertical="true"
                        android:layout_toRightOf="@+id/data_usage_icon_holder"
                        android:layout_toEndOf="@+id/data_usage_icon_holder"
@@ -209,7 +209,7 @@
 
                    <TextView
                        android:id="@+id/language_section_label"
-                       android:text="App interface language"
+                       android:text="@string/app_interface_language"
                        android:layout_centerVertical="true"
                        android:layout_toRightOf="@+id/language_icon_holder"
                        android:layout_toEndOf="@+id/language_icon_holder"
@@ -258,7 +258,7 @@
 
                    <TextView
                        android:id="@+id/logout_section_label"
-                       android:text="Logout"
+                       android:text="@string/logout"
                        android:layout_centerVertical="true"
                        android:layout_toRightOf="@+id/logout_icon_holder"
                        android:layout_toEndOf="@+id/logout_icon_holder"

@@ -31,14 +31,13 @@
 
 package com.ustadmobile.core.impl;
 
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.HTTPCacheDir;
-import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -251,7 +250,7 @@ public abstract class UstadMobileSystemImpl {
         try {
             checkCacheDir(context);
             loadActiveUserInfo(context);
-            loadLocale(context);
+//            loadLocale(context);
             if(getActiveUser(context) != null) {
                 getHTTPCacheDir(context).setPrivateCacheDir(
                     getCacheDir(CatalogController.USER_RESOURCE, context));
@@ -305,37 +304,37 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract void go(String viewName, Hashtable args, Object context);
 
-    public boolean loadLocale(Object context) {
-        //choose the locale
-        boolean success = false;
-        String usersLocale = null;
-        if(getActiveUser(context) != null) {
-            usersLocale = getUserPref(UserSettingsController.PREFKEY_LANG, "",
-                context);
-        }
-
-        if(locale.equals(""))
-            locale = getSystemLocale(context);
-
-        InputStream localeIn = null;
-        try {
-            localeIn = openResourceInputStream("locale/" +usersLocale + ".properties",
-                context);
-            messages = MessagesHashtable.load(localeIn);
-            getLogger().l(UMLog.VERBOSE, 423, locale);
-            String localeDir = messages.get(MessageIDConstants.dir);
-            direction = localeDir != null && localeDir.equals("rtl") ?
-                UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
-            success = true;
-        }catch(IOException e) {
-            getLogger().l(UMLog.CRITICAL, 9, null, e);
-        }finally {
-            UMIOUtils.closeInputStream(localeIn);
-            localeIn = null;
-        }
-
-        return success;
-    }
+//    public boolean loadLocale(Object context) {
+//        //choose the locale
+//        boolean success = false;
+//        String usersLocale = null;
+//        if(getActiveUser(context) != null) {
+//            usersLocale = getUserPref(UserSettingsController.PREFKEY_LANG, "",
+//                context);
+//        }
+//
+//        if(locale.equals(""))
+//            locale = getSystemLocale(context);
+//
+//        InputStream localeIn = null;
+//        try {
+//            localeIn = openResourceInputStream("locale/" + locale + ".properties",
+//                context);
+//            messages = MessagesHashtable.load(localeIn);
+//            getLogger().l(UMLog.VERBOSE, 423, locale);
+//            String localeDir = messages.get(MessageID.dir);
+//            direction = localeDir != null && localeDir.equals("rtl") ?
+//                UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
+//            success = true;
+//        }catch(IOException e) {
+//            getLogger().l(UMLog.CRITICAL, 9, null, e);
+//        }finally {
+//            UMIOUtils.closeInputStream(localeIn);
+//            localeIn = null;
+//        }
+//
+//        return success;
+//    }
 
     /**
      * Provides the currently active locale
@@ -397,20 +396,11 @@ public abstract class UstadMobileSystemImpl {
         }
     }
 
-
-
     /**
      * Get a string for use in the UI
-     *
-     * @param msgCode
-     * @see MessageIDConstants
-     *
-     * @return String if found in current locale, otherwise null
      */
-    public String getString(int msgCode) {
-        String msg = messages.get(msgCode);
-        return msg != null ? msg : "";
-    }
+    public abstract String getString(int messageCode, Object context);
+
 
     /**
      * Gets the direction of the UI

@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
@@ -67,8 +67,8 @@ public abstract class UstadBaseController implements UstadController {
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
         CMD_ABOUT, CMD_SETTINGS, CMD_SHARE_APP,CMD_LOGOUT};
     
-    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageIDConstants.home,
-        MessageIDConstants.about, MessageIDConstants.settings,MessageIDConstants.shareAppSetup ,MessageIDConstants.logout};
+    public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageID.home,
+        MessageID.about, MessageID.settings,MessageID.share_application,MessageID.logout};
 
 
     /**
@@ -211,7 +211,7 @@ public abstract class UstadBaseController implements UstadController {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         for(int i = offset; i < STANDARD_APPEMNU_CMDS.length + offset; i++) {
             cmds[i] = STANDARD_APPEMNU_CMDS[i - offset];
-            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i - offset]);
+            labels[i] = impl.getString(STANDARD_APPMENU_STRIDS[i - offset], getContext());
         }
     }
     
@@ -229,7 +229,7 @@ public abstract class UstadBaseController implements UstadController {
     public static void handleClickShareAppSetupFile(Object context){
         UstadMobileSystemImpl impl=UstadMobileSystemImpl.getInstance();
         impl.getNetworkManager().shareAppSetupFile(impl.getAppSetupFile(context),
-                impl.getString(MessageIDConstants.shareAppDialogTitle));
+                impl.getString(MessageID.share_via, context));
     }
 
 

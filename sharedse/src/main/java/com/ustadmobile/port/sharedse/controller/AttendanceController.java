@@ -30,9 +30,9 @@
  */
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -92,7 +92,7 @@ public class AttendanceController extends UstadBaseController {
 
 
     public static final int[] ATTENDANCE_MESSAGES = new int[] {
-            MessageIDConstants.not_taken, MessageIDConstants.sending, MessageIDConstants.sent
+            MessageID.not_taken, MessageID.sending, MessageID.sent
     };
 
     //areas in which optical marks are to be found on the paper

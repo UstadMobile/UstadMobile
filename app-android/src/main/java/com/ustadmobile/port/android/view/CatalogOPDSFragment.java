@@ -59,10 +59,10 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -218,10 +218,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
                 if (controller == null) {
-                    String errMsg = LocaleUtil.formatMessage(
-                            impl.getString(MessageIDConstants.course_catalog_load_error), "Catalog controller");
-                    impl.getAppView(getActivity()).showAlertDialog(impl.getString(MessageIDConstants.error),
-                            errMsg);
+                    String errMsg = LocaleUtil.formatMessage(impl.getString(MessageID.course_catalog_load_error, getContext()),
+                            "Catalog controller");
+                    impl.getAppView(getActivity()).showAlertDialog(
+                            impl.getString(MessageID.error, getContext()), errMsg);
                 } else {
                     getActivity().setTitle(mCatalogController.getModel().opdsFeed.title);
                     mCatalogController.setUIStrings();
@@ -740,16 +740,19 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             LayoutInflater inflater = getActivity().getLayoutInflater();
-            builder.setTitle(impl.getString(MessageIDConstants.add_library));
+            //builder.setTitle(impl.getString(MessageIDConstants.add_library));
+            builder.setTitle(R.string.add_library);
             View dialogView =inflater.inflate(R.layout.dialog_basepoint_addfeed, null);
             builder.setView(dialogView);
             Fragment frag = getActivity().getSupportFragmentManager().findFragmentByTag(CatalogActivity.FRAGMENT_CATALOG_TAG);
             if(frag != null && frag instanceof CatalogOPDSFragment) {
                 CatalogOPDSFragment catFrag = (CatalogOPDSFragment)frag;
-                builder.setNegativeButton(impl.getString(MessageIDConstants.cancel), catFrag);
-                builder.setPositiveButton(impl.getString(MessageIDConstants.add), catFrag);
-                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_title)).setHint(impl.getString(MessageIDConstants.library_title));
-                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_url)).setHint(impl.getString(MessageIDConstants.library_url));
+                builder.setNegativeButton(R.string.cancel, catFrag);
+                builder.setPositiveButton(R.string.add, catFrag);
+                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_title)).setHint(
+                        R.string.library_title);
+                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_url)).setHint(
+                        R.string.library_url);
                 //TODO: Fix me
                 String[] presetTitles = catFrag.mCatalogController.getFeedList(
                         CatalogController.OPDS_FEEDS_INDEX_TITLE);

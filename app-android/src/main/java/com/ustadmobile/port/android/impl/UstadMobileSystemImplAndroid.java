@@ -66,6 +66,7 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.WelcomeView;
+import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
@@ -293,6 +294,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
         return locale;
+    }
+
+    @Override
+    public String getString(int messageCode, Object context) {
+        Integer androidId = MessageIDMap.ID_MAP.get(messageCode);
+        if(androidId != null) {
+            return ((Context)context).getResources().getString(androidId);
+        }else {
+            return null;
+        }
     }
 
     @Override

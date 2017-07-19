@@ -7,7 +7,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.UserSettingItem;
@@ -30,7 +29,7 @@ public class SettingsHome extends UstadBaseActivity implements View.OnClickListe
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((TextView)findViewById(R.id.toolbarTitle)).setText(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.settings));
+        ((TextView)findViewById(R.id.toolbarTitle)).setText(R.string.settings);
 
         data_usage_settings.setOnClickListener(this);
 

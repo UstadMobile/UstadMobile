@@ -13,7 +13,6 @@
     <string name="title_activity_catalog">Catalog</string>
 
     <string name="download">Download</string>
-    <string name="delete">Delete</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -23,17 +22,9 @@
 
     <string name="yourphonenumber">Your phone number</string>
     <string name="yourname">Your name</string>
-    <string name="male">Male</string>
-    <string name="female">Female</string>
-    <string name="register">Register</string>
     <string name="title_activity_user_settings">UserSettingsActivity</string>
     <string name="title_activity_class_management">ClassManagementActivity</string>
     <string name="title_activity_enroll_student">EnrollStudentActivity</string>
-    <string name="account">Account</string>
-    <string name="data_usage">Data usage</string>
-    <string name="language">Language preference</string>
-    <string name="logout">Logout</string>
-    <string name="supernodeOption">Set super node enabled</string>
     <string name="title_activity_remote_test_slave_server">RemoteTestSlaveServer</string>
     <string name="title_activity_settings">SettingsActivity</string>
 </resources>

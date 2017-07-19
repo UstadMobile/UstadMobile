@@ -5,8 +5,8 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMLog;
@@ -212,13 +212,15 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         String systemBaseDir = getSystemBaseDir(context);
 
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
-            dirList.add(new UMStorageDir(systemBaseDir, getString(MessageIDConstants.device), false, true, false));
+            dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
+                    false, true, false));
 
             //Find external directories
             String[] externalDirs = findRemovableStorage();
             for(String extDir : externalDirs) {
                 dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
-                        UstadMobileSystemImpl.CONTENT_DIR_NAME}), getString(MessageIDConstants.memory_card),
+                        UstadMobileSystemImpl.CONTENT_DIR_NAME}),
+                        getString(MessageID.memory_card, context),
                         true, true, false, false));
             }
         }
@@ -226,7 +228,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
             String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
-            dirList.add(new UMStorageDir(userBase, getString(MessageIDConstants.device), false, true, true));
+            dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),
+                    false, true, true));
         }
 
 

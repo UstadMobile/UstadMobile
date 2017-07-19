@@ -102,7 +102,7 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
                 if(activityId.equals(UstadMobileConstants.PREFIX_ATTENDANCE_URL + attendanceClasses[i].id)) {
                     attendanceClasses[i].syncStatus = statusId;
                     classListView.setClassStatus(attendanceClasses[i].id, statusId,
-                            attendanceClasses[i].getStatusText());
+                            attendanceClasses[i].getStatusText(getContext()));
                 }
             }
         }

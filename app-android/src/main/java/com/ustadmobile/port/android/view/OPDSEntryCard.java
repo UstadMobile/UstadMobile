@@ -44,7 +44,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -99,8 +98,8 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
 
     public void setLocalAvailableFile(boolean isAvailable){
         ((TextView)findViewById(R.id.opds_item_detail_text)).setText(
-                isAvailable? UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.fileAvailableLocally)
-                        : UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.fileUnAvailableLocally));
+                isAvailable? R.string.file_available_locally : R.string.file_unavailable_locally);
+
     }
 
 

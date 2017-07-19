@@ -5,6 +5,7 @@ package com.ustadmobile.port.sharedse.controller;
 
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -16,7 +17,6 @@ import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
-import com.ustadmobile.core.MessageIDConstants;
 
 /**
  *
@@ -93,19 +93,19 @@ public class EnrollStudentController extends UstadBaseController {
 
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        enrollStudentView.setTitle(impl.getString(MessageIDConstants.login));
-        enrollStudentView.setButtonText(impl.getString(MessageIDConstants.login));
-        enrollStudentView.setUsernameHint(impl.getString(MessageIDConstants.username));
-        enrollStudentView.setPasswordHint(impl.getString(MessageIDConstants.password));
-        enrollStudentView.setRegisterButtonText(impl.getString(MessageIDConstants.register));
-        enrollStudentView.setRegisterNameHint(impl.getString(MessageIDConstants.name));
-        enrollStudentView.setRegisterPhoneNumberHint(impl.getString(MessageIDConstants.phone_number));
-        enrollStudentView.setRegisterGenderMaleLabel(impl.getString(MessageIDConstants.male));
-        enrollStudentView.setRegisterGenderFemaleLabel(impl.getString(MessageIDConstants.female));
-        String optSffx = " (" + impl.getString(MessageIDConstants.optional) + ")";
-        enrollStudentView.setRegisterUsernameHint(impl.getString(MessageIDConstants.username) + optSffx);
-        enrollStudentView.setRegisterPasswordHint(impl.getString(MessageIDConstants.password) + optSffx);
-        enrollStudentView.setRegisterEmailHint(impl.getString(MessageIDConstants.email) + optSffx);
+        enrollStudentView.setTitle(impl.getString(MessageID.login, getContext()));
+        enrollStudentView.setButtonText(impl.getString(MessageID.login, getContext()));
+        enrollStudentView.setUsernameHint(impl.getString(MessageID.username, getContext()));
+        enrollStudentView.setPasswordHint(impl.getString(MessageID.password, getContext()));
+        enrollStudentView.setRegisterButtonText(impl.getString(MessageID.register, getContext()));
+        enrollStudentView.setRegisterNameHint(impl.getString(MessageID.name, getContext()));
+        enrollStudentView.setRegisterPhoneNumberHint(impl.getString(MessageID.phone_number, getContext()));
+        enrollStudentView.setRegisterGenderMaleLabel(impl.getString(MessageID.male, getContext()));
+        enrollStudentView.setRegisterGenderFemaleLabel(impl.getString(MessageID.female, getContext()));
+        String optSffx = " (" + impl.getString(MessageID.optional, getContext()) + ")";
+        enrollStudentView.setRegisterUsernameHint(impl.getString(MessageID.username, getContext()) + optSffx);
+        enrollStudentView.setRegisterPasswordHint(impl.getString(MessageID.password, getContext()) + optSffx);
+        enrollStudentView.setRegisterEmailHint(impl.getString(MessageID.email, getContext()) + optSffx);
         enrollStudentView.setDirection(UstadMobileSystemImpl.getInstance().getDirection());
   
     }
@@ -196,7 +196,7 @@ public class EnrollStudentController extends UstadBaseController {
                       
             }
         };
-        impl.getAppView(context).showProgressDialog(impl.getString(MessageIDConstants.processing));
+        impl.getAppView(context).showProgressDialog(impl.getString(MessageID.processing, getContext()));
         String serverSays;
         //return serverSays;
         enrollThread.start();

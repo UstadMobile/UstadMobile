@@ -47,8 +47,8 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.MessageIDConstants;
 import com.ustadmobile.core.controller.LoginController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.LoginView;
@@ -79,7 +79,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         mLoginController = LoginController.makeControllerForView(this);
         setBaseController(mLoginController);
 
-        setTitle(UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.login));
+        setTitle(R.string.login);
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.login_toolbar);
         setSupportActionBar(toolbar);
@@ -182,7 +182,7 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
 
         private WeakHashMap<Integer, LoginFragment> fragmentMap;
 
-        private int[] tabTitles = new int[] {MessageIDConstants.login, MessageIDConstants.register};
+        private int[] tabTitles = new int[] {MessageID.login, MessageID.register};
 
         public LoginPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -209,7 +209,8 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
         @Override
         public CharSequence getPageTitle(int position) {
             // Generate title based on item position
-            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position]);
+            return UstadMobileSystemImpl.getInstance().getString(
+                    tabTitles[position], LoginActivity.this);
         }
     }
 

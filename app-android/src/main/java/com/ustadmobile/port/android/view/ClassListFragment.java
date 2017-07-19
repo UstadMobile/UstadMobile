@@ -109,7 +109,7 @@ public class ClassListFragment extends UstadBaseFragment implements ClassListVie
             getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     AttendanceClass cls = (AttendanceClass)card.getEntity();
-                    card.setStatusText(cls.getStatusText());
+                    card.setStatusText(cls.getStatusText(getContext()));
                     card.setStatusIcon(cls.getStatusIconCode());
                 }
             });

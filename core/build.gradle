@@ -101,8 +101,8 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
         String basePointMenuArrayStr = "new com.ustadmobile.core.view.BasePointMenuItem[]{"
         for(int j = 0; j< titleIdsList.size(); j++) {
             String titleIdVal = titleIdsList.get(j)
-            if(titleIdsList[i].startsWith("MessageIDConstants")) {
-                titleIdVal = "com.ustadmobile.core." + titleIdVal
+            if(titleIdsList[i].startsWith("MessageID")) {
+                titleIdVal = "com.ustadmobile.core.generated.locale." + titleIdVal
             }
             basePointMenuArrayStr += "new com.ustadmobile.core.view.BasePointMenuItem("+ titleIdVal + ", \"" + destinationsList.get(j) + "\", " + (iconList.get(j) != null ? "\""+iconList.get(j) + "\"": "null") +")"
             if(j < titleIdsList.size()-1){
