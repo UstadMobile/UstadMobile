@@ -2,14 +2,9 @@ package com.ustadmobile.port.android.view;
 
 
 import android.app.Dialog;
-import android.content.Context;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,23 +13,22 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.FrameLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.WelcomeController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.view.WelcomeView;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -46,8 +40,6 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
     private CheckBox mDontShowAgainCheckbox;
 
     protected View mView;
-
-    boolean disableRecreate = false;
 
     public WelcomeDialogFragment() {
         // Required empty public constructor
@@ -76,17 +68,27 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
         Log.i(UMLogAndroid.LOGTAG, "translated title = " + translatedTitle);
 
         final Spinner languageSpinnerView= (Spinner) mView.findViewById(R.id.language_choice_spinner);
-        int numLangs = UstadMobileConstants.SUPPORTED_LOCALES.length + 1;
+        int numLangs = CoreBuildConfig.SUPPORTED_LOCALES.length;
         languageList=new ArrayList<>();
-        languageList.add(getResources().getString(R.string.select_language));
-        for(int i = 1; i < numLangs; i++) {
-            languageList.add(UstadMobileConstants.SUPPORTED_LOCALES[i-1][UstadMobileConstants.LOCALE_NAME]);
+        languageList.add(impl.getString(MessageID.device_language, getContext()));
+        String userLocale = impl.getLocale(getContext());
+        String localeName;
+        int selectedLocale = 0;
+        for(int i = 0; i < numLangs; i++) {
+            localeName = (String)UstadMobileConstants.LANGUAGE_NAMES.get(
+                    CoreBuildConfig.SUPPORTED_LOCALES[i]);
+            if(userLocale.equals(CoreBuildConfig.SUPPORTED_LOCALES[i]))
+                selectedLocale = i + 1;
+
+            languageList.add(localeName);
         }
 
         final ArrayAdapter<String> languageAdapter= new ArrayAdapter<>(getActivity(),
                 android.R.layout.simple_spinner_item, languageList);
         languageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         languageSpinnerView.setAdapter(languageAdapter);
+        languageSpinnerView.setSelection(selectedLocale, false);
+        Log.i(UMLogAndroid.LOGTAG, "Selected lang: " + selectedLocale);
         languageSpinnerView.setOnItemSelectedListener(this);
 
 
@@ -98,14 +100,18 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
         });
         mDontShowAgainCheckbox = (CheckBox)mView.findViewById(
                 R.id.fragment_welcome_dont_show_next_time_checkbox);
+
+        String dontShowVal =UstadMobileSystemImpl.getInstance().getAppPref(
+                WelcomeController.PREF_KEY_WELCOME_DONT_SHOW_TRANSIENT, getContext());
+
+        if(dontShowVal != null && !dontShowVal.equals("false"))
+            mDontShowAgainCheckbox.setChecked(true);
+
         mDontShowAgainCheckbox.setOnCheckedChangeListener(this);
 
         mView.findViewById(R.id.welcome_dialog_got_it_button).setOnClickListener(this);
 
         mController = new WelcomeController(getContext(), this);
-        if(savedInstanceState != null)
-            disableRecreate = true;
-
         return mView;
     }
 
@@ -124,42 +130,25 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if(position==0){
-            return;
+        if(Build.VERSION.SDK_INT >= 17) {
+            String chosenLocale = position == 0 ? UstadMobileSystemImpl.LOCALE_USE_SYSTEM
+                    : CoreBuildConfig.SUPPORTED_LOCALES[position - 1];
+            if (!chosenLocale.equals(UstadMobileSystemImpl.getInstance().getLocale(getContext()))) {
+                UstadMobileSystemImpl.getInstance().setLocale(chosenLocale, getContext());
+                UstadBaseActivity activity = (UstadBaseActivity) getActivity();
+                activity.recreate();
+            }
         }
-
-
-        if(Build.VERSION.SDK_INT >= 17 && !disableRecreate) {
-
-//            String chosenLocale = UstadMobileConstants.SUPPORTED_LOCALES[position][UstadMobileConstants.LOCALE_CODE];
-//            Configuration conf = getContext().getResources().getConfiguration();
-//            conf.setLocale(new Locale(chosenLocale));
-//            Context localizedContext = getContext().createConfigurationContext(conf);
-//            Resources localizedResources = localizedContext.getResources();
-//            int[][] resIds = new int[][] {
-//                    {R.id.fragment_welcome_title_text, R.string.welcome}
-//            };
-//
-//            for(int i = 0; i < resIds.length; i++) {
-//                TextView tv = (TextView)mView.findViewById(resIds[i][0]);
-//                tv.setText(localizedResources.getText(resIds[i][1]));
-//            }
-            String chosenLocale = UstadMobileConstants.SUPPORTED_LOCALES[position-1][UstadMobileConstants.LOCALE_CODE];
-            UstadMobileSystemImpl.getInstance().setLocale(chosenLocale, getContext());
-            UstadBaseActivity activity = (UstadBaseActivity)getActivity();
-            activity.recreate();
-        }else {
-            disableRecreate = false;
-        }
-
-
-        //TODO: implement the language selection logic to the app (position 0 is for "Select language" placeholder
     }
 
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.welcome_dialog_got_it_button:
+                UstadMobileSystemImpl.getInstance().setAppPref(
+                        WelcomeController.PREF_KEY_WELCOME_DONT_SHOW_TRANSIENT,
+                        null, getContext());
+                mController.setHideWelcomeNextTime(mDontShowAgainCheckbox.isChecked());
                 dismiss();
                 break;
         }
@@ -167,8 +156,9 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(mController != null)
-            mController.handleClickHideWelcomeNextTime(isChecked);
+        UstadMobileSystemImpl.getInstance().setAppPref(
+                WelcomeController.PREF_KEY_WELCOME_DONT_SHOW_TRANSIENT,
+                String.valueOf(isChecked), getContext());
     }
 
     @Override
@@ -180,6 +170,4 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
     public void onNothingSelected(AdapterView<?> parent) {
 
     }
-
-
 }

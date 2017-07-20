@@ -66,6 +66,8 @@
     <string name='library_title'>Library Name e.g. A Library</string>
     <string name='library_url'>Library OPDS URL e.g. http://..</string>
     <string name='enter_phone_num'>Please enter phone number</string>
+    <string name="phone">Phone</string>
+    <string name="tablet">Tablet</string>
     <string name='enter_name'>Please enter name</string>
     <string name='attendance'>Attendance</string>
     <string name='processing'>Processing</string>
@@ -103,8 +105,10 @@
     <string name="welcome_dialog_subheader">Trying to get a job?\nGet the skills for success here!</string>
     <string name="welcome_dialog_box1"><![CDATA[<b><font color="#2196f3">Download:</font></b> The modules in this app are <b>FREE!</b> Download them to access their contents. You can complete them offline anytime, anywhere!]]></string>
     <string name="welcome_dialog_box2"><![CDATA[<b><font color="#2196f3">Learn:</font></b> Interactive videos will teach you CV writing, interview skills, communication skills, and more!]]></string>
-    <string name="welcome_dialog_box3"><![CDATA[<b><font color="#2196f3">In-Person Classes:</font></b> If you are a government university student or recent graduate, you can attend in-person classes at USWDP centers FREE after passing the modules in this app.]]></string>
+    <string name="welcome_dialog_box3"><![CDATA[<b><font color="#2196f3">In-Person Classes:</font></b> If you are a government university student or a recent graduate, you can attend in-person classes at USWDP centers FREE after passing the modules in this app.]]></string>
     <string name="select_language">Select language</string>
+    <!-- For language selector where %s is replaced by the device type name -->
+    <string name="device_language">Device language</string>
     <string name="ok_got_it">OK, got it!</string>
     <string name="dont_show_this_next_time">Don\'t show this next time</string>
 </resources>

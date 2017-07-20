@@ -11,19 +11,18 @@ public class WelcomeController extends UstadBaseController {
 
     public static final String PREF_KEY_WELCOME_DONT_SHOW = "welcome.dontshow";
 
+    public static final String PREF_KEY_WELCOME_DONT_SHOW_TRANSIENT = "welcome.dontshowt";
+
     public WelcomeController(Object context, WelcomeView view) {
         super(context);
         setView(view);
-        view.setDontShowAgainChecked(UstadMobileSystemImpl.getInstance().getAppPref(
-                PREF_KEY_WELCOME_DONT_SHOW, "true", context).equals("true"));
-
     }
 
     public void setUIStrings() {
 
     }
 
-    public void handleClickHideWelcomeNextTime(boolean checked) {
+    public void setHideWelcomeNextTime(boolean checked) {
         UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_WELCOME_DONT_SHOW, String.valueOf(checked),
                 getContext());
     }

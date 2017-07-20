@@ -53,8 +53,10 @@ import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
@@ -742,4 +744,5 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public String getAppSetupFile(Object context) {
         return new File(((Context)context).getApplicationInfo().sourceDir).getAbsolutePath();
     }
+
 }

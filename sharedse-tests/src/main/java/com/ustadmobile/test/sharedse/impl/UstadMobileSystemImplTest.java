@@ -1,5 +1,6 @@
 package com.ustadmobile.test.sharedse.impl;
 
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -242,5 +243,10 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     @Override
     public String getVersion(Object context) {
         return null;
+    }
+
+    @Override
+    public int getDeviceType(Object context) {
+        return MessageID.phone;
     }
 }

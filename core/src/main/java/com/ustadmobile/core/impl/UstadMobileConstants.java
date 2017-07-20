@@ -760,6 +760,7 @@ public class UstadMobileConstants {
         LANGUAGE_NAMES.put("en-US", "English (US)");
         LANGUAGE_NAMES.put("ps", "پښتو");
         LANGUAGE_NAMES.put("fa-AF", "دری");
+        LANGUAGE_NAMES.put("fa", "دری");
     }
 
 }

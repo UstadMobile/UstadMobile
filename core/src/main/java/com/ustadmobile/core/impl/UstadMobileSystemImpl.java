@@ -195,6 +195,12 @@ public abstract class UstadMobileSystemImpl {
      * This is limited both for usability and performance.
      */
     public static final int RESUME_MAX_CHOICES = 5;
+
+    /**
+     * The return value from getLocale when the user has said to use the system's locale
+     */
+    public static final String LOCALE_USE_SYSTEM = "";
+
     /**
      * Get an instance of the system implementation - relies on the platform
      * specific factory method
@@ -303,38 +309,6 @@ public abstract class UstadMobileSystemImpl {
      * @param context System context object
      */
     public abstract void go(String viewName, Hashtable args, Object context);
-
-//    public boolean loadLocale(Object context) {
-//        //choose the locale
-//        boolean success = false;
-//        String usersLocale = null;
-//        if(getActiveUser(context) != null) {
-//            usersLocale = getUserPref(UserSettingsController.PREFKEY_LANG, "",
-//                context);
-//        }
-//
-//        if(locale.equals(""))
-//            locale = getSystemLocale(context);
-//
-//        InputStream localeIn = null;
-//        try {
-//            localeIn = openResourceInputStream("locale/" + locale + ".properties",
-//                context);
-//            messages = MessagesHashtable.load(localeIn);
-//            getLogger().l(UMLog.VERBOSE, 423, locale);
-//            String localeDir = messages.get(MessageID.dir);
-//            direction = localeDir != null && localeDir.equals("rtl") ?
-//                UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
-//            success = true;
-//        }catch(IOException e) {
-//            getLogger().l(UMLog.CRITICAL, 9, null, e);
-//        }finally {
-//            UMIOUtils.closeInputStream(localeIn);
-//            localeIn = null;
-//        }
-//
-//        return success;
-//    }
 
     /**
      * Provides the currently active locale
@@ -1073,8 +1047,6 @@ public abstract class UstadMobileSystemImpl {
      * @return String: file absolute path
      */
     public abstract String getAppSetupFile(Object context);
-
-
 }
 
 
