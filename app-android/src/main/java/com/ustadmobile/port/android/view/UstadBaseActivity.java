@@ -40,9 +40,6 @@ import java.util.Locale;
  */
 public abstract class UstadBaseActivity extends AppCompatActivity implements ServiceConnection {
 
-
-    private String mUILocale;
-
     private int mUIDirection = UstadMobileConstants.DIR_LTR;
 
     private UstadBaseController baseController;
@@ -200,20 +197,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onStart() {
         super.onStart();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(handleUIStringsOnResume) {
-            String sysLocale = UstadMobileSystemImpl.getInstance().getLocale(this);
-            if(mUILocale != null && !mUILocale.equals(sysLocale)) {
-                //the locale has changed - we need to update the ui
-                baseController.setUIStrings();
-            }
-
-            mUILocale = new String(sysLocale);
-        }
     }
 
     public void onStop() {

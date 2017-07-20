@@ -1,11 +1,16 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DataSettingsView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.core.view.UserSettingsView2;
+
+import java.util.Hashtable;
 
 /**
  * Created by mike on 5/30/17.
@@ -15,12 +20,12 @@ public class UserSettingsController2 extends  UstadBaseController implements App
 
     private static final int CMD_SET_LANG = 1;
 
-    public UserSettingsController2(Object context, boolean statusEventListeningEnabled) {
-        super(context, statusEventListeningEnabled);
-    }
+    private UserSettingsView2 view;
 
-    public UserSettingsController2(Object context) {
+    public UserSettingsController2(Object context, Hashtable args, UserSettingsView2 view) {
         super(context);
+        setView(view);
+        this.view = view;
     }
 
     public void handleClickAccount() {
@@ -28,8 +33,16 @@ public class UserSettingsController2 extends  UstadBaseController implements App
     }
 
     public void handleClickLanguage() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] availableLocales = new String[CoreBuildConfig.SUPPORTED_LOCALES.length + 1];
+        availableLocales[0] = impl.getString(MessageID.device_language, getContext());
+        for(int i = 0; i < CoreBuildConfig.SUPPORTED_LOCALES.length; i++) {
+            availableLocales[i + 1] = UstadMobileConstants.LANGUAGE_NAMES.get(
+                    CoreBuildConfig.SUPPORTED_LOCALES[i]).toString();
+        }
+
         UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog("Language",
-                CoreBuildConfig.SUPPORTED_LOCALES, CMD_SET_LANG, this);
+                availableLocales, CMD_SET_LANG, this);
     }
 
     public void handleClickDataSettings() {
@@ -47,8 +60,12 @@ public class UserSettingsController2 extends  UstadBaseController implements App
 
     @Override
     public void appViewChoiceSelected(int commandId, int choice) {
-        String chosenLocale = CoreBuildConfig.SUPPORTED_LOCALES[choice];
+        String chosenLocale = choice == 0
+            ? UstadMobileSystemImpl.LOCALE_USE_SYSTEM
+            : CoreBuildConfig.SUPPORTED_LOCALES[choice - 1];
+
         UstadMobileSystemImpl.getInstance().setLocale(chosenLocale, getContext());
         UstadMobileSystemImpl.getInstance().getAppView(getContext()).dismissChoiceDialog();
+        view.refreshLanguage();
     }
 }

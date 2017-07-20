@@ -20,7 +20,7 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        mController = new UserSettingsController2(this);
+        mController = new UserSettingsController2(this, null, this);
         setUMToolbar(R.id.setting_tool_bar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -111,5 +111,10 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void refreshLanguage() {
+        recreate();
     }
 }
