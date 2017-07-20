@@ -137,6 +137,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public static final String TAG_DIALOG_FRAGMENT = "UMDialogFrag";
 
+    public static final String ACTION_LOCALE_CHANGE = "com.ustadmobile.locale_change";
+
     /**
      * Map of view names to the activity class that is implementing them on Android
      *

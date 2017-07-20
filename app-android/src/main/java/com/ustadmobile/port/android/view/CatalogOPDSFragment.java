@@ -207,7 +207,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         //in case user left activity when loading was going on
         if(getActivity() != null) {
-            getActivity().runOnUiThread(new Runnable() {
+            super.runOnUiThread(new Runnable() {
                 public void run() {
                     refreshLayout.setRefreshing(false);
 
@@ -215,7 +215,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             });
         }
 
-        getActivity().runOnUiThread(new Runnable() {
+        super.runOnUiThread(new Runnable() {
             public void run() {
                 if (controller == null) {
                     String errMsg = LocaleUtil.formatMessage(impl.getString(MessageID.course_catalog_load_error, getContext()),
@@ -427,7 +427,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setEntryStatus(final String entryId, final int status) {
-        getActivity().runOnUiThread(new Runnable() {
+        super.runOnUiThread(new Runnable() {
             public void run() {
                 if(idToCardMap.containsKey(entryId)) {
                     idToCardMap.get(entryId).setOPDSEntryOverlay(status);
@@ -443,7 +443,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         final Bitmap bitmap = BitmapFactory.decodeFile(iconFileURI);
         final String errURI = iconFileURI;
 
-        getActivity().runOnUiThread(new Runnable() {
+        super.runOnUiThread(new Runnable() {
             public void run() {
                 //TODO: idToCardMap should not be null when this is called... this should only be called after cards are made...
                 if(idToCardMap != null && idToCardMap.containsKey(entryId)) {
@@ -470,7 +470,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setDownloadEntryProgressVisible(final String entryId, final boolean visible) {
-        getActivity().runOnUiThread(new Runnable() {
+        super.runOnUiThread(new Runnable() {
             public void run() {
                 if(idToCardMap.containsKey(entryId)) {
                     idToCardMap.get(entryId).setProgressBarVisible(visible);
@@ -481,7 +481,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void updateDownloadEntryProgress(final String entryId, final int loaded, final int total) {
-        getActivity().runOnUiThread(new Runnable() {
+        super.runOnUiThread(new Runnable() {
             public void run() {
                 int progressPercent = Math.round(((float)loaded/(float)total) * OPDSEntryCard.PROGRESS_ENTRY_MAX);
                 if(idToCardMap.containsKey(entryId)) {
@@ -563,7 +563,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         this.mAddOptionAvailable = addOptionAvailable;
         if(getActivity() == null)
             return;
-        getActivity().runOnUiThread( new Runnable() {
+        super.runOnUiThread( new Runnable() {
             public void run() {
                 rootContainer.findViewById(R.id.fragment_catalog_addbutton).setVisibility(
                         addOptionAvailable ? View.VISIBLE : View.GONE);

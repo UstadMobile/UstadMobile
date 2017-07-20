@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -11,6 +13,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UserSettingsController2;
 import com.ustadmobile.core.view.UserSettingsView2;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 public class UserSettingsActivity2 extends UstadBaseActivity implements UserSettingsView2,View.OnClickListener{
     private UserSettingsController2 mController;
@@ -115,6 +118,8 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
 
     @Override
     public void refreshLanguage() {
+        Intent intent = new Intent(UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         recreate();
     }
 }

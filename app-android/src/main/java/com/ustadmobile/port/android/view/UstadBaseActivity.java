@@ -1,16 +1,20 @@
 package com.ustadmobile.port.android.view;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -60,6 +64,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private List<WeakReference<Fragment>> fragmentList;
 
+    private boolean localeChanged = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //bind to the LRS forwarding service
@@ -69,9 +75,44 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityCreate(this, savedInstanceState);
         fragmentList = new ArrayList<>();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
+                intentFilter);
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(localeChanged) {
+            String userLocale = UstadMobileSystemImpl.getInstance().getLocale(getBaseContext());
+            Locale locale;
+            if(userLocale.equals(UstadMobileSystemImpl.LOCALE_USE_SYSTEM))
+                locale = Locale.getDefault();
+            else
+                locale = new Locale(userLocale);
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    recreate();
+                }
+            }, 200);
+
+        }
+    }
+
+    private BroadcastReceiver mLocaleChangeBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch(intent.getAction()) {
+                case UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE:
+                    localeChanged = true;
+                    break;
+            }
+        }
+    };
 
 
 
@@ -207,6 +248,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onDestroy() {
         super.onDestroy();
         unbindService(mLrsServiceConnection);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
         PersistenceManagerAndroid.getInstanceAndroid().releaseHelperForContext(this);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
