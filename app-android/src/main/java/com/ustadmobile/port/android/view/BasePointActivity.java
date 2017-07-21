@@ -68,16 +68,25 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         }
         setContentView(R.layout.activity_base_point);
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
-        if(savedInstanceState != null && savedInstanceState.containsKey(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED)) {
-            if(args == null)
-                args = new Hashtable();
+        Hashtable savedInstanceHt = UMAndroidUtil.bundleToHashtable(savedInstanceState);
+        String recreateWelcomeVal = UstadMobileSystemImpl.getInstance().getAppPref(
+                "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
 
-            args.put(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED,
-                    savedInstanceState.getString(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED));
+        /*
+         * When recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
+         * called by Android. Thus we look for a manually saved state.
+         */
+        if(recreateWelcomeVal != null) {
+            UstadMobileSystemImpl.getInstance().setAppPref(
+                    "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, null, this);
+        }
+
+        if(savedInstanceHt == null && recreateWelcomeVal != null) {
+            savedInstanceHt.put(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, recreateWelcomeVal);
         }
 
         //make OPDS fragments and set them here
-        mBasePointController = BasePointController.makeControllerForView(this, args);
+        mBasePointController = BasePointController.makeControllerForView(this, args, savedInstanceHt);
         setBaseController(mBasePointController);
         setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -108,10 +117,26 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         setMenuItems(this.mNavigationDrawerItems);
     }
 
+    public void setWelcomeScreenDisplayed(boolean displayed) {
+        mBasePointController.setWelcomeScreenDisplayed(displayed);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         mBasePointController.onResume();
+    }
+
+    @Override
+    public void recreate() {
+        /*
+         * When recreate is manually called (e.g. in-app locale change) onSaveInstanceState is not
+         * called by Android
+         */
+        String welcomeScreenDisplayed = String.valueOf(mBasePointController.isWelcomeScreenDisplayed());
+        UstadMobileSystemImpl.getInstance().setAppPref("recreate-"
+                    + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, welcomeScreenDisplayed, this);
+        super.recreate();
     }
 
     @Override
@@ -210,6 +235,12 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         }
 
         return false;
+    }
+
+    @Override
+    public void onDestroy() {
+        mBasePointController.onDestroy();
+        super.onDestroy();
     }
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {

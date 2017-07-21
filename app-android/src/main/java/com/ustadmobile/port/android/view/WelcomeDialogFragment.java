@@ -135,7 +135,8 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
                     : CoreBuildConfig.SUPPORTED_LOCALES[position - 1];
             if (!chosenLocale.equals(UstadMobileSystemImpl.getInstance().getLocale(getContext()))) {
                 UstadMobileSystemImpl.getInstance().setLocale(chosenLocale, getContext());
-                UstadBaseActivity activity = (UstadBaseActivity) getActivity();
+                BasePointActivity activity = (BasePointActivity) getActivity();
+                activity.setWelcomeScreenDisplayed(false);
                 activity.recreate();
             }
         }
@@ -149,7 +150,7 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
                         WelcomeController.PREF_KEY_WELCOME_DONT_SHOW_TRANSIENT,
                         null, getContext());
                 mController.setHideWelcomeNextTime(mDontShowAgainCheckbox.isChecked());
-                dismiss();
+                mController.handleClickOK();
                 break;
         }
     }

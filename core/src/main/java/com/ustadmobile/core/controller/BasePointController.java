@@ -71,12 +71,14 @@ public class BasePointController extends UstadBaseController implements DialogRe
     private boolean welcomeScreenDisplayed = false;
 
     public static final String ARG_WELCOME_SCREEN_DISPLAYED = "wsd";
+
+    private boolean keepTmpVariables = false;
     
     public BasePointController(Object context) {
         super(context);
     }
     
-    public static BasePointController makeControllerForView(BasePointView view, Hashtable args) {
+    public static BasePointController makeControllerForView(BasePointView view, Hashtable args, Hashtable savedState) {
         BasePointController ctrl = new BasePointController(view.getContext());
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
@@ -98,8 +100,8 @@ public class BasePointController extends UstadBaseController implements DialogRe
         view.setMenuItems(impl.getActiveUser(view.getContext()) != null ?
             CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
 
-        if(args.contains(ARG_WELCOME_SCREEN_DISPLAYED)) {
-            ctrl.welcomeScreenDisplayed = args.get(ARG_WELCOME_SCREEN_DISPLAYED).toString().equals("true");
+        if(savedState != null && savedState.containsKey(ARG_WELCOME_SCREEN_DISPLAYED)){
+            ctrl.welcomeScreenDisplayed = savedState.get(ARG_WELCOME_SCREEN_DISPLAYED).toString().equals("true");
         }
 
         return ctrl;
@@ -232,7 +234,7 @@ public class BasePointController extends UstadBaseController implements DialogRe
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(!welcomeScreenDisplayed
                 && impl.getAppPref(WelcomeController.PREF_KEY_WELCOME_DONT_SHOW, "false",getContext()).equals("false")) {
-            welcomeScreenDisplayed = true;
+            setWelcomeScreenDisplayed(true);
             UstadMobileSystemImpl.getInstance().go(WelcomeView.VIEW_NAME, getContext());
         }
     }
@@ -243,5 +245,12 @@ public class BasePointController extends UstadBaseController implements DialogRe
 
     public void setWelcomeScreenDisplayed(boolean welcomeScreenDisplayed) {
         this.welcomeScreenDisplayed = welcomeScreenDisplayed;
+    }
+
+    public void onDestroy() {
+        if(!keepTmpVariables) {
+            UstadMobileSystemImpl.getInstance().setAppPref("tmp" + ARG_WELCOME_SCREEN_DISPLAYED,
+                    null, getContext());
+        }
     }
 }

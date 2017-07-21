@@ -645,7 +645,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         public OPDSRecyclerAdapter(CatalogController controller) {
             this.controller = controller;
-            this.feed = controller.getModel().opdsFeed;
+            if(controller != null)
+                this.feed = controller.getModel().opdsFeed;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {

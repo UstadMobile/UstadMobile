@@ -9,4 +9,6 @@ public interface WelcomeView extends UstadView {
     String VIEW_NAME = "WelcomeView";
 
     void setDontShowAgainChecked(boolean checked);
+
+    void dismiss();
 }
