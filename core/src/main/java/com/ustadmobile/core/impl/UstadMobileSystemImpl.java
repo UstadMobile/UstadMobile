@@ -313,9 +313,26 @@ public abstract class UstadMobileSystemImpl {
     /**
      * Provides the currently active locale
      *
-     * @return The currently active locale
+     * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
     public String getLocale(Object context) {
+        return locale;
+    }
+
+    /**
+     * Provides the language code of the currently active locale. This is different to getLocale. If
+     * the locale is currently set to LOCALE_USE_SYSTEM then that language will be resolved and the
+     * code returned.
+     *
+     * @param context
+     *
+     * @return The locale as the user sees it.
+     */
+    public String getDisplayedLocale(Object context) {
+        String locale = getLocale(context);
+        if(locale.equals(LOCALE_USE_SYSTEM))
+            locale = getSystemLocale(context);
+
         return locale;
     }
 

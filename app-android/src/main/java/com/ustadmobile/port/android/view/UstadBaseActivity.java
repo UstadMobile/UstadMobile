@@ -5,14 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -20,11 +18,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.ustadmobile.core.controller.BasePointController;
-import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
@@ -66,6 +64,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private boolean localeChanged = false;
 
+    private String localeOnCreate = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //bind to the LRS forwarding service
@@ -80,29 +80,28 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         LocalBroadcastManager.getInstance(this).registerReceiver(mLocaleChangeBroadcastReceiver,
                 intentFilter);
         super.onCreate(savedInstanceState);
+        localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if(localeChanged) {
-            String userLocale = UstadMobileSystemImpl.getInstance().getLocale(getBaseContext());
-            Locale locale;
-            if(userLocale.equals(UstadMobileSystemImpl.LOCALE_USE_SYSTEM))
-                locale = Locale.getDefault();
-            else
-                locale = new Locale(userLocale);
-
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    recreate();
-                }
-            }, 200);
-
+            if(UMUtil.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        recreate();
+                    }
+                }, 200);
+            }
         }
     }
 
+    /**
+     * Handles internal locale changes. When the user changes the locale using the system settings
+     * Android will take care of destroying and recreating the activity.
+     */
     private BroadcastReceiver mLocaleChangeBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

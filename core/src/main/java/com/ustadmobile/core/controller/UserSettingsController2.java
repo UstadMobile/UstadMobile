@@ -4,9 +4,9 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.DataSettingsView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView2;
 
@@ -22,10 +22,13 @@ public class UserSettingsController2 extends  UstadBaseController implements App
 
     private UserSettingsView2 view;
 
+    private String localeOnCreate = null;
+
     public UserSettingsController2(Object context, Hashtable args, UserSettingsView2 view) {
         super(context);
         setView(view);
         this.view = view;
+        localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(context);
     }
 
     public void handleClickAccount() {
@@ -66,6 +69,9 @@ public class UserSettingsController2 extends  UstadBaseController implements App
 
         UstadMobileSystemImpl.getInstance().setLocale(chosenLocale, getContext());
         UstadMobileSystemImpl.getInstance().getAppView(getContext()).dismissChoiceDialog();
-        view.refreshLanguage();
+
+        if(UMUtil.hasDisplayedLocaleChanged(localeOnCreate, getContext())) {
+            view.refreshLanguage();
+        }
     }
 }

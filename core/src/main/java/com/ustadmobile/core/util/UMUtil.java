@@ -419,6 +419,24 @@ public class UMUtil {
         return retVal;
     }
 
+    /**
+     * Determine if the two given locales are the same as far as what the user will see.
+     *
+     * @param oldLocale
+     *
+     * @return
+     */
+    public static boolean hasDisplayedLocaleChanged(String oldLocale, Object context) {
+        String currentlyDisplayedLocale = UstadMobileSystemImpl.getInstance().getDisplayedLocale(context);
+        if(currentlyDisplayedLocale != null && oldLocale != null
+                && oldLocale.substring(0, 2).equals(currentlyDisplayedLocale.substring(0,2))) {
+            return false;
+        }else {
+            return true;
+        }
+    }
+
+
 
     
 }
