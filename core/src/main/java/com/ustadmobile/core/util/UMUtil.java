@@ -436,6 +436,24 @@ public class UMUtil {
         }
     }
 
+    /**
+     * Determine if the two given locales are the same language - e.g. en, en-US, en-GB etc.
+     *
+     * @param locale1
+     * @param locale2
+     *
+     * @return True if the given locales are the same language, false otherwise
+     */
+    public static boolean isSameLanguage(String locale1, String locale2) {
+        if(locale1 == null && locale2 == null) {
+            return true;//no language to compare
+        }else if(locale1 == null || locale2 == null){
+            return false;//one is null
+        }else {
+            return locale1.substring(0,2).equals(locale2.substring(0, 2));
+        }
+    }
+
 
 
     

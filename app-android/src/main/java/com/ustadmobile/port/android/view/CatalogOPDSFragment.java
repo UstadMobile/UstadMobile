@@ -646,7 +646,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         public OPDSRecyclerAdapter(CatalogController controller) {
             this.controller = controller;
             if(controller != null)
-                this.feed = controller.getModel().opdsFeed;
+                this.feed = controller.getDisplayFeed();
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -671,50 +671,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             holder.mEntryCard.setOnClickListener(CatalogOPDSFragment.this);
             holder.mEntryCard.setOnLongClickListener(CatalogOPDSFragment.this);
 
-            //check the acquisition status
+            //check the acquisition status  
             int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);
             holder.mEntryCard.setOPDSEntryOverlay(entryStatus);
 
-            /*//if the file is not available - show whether it can be acquired locally
-            boolean isAcquisitionEntry = !feed.entries[position].getAcquisitionLinks().isEmpty();
-            if(isAcquisitionEntry && entryStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
-                ArrayList<String> idList = new ArrayList<>();
-                for(int i = 0; i < feed.entries.length; i++){
-                    if(!feed.entries[i].getAcquisitionLinks().isEmpty())
-                        idList.add(feed.entries[i].id);
-                }
-
-                if(position==(feed.entries.length-1) && !isRequesting){
-                    UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager().checkLocalFilesAvailability(getActivity(), idList);
-                    isRequesting=true;
-                }
-                boolean isAvailableLocally =false;
-                FileCheckResponse response=((NetworkManagerAndroid)UstadMobileSystemImplAndroid.getInstanceAndroid().
-                        getNetworkManager()).fileCheckResponse(feed.entries[position].id);
-                if(response!=null){
-                    isAvailableLocally=response.isFileAvailable();
-                }
-
-
-                holder.mEntryCard.setLocalAvailableFile(isAvailableLocally);
-                //set the text line to be visible
-                holder.mEntryCard.setFileAvailabilityTextVisibility(true);
-            }else {
-                //set the text line to be invisible
-                holder.mEntryCard.setFileAvailabilityTextVisibility(false);
-            }
-
-
-
-
-            if(entryStatus != -1) {
-                holder.mEntryCard.setOPDSEntryOverlay(entryStatus);
-            }
-
-            if(entryStatus == CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS) {
-                holder.mEntryCard.setProgressBarVisible(true);
-            }
-*/
             //Make sure if this entry is being recycled the idToCardMap won't get confused
             if(idToCardMap.containsValue(holder.mEntryCard)) {
                 Iterator<Map.Entry<String, OPDSEntryCard>> iterator = idToCardMap.entrySet().iterator();
@@ -733,7 +693,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
 
         public int getItemCount() {
-            return feed != null ? feed.entries.length : 0;
+            return feed != null ? feed.getNumEntries(): 0;
         }
     }
 

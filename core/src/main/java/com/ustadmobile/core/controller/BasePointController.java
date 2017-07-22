@@ -131,6 +131,10 @@ public class BasePointController extends UstadBaseController implements DialogRe
             args.put(iPrefix + CatalogController.KEY_RESMOD, 
                 new Integer(CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE));
 
+            if(CoreBuildConfig.BASEPOINT_FILTER_BY_UI_LANG) {
+                args.put(iPrefix + CatalogController.ARG_FILTER_BY_UI_LANG, "true");
+            }
+
             //by default show the browse button on the first tab only
             if(i == 0 && CoreBuildConfig.BASEPOINT_BROWSEBUTTON_ENABLED) {
                 args.put(iPrefix + CatalogController.KEY_BROWSE_BUTTON_URL,

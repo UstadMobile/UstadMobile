@@ -127,6 +127,8 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         
         return null;
     }
+
+
     
     public UstadJSOPDSEntry[] getEntriesByLinkParams(String linkRel, 
         String linkType, boolean relByPrefix, boolean mimeTypeByPrefix){
@@ -298,6 +300,30 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         }
 
         return languageList;
+    }
+
+    /**
+     * Filter this feed to produce a new OPDS feed
+     *
+     * @param filter
+     * @param newId
+     * @param title
+     * @param srcHref
+     * @return
+     */
+    public UstadJSOPDSFeed filter(OPDSEntryFilter filter, String title, String srcHref, String newId) {
+        UstadJSOPDSFeed filteredFeed = new UstadJSOPDSFeed(srcHref, title, newId);
+
+        int numEntries = getNumEntries();
+        boolean accept;
+        for(int i = 0; i < numEntries; i++) {
+            accept = filter.accept(getEntry(i));
+            if(accept) {
+                filteredFeed.addEntry(new UstadJSOPDSEntry(filteredFeed, getEntry(i)));
+            }
+        }
+
+        return filteredFeed;
     }
 
 

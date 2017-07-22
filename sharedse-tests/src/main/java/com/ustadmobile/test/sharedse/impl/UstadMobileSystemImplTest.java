@@ -245,8 +245,4 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         return null;
     }
 
-    @Override
-    public int getDeviceType(Object context) {
-        return MessageID.phone;
-    }
 }

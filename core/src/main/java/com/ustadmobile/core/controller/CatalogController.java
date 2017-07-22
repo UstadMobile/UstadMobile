@@ -45,6 +45,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
+import com.ustadmobile.core.opds.OPDSEntryFilter;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -194,6 +195,8 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     
     //this is where the feed (and its entries) live.
     private CatalogModel model;
+
+    private UstadJSOPDSFeed displayFeed;
     
     public static final String LOCALOPDS_ID_SUFFIX = "-local";
     
@@ -339,6 +342,13 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      */
     public static final long STORAGE_DIR_CHECK_AGAIN_AFTER = 1 * 60 * 1000;
 
+    /**
+     * If present in the arguments loading this controller, the feed for the view to display, e.g.
+     * the one returned by getDisplayFeed will be filtered and only entries that match the ui
+     * language will be shown to the user
+     */
+    public static final String ARG_FILTER_BY_UI_LANG = "filter_by_lang";
+
 
     private String footerButtonUrl;
 
@@ -349,7 +359,8 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     
     public CatalogController(CatalogModel model, Object context){
         this(context);
-        this.model=model;
+        this.model= model;
+        this.displayFeed = model != null ? model.opdsFeed : null;
 
         //if a model is set at time of construction: this is not being used just to make another catalog
         //it is a catalog - therefor add acquisition status listeners
@@ -387,7 +398,24 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public CatalogModel getModel() {
         return this.model;
     }
-    
+
+    public UstadJSOPDSFeed getDisplayFeed() {
+        return displayFeed;
+    }
+
+    /**
+     * Set the display filter to be used.
+     *
+     * @param filter
+     */
+    public void setDisplayFilter(OPDSEntryFilter filter) {
+        UstadJSOPDSFeed baseFeed = model != null ? model.opdsFeed : null;
+        if(baseFeed != null) {
+            displayFeed = baseFeed.filter(filter, baseFeed.title, baseFeed.href, baseFeed.id+"-filter");
+        }else {
+            displayFeed = null;
+        }
+    }
     
 
     /**
@@ -495,6 +523,17 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         int resourceMode = args.containsKey(KEY_RESMOD) ? ((Integer)args.get(KEY_RESMOD)).intValue() : SHARED_RESOURCE;
 
         CatalogController result = new CatalogController(new CatalogModel(opdsFeed), context);
+        if(args.containsKey(ARG_FILTER_BY_UI_LANG) && args.get(ARG_FILTER_BY_UI_LANG).equals("true")) {
+            final String uiLanguage = UstadMobileSystemImpl.getInstance().getDisplayedLocale(context);
+            result.setDisplayFilter(new OPDSEntryFilter() {
+                @Override
+                public boolean accept(UstadJSOPDSEntry entry) {
+                    return entry.getLanguage() == null || UMUtil.isSameLanguage(
+                            entry.getLanguage(), uiLanguage);
+                }
+            });
+        }
+
         result.setResourceMode(resourceMode);
         
         return result;
