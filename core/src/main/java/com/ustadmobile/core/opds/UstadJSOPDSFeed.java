@@ -237,7 +237,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      *
      * @return Number of entries in this feed
      */
-    public int getNumEntries() {
+    public int size() {
         return entries.length;
     }
 
@@ -256,22 +256,82 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * Given acquisition preferences : select the links to actually download
      *
      * @param preferredMimeTypes
-     * @param preferredLangs
+     * @param preferredLanguages
      */
-    public UstadJSOPDSFeed selectAcquisitionLinks(final String[] preferredMimeTypes, final String[] preferredLangs, int mimeWeight, int langWeight) {
+    public UstadJSOPDSFeed selectAcquisitionLinks(Vector selectedEntries, final String[] preferredMimeTypes, final String[] preferredLanguages, final int mimeWeight, final int langWeight) {
         UstadJSOPDSFeed retFeed = new UstadJSOPDSFeed(href, title, id);
         retFeed.addLink(getAbsoluteSelfLink());
 
-        int numEntries = getNumEntries();
-        UstadJSOPDSEntry srcEntry;
-        String[] acquisitionLinks;
+        int numEntries = selectedEntries.size();
+        final int noMatchFactor = 500;
+
         for(int i = 0; i < numEntries; i++) {
-            srcEntry = getEntry(i);
-            UstadJSOPDSEntry acquireEntry = new UstadJSOPDSEntry(retFeed, srcEntry, false);
-            acquisitionLinks = srcEntry.getBestAcquisitionLink(preferredMimeTypes, preferredLangs, mimeWeight, langWeight);
-            if(acquisitionLinks != null) {
-                acquireEntry.addLink(acquisitionLinks);
-                retFeed.addEntry(acquireEntry);
+            UstadJSOPDSEntry selectedEntry = (UstadJSOPDSEntry)selectedEntries.elementAt(i);
+
+            Vector entryTranslationLinks = getEntryById(selectedEntry.id).getAlternativeTranslations();
+            Vector translatedEntriesVector = new Vector();
+            String[] entryTranslationLink;
+
+            for(int j = 0; j < entryTranslationLinks.size(); j++) {
+                entryTranslationLink = (String[])entryTranslationLinks.elementAt(j);
+                UstadJSOPDSEntry translatedEntry = findEntryForAlternateTranslation(
+                        entryTranslationLink[UstadJSOPDSEntry.ATTR_HREF]);
+                if(translatedEntry != null)
+                    translatedEntriesVector.addElement(translatedEntry);
+            }
+
+            UstadJSOPDSEntry[] entriesToSelectFrom = new UstadJSOPDSEntry[
+                    translatedEntriesVector.size() + 1];
+            translatedEntriesVector.copyInto(entriesToSelectFrom);
+            entriesToSelectFrom[entriesToSelectFrom.length-1] = selectedEntry;
+
+            UMUtil.bubbleSort(entriesToSelectFrom, new UMUtil.Comparer() {
+                @Override
+                public int compare(Object o1, Object o2) {
+                    UstadJSOPDSEntry entry1 = (UstadJSOPDSEntry)o1;
+                    UstadJSOPDSEntry entry2 = (UstadJSOPDSEntry)o2;
+
+                    Object link1Obj = entry1.getBestAcquisitionLink(preferredMimeTypes);
+                    Object link2Obj = entry2.getBestAcquisitionLink(preferredMimeTypes);
+
+                    //TODO: Handle when there is no acquisition link at all.
+                    //getFirstAcquisitionLink is redundant, this is done by getBestAcquisitionLink anyway
+                    String[] link1 = link1Obj != null ? (String[])link1Obj : entry1.getFirstAcquisitionLink(null);
+                    String[] link2 = link2Obj != null ? (String[])link2Obj : entry2.getFirstAcquisitionLink(null);
+
+
+
+                    int mimeDiff1 = UMUtil.indexInArray(preferredMimeTypes,
+                            link1[UstadJSOPDSEntry.LINK_MIMETYPE]);
+                    if(mimeDiff1 == -1)
+                        mimeDiff1 = preferredMimeTypes.length+1;
+
+                    int mimeDiff2 = UMUtil.indexInArray(preferredMimeTypes,
+                            link2[UstadJSOPDSEntry.LINK_MIMETYPE]);
+                    if(mimeDiff2 == -1)
+                        mimeDiff2 = preferredMimeTypes.length+1;
+
+                    int mimeDiff = (mimeDiff1 - mimeDiff2) * mimeWeight;
+
+                    int langDiff1 = UMUtil.indexInArray(preferredLanguages, entry1.getLanguage());
+                    if(langDiff1 == -1)
+                        langDiff1 = preferredLanguages.length+1;
+
+                    int langDiff2 = UMUtil.indexInArray(preferredLanguages, entry2.getLanguage());
+                    if(langDiff2 == -1)
+                        langDiff2 = preferredLanguages.length+1;
+
+                    int langDiff = (langDiff1 - langDiff2) * langWeight;
+
+                    return langDiff + mimeDiff;
+                }
+            });
+
+            if(entriesToSelectFrom.length > 0) {
+                UstadJSOPDSEntry acquisitionEntry = new UstadJSOPDSEntry(retFeed,
+                        entriesToSelectFrom[0], false);
+                acquisitionEntry.addLink(entriesToSelectFrom[0].getBestAcquisitionLink(preferredMimeTypes));
+                retFeed.addEntry(acquisitionEntry);
             }
         }
 
@@ -289,7 +349,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * @return A vector with a list of all distinct languages found in all entries of this feed
      */
     public Vector getLinkHrefLanguageOptions(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix, Vector languageList) {
-        int numEntries = getNumEntries();
+        int numEntries = size();
         if(languageList == null)
             languageList = new Vector();
 
@@ -301,6 +361,43 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
 
         return languageList;
     }
+
+    public Vector getEntriesByLinkParams(String linkRel, String mimeType, String href, boolean relByPrefix, boolean mimeTypeByPrefix, boolean hrefByPrefix, int limit) {
+        Vector matchingEntries = new Vector();
+        Vector entryResult;
+        for(int i = 0; i < size(); i++) {
+            entryResult = getEntry(i).getLinks(linkRel, mimeType, href, relByPrefix, mimeTypeByPrefix,
+                    hrefByPrefix, 1);
+            if(entryResult != null && entryResult.size() > 0)
+                matchingEntries.addElement(getEntry(i));
+        }
+
+        return matchingEntries;
+    }
+
+    public UstadJSOPDSEntry getFirstEntryByLinkParams(String linkRel, String mimeType, String href, boolean relByPrefix, boolean mimeTypeByPrefix, boolean hrefByPrefix) {
+        Vector matches = getEntriesByLinkParams(linkRel, mimeType, href, relByPrefix, mimeTypeByPrefix, hrefByPrefix, 1);
+        return matches.size() > 0 ? (UstadJSOPDSEntry)matches.elementAt(0) : null;
+    }
+
+    public UstadJSOPDSEntry findEntryForAlternateTranslation(String alternateHref) {
+        String entryLang;
+        String[] currentAlternateLinks;
+        for(int i = 0; i < size(); i++) {
+            entryLang = getEntry(i).getLanguage();
+            currentAlternateLinks = getEntry(i).getFirstLink(LINK_REL_ALTERNATE, null, alternateHref,
+                    false, false, false);
+
+            if(currentAlternateLinks != null
+                    && (currentAlternateLinks[ATTR_HREFLANG] == null
+                        ||UMUtil.isSameLanguage(currentAlternateLinks[ATTR_HREFLANG], entryLang))) {
+                return getEntry(i);
+            }
+        }
+
+        return null;
+    }
+
 
     /**
      * Filter this feed to produce a new OPDS feed
@@ -314,7 +411,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     public UstadJSOPDSFeed filter(OPDSEntryFilter filter, String title, String srcHref, String newId) {
         UstadJSOPDSFeed filteredFeed = new UstadJSOPDSFeed(srcHref, title, newId);
 
-        int numEntries = getNumEntries();
+        int numEntries = size();
         boolean accept;
         for(int i = 0; i < numEntries; i++) {
             accept = filter.accept(getEntry(i));
@@ -324,6 +421,32 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         }
 
         return filteredFeed;
+    }
+
+    /**
+     * Find which languages are available for entries in this feed
+     *
+     * @return
+     */
+    public Vector getAvailableLanguages() {
+        int size = size();
+        Vector languages = new Vector();
+        Vector alternateTranslations;
+        int i, j;
+        String[] currentLink;
+        String currentLang;
+        for(i = 0; i < size; i++) {
+            alternateTranslations = getEntry(i).getAlternativeTranslations();
+
+            for(j = 0; j < alternateTranslations.size(); j++){
+                currentLink = (String[])alternateTranslations.elementAt(j);
+                currentLang =currentLink[ATTR_HREFLANG];
+                if(!languages.contains(currentLang))
+                    languages.addElement(currentLang);
+            }
+        }
+
+        return languages;
     }
 
 

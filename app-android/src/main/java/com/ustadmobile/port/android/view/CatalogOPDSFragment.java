@@ -75,6 +75,7 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Vector;
 import java.util.WeakHashMap;
 
 
@@ -309,7 +310,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                         acquisitionFeed.addEntry(new UstadJSOPDSEntry(acquisitionFeed, selectedEntries[i]));
                     }
 
-                    mCatalogController.handleClickDownload(acquisitionFeed);
+                    Vector selectEntriesVector = new Vector();
+                    for(int i = 0; i < selectedEntries.length; i++) {
+                        selectEntriesVector.addElement(selectedEntries[i]);
+                    }
+
+                    mCatalogController.handleClickDownload(acquisitionFeed, selectEntriesVector);
                 }else {
                     mCatalogController.handleClickDownloadAll();
                 }
@@ -381,7 +387,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             if(getSelectedEntries().length > 0) {
                 toggleEntrySelected(card);
             }else {
-                mCatalogController.handleClickEntry(card.getEntry());
+                mCatalogController.handleClickEntry(card.getEntry().id);
             }
             return;
         }
@@ -671,7 +677,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             holder.mEntryCard.setOnClickListener(CatalogOPDSFragment.this);
             holder.mEntryCard.setOnLongClickListener(CatalogOPDSFragment.this);
 
-            //check the acquisition status  
+            //check the acquisition status
             int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);
             holder.mEntryCard.setOPDSEntryOverlay(entryStatus);
 
@@ -693,7 +699,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         }
 
         public int getItemCount() {
-            return feed != null ? feed.getNumEntries(): 0;
+            return feed != null ? feed.size(): 0;
         }
     }
 

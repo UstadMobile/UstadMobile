@@ -35,6 +35,8 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
     protected UstadJSOPDSFeed acquisitionFeedSelected;
 
+    protected Vector acquisitionEntriesSelected;
+
     protected UstadJSOPDSEntry[] removeEntriesSelected;
 
     public interface AcquisitionChoicesCompletedCallback {
@@ -59,14 +61,16 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
     /**
      *
-     * @param acquisitionFeed
+     * @param
      */
-    public void handleClickDownload(UstadJSOPDSFeed acquisitionFeed) {
+    public void handleClickDownload(UstadJSOPDSFeed acquisitionFeed, Vector selectedEntries) {
         this.acquisitionFeedSelected = acquisitionFeed;
-        Vector availableLanguages = acquisitionFeed.getLinkHrefLanguageOptions(
-                UstadJSOPDSItem.LINK_ACQUIRE, null, true, true, null);
+        this.acquisitionEntriesSelected = selectedEntries;
+
+        Vector availableLanguages = acquisitionFeed.getAvailableLanguages();
         acquisitionLanguageChoices = new String[availableLanguages.size()];
         availableLanguages.copyInto(acquisitionLanguageChoices);
+
         if(availableLanguages.size() > 1) {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             String[] displayLanguages = new String[acquisitionLanguageChoices.length];
@@ -115,7 +119,8 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
         switch(commandId) {
             case CMD_CHOOSE_LANG:
                 UstadJSOPDSFeed acquisitionFeed = acquisitionFeedSelected.selectAcquisitionLinks(
-                        getPreferredFormats(context), new String[]{acquisitionLanguageChoices[choice]},
+                        acquisitionEntriesSelected, getPreferredFormats(context),
+                        new String[]{acquisitionLanguageChoices[choice]},
                         CoreBuildConfig.ACQUISITION_SELECT_WEIGHT_MIMETYPE,
                         CoreBuildConfig.ACQUISITION_SELECT_WEIGHT_LANGUAGE);
                 acquisitionFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,

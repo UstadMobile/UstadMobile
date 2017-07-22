@@ -825,7 +825,12 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      */
     public void handleClickDownloadAll() {
         selectedEntries = getModel().opdsFeed.entries;
-        handleClickDownload(getModel().opdsFeed);
+        Vector displayedEntries = new Vector();
+        for(int i = 0; i < getDisplayFeed().size(); i++) {
+            displayedEntries.addElement(getDisplayFeed().getEntry(i));
+        }
+
+        handleClickDownload(getModel().opdsFeed, displayedEntries);
     }
     
     /**
@@ -875,9 +880,10 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      * be another OPDS catalog Feed to display or it could be a container
      * entry.
      * 
-     * @param entry 
+     * @param entryId
      */
-    public void handleClickEntry(final UstadJSOPDSEntry entry) {
+    public void handleClickEntry(final String entryId) {
+        UstadJSOPDSEntry entry = getModel().opdsFeed.getEntryById(entryId);
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(!entry.parentFeed.isAcquisitionFeed()) {
             //we are loading another opds catalog
@@ -895,7 +901,9 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             UstadJSOPDSFeed entryFeed = entry.getEntryFeed();
             String[] entryAbsoluteLink = entryFeed.getAbsoluteSelfLink();
             catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
-                    entry.getEntryFeed().serializeToString());
+                    entry.parentFeed.serializeToString());
+            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,
+                    entry.id);
             impl.go(CatalogEntryView.VIEW_NAME, catalogEntryArgs, context);
         }
     }
@@ -1071,7 +1079,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
                 }
                 
                 parser.setInput(catalogIn, "UTF-8");
-                //opdsFeed = UstadJSOPDSFeed.loadFromXML(parser);
                 opdsFeed = new UstadJSOPDSFeed();
                 opdsFeed.loadFromXpp(parser);
                 opdsFeed.href = url;

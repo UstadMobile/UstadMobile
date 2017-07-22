@@ -11,7 +11,6 @@ import org.xmlpull.v1.XmlPullParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -96,7 +95,7 @@ public class TestUstadJSOPDSFeed {
         Assert.assertEquals("Serializer set absolute self href", feed.href,
                 deserializedFeed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF]);
         Assert.assertEquals("Feed loaded with correct id", feed.id, deserializedFeed.id);
-        for(int i = 0; i < feed.getNumEntries(); i++) {
+        for(int i = 0; i < feed.size(); i++) {
             Assert.assertEquals("Feed entry " + i + " has same id ", feed.getEntry(i).id,
                     deserializedFeed.getEntry(i).id);
         }

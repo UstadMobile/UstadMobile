@@ -161,6 +161,7 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         this.content = srcItem.content;
         this.contentType = srcItem.getContentType();
         this.authors = new Vector();
+        this.language = srcItem.language;
         if(srcItem.authors != null) {
             for(int i = 0; i < srcItem.authors.size(); i++) {
                 this.authors.addElement(srcItem.authors.elementAt(i));
@@ -191,59 +192,25 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
     }
 
 
-
-
-    public String[] getBestAcquisitionLink(final String[] preferredMimeTypes, final String[] preferredLanguages, final int mimeWeight, final int langWeight) {
-        Vector acquisitionLinks = getLinks();
-        if(acquisitionLinks.size() == 0) {
-            return null;
+    /**
+     * Find the best acquisition link by mime type. If none matches any of the preferred mime types
+     * the first acquisition link is returned.
+     *
+     * @param preferredMimeTypes Preferred mime types in order of most preferred to least preferred
+     *
+     * @return
+     */
+    public String[] getBestAcquisitionLink(final String[] preferredMimeTypes) {
+        String[] link;
+        for(int i = 0; i < preferredMimeTypes.length; i++) {
+            link = getFirstAcquisitionLink(preferredMimeTypes[i]);
+            if(link != null)
+                return link;
         }
 
-        Object[] acquireLinks = new Object[acquisitionLinks.size()];
-        final String entryLang = getLanguage();
-
-        if(acquisitionLinks.size() > 1) {
-            acquisitionLinks.copyInto(acquireLinks);
-            UMUtil.bubbleSort(acquireLinks, new UMUtil.Comparer() {
-                @Override
-                public int compare(Object o1, Object o2) {
-                    String[] link1 = (String[]) o1;
-                    String[] link2 = (String[]) o2;
-
-                    int mimeDiff1 = UMUtil.indexInArray(preferredMimeTypes,
-                            link1[UstadJSOPDSEntry.LINK_MIMETYPE]);
-                    if(mimeDiff1 == -1)
-                        mimeDiff1 = preferredMimeTypes.length+1;
-
-                    int mimeDiff2 = UMUtil.indexInArray(preferredMimeTypes,
-                            link2[UstadJSOPDSEntry.LINK_MIMETYPE]);
-                    if(mimeDiff2 == -1)
-                        mimeDiff2 = preferredMimeTypes.length+1;
-
-                    int mimeDiff = (mimeDiff1 - mimeDiff2) * mimeWeight;
-
-                    String lang1 = link1[ATTR_HREFLANG] != null ? link1[ATTR_HREFLANG] : entryLang;
-                    String lang2 = link1[ATTR_HREFLANG] != null ? link2[ATTR_HREFLANG] : entryLang;
-                    int langDiff1 = UMUtil.indexInArray(preferredLanguages, lang1);
-                    if(langDiff1 == -1)
-                        langDiff1 = preferredLanguages.length+1;
-
-                    int langDiff2 = UMUtil.indexInArray(preferredLanguages, lang2);
-                    if(langDiff2 == -1)
-                        langDiff2 = preferredLanguages.length+1;
-
-                    int langDiff = (langDiff1 - langDiff2) * langWeight;
-
-                    return langDiff + mimeDiff;
-                }
-            });
-        }
-
-        return (String[])acquireLinks[0];
-
+        return getFirstAcquisitionLink(null);
     }
 
-    
     public Vector getNavigationLinks(){
         return this.getLinks(null, TYPE_ATOMFEED, false, true);
     }

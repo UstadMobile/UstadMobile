@@ -35,6 +35,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     public static final String ARG_ENTRY_OPDS_STR = "opds_str";
 
+    public static final String ARG_ENTRY_ID = "entry_id";
+
     private UstadJSOPDSEntry entry;
 
     private UstadJSOPDSFeed entryFeed;
@@ -60,8 +62,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
             try {
                 entryFeed = new UstadJSOPDSFeed();
                 entryFeed.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
-                entry = entryFeed.entries[0];
-                entry.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
+                entry = entryFeed.getEntryById(args.get(ARG_ENTRY_ID).toString());
                 catalogEntryView.setTitle(entry.title);
 
                 CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
@@ -154,7 +155,9 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     public void handleClickButton(int buttonId) {
         switch(buttonId) {
             case CatalogEntryView.BUTTON_DOWNLOAD:
-                handleClickDownload(entryFeed);
+                Vector selectedEntries = new Vector();
+                selectedEntries.addElement(entry);
+                handleClickDownload(entryFeed, selectedEntries);
                 break;
 
             case CatalogEntryView.BUTTON_REMOVE:

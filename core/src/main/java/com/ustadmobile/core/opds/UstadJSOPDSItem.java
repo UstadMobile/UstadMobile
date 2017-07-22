@@ -181,6 +181,11 @@ public abstract class UstadJSOPDSItem {
     public static final String LINK_REL_SELF_ABSOLUTE = "http://www.ustadmobile.com/namespace/self-absolute";
 
     /**
+     * The alternate links as per the Atom spec
+     */
+    public static final String LINK_REL_ALTERNATE = "alternate";
+
+    /**
     * Type to be used for a catalog link of an acquisition feed as per OPDS spec
     * 
     * @type String
@@ -284,23 +289,28 @@ public abstract class UstadJSOPDSItem {
     }
     
     /**
-     * Search through the links of this opds item
+     * Search through the links of this opds item - return any matching links
      * 
      * @param linkRel
      * @param mimeType
+     * @param href
      * @param relByPrefix
      * @param mimeTypeByPrefix
-     * @return 
+     * @param hrefByPrefix
+     * @param limit maximum number of results to find - stop looking and return when hit. 0 = unlimited
+     *
+     * @return Vector of links string arrays that match the given parameters.
      */
-    public Vector getLinks(String linkRel, String mimeType, boolean relByPrefix,
-            boolean mimeTypeByPrefix) {
+    public Vector getLinks(String linkRel, String mimeType, String href, boolean relByPrefix,
+            boolean mimeTypeByPrefix, boolean hrefByPrefix, int limit) {
         Vector result = new Vector();
-        boolean matchRel = false;
-        boolean matchType = false;
-        
+        boolean matchRel, matchType, matchHref;
+
+        int matches = 0;
         for(int i = 0; i < linkVector.size(); i++) {
             matchRel = true;
             matchType = true;
+            matchHref = true;
             
             String[] thisLink = (String[])linkVector.elementAt(i);
             if(linkRel != null && thisLink[ATTR_REL] != null) {
@@ -318,14 +328,53 @@ public abstract class UstadJSOPDSItem {
             }else if(mimeType != null && thisLink[ATTR_MIMETYPE] == null) {
                 matchType = false;
             }
+
+            if(href != null && thisLink[ATTR_HREF] != null) {
+                matchHref = hrefByPrefix ?
+                        thisLink[ATTR_HREF].startsWith(href)
+                        : thisLink[ATTR_HREF].equals(href);
+            }else if(href != null && thisLink[ATTR_HREF] == null){
+                matchHref = false;
+            }
             
-            if(matchRel && matchType) {
+            if(matchRel && matchType && matchHref) {
                 result.addElement(thisLink);
+                matches++;
+                if(limit > 0 && matches == limit)
+                    return result;
             }
         }
         
         return result;
     }
+
+    public Vector getLinks(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix) {
+        return getLinks(linkRel, mimeType, null, relByPrefix, mimeTypeByPrefix, false, 0);
+    }
+
+    /**
+     * As per the OPDS spec available translations are given in the form of:
+     * link rel='alternate' hreflang='en' href=''
+     *
+     * @return a vector of link string arrays
+     */
+    public Vector getAlternativeTranslations() {
+        Vector alternateLinks = getLinks(LINK_REL_ALTERNATE, null);
+        Vector translations = new Vector();
+        final String itemLang = getLanguage();
+
+        String[] currentLink;
+        for(int i = 0; i < alternateLinks.size(); i++) {
+            currentLink = (String[])alternateLinks.elementAt(i);
+            if(currentLink[ATTR_HREFLANG] != null
+                    && !UMUtil.isSameLanguage(currentLink[ATTR_HREFLANG], itemLang))
+                translations.addElement(currentLink);
+        }
+
+        return translations;
+    }
+
+
 
     /**
      * Returns the String of attributes for the first link matching the given criteria. Convenience
@@ -338,8 +387,8 @@ public abstract class UstadJSOPDSItem {
      *
      * @return
      */
-    public String[] getFirstLink(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix ){
-        Vector result = getLinks(linkRel, mimeType, relByPrefix, mimeTypeByPrefix);
+    public String[] getFirstLink(String linkRel, String mimeType, String href, boolean relByPrefix, boolean mimeTypeByPrefix, boolean hrefByPrefix){
+        Vector result = getLinks(linkRel, mimeType, href, relByPrefix, mimeTypeByPrefix, hrefByPrefix, 1);
         if(result.size() == 0) {
             return null;
         }else {
@@ -347,8 +396,12 @@ public abstract class UstadJSOPDSItem {
         }
     }
 
+    public String[] getFirstLink(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix) {
+        return getFirstLink(linkRel, mimeType, null, relByPrefix, mimeTypeByPrefix, false);
+    }
+
     public String[] getFirstLink(String linkRel, String mimeType) {
-        return getFirstLink(linkRel, mimeType, false, false);
+        return getFirstLink(linkRel, mimeType, null, false, false, false);
     }
 
     
@@ -421,19 +474,23 @@ public abstract class UstadJSOPDSItem {
 
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_UPDATED], updated);
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_DC, ATTR_NAMES[ATTR_PUBLISHER], publisher);
-        
-        for(int i = 0; i < linkVector.size(); i++) {
+        serializeStringToTag(xs, UstadJSOPDSFeed.NS_DC, "language", language);
+
+        int i, j;
+        for(i = 0; i < linkVector.size(); i++) {
             String[] thisLink = (String[])linkVector.elementAt(i);
             xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_LINK]);
-            xs.attribute(null, ATTR_NAMES[ATTR_HREF], thisLink[ATTR_HREF]);
-            if(thisLink[ATTR_REL] != null) {
-                xs.attribute(null, ATTR_NAMES[ATTR_REL], thisLink[ATTR_REL]);
-            }
-            if(thisLink[ATTR_MIMETYPE] != null) {
-                xs.attribute(null, ATTR_NAMES[ATTR_MIMETYPE], thisLink[ATTR_MIMETYPE]);
+
+            for(j = 0; j < thisLink.length; j++) {
+                if(thisLink[j] != null) {
+                    xs.attribute(null, ATTR_NAMES[j], thisLink[j]);
+                }
             }
             xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_LINK]);
         }
+
+
+
     }
     
     
