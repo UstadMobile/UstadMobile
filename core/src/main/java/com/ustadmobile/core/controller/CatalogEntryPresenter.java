@@ -52,7 +52,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     private Vector[] modifyUnacquiredEntries;
 
-    private static final int CMD_REMOVE_ENTRY = 60;
+    private static final int CMD_REMOVE_PRESENTER_ENTRY = 60;
 
     private static final int CMD_DOWNLOAD_OTHER_LANG = 61;
 
@@ -249,11 +249,23 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         if(modifyAcquiredEntries[1].size() == 1) {
                             handleClickRemove(new UstadJSOPDSEntry[]{
                                     (UstadJSOPDSEntry) modifyAcquiredEntries[1].elementAt(0)});
+                        }else {
+                            String[] languagesToRemove = new String[modifyAcquiredEntries[0].size()];
+                            modifyAcquiredEntries[0].copyInto(languagesToRemove);
+                            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                            impl.getAppView(getContext()).showChoiceDialog(
+                                    impl.getString(MessageID.delete, getContext()), languagesToRemove,
+                                    CMD_REMOVE_PRESENTER_ENTRY,this);
                         }
 
                         break;
                 }
 
+                break;
+
+            case CMD_REMOVE_PRESENTER_ENTRY:
+                UstadJSOPDSEntry entryToDelete = (UstadJSOPDSEntry)modifyAcquiredEntries[1].elementAt(choice);
+                handleClickRemove(new UstadJSOPDSEntry[]{entryToDelete});
                 break;
         }
 
@@ -267,9 +279,13 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     @Override
     protected void onEntriesRemoved() {
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, true);
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY, false);
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, false);
+        //check if any version is still acquired
+        Hashtable acquiredVersions = getTranslatedAlternatives(entry, CatalogController.STATUS_ACQUIRED);
+        if(acquiredVersions.size() == 0) {
+            catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, true);
+            catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY, false);
+            catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, false);
+        }
     }
 
     @Override
