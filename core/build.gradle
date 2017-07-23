@@ -67,7 +67,7 @@ if(rootProject.file("buildconfig.local.properties").exists()) {
  * will otherwise mark it as an unresolved reference if we use the default generated sources directory.
  */
 task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    inputs.files(rootProject.files("buildconfig.*.properties"))
+    inputs.files(fileTree(dir: rootProject.file(".")).matching { include 'buildconfig.*.properties' })
     outputDir = new File ("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.core.buildconfig"
     appName = project.ext.buildConfigProperties['appName']
@@ -145,7 +145,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
 compileJava.dependsOn(generateCoreBuildConfig)
 
 task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
-    inputs.files(rootProject.files("locale/**/*.xml"))
+    inputs.files(fileTree(dir: rootProject.file("locale")).matching { include '*.xml' })
     outputDir = new File("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.core.generated.locale"
 
