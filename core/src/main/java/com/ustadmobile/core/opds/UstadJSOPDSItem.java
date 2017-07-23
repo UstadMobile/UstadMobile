@@ -358,7 +358,7 @@ public abstract class UstadJSOPDSItem {
      *
      * @return a vector of link string arrays
      */
-    public Vector getAlternativeTranslations() {
+    public Vector getAlternativeTranslationLinks() {
         Vector alternateLinks = getLinks(LINK_REL_ALTERNATE, null);
         Vector translations = new Vector();
         final String itemLang = getLanguage();

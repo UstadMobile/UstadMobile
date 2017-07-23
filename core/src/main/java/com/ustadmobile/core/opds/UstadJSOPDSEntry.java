@@ -286,4 +286,28 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         return feed;
     }
 
+    /**
+     * Get the entry ids of translated versions of this resource. Looks at the alternative translation
+     * links, and then goes through the parent feed to find those entries.
+     *
+     * @return String array of translated versions of this resource
+     */
+    public String[] getAlternativeTranslationEntryIds() {
+        Vector translationLinks = getAlternativeTranslationLinks();
+        Vector translatedIds = new Vector();
+        String[] currentLink;
+        UstadJSOPDSEntry translatedEntry;
+        for(int i = 0; i < translationLinks.size(); i++) {
+            currentLink = (String[])translationLinks.elementAt(i);
+            translatedEntry  =parentFeed.findEntryForAlternateTranslation(
+                    currentLink[ATTR_HREF]);
+            if(translatedEntry != null)
+                translatedIds.addElement(translatedEntry.id);
+        }
+
+        String[] alternativeEntryIds = new String[translatedIds.size()];
+        translatedIds.copyInto(alternativeEntryIds);
+        return alternativeEntryIds;
+    }
+
 }

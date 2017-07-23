@@ -268,7 +268,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         for(int i = 0; i < numEntries; i++) {
             UstadJSOPDSEntry selectedEntry = (UstadJSOPDSEntry)selectedEntries.elementAt(i);
 
-            Vector entryTranslationLinks = getEntryById(selectedEntry.id).getAlternativeTranslations();
+            Vector entryTranslationLinks = getEntryById(selectedEntry.id).getAlternativeTranslationLinks();
             Vector translatedEntriesVector = new Vector();
             String[] entryTranslationLink;
 
@@ -436,7 +436,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         String[] currentLink;
         String currentLang;
         for(i = 0; i < size; i++) {
-            alternateTranslations = getEntry(i).getAlternativeTranslations();
+            alternateTranslations = getEntry(i).getAlternativeTranslationLinks();
 
             for(j = 0; j < alternateTranslations.size(); j++){
                 currentLink = (String[])alternateTranslations.elementAt(j);

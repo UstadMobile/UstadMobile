@@ -3,13 +3,12 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AcquisitionManager;
-import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
 
@@ -22,9 +21,11 @@ import java.util.Vector;
 
 public abstract class BaseCatalogController extends UstadBaseController implements AppViewChoiceListener  {
 
-    public static final int CMD_CHOOSE_LANG = 52;
+    public static final int CMD_CHOOSE_LANG_DOWNLOAD = 52;
 
     public static final int CMD_REMOVE_ENTRIES = 53;
+
+    public static final int CMD_CHOOSE_LANG_OPEN = 54;
 
     /**
      * Preferred format list is kept as a comma separated string
@@ -38,6 +39,8 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
     protected Vector acquisitionEntriesSelected;
 
     protected UstadJSOPDSEntry[] removeEntriesSelected;
+
+    protected Vector openEntriesAvailable;
 
     public interface AcquisitionChoicesCompletedCallback {
 
@@ -85,9 +88,9 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
             impl.getAppView(context).showChoiceDialog(
                     impl.getString(MessageID.language, getContext()),
-                    displayLanguages, CMD_CHOOSE_LANG, this);
+                    displayLanguages, CMD_CHOOSE_LANG_DOWNLOAD, this);
         }else if(availableLanguages.size() == 1){
-            appViewChoiceSelected(CMD_CHOOSE_LANG, 0);
+            appViewChoiceSelected(CMD_CHOOSE_LANG_DOWNLOAD, 0);
         }
     }
 
@@ -102,8 +105,56 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
     }
 
     public void handleClickOpenEntry(UstadJSOPDSEntry entry) {
+        Vector candidateEntries = new Vector();
+        Vector acquiredEntries = new Vector();
+
+        candidateEntries.addElement(entry);
+        String[] translatedEntryIds = entry.getAlternativeTranslationEntryIds();
+        for(int i = 0; i < translatedEntryIds.length; i++) {
+            UstadJSOPDSEntry translatedEntry = entry.parentFeed.getEntryById(translatedEntryIds[i]);
+            if(translatedEntry != null)
+                candidateEntries.addElement(translatedEntry);
+
+        }
+
+        CatalogEntryInfo info;
+        UstadJSOPDSEntry candidateEntry;
+        for(int i = 0; i < candidateEntries.size(); i++) {
+            candidateEntry = (UstadJSOPDSEntry)candidateEntries.elementAt(i);
+            info = CatalogController.getEntryInfo(candidateEntry.id,
+                    CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
+                    getContext());
+            if(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED)
+                acquiredEntries.addElement(candidateEntry);
+        }
+
+        if(acquiredEntries.size() == 0) {
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
+                "Error: entry not acquired", AppView.LENGTH_LONG);
+        }else if(acquiredEntries.size() == 1) {
+            handleOpenEntry((UstadJSOPDSEntry)acquiredEntries.elementAt(0));
+        }else {
+            String[] availableLanguages = new String[acquiredEntries.size()];
+            Object candidateLangObj;
+            for(int i = 0; i < availableLanguages.length; i++) {
+                candidateEntry = (UstadJSOPDSEntry)acquiredEntries.elementAt(i);
+                candidateLangObj = UstadMobileConstants.LANGUAGE_NAMES.get(
+                        candidateEntry.getLanguage());
+                availableLanguages[i] = candidateLangObj != null ? (String)candidateLangObj :
+                        candidateEntry.getLanguage();
+            }
+            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            this.openEntriesAvailable = acquiredEntries;
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog(
+                    impl.getString(MessageID.select_language, getContext()), availableLanguages,
+                    CMD_CHOOSE_LANG_OPEN, this);
+        }
+    }
+
+    public void handleOpenEntry(UstadJSOPDSEntry entry) {
         CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
                 CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+
         if (entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
             Hashtable openArgs = new Hashtable();
             openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
@@ -114,10 +165,9 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
     }
 
 
-
     public void appViewChoiceSelected(int commandId, int choice) {
         switch(commandId) {
-            case CMD_CHOOSE_LANG:
+            case CMD_CHOOSE_LANG_DOWNLOAD:
                 UstadJSOPDSFeed acquisitionFeed = acquisitionFeedSelected.selectAcquisitionLinks(
                         acquisitionEntriesSelected, getPreferredFormats(context),
                         new String[]{acquisitionLanguageChoices[choice]},
@@ -139,6 +189,11 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
                             getContext());
                 }
                 onEntriesRemoved();
+                break;
+
+            case CMD_CHOOSE_LANG_OPEN:
+                handleOpenEntry((UstadJSOPDSEntry)openEntriesAvailable.elementAt(choice));
+                openEntriesAvailable = null;
                 break;
         }
     }

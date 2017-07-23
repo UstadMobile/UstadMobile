@@ -50,7 +50,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_OPEN, R.id.activity_catalog_entry_open_button);
-        BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_REMOVE, R.id.activity_catalog_entry_remove_modify_button);
+        BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_MODIFY, R.id.activity_catalog_entry_remove_modify_button);
     }
 
 

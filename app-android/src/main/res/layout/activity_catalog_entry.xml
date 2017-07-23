@@ -81,7 +81,7 @@
                     android:id="@+id/activity_catalog_entry_download_button"
                     android:background="@color/catalog_entry_download_button_background"
                     android:textColor="@color/catalog_entry_download_button_text"
-                    android:text="Download"
+                    android:text="@string/download"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />
@@ -89,7 +89,7 @@
                     android:id="@+id/activity_catalog_entry_remove_modify_button"
                     android:background="@color/catalog_entry_remove_modify_button_background"
                     android:textColor="@color/catalog_entry_remove_modify_button_text"
-                    android:text="Remove"
+                    android:text="@string/delete"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />
@@ -97,7 +97,7 @@
                     android:id="@+id/activity_catalog_entry_open_button"
                     android:background="@color/catalog_entry_open_button_background"
                     android:textColor="@color/catalog_entry_open_button_text"
-                    android:text="Open"
+                    android:text="@string/open"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />

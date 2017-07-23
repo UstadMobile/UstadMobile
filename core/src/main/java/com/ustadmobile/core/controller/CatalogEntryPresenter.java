@@ -1,8 +1,5 @@
 package com.ustadmobile.core.controller;
 
-import com.ustadmobile.core.impl.AcquisitionManager;
-import com.ustadmobile.core.impl.AcquisitionStatusEvent;
-import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -15,6 +12,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.CatalogEntryView;
 
 
@@ -45,6 +43,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     private long entryCheckTaskId = -1;
 
+    private String[] entryTranslationIds;
+
     public CatalogEntryPresenter(Object context) {
         super(context);
     }
@@ -68,8 +68,23 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
                         CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
                 catalogEntryView.setDescription(entry.content, entry.getContentType());
+                entryTranslationIds = entry.getAlternativeTranslationEntryIds();
 
-                updateButtonsByStatus(entryInfo != null ? entryInfo.acquisitionStatus :
+                boolean isAcquired = entryInfo != null
+                        ? entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED
+                        : false;
+
+                CatalogEntryInfo translatedEntryInfo;
+                for(int i = 0; i < entryTranslationIds.length && !isAcquired; i++) {
+                    translatedEntryInfo = CatalogController.getEntryInfo(entryTranslationIds[i],
+                            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
+                            context);
+                    isAcquired = translatedEntryInfo != null
+                            && translatedEntryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED;
+                }
+
+
+                updateButtonsByStatus(isAcquired ? CatalogController.STATUS_ACQUIRED :
                         CatalogController.STATUS_NOT_ACQUIRED);
 
                 loadImages();
@@ -100,7 +115,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 acquisitionStatus != CatalogController.STATUS_ACQUIRED);
         catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN,
                 acquisitionStatus == CatalogController.STATUS_ACQUIRED);
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE,
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY,
                 acquisitionStatus == CatalogController.STATUS_ACQUIRED);
     }
 
@@ -160,7 +175,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 handleClickDownload(entryFeed, selectedEntries);
                 break;
 
-            case CatalogEntryView.BUTTON_REMOVE:
+            case CatalogEntryView.BUTTON_MODIFY:
                 handleClickRemove(new UstadJSOPDSEntry[]{entry});
                 break;
             case CatalogEntryView.BUTTON_OPEN:
@@ -178,7 +193,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     @Override
     protected void onEntriesRemoved() {
         catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, true);
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_REMOVE, false);
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY, false);
         catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, false);
     }
 
@@ -189,7 +204,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     @Override
     public void acquisitionProgressUpdate(String entryId, final AcquisitionTaskStatus status) {
-        if(entry != null && entryId.equals(entry.id)) {
+        if(entry != null && (entryId.equals(entry.id) || UMUtil.getIndexInArray(entryId, entryTranslationIds) != -1)) {
             catalogEntryView.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -204,17 +219,19 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     @Override
     public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-        switch(status.getStatus()) {
-            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
-                catalogEntryView.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        catalogEntryView.setProgressVisible(false);
-                        updateButtonsByStatus(CatalogController.STATUS_ACQUIRED);
-                    }
-                });
-                break;
-            //TODO: handle show download failed
+        if(entryId.equals(entry.id) || UMUtil.getIndexInArray(entryId, entryTranslationIds) != -1) {
+            switch(status.getStatus()) {
+                case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
+                    catalogEntryView.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            catalogEntryView.setProgressVisible(false);
+                            updateButtonsByStatus(CatalogController.STATUS_ACQUIRED);
+                        }
+                    });
+                    break;
+                //TODO: handle show download failed
+            }
         }
     }
 

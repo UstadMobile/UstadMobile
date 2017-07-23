@@ -14,7 +14,7 @@ public interface CatalogEntryView extends UstadView {
 
     int BUTTON_DOWNLOAD = 0;
 
-    int BUTTON_REMOVE = 1;
+    int BUTTON_MODIFY = 1;
 
     int BUTTON_OPEN = 2;
 
