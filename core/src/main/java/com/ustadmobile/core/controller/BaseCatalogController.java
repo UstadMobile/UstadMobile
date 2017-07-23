@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
 
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -66,15 +67,15 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
      *
      * @param
      */
-    public void handleClickDownload(UstadJSOPDSFeed acquisitionFeed, Vector selectedEntries) {
+    public void handleClickDownload(UstadJSOPDSFeed acquisitionFeed, Vector selectedEntries, String[] languageChoices, boolean forceShowLanguageChoice) {
         this.acquisitionFeedSelected = acquisitionFeed;
         this.acquisitionEntriesSelected = selectedEntries;
+        this.acquisitionLanguageChoices = languageChoices;
 
-        Vector availableLanguages = acquisitionFeed.getAvailableLanguages();
-        acquisitionLanguageChoices = new String[availableLanguages.size()];
-        availableLanguages.copyInto(acquisitionLanguageChoices);
 
-        if(availableLanguages.size() > 1) {
+        if(languageChoices.length == 1 && !forceShowLanguageChoice){
+            appViewChoiceSelected(CMD_CHOOSE_LANG_DOWNLOAD, 0);
+        }else {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             String[] displayLanguages = new String[acquisitionLanguageChoices.length];
             Object displayLangVal;
@@ -89,10 +90,18 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
             impl.getAppView(context).showChoiceDialog(
                     impl.getString(MessageID.language, getContext()),
                     displayLanguages, CMD_CHOOSE_LANG_DOWNLOAD, this);
-        }else if(availableLanguages.size() == 1){
-            appViewChoiceSelected(CMD_CHOOSE_LANG_DOWNLOAD, 0);
         }
     }
+
+    public void handleClickDownload(UstadJSOPDSFeed acquisitionFeed, Vector selectedEntries) {
+        Vector availableLanguages = acquisitionFeed.getAvailableLanguages();
+        acquisitionLanguageChoices = new String[availableLanguages.size()];
+        availableLanguages.copyInto(acquisitionLanguageChoices);
+
+        handleClickDownload(acquisitionFeed, selectedEntries, acquisitionLanguageChoices, false);
+    }
+
+
 
     public void handleClickRemove(UstadJSOPDSEntry[] entries) {
         this.removeEntriesSelected = entries;
@@ -104,47 +113,96 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
     }
 
-    public void handleClickOpenEntry(UstadJSOPDSEntry entry) {
-        Vector candidateEntries = new Vector();
-        Vector acquiredEntries = new Vector();
-
-        candidateEntries.addElement(entry);
+    protected Hashtable getTranslatedAlternatives(UstadJSOPDSEntry entry){
+        Hashtable candidateEntries = new Hashtable();
+        candidateEntries.put(entry.getLanguage() != null ? entry.getLanguage() : "", entry);
         String[] translatedEntryIds = entry.getAlternativeTranslationEntryIds();
         for(int i = 0; i < translatedEntryIds.length; i++) {
             UstadJSOPDSEntry translatedEntry = entry.parentFeed.getEntryById(translatedEntryIds[i]);
-            if(translatedEntry != null)
-                candidateEntries.addElement(translatedEntry);
+            if(translatedEntry != null && translatedEntry.getLanguage() != null)
+                candidateEntries.put(translatedEntry.getLanguage(), translatedEntry);
 
         }
+
+        return candidateEntries;
+    }
+
+    /**
+     * Returns a hashtable in the form of language - entry id for the entry and any known translations
+     *
+     * @param entry
+     *
+     * @return
+     */
+    protected Hashtable getTranslatedAlternatives(UstadJSOPDSEntry entry, int acquisitionStatus) {
+        Hashtable candidateEntries = getTranslatedAlternatives(entry);
+        Hashtable matchingEntries = new Hashtable();
+
 
         CatalogEntryInfo info;
         UstadJSOPDSEntry candidateEntry;
-        for(int i = 0; i < candidateEntries.size(); i++) {
-            candidateEntry = (UstadJSOPDSEntry)candidateEntries.elementAt(i);
+        String candidateLang;
+        Enumeration candidateLangs = candidateEntries.keys();
+        while(candidateLangs.hasMoreElements()) {
+            candidateLang = (String)candidateLangs.nextElement();
+            candidateEntry = (UstadJSOPDSEntry)candidateEntries.get(candidateLang);
             info = CatalogController.getEntryInfo(candidateEntry.id,
                     CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
                     getContext());
-            if(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED)
-                acquiredEntries.addElement(candidateEntry);
+            if(info != null && info.acquisitionStatus == acquisitionStatus) {
+                matchingEntries.put(candidateLang, candidateEntry);
+            }else if(info == null && acquisitionStatus == CatalogController.STATUS_NOT_ACQUIRED) {
+                matchingEntries.put(candidateLang, candidateEntry);
+            }
         }
 
-        if(acquiredEntries.size() == 0) {
+        return matchingEntries;
+    }
+
+    /**
+     * Prepares two vectors in corresponding order. The first vector is a list of langauges in which
+     * the item is available. The second vector is a list of the corresponding entry ids.
+     *
+     * @param entry
+     * @param acquisitionStatus
+     *
+     * @return
+     */
+    protected Vector[] getTranslatedAlternativesLangVectors(UstadJSOPDSEntry entry, int acquisitionStatus) {
+        Vector langNameVector= new Vector();
+        Vector entryIdVector = new Vector();
+
+        Hashtable translatedAlternativesTable = getTranslatedAlternatives(entry, acquisitionStatus);
+        Enumeration langCodesE = translatedAlternativesTable.keys();
+
+        Object langNameObj;
+        String langCode;
+        while(langCodesE.hasMoreElements()) {
+            langCode = (String)langCodesE.nextElement();
+            langNameObj = UstadMobileConstants.LANGUAGE_NAMES.get(langCode);
+            langNameVector.addElement(langNameObj != null ? langNameObj : langCode);
+            entryIdVector.addElement(translatedAlternativesTable.get(langCode));
+        }
+
+        return new Vector[]{langNameVector, entryIdVector};
+    }
+
+
+    public void handleClickOpenEntry(UstadJSOPDSEntry entry) {
+        Vector[] langOptionsVectors = getTranslatedAlternativesLangVectors(entry,
+                CatalogController.STATUS_ACQUIRED);
+
+        if(langOptionsVectors[0].size() == 0) {
             UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
                 "Error: entry not acquired", AppView.LENGTH_LONG);
-        }else if(acquiredEntries.size() == 1) {
-            handleOpenEntry((UstadJSOPDSEntry)acquiredEntries.elementAt(0));
+        }else if(langOptionsVectors[0].size() == 1) {
+            handleOpenEntry((UstadJSOPDSEntry)langOptionsVectors[1].elementAt(0));
         }else {
-            String[] availableLanguages = new String[acquiredEntries.size()];
-            Object candidateLangObj;
-            for(int i = 0; i < availableLanguages.length; i++) {
-                candidateEntry = (UstadJSOPDSEntry)acquiredEntries.elementAt(i);
-                candidateLangObj = UstadMobileConstants.LANGUAGE_NAMES.get(
-                        candidateEntry.getLanguage());
-                availableLanguages[i] = candidateLangObj != null ? (String)candidateLangObj :
-                        candidateEntry.getLanguage();
-            }
+            String[] availableLanguages = new String[langOptionsVectors[0].size()];
+            langOptionsVectors[0].copyInto(availableLanguages);
+
             final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            this.openEntriesAvailable = acquiredEntries;
+            this.openEntriesAvailable = langOptionsVectors[1];
             UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog(
                     impl.getString(MessageID.select_language, getContext()), availableLanguages,
                     CMD_CHOOSE_LANG_OPEN, this);

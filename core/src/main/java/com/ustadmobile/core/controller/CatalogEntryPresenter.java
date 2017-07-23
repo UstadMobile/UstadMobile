@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -44,6 +45,18 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     private long entryCheckTaskId = -1;
 
     private String[] entryTranslationIds;
+
+    private Integer[] modifyCommandsAvailable;
+
+    private Vector[] modifyAcquiredEntries;
+
+    private Vector[] modifyUnacquiredEntries;
+
+    private static final int CMD_REMOVE_ENTRY = 60;
+
+    private static final int CMD_DOWNLOAD_OTHER_LANG = 61;
+
+    private static final int CMD_MODIFY_ENTRY = 62;
 
     public CatalogEntryPresenter(Object context) {
         super(context);
@@ -176,13 +189,75 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 break;
 
             case CatalogEntryView.BUTTON_MODIFY:
-                handleClickRemove(new UstadJSOPDSEntry[]{entry});
+                handleClickModify();
                 break;
             case CatalogEntryView.BUTTON_OPEN:
                 handleClickOpenEntry(entry);
                 break;
 
         }
+    }
+
+    protected void handleClickModify() {
+        modifyAcquiredEntries = getTranslatedAlternativesLangVectors(entry,
+                CatalogController.STATUS_ACQUIRED);
+
+        modifyUnacquiredEntries = getTranslatedAlternativesLangVectors(entry,
+                CatalogController.STATUS_NOT_ACQUIRED);
+
+        Vector modifyCommandsAvailableVector = new Vector();
+        if(modifyAcquiredEntries[0].size() > 0)
+            modifyCommandsAvailableVector.addElement(new Integer(MessageID.delete));
+
+        if(modifyUnacquiredEntries[0].size() > 0)
+            modifyCommandsAvailableVector.addElement(new Integer(MessageID.download_in_another_language));
+
+        modifyCommandsAvailable = new Integer[modifyCommandsAvailableVector.size()];
+        modifyCommandsAvailableVector.copyInto(modifyCommandsAvailable);
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String[] modifyOptionsToShow = new String[modifyCommandsAvailable.length];
+        for(int i = 0; i < modifyOptionsToShow.length; i++) {
+            modifyOptionsToShow[i] = impl.getString(modifyCommandsAvailable[i].intValue(),
+                    getContext());
+        }
+
+        impl.getAppView(getContext()).showChoiceDialog(impl.getString(MessageID.modify, getContext()),
+                modifyOptionsToShow, CMD_MODIFY_ENTRY, this);
+
+    }
+
+    @Override
+    public void appViewChoiceSelected(int commandId, int choice) {
+        switch(commandId) {
+            case CMD_MODIFY_ENTRY:
+                int cmdChosen = modifyCommandsAvailable[choice].intValue();
+
+                switch(cmdChosen) {
+                    case MessageID.download_in_another_language:
+                        Vector selectedEntries = new Vector();
+                        selectedEntries.addElement(entry);
+                        String[] languageChoices = new String[modifyUnacquiredEntries[0].size()];
+                        for(int i = 0; i < languageChoices.length; i++) {
+                            languageChoices[i] = ((UstadJSOPDSEntry)
+                                    modifyUnacquiredEntries[1].elementAt(i)).getLanguage();
+                        }
+                        handleClickDownload(entryFeed, selectedEntries, languageChoices, true);
+                        break;
+
+                    case MessageID.delete:
+                        if(modifyAcquiredEntries[1].size() == 1) {
+                            handleClickRemove(new UstadJSOPDSEntry[]{
+                                    (UstadJSOPDSEntry) modifyAcquiredEntries[1].elementAt(0)});
+                        }
+
+                        break;
+                }
+
+                break;
+        }
+
+        super.appViewChoiceSelected(commandId, choice);
     }
 
     @Override

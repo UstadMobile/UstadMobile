@@ -1557,9 +1557,17 @@ public class CatalogController extends BaseCatalogController implements AppViewC
                         thisEntryInfo.fileURI = containerFiles[i];
                         thisEntryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
                         thisEntryInfo.srcURLs = new String[] { containerFiles[i] };
-                        setEntryInfo(containerFeed.entries[j].id, thisEntryInfo, 
-                            resourceMode, context);
+                        setEntryInfo(containerFeed.entries[j].id, thisEntryInfo,
+                                resourceMode, context);
                     }
+
+                    if(thisEntryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+                        thisEntryInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+                        setEntryInfo(containerFeed.entries[j].id, thisEntryInfo,
+                                resourceMode, context);
+                    }
+
+
                 }
             }catch(Exception e) {
                impl.l(UMLog.ERROR, 113, containerFiles[i], e);

@@ -89,7 +89,7 @@
                     android:id="@+id/activity_catalog_entry_remove_modify_button"
                     android:background="@color/catalog_entry_remove_modify_button_background"
                     android:textColor="@color/catalog_entry_remove_modify_button_text"
-                    android:text="@string/delete"
+                    android:text="@string/modify"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content" />

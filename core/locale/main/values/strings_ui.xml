@@ -99,6 +99,8 @@
     <string name="sent">Sent</string>
     <string name="sending">Sending</string>
     <string name="not_taken">Not Taken</string>
+    <string name="download_in_another_language">Download in another language</string>
+    <string name="modify">Modify</string>
 
 
     <string name="welcome">Welcome!</string>
