@@ -144,7 +144,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
 }
 compileJava.dependsOn(generateCoreBuildConfig)
 
-task prepareLocale2 (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
     inputs.files(rootProject.files("locale/**/*.xml"))
     outputDir = new File("${projectDir}/src/main/java")
     packageName = "com.ustadmobile.core.generated.locale"
@@ -174,50 +174,6 @@ task prepareLocale2 (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigT
         buildConfigField "int", strName, String.valueOf(value)
     }
 }
-compileJava.dependsOn(prepareLocale2)
-
-task prepareLocale {
-    inputs.files("core/locale/*/*.properties")
-    doLast {
-
-        File coreLocaleDir = rootProject.file("core/locale/main")
-        String[] coreLocaleFileNames = coreLocaleDir.listFiles(new FilenameFilter() {
-            @Override
-            boolean accept(File file, String s) {
-                return s.endsWith(".properties")
-            }
-        })
-
-        File localeDir = project.file("src/main/assets/locale")
-        if(!localeDir.isDirectory()) {
-            localeDir.mkdir()
-        }
-
-        for(int i = 0; i < coreLocaleFileNames.length; i++){
-            Properties locale = new Properties()
-            File mainLocaleFile = new File(coreLocaleFileNames[i])
-            locale.load(new FileReader(mainLocaleFile))
-            String nameOnly = coreLocaleFileNames[i]
-            System.out.println("Path Sep = '" + File.separator +"'")
-            if(nameOnly.contains(File.separator)) {
-                nameOnly = nameOnly.substring(nameOnly.lastIndexOf(File.separator)+1)
-            }
-
-            System.out.println("Name only = " + nameOnly)
-            String localFileName = "core/locale/localconfig/" + nameOnly
-            File localConfigMatch = rootProject.file(localFileName)
-            if(localConfigMatch.exists()) {
-                locale.load(new FileReader(localConfigMatch))
-            }
-
-
-
-            File mergedDestFile = rootProject.file("core/src/main/assets/locale/" + nameOnly)
-            locale.store(new FileWriter(mergedDestFile), "DO NOT EDIT! This is an automerge of main and localconfig locale properties and will be overwritten on build")
-        }
-    }
-}
-
 compileJava.dependsOn(prepareLocale)
 
 /*
