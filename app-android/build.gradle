@@ -58,7 +58,6 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(copyXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
-        variant.javaCompiler.dependsOn(copyLocaleFilesFromCore)
     }
 }
 
@@ -145,20 +144,6 @@ task checkBuildConfig {
     inputs.files("buildconfig.*.properties")
 }
 assemble.dependsOn(checkBuildConfig)
-
-task copyLocaleFilesFromCore(type: Copy) {
-    inputs.files('../core/locale/**/*.properties')
-    from('../core/src/main/assets/locale/') {
-        include "*.properties"
-    }
-    into "src/main/assets/locale"
-    doLast {
-        System.out.println("Update locale files android")
-    }
-
-}
-assemble.dependsOn(copyLocaleFilesFromCore)
-
 
 task copyXmlLocaleFilesFromCore(type: Copy) {
     inputs.files('../core/locale/main/values/strings_ui.xml')
