@@ -240,4 +240,4 @@ testres/p2p/*
 !testres/p2p/startTestsTask.sh
 
 #Generated model
-#ustadmobile-ormlite/src/main/java/com/ustadmobile/port/ormlite/persistence/generated/model/*
+ustadmobile-ormlite/src/main/java/com/ustadmobile/port/ormlite/persistence/generated/model/*
