@@ -9,7 +9,18 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.nanolrs.android.service.UMSyncService;
+import com.ustadmobile.nanolrs.core.manager.NodeManager;
+import com.ustadmobile.nanolrs.core.manager.UserManager;
+import com.ustadmobile.nanolrs.core.model.Node;
+import com.ustadmobile.nanolrs.core.model.User;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.UUID;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 
@@ -34,6 +45,9 @@ public class NetworkServiceAndroid extends Service{
     private final IBinder mBinder = new LocalServiceBinder();
     private NetworkManagerAndroid networkManagerAndroid;
 
+    private UMSyncService umSyncService;
+
+
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
@@ -53,6 +67,9 @@ public class NetworkServiceAndroid extends Service{
         networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
+        Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
+        bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+
     }
 
     @Override
@@ -66,7 +83,7 @@ public class NetworkServiceAndroid extends Service{
             UstadMobileSystemImpl.getInstance().setAppPref("devices","",getApplicationContext());
         }
         unbindService(wifiP2PServiceConnection);
-
+        unbindService(umSyncServiceConnection);
 
         super.onDestroy();
     }
@@ -118,6 +135,85 @@ public class NetworkServiceAndroid extends Service{
             wifiDirectHandler = null;
         }
     };
+
+    /**
+     *This is an interface for monitoring the state of an application service.
+     * it defines callbacks for service binding, passed to bindService().
+     * Either of the two methods will be invoked:
+     * <p>
+     *     <b>onServiceConnected</b>: Invoked when service successfully connected
+     *     <b>onServiceDisconnected</b>: Invoked when service connection failed.
+     * </p>
+     */
+    ServiceConnection umSyncServiceConnection=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            User loggedInUser = null;
+            Node endNode = null;
+            String mainNodeHostName = "main1";
+            String loggedInUsername = null;
+            Object context = getApplicationContext();
+
+            UserManager userManager =
+                    PersistenceManager.getInstance().getManager(UserManager.class);
+            NodeManager nodeManager =
+                    PersistenceManager.getInstance().getManager(NodeManager.class);
+
+            umSyncService = ((UMSyncService.UMSyncBinder) iBinder).getService();
+
+            loggedInUsername = UstadMobileSystemImpl.getInstance().getActiveUser(context);
+            List<User> users = userManager.findByUsername(context, loggedInUsername);
+            if(users!=null&&!users.isEmpty()){
+                loggedInUser = users.get(0);
+            }else{
+                loggedInUser = null;
+                System.out.println("No user logged in. Setting null (will not proceed)");
+
+
+                //TODO: Remove this after logged in user is set
+                List<User> testusers = userManager.findByUsername(context, "test");
+                if(testusers!= null && !testusers.isEmpty()){
+                    loggedInUser = testusers.get(0);
+                }else{
+                    //create a test user
+                    try {
+                        loggedInUser = (User)userManager.makeNew();
+                        loggedInUser.setUsername("test");
+                        loggedInUser.setUuid(UUID.randomUUID().toString());
+                        loggedInUser.setPassword("secret");
+                        loggedInUser.setNotes("test user");
+                        loggedInUser.setDateCreated(System.currentTimeMillis());
+                        userManager.persist(context, loggedInUser);
+
+                        UstadMobileSystemImpl.getInstance().setActiveUser(loggedInUser.getUsername(), context);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println("!!!!!!Made a test user. PLEASE DELETE THIS FOR PROD!!!!!!");
+
+            }
+
+
+            try {
+                endNode = nodeManager.getMainNode(mainNodeHostName, context);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            umSyncService.setLoggedInUser(loggedInUser);
+            umSyncService.setEndNode(endNode);
+
+        }
+
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            //sup?
+            int x=0;
+        }
+    };
+
 
     /**
      * Class used for the client Binder.  Because we know this service always
