@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<feed xmlns="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/terms/"
+    xmlns:opds="http://opds-spec.org/2010/catalog">
+    <id>http://umcloud1.ustadmobile.com/opds/courseid/6CM</id>
+
+    <link rel="start"
+        href="/opds/"
+        type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+
+    <link rel="self"
+        href="test-acquisition-task-feed.opds"
+        type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+
+    <title>Skills for Success</title>
+    <updated>2015-02-09T21:00:57Z</updated>
+    <author>
+        <name>Mike Test4</name>
+        <uri>/user/6</uri>
+    </author>
+
+    <entry>
+        <title>CV Writing</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="1-cvwriting-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="cvwriting-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/png"
+            href="cvwriting-cover.png"/>
+
+        <id>202b10fe-b028-4b84-9b84-852aa123456a</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">How to write a standout CV</content>
+    </entry>
+
+    <entry>
+        <title>CV Writing (Dari)</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="1-cvwriting-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="cvwriting-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/png"
+            href="cvwriting-cover.png"/>
+
+        <id>202b10fe-b028-4b84-9b84-852aa123456b</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">How to write a standout CV (Dari)</content>
+    </entry>
+
+    <entry>
+        <title>CV Writing (Pashto)</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="1-cvwriting-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="cvwriting-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/png"
+            href="cvwriting-cover.png"/>
+
+        <id>202b10fe-b028-4b84-9b84-852aa123456c</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">How to write a standout CV (Pashto)</content>
+    </entry>
+
+
+</feed>
