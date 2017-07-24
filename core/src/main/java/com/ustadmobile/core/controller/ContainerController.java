@@ -428,12 +428,12 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
     public String getXAPIQuery() {
         String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
         String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
+        String xapiEndpoint = UMFileUtil.resolveLink(openPath, "/xapi");
 
-        //TODO: Change this hardcoded setting to something that is set properly
         return "?actor=" +
             URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
             "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
-            "&endpoint=" + URLTextUtil.urlEncodeUTF8("http://127.0.0.1:8001/xapi/") +
+            "&endpoint=" + URLTextUtil.urlEncodeUTF8(xapiEndpoint) +
             "&registration=" + registrationUUID;
     }
     
@@ -442,7 +442,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
      * Resolve an HREF from an OPF item to a full path
      * 
      * @param opf
-     * @param href
+     * @param hrefs
      * 
      * @return 
      */
