@@ -58,6 +58,7 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(copyXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
+        variant.javaCompiler.dependsOn(copyCachePrimeMain)
     }
 }
 
@@ -152,6 +153,17 @@ task copyXmlLocaleFilesFromCore(type: Copy) {
     into "src/main/res"
 }
 assemble.dependsOn(copyXmlLocaleFilesFromCore)
+
+task copyCachePrimeMain(type: Copy) {
+    outputs.upToDateWhen { false }
+    inputs.files(fileTree(dir: rootProject.file("core/src/main/assets/cache")).matching { include '**' })
+    eachFile { println it.file }
+    from ("../core/src/main/assets/cache")
+    include "**"
+    into "src/main/assets/cache"
+}
+assemble.dependsOn(copyCachePrimeMain)
+
 
 task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/*/*.xml")

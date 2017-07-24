@@ -218,6 +218,9 @@ core/src/main/java/com/ustadmobile/core/buildconfig/CoreBuildConfig.java
 core/src/main/java/com/ustadmobile/core/generated/*
 app-android/src/main/java/com/ustadmobile/port/android/generated/*
 
+#Copied cache prime files
+app-android/src/main/assets/cache
+
 #Local buildconfig files
 buildconfig.local.properties
 

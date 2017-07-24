@@ -256,11 +256,11 @@ public abstract class UstadMobileSystemImpl {
         try {
             checkCacheDir(context);
             loadActiveUserInfo(context);
-//            loadLocale(context);
             if(getActiveUser(context) != null) {
                 getHTTPCacheDir(context).setPrivateCacheDir(
                     getCacheDir(CatalogController.USER_RESOURCE, context));
             }
+            getHTTPCacheDir(context).primeCache(context);
 
             initRan = true;
         }catch(IOException e) {

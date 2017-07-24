@@ -9,7 +9,10 @@ import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -91,6 +94,8 @@ public class HTTPCacheDir {
     public static final int DEFAULT_MAX_ENTRIES = 200;
     
     private int maxEntries;
+
+    public static final String CACHE_PRIME_INDEX_RES = "cache/";
     
     /**
      * Starts a new HTTP cache directory in the directory given
@@ -105,12 +110,65 @@ public class HTTPCacheDir {
 
         this.maxEntries = maxEntries;
         
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-
         for(int i = 0; i < 2; i++) {
             initCacheDir(i);
         }
+    }
+
+    /**
+     *
+     *
+     * @param context
+     * @throws IOException
+     */
+    public void primeCache(Object context) throws IOException{
+        InputStream in = null;
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        try {
+            in = impl.openResourceInputStream(UMFileUtil.joinPaths(new String[]{CACHE_PRIME_INDEX_RES,
+                INDEX_FILENAME}), context);
+            UMIOUtils.readFully(in, bout, 1024);
+            in.close();
+            in = null;
+
+            String cacheJsonStr = new String(bout.toByteArray(), "UTF-8");
+            JSONObject primeObject = new JSONObject(cacheJsonStr);
+            Iterator<String> primeUrls = primeObject.keys();
+            String url;
+            JSONArray entry;
+            while(primeUrls.hasNext()) {
+                url = primeUrls.next();
+                if(getEntry(url) == null){
+                    InputStream entryIn = null;
+                    OutputStream entryOut = null;
+                    String filename;
+                    try {
+                        entry = primeObject.getJSONArray(url);
+                        filename = entry.getString(IDX_FILENAME);
+                        entryIn = impl.openResourceInputStream(UMFileUtil.joinPaths(new String[]{
+                            CACHE_PRIME_INDEX_RES, filename}), context);
+                        entryOut = impl.openFileOutputStream(UMFileUtil.joinPaths(new String[]{
+                                dirName[SHARED], filename}), 0);
+                        UMIOUtils.readFully(entryIn, entryOut, 1024);
+                        addEntryToCache(url, entry, SHARED);
+                    }catch(IOException e) {
+                        UstadMobileSystemImpl.l(UMLog.ERROR, 653, url, e);
+                    }catch(JSONException j) {
+                        UstadMobileSystemImpl.l(UMLog.ERROR, 655, url, j);
+                    }finally {
+                        UMIOUtils.closeOutputStream(entryOut);
+                        UMIOUtils.closeInputStream(entryIn);
+                    }
+                }
+            }
+
+        }catch(IOException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 654, null, e);
+        }finally {
+            UMIOUtils.closeInputStream(in);
+        }
+        saveIndex();
     }
     
     public HTTPCacheDir(String sharedDirName, String privateDirName) {
@@ -781,7 +839,7 @@ public class HTTPCacheDir {
         
         UMIOUtils.throwIfNotNullIO(ioe);
         
-        JSONArray arr  = new JSONArray();
+
 
         long currentTime = System.currentTimeMillis();
         long expiresTime = calculateExpiryTime(result.getResponseHeaders());
@@ -790,28 +848,38 @@ public class HTTPCacheDir {
         if(expiresTime == -1) {
             expiresTime = currentTime + DEFAULT_EXPIRES;
         }
-        
+
         try {
-            arr.put(IDX_EXPIRES, expiresTime);
-            arr.put(IDX_ETAG, result.getHeaderValue("etag"));
-            arr.put(IDX_LASTMODIFIED, 0);
-            arr.put(IDX_LASTACCESSED, System.currentTimeMillis());
-            arr.put(IDX_FILENAME, filename);
-            arr.put(IDX_PRIVATE, cacheNum == PRIVATE);
-            cacheIndex[cacheNum].put(url, arr);
+            JSONArray cacheEntry = new JSONArray();
+            cacheEntry.put(IDX_EXPIRES, expiresTime);
+            cacheEntry.put(IDX_ETAG, result.getHeaderValue("etag"));
+            cacheEntry.put(IDX_LASTMODIFIED, 0);
+            cacheEntry.put(IDX_LASTACCESSED, System.currentTimeMillis());
+            cacheEntry.put(IDX_FILENAME, filename);
+            cacheEntry.put(IDX_PRIVATE, cacheNum == PRIVATE);
+            addEntryToCache(url, cacheEntry, cacheNum);
         }catch(JSONException e) {
             //this should never happen putting simlpe values in
             impl.l(UMLog.ERROR, 125, url, e);
         }
-        
-        
+
         return cacheFileURI;
     }
-    
+
     public String cacheResult(String url, HTTPResult result) throws IOException{
         return cacheResult(url, result, null);
     }
-    
+
+
+    protected void addEntryToCache(String url, JSONArray entry, int cacheNum) {
+        try {
+            cacheIndex[cacheNum].put(url, entry);
+        }catch(JSONException e) {
+            //should never happen - putting a basic key in
+            e.printStackTrace();
+        }
+    }
+
 
     static class IteratorArrayEnumeration implements Enumeration{
 
