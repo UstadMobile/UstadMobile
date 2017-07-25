@@ -35,6 +35,7 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.HTTPCacheDir;
@@ -1065,6 +1066,16 @@ public abstract class UstadMobileSystemImpl {
      * @return String: file absolute path
      */
     public abstract String getAppSetupFile(Object context);
+
+
+    /**
+     * Retrieve the progress for a given course entry id.
+     *
+     * @param entryIds
+     * @return
+     */
+    public abstract CourseProgress getCourseProgress(String[] entryIds, Object context);
+
 }
 
 

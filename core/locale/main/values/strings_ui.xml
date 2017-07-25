@@ -101,6 +101,9 @@
     <string name="not_taken">Not Taken</string>
     <string name="download_in_another_language">Download in another language</string>
     <string name="modify">Modify</string>
+    <string name="passed">Passed</string>
+    <string name="failed_message">Try again</string>
+    <string name="in_progress">In progress</string>
 
 
     <string name="welcome">Welcome!</string>

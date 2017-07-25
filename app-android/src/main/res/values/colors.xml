@@ -44,4 +44,10 @@
 
     <color name="highlight_area">#009688</color>
 
+    <color name="entry_learner_progress_in_progress">#565656</color>
+
+    <color name="entry_learner_progresss_failed">#ffa904</color>
+
+    <color name="entry_learner_progress_passed">#6bb865</color>
+
 </resources>

@@ -35,7 +35,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -44,10 +47,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.txusballesteros.widgets.FitChart;
+import com.txusballesteros.widgets.FitChartValue;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by mike on 08/08/15.
@@ -55,6 +65,14 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 public class OPDSEntryCard extends android.support.v7.widget.CardView {
 
     private UstadJSOPDSEntry entry;
+
+    private static final HashMap<Integer, Integer> STATUS_TO_COLOR_MAP = new HashMap<>();
+
+    static {
+        STATUS_TO_COLOR_MAP.put(MessageID.in_progress, R.color.entry_learner_progress_in_progress);
+        STATUS_TO_COLOR_MAP.put(MessageID.failed_message, R.color.entry_learner_progresss_failed);
+        STATUS_TO_COLOR_MAP.put(MessageID.passed, R.color.entry_learner_progress_passed);
+    }
 
     /**
      * The 100% amount of the progress bar; defined as 100
@@ -157,6 +175,42 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     public void setThumbnail(Bitmap bitmap) {
         ((ImageView)findViewById(R.id.opds_item_thumbnail)).setImageBitmap(bitmap);
     }
+
+    public void setProgress(CourseProgress progress) {
+        View progressViewHolder = findViewById(R.id.opds_item_learner_progress_holder);
+        switch(progress.getStatus()) {
+            case CourseProgress.STATUS_NOT_STARTED:
+                progressViewHolder.setVisibility(View.GONE);
+                break;
+
+            default:
+                progressViewHolder.setVisibility(View.VISIBLE);
+
+                FitChart chart = (FitChart)findViewById(R.id.opds_item_learner_progress_fitchart);
+                chart.setMinValue(0f);
+                chart.setMaxValue(100);
+                int percentageToShow =progress.getStatus() == MessageID.in_progress
+                        ? progress.getProgress() : Math.round(progress.getScore() * 100);
+
+                int statusColorId = STATUS_TO_COLOR_MAP.get(progress.getStatus());
+                FitChartValue chartValue = new FitChartValue(percentageToShow, statusColorId);
+                ArrayList<FitChartValue> chartValues = new ArrayList<>();
+                chartValues.add(chartValue);
+                chart.setValues(chartValues);
+                TextView progressNumTextView = (TextView)findViewById(
+                        R.id.opds_item_learner_progress_text);
+                progressNumTextView.setText(percentageToShow + "%");
+                progressNumTextView.setTextColor(statusColorId);
+
+                TextView progressTextView = (TextView)findViewById(R.id.opds_item_learner_progress_status_text);
+                progressTextView.setText(UstadMobileSystemImpl.getInstance().getString(
+                        progress.getStatus(), getContext()));
+                progressTextView.setTextColor(statusColorId);
+                break;
+        }
+
+    }
+
 
     @Override
     protected void dispatchDraw(Canvas canvas) {

@@ -47,7 +47,9 @@
             android:id="@+id/opdsitem_title_text"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/opds_item_thumbnail"
-            android:layout_toEndOf="@+id/opds_item_thumbnail"/>
+            android:layout_toEndOf="@+id/opds_item_thumbnail"
+            android:layout_toStartOf="@+id/opds_item_learner_progress_holder"
+            android:layout_toLeftOf="@+id/opds_item_learner_progress_holder"/>
 
         <TextView
             android:layout_marginTop="5dp"
@@ -58,7 +60,9 @@
             android:id="@+id/opds_item_detail_text"
             android:layout_below="@+id/opdsitem_title_text"
             android:layout_alignLeft="@+id/opdsitem_title_text"
-            android:layout_alignStart="@+id/opdsitem_title_text" />
+            android:layout_alignStart="@+id/opdsitem_title_text"
+            android:layout_toStartOf="@+id/opds_item_learner_progress_holder"
+            android:layout_toLeftOf="@+id/opds_item_learner_progress_holder"/>
 
         <ProgressBar
             style="?android:attr/progressBarStyleHorizontal"
@@ -73,6 +77,48 @@
             android:max="100"
             android:progress="0"
             android:visibility="invisible" />
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/opds_item_learner_progress_holder"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:id="@+id/opds_item_learner_progress_status_text"
+                android:textSize='8dp'
+                android:textAllCaps="true"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <FrameLayout
+                android:layout_width="50dp"
+                android:layout_height="50dp">
+
+                <com.txusballesteros.widgets.FitChart
+                    android:id="@+id/opds_item_learner_progress_fitchart"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    card_view:strokeSize="2dp"
+                    android:gravity="center"
+                    />
+
+                <TextView
+                    android:id="@+id/opds_item_learner_progress_text"
+                    android:text="50%"
+                    android:gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+
 
         <LinearLayout
             android:id="@+id/opds_item_status_layout"

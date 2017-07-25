@@ -65,6 +65,7 @@ import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
@@ -454,6 +455,18 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 //TODO: idToCardMap should not be null when this is called... this should only be called after cards are made...
                 if(idToCardMap != null && idToCardMap.containsKey(entryId)) {
                     idToCardMap.get(entryId).setThumbnail(bitmap);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void setEntryProgress(final String entryId, final CourseProgress progress) {
+        super.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(idToCardMap != null && idToCardMap.containsKey(entryId)) {
+                    idToCardMap.get(entryId).setProgress(progress);
                 }
             }
         });

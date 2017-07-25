@@ -63,11 +63,13 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.WelcomeView;
+import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
@@ -315,6 +317,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         SharedPreferences appPrefs = getAppSharedPreferences((Context)context);
         currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
         currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
+        xapiAgent = XapiAgentEndpoint.createOrUpdate(context, null, currentUsername,
+                UMTinCanUtil.getXapiServer(context));
         this.userPreferences = null;
         return true;
     }

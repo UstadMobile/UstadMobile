@@ -31,6 +31,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 
@@ -129,6 +130,16 @@ public interface CatalogView extends UstadView{
      * @param total total amount to load (or -1 if not yet known)
      */
     public void updateDownloadEntryProgress(String entryId, int loaded, int total);
+
+    /**
+     * Show the user's progress on this course (displayed to the right of the entry as a donut
+     * chart (e.g. fitness goal style).
+     *
+     * @param entryId
+     * @param progress
+     */
+    void setEntryProgress(String entryId, CourseProgress progress);
+
     
     /**
      * Get the entries that have been selected by the user (e.g. by long press)

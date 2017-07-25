@@ -593,12 +593,39 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             thumbnailLoadThread.start();
         }
     }
+
+    /**
+     *
+     */
+    public void loadEntryProgress() {
+        final UstadJSOPDSFeed displayFeed = getDisplayFeed();
+        final UstadJSOPDSFeed mainFeed = getModel().opdsFeed;
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(impl.getActiveUser(getContext()) != null) {
+            String entryId;
+            for(int i = 0; i < displayFeed.entries.length; i++) {
+                entryId = displayFeed.entries[i].id;
+                String[] translatedIds =mainFeed.getEntryById(entryId).getAlternativeTranslationEntryIds();
+                String[] progressCheckIds = new String[translatedIds.length + 1];
+                for(int j = 0; j < translatedIds.length; j++) {
+                    progressCheckIds[j] = translatedIds[j];
+                }
+                progressCheckIds[translatedIds.length] = displayFeed.entries[i].id;
+
+                view.setEntryProgress(entryId,  impl.getCourseProgress(progressCheckIds,
+                        getContext()));
+            }
+        }
+    }
     
     
     /**
      * This is the runnable target method that actually loads thumbnails
      */
     public void run() {
+        //set user progress
+        loadEntryProgress();
+
         UstadJSOPDSFeed feed = model.opdsFeed;
         String[] imageLinks;
         HTTPCacheDir cache = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(context);
@@ -1207,7 +1234,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         impl.getLogger().l(UMLog.VERBOSE, 405, "id: " + catalog.id + " href: " + catalog.href);
         
         
-        boolean isUserMode = (resourceMode & USER_RESOURCE) == USER_RESOURCE;
+        boolean isUserMode = impl.getActiveUser(context) != null && ((resourceMode & USER_RESOURCE) == USER_RESOURCE);
                             
         impl.getLogger().l(UMLog.DEBUG, 505, catalog.id + "/mode:" + resourceMode);
 	

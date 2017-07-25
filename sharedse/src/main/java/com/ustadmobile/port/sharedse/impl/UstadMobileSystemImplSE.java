@@ -12,12 +12,20 @@ import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
+import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
 
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
+import com.ustadmobile.nanolrs.core.manager.XapiStatementManager;
+import com.ustadmobile.nanolrs.core.model.XapiAgent;
+import com.ustadmobile.nanolrs.core.model.XapiStatement;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.sharedse.impl.zip.*;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
@@ -54,6 +62,8 @@ import java.util.Locale;
 public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     private XmlPullParserFactory xmlPullParserFactory;
+
+    protected XapiAgent xapiAgent;
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -405,6 +415,49 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
      */
     public abstract NetworkManager getNetworkManager();
 
+    protected XapiAgent getCurrentAgent() {
+        //This is set with setActiveUser
+        return xapiAgent;
+    }
 
+    @Override
+    public void setActiveUser(String username, Object context) {
+        super.setActiveUser(username, context);
+        xapiAgent = username != null ? XapiAgentEndpoint.createOrUpdate(context, null, username,
+                UMTinCanUtil.getXapiServer(context)) : null;
+    }
 
+    @Override
+    public CourseProgress getCourseProgress(String[] entryIds, Object context) {
+        XapiStatementManager stmtManager = PersistenceManager.getInstance().getManager(XapiStatementManager.class);
+
+        String[] entryIdsPrefixed = new String[entryIds.length];
+        for(int i = 0; i < entryIdsPrefixed.length; i++) {
+            entryIdsPrefixed[i] = "epub:" + entryIds[i];
+        }
+
+        List<? extends XapiStatement> progressStmts = stmtManager.findByProgress(context,
+                entryIdsPrefixed, getCurrentAgent(), null, new String[]{
+                    UMTinCanUtil.VERB_ANSWERED, UMTinCanUtil.VERB_PASSED, UMTinCanUtil.VERB_FAILED
+                }, 1);
+
+        if(progressStmts.size() == 0) {
+            return new CourseProgress(CourseProgress.STATUS_NOT_STARTED, 0, 0);
+        }else {
+            XapiStatement stmt = progressStmts.get(0);
+            String stmtVerb = stmt.getVerb().getVerbId();
+            CourseProgress courseProgress = new CourseProgress();
+            if(stmtVerb.equals(UMTinCanUtil.VERB_ANSWERED))
+                courseProgress.setStatus(MessageID.in_progress);
+            else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
+                courseProgress.setStatus(MessageID.failed_message);
+            else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
+                courseProgress.setStatus(MessageID.passed);
+
+            courseProgress.setProgress(stmt.getResultProgress());
+            courseProgress.setScore(Math.round(stmt.getResultScoreScaled() * 100));
+
+            return courseProgress;
+        }
+    }
 }
