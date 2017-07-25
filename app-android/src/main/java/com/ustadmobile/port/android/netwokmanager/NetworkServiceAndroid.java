@@ -67,8 +67,9 @@ public class NetworkServiceAndroid extends Service{
         networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
-        Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
-        bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+//        Temporarily disabled
+//        Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
+//        bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
 
     }
 
@@ -83,7 +84,7 @@ public class NetworkServiceAndroid extends Service{
             UstadMobileSystemImpl.getInstance().setAppPref("devices","",getApplicationContext());
         }
         unbindService(wifiP2PServiceConnection);
-        unbindService(umSyncServiceConnection);
+//        unbindService(umSyncServiceConnection);
 
         super.onDestroy();
     }

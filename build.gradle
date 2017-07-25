@@ -29,11 +29,11 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-version = "0.2.4.25"
+version = "0.2.4.27"
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 96
-    nanoLrsVersion = "0.1.80"
+    ustadVersionCode = 97
+    nanoLrsVersion = "0.1.78"
 }
 
 ext.buildConfigProperties = new Properties()
