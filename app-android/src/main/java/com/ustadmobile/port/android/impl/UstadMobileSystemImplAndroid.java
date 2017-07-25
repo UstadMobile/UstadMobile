@@ -317,8 +317,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         SharedPreferences appPrefs = getAppSharedPreferences((Context)context);
         currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
         currentAuth = appPrefs.getString(KEY_CURRENTAUTH, null);
-        xapiAgent = XapiAgentEndpoint.createOrUpdate(context, null, currentUsername,
-                UMTinCanUtil.getXapiServer(context));
+        if(currentUsername != null) {
+            xapiAgent = XapiAgentEndpoint.createOrUpdate(context, null, currentUsername,
+                    UMTinCanUtil.getXapiServer(context));
+        }
         this.userPreferences = null;
         return true;
     }
