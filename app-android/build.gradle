@@ -21,12 +21,9 @@ buildscript {
 
 repositories {
     mavenCentral()
-    maven {
-        url "http://devserver2.ustadmobile.com/repo-mvn"
-    }
 
     maven {
-        url "/home/mike/src/repo"
+        url "http://devserver2.ustadmobile.com/repo-mvn"
     }
 
 }

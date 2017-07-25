@@ -9,6 +9,7 @@ repositories {
     maven {
         url "http://devserver2.ustadmobile.com/repo-mvn"
     }
+
 }
 
 /*
