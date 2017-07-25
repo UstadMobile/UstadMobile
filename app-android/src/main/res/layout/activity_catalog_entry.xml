@@ -172,6 +172,13 @@
 
                         </RelativeLayout>
 
+                        <com.ustadmobile.port.android.view.LearnerProgressView
+                            android:id="@+id/activity_catalog_entry_learner_progress"
+                            android:layout_width="@dimen/dimen_50dp"
+                            android:layout_height="wrap_content">
+
+                        </com.ustadmobile.port.android.view.LearnerProgressView>
+
 
                     </LinearLayout>
 

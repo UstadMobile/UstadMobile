@@ -1,5 +1,7 @@
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.model.CourseProgress;
+
 /**
  * Created by mike on 4/17/17.
  */
@@ -61,6 +63,10 @@ public interface CatalogEntryView extends UstadView {
     void setProgressVisible(boolean visible);
 
     void setProgress(float progress);
+
+    void setLearnerProgress(CourseProgress progress);
+
+    void setLearnerProgressVisible(boolean visible);
 
     void setProgressStatusText(String progressStatusText);
 }
