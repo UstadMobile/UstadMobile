@@ -90,6 +90,9 @@
     <string name='account'>حساب</string>
     <string name='data_usage'>استفاده از داده</string>
 
+    <string name="modify">اصلاح</string>
+    <string name="open">باز کردن</string>
+
     <string name="welcome">خوش آمدی</string>
     <string name='welcome_dialog_subheader'>تلاش برای به‌دست آوردن وظیفه؟\n مهارت‌های موفقیت را این‌جا به دست آورید!</string>
     <string name='welcome_dialog_box1'>رنگ فونت: مادیول‌های این اپلکیشن رایگان میباشد. برای دستری به محتوای، اپلکیشن را دانلود نماید. شما می‌توانید بدون انترنت در هرجا و هر وقت از آن استفاده کنید. </string>

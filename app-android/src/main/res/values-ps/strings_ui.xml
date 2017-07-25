@@ -90,6 +90,8 @@
 
     <string name='account'>حساب</string>
 
+    <string name="modify">بدلول</string>
+    <string name="open">پرانیستل</string>
 
     <string name='welcome'>ښه راغلاست</string>
     <string name='welcome_dialog_subheader'>د دندې د ترلاسه کولو هڅه\n د بریالیتوب مهارتونه دلته ترلاسه کړئ</string>

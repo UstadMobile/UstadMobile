@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Ustad Mobile</string>
-    <string name="open">Open</string>
     <string name="closed">Closed</string>
 
     <string name="title_activity_login">Login</string>
