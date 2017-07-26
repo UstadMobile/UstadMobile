@@ -128,7 +128,9 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
         CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(progressIds,
                 getContext());
-        if(progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
+        if(progress == null) {
+            return;
+        }else if(progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
             catalogEntryView.setLearnerProgressVisible(false);
         }else {
             catalogEntryView.setLearnerProgressVisible(true);

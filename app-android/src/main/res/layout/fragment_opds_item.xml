@@ -82,7 +82,7 @@
             android:id="@+id/opds_item_learner_progress_holder"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:visibility="visible"
+            android:visibility="gone"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             />

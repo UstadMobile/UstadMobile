@@ -429,6 +429,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     @Override
     public CourseProgress getCourseProgress(String[] entryIds, Object context) {
+        if(getActiveUser(context) == null)
+            return null;
+
         XapiStatementManager stmtManager = PersistenceManager.getInstance().getManager(XapiStatementManager.class);
 
         String[] entryIdsPrefixed = new String[entryIds.length];
