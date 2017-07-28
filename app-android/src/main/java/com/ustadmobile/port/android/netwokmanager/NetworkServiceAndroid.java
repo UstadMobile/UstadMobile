@@ -58,7 +58,6 @@ public class NetworkServiceAndroid extends Service{
 
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -67,9 +66,14 @@ public class NetworkServiceAndroid extends Service{
         networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
-//        Temporarily disabled
-//        Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
-//        bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+        //Sync:
+        Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
+        String loggedInUserString =
+                UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
+        if(loggedInUserString != null && !loggedInUserString.isEmpty()){
+            bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+        }
+        //bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
 
     }
 
@@ -84,7 +88,13 @@ public class NetworkServiceAndroid extends Service{
             UstadMobileSystemImpl.getInstance().setAppPref("devices","",getApplicationContext());
         }
         unbindService(wifiP2PServiceConnection);
-//        unbindService(umSyncServiceConnection);
+        //Sync:
+        String loggedInUserString =
+                UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
+        if(loggedInUserString != null && !loggedInUserString.isEmpty()){
+            unbindService(umSyncServiceConnection);
+        }
+        //unbindService(umSyncServiceConnection);
 
         super.onDestroy();
     }
@@ -170,7 +180,7 @@ public class NetworkServiceAndroid extends Service{
                 loggedInUser = null;
                 System.out.println("No user logged in. Setting null (will not proceed)");
 
-
+                /*
                 //TODO: Remove this after logged in user is set
                 List<User> testusers = userManager.findByUsername(context, "test");
                 if(testusers!= null && !testusers.isEmpty()){
@@ -179,7 +189,7 @@ public class NetworkServiceAndroid extends Service{
                     //create a test user
                     try {
                         loggedInUser = (User)userManager.makeNew();
-                        loggedInUser.setUsername("test");
+                        loggedInUser.setUsername("autostart");
                         loggedInUser.setUuid(UUID.randomUUID().toString());
                         loggedInUser.setPassword("secret");
                         loggedInUser.setNotes("test user");
@@ -192,7 +202,7 @@ public class NetworkServiceAndroid extends Service{
                     }
                 }
                 System.out.println("!!!!!!Made a test user. PLEASE DELETE THIS FOR PROD!!!!!!");
-
+                */
             }
 
 
