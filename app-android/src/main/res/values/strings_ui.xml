@@ -115,6 +115,7 @@
     <string name="waiting">Waiting</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
+    <string name="university_name" value="10001">University name</string>
 
 
     <string name="welcome">Welcome!</string>

@@ -155,12 +155,20 @@ task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTa
     Map<String, Integer> messageIds = new HashMap<>();
     AtomicInteger messageIdGenerator = new AtomicInteger()
 
-    rootProject.fileTree(dir : "core/locale", include: "**/*.xml").each() { File file ->
+    rootProject.fileTree(dir : "core/locale/main/values", include: "*.xml").each() { File file ->
         def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
         xmlDoc.string.each() { str ->
             String msgName = str.@name
+
             if(!messageIds.containsKey(msgName)) {
-                messageIds.put(msgName, new Integer(messageIdGenerator.getAndIncrement()))
+                Integer value;
+                if(str.attributes().get("value") != null) {
+                    value = new Integer(str.attributes().get("value"))
+                }else {
+                    value = new Integer(messageIdGenerator.getAndIncrement())
+                }
+
+                messageIds.put(msgName, value)
             }
         }
     }
