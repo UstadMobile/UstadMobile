@@ -1,6 +1,6 @@
 package com.ustadmobile.port.android.view;
 
-import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -8,13 +8,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UMLog;
@@ -22,19 +20,21 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 
 /**
- * A simple Fragment that uses a WebView to show one part of a piece of content
- *
+ * A simple Fragment that uses a WebView to show one part of a piece of content. This fragment MUST
+ * be attached to ContainerActivity in order to work. When the fragment is restored from a saved
+ * state the internal server URL may have changed since hwen it was created. It therefor relies on
+ * attaching to the activity to get these values.
  */
 public class ContainerPageFragment extends Fragment {
 
     /**
      * The argument key for the page number this fragment represents.
      */
-    public static final String ARG_PAGE_BASE_URI = "baseuri";
+//    public static final String ARG_PAGE_BASE_URI = "baseuri";
 
     public static final String ARG_PAGE_HREF = "href";
 
-    public static final String ARG_PAGE_QUERY = "query";
+//    public static final String ARG_PAGE_QUERY = "query";
 
     public static final String ARG_PAGE_INDEX = "index";
 
@@ -66,20 +66,17 @@ public class ContainerPageFragment extends Fragment {
     /**
      * Generates a new Fragment for a page fragment
      *
-     * @param baseURI The base URI of the page (normally where the EPUB OPF itself is) - e.g. http://localhost:1234/mount/EPUB.
-     *                 This must be a directory e.g. full url to load is baseURI/href
      * @param href The HREF of the page itself as per it's entry in the OPF manifest
-     * @param query Query string to append to the URL (including the '?')
      *
      * @return A new instance of fragment ContainerPageFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ContainerPageFragment newInstance(String baseURI, String href, String query, int pageSpineIndex) {
+    public static ContainerPageFragment newInstance(String href, int pageSpineIndex) {
         ContainerPageFragment fragment = new ContainerPageFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PAGE_BASE_URI, baseURI);
+//        args.putString(ARG_PAGE_BASE_URI, baseURI);
         args.putString(ARG_PAGE_HREF, href);
-        args.putString(ARG_PAGE_QUERY, query);
+//        args.putString(ARG_PAGE_QUERY, query);
         args.putInt(ARG_PAGE_INDEX, pageSpineIndex);
         fragment.setArguments(args);
         return fragment;
@@ -93,11 +90,10 @@ public class ContainerPageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mBaseURI = getArguments().getString(ARG_PAGE_BASE_URI);
             mHref = getArguments().getString(ARG_PAGE_HREF);
-            mQuery = getArguments().getString(ARG_PAGE_QUERY);
             pageSpineIndex = getArguments().getInt(ARG_PAGE_INDEX);
         }
+//        TODO: check this - what if it hasn't attached yet?
         this.autoplayRunJavascript = ((ContainerActivity)getActivity()).getAutoplayRunJavascript();
     }
 
@@ -121,10 +117,10 @@ public class ContainerPageFragment extends Fragment {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
-        webView.loadUrl(getPageURL());
+
         webView.setWebViewClient(new ContainerPageWebViewClient(webView));
         webView.setWebChromeClient(new ContainerPageViewWebChromeClient());
-
+        loadURL();
 
         return viewGroup;
     }
@@ -136,7 +132,7 @@ public class ContainerPageFragment extends Fragment {
     }
 
     private void loadURL() {
-        if(webView != null) {
+        if(webView != null && mBaseURI != null && (webView.getUrl() == null || !webView.getUrl().equals(getPageURL()))) {
             webView.loadUrl(getPageURL());
         }
     }
@@ -203,12 +199,23 @@ public class ContainerPageFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mListener = (OnFragmentInteractionListener) activity;
+            mListener = (OnFragmentInteractionListener) context;
+            if(context instanceof ContainerActivity) {
+                final ContainerActivity activity = (ContainerActivity)context;
+                activity.runWhenMounted(new Runnable() {
+                    @Override
+                    public void run() {
+                        ContainerPageFragment.this.mQuery = activity.getXapiQuery();
+                        ContainerPageFragment.this.mBaseURI = activity.getOpfBasePath();
+                        loadURL();
+                    }
+                });
+            }
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
+            throw new ClassCastException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
     }
@@ -270,16 +277,11 @@ public class ContainerPageFragment extends Fragment {
         @Override
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
-
-            if(ContainerPageFragment.this.getUserVisibleHint()) {
-                this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
-            }
-
-            /*
-            if(!this.isFirstPage) {
-
-            }
-            */
+            boolean isBlankUrl = url != null && url.equalsIgnoreCase("about");
+            //TODO: Fix autoplay javascript. This causes an infinite reload of about:blank when the activity is recreated from it's saved state
+//            if(ContainerPageFragment.this.getUserVisibleHint()) {
+//                this.containerView.loadUrl(ContainerPageFragment.this.autoplayRunJavascript);
+//            }
         }
 
 

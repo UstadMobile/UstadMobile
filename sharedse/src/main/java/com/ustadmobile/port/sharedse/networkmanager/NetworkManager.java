@@ -254,6 +254,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             httpd.addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
+            UstadMobileSystemImpl.l(UMLog.INFO, 343, "Embedded httpd started on port: " +
+                    httpd.getListeningPort());
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.CRITICAL, 1, "Failed to start http server");
             throw new RuntimeException("Failed to start http server", e);
@@ -324,6 +326,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @return
      */
+    //TODO: remove mContext parameter
     public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
         EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
         task.setTaskType(QUEUE_ENTRY_STATUS);
@@ -1180,8 +1183,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Clean up the network manager for shutdown
      */
     public void onDestroy() {
+        mContext = null;
         if(httpd != null) {
             httpd.stop();
+            httpd = null;
         }
     }
 
@@ -1190,13 +1195,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * the activity is being created from a saved state)
      *
      * @param zipPath Path to the zip that should be mounted (mandatory)
-     * @param mountName Directory name that this should be mounted as e.g. something.epub-timestamp
+     * @param mountName Directory name that this should be mounted as e.g. something.epub-timestamp. Can be null
      *
      * @return The mountname that was used - the ocntent will then be accessible on getZipMountURL()/return value
      */
     public String mountZipOnHttp(String zipPath, String mountName) {
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
-                + this + "httpd server = " + httpd);
+                + this + "httpd server = " + httpd + " listening port = " + httpd.getListeningPort());
+
         String extension = UMFileUtil.getExtension(zipPath);
         HashMap<String, List<MountedZipHandler.MountedZipFilter>> filterMap = null;
 
