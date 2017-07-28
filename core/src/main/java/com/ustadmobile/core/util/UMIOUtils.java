@@ -36,6 +36,8 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -122,6 +124,22 @@ public class UMIOUtils {
         }
         out.flush();
     }
+
+    /**
+     * Read from the given input stream and return a string
+     *
+     * @param in Input Stream to read from
+     * @param encoding Encoding to use
+     * @return String from the given input stream in the given encoding
+     * @throws IOException
+     */
+    public static final String readToString(InputStream in, String encoding) throws IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        readFully(in, bout, 1024);
+        in.close();
+        return new String(bout.toByteArray(), encoding);
+    }
+
     
     public static final void throwIfNotNullIO(IOException e) throws IOException{
         if(e != null) {

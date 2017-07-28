@@ -18,6 +18,10 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * A simple Fragment that uses a WebView to show one part of a piece of content. This fragment MUST
@@ -61,6 +65,9 @@ public class ContainerPageFragment extends Fragment {
     private String currentPageTitle;
 
     private int pageSpineIndex;
+
+    public static final String PAUSE_ALL_MEDIA_SCRIPT_ASSET_NAME = "ustadmobile-pause-all.js";
+
 
 
     /**
@@ -135,6 +142,27 @@ public class ContainerPageFragment extends Fragment {
         if(webView != null && mBaseURI != null && (webView.getUrl() == null || !webView.getUrl().equals(getPageURL()))) {
             webView.loadUrl(getPageURL());
         }
+    }
+
+    @Override
+    public void onPause() {
+        InputStream assetIn = null;
+        String pauseOnCloseJs = null;
+        /*
+         * On Android 4.4 and below the web view does not automatically pause media.
+         */
+        try {
+            assetIn = getContext().getAssets().open(PAUSE_ALL_MEDIA_SCRIPT_ASSET_NAME);
+            pauseOnCloseJs = UMIOUtils.readToString(assetIn, "UTF-8");
+            if(webView != null)
+                webView.loadUrl("javascript:" + pauseOnCloseJs);
+        }catch(IOException e) {
+            e.printStackTrace();
+        }finally {
+            UMIOUtils.closeInputStream(assetIn);
+        }
+
+        super.onPause();
     }
 
     public void setPageHref(String href, boolean reload) {

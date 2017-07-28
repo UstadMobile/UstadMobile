@@ -54,7 +54,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.ContainerActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/title_activity_container" />
+            android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.UserSettingsActivity"
             android:label="@string/title_activity_user_settings"
@@ -77,7 +77,7 @@
         <activity android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity" />
         <activity
             android:name="com.ustadmobile.port.android.view.UserSettingsActivity2"
-            android:label="@string/title_activity_settings"
+            android:label="@string/settings"
             android:theme="@style/Theme.UstadTheme"></activity>
     </application>
 
