@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,11 +35,7 @@ public class ContainerPageFragment extends Fragment {
     /**
      * The argument key for the page number this fragment represents.
      */
-//    public static final String ARG_PAGE_BASE_URI = "baseuri";
-
     public static final String ARG_PAGE_HREF = "href";
-
-//    public static final String ARG_PAGE_QUERY = "query";
 
     public static final String ARG_PAGE_INDEX = "index";
 
@@ -69,7 +66,6 @@ public class ContainerPageFragment extends Fragment {
     public static final String PAUSE_ALL_MEDIA_SCRIPT_ASSET_NAME = "ustadmobile-pause-all.js";
 
 
-
     /**
      * Generates a new Fragment for a page fragment
      *
@@ -81,9 +77,7 @@ public class ContainerPageFragment extends Fragment {
     public static ContainerPageFragment newInstance(String href, int pageSpineIndex) {
         ContainerPageFragment fragment = new ContainerPageFragment();
         Bundle args = new Bundle();
-//        args.putString(ARG_PAGE_BASE_URI, baseURI);
         args.putString(ARG_PAGE_HREF, href);
-//        args.putString(ARG_PAGE_QUERY, query);
         args.putInt(ARG_PAGE_INDEX, pageSpineIndex);
         fragment.setArguments(args);
         return fragment;
@@ -162,7 +156,19 @@ public class ContainerPageFragment extends Fragment {
             UMIOUtils.closeInputStream(assetIn);
         }
 
+        if(webView != null) {
+            webView.onPause();
+        }
+
         super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(webView != null) {
+            webView.onResume();
+        }
     }
 
     public void setPageHref(String href, boolean reload) {

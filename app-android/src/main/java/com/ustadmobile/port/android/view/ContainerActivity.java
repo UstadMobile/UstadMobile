@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -73,8 +74,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private boolean mBound = false;
 
-    protected boolean inUse = false;
-
     private ContainerController mContainerController;
 
     private String mBaseURL = null;
@@ -110,6 +109,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
 
     private Vector<Runnable> runWhenContentMounted = new Vector<>();
+
+    private AudioManager mAudioManager;
 
 
     @Override
@@ -467,18 +468,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     public void onStart() {
         super.onStart();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        inUse = true;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        inUse = false;
     }
 
     public void onStop() {
