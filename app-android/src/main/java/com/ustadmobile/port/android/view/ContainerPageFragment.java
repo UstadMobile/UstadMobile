@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;

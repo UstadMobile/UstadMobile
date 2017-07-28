@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -110,7 +109,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private Vector<Runnable> runWhenContentMounted = new Vector<>();
 
-    private AudioManager mAudioManager;
 
 
     @Override
