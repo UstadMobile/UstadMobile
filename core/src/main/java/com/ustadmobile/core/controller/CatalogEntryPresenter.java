@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.EntryCheckResponse;
@@ -116,6 +117,25 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
             }
         }
         UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
+    }
+
+    public void onStart() {
+        String[] progressIds = new String[entryTranslationIds.length + 1];
+        for(int i = 0; i < entryTranslationIds.length; i++) {
+            progressIds[i] = entryTranslationIds[i];
+        }
+        progressIds[entryTranslationIds.length] = entry.id;
+
+        CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(progressIds,
+                getContext());
+        if(progress == null) {
+            return;
+        }else if(progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
+            catalogEntryView.setLearnerProgressVisible(false);
+        }else {
+            catalogEntryView.setLearnerProgressVisible(true);
+            catalogEntryView.setLearnerProgress(progress);
+        }
     }
 
     /**

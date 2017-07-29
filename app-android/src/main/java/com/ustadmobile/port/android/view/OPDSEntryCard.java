@@ -177,7 +177,7 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     }
 
     public void setProgress(CourseProgress progress) {
-        View progressViewHolder = findViewById(R.id.opds_item_learner_progress_holder);
+        LearnerProgressView progressViewHolder = (LearnerProgressView)findViewById(R.id.opds_item_learner_progress_holder);
         switch(progress.getStatus()) {
             case CourseProgress.STATUS_NOT_STARTED:
                 progressViewHolder.setVisibility(View.GONE);
@@ -185,30 +185,9 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
 
             default:
                 progressViewHolder.setVisibility(View.VISIBLE);
-
-                FitChart chart = (FitChart)findViewById(R.id.opds_item_learner_progress_fitchart);
-                chart.setMinValue(0f);
-                chart.setMaxValue(100);
-                int percentageToShow =progress.getStatus() == MessageID.in_progress
-                        ? progress.getProgress() : Math.round(progress.getScore() * 100);
-
-                int statusColorId = STATUS_TO_COLOR_MAP.get(progress.getStatus());
-                FitChartValue chartValue = new FitChartValue(percentageToShow, statusColorId);
-                ArrayList<FitChartValue> chartValues = new ArrayList<>();
-                chartValues.add(chartValue);
-                chart.setValues(chartValues);
-                TextView progressNumTextView = (TextView)findViewById(
-                        R.id.opds_item_learner_progress_text);
-                progressNumTextView.setText(percentageToShow + "%");
-                progressNumTextView.setTextColor(statusColorId);
-
-                TextView progressTextView = (TextView)findViewById(R.id.opds_item_learner_progress_status_text);
-                progressTextView.setText(UstadMobileSystemImpl.getInstance().getString(
-                        progress.getStatus(), getContext()));
-                progressTextView.setTextColor(statusColorId);
+                progressViewHolder.setProgress(progress);
                 break;
         }
-
     }
 
 

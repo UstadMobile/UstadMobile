@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.CatalogEntryView;
@@ -135,6 +136,12 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         seeAlsoRecyclerView.setNestedScrollingEnabled(false);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        mPresenter.onStart();
+    }
+
     private int getButtonIdFromViewId(int viewId) {
         Enumeration<Integer> enumeration = BUTTON_ID_MAP.keys();
         Integer buttonId;
@@ -244,17 +251,27 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
                 statusIconView.setImageDrawable(ContextCompat.getDrawable(this,
                         R.drawable.ic_done_black_16dp));
                 statusIconView.setVisibility(View.VISIBLE);
-//                statusTextView.setText(impl.getString(MessageIDConstants.fileAvailableLocally));
                 statusTextView.setText(R.string.file_available_locally);
                 break;
             case CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE:
                 statusIconView.setImageDrawable(ContextCompat.getDrawable(this,
                         R.drawable.ic_cloud_download_black_24dp));
-//                statusTextView.setText(impl.getString(MessageIDConstants.fileUnAvailableLocally));
                 statusTextView.setText(R.string.file_unavailable_locally);
                 statusIconView.setVisibility(View.VISIBLE);
                 break;
         }
+    }
+
+    @Override
+    public void setLearnerProgress(CourseProgress progress) {
+        ((LearnerProgressView)findViewById(R.id.activity_catalog_entry_learner_progress)).setProgress(
+                progress);
+    }
+
+    @Override
+    public void setLearnerProgressVisible(boolean visible) {
+        findViewById(R.id.activity_catalog_entry_learner_progress).setVisibility(visible ?
+                View.VISIBLE: View.GONE);
     }
 
     @Override

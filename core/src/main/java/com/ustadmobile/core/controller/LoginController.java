@@ -44,6 +44,7 @@ import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.UstadView;
 import java.io.IOException;
 import java.util.Hashtable;
@@ -338,79 +339,83 @@ public class LoginController extends UstadBaseController{
      *  UstadMobileSystemImpl.PREFKEY_XAPISERVER - The URL of the xAPI server: 
      *  regserver can be relative to this.
      */
-    public void handleClickRegister(final Hashtable userInfoParams) {
-        final String xAPIServer = (String)userInfoParams.get(
-            UstadMobileSystemImpl.PREFKEY_XAPISERVER);
-        updateXAPIServer(xAPIServer);
+//    public void handleClickRegister(final Hashtable userInfoParams) {
+//        final String xAPIServer = (String)userInfoParams.get(
+//            UstadMobileSystemImpl.PREFKEY_XAPISERVER);
+//        updateXAPIServer(xAPIServer);
+//
+//
+//        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//
+//        if(!userInfoParams.containsKey(LoginController.REGISTER_PHONENUM) || userInfoParams.get(LoginController.REGISTER_PHONENUM).equals("")) {
+//            impl.getAppView(getContext()).showAlertDialog(
+//                    impl.getString(MessageID.error, getContext()),
+//                    impl.getString(MessageID.enter_phone_num, getContext()));
+//            return;
+//        }
+//
+//        if(!userInfoParams.containsKey(LoginController.REGISTER_NAME) || userInfoParams.get(LoginController.REGISTER_NAME).equals("")) {
+//            impl.getAppView(getContext()).showAlertDialog(
+//                    impl.getString(MessageID.error, getContext()),
+//                    impl.getString(MessageID.enter_name, getContext()));
+//            return;
+//        }
+//
+//        final LoginController thisCtrl = this;
+//        final Object ctx = context;
+//        Thread registerThread = new Thread() {
+//            public void run() {
+//                String serverURL = UstadMobileSystemImpl.getInstance().getAppPref("regserver",
+//                        UstadMobileDefaults.DEFAULT_REGISTER_SERVER, context);
+//                serverURL = UMFileUtil.resolveLink(xAPIServer, serverURL);
+//
+//                StringBuffer phoneNumSB = new StringBuffer().append('+').append(
+//                    userInfoParams.get(LoginController.REGISTER_COUNTRY));
+//
+//                String userPhoneNum = userInfoParams.get(
+//                        LoginController.REGISTER_PHONENUM).toString();
+//
+//                //chop off leading zeros from the supplied phone number
+//                int phoneNumStart = 0;
+//                char currentChar;
+//                for(; phoneNumStart < userPhoneNum.length(); phoneNumStart++) {
+//                    currentChar = userPhoneNum.charAt(phoneNumStart);
+//                    if(!(currentChar == '0' || currentChar == ' ')) {
+//                        break;
+//                    }
+//                }
+//
+//                phoneNumStart = Math.min(phoneNumStart, userPhoneNum.length()-2);
+//
+//                phoneNumSB.append(userPhoneNum.substring(phoneNumStart)+1);
+//                userInfoParams.put(LoginController.REGISTER_PHONENUM,
+//                    phoneNumSB.toString());
+//
+//                try {
+//                    String serverResponse = registerNewUser(userInfoParams, serverURL);
+//                    JSONObject obj = new JSONObject(serverResponse);
+//                    String newUsername = obj.getString("username");
+//                    String newPassword = obj.getString("password");
+//                    UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
+//                    thisCtrl.handleUserLoginAuthComplete(newUsername, newPassword);
+//                }catch(Exception e) {
+//                    UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
+//                    UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
+//                        UstadMobileSystemImpl.getInstance().getString(
+//                            MessageID.err_registering_new_user, LoginController.this.getContext())
+//                            + e.toString(), AppView.LENGTH_LONG);
+//                    e.printStackTrace();
+//                }
+//
+//            }
+//        };
+//        impl.getAppView(ctx).showProgressDialog(
+//                impl.getString(MessageID.registering, getContext()));
+//        registerThread.start();
+//    }
 
-
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        if(!userInfoParams.containsKey(LoginController.REGISTER_PHONENUM) || userInfoParams.get(LoginController.REGISTER_PHONENUM).equals("")) {
-            impl.getAppView(getContext()).showAlertDialog(
-                    impl.getString(MessageID.error, getContext()),
-                    impl.getString(MessageID.enter_phone_num, getContext()));
-            return;
-        }
-
-        if(!userInfoParams.containsKey(LoginController.REGISTER_NAME) || userInfoParams.get(LoginController.REGISTER_NAME).equals("")) {
-            impl.getAppView(getContext()).showAlertDialog(
-                    impl.getString(MessageID.error, getContext()),
-                    impl.getString(MessageID.enter_name, getContext()));
-            return;
-        }
-
-        final LoginController thisCtrl = this;
-        final Object ctx = context;
-        Thread registerThread = new Thread() {
-            public void run() {
-                String serverURL = UstadMobileSystemImpl.getInstance().getAppPref("regserver",
-                        UstadMobileDefaults.DEFAULT_REGISTER_SERVER, context);
-                serverURL = UMFileUtil.resolveLink(xAPIServer, serverURL);
-                
-                StringBuffer phoneNumSB = new StringBuffer().append('+').append(
-                    userInfoParams.get(LoginController.REGISTER_COUNTRY));
-                
-                String userPhoneNum = userInfoParams.get(
-                        LoginController.REGISTER_PHONENUM).toString();
-                
-                //chop off leading zeros from the supplied phone number
-                int phoneNumStart = 0;
-                char currentChar;
-                for(; phoneNumStart < userPhoneNum.length(); phoneNumStart++) {
-                    currentChar = userPhoneNum.charAt(phoneNumStart);
-                    if(!(currentChar == '0' || currentChar == ' ')) {
-                        break;
-                    }
-                }
-                
-                phoneNumStart = Math.min(phoneNumStart, userPhoneNum.length()-2);
-                
-                phoneNumSB.append(userPhoneNum.substring(phoneNumStart)+1);
-                userInfoParams.put(LoginController.REGISTER_PHONENUM, 
-                    phoneNumSB.toString());
-                
-                try {
-                    String serverResponse = registerNewUser(userInfoParams, serverURL);
-                    JSONObject obj = new JSONObject(serverResponse);
-                    String newUsername = obj.getString("username");
-                    String newPassword = obj.getString("password");
-                    UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
-                    thisCtrl.handleUserLoginAuthComplete(newUsername, newPassword);
-                }catch(Exception e) {
-                    UstadMobileSystemImpl.getInstance().getAppView(ctx).dismissProgressDialog();
-                    UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
-                        UstadMobileSystemImpl.getInstance().getString(
-                            MessageID.err_registering_new_user, LoginController.this.getContext())
-                            + e.toString(), AppView.LENGTH_LONG);
-                    e.printStackTrace();
-                }
-                
-            }
-        };
-        impl.getAppView(ctx).showProgressDialog(
-                impl.getString(MessageID.registering, getContext()));
-        registerThread.start();
+    public void handleClickRegister() {
+        UstadMobileSystemImpl.getInstance().go(RegistrationView.VIEW_NAME, getContext());
     }
     
     protected void updateXAPIServer(String newServer) {

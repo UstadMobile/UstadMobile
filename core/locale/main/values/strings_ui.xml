@@ -36,6 +36,7 @@
     <string name='back'>Back</string>
     <string name='username'>Username</string>
     <string name='password'>Password</string>
+    <string name="new_password">New password</string>
     <string name='phone_memory'>Phone memory</string>
     <string name='memory_card'>Memory card</string>
     <string name='device'>Device</string>
@@ -76,7 +77,7 @@
     <string name='reports'>Reports</string>
     <string name='students'>Account</string>
     <string name='language_preference'>Language Preference</string>
-    <string name='forgot_password'>Logout</string>
+    <string name='forgot_password'>Forgot password</string>
     <string name='connections'>Connection</string>
     <string name='notifications'>Notifications</string>
     <string name='reset_counter_label'>Reset data counter</string>
@@ -96,24 +97,41 @@
     <string name='enable_supernode'>Enable supernode</string>
     <string name="share_application">Share Application</string>
     <string name="share_via">Share via...</string>
+    <string name="share">Share</string>
+    <string name="receive">Receive</string>
     <string name="sent">Sent</string>
     <string name="sending">Sending</string>
+    <string name="send">Send</string>
+    <string name="size">Size</string>
+    <string name="see_also">See also</string>
     <string name="not_taken">Not Taken</string>
     <string name="download_in_another_language">Download in another language</string>
     <string name="modify">Modify</string>
+    <string name="open">Open</string>
     <string name="passed">Passed</string>
     <string name="failed_message">Try again</string>
     <string name="in_progress">In progress</string>
+    <string name="downloading">Downloading</string>
+    <string name="waiting">Waiting</string>
+    <string name="queued">Queued</string>
+    <string name="failed">Failed</string>
+
+    <string name="field_university" value="980">University Name</string>
+    <string name="field_fullname" value="981">Full Name</string>
+    <string name="field_email" value="982">Email</string>
+    <string name="field_gender" value="983">Gender</string>
+    <string name="field_phonenumber" value="984">Phone Number</string>
+    <string name="field_faculty" value="985">Faculty</string>
 
 
     <string name="welcome">Welcome!</string>
     <string name="welcome_dialog_subheader">Trying to get a job?\nGet the skills for success here!</string>
-    <string name="welcome_dialog_box1"><![CDATA[<b><font color="#2196f3">Download:</font></b> The modules in this app are <b>FREE!</b> Download them to access their contents. You can complete them offline anytime, anywhere!]]></string>
+    <string name="welcome_dialog_box1"><![CDATA[<b><font color="#2196f3">Download:</font></b> The modules in this app are free! Download them to access their contents. You can complete them offline anytime, anywhere!]]></string>
     <string name="welcome_dialog_box2"><![CDATA[<b><font color="#2196f3">Learn:</font></b> Interactive videos will teach you CV writing, interview skills, communication skills, and more!]]></string>
-    <string name="welcome_dialog_box3"><![CDATA[<b><font color="#2196f3">In-Person Classes:</font></b> If you are a government university student or a recent graduate, you can attend in-person classes at USWDP centers FREE after passing the modules in this app.]]></string>
+    <string name="welcome_dialog_box3"><![CDATA[<b><font color="#2196f3">In-Person Classes:</font></b> If you are a government university student or a recent graduate, you can attend in-person classes at USWDP centers for free after passing the modules in this app.]]></string>
     <string name="select_language">Select language</string>
     <!-- For language selector where %s is replaced by the device type name -->
-    <string name="device_language">Device language</string>
+    <string name="device_language">Use device language</string>
     <string name="ok_got_it">OK, got it!</string>
     <string name="dont_show_this_next_time">Don\'t show this next time</string>
 </resources>

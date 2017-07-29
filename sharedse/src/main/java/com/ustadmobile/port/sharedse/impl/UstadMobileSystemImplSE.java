@@ -50,6 +50,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -429,6 +430,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     @Override
     public CourseProgress getCourseProgress(String[] entryIds, Object context) {
+        if(getActiveUser(context) == null)
+            return null;
+
         XapiStatementManager stmtManager = PersistenceManager.getInstance().getManager(XapiStatementManager.class);
 
         String[] entryIdsPrefixed = new String[entryIds.length];
@@ -459,5 +463,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
             return courseProgress;
         }
+    }
+
+    @Override
+    public int registerUser(String username, String password, HashMap fields, Object context) {
+        //TODO
+
+        return 0;
     }
 }

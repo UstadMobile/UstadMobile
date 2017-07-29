@@ -78,46 +78,14 @@
             android:progress="0"
             android:visibility="invisible" />
 
-        <LinearLayout
-            android:visibility="gone"
+        <com.ustadmobile.port.android.view.LearnerProgressView
             android:id="@+id/opds_item_learner_progress_holder"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:visibility="gone"
             android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true">
-
-            <TextView
-                android:id="@+id/opds_item_learner_progress_status_text"
-                android:textSize='8dp'
-                android:textAllCaps="true"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <FrameLayout
-                android:layout_width="50dp"
-                android:layout_height="50dp">
-
-                <com.txusballesteros.widgets.FitChart
-                    android:id="@+id/opds_item_learner_progress_fitchart"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    card_view:strokeSize="2dp"
-                    android:gravity="center"
-                    />
-
-                <TextView
-                    android:id="@+id/opds_item_learner_progress_text"
-                    android:text="50%"
-                    android:gravity="center"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-            </FrameLayout>
-
-        </LinearLayout>
-
+            android:layout_alignParentRight="true"
+            />
 
 
         <LinearLayout
