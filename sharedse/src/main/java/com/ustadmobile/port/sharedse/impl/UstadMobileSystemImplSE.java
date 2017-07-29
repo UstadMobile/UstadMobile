@@ -5,6 +5,7 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
+import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HTTPResult;
@@ -21,8 +22,12 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
+import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
+import com.ustadmobile.nanolrs.core.manager.UserManager;
 import com.ustadmobile.nanolrs.core.manager.XapiStatementManager;
+import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.model.XapiAgent;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
@@ -48,6 +53,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -55,6 +61,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  *
@@ -467,8 +474,79 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
 
     @Override
     public int registerUser(String username, String password, HashMap fields, Object context) {
-        //TODO
+        UserManager userManager =
+                PersistenceManager.getInstance().getManager(UserManager.class);
+        UserCustomFieldsManager userCustomFieldsManager =
+                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
 
+        String loggedInUsername = null;
+        loggedInUsername = UstadMobileSystemImpl.getInstance().getActiveUser(context);
+        //ignore loggedInUsername cause if we're clicking register, we want this user
+        //to log in..
+
+        User loggedInUser = null;
+        List<User> users = userManager.findByUsername(context, username);
+        if(users!= null && !users.isEmpty()){
+            loggedInUser = users.get(0);
+        }else{
+            //create the user
+            try {
+                loggedInUser = (User)userManager.makeNew();
+                loggedInUser.setUsername(username);
+                loggedInUser.setUuid(UUID.randomUUID().toString());
+                loggedInUser.setPassword(password);
+                loggedInUser.setNotes("User Created via Registration Page");
+                loggedInUser.setDateCreated(System.currentTimeMillis());
+                userManager.persist(context, loggedInUser);
+                userCustomFieldsManager.createUserCustom(fields,loggedInUser, context);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return 1;
+            }
+        }
+
+        handleUserLoginAuthComplete(loggedInUser.getUsername(), loggedInUser.getPassword(), context);
         return 0;
+    }
+
+    /**
+     * Utility merge of what happens after a user is logged in through username/password
+     * and what happens after they are newly registered etc.
+     */
+    private void handleUserLoginAuthComplete(final String username, final String password, Object dbContext) {
+        setActiveUser(username, dbContext);
+        setActiveUserAuth(password, dbContext);
+        String authHashed = hashAuth(dbContext, password);
+        setAppPref("um-authcache-" + username, authHashed, dbContext);
+
+    }
+
+    @Override
+    public boolean handleLoginLocally(String username, String password, Object dbContext) {
+        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
+        boolean result = userManager.authenticate(dbContext, username, password);
+        if(result){
+            handleUserLoginAuthComplete(username, password, dbContext);
+        }
+        return result;
+
+    }
+
+    @Override
+    public boolean createUserLocally(String username, String password, String uuid, Object dbContext) {
+        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
+        try {
+            User user = (User) userManager.makeNew();
+            if(uuid != null && !uuid.isEmpty()){
+                user.setUuid(uuid);
+            }
+            user.setUsername(username);
+            user.setPassword(password);
+            userManager.persist(dbContext, user);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

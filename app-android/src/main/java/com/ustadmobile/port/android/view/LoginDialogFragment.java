@@ -104,7 +104,12 @@ public class LoginDialogFragment extends UstadDialogFragment implements LoginVie
             case R.id.fragment_login_dialog_login_button:
                 String username = ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).getText().toString();
                 String password = ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).getText().toString();
-                mLoginController.handleClickLogin(username, password, mXapiServer);
+
+                boolean locallyPresent =
+                        mLoginController.handleLoginLocally(username, password, getContext());
+                if(!locallyPresent) {
+                    mLoginController.handleClickLogin(username, password, mXapiServer);
+                }
                 break;
 
             case R.id.fragment_login_dialog_register_button:

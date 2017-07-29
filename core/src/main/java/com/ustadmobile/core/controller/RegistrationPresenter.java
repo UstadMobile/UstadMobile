@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
 import com.ustadmobile.nanolrs.core.manager.UserManager;
@@ -22,6 +23,13 @@ public class RegistrationPresenter extends UstadBaseController {
 
     private RegistrationView view;
 
+    public static final int RESULT_REGISTRATION_SUCCESS=2;
+
+    //Hashed user authentication to cache in case they login next time when offline
+    public static final String PREFKEY_AUTHCACHE_PREFIX = "um-authcache-";
+
+    private DialogResultListener resultListener;
+
     //TODO: Remove. Instead get it from build config
     public int[] extraFields = new int[]{MessageID.field_university,
             MessageID.field_fullname, MessageID.field_gender,
@@ -32,10 +40,9 @@ public class RegistrationPresenter extends UstadBaseController {
         super(context);
         this.view = view;
         //TODO: Replace with values from build config
-        for(int field:extraFields){
-            view.addField(field, 0);
+        for(int i=0; i < extraFields.length; i++){
+            view.addField(extraFields[i], 0);
         }
-
 
     }
 
@@ -49,41 +56,18 @@ public class RegistrationPresenter extends UstadBaseController {
      */
     public void handleClickRegister(String username, String password, HashMap fields) {
 
-        //TODO: Remove this after logged in user is set
         Object context = getContext();
-        UserManager userManager =
-                PersistenceManager.getInstance().getManager(UserManager.class);
-        UserCustomFieldsManager userCustomFieldsManager =
-                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
-
-        String loggedInUsername = null;
-        loggedInUsername = UstadMobileSystemImpl.getInstance().getActiveUser(context);
-        //ignore loggedInUsername cause if we're clicking register, we want this user
-        //to log in..
-
-        User loggedInUser = null;
-        List<User> users = userManager.findByUsername(context, username);
-        if(users!= null && !users.isEmpty()){
-            loggedInUser = users.get(0);
-        }else{
-            //create the user
-            try {
-                loggedInUser = (User)userManager.makeNew();
-                loggedInUser.setUsername(username);
-                loggedInUser.setUuid(UUID.randomUUID().toString());
-                loggedInUser.setPassword(password);
-                loggedInUser.setNotes("User Created via Registration Page");
-                loggedInUser.setDateCreated(System.currentTimeMillis());
-                userManager.persist(context, loggedInUser);
-
-                userCustomFieldsManager.createUserCustom(fields,loggedInUser, context);
-
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        UstadMobileSystemImpl.getInstance().registerUser(username, password, fields, context);
+        if(resultListener != null){
+            resultListener.onDialogResult(RESULT_REGISTRATION_SUCCESS, view, null);
         }
-        UstadMobileSystemImpl.getInstance().setActiveUser(loggedInUser.getUsername(), context);
     }
 
+    public DialogResultListener getResultListener() {
+        return resultListener;
+    }
 
+    public void setResultListener(DialogResultListener resultListener) {
+        this.resultListener = resultListener;
+    }
 }

@@ -46,7 +46,12 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.nanolrs.core.manager.UserManager;
+import com.ustadmobile.nanolrs.core.model.User;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Hashtable;
 
 
@@ -431,7 +436,25 @@ public class LoginController extends UstadBaseController{
         }
     }
 
-
+    /**
+     * Authenticates login locally and proceeds with the next Activity
+     * @param username
+     * @param password
+     * @param dbContext
+     * @return
+     */
+    public boolean handleLoginLocally(String username, String password, Object dbContext){
+        boolean result = UstadMobileSystemImpl.getInstance().handleLoginLocally(username, password, dbContext);
+        if(result) {
+            if (resultListener != null) {
+                resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog) view, null);
+            } else {
+                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
+                        BasePointController.makeDefaultBasePointArgs(context), context);
+            }
+        }
+        return result;
+    }
     /**
      * Handles what happens when in the app the login button is clicked.
      * @param username
@@ -494,6 +517,10 @@ public class LoginController extends UstadBaseController{
                 }else {
                     impl.setActiveUser(username, context);
                     impl.setActiveUserAuth(password, context);
+
+                    //Added by Varuna:
+                    //create a user locally:
+                    impl.createUserLocally(username, password, null, getContext());
 
                     impl.getAppView(context).setProgressDialogTitle("Checking user role");
                     // try and find the role

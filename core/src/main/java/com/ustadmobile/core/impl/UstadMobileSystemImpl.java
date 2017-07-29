@@ -1077,8 +1077,32 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract CourseProgress getCourseProgress(String[] entryIds, Object context);
 
-
+    /**
+     * Register users locally
+     * @param username
+     * @param password
+     * @param fields
+     * @param context
+     * @return
+     */
     public abstract int registerUser(String username, String password, HashMap fields, Object context);
+
+    /**
+     * Authenticate locally
+     * @param username
+     * @param password
+     * @return
+     */
+    public abstract boolean handleLoginLocally(String username, String password, Object context);
+
+    /**
+     * Create local user
+     * @param username
+     * @param password
+     * @param uuid
+     * @return
+     */
+    public abstract boolean createUserLocally(String username, String password, String uuid, Object context);
 
 }
 

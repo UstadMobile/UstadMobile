@@ -231,6 +231,12 @@ public class BasePointController extends UstadBaseController implements DialogRe
                 basePointView.setMenuItems(CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED);
                 impl.getAppView(getContext()).showNotification("Login successful", AppView.LENGTH_LONG);
                 break;
+
+            case RegistrationPresenter.RESULT_REGISTRATION_SUCCESS:
+                dialog.dismiss();
+                basePointView.setMenuItems(CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED);
+                impl.getAppView(getContext()).showNotification("Registration successful", AppView.LENGTH_LONG);
+
         }
     }
 

@@ -34,7 +34,7 @@ version = "0.2.4.34"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 105
-    nanoLrsVersion = "0.2.06"
+    nanoLrsVersion = "0.2.07"
 }
 
 ext.buildConfigProperties = new Properties()

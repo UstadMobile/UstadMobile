@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
@@ -13,6 +14,7 @@ import android.widget.LinearLayout;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.RegistrationPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
@@ -37,6 +39,9 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         mView = inflater.inflate(R.layout.fragment_register_dialog, container, false);
         mPresenter = new RegistrationPresenter(getContext(), this);
         mView.findViewById(R.id.fragment_register_dialog_register_button).setOnClickListener(this);
+        if(mResultListener != null)
+            mPresenter.setResultListener(mResultListener);
+
         return mView;
     }
 
@@ -76,8 +81,17 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
 
                 mPresenter.handleClickRegister(username, password, fieldMap);
 
+
+
         }
 
 
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if(mPresenter != null)
+            mPresenter.setResultListener(mResultListener);
     }
 }

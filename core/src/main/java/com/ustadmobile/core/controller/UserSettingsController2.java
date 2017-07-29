@@ -9,8 +9,13 @@ import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView2;
+import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
+import com.ustadmobile.nanolrs.core.manager.UserManager;
+import com.ustadmobile.nanolrs.core.model.User;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
 import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Created by mike on 5/30/17.
@@ -33,6 +38,22 @@ public class UserSettingsController2 extends  UstadBaseController implements App
 
     public void handleClickAccount() {
 
+    }
+
+    public String getLoggedInUsername(){
+        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
+        UserCustomFieldsManager ucfManager =
+                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
+        String loggedInUsername =
+                UstadMobileSystemImpl.getInstance().getActiveUser(context);
+        List<User> loggedInUsers = userManager.findByUsername(context, loggedInUsername);
+        User loggedInUser = null;
+        String nameToDisplay = "Student/Username";
+        if(loggedInUsers!= null && !loggedInUsers.isEmpty()){
+            loggedInUser = loggedInUsers.get(0);
+            nameToDisplay = loggedInUser.getUsername();
+        }
+        return nameToDisplay;
     }
 
     public void handleClickLanguage() {

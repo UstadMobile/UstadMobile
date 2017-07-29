@@ -70,10 +70,9 @@ public class NetworkServiceAndroid extends Service{
         Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
         String loggedInUserString =
                 UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
-        if(loggedInUserString != null && !loggedInUserString.isEmpty()){
-            bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
-        }
-        //bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+
+        bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+
 
     }
 
@@ -91,10 +90,8 @@ public class NetworkServiceAndroid extends Service{
         //Sync:
         String loggedInUserString =
                 UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
-        if(loggedInUserString != null && !loggedInUserString.isEmpty()){
-            unbindService(umSyncServiceConnection);
-        }
-        //unbindService(umSyncServiceConnection);
+
+        unbindService(umSyncServiceConnection);
 
         super.onDestroy();
     }
