@@ -1,14 +1,20 @@
 package com.ustadmobile.port.android.view;
 
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -304,7 +310,42 @@ public class ContainerPageFragment extends Fragment {
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, String url) {
             this.isFirstPage = false;
-            return super.shouldOverrideUrlLoading(view, url);
+            if(url.endsWith("?action=download")) {
+                final String downloadUrl = url.substring(0, url.indexOf('?'));
+
+                final long[] downloadId = new long[]{-1};
+
+                BroadcastReceiver receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        long completedDownloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -2);
+                        if(completedDownloadId == downloadId[0]) {
+                            context.unregisterReceiver(this);
+                            startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+                        }
+                    }
+                };
+
+
+                IntentFilter intentFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+                getContext().registerReceiver(receiver, intentFilter);
+
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                        UMFileUtil.getFilename(downloadUrl));
+                DownloadManager downloadManager = (DownloadManager)ContainerPageFragment.this.getContext().getSystemService(
+                        Context.DOWNLOAD_SERVICE);
+                downloadId[0] = downloadManager.enqueue(request);
+
+                return true;
+            }else {
+                return super.shouldOverrideUrlLoading(view, url);
+            }
+        }
+
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            return super.shouldOverrideUrlLoading(view, request);
         }
 
         @Override

@@ -85,7 +85,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
                         "zip		application/octet-stream "+
                         "exe		application/octet-stream "+
                         "wav		audio/wav "+
-                        "class		application/octet-stream " );
+                        "class		application/octet-stream " +
+                        "docx       application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         while ( st.hasMoreTokens())
             theMimeTypes.put( st.nextToken(), st.nextToken());
     }
