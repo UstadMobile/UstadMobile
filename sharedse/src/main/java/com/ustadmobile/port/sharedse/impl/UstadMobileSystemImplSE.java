@@ -470,7 +470,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     }
 
     @Override
-    public int registerUser(String username, String password, HashMap fields, Object context) {
+    public int registerUser(String username, String password, Hashtable fields, Object context) {
         UserManager userManager =
                 PersistenceManager.getInstance().getManager(UserManager.class);
         UserCustomFieldsManager userCustomFieldsManager =

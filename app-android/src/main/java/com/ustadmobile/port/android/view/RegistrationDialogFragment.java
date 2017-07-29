@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
 import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * Created by varuna on 7/28/2017.
@@ -71,7 +72,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
             case R.id.fragment_register_dialog_register_button:
                 String username = ((EditText)mView.findViewById(R.id.fragment_register_dialog_username_text)).getText().toString();
                 String password = ((EditText)mView.findViewById(R.id.fragment_register_dialog_password_text)).getText().toString();
-                HashMap fieldMap = new HashMap();
+                Hashtable fieldMap = new Hashtable();
                 int[] allFields = mPresenter.extraFields;
                 for(int field:allFields){
                     String value = ((EditText)mView.findViewById(field)).getText().toString();
