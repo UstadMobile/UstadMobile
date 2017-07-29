@@ -43,6 +43,7 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.OPDSEntryFilter;
@@ -614,6 +615,12 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
                 view.setEntryProgress(entryId,  impl.getCourseProgress(progressCheckIds,
                         getContext()));
+            }
+        }else {
+            CourseProgress notStartedProgress = new CourseProgress(CourseProgress.STATUS_NOT_STARTED,
+                    0, 0);
+            for(int i = 0; i < displayFeed.entries.length; i++) {
+                view.setEntryProgress(displayFeed.entries[i].id, notStartedProgress);
             }
         }
     }
