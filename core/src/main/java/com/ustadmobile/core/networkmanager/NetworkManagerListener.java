@@ -17,7 +17,7 @@ public interface NetworkManagerListener extends NetworkManagerTaskListener{
      * Indicate that entry status check status task has information about the entry.
      * @param fileIds List of all entry under process.
      */
-    void fileStatusCheckInformationAvailable(List<String> fileIds);
+    void fileStatusCheckInformationAvailable(String[] fileIds);
 
     /**
      * Indicate that new NetworkNode has been discovered

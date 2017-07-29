@@ -746,9 +746,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param fileIds List of entry ID's which were processed
      */
     protected void fireFileStatusCheckInformationAvailable(List<String> fileIds) {
+        String[] fileIdsArray = new String[fileIds.size()];
+        fileIds.toArray(fileIdsArray);
         synchronized (networkManagerListeners) {
             for(NetworkManagerListener listener : networkManagerListeners){
-                listener.fileStatusCheckInformationAvailable(fileIds);
+                listener.fileStatusCheckInformationAvailable(fileIdsArray);
             }
         }
     }

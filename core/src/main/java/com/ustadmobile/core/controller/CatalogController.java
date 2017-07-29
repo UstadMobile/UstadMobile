@@ -527,7 +527,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         if(args.containsKey(ARG_FILTER_BY_UI_LANG) && args.get(ARG_FILTER_BY_UI_LANG).equals("true")) {
             final String uiLanguage = UstadMobileSystemImpl.getInstance().getDisplayedLocale(context);
             result.setDisplayFilter(new OPDSEntryFilter() {
-                @Override
                 public boolean accept(UstadJSOPDSEntry entry) {
                     return entry.getLanguage() == null || UMUtil.isSameLanguage(
                             entry.getLanguage(), uiLanguage);
@@ -2231,12 +2230,10 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         view.refresh();
     }
 
-    @Override
     protected void onDownloadStarted() {
 
     }
 
-    @Override
     protected void onEntriesRemoved() {
 
     }
@@ -2246,7 +2243,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 
-    @Override
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
         UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
         if(entry != null) {
@@ -2255,7 +2251,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
     }
 
-    @Override
     public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
         UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
         if(entry == null)

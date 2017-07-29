@@ -2,12 +2,12 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.EntryCheckResponse;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -608,7 +608,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
      * @return String [] : Array of file URLS;
      */
     private String []  getFileURIs(){
-        Vector downloadDestVector = getFeed().getLinks(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
+        Vector downloadDestVector = getFeed().getLinks(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
                 null);
         if(downloadDestVector.isEmpty()) {
             throw new IllegalArgumentException("No download destination in acquisition feed for acquireCatalogEntries");
@@ -739,7 +739,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
     @Override
-    public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+    public void fileStatusCheckInformationAvailable(String[] fileIds) {
 
     }
 

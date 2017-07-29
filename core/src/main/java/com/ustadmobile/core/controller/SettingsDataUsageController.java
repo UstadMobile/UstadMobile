@@ -49,7 +49,6 @@ public class SettingsDataUsageController extends UstadBaseController {
         UstadMobileSystemImpl.getInstance().setAppPref(PREFKEY_CONNECTION_TYPE, String.valueOf(CONNECTION_TYPE), getContext());
         return isMobileData;
     }
-    @Override
     public void setView(UstadView view) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         super.setView(view);
@@ -62,7 +61,6 @@ public class SettingsDataUsageController extends UstadBaseController {
         }
     }
 
-    @Override
     public void setUIStrings() {
     }
 }

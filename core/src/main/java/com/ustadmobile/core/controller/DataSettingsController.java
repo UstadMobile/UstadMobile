@@ -14,7 +14,7 @@ public class DataSettingsController extends UstadBaseController {
 
     }
 
-    @Override
+
     public void setUIStrings() {
 
     }

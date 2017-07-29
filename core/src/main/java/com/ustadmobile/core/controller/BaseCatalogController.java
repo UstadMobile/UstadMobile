@@ -2,9 +2,9 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMUtil;
@@ -60,7 +60,7 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
 
     public void onCreate(Hashtable savedState) {
-        //AcquisitionManager.getInstance().registerEntryAquisitionStatusListener(this, context);
+
     }
 
     /**
@@ -231,7 +231,7 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
                         new String[]{acquisitionLanguageChoices[choice]},
                         CoreBuildConfig.ACQUISITION_SELECT_WEIGHT_MIMETYPE,
                         CoreBuildConfig.ACQUISITION_SELECT_WEIGHT_LANGUAGE);
-                acquisitionFeed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
+                acquisitionFeed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
                         "application/dir", getAcquisitionStorageDir());
 
 

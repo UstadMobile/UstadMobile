@@ -23,12 +23,10 @@ public class WelcomeController extends UstadBaseController {
         setView(view);
     }
 
-    @Override
     public void handleViewPause() {
 
     }
 
-    @Override
     public void handleViewResume() {
         UstadMobileSystemImpl.getInstance().setAppPref(PREF_KEY_WELCOME_SCREEN_ACTIVE, "true",
                 getContext());

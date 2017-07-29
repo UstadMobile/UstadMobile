@@ -58,7 +58,7 @@ public class TestWifiDirectGroupConnection {
         final Object connectionLock = new Object();
         NetworkManagerListener listener = new NetworkManagerListener() {
             @Override
-            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
 
             }
 

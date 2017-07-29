@@ -117,9 +117,9 @@ public class TestEntryStatusTask{
         NetworkManagerListener responseListener = new NetworkManagerListener() {
 
             @Override
-            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
-                for(int i = 0; i < fileIds.size(); i++) {
-                    actualAvailability.put(fileIds.get(i), manager.isFileAvailable(fileIds.get(i)));
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
+                for(int i = 0; i < fileIds.length; i++) {
+                    actualAvailability.put(fileIds[i], manager.isFileAvailable(fileIds[i]));
                 }
             }
 

@@ -286,7 +286,6 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
             entriesToSelectFrom[entriesToSelectFrom.length-1] = selectedEntry;
 
             UMUtil.bubbleSort(entriesToSelectFrom, new UMUtil.Comparer() {
-                @Override
                 public int compare(Object o1, Object o2) {
                     UstadJSOPDSEntry entry1 = (UstadJSOPDSEntry)o1;
                     UstadJSOPDSEntry entry2 = (UstadJSOPDSEntry)o2;

@@ -132,6 +132,7 @@ public class HTTPCacheDir {
             in.close();
             in = null;
 
+            /* $if umplatform != 2 $ */
             String cacheJsonStr = new String(bout.toByteArray(), "UTF-8");
             JSONObject primeObject = new JSONObject(cacheJsonStr);
             Iterator<String> primeUrls = primeObject.keys();
@@ -162,6 +163,7 @@ public class HTTPCacheDir {
                     }
                 }
             }
+            /* $endif */
 
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 654, null, e);
@@ -881,6 +883,7 @@ public class HTTPCacheDir {
     }
 
 
+    /* $if umplatform != 2 $ */
     static class IteratorArrayEnumeration implements Enumeration{
 
         private int iteratorIndex;
@@ -902,12 +905,10 @@ public class HTTPCacheDir {
             }
         }
 
-        @Override
         public boolean hasMoreElements() {
             return hasMoreElements(iteratorIndex);
         }
 
-        @Override
         public Object nextElement() {
             if(iterators[iteratorIndex] != null && iterators[iteratorIndex].hasNext()) {
                 return iterators[iteratorIndex].next();
@@ -919,5 +920,7 @@ public class HTTPCacheDir {
             }
         }
     }
+
+    /* $endif$ */
     
 }
