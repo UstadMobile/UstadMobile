@@ -117,6 +117,13 @@
     <string name="failed">Failed</string>
     <string name="university_name" value="10001">University name</string>
 
+    <string name="field_university" value="980">University Name</string>
+    <string name="field_fullname" value="981">Full Name</string>
+    <string name="field_email" value="982">Email</string>
+    <string name="field_gender" value="983">Gender</string>
+    <string name="field_phonenumber" value="984">Phone Number</string>
+    <string name="field_faculty" value="985">Faculty</string>
+
 
     <string name="welcome">Welcome!</string>
     <string name="welcome_dialog_subheader">Trying to get a job?\nGet the skills for success here!</string>

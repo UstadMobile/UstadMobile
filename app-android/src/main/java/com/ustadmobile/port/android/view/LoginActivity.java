@@ -152,24 +152,24 @@ public class LoginActivity extends UstadBaseActivity implements LoginView, View.
             String password = ((EditText)findViewById(R.id.login_password)).getText().toString();
             mLoginController.handleClickLogin(username, password, xAPIServer);
         }else if(id == R.id.login_registerbutton) {
-            Hashtable userVals = new Hashtable();
-            int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();
-
-            userVals.put(LoginController.REGISTER_COUNTRY,
-                    new Integer(UstadMobileConstants.COUNTRYDIALINGCODES[selectedCountryNum]));
-            userVals.put(LoginController.REGISTER_PHONENUM,
-                    ((EditText) findViewById(R.id.login_registerphonenum)).getText().toString());
-            userVals.put(LoginController.REGISTER_NAME,
-                    ((EditText)findViewById(R.id.login_registername)).getText().toString());
-            int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
-            userVals.put(LoginController.REGISTER_GENDER,
-                    genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
-            userVals.put(LoginController.REGISTER_USERNAME, getEditTextVal(R.id.login_registerusername));
-            userVals.put(LoginController.REGISTER_PASSWORD, getEditTextVal(R.id.login_registerpassword));
-            userVals.put(LoginController.REGISTER_EMAIL, getEditTextVal(R.id.login_registeremail));
-            userVals.put(LoginController.REGISTER_REGCODE, getEditTextVal(R.id.login_registerregcode));
-            userVals.put(UstadMobileSystemImpl.PREFKEY_XAPISERVER, xAPIServer);
-            mLoginController.handleClickRegister(userVals);
+//            Hashtable userVals = new Hashtable();
+//            int selectedCountryNum = ((Spinner)findViewById(R.id.login_registercountry)).getSelectedItemPosition();
+//
+//            userVals.put(LoginController.REGISTER_COUNTRY,
+//                    new Integer(UstadMobileConstants.COUNTRYDIALINGCODES[selectedCountryNum]));
+//            userVals.put(LoginController.REGISTER_PHONENUM,
+//                    ((EditText) findViewById(R.id.login_registerphonenum)).getText().toString());
+//            userVals.put(LoginController.REGISTER_NAME,
+//                    ((EditText)findViewById(R.id.login_registername)).getText().toString());
+//            int genderSelectedId = ((RadioGroup)findViewById(R.id.login_registergenderradiogroup)).getCheckedRadioButtonId();
+//            userVals.put(LoginController.REGISTER_GENDER,
+//                    genderSelectedId == R.id.login_register_radio_female ? "f" : "m");
+//            userVals.put(LoginController.REGISTER_USERNAME, getEditTextVal(R.id.login_registerusername));
+//            userVals.put(LoginController.REGISTER_PASSWORD, getEditTextVal(R.id.login_registerpassword));
+//            userVals.put(LoginController.REGISTER_EMAIL, getEditTextVal(R.id.login_registeremail));
+//            userVals.put(LoginController.REGISTER_REGCODE, getEditTextVal(R.id.login_registerregcode));
+//            userVals.put(UstadMobileSystemImpl.PREFKEY_XAPISERVER, xAPIServer);
+//            mLoginController.handleClickRegister(userVals);
         }
     }
 

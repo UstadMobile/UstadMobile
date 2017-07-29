@@ -58,7 +58,6 @@ public class NetworkServiceAndroid extends Service{
 
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -67,9 +66,14 @@ public class NetworkServiceAndroid extends Service{
         networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
-//        Temporarily disabled
-//        Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
-//        bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+        //Sync:
+        Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
+        String loggedInUserString =
+                UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
+        if(loggedInUserString != null && !loggedInUserString.isEmpty()){
+            bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
+        }
+        //bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
 
     }
 
@@ -84,7 +88,13 @@ public class NetworkServiceAndroid extends Service{
             UstadMobileSystemImpl.getInstance().setAppPref("devices","",getApplicationContext());
         }
         unbindService(wifiP2PServiceConnection);
-//        unbindService(umSyncServiceConnection);
+        //Sync:
+        String loggedInUserString =
+                UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
+        if(loggedInUserString != null && !loggedInUserString.isEmpty()){
+            unbindService(umSyncServiceConnection);
+        }
+        //unbindService(umSyncServiceConnection);
 
         super.onDestroy();
     }
@@ -151,7 +161,7 @@ public class NetworkServiceAndroid extends Service{
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             User loggedInUser = null;
             Node endNode = null;
-            String mainNodeHostName = "main1";
+            String mainNodeHostName = UMSyncService.DEFAULT_MAIN_SERVER_HOST_NAME;
             String loggedInUsername = null;
             Object context = getApplicationContext();
 
@@ -169,49 +179,22 @@ public class NetworkServiceAndroid extends Service{
             }else{
                 loggedInUser = null;
                 System.out.println("No user logged in. Setting null (will not proceed)");
-
-
-                //TODO: Remove this after logged in user is set
-                List<User> testusers = userManager.findByUsername(context, "test");
-                if(testusers!= null && !testusers.isEmpty()){
-                    loggedInUser = testusers.get(0);
-                }else{
-                    //create a test user
-                    try {
-                        loggedInUser = (User)userManager.makeNew();
-                        loggedInUser.setUsername("test");
-                        loggedInUser.setUuid(UUID.randomUUID().toString());
-                        loggedInUser.setPassword("secret");
-                        loggedInUser.setNotes("test user");
-                        loggedInUser.setDateCreated(System.currentTimeMillis());
-                        userManager.persist(context, loggedInUser);
-
-                        UstadMobileSystemImpl.getInstance().setActiveUser(loggedInUser.getUsername(), context);
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-                System.out.println("!!!!!!Made a test user. PLEASE DELETE THIS FOR PROD!!!!!!");
-
             }
-
 
             try {
                 endNode = nodeManager.getMainNode(mainNodeHostName, context);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
             umSyncService.setLoggedInUser(loggedInUser);
             umSyncService.setEndNode(endNode);
-
         }
 
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             //sup?
-            int x=0;
+            int x   =0;
         }
     };
 

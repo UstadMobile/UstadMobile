@@ -121,6 +121,7 @@ public class LoginFragment extends Fragment {
             case LoginView.SECTION_REGISTER:
                 Button registerButton = (Button)mRootViewGroup.findViewById(R.id.login_registerbutton);
                 registerButton.setText(impl.getString(MessageID.register, getContext()));
+
                 setTextViewHint(mRootViewGroup, R.id.login_registername,
                         impl.getString(MessageID.name, getContext()));
                 ((TextView)mRootViewGroup.findViewById(R.id.login_registerphonenum)).setHint(

@@ -20,8 +20,18 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.LoginView;
+import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
+import com.ustadmobile.nanolrs.core.manager.UserManager;
+import com.ustadmobile.nanolrs.core.model.User;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.Vector;
 
 /**
@@ -54,6 +64,9 @@ public class LoginDialogFragment extends UstadDialogFragment implements LoginVie
 
         Button loginButton = (Button)mView.findViewById(R.id.fragment_login_dialog_login_button);
         loginButton.setOnClickListener(this);
+
+        Button registerButton = (Button)mView.findViewById(R.id.fragment_login_dialog_register_button);
+        registerButton.setOnClickListener(this);
 
         mLoginController = LoginController.makeControllerForView(this);
         mLoginController.setUIStrings();
@@ -92,6 +105,10 @@ public class LoginDialogFragment extends UstadDialogFragment implements LoginVie
                 String username = ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).getText().toString();
                 String password = ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).getText().toString();
                 mLoginController.handleClickLogin(username, password, mXapiServer);
+                break;
+
+            case R.id.fragment_login_dialog_register_button:
+                mLoginController.handleClickRegister();
                 break;
         }
     }
