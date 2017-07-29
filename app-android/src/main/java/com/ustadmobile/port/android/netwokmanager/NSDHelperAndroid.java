@@ -203,8 +203,10 @@ public class NSDHelperAndroid {
      * Upon un-registration of the listener which registered the service, service will stop.
      */
     public void unregisterNSDService(){
-        mNsdManager.unregisterService(networkRegistrationListener);
-        networkRegistrationListener = null;
+        if(networkRegistrationListener != null) {
+            mNsdManager.unregisterService(networkRegistrationListener);
+            networkRegistrationListener = null;
+        }
     }
 
     /**

@@ -73,8 +73,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private boolean mBound = false;
 
-    protected boolean inUse = false;
-
     private ContainerController mContainerController;
 
     private String mBaseURL = null;
@@ -88,8 +86,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     private static final String OUTSTATE_MOUNTPOINT = "mountpt";
 
     private int mSavedPosition = -1;
-
-    private String mSavedMountPoint;
 
     private Hashtable mArgs;
 
@@ -109,6 +105,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
      * Navigation items in the order in which they appear in the drawer on the left
      */
     private EPUBNavItem[] drawerNavItems;
+
+
+    private Vector<Runnable> runWhenContentMounted = new Vector<>();
+
 
 
     @Override
@@ -139,7 +139,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             if(saved.getInt(OUTSTATE_CURRENTITEM, -1) != -1) {
                 mSavedPosition = saved.getInt(OUTSTATE_CURRENTITEM);
             }
-            mSavedMountPoint = saved.getString(OUTSTATE_MOUNTPOINT);
         }
 
         Toolbar toolbar = (Toolbar)findViewById(R.id.container_toolbar);
@@ -202,13 +201,41 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     public void initContent() {
         mMountedPath = mNetworkService.getNetworkManager().mountZipOnHttp(
-                ContainerActivity.this.mContainerURI, mSavedMountPoint);
+                ContainerActivity.this.mContainerURI, null);
         mBaseURL = UMFileUtil.joinPaths(new String[]{
                 mNetworkService.getNetworkManager().getLocalHttpUrl(), mMountedPath});
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
         UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + "on " + mBaseURL + " type "
                 + mMimeType);
+
         ContainerController.makeControllerForView(this, mArgs, this);
+    }
+
+    public String getBaseURL() {
+        return mBaseURL;
+    }
+
+    public String getOpfBasePath() {
+        return mContainerController.getOPFBasePath(mContainerController.getActiveOPF());
+    }
+
+    public String getXapiQuery() {
+        return mContainerController.getXAPIQuery();
+    }
+
+    /**
+     * A runnable posted here will be run when the controller is ready. If the controller is currently
+     * ready the method will be run immediately. Otherwise it will be added to a vector of Runnables
+     * to run when the controller is ready.
+     *
+     * @param runnable
+     */
+    public void runWhenMounted(Runnable runnable) {
+        if(mContainerController != null) {
+            runnable.run();
+        }else {
+            runWhenContentMounted.add(runnable);
+        }
     }
 
     @Override
@@ -237,6 +264,15 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             public void run() {
                 if (controller != null) {
                     mContainerController = (ContainerController) controller;
+                    synchronized (runWhenContentMounted) {
+                        Iterator<Runnable> runnableIterator = runWhenContentMounted.iterator();
+                        Runnable runnable;
+                        while(runnableIterator.hasNext()) {
+                            runnable = runnableIterator.next();
+                            runnable.run();
+                            runnableIterator.remove();
+                        }
+                    }
                     setupFromController((ContainerController) controller);
                 } else {
                     UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
@@ -432,25 +468,13 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        inUse = true;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        inUse = false;
-    }
-
     public void onStop() {
         super.onStop();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
     }
 
     public void handlePageTitleUpdated(int index, String title) {
-        if(mPager.getCurrentItem() == index && mContainerController != null) {
+        if(mPager != null && mPager.getCurrentItem() == index && mContainerController != null) {
             mContainerController.handlePageTitleUpdated(title);
         }
     }
@@ -568,7 +592,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                 return existingFrag;
             }else {
                 ContainerPageFragment frag =
-                        ContainerPageFragment.newInstance(baseURI, hrefList[position], query, position);
+                        ContainerPageFragment.newInstance(hrefList[position], position);
 
                 this.pagesMap.put(Integer.valueOf(position), frag);
                 return frag;
