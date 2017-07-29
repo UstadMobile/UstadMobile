@@ -105,6 +105,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
                 //TODO: as this is bound to the activity - this might not be ready - lifecycle implication needs handled
                 NetworkManagerCore manager  = UstadMobileSystemImpl.getInstance().getNetworkManager();
+                /* $if umplatform != 2  $ */
                 List<EntryCheckResponse> fileResponse = manager.getEntryResponsesWithLocalFile(entry.id);
                 if(fileResponse != null) {
                     catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_AVAILABLE);
@@ -112,6 +113,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                     catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_IN_PROGRESS);
                     entryCheckTaskId = manager.requestFileStatus(new String[]{entry.id}, true, true);
                 }
+                /* $endif$ */
             }catch(Exception e) {
                 e.printStackTrace();
             }
@@ -128,9 +130,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
         CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(progressIds,
                 getContext());
-        if(progress == null) {
-            return;
-        }else if(progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
+        if(progress == null || progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
             catalogEntryView.setLearnerProgressVisible(false);
         }else {
             catalogEntryView.setLearnerProgressVisible(true);
@@ -155,7 +155,6 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     public void loadImages() {
         new Thread(new Runnable() {
-            @Override
             public void run() {
                 //Load the image icon
                 Vector thumbnails = entry.getThumbnails();
@@ -168,7 +167,6 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                                 getContext()).get(thumbnailUrl);
 
                         catalogEntryView.runOnUiThread(new Runnable() {
-                            @Override
                             public void run() {
                                 catalogEntryView.setIcon(thumbnailFileUri);
                             }
@@ -187,7 +185,6 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         final String coverImageFileUri = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
                                 getContext()).get(coverImageUrl);
                         catalogEntryView.runOnUiThread(new Runnable() {
-                            @Override
                             public void run() {
                                 catalogEntryView.setHeader(coverImageFileUri);
                             }
@@ -247,7 +244,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     }
 
-    @Override
+    
     public void appViewChoiceSelected(int commandId, int choice) {
         switch(commandId) {
             case CMD_MODIFY_ENTRY:
@@ -292,12 +289,12 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
         super.appViewChoiceSelected(commandId, choice);
     }
 
-    @Override
+    
     protected void onDownloadStarted() {
         catalogEntryView.setProgressVisible(true);
     }
 
-    @Override
+    
     protected void onEntriesRemoved() {
         //check if any version is still acquired
         Hashtable acquiredVersions = getTranslatedAlternatives(entry, CatalogController.STATUS_ACQUIRED);
@@ -308,16 +305,16 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
         }
     }
 
-    @Override
+    
     public void setUIStrings() {
 
     }
 
-    @Override
+    
     public void acquisitionProgressUpdate(String entryId, final AcquisitionTaskStatus status) {
         if(entry != null && (entryId.equals(entry.id) || UMUtil.getIndexInArray(entryId, entryTranslationIds) != -1)) {
             catalogEntryView.runOnUiThread(new Runnable() {
-                @Override
+                
                 public void run() {
                     if(status.getTotalSize() == -1)
                         catalogEntryView.setProgress(-1);
@@ -328,13 +325,13 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
         }
     }
 
-    @Override
+    
     public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
         if(entryId.equals(entry.id) || UMUtil.getIndexInArray(entryId, entryTranslationIds) != -1) {
             switch(status.getStatus()) {
                 case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
                     catalogEntryView.runOnUiThread(new Runnable() {
-                        @Override
+                        
                         public void run() {
                             catalogEntryView.setProgressVisible(false);
                             updateButtonsByStatus(CatalogController.STATUS_ACQUIRED);
@@ -351,16 +348,15 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
         manager.removeAcquisitionTaskListener(this);
     }
 
-    @Override
-    public void fileStatusCheckInformationAvailable(List<String> fileIds) {
-        if(fileIds.contains(entry.id)) {
+    public void fileStatusCheckInformationAvailable(String[] fileIds) {
+        if(UMUtil.getIndexInArray(entry.id, fileIds) != -1) {
             final boolean available = manager.getEntryResponsesWithLocalFile(entry.id) != null;
             updateViewLocallyAvailableStatus(available ?
                     CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
         }
     }
 
-    @Override
+    
     public void networkTaskStatusChanged(NetworkTask task) {
         if(task.getTaskId() == entryCheckTaskId) {
             boolean available =
@@ -372,29 +368,29 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     private void updateViewLocallyAvailableStatus(final int status) {
         catalogEntryView.runOnUiThread(new Runnable() {
-            @Override
+            
             public void run() {
                 catalogEntryView.setLocallyAvailableStatus(status);
             }
         });
     }
 
-    @Override
+    
     public void networkNodeDiscovered(NetworkNode node) {
 
     }
 
-    @Override
+    
     public void networkNodeUpdated(NetworkNode node) {
 
     }
 
-    @Override
+    
     public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
 
     }
 
-    @Override
+    
     public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
     }

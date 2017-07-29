@@ -222,7 +222,6 @@ public class BasePointController extends UstadBaseController implements DialogRe
         UstadMobileSystemImpl.getInstance().go(item.getDestination(), getContext());
     }
 
-    @Override
     public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         switch(commandId) {

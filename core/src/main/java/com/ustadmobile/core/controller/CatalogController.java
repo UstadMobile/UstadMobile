@@ -43,6 +43,7 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CatalogModel;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.OPDSEntryFilter;
@@ -526,7 +527,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         if(args.containsKey(ARG_FILTER_BY_UI_LANG) && args.get(ARG_FILTER_BY_UI_LANG).equals("true")) {
             final String uiLanguage = UstadMobileSystemImpl.getInstance().getDisplayedLocale(context);
             result.setDisplayFilter(new OPDSEntryFilter() {
-                @Override
                 public boolean accept(UstadJSOPDSEntry entry) {
                     return entry.getLanguage() == null || UMUtil.isSameLanguage(
                             entry.getLanguage(), uiLanguage);
@@ -614,6 +614,12 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
                 view.setEntryProgress(entryId,  impl.getCourseProgress(progressCheckIds,
                         getContext()));
+            }
+        }else {
+            CourseProgress notStartedProgress = new CourseProgress(CourseProgress.STATUS_NOT_STARTED,
+                    0, 0);
+            for(int i = 0; i < displayFeed.entries.length; i++) {
+                view.setEntryProgress(displayFeed.entries[i].id, notStartedProgress);
             }
         }
     }
@@ -2224,12 +2230,10 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         view.refresh();
     }
 
-    @Override
     protected void onDownloadStarted() {
 
     }
 
-    @Override
     protected void onEntriesRemoved() {
 
     }
@@ -2239,7 +2243,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 
-    @Override
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
         UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
         if(entry != null) {
@@ -2248,7 +2251,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
     }
 
-    @Override
     public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
         UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
         if(entry == null)

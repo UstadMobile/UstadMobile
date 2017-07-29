@@ -146,7 +146,8 @@
                                 android:layout_marginLeft="@dimen/catalog_entry_local_availability_icon_size"
                                 android:text="SIZE"
                                 android:layout_width="match_parent"
-                                android:layout_height="wrap_content" />
+                                android:layout_height="wrap_content"
+                                android:visibility="invisible"/>
 
                             <ImageView
                                 android:id="@+id/activity_catalog_entry_local_availability_icon"

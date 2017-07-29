@@ -2,10 +2,15 @@ package com.ustadmobile.core.networkmanager;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
+
+/* $if umplatform != 2 $ */
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+/* $else$
+import java.util.Vector;
+$endif$ */
 
 /**
  * <h1>NetworkNode</h1>
@@ -16,6 +21,8 @@ import java.util.List;
  */
 
 public class NetworkNode {
+
+    /* $if umplatform != 2 $*/
 
     private String deviceBluetoothMacAddress;
 
@@ -158,7 +165,6 @@ public class NetworkNode {
         return Calendar.getInstance().getTimeInMillis() - networkServiceLastUpdated;
     }
 
-    @Override
     public boolean equals(Object object) {
         return object instanceof NetworkNode &&
                 ((deviceWifiDirectMacAddress!=null && getDeviceWifiDirectMacAddress().equals(deviceWifiDirectMacAddress))
@@ -183,9 +189,11 @@ public class NetworkNode {
      *
      * @return List of AcquisitionTaskHistoryEntry downloaded from this node, null if no entries exist
      */
+
     public List<AcquisitionTaskHistoryEntry> getAcquisitionHistory() {
         return acquisitionTaskHistory;
     }
+
 
     public int getNumFailures() {
         if(acquisitionTaskHistory == null)
@@ -204,5 +212,5 @@ public class NetworkNode {
         return numFailures;
     }
 
-
+    /* $endif */
 }

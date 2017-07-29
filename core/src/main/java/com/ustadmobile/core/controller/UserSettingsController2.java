@@ -77,12 +77,10 @@ public class UserSettingsController2 extends  UstadBaseController implements App
         LoginController.handleLogout(getContext(), BasePointView.VIEW_NAME);
     }
 
-    @Override
     public void setUIStrings() {
 
     }
 
-    @Override
     public void appViewChoiceSelected(int commandId, int choice) {
         String chosenLocale = choice == 0
             ? UstadMobileSystemImpl.LOCALE_USE_SYSTEM

@@ -65,7 +65,6 @@ public class EntryCheckResponse {
         this.networkNode = networkNode;
     }
 
-    @Override
     public boolean equals(Object object) {
         return object instanceof EntryCheckResponse && getNetworkNode().equals(this.networkNode);
     }

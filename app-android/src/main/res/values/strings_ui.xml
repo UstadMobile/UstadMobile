@@ -115,6 +115,7 @@
     <string name="waiting">Waiting</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
+    <string name="university_name" value="10001">University name</string>
 
     <string name="field_university" value="980">University Name</string>
     <string name="field_fullname" value="981">Full Name</string>

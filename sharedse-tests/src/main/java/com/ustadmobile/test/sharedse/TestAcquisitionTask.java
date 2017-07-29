@@ -2,11 +2,11 @@ package com.ustadmobile.test.sharedse;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.impl.AcquisitionManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.EntryCheckResponse;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -105,7 +105,7 @@ public class TestAcquisitionTask{
         final long[] testTaskId = new long[1];
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
-            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
             }
 
             @Override
@@ -212,7 +212,7 @@ public class TestAcquisitionTask{
 
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
-        feed.addLink(AcquisitionManager.LINK_REL_DOWNLOAD_DESTINATION,
+        feed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
                 FEED_LINK_MIME, destinationDir);
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
                 catalogUrl);

@@ -108,8 +108,10 @@ NetBeans.  See README for instructions on building from source.
     <!--
     We copy the source code in and gitignore it because J2ME code
     needs to be preverified and compiled to be JDK1.3 compliant.
+
+    TODO: Add copycore-tests once we have a method to adapt JUnit 4 tests to J2ME
     -->
-    <target name="copycore-all" depends="copycore-tests,copycore-main"/>
+    <target name="copycore-all" depends="copycore-main"/>
 
     <!-- Call the project gradle to generate build config files with static constants -->
     <target name="generate-core-buildconfig">
@@ -130,12 +132,12 @@ NetBeans.  See README for instructions on building from source.
             <fileset dir="src/com/ustadmobile/test/core" excludes="**/TestConstants.java **/UMContextGetter.java"/>
         </delete>
         
-        <preprocess indir="../core/src/test/java" outdir="preproctmp" out="merge">
+        <preprocess indir="../core/src/test/java" outdir="preproctmp" out="merge" except="PlatformTestUtil.java">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <var name="umplatform" value="${preproc.var.umplatform}"/>
         </preprocess>
         
-        <preprocess indir="../core-tests/src/main/java" outdir="preproctmp" out="merge">
+        <preprocess indir="../core-tests/src/main/java" outdir="preproctmp" out="merge" except="PlatformTestUtil.java">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <var name="umplatform" value="${preproc.var.umplatform}"/>
         </preprocess>
@@ -180,7 +182,7 @@ NetBeans.  See README for instructions on building from source.
 
 	<mkdir dir="src/com/ustadmobile/core"/>
         <delete dir="preproctmp"/>
-        <preprocess indir="../core/src/main/java/com/ustadmobile/core" outdir="preproctmp">
+        <preprocess indir="../core/src/main/java/com/ustadmobile/core" outdir="preproctmp" except="networkmanager">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <!-- Platform 2 = J2ME -->
             <var name="umplatform" value="${preproc.var.umplatform}"/>

@@ -52,7 +52,7 @@ public class TestNetworkManager {
         final Object nodeDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
-            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
 
             }
 
@@ -142,7 +142,7 @@ public class TestNetworkManager {
         final Object nodeNSDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
-            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
 
             }
 
@@ -216,7 +216,7 @@ public class TestNetworkManager {
         final long[] timeEnabled = new long[]{-1};
         NetworkManagerListener listener = new NetworkManagerListener() {
             @Override
-            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
 
             }
 
@@ -316,7 +316,7 @@ public class TestNetworkManager {
         final long[] timeEnabled = new long[]{-1};
         NetworkManagerListener listener = new NetworkManagerListener() {
             @Override
-            public void fileStatusCheckInformationAvailable(List<String> fileIds) {
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
 
             }
 
