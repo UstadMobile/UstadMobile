@@ -15,12 +15,10 @@ import com.ustadmobile.nanolrs.core.manager.UserManager;
 import com.ustadmobile.nanolrs.core.model.Node;
 import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
-import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.UUID;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 

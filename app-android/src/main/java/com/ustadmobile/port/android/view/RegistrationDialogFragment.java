@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.RegistrationPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
@@ -80,12 +79,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
                 }
 
                 mPresenter.handleClickRegister(username, password, fieldMap);
-
-
-
         }
-
-
     }
 
     @Override

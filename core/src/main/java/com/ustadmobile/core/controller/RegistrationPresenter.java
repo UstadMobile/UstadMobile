@@ -4,16 +4,8 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.RegistrationView;
-import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
-import com.ustadmobile.nanolrs.core.manager.UserManager;
-import com.ustadmobile.nanolrs.core.model.User;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
-
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+
 
 /**
  * Created by varuna on 7/28/2017.
