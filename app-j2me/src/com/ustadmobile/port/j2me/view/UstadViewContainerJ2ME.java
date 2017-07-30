@@ -32,6 +32,7 @@ package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Container;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -134,5 +135,11 @@ public class UstadViewContainerJ2ME extends Container implements UstadView, Acti
     public void setUIStrings() {
         //by default - do nothing
     }
+
+    public void runOnUiThread(Runnable r) {
+        Display.getInstance().callSerially(r);
+    }
+    
+    
     
 }

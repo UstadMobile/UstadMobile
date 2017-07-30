@@ -64,7 +64,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Timer;
@@ -1886,7 +1886,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
         String lastCheckedDir = UstadMobileSystemImpl.getInstance().getAppPref(PREFKEY_STORAGE_DIR_CHECKTIME,
             getContext());
-        long timeNow = Calendar.getInstance().getTimeInMillis();
+        long timeNow = new Date().getTime();
         if(lastCheckedDir == null || timeNow - Long.parseLong(lastCheckedDir) > 500) {
             try {
                 makeDeviceFeed(impl.getStorageDirs(resourceMode, context), resourceMode, context);

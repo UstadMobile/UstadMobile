@@ -43,7 +43,6 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.LoginView;
 
-import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -57,6 +56,7 @@ import java.util.Hashtable;
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
+    import org.json.*;
 /* $endif$ */
 
 

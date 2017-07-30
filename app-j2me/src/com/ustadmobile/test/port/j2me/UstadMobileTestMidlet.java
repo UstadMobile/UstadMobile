@@ -41,9 +41,7 @@ public class UstadMobileTestMidlet extends j2meunit.midletui.TestRunner {
     private static final int ALERT_DISPLAY_TIME = 4000;
     
     //Start the tests:
-    public void startApp(){
-        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryJ2ME.class);
-        
+    public void startApp(){        
         String testServerURL = 
             "http://" + TestConstants.TEST_SERVER + ":" + TestConstants.TEST_CONTROL_PORT + "/";
         lcduiDisplay = 

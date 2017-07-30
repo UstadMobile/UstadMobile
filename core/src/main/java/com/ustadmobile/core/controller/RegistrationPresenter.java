@@ -4,7 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.RegistrationView;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 
