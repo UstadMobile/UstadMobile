@@ -33,27 +33,15 @@ public class UserSettingsController2 extends  UstadBaseController implements App
         super(context);
         setView(view);
         this.view = view;
-        localeOnCreate = UstadMobileSystemImpl.getInstance().getDisplayedLocale(context);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        localeOnCreate = impl.getDisplayedLocale(context);
+        if(impl.getActiveUser(context) != null)
+            view.setUserDisplayName(impl.getActiveUser(context));
+
     }
 
     public void handleClickAccount() {
 
-    }
-
-    public String getLoggedInUsername(){
-        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
-        UserCustomFieldsManager ucfManager =
-                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
-        String loggedInUsername =
-                UstadMobileSystemImpl.getInstance().getActiveUser(context);
-        List<User> loggedInUsers = userManager.findByUsername(context, loggedInUsername);
-        User loggedInUser = null;
-        String nameToDisplay = "Student/Username";
-        if(loggedInUsers!= null && !loggedInUsers.isEmpty()){
-            loggedInUser = loggedInUsers.get(0);
-            nameToDisplay = loggedInUser.getUsername();
-        }
-        return nameToDisplay;
     }
 
     public void handleClickLanguage() {

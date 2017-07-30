@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="@dimen/text_hint"
                 android:background="@drawable/logindialog_edit_text_drawable"
-                android:inputType="text"
+                android:inputType="textNoSuggestions"
                 android:drawableLeft="@drawable/ic_person_white_24dp"
                 android:drawablePadding="@dimen/dimen_20dp"
                 android:paddingLeft="@dimen/dimen_12dp"
@@ -41,6 +41,7 @@
                 android:paddingTop="@dimen/dimen_12dp"
                 android:paddingBottom="@dimen/dimen_12dp"
                 android:hint="@string/username"
+                android:imeOptions="actionNext"
                 />
 
             <EditText
@@ -59,6 +60,7 @@
                 android:paddingTop="@dimen/dimen_12dp"
                 android:paddingBottom="@dimen/dimen_12dp"
                 android:hint="@string/password"
+                android:imeOptions="actionDone"
                 />
 
             <Button

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -49,6 +50,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         //TODO
         LinearLayout fieldLayout = (LinearLayout)mView.findViewById(
                 R.id.fragment_register_dialog_field_layout);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         TextInputLayout textInputLayout = new TextInputLayout(getContext());
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -57,6 +59,9 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         TextInputEditText editText = new TextInputEditText(getContext());
         editText.setId(fieldName);
         editText.setHint(UstadMobileSystemImpl.getInstance().getString(fieldName, getContext()));
+        editText.setImeActionLabel(getResources().getString(R.string.next), EditorInfo.IME_ACTION_NEXT);
+        editText.setMinLines(1);
+        editText.setMaxLines(1);
 
         textInputLayout.addView(editText);
         fieldLayout.addView(textInputLayout, params);

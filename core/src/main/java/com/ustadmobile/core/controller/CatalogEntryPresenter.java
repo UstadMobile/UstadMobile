@@ -20,8 +20,11 @@ import com.ustadmobile.core.view.CatalogEntryView;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
+
+/* $if umplatform != 2 $ */
+import java.util.List;
+/* $endif */
 
 /**
  * Created by mike on 4/17/17.

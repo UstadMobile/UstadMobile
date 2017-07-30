@@ -37,8 +37,7 @@ public class RegistrationPresenter extends UstadBaseController {
         }
 
     }
-
-    @Override
+    
     public void setUIStrings() {
         //Doens't do much
     }
@@ -47,7 +46,6 @@ public class RegistrationPresenter extends UstadBaseController {
      * Handle register link in Registration view
      */
     public void handleClickRegister(String username, String password, HashMap fields) {
-
         Object context = getContext();
         UstadMobileSystemImpl.getInstance().registerUser(username, password, fields, context);
         if(resultListener != null){

@@ -10,6 +10,8 @@ public interface UserSettingsView2 extends  UstadView{
 
     void setActiveLanguage(String language);
 
+    void setUserDisplayName(String name);
+
     void refreshLanguage();
 
 }
