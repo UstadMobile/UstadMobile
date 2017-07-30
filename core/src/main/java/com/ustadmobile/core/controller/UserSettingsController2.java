@@ -48,7 +48,8 @@ public class UserSettingsController2 extends  UstadBaseController implements App
                     CoreBuildConfig.SUPPORTED_LOCALES[i]).toString();
         }
 
-        UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog("Language",
+        UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog(
+                impl.getString(MessageID.language, getContext()),
                 availableLocales, CMD_SET_LANG, this);
     }
 

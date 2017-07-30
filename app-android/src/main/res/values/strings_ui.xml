@@ -135,4 +135,8 @@
     <string name="device_language">Use device language</string>
     <string name="ok_got_it">OK, got it!</string>
     <string name="dont_show_this_next_time">Don\'t show this next time</string>
+
+    <string name="login_successful">Login successful</string>
+    <string name="registration_successful">Registration successful</string>
+
 </resources>

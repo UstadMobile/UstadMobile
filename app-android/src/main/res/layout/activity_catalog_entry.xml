@@ -260,7 +260,7 @@
                     <TextView
                         android:background="@color/background_light"
                         android:padding="@dimen/dimen_16dp"
-                        android:text="SEE ALSO"
+                        android:text="@string/see_also"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
