@@ -64,6 +64,7 @@
                 />
 
             <Button
+                android:visibility="invisible"
                 android:clickable="true"
                 android:id="@+id/fragment_login_forgot_password_button"
                 android:background="@drawable/text_only_button_background"

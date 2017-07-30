@@ -52,7 +52,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 /* $if umplatform == 2  $
@@ -1083,7 +1082,7 @@ public abstract class UstadMobileSystemImpl {
      * @param context
      * @return
      */
-    public abstract int registerUser(String username, String password, HashMap fields, Object context);
+    public abstract int registerUser(String username, String password, Hashtable fields, Object context);
 
     /**
      * Authenticate locally

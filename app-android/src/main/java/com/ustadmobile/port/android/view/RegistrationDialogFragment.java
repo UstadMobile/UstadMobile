@@ -18,7 +18,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 
 /**
  * Created by varuna on 7/28/2017.
@@ -30,6 +32,10 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
 
     private RegistrationPresenter mPresenter;
 
+    private ArrayList<TextInputEditText> fieldList = new ArrayList<>();
+
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -37,8 +43,13 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         // Inflate the layout for this fragment
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mView = inflater.inflate(R.layout.fragment_register_dialog, container, false);
-        mPresenter = new RegistrationPresenter(getContext(), this);
+
         mView.findViewById(R.id.fragment_register_dialog_register_button).setOnClickListener(this);
+
+        fieldList.add((TextInputEditText)mView.findViewById(R.id.fragment_register_dialog_username_text));
+        fieldList.add((TextInputEditText)mView.findViewById(R.id.fragment_register_dialog_password_text));
+
+        mPresenter = new RegistrationPresenter(getContext(), this);
         if(mResultListener != null)
             mPresenter.setResultListener(mResultListener);
 
@@ -59,13 +70,16 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         TextInputEditText editText = new TextInputEditText(getContext());
         editText.setId(fieldName);
         editText.setHint(UstadMobileSystemImpl.getInstance().getString(fieldName, getContext()));
-        editText.setImeActionLabel(getResources().getString(R.string.next), EditorInfo.IME_ACTION_NEXT);
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setSingleLine();
         editText.setMinLines(1);
         editText.setMaxLines(1);
 
         textInputLayout.addView(editText);
         fieldLayout.addView(textInputLayout, params);
-
+        TextInputEditText prevEl = fieldList.get(fieldList.size()-1);
+        prevEl.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        fieldList.add(editText);
     }
 
     @Override
@@ -76,7 +90,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
             case R.id.fragment_register_dialog_register_button:
                 String username = ((EditText)mView.findViewById(R.id.fragment_register_dialog_username_text)).getText().toString();
                 String password = ((EditText)mView.findViewById(R.id.fragment_register_dialog_password_text)).getText().toString();
-                HashMap fieldMap = new HashMap();
+                Hashtable fieldMap = new Hashtable();
                 int[] allFields = mPresenter.extraFields;
                 for(int field:allFields){
                     String value = ((EditText)mView.findViewById(field)).getText().toString();

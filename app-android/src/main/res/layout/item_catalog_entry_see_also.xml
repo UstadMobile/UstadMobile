@@ -15,7 +15,7 @@
         android:layout_height="@dimen/catalog_entry_see_also_icon_size" />
 
     <TextView
-        android:text="Fish"
+        android:text="Item"
         android:textColor="@color/primary_dark"
         android:paddingTop="@dimen/dimen_16dp"
         android:paddingBottom="@dimen/dimen_16dp"

@@ -41,6 +41,7 @@
                    android:layout_marginEnd="@dimen/dimen_16dp"
                    app:civ_fill_color="@color/primary"/>
                <FrameLayout
+                   android:visibility="invisible"
                    android:id="@+id/capture_camera_icon"
                    android:layout_marginLeft="@dimen/list_item_size"
                    android:layout_marginStart="@dimen/list_item_size"
@@ -72,6 +73,7 @@
                    android:layout_width="@dimen/dimen_40dp"
                    android:layout_height="@dimen/dimen_40dp">
                    <ImageView
+                       android:visibility="invisible"
                        android:layout_gravity="center"
                        android:tint="@color/primary"
                        android:src="@drawable/ic_edit_black_24dp"

@@ -20,6 +20,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
 import com.ustadmobile.nanolrs.core.manager.UserManager;
@@ -470,7 +471,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     }
 
     @Override
-    public int registerUser(String username, String password, HashMap fields, Object context) {
+    public int registerUser(String username, String password, Hashtable fields, Object context) {
         UserManager userManager =
                 PersistenceManager.getInstance().getManager(UserManager.class);
         UserCustomFieldsManager userCustomFieldsManager =
@@ -536,6 +537,11 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             User user = (User) userManager.makeNew();
             if(uuid != null && !uuid.isEmpty()){
                 user.setUuid(uuid);
+            }else {
+                /*
+                 * TODO: Change me: The absence of this was causing null pointer exception
+                 */
+                user.setUuid(UMUUID.randomUUID().toString());
             }
             user.setUsername(username);
             user.setPassword(password);
