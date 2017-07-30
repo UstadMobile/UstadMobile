@@ -459,12 +459,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             if(stmtVerb.equals(UMTinCanUtil.VERB_ANSWERED))
                 courseProgress.setStatus(MessageID.in_progress);
             else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
-                courseProgress.setStatus(MessageID.failed_message);
-            else if(stmtVerb.equals(UMTinCanUtil.VERB_PASSED))
                 courseProgress.setStatus(MessageID.passed);
+            else if(stmtVerb.equals(UMTinCanUtil.VERB_FAILED))
+                courseProgress.setStatus(MessageID.failed_message);
 
             courseProgress.setProgress(stmt.getResultProgress());
-            courseProgress.setScore(Math.round(stmt.getResultScoreScaled() * 100));
+            courseProgress.setScore(Math.round(stmt.getResultScoreScaled()));
 
             return courseProgress;
         }

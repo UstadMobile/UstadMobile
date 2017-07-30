@@ -10,7 +10,7 @@ public class CourseProgress {
 
     private int status;
 
-    private int score;
+    private float score;
 
     private int progress;
 
@@ -41,11 +41,11 @@ public class CourseProgress {
         this.status = status;
     }
 
-    public int getScore() {
+    public float getScore() {
         return score;
     }
 
-    public void setScore(int score) {
+    public void setScore(float score) {
         this.score = score;
     }
 
