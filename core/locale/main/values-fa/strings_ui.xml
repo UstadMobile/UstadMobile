@@ -146,6 +146,7 @@
     <string name='queued'>در صف</string>
     <string name='failed'> ناموفق</string>
     <string name='ok_got_it'>سمه ده، پوه شوم</string>
+    <string name="dont_show_this_next_time">این را بار بعدی نشان ندهید</string>
 
 
 
