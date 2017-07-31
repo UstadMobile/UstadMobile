@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
@@ -538,7 +539,7 @@ public class LoginController extends UstadBaseController{
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         view.setVersionLabel(impl.getVersion(context) + " - " +
-                HTTPCacheDir.makeHTTPDate(impl.getBuildTime()));
+                HTTPCacheDir.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     impl.isHttpsSupported() ? UstadMobileDefaults.DEFAULT_XAPI_SERVER : UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL,
