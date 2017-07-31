@@ -1012,13 +1012,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener);
 
     /**
-     * Returns the unix time stamp for the at which the version was built
-     *
-     * @return Unix time that the version was built
-     */
-    public abstract long getBuildTime();
-
-    /**
      * Gives a string with the version number
      *
      * @return String with version number
