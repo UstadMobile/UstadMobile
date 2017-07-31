@@ -133,7 +133,8 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
         if(Build.VERSION.SDK_INT >= 17) {
             String chosenLocale = position == 0 ? UstadMobileSystemImpl.LOCALE_USE_SYSTEM
                     : CoreBuildConfig.SUPPORTED_LOCALES[position - 1];
-            if (!chosenLocale.equals(UstadMobileSystemImpl.getInstance().getLocale(getContext()))) {
+            if (!chosenLocale.equals(UstadMobileSystemImpl.getInstance().getLocale(getContext()))
+                    && getActivity() != null && getActivity() instanceof BasePointActivity) {
                 UstadMobileSystemImpl.getInstance().setLocale(chosenLocale, getContext());
                 BasePointActivity activity = (BasePointActivity) getActivity();
                 activity.setWelcomeScreenDisplayed(false);
