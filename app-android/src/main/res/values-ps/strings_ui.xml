@@ -142,6 +142,16 @@
     <string name='failed'>نابریالی</string>
     <string name='ok_got_it'>سمه ده، پوه شوم!</string>
 
+    <string name="university_name" value="10001">د پوهنتون نوم</string>
+
+    <string name="field_university" value="980">د پوهنتون نوم</string>
+    <string name="field_fullname" value="981">بشپړ نوم </string>
+    <string name="field_email" value="982">ایمیل آدرس</string>
+    <!-- Gender translation pashto: confirmation pending -->
+    <string name="field_gender" value="983">جنسیت</string>
+    <string name="field_phonenumber" value="984">د ټیلیفون شمیره</string>
+    <string name="field_faculty" value="985">د پوهنځي نوم</string>
+
 
 
 </resources>
