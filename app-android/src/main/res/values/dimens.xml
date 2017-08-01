@@ -39,7 +39,7 @@
     <dimen name="catalog_entry_local_availability_icon_margin">4dp</dimen>
     <dimen name="catalog_entry_local_availability_icon_size_plus_margin">20dp</dimen>
 
-    <dimen name="catalog_entry_see_also_icon_size">150dp</dimen>
+    <dimen name="catalog_entry_see_also_icon_size">75dp</dimen>
 
     <dimen name="dimen_2dp">2dp</dimen>
     <dimen name="dimen_4dp">4dp</dimen>

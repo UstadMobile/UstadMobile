@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
@@ -17,6 +18,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -30,6 +32,10 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
 
     private RegistrationPresenter mPresenter;
 
+    private ArrayList<TextInputEditText> fieldList = new ArrayList<>();
+
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -37,8 +43,13 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         // Inflate the layout for this fragment
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mView = inflater.inflate(R.layout.fragment_register_dialog, container, false);
-        mPresenter = new RegistrationPresenter(getContext(), this);
+
         mView.findViewById(R.id.fragment_register_dialog_register_button).setOnClickListener(this);
+
+        fieldList.add((TextInputEditText)mView.findViewById(R.id.fragment_register_dialog_username_text));
+        fieldList.add((TextInputEditText)mView.findViewById(R.id.fragment_register_dialog_password_text));
+
+        mPresenter = new RegistrationPresenter(getContext(), this);
         if(mResultListener != null)
             mPresenter.setResultListener(mResultListener);
 
@@ -50,6 +61,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         //TODO
         LinearLayout fieldLayout = (LinearLayout)mView.findViewById(
                 R.id.fragment_register_dialog_field_layout);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         TextInputLayout textInputLayout = new TextInputLayout(getContext());
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -58,10 +70,16 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         TextInputEditText editText = new TextInputEditText(getContext());
         editText.setId(fieldName);
         editText.setHint(UstadMobileSystemImpl.getInstance().getString(fieldName, getContext()));
+        editText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editText.setSingleLine();
+        editText.setMinLines(1);
+        editText.setMaxLines(1);
 
         textInputLayout.addView(editText);
         fieldLayout.addView(textInputLayout, params);
-
+        TextInputEditText prevEl = fieldList.get(fieldList.size()-1);
+        prevEl.setImeOptions(EditorInfo.IME_ACTION_NEXT);
+        fieldList.add(editText);
     }
 
     @Override

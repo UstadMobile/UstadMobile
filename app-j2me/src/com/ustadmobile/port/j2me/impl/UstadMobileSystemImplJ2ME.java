@@ -37,7 +37,7 @@ import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.plaf.UIManager;
 import com.twmacinta.util.MD5;
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.port.j2me.app.AppPref;
 import java.io.IOException;
@@ -53,6 +53,7 @@ import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -421,13 +422,14 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
         
         if(incSharedStorage) {
             storageDirs.addElement(new UMStorageDir(baseSystemDir, 
-                getString(MessageIDConstants.phone_memory), false, true, false));
+                getString(MessageID.phone_memory, context), false, true, false));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(0).toString());
         }
         
         if(incUserStorage) {
             storageDirs.addElement(new UMStorageDir(UMFileUtil.joinPaths(
-                new String[]{baseSystemDir, username}), getString(MessageIDConstants.phone_memory), 
+                new String[]{baseSystemDir, username}), 
+                getString(MessageID.phone_memory, context), 
                 false, true, true));
             l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
         }
@@ -470,7 +472,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 CONTENT_DIR_NAME});
             if(incSharedStorage) {
                 storageDirs.addElement(new UMStorageDir(sdcardBaseDir, 
-                    getString(MessageIDConstants.memory_card), true, sdCardAvailable, false));
+                    getString(MessageID.memory_card, context), true, sdCardAvailable, false));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
             
@@ -478,7 +480,7 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
                 String userSDDir = UMFileUtil.joinPaths(
                     new String[] {sdcardBaseDir, username});
                 storageDirs.addElement(new UMStorageDir(userSDDir, 
-                    getString(MessageIDConstants.memory_card), true, sdCardAvailable, true));
+                    getString(MessageID.memory_card, context), true, sdCardAvailable, true));
                 l(UMLog.DEBUG, 591, storageDirs.elementAt(storageDirs.size()-1).toString());
             }
         }
@@ -1281,6 +1283,36 @@ public class UstadMobileSystemImplJ2ME  extends UstadMobileSystemImpl {
 
     public String getVersion(Object context) {
         return midlet.getAppProperty("MIDlet-Version");
+    }
+
+    public String getString(int messageCode, Object context) {
+        //TODO: Implement me
+        return "";
+    }
+
+    public String getAppSetupFile(Object context) {
+        //TODO: implement me
+        return null;
+    }
+
+    public CourseProgress getCourseProgress(String[] entryIds, Object context) {
+        //TODO: implement me
+        return null;
+    }
+
+    public int registerUser(String username, String password, Hashtable fields, Object context) {
+        //TODO implement me
+        return -1;
+    }
+
+    public boolean handleLoginLocally(String username, String password, Object context) {
+        //TODO: implement me
+        return false;
+    }
+
+    public boolean createUserLocally(String username, String password, String uuid, Object context) {
+        //TODO: implement me
+        return false;
     }
     
     

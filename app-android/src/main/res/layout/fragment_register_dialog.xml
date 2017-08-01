@@ -21,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/fragment_register_dialog_title"
+        android:layout_above="@+id/fragment_register_dialog_register_button"
         >
         <LinearLayout
             android:id="@+id/fragment_register_dialog_field_layout"
@@ -36,8 +37,12 @@
                 <android.support.design.widget.TextInputEditText
                     android:id="@+id/fragment_register_dialog_username_text"
                     android:hint="@string/username"
+                    android:inputType="textNoSuggestions"
+                    android:imeOptions="actionNext"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:maxLines="1"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -49,8 +54,11 @@
                     android:id="@+id/fragment_register_dialog_password_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:imeOptions="actionNext"
                     android:hint="@string/password"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:minLines="1"
+                    android:maxLines="1"/>
 
             </android.support.design.widget.TextInputLayout>
 
@@ -64,6 +72,7 @@
         android:id="@+id/fragment_register_dialog_register_button"
         android:layout_alignParentBottom="true"
         android:background="@color/primary"
+        android:textColor="@android:color/white"
         android:text="@string/register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

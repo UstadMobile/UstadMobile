@@ -117,10 +117,30 @@
          که د دولتي پوهنتون محصل یاست او یا په دې وروستیو کې فارغه شوي یاست، کولای شئ  په بریالۍ توګه د دې اپلکېشن د مادیول له ترسره کولو وروسته د USWDP مرکزونو په وړیا ټولګیو کې حضوري برخه واخلئ.
     ]]>
     </string>
-    <string name='select_language'>ژبه غوره کړئ</string>
     <string name='dont_show_this_next_time'>بل ځل دا مه ښکاره کوه</string>
-    <string name='ok_got_it'>سمه ده، پوه شوم</string>
 
+    <string name='data_usage_label'>د ګرځنده تېلفون د ډاټا ټولیز مصرف</string>
+    <string name='app_interface_language'>د اپلکېشن ژبه</string>
+    <string name='enable_supernode'>سوپرنوډ فعاله کړئ</string>
+    <string name='share_application'>اپلکېشن شریک کړئ</string>
+    <string name='share_via'>له دې لارې یې شریک کړئ</string>
+    <string name='share'>شریک کول</string>
+    <string name='receive'>ترلاسه کول</string>
+    <string name='sent'>ولېږل شو</string>
+    <string name='sending'>د لېږل پر حال کې</string>
+    <string name='send'>لېږل</string>
+    <string name='size'>اندازه</string>
+    <string name='see_also'>همدارنګه ـ وګورئ</string>
+    <string name='download_in_another_language'>په بله ژبه کې یې دانلوډ کړئ</string>
+    <string name='passed'>بریالي شوی</string>
+    <string name='in_progress'>په جریان کې</string>
+    <string name='select_language'>ژبه غوره کړئ</string>
+    <string name='device_language'>د وزلې وکاروئ</string>
+    <string name='downloading'>د دانلوډ پر حال کې</string>
+    <string name='waiting'>د انتظار په حال کې</string>
+    <string name='queued'>په کتار کې</string>
+    <string name='failed'>نابریالی</string>
+    <string name='ok_got_it'>سمه ده، پوه شوم!</string>
 
 
 

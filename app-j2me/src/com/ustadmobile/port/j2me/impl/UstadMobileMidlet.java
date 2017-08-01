@@ -27,9 +27,7 @@ import javax.microedition.midlet.*;
 public class UstadMobileMidlet extends MIDlet {
 
     public void startApp() {
-        Display.init(this);
-        UstadMobileSystemImpl.setSystemImplFactoryClass(UstadMobileSystemImplFactoryJ2ME.class);
-        
+        Display.init(this);        
         UstadMobileSystemImplJ2ME impl = 
                 (UstadMobileSystemImplJ2ME)UstadMobileSystemImpl.getInstance();
         impl.setMIDlet(this);

@@ -31,11 +31,12 @@
 package com.ustadmobile.port.j2me.view;
 
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Display;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.plaf.UIManager;
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -79,7 +80,7 @@ public class UstadViewFormJ2ME extends Form {
         umViewDirection = UIManager.getInstance().getLookAndFeel().isRTL() ? UstadMobileConstants.DIR_RTL : UstadMobileConstants.DIR_LTR;
         this.backCommandEnabled = backCommandEnabled;
         backCommand = new Command(
-                UstadMobileSystemImpl.getInstance().getString(MessageIDConstants.back), 
+                UstadMobileSystemImpl.getInstance().getString(MessageID.back, context), 
                 CMD_BACK_ID);
         addCommandListener(new UstadFormCommandListener(context));
         if(this.backCommandEnabled) {
@@ -248,6 +249,8 @@ public class UstadViewFormJ2ME extends Form {
         //placeholder
     }
     
-    
+    public void runOnUiThread(Runnable r) {
+        Display.getInstance().callSerially(r);
+    }
     
 }

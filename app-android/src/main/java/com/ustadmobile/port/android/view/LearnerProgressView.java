@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 import android.content.Context;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -65,7 +66,8 @@ public class LearnerProgressView extends LinearLayout {
         int percentageToShow =progress.getStatus() == MessageID.in_progress
                 ? progress.getProgress() : Math.round(progress.getScore() * 100);
 
-        int statusColorId = STATUS_TO_COLOR_MAP.get(progress.getStatus());
+        int statusColorId = ContextCompat.getColor(getContext(),
+                STATUS_TO_COLOR_MAP.get(progress.getStatus()));
         FitChartValue chartValue = new FitChartValue(percentageToShow, statusColorId);
         ArrayList<FitChartValue> chartValues = new ArrayList<>();
         chartValues.add(chartValue);

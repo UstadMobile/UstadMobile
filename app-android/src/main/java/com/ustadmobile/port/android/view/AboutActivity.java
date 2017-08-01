@@ -68,7 +68,7 @@ public class AboutActivity extends UstadBaseActivity implements AboutView, Contr
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.action_leavecontainer:
+            case R.id.action_finish:
                 finish();
                 return true;
         }

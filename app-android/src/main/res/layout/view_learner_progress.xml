@@ -6,6 +6,7 @@
     android:layout_width="50dp">
 
         <TextView
+            android:textAlignment="center"
             android:id="@+id/opds_item_learner_progress_status_text"
             android:textSize='8dp'
             android:textAllCaps="true"

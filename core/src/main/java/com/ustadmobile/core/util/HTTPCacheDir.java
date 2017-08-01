@@ -726,7 +726,8 @@ public class HTTPCacheDir {
     public Enumeration getCachedURLs() {
         Enumeration urls;
         /* $if umplatform == 2  $
-            urls = cacheIndex.keys();
+            //TODO: Support both private and shared cache values in getCachedUrls on J2ME. For now return only those in shared cache.
+            urls = cacheIndex[SHARED].keys();
          $else$ */
             final Iterator[] urlIterators = new Iterator[NUM_DIRS];
             for(int i = 0; i < NUM_DIRS; i++) {

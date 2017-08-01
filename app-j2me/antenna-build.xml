@@ -156,7 +156,10 @@ NetBeans.  See README for instructions on building from source.
 
 	<mkdir dir="src/com/ustadmobile/core"/>
         <delete>
-            <fileset dir="src/com/ustadmobile/core"/>
+            <fileset dir="src/com/ustadmobile/core">
+                <exclude name="**/networkmanager/*.java"/>
+                <exclude name="**/UstadMobileSystemImplFactory.java"/>
+            </fileset>
         </delete>
 
         <delete failonerror="false">
@@ -182,7 +185,7 @@ NetBeans.  See README for instructions on building from source.
 
 	<mkdir dir="src/com/ustadmobile/core"/>
         <delete dir="preproctmp"/>
-        <preprocess indir="../core/src/main/java/com/ustadmobile/core" outdir="preproctmp" except="networkmanager">
+        <preprocess indir="../core/src/main/java/com/ustadmobile/core" outdir="preproctmp" except="networkmanager,UstadMobileSystemImplFactory.java">
             <filetype commentend="*/" commentbegin="/*" extensions="java"/>
             <!-- Platform 2 = J2ME -->
             <var name="umplatform" value="${preproc.var.umplatform}"/>

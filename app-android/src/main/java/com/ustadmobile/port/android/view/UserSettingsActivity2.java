@@ -31,7 +31,7 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        mController = new UserSettingsController2(this, null, this);
+
         setUMToolbar(R.id.setting_tool_bar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -50,17 +50,14 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
         ((ImageView) findViewById(R.id.language_icon)).setColorFilter(defaultIconColor);
         ((ImageView) findViewById(R.id.logout_icon)).setColorFilter(defaultIconColor);
 
-
-        String nameToDisplay = mController.getLoggedInUsername();
-        ((TextView)findViewById(R.id.user_profile_full_name)).setText(nameToDisplay);
-
-
         accountSection.setOnClickListener(this);
         dataUsageSection.setOnClickListener(this);
         languageSection.setOnClickListener(this);
         logoutSection.setOnClickListener(this);
         actionCaptureImage.setOnClickListener(this);
         actionEditProfile.setOnClickListener(this);
+
+        mController = new UserSettingsController2(this, null, this);
     }
 
     @Override
@@ -132,5 +129,10 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
         Intent intent = new Intent(UstadMobileSystemImplAndroid.ACTION_LOCALE_CHANGE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
         recreate();
+    }
+
+    @Override
+    public void setUserDisplayName(String name) {
+        ((TextView)findViewById(R.id.user_profile_full_name)).setText(name);
     }
 }

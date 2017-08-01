@@ -725,11 +725,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public long getBuildTime() {
-        return 0;
-    }
-
-    @Override
     public String getVersion(Object ctx) {
         Context context = (Context)ctx;
         String versionInfo = null;

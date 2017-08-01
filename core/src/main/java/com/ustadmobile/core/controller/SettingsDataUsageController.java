@@ -56,9 +56,11 @@ public class SettingsDataUsageController extends UstadBaseController {
         boolean wifiP2PSupported = impl.isWiFiP2PSupported();
         this.view.setSupernodeSettingVisible(wifiP2PSupported);
 
+        /* $if umplatform != 2 $ */
         if(wifiP2PSupported) {
             this.view.setSupernodeEnabled(Boolean.parseBoolean(impl.getAppPref(PREFKEY_SUPERNODE, "false", getContext())));
         }
+        /* $endif$ */
     }
 
     public void setUIStrings() {

@@ -28,6 +28,8 @@
         <ImageView
             android:layout_width="@dimen/dimen_70dp"
             android:layout_height="@dimen/dimen_70dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginRight="@dimen/dimen_4dp"
             android:scaleType="centerInside"
             android:id="@+id/opds_item_thumbnail"
             android:width="@dimen/dimen_70dp"

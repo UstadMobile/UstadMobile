@@ -86,7 +86,6 @@
     <string name='file_available_locally'>قابل دسترس بصورت محلی</string>
     <string name='file_unavailable_locally'>غیر قابل دسترس بصورت محلی</string>
     <string name='connection'>اتصال عمومی</string>
-    <string name='data_usage_label'>کل استفاده داده موبائل</string>
     <string name='account'>حساب</string>
     <string name='data_usage'>استفاده از داده</string>
 
@@ -114,6 +113,41 @@
          اگر محصل پوهنتون دولتی هستیید و یا اخیراً فارغ شده‌اید، می‌توانید بعد از سپری کردن موفقانه مادیول این اپلکیشن در صنوف مجانی مراکز USWDP  حضوری شرکت کنید.
     ]]>
     </string>
-    <string name='ok_got_it'>درست</string>
+
+
+    <string name="university_name" value="10001">نام پوهنتون</string>
+
+    <string name="field_university" value="980">نام پوهنتون</string>
+    <string name="field_fullname" value="981">نام مکمل </string>
+    <string name="field_email" value="982">ایمیل آدرس</string>
+    <string name="field_gender" value="983">جنس</string>
+    <string name="field_phonenumber" value="984">شمارۀ تلفون</string>
+    <string name="field_faculty" value="985">نام پوهنحی</string>
+
+    <string name='data_usage_label'>مجموع مصرف داده تلفن همراه</string>
+    <string name='app_interface_language'>زبان اپلکیشن</string>
+    <string name='enable_supernode'>سوپرنود را فعال سازید</string>
+    <string name='share_application'>اپلکیشن را شریک کنید</string>
+    <string name='share_via'>بدین وسیله شریک کنید</string>
+    <string name='share'>شریک کردن</string>
+    <string name='receive'>دریافت کردن</string>
+    <string name='sent'>فرستاده شد</string>
+    <string name='sending'>در حال فرستادن</string>
+    <string name='send'>فرستادن</string>
+    <string name='size'>اندازه</string>
+    <string name='see_also'>همچنان - ببینید</string>
+    <string name='download_in_another_language'>به زبان دیگری دانلود کنید</string>
+    <string name='passed'>کامیاب شدید</string>
+    <string name='in_progress'>در جریان</string>
+    <string name='select_language'>زبان را انتخاب کنید</string>
+    <string name='device_language'>از زبان دستگاه استفاده کنید</string>
+    <string name='downloading'>در حال دانلود</string>
+    <string name='waiting'>در حال انتظار</string>
+    <string name='queued'>در صف</string>
+    <string name='failed'> ناموفق</string>
+    <string name='ok_got_it'>سمه ده، پوه شوم</string>
+    <string name="dont_show_this_next_time">این را بار بعدی نشان ندهید</string>
+
+
 
 </resources>

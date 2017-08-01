@@ -36,10 +36,11 @@ import com.sun.lwuit.RadioButton;
 import com.sun.lwuit.Tabs;
 import com.sun.lwuit.events.FocusListener;
 import com.sun.lwuit.layouts.BorderLayout;
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -57,8 +58,8 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     
     private BasePointController basePointController;
     
-    private int[] tabTitles =  new int[]{MessageIDConstants.my_resources, 
-        MessageIDConstants.browse_feeds};
+    private int[] tabTitles =  new int[]{MessageID.my_resources, 
+        MessageID.browse_feeds};
         
     /**
      * At this point J2ME does not support the class list tab: is one tab - just my resources
@@ -71,7 +72,8 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     public BasePointViewJ2ME(Hashtable args, Object context, boolean backCommandEnabled) {
         super(args, context, backCommandEnabled);
         setLayout(new BorderLayout());
-        basePointController = BasePointController.makeControllerForView(this, args);
+        basePointController = BasePointController.makeControllerForView(this, args, 
+                null);
     }
     
     
@@ -88,7 +90,7 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
                 opdsArgs = basePointController.getCatalogOPDSArguments(i);
                 opdsContainers[i] = new CatalogOPDSContainer(opdsArgs, 
                     getContext(), this);
-                tabs.addTab(impl.getString(tabTitles[i]), opdsContainers[i]);
+                tabs.addTab(impl.getString(tabTitles[i], getContext()), opdsContainers[i]);
             }
             
             setActiveUstadViewContainer(opdsContainers[0]);
@@ -107,9 +109,13 @@ public class BasePointViewJ2ME extends UstadViewFormJ2ME implements BasePointVie
     public void onCreateMenuCommands(Vector cmdVector) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Command cmd;
-        for(int i = 0; i < CoreBuildConfig.BASEPOINT_MENU.length; i++) {
+        
+        BasePointMenuItem[] menu = impl.getActiveUser(getContext()) != null ?
+                CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED 
+                : CoreBuildConfig.BASEPOINT_MENU_GUEST;
+        for(int i = 0; i < menu.length; i++) {
             cmd = new Command(impl.getString(
-                CoreBuildConfig.BASEPOINT_MENU[i].getTitleStringId()), 
+                menu[i].getTitleStringId(), getContext()), 
                 OFFSET_BASEPOINT_MENU_CMDS+ i);
             cmdVector.addElement(cmd);
         }

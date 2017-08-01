@@ -77,6 +77,8 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     baseMenuTypes.add("guest")
     baseMenuTypes.add("authenticated")
 
+    long buildTimeMillis = Calendar.getInstance().getTimeInMillis()
+
     for(int i = 0; i < baseMenuTypes.size(); i++) {
         String menuTypePrefix = "baseMenu." + baseMenuTypes.get(i)
         int menuItemIndex = 0
@@ -126,7 +128,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
 
     buildConfigField "String[]", "SUPPORTED_LOCALES", supportedLocalesValue
 
-
+    buildConfigField "long", "BUILD_TIME_MILLIS", String.valueOf(buildTimeMillis) + "L"
     buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
     buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
     buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]

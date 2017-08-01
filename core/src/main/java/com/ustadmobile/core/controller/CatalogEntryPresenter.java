@@ -5,10 +5,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
-import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
-import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -20,8 +18,13 @@ import com.ustadmobile.core.view.CatalogEntryView;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
+
+/* $if umplatform != 2 $ */
+import java.util.List;
+import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.networkmanager.EntryCheckResponse;
+/* $endif */
 
 /**
  * Created by mike on 4/17/17.
@@ -162,7 +165,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                     try {
                         String thumbnailUrl = UMFileUtil.resolveLink(
                                 entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
-                                ((String[])thumbnails.get(0))[UstadJSOPDSItem.ATTR_HREF]);
+                                ((String[])thumbnails.elementAt(0))[UstadJSOPDSItem.ATTR_HREF]);
                         final String thumbnailFileUri = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
                                 getContext()).get(thumbnailUrl);
 
@@ -181,7 +184,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                     try {
                         String coverImageUrl = UMFileUtil.resolveLink(
                             entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
-                                ((String[])coverImages.get(0))[UstadJSOPDSItem.ATTR_HREF]);
+                                ((String[])coverImages.elementAt(0))[UstadJSOPDSItem.ATTR_HREF]);
                         final String coverImageFileUri = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
                                 getContext()).get(coverImageUrl);
                         catalogEntryView.runOnUiThread(new Runnable() {
@@ -358,12 +361,14 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     
     public void networkTaskStatusChanged(NetworkTask task) {
+        /* $if umplatform != 2  $ */
         if(task.getTaskId() == entryCheckTaskId) {
             boolean available =
                 UstadMobileSystemImpl.getInstance().getNetworkManager().getEntryResponsesWithLocalFile(entry.id) != null;
             updateViewLocallyAvailableStatus(available ?
                 CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
         }
+        /* $endif$ */
     }
 
     private void updateViewLocallyAvailableStatus(final int status) {
@@ -375,7 +380,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
         });
     }
 
-    
+    /* $if umplatform != 2  $ */
     public void networkNodeDiscovered(NetworkNode node) {
 
     }
@@ -384,6 +389,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     public void networkNodeUpdated(NetworkNode node) {
 
     }
+
+    /* $endif$ */
 
     
     public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {

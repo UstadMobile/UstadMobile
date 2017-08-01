@@ -236,11 +236,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public long getBuildTime() {
-        return 0;
-    }
-
-    @Override
     public String getVersion(Object context) {
         return null;
     }

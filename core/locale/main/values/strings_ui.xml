@@ -87,8 +87,8 @@
     <string name='data_label'>Send answers, scores and usage information.</string>
     <string name='p2p_connection_label'>P2P Connections</string>
     <string name='node_title_list'>Node List</string>
-    <string name='file_available_locally'>Available locally</string>
-    <string name='file_unavailable_locally'>Unavailable locally</string>
+    <string name='file_available_locally'>Available nearby</string>
+    <string name='file_unavailable_locally'>Available online</string>
     <string name='connection'>General Connection</string>
     <string name='data_usage_label'>Total mobile data usage</string>
     <string name='account'>Account</string>
@@ -135,4 +135,8 @@
     <string name="device_language">Use device language</string>
     <string name="ok_got_it">OK, got it!</string>
     <string name="dont_show_this_next_time">Don\'t show this next time</string>
+
+    <string name="login_successful">Login successful</string>
+    <string name="registration_successful">Registration successful</string>
+
 </resources>

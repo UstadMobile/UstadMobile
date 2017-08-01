@@ -34,7 +34,7 @@ import com.sun.lwuit.*;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
 import com.sun.lwuit.layouts.BoxLayout;
-import com.ustadmobile.core.MessageIDConstants;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -94,7 +94,7 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
 
 
             Command loginCmd = new Command(UstadMobileSystemImpl.getInstance().getString(
-                MessageIDConstants.login), CMD_LOGIN);
+                MessageID.login, getContext()), CMD_LOGIN);
             loginButton = new Button(loginCmd);
             loginButton.addActionListener(this);
             this.addComponent(loginButton);
@@ -120,8 +120,8 @@ public class LoginViewJ2ME extends UstadViewFormJ2ME implements LoginView, Actio
     
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        loginButton.setText(impl.getString(MessageIDConstants.login));
-        setTitle(impl.getString(MessageIDConstants.login));
+        loginButton.setText(impl.getString(MessageID.login, getContext()));
+        setTitle(impl.getString(MessageID.login, getContext()));
     }
     
     public void setController(LoginController controller) {

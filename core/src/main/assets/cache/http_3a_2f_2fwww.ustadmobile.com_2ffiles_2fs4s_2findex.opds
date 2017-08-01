@@ -49,11 +49,11 @@
             <name>Varuna Singh</name>
             <uri>/user/2</uri>
         </author>
-        <content type="text">How to write a standout CV</content>
+        <content type="text">Learn how to write a professional CV </content>
     </entry>
 
     <entry>
-        <title>CV Writing (Dari)</title>
+        <title>نوشتن خلص سوانح</title>
         <dc:language>fa</dc:language>
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml"/>              
@@ -80,11 +80,11 @@
             <name>Varuna Singh</name>
             <uri>/user/2</uri>
         </author>
-        <content type="text">How to write a standout CV (Dari)</content>
+        <content type="text">بیاموزید که خلص سوانح مسلکی را چگونه بنوسید</content>
     </entry>
 
     <entry>
-        <title>CV Writing (Pashto)</title>
+        <title>د سي وي لیکل</title>
         <dc:language>ps</dc:language>
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml"/>              
@@ -111,7 +111,7 @@
             <name>Varuna Singh</name>
             <uri>/user/2</uri>
         </author>
-        <content type="text">How to write a standout CV (Pashto)</content>
+        <content type="text">زده کړئ چې څنګه مسلکي سي وي ولیکئ</content>
     </entry>
 
 

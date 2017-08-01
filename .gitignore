@@ -69,12 +69,14 @@ ports/android/src/androidTest/java/com/ustadmobile/test/core/*
 app-j2me/src/com/ustadmobile/core/*
 !app-j2me/src/com/ustadmobile/core/view
 !app-j2me/src/com/ustadmobile/core/impl
+!app-j2me/src/com/ustadmobile/core/networkmanager
 
 app-j2me/src/com/ustadmobile/core/view/*
 !app-j2me/src/com/ustadmobile/core/view/ViewFactory.java
 
 app-j2me/src/com/ustadmobile/core/impl/*
 !app-j2me/src/com/ustadmobile/core/impl/UstadMobileSystemImplFactory.java
+
 
 #QRCode that gets checked out into the source directory
 app-j2me/src/jp

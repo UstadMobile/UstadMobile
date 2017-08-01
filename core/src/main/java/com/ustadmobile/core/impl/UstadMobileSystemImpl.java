@@ -43,7 +43,6 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.LoginView;
 
-import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -57,6 +56,7 @@ import java.util.Hashtable;
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
+    import org.json.*;
 /* $endif$ */
 
 
@@ -1010,13 +1010,6 @@ public abstract class UstadMobileSystemImpl {
      * @param activityId The activity ID we are looking for registrations for
      */
     public abstract void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener);
-
-    /**
-     * Returns the unix time stamp for the at which the version was built
-     *
-     * @return Unix time that the version was built
-     */
-    public abstract long getBuildTime();
 
     /**
      * Gives a string with the version number

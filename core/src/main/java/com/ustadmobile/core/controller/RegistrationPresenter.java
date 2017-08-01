@@ -4,7 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.RegistrationView;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 
@@ -38,7 +37,6 @@ public class RegistrationPresenter extends UstadBaseController {
         }
 
     }
-
     public void setUIStrings() {
         //Doens't do much
     }
@@ -47,7 +45,6 @@ public class RegistrationPresenter extends UstadBaseController {
      * Handle register link in Registration view
      */
     public void handleClickRegister(String username, String password, Hashtable fields) {
-
         Object context = getContext();
         UstadMobileSystemImpl.getInstance().registerUser(username, password, fields, context);
         if(resultListener != null){

@@ -6,6 +6,7 @@
 package com.ustadmobile.core.controller;
 
 
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -228,14 +229,18 @@ public class BasePointController extends UstadBaseController implements DialogRe
             case LoginController.RESULT_LOGIN_SUCCESSFUL:
                 dialog.dismiss();
                 basePointView.setMenuItems(CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED);
-                impl.getAppView(getContext()).showNotification("Login successful", AppView.LENGTH_LONG);
+                impl.getAppView(getContext()).showNotification(
+                        impl.getString(MessageID.login_successful, getContext()),
+                        AppView.LENGTH_LONG);
                 break;
 
             case RegistrationPresenter.RESULT_REGISTRATION_SUCCESS:
                 dialog.dismiss();
                 basePointView.setMenuItems(CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED);
-                impl.getAppView(getContext()).showNotification("Registration successful", AppView.LENGTH_LONG);
-
+                impl.getAppView(getContext()).showNotification(
+                        impl.getString(MessageID.registration_successful, getContext()),
+                        AppView.LENGTH_LONG);
+                break;
         }
     }
 
