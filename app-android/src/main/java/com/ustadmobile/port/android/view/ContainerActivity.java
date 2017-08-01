@@ -116,6 +116,9 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         super.onCreate(saved);
 
         setContentView(R.layout.activity_container_epubpager);
+        DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.container_drawer_layout);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+
 
         InputStream is = null;
         try {
@@ -171,6 +174,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             }
 
         };
+        mDrawerToggle.setDrawerIndicatorEnabled(false);
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
