@@ -16,11 +16,13 @@ import com.ustadmobile.nanolrs.core.model.Node;
 import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import java.sql.SQLException;
 import java.util.List;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
+import listener.ActiveUserListener;
 
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 
@@ -37,7 +39,7 @@ import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.P
  * @author kileha3
  *
  */
-public class NetworkServiceAndroid extends Service{
+public class NetworkServiceAndroid extends Service implements ActiveUserListener{
 
     private WifiDirectHandler wifiDirectHandler;
     private final IBinder mBinder = new LocalServiceBinder();
@@ -68,7 +70,7 @@ public class NetworkServiceAndroid extends Service{
         Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
         String loggedInUserString =
                 UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
-
+        UstadMobileSystemImplSE.getInstanceSE().addActiveUserListener(this);
         bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
 
 
@@ -85,10 +87,11 @@ public class NetworkServiceAndroid extends Service{
             UstadMobileSystemImpl.getInstance().setAppPref("devices","",getApplicationContext());
         }
         unbindService(wifiP2PServiceConnection);
+
         //Sync:
+        UstadMobileSystemImplSE.getInstanceSE().removeActiveUserListener(this);
         String loggedInUserString =
                 UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
-
         unbindService(umSyncServiceConnection);
 
         super.onDestroy();
@@ -192,6 +195,22 @@ public class NetworkServiceAndroid extends Service{
             int x   =0;
         }
     };
+
+    @Override
+    public void userChanged(String username, Object context) {
+        UserManager userManager =
+                PersistenceManager.getInstance().getManager(UserManager.class);
+        User loggedInUser = null;
+        List<User> users = userManager.findByUsername(context, username);
+        if(users!=null&&!users.isEmpty()){
+            loggedInUser = users.get(0);
+        }else{
+            loggedInUser = null;
+            System.out.println("No user logged in. Setting null (will not proceed)");
+        }
+        umSyncService.setLoggedInUser(loggedInUser);
+
+    }
 
 
     /**

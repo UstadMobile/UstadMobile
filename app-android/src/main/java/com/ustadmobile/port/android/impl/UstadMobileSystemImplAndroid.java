@@ -70,6 +70,7 @@ import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.WelcomeView;
+import com.ustadmobile.nanolrs.android.service.UMSyncService;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
@@ -575,6 +576,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
 
         this.userPreferences = null;
+
     }
 
     @Override

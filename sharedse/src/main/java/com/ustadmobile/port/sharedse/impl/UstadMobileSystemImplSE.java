@@ -53,12 +53,14 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.Vector;
+
+import listener.ActiveUserListener;
 
 /**
  *
@@ -69,6 +71,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     private XmlPullParserFactory xmlPullParserFactory;
 
     protected XapiAgent xapiAgent;
+
+    Vector activeUserListener = new Vector();
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -430,6 +434,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         super.setActiveUser(username, context);
         xapiAgent = username != null ? XapiAgentEndpoint.createOrUpdate(context, null, username,
                 UMTinCanUtil.getXapiServer(context)) : null;
+
+        fireActiveUserChangedEvent(username, context);
     }
 
     @Override
@@ -536,6 +542,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             User user = (User) userManager.makeNew();
             if(uuid != null && !uuid.isEmpty()){
                 user.setUuid(uuid);
+            }else{
+                user.setUuid(UUID.randomUUID().toString());
             }
             user.setUsername(username);
             user.setPassword(password);
@@ -546,4 +554,20 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             return false;
         }
     }
+
+    public void addActiveUserListener(ActiveUserListener listener) {
+        activeUserListener.addElement(listener);
+    }
+
+    public void removeActiveUserListener(ActiveUserListener listener) {
+        activeUserListener.removeElement(listener);
+    }
+
+    protected void fireActiveUserChangedEvent(String username, Object context) {
+        for(int i = 0; i < activeUserListener.size(); i++) {
+            ((ActiveUserListener)activeUserListener
+                    .elementAt(i)).userChanged(username, context);
+        }
+    }
+
 }
