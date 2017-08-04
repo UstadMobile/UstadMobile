@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
@@ -34,6 +36,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
@@ -50,12 +53,15 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private Vector<String[]> seeAlsoItems = new Vector<>();
 
+    private Vector<String> seeAlsoIcons = new Vector<>();
+
     private SeeAlsoViewAdapter seeAlsoViewAdapter;
 
     private ImageViewLoadTarget headerLoadTarget;
 
     private ImageViewLoadTarget iconLoadTarget;
 
+    private HashMap<View, Integer> seeAlsoViewToIndexMap = new HashMap<>();
 
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
@@ -70,10 +76,18 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
         private TextView titleView;
 
+        private ImageViewLoadTarget imageLoadTarget;
+
+        private int currentIndex;
+
+        private View itemView;
+
         public SeeAlsoViewHolder(View itemView) {
             super(itemView);
+            this.itemView = itemView;
             iconView = (ImageView)itemView.findViewById(R.id.item_catalog_entry_see_also_imageview);
             titleView = (TextView)itemView.findViewById(R.id.item_catalog_entry_see_also_title);
+            imageLoadTarget = new ImageViewLoadTarget(CatalogEntryActivity.this, iconView);
         }
     }
 
@@ -83,14 +97,19 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         public SeeAlsoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(CatalogEntryActivity.this).inflate(
                     R.layout.item_catalog_entry_see_also, parent, false);
+            view.setOnClickListener(CatalogEntryActivity.this);
             return new SeeAlsoViewHolder(view);
         }
 
 
         @Override
         public void onBindViewHolder(SeeAlsoViewHolder holder, int position) {
-            holder.titleView.setText(CatalogEntryActivity.this.seeAlsoItems.get(0)
-                    [UstadJSOPDSItem.ATTR_TITLE]);
+            String[] links = CatalogEntryActivity.this.seeAlsoItems.get(position);
+            holder.titleView.setText(links[UstadJSOPDSItem.ATTR_TITLE]);
+            ImageLoader.getInstance().loadImage(seeAlsoIcons.elementAt(position),
+                    holder.imageLoadTarget, mPresenter);
+            holder.currentIndex = position;
+            seeAlsoViewToIndexMap.put(holder.itemView, position);
         }
 
         @Override
@@ -168,7 +187,12 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void onClick(View v) {
-        mPresenter.handleClickButton(getButtonIdFromViewId(v.getId()));
+        if(v instanceof Button) {
+            mPresenter.handleClickButton(getButtonIdFromViewId(v.getId()));
+        }else if(seeAlsoViewToIndexMap.containsKey(v)){
+            int seeAlsoPos = seeAlsoViewToIndexMap.get(v);
+            mPresenter.handleClickSeeAlsoItem(seeAlsoItems.get(seeAlsoPos));
+        }
     }
 
     @Override
@@ -273,15 +297,20 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
-    public void addSeeAlsoItem(String[] link) {
+    public void addSeeAlsoItem(String[] link, String iconUrl) {
         seeAlsoItems.add(link);
+        seeAlsoIcons.add(iconUrl);
         seeAlsoViewAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void removeSeeAlsoItem(String[] link) {
-        seeAlsoItems.remove(link);
-        seeAlsoViewAdapter.notifyDataSetChanged();
+        int linkIndex = seeAlsoItems.indexOf(link);
+        if(linkIndex != -1) {
+            seeAlsoItems.removeElementAt(linkIndex);
+            seeAlsoIcons.removeElementAt(linkIndex);
+            seeAlsoViewAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
