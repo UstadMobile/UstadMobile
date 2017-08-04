@@ -326,6 +326,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
     public void onDestroy() {
+        super.onDestroy();
         manager.removeNetworkManagerListener(this);
         manager.removeAcquisitionTaskListener(this);
     }

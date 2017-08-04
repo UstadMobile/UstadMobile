@@ -2,6 +2,7 @@ package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.ControllerLifecycleListener;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 
@@ -75,11 +76,13 @@ public class ImageLoader implements ControllerLifecycleListener {
                     target.setImageFromFile(fileUri);
                 }
             }catch(IOException e) {
-
+                UstadMobileSystemImpl.l(UMLog.ERROR, 657, url, e);
             }
 
-            Vector controllerTasks = getTasksByController(controller);
-            controllerTasks.removeElement(this);
+            Vector controllerTasks = removeTaskForController(controller, this);
+            if(controllerTasks == null)
+                return;//controller has been destroyed
+
             LoadImageFromNetworkTask networkTask = new LoadImageFromNetworkTask(url, target, controller);
             controllerTasks.addElement(networkTask);
             networkLoadTimer.schedule(networkTask, 0);
@@ -97,12 +100,12 @@ public class ImageLoader implements ControllerLifecycleListener {
             try {
                 HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(context);
                 String filePath = cacheDir.get(url);
-                if(filePath != null) {
+                Vector activeTasks = removeTaskForController(controller, this);
+                if(filePath != null && activeTasks != null) {
                     target.setImageFromFile(filePath);
                 }
-                getTasksByController(controller).removeElement(this);
             }catch(IOException e) {
-
+                UstadMobileSystemImpl.l(UMLog.ERROR, 658, url, e);
             }
         }
     }
@@ -137,11 +140,14 @@ public class ImageLoader implements ControllerLifecycleListener {
      * @param controller The controller in which this image is being displayed. If the controller
      *                   is destroyed, the load will be canceled.
      */
-    public void loadImage(String src, ImageLoadTarget target, UstadBaseController controller) {
-        Vector controllerTasks = getTasksByController(controller);
-        if(controllerTasks == null) {
-            controllerTasks = new Vector();
-            tasksByController.put(controller, controllerTasks);
+    public void loadImage(final String src, final ImageLoadTarget target, final UstadBaseController controller) {
+        Vector controllerTasks;
+        synchronized (tasksByController) {
+            controllerTasks = getTasksByController(controller);
+            if(controllerTasks == null) {
+                controllerTasks = new Vector();
+                tasksByController.put(controller, controllerTasks);
+            }
         }
 
         controller.addLifecycleListener(this);
@@ -157,6 +163,28 @@ public class ImageLoader implements ControllerLifecycleListener {
         else
             return null;
     }
+
+    /**
+     *
+     * @param controller
+     * @param task
+     * @return
+     */
+    private Vector removeTaskForController(UstadBaseController controller, ImageLoaderTask task) {
+        Vector controllerTaskVector = getTasksByController(controller);
+        if(controllerTaskVector == null)
+            return null;
+
+        synchronized (controllerTaskVector) {
+            if(controllerTaskVector.indexOf(task) != -1) {
+                controllerTaskVector.removeElement(task);
+                return controllerTaskVector;
+            }
+        }
+
+        return null;
+    }
+
 
     public void onStarted(UstadBaseController controller) {
 

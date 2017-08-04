@@ -2241,6 +2241,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     }
 
     public void onDestroy() {
+        super.onDestroy();
         if(this.model != null)
             UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
