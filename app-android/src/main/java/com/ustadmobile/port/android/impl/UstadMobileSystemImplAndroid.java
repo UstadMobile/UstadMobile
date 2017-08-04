@@ -244,8 +244,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
     }
 
-    //private HashMap<Context, ServiceConnection> httpServiceConnections = new HashMap<>();
-
     protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
     protected NetworkManagerAndroid networkManagerAndroid;
@@ -395,6 +393,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public void handleActivityDestroy(Activity mContext) {
         mContext.unbindService(networkServiceConnections.get(mContext));
+        networkServiceConnections.remove(mContext);
+        if(appViews.containsKey(mContext)) {
+            appViews.remove(mContext);
+        }
     }
 
 
