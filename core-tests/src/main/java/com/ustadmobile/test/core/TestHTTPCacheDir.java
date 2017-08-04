@@ -60,26 +60,17 @@ import com.ustadmobile.core.util.UMFileUtil;
  */
 public class TestHTTPCacheDir  {
     
-    private static String httpRoot;
 
     private static RouterNanoHTTPD resourcesHttpd;
 
     @BeforeClass
     public static void startHttpResourcesServer() throws IOException {
-        if(resourcesHttpd == null) {
-            resourcesHttpd = new RouterNanoHTTPD(0);
-            resourcesHttpd.addRoute("/res/(.*)", ClassResourcesResponder.class, "/res/");
-            resourcesHttpd.start();
-            httpRoot = "http://localhost:" + resourcesHttpd.getListeningPort() + "/res/";
-        }
+        ResourcesHttpdTestServer.startServer();
     }
 
     @AfterClass
     public static void stopHttpResourcesServer() throws IOException {
-        if(resourcesHttpd != null) {
-            resourcesHttpd.stop();
-            resourcesHttpd = null;
-        }
+        ResourcesHttpdTestServer.stopServer();
     }
 
     @Test
@@ -90,6 +81,7 @@ public class TestHTTPCacheDir  {
         String cacheDirName = impl.getCacheDir(CatalogController.SHARED_RESOURCE, 
             new Object());
         HTTPCacheDir cacheDir = new HTTPCacheDir(cacheDirName, null);
+        String httpRoot = ResourcesHttpdTestServer.getHttpRoot();
         
         String httpURL = UMFileUtil.joinPaths(new String[] {httpRoot, 
             "phonepic-smaller.png"});

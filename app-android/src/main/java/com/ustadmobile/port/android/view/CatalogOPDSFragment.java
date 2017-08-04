@@ -71,6 +71,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Hashtable;
@@ -444,20 +445,20 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void setEntrythumbnail(final String entryId, String iconFileURI) {
-        iconFileURI = UMFileUtil.stripPrefixIfPresent("file://", iconFileURI);
-
-        final Bitmap bitmap = BitmapFactory.decodeFile(iconFileURI);
-        final String errURI = iconFileURI;
-
-        super.runOnUiThread(new Runnable() {
-            public void run() {
-                //TODO: idToCardMap should not be null when this is called... this should only be called after cards are made...
-                if(idToCardMap != null && idToCardMap.containsKey(entryId)) {
-                    idToCardMap.get(entryId).setThumbnail(bitmap);
-                }
+    public void setEntrythumbnail(final String entryId, String iconUrl) {
+        ImageLoader.getInstance().loadImage(iconUrl, new ImageLoader.ImageLoadTarget() {
+            @Override
+            public void setImageFromFile(String filePath) {
+                String fileUri = UMFileUtil.stripPrefixIfPresent("file://", filePath);
+                final Bitmap imgBitmap = BitmapFactory.decodeFile(fileUri);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        idToCardMap.get(entryId).setThumbnail(imgBitmap);
+                    }
+                });
             }
-        });
+        }, mCatalogController);
     }
 
     @Override
