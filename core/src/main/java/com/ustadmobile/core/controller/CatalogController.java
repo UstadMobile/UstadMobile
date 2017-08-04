@@ -932,14 +932,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             }
         }else {
             //Go to the entry view
-            Hashtable catalogEntryArgs = new Hashtable();
-            UstadJSOPDSFeed entryFeed = entry.getEntryFeed();
-            String[] entryAbsoluteLink = entryFeed.getAbsoluteSelfLink();
-            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
-                    entry.parentFeed.serializeToString());
-            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,
-                    entry.id);
-            impl.go(CatalogEntryView.VIEW_NAME, catalogEntryArgs, context);
+            handleOpenEntryView(entry);
         }
     }
 

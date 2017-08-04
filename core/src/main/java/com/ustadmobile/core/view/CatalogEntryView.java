@@ -71,7 +71,7 @@ public interface CatalogEntryView extends UstadView {
 
     void setProgressStatusText(String progressStatusText);
 
-    void addSeeAlsoItem(String[] itemLink);
+    void addSeeAlsoItem(String[] itemLink, String iconUrl);
 
     void removeSeeAlsoItem(String[] itemLink);
 

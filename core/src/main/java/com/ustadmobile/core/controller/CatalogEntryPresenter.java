@@ -120,8 +120,26 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 //set see also items
                 if(entry != null){
                     Vector relatedLinks = entry.getLinks(UstadJSOPDSItem.LINK_REL_RELATED, null);
+
+                    String[] thumbnailLink = null;
+                    String[] currentLink;
+                    String thumbnailUrl = null;
                     for(int i = 0; i < relatedLinks.size(); i++) {
-                        catalogEntryView.addSeeAlsoItem((String[])relatedLinks.elementAt(i));
+                        currentLink = (String[])relatedLinks.elementAt(i);
+                        Vector relatedEntryMatch = entryFeed.getEntriesByLinkParams(
+                                UstadJSOPDSFeed.LINK_REL_ALTERNATE, null,
+                                currentLink[UstadJSOPDSItem.ATTR_HREF], entry.getLanguage());
+                        UstadJSOPDSEntry entryLink;
+                        if(relatedEntryMatch != null && relatedEntryMatch.size() > 0) {
+                            entryLink = (UstadJSOPDSEntry)relatedEntryMatch.elementAt(0);
+                            thumbnailLink = entryLink.getThumbnailLink(true);
+                            thumbnailUrl = UMFileUtil.resolveLink(
+                                    entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
+                                    thumbnailLink[UstadJSOPDSItem.ATTR_HREF]);
+                        }
+
+                        catalogEntryView.addSeeAlsoItem((String[])relatedLinks.elementAt(i),
+                                thumbnailUrl);
                     }
                 }
 
@@ -223,7 +241,15 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
         impl.getAppView(getContext()).showChoiceDialog(impl.getString(MessageID.modify, getContext()),
                 modifyOptionsToShow, CMD_MODIFY_ENTRY, this);
+    }
 
+    public void handleClickSeeAlsoItem(String[] link) {
+        Vector relatedEntryMatch = entryFeed.getEntriesByLinkParams(
+                UstadJSOPDSFeed.LINK_REL_ALTERNATE, null,
+                link[UstadJSOPDSItem.ATTR_HREF], entry.getLanguage());
+        if(relatedEntryMatch.size() > 0) {
+            handleOpenEntryView((UstadJSOPDSEntry)relatedEntryMatch.elementAt(0));
+        }
     }
 
     

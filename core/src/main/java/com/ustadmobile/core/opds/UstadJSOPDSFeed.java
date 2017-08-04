@@ -35,6 +35,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -374,10 +375,26 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         return matchingEntries;
     }
 
+    public Vector getEntriesByLinkParams(String linkRel, String mimeType, String href, String language) {
+        Vector initialMatches = getEntriesByLinkParams(linkRel, mimeType, href, false, false, false, 0);
+        Vector languageMatches = new Vector();
+        Enumeration entries = initialMatches.elements();
+        UstadJSOPDSEntry entry;
+        while(entries.hasMoreElements()) {
+            entry = (UstadJSOPDSEntry)entries.nextElement();
+            if(UMUtil.isSameLanguage(entry.getLanguage(), language))
+                languageMatches.addElement(entry);
+        }
+
+        return languageMatches;
+    }
+
     public UstadJSOPDSEntry getFirstEntryByLinkParams(String linkRel, String mimeType, String href, boolean relByPrefix, boolean mimeTypeByPrefix, boolean hrefByPrefix) {
         Vector matches = getEntriesByLinkParams(linkRel, mimeType, href, relByPrefix, mimeTypeByPrefix, hrefByPrefix, 1);
         return matches.size() > 0 ? (UstadJSOPDSEntry)matches.elementAt(0) : null;
     }
+
+
 
     public UstadJSOPDSEntry findEntryForAlternateTranslation(String alternateHref) {
         String entryLang;
