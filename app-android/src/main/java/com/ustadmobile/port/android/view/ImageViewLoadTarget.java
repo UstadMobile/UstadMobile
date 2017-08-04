@@ -16,6 +16,9 @@ import java.io.IOException;
  * Created by mike on 8/4/17.
  */
 
+/**
+ * Wrapper for ImageLoadTarget
+ */
 public class ImageViewLoadTarget implements ImageLoader.ImageLoadTarget {
 
     private ImageView imageView;

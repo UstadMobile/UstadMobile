@@ -12,9 +12,26 @@ import java.util.TimerTask;
 import java.util.Vector;
 
 /**
- * Created by mike on 8/3/17.
+ * Ustad Mobile Image Loader. The Image Loader is cross platform and should work on any platform
+ * where file I/O is supported. It uses the existing HTTPCacheDir class.
+ *
+ * The ImageLoader will first display any cached copy of an image that exists (to improve responsiveness
+ * for the user). It will then use the main http cache method to validate or download the image as
+ * required. This is done using two separate threads each managed by a Timer.
+ *
+ * To receive an Image the destination must implement ImageViewLoadTarget. Typical usage would be
+ * along the lines of:
+ *
+ * ImageLoader.getInstance().loadImage("http://path/to/image.jpg", new ImageLoader.ImageLoadTarget() {
+ *     public void setImageFromFile(String filePath) {
+ *         //set the image itself as per platform requirements
+ *     }
+ * }, controller);
+ *
+ * Where the controller is the controller in which this image is displayed. If the controller is
+ * destroyed the loading of the image will be cancelled.
+ *
  */
-
 public class ImageLoader implements ControllerLifecycleListener {
 
     private Timer cacheLoadTimer;
@@ -96,6 +113,9 @@ public class ImageLoader implements ControllerLifecycleListener {
         return singleton;
     }
 
+    /**
+     *
+     */
     public interface ImageLoadTarget {
 
         void setImageFromFile(String filePath);
@@ -108,6 +128,15 @@ public class ImageLoader implements ControllerLifecycleListener {
         tasksByController = new Hashtable();
     }
 
+    /**
+     * Loads the image as per the specified src. Wehn the image is available the target will be
+     * given a fill path where the image is saved to
+     *
+     * @param src The url of where to download the image from.
+     * @param target An ImageLoadTarget which can display an image. E.g. use a wrapper around an ImageView etc.
+     * @param controller The controller in which this image is being displayed. If the controller
+     *                   is destroyed, the load will be canceled.
+     */
     public void loadImage(String src, ImageLoadTarget target, UstadBaseController controller) {
         Vector controllerTasks = getTasksByController(controller);
         if(controllerTasks == null) {
