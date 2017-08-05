@@ -378,7 +378,7 @@ public class HTTPCacheDir {
             try {
                 url = (String)e.nextElement();
                 for(int i = 0; i < NUM_DIRS && cacheIndex[i] != null; i++){
-                    currentEntry = cacheIndex[i].getJSONArray(url);
+                    currentEntry = cacheIndex[i].optJSONArray(url);
                     if(currentEntry != null && filename.equals(currentEntry.getString(IDX_FILENAME))) {
                         return currentEntry;
                     }
@@ -437,6 +437,9 @@ public class HTTPCacheDir {
         //if the filename is being used for an ID - lets see if that exists...
         if(entry == null && filename != null) {
             entry = getEntryByFilename(filename);
+            if(entry != null) {
+                cacheNum = entry.getBoolean(IDX_PRIVATE) != true ? SHARED : PRIVATE;
+            }
         }
 
         //check that the file is still present in the cache (e.g. Android may have deleted it)
