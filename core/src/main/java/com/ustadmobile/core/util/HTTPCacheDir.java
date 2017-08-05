@@ -438,6 +438,16 @@ public class HTTPCacheDir {
         if(entry == null && filename != null) {
             entry = getEntryByFilename(filename);
         }
+
+        //check that the file is still present in the cache (e.g. Android may have deleted it)
+        if(entry != null) {
+            String fileUri = entry.getString(IDX_FILENAME);
+            if(!(impl.fileExists(fileUri) && impl.fileSize(fileUri) > 0)) {
+                //Cache entry has been deleted by someone else
+                cacheIndex[cacheNum].remove(url);
+                entry = null;
+            }
+        }
         
         if(headers != null && headers.containsKey("cache-control")) {
             Hashtable cacheCtrl = UMFileUtil.parseParams((String)headers.get("cache-control"), ';');
