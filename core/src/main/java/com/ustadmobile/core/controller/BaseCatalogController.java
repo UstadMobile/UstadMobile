@@ -10,6 +10,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.ContainerView;
 
 import java.util.Enumeration;
@@ -220,6 +221,22 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
             openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
             UstadMobileSystemImpl.getInstance().go(ContainerView.VIEW_NAME, openArgs, getContext());
         }
+    }
+
+    /**
+     * Open the given entry in the catalog entry view
+     * @param entry
+     */
+    public void handleOpenEntryView(UstadJSOPDSEntry entry) {
+        Hashtable catalogEntryArgs = new Hashtable();
+        UstadJSOPDSFeed entryFeed = entry.getEntryFeed();
+        String[] entryAbsoluteLink = entryFeed.getAbsoluteSelfLink();
+        catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
+                entry.parentFeed.serializeToString());
+        catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,
+                entry.id);
+        UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, catalogEntryArgs,
+                getContext());
     }
 
 

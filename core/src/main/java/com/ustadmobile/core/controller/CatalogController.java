@@ -293,8 +293,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     
     //Hashtable indexed entry id -> download ID (Long object)
     private Hashtable downloadingEntries;
-    
-    private Thread thumbnailLoadThread;
 
     //True if this is a user's own catalog feed that they can add/remove from - false otherwise
     private boolean isUserCatalogFeed = false;
@@ -588,9 +586,13 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      * 
      */
     public void loadThumbnails() {
-        if(thumbnailLoadThread == null) {
-            thumbnailLoadThread = new Thread(this);
-            thumbnailLoadThread.start();
+        String[] imageLinks;
+        UstadJSOPDSFeed feed = getDisplayFeed();
+        String imageUrl;
+        for(int i = 0; i < feed.entries.length && !isDestroyed(); i++) {
+            imageLinks = feed.entries[i].getThumbnailLink(false);
+            imageUrl = UMFileUtil.resolveLink(feed.href, imageLinks[UstadJSOPDSEntry.LINK_HREF]);
+            view.setEntrythumbnail(feed.entries[i].id, imageUrl);
         }
     }
 
@@ -930,14 +932,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             }
         }else {
             //Go to the entry view
-            Hashtable catalogEntryArgs = new Hashtable();
-            UstadJSOPDSFeed entryFeed = entry.getEntryFeed();
-            String[] entryAbsoluteLink = entryFeed.getAbsoluteSelfLink();
-            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
-                    entry.parentFeed.serializeToString());
-            catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,
-                    entry.id);
-            impl.go(CatalogEntryView.VIEW_NAME, catalogEntryArgs, context);
+            handleOpenEntryView(entry);
         }
     }
 
@@ -2239,6 +2234,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     }
 
     public void onDestroy() {
+        super.onDestroy();
         if(this.model != null)
             UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }

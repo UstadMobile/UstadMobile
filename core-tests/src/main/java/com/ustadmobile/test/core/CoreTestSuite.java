@@ -8,7 +8,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    TestHTTPCacheDir.class
+        TestHTTPCacheDir.class,
+        TestImageLoader.class
 })
 public abstract class CoreTestSuite {
 }

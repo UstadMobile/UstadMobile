@@ -196,47 +196,57 @@ public class MockNetworkManager extends NetworkManager {
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         if(enabled && wifiDirectBroadcastTimer == null) {
-            stopClientMode();
-            startSuperNode();
+//            stopClientMode();
+//            startSuperNode();
         }else if(!enabled) {
-            stopSuperNode();
-            startClientMode();
+//            stopSuperNode();
+//            startClientMode();
         }
     }
 
     @Override
-    public synchronized void startSuperNode() {
-        if(wifiDirectBroadcastTimer == null) {
-            HashMap<String, String> txtRecords = new HashMap<>();
-            txtRecords.put(NetworkManager.SD_TXT_KEY_BT_MAC, mockBluetoothAddr);
-            txtRecords.put(NetworkManager.SD_TXT_KEY_IP_ADDR,
-                    MockNetworkManager.this.getDeviceIPAddress());
-            txtRecords.put(NetworkManager.SD_TXT_KEY_PORT, String.valueOf(getHttpListeningPort()));
-            wifiDirectBroadcastTimer = new Timer();
-            wifiDirectBroadcastTimer.scheduleAtFixedRate(new WifiDirectBroadcastTimerTask(txtRecords),
-                    WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
-        }
+    public void updateSupernodeServices() {
+
     }
 
     @Override
-    public synchronized void stopSuperNode() {
-        if(wifiDirectBroadcastTimer != null) {
-            wifiDirectBroadcastTimer.cancel();
-            wifiDirectBroadcastTimer = null;
-        }
+    public void updateClientServices() {
+
     }
 
-    @Override
-    public void startClientMode() {
-        setWifiDirectDiscoveryEnabled(true);
-        setNetworkServiecDiscoveryEnabled(true);
-    }
-
-    @Override
-    public void stopClientMode() {
-        setWifiDirectDiscoveryEnabled(false);
-        setNetworkServiecDiscoveryEnabled(false);
-    }
+    //    @Override
+//    public synchronized void startSuperNode() {
+//        if(wifiDirectBroadcastTimer == null) {
+//            HashMap<String, String> txtRecords = new HashMap<>();
+//            txtRecords.put(NetworkManager.SD_TXT_KEY_BT_MAC, mockBluetoothAddr);
+//            txtRecords.put(NetworkManager.SD_TXT_KEY_IP_ADDR,
+//                    MockNetworkManager.this.getDeviceIPAddress());
+//            txtRecords.put(NetworkManager.SD_TXT_KEY_PORT, String.valueOf(getHttpListeningPort()));
+//            wifiDirectBroadcastTimer = new Timer();
+//            wifiDirectBroadcastTimer.scheduleAtFixedRate(new WifiDirectBroadcastTimerTask(txtRecords),
+//                    WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
+//        }
+//    }
+//
+//    @Override
+//    public synchronized void stopSuperNode() {
+//        if(wifiDirectBroadcastTimer != null) {
+//            wifiDirectBroadcastTimer.cancel();
+//            wifiDirectBroadcastTimer = null;
+//        }
+//    }
+//
+//    @Override
+//    public void startClientMode() {
+//        setWifiDirectDiscoveryEnabled(true);
+//        setNetworkServiecDiscoveryEnabled(true);
+//    }
+//
+//    @Override
+//    public void stopClientMode() {
+//        setWifiDirectDiscoveryEnabled(false);
+//        setNetworkServiecDiscoveryEnabled(false);
+//    }
 
     @Override
     public synchronized boolean isSuperNodeEnabled() {

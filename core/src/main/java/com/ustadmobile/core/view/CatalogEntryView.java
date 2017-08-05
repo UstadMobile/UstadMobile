@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.model.CourseProgress;
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 /**
  * Created by mike on 4/17/17.
@@ -69,4 +70,11 @@ public interface CatalogEntryView extends UstadView {
     void setLearnerProgressVisible(boolean visible);
 
     void setProgressStatusText(String progressStatusText);
+
+    void addSeeAlsoItem(String[] itemLink, String iconUrl);
+
+    void removeSeeAlsoItem(String[] itemLink);
+
+    void clearSeeAlsoItems();
+
 }

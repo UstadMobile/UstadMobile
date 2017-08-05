@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,7 +24,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogEntryView;
+import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -32,8 +36,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Vector;
 
 public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener {
 
@@ -43,10 +49,19 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private RecyclerView seeAlsoRecyclerView;
 
-    private NetworkManagerAndroid managerAndroid;
-
     private static Hashtable<Integer, Integer> BUTTON_ID_MAP =new Hashtable<>();
 
+    private Vector<String[]> seeAlsoItems = new Vector<>();
+
+    private Vector<String> seeAlsoIcons = new Vector<>();
+
+    private SeeAlsoViewAdapter seeAlsoViewAdapter;
+
+    private ImageViewLoadTarget headerLoadTarget;
+
+    private ImageViewLoadTarget iconLoadTarget;
+
+    private HashMap<View, Integer> seeAlsoViewToIndexMap = new HashMap<>();
 
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
@@ -61,17 +76,52 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
         private TextView titleView;
 
+        private ImageViewLoadTarget imageLoadTarget;
+
+        private int currentIndex;
+
+        private View itemView;
+
         public SeeAlsoViewHolder(View itemView) {
             super(itemView);
+            this.itemView = itemView;
             iconView = (ImageView)itemView.findViewById(R.id.item_catalog_entry_see_also_imageview);
             titleView = (TextView)itemView.findViewById(R.id.item_catalog_entry_see_also_title);
+            imageLoadTarget = new ImageViewLoadTarget(CatalogEntryActivity.this, iconView);
         }
     }
+
+    private class SeeAlsoViewAdapter extends RecyclerView.Adapter<SeeAlsoViewHolder> {
+
+        @Override
+        public SeeAlsoViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(CatalogEntryActivity.this).inflate(
+                    R.layout.item_catalog_entry_see_also, parent, false);
+            view.setOnClickListener(CatalogEntryActivity.this);
+            return new SeeAlsoViewHolder(view);
+        }
+
+
+        @Override
+        public void onBindViewHolder(SeeAlsoViewHolder holder, int position) {
+            String[] links = CatalogEntryActivity.this.seeAlsoItems.get(position);
+            holder.titleView.setText(links[UstadJSOPDSItem.ATTR_TITLE]);
+            ImageLoader.getInstance().loadImage(seeAlsoIcons.elementAt(position),
+                    holder.imageLoadTarget, mPresenter);
+            holder.currentIndex = position;
+            seeAlsoViewToIndexMap.put(holder.itemView, position);
+        }
+
+        @Override
+        public int getItemCount() {
+            return CatalogEntryActivity.this.seeAlsoItems.size();
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        managerAndroid= (NetworkManagerAndroid) UstadMobileSystemImpl.getInstance().getNetworkManager();
         if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.LOLLIPOP){
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -87,6 +137,21 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
         //mCollapsingToolbar = (CollapsingToolbarLayout)findViewById(R.id.activity_catalog_entry_collapsing_toolbar);
 
+
+        seeAlsoRecyclerView = (RecyclerView)findViewById(R.id.activity_catalog_entry_see_also_recycler_view);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        seeAlsoRecyclerView.setLayoutManager(linearLayoutManager);
+        seeAlsoViewAdapter = new SeeAlsoViewAdapter();
+        seeAlsoRecyclerView.setAdapter(seeAlsoViewAdapter);
+        seeAlsoRecyclerView.setNestedScrollingEnabled(false);
+
+        headerLoadTarget = new ImageViewLoadTarget(this,
+                (ImageView)findViewById(R.id.activity_catalog_entry_header_img));
+
+        iconLoadTarget = new ImageViewLoadTarget(this,
+                (ImageView)findViewById(R.id.activity_catalog_entry_icon_img));
+
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mPresenter = new CatalogEntryPresenter(this, this, args);
         mPresenter.onCreate();
@@ -94,46 +159,12 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         try{
             UstadJSOPDSFeed feed=new UstadJSOPDSFeed();
             feed.loadFromString(args.get(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR).toString());
-
-            String entryId=feed.entries[0].id;
-
-            List<String> entries=new ArrayList<>();
-            entries.add(entryId);
-
-            //managerAndroid.requestFileStatus(entries,this);
-
-
-
         } catch (XmlPullParserException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        seeAlsoRecyclerView = (RecyclerView)findViewById(R.id.activity_catalog_entry_see_also_recycler_view);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        seeAlsoRecyclerView.setLayoutManager(linearLayoutManager);
-        final Context ctx = this;
-        seeAlsoRecyclerView.setAdapter(new RecyclerView.Adapter() {
-
-            @Override
-            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(ctx).inflate(R.layout.item_catalog_entry_see_also, parent, false);
-                return new SeeAlsoViewHolder(view);
-            }
-
-            @Override
-            public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
-            }
-
-            @Override
-            public int getItemCount() {
-                return 5;
-            }
-        });
-        seeAlsoRecyclerView.setNestedScrollingEnabled(false);
     }
 
     @Override
@@ -156,7 +187,12 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void onClick(View v) {
-        mPresenter.handleClickButton(getButtonIdFromViewId(v.getId()));
+        if(v instanceof Button) {
+            mPresenter.handleClickButton(getButtonIdFromViewId(v.getId()));
+        }else if(seeAlsoViewToIndexMap.containsKey(v)){
+            int seeAlsoPos = seeAlsoViewToIndexMap.get(v);
+            mPresenter.handleClickSeeAlsoItem(seeAlsoItems.get(seeAlsoPos));
+        }
     }
 
     @Override
@@ -170,15 +206,13 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
-    public void setHeader(String headerFileUri) {
-        ((ImageView)findViewById(R.id.activity_catalog_entry_header_img)).setImageBitmap(
-            BitmapFactory.decodeFile(headerFileUri));
+    public void setHeader(String headerUrl) {
+        ImageLoader.getInstance().loadImage(headerUrl, headerLoadTarget, mPresenter);
     }
 
     @Override
     public void setIcon(String iconFileUri) {
-        ((ImageView)findViewById(R.id.activity_catalog_entry_icon_img)).setImageBitmap(
-            BitmapFactory.decodeFile(iconFileUri));
+        ImageLoader.getInstance().loadImage(iconFileUri, iconLoadTarget, mPresenter);
     }
 
     @Override
@@ -260,6 +294,29 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
                 statusIconView.setVisibility(View.VISIBLE);
                 break;
         }
+    }
+
+    @Override
+    public void addSeeAlsoItem(String[] link, String iconUrl) {
+        seeAlsoItems.add(link);
+        seeAlsoIcons.add(iconUrl);
+        seeAlsoViewAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void removeSeeAlsoItem(String[] link) {
+        int linkIndex = seeAlsoItems.indexOf(link);
+        if(linkIndex != -1) {
+            seeAlsoItems.removeElementAt(linkIndex);
+            seeAlsoIcons.removeElementAt(linkIndex);
+            seeAlsoViewAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void clearSeeAlsoItems() {
+        seeAlsoItems.clear();
+        seeAlsoViewAdapter.notifyDataSetChanged();
     }
 
     @Override

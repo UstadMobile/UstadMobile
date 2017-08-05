@@ -185,6 +185,12 @@ public abstract class UstadJSOPDSItem {
      */
     public static final String LINK_REL_ALTERNATE = "alternate";
 
+
+    /**
+     * The related links as per the Atom spec
+     */
+    public static final String LINK_REL_RELATED = "related";
+
     /**
     * Type to be used for a catalog link of an acquisition feed as per OPDS spec
     * 

@@ -33,7 +33,6 @@
                 app:layout_collapseMode="pin">
 
                 <ImageView
-                    android:src="@drawable/videoplaceholder"
                     android:id="@+id/activity_catalog_entry_header_img"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

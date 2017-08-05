@@ -38,6 +38,7 @@ import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 /**
  * Base Controller that provides key functionality for any view :
@@ -53,6 +54,8 @@ public abstract class UstadBaseController implements UstadController {
     protected Object context;
     
     protected boolean isDestroyed = false;
+
+    protected Vector controllerLifecycleListeners;
     
     public static final int CMD_ABOUT = 1001;
     
@@ -121,6 +124,27 @@ public abstract class UstadBaseController implements UstadController {
      * locale is changed
      */
     public abstract void setUIStrings();
+
+    /**
+     * Called when the view is destroyed and removed from memory. onDestroy in Android, when the form
+     * is navigated away from in J2ME
+     */
+    public void onDestroy() {
+        if(controllerLifecycleListeners == null)
+            return;
+
+        for(int i = 0; i < controllerLifecycleListeners.size(); i++) {
+            ((ControllerLifecycleListener)controllerLifecycleListeners.elementAt(i)).onDestroyed(this);
+        }
+    }
+
+    public void onStop() {
+
+    }
+
+    public void onStart() {
+
+    }
 
 
     /**
@@ -231,6 +255,21 @@ public abstract class UstadBaseController implements UstadController {
         impl.getNetworkManager().shareAppSetupFile(impl.getAppSetupFile(context),
                 impl.getString(MessageID.share_via, context));
     }
+
+    public void addLifecycleListener(ControllerLifecycleListener listener) {
+        if(controllerLifecycleListeners == null)
+            controllerLifecycleListeners = new Vector();
+
+        controllerLifecycleListeners.addElement(listener);
+    }
+
+    public void removeLifecycleListener(ControllerLifecycleListener listener) {
+        controllerLifecycleListeners.removeElement(listener);
+    }
+
+
+
+
 
 
 
