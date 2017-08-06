@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,9 +21,11 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -603,11 +606,28 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void shareAppSetupFile(String filePath, String shareTitle) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("*/*");
+        shareIntent.setPackage("com.android.bluetooth");
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
-        Intent chooserIntent=Intent.createChooser(shareIntent,shareTitle);
-        chooserIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(chooserIntent);
+
+        if(shareIntent.resolveActivity(getContext().getPackageManager()) != null) {
+            getContext().startActivity(shareIntent);
+        }else{
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    Toast.makeText(getContext(),
+                            R.string.error_this_device_doesnt_support_bluetooth_sharing,
+                            Toast.LENGTH_LONG).show();
+                }
+            }.execute();
+        }
+
     }
 
 

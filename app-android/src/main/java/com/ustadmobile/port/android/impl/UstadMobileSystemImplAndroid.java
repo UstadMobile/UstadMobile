@@ -54,6 +54,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -63,6 +64,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.AppView;
@@ -111,6 +113,8 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -121,6 +125,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.WeakHashMap;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 
 /**
@@ -751,8 +758,45 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getAppSetupFile(Object context) {
-        return new File(((Context)context).getApplicationInfo().sourceDir).getAbsolutePath();
+    public String getAppSetupFile(Object context, boolean zip) {
+        File apkFile = new File(((Context)context).getApplicationInfo().sourceDir);
+        String baseName = CoreBuildConfig.BASE_NAME + "-" + CoreBuildConfig.VERSION;
+        FileInputStream apkFileIn = null;
+        if(zip) {
+            ZipOutputStream zipOut = null;
+            File outZipFile = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS), baseName  +".zip");
+            try {
+                zipOut = new ZipOutputStream(new FileOutputStream(outZipFile));
+                zipOut.putNextEntry(new ZipEntry(baseName + ".apk"));
+                apkFileIn = new FileInputStream(apkFile);
+                UMIOUtils.readFully(apkFileIn, zipOut, 1024);
+                zipOut.closeEntry();
+            }catch(IOException e) {
+                e.printStackTrace();
+            }finally {
+                UMIOUtils.closeOutputStream(zipOut);
+                UMIOUtils.closeInputStream(apkFileIn);
+            }
+
+            return outZipFile.getAbsolutePath();
+        }else {
+            FileOutputStream fout = null;
+            File outApkFile = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS), baseName + ".apk");
+            try {
+                apkFileIn = new FileInputStream(apkFile);
+                fout = new FileOutputStream(outApkFile);
+                UMIOUtils.readFully(apkFileIn, fout, 1024);
+            }catch(IOException e) {
+                e.printStackTrace();
+            }finally {
+                UMIOUtils.closeInputStream(apkFileIn);
+                UMIOUtils.closeOutputStream(fout);
+            }
+
+            return outApkFile.getAbsolutePath();
+        }
     }
 
 }

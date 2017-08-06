@@ -72,6 +72,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     packageName = "com.ustadmobile.core.buildconfig"
     appName = project.ext.buildConfigProperties['appName']
     clsName = "CoreBuildConfig"
+    version = rootProject.version
 
     ArrayList<String> baseMenuTypes = new ArrayList<>()
     baseMenuTypes.add("guest")
@@ -128,6 +129,7 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
 
     buildConfigField "String[]", "SUPPORTED_LOCALES", supportedLocalesValue
 
+    buildConfigField "String", "BASE_NAME", project.ext.buildConfigProperties["baseName"]
     buildConfigField "long", "BUILD_TIME_MILLIS", String.valueOf(buildTimeMillis) + "L"
     buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
     buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]

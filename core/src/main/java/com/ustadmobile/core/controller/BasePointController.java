@@ -74,7 +74,9 @@ public class BasePointController extends UstadBaseController implements DialogRe
     public static final String ARG_WELCOME_SCREEN_DISPLAYED = "wsd";
 
     private boolean keepTmpVariables = false;
-    
+
+    public static final int CMD_SHARE_APP=1005;
+
     public BasePointController(Object context) {
         super(context);
     }
@@ -267,4 +269,24 @@ public class BasePointController extends UstadBaseController implements DialogRe
                     null, getContext());
         }
     }
+
+    public void handleClickShareApp() {
+        basePointView.showShareAppDialog();
+    }
+
+    public void handleClickConfirmShareApp(final boolean zip) {
+        final UstadMobileSystemImpl impl =UstadMobileSystemImpl.getInstance();
+        basePointView.setShareAppDialogProgressVisible(true);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String appSetupFile = impl.getAppSetupFile(getContext(), zip);
+                impl.getNetworkManager().shareAppSetupFile(appSetupFile,
+                        impl.getString(MessageID.share, getContext()));
+                basePointView.dismissShareAppDialog();
+            }
+        }).start();
+    }
+
+
 }

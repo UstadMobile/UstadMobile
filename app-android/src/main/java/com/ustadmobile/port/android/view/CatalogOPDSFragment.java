@@ -451,6 +451,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             public void setImageFromFile(String filePath) {
                 String fileUri = UMFileUtil.stripPrefixIfPresent("file://", filePath);
                 final Bitmap imgBitmap = BitmapFactory.decodeFile(fileUri);
+                //TODO: Check this as it occassionally causes a null pointer exception on set Thumbnail
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
