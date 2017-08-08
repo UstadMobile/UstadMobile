@@ -233,7 +233,7 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha5'
-    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.25-SNAPSHOT'
+    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.28-SNAPSHOT'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.txusballesteros:FitChart:1.0'
     androidTestCompile 'junit:junit:4.12'

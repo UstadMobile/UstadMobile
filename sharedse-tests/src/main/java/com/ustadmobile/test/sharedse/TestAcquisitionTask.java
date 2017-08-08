@@ -230,13 +230,21 @@ public class TestAcquisitionTask{
      * @throws XmlPullParserException
      */
     @Test
-    public void testAcquisition() throws IOException, InterruptedException, XmlPullParserException {
+    public void testAcquisitionLocalWifi() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         testAcquisition(remoteNode, manager, true, false, NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
+        Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+    }
+
+    @Test
+    public void testAcquisitionWifiDirect() throws IOException, InterruptedException, XmlPullParserException {
+        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         testAcquisition(remoteNode, manager, false, true, NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
         Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
+
 
     /**
      * Test what happens with acquisition over WiFi direct when the bluetooth connection to the
