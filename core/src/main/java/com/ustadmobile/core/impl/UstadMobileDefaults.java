@@ -28,16 +28,7 @@ package com.ustadmobile.core.impl;
  * @author mike
  */
 public class UstadMobileDefaults {
-    
-    /**
-     * The default Experience API server
-     */
-    public static final String DEFAULT_XAPI_SERVER = 
-            "https://umcloud1.ustadmobile.com/umlrs/";
 
-    public static final String DEFAULT_XAPI_SERVER_NOSSL =
-            "http://umcloud1.ustadmobile.com/umlrs/";
-            
     /**
      * The statement relative location relative to endpoint
      */

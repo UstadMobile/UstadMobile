@@ -347,7 +347,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         //String xapiServer = "http://umcloud1.ustadmobile.com/umlrs/";
         String xapiServer = getAppPref(
                 UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
 
         XapiStatementsForwardingEndpoint.putAndQueueStatement(context, stmtObj,
                 xapiServer, getActiveUser(context), getActiveUserAuth(context));

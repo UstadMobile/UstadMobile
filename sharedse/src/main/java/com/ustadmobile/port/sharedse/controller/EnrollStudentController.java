@@ -3,6 +3,7 @@
  */
 package com.ustadmobile.port.sharedse.controller;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -146,7 +147,7 @@ public class EnrollStudentController extends UstadBaseController {
                 String teacher_enroll_student_url = null;
                 String umCloudServer = UstadMobileSystemImpl.getInstance().getAppPref(
                             UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                            UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                            CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
                 teacher_enroll_student_url = umCloudServer + "/" + 
                         TEACHER_ENROLL_STUDENT_ENDPOINT;
 

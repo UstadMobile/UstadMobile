@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.port.sharedse.controller;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -291,7 +292,7 @@ public class AttendanceController extends UstadBaseController {
                 String username = impl.getActiveUser(context);
                 String password = impl.getActiveUserAuth(context);
                 String classURL = UMFileUtil.resolveLink(
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER,
+                    CoreBuildConfig.DEFAULT_XAPI_SERVER,
                     UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
                         + classID;
 
@@ -437,7 +438,7 @@ public class AttendanceController extends UstadBaseController {
                 final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
                 String xAPIServer = impl.getAppPref(
                         UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                        UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                        CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
                 String registrationUUID = UMTinCanUtil.generateUUID();
 
 
