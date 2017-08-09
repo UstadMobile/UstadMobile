@@ -1,16 +1,17 @@
-package com.ustadmobile.test.sharedse;
+package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
+import com.ustadmobile.test.sharedse.SharedSeTestSuite;
+import com.ustadmobile.test.sharedse.TestUtilsSE;
 
 import org.junit.Assert;
-import org.junit.Assume;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -48,6 +49,11 @@ public class TestEntryStatusTask{
     }
 
 
+    @Before
+    public void checkNetworkEnabled() {
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
+    }
+
     @Test
     public void testEntryStatusBluetooth() throws IOException, InterruptedException {
         Assert.assertTrue("Test slave supernode enabled",
@@ -60,11 +66,13 @@ public class TestEntryStatusTask{
 
     @Test
     public void testEntryStatusHttp() throws IOException, InterruptedException {
+        NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+
         Assert.assertTrue("Test slave supernode enabled",
                 TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
                 TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
-        NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+
         NetworkNode remoteNode = networkManager.getNodeByIpAddress(
                 SharedSeTestSuite.REMOTE_SLAVE_SERVER);
 
@@ -200,8 +208,7 @@ public class TestEntryStatusTask{
      */
     public static void testEntryStatus(Hashtable expectedAvailability, NetworkNode remoteNode, boolean useBluetooth, boolean useHttp) throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        Assume.assumeTrue("Network test wifi and bluetooth enabled",
-                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+
 
         final Object statusRequestLock=new Object();
         final Hashtable actualAvailability = new Hashtable();

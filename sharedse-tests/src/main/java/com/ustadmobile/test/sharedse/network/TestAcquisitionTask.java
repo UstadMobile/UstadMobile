@@ -1,4 +1,4 @@
-package com.ustadmobile.test.sharedse;
+package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
@@ -22,17 +22,17 @@ import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.ClassResourcesResponder;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
+import com.ustadmobile.test.sharedse.SharedSeTestSuite;
+import com.ustadmobile.test.sharedse.TestUtilsSE;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -45,7 +45,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  *
  * Created by kileha3 on 17/05/2017.
  */
-public class TestAcquisitionTask{
+public class TestAcquisitionTask {
 
     private static final int DEFAULT_ACQUIRE_TIMEOUT = 120000;//default acquire timeout: 2mins
 
@@ -69,9 +69,8 @@ public class TestAcquisitionTask{
             resourcesHttpd.start();
             httpRoot = "http://localhost:" + resourcesHttpd.getListeningPort() + "/res/";
         }
-        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        Assume.assumeTrue("Bluetooth and WiFi enabled", manager.isBluetoothEnabled() &&
-            manager.isWiFiEnabled());
+
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
     }
 
     @AfterClass
@@ -223,6 +222,7 @@ public class TestAcquisitionTask{
     @Test
     public void testAcquisitionLocalWifi() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
 
         TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
@@ -238,6 +238,7 @@ public class TestAcquisitionTask{
     @Test
     public void testAcquisitionWifiDirect() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
                 TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
@@ -260,6 +261,7 @@ public class TestAcquisitionTask{
     @Test(timeout = 10 * 60 * 1000)//for debugging purposes - should normally complete in 30s
     public void testAcquisitionBluetoothFail() throws Exception {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
                 TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
@@ -300,6 +302,7 @@ public class TestAcquisitionTask{
     @Test
     public void testAcquisitionStop() throws Exception {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
         CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
         CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
@@ -351,6 +354,7 @@ public class TestAcquisitionTask{
     //@Test(timeout = 7 * 60 * 1000)
     public void testAcquisitionWifiDirectFail() throws Exception{
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         Exception e = null;

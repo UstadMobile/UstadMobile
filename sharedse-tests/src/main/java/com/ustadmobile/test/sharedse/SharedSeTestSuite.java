@@ -12,15 +12,11 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-        TestNetworkManager.class,
-        TestEntryStatusTask.class,
-        TestNetworkManagerEntryStatusMonitoring.class,
-        TestAcquisitionTask.class,
         TestResumableHttpDownload.class,
-        TestWifiDirectGroupConnection.class
 })
 
 public abstract class SharedSeTestSuite {
+
 
     /**
      * The remote test slave device. This can be modified using the @BeforeClass (e.g. by the

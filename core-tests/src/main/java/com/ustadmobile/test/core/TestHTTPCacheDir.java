@@ -40,6 +40,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMFileUtil;
     import com.ustadmobile.test.core.impl.ClassResourcesResponder;
+    import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 
     import org.json.JSONArray;
@@ -78,8 +79,8 @@ public class TestHTTPCacheDir  {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         //context is not needed when we are asking for the shaerd cache dir
-        String cacheDirName = impl.getCacheDir(CatalogController.SHARED_RESOURCE, 
-            new Object());
+        String cacheDirName = impl.getCacheDir(CatalogController.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
         HTTPCacheDir cacheDir = new HTTPCacheDir(cacheDirName, null);
         String httpRoot = ResourcesHttpdTestServer.getHttpRoot();
         
@@ -158,7 +159,8 @@ public class TestHTTPCacheDir  {
          * Test caching of private responses
          */
         cacheDir.saveIndex();
-        String privateCacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE, new Object());
+        String privateCacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE,
+                PlatformTestUtil.getTargetContext());
         cacheDir.setPrivateCacheDir(privateCacheDir);
         String httpUrlPrivate = UMFileUtil.joinPaths(new String[]{httpRoot, "smallcheck.jpg?private=true"});
         String privateCacheFile = cacheDir.get(httpUrlPrivate);

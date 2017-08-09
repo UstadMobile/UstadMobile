@@ -50,8 +50,6 @@ public class ImageLoader implements ControllerLifecycleListener {
 
         ImageLoadTarget target;
 
-        Object context;
-
         UstadBaseController controller;
 
         private ImageLoaderTask(String url, ImageLoadTarget target, UstadBaseController controller) {
@@ -69,7 +67,7 @@ public class ImageLoader implements ControllerLifecycleListener {
         }
 
         public void run() {
-            HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(context);
+            HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(controller.getContext());
             String fileUri = cacheDir.getCacheFileURIByURL(url);
             try {
                 if(fileUri != null && UstadMobileSystemImpl.getInstance().fileExists(fileUri)){
@@ -98,7 +96,8 @@ public class ImageLoader implements ControllerLifecycleListener {
 
         public void run() {
             try {
-                HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(context);
+                HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
+                        controller.getContext());
                 String filePath = cacheDir.get(url);
                 Vector activeTasks = removeTaskForController(controller, this);
                 if(filePath != null && activeTasks != null) {

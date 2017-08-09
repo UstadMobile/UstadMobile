@@ -65,7 +65,7 @@ public class TestImageLoader {
                 "phonepic-smaller.png"});
         ImageLoader.getInstance().loadImage(httpURL, testTarget, controller);
         synchronized (waitLock){
-            try { waitLock.wait(); }
+            try { waitLock.wait(15000); }
             catch(InterruptedException e) {}
         }
         Assert.assertTrue("Downloaded image from file exists", impl.fileExists(loadedImage[0]));
