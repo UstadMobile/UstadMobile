@@ -310,51 +310,6 @@ public class NetworkManagerAndroid extends NetworkManager{
         updateSupernodeServices();
     }
 
-//    @Override
-//    public void startSuperNode() {
-//       if(networkService.getWifiDirectHandlerAPI()!=null){
-//           WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-//           wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-//           wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
-//           bluetoothServerAndroid.start();
-//           nsdHelperAndroid.registerNSDService();
-//           addNotification(NOTIFICATION_TYPE_SERVER,serverNotificationTitle, serverNotificationMessage);
-//           isSuperNodeEnabled=true;
-//           nodeStatus = NODE_STATUS_SUPERNODE_RUNNING;
-//       }
-//    }
-
-//    @Override
-//    public void stopSuperNode() {
-//        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-//        if(wifiDirectHandler!=null){
-//            if(mBuilder!=null && mNotifyManager!=null){
-//                removeNotification(NOTIFICATION_TYPE_SERVER);
-//            }
-//            wifiDirectHandler.removeService();
-//
-//            bluetoothServerAndroid.stop();
-//            isSuperNodeEnabled=false;
-//            nodeStatus = NODE_STATUS_CLIENT_RUNNING;
-//        }
-//    }
-
-//    @Override
-//    public void startClientMode() {
-//        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-//        wifiDirectHandler.continuouslyDiscoverServices();
-//        if(!nsdHelperAndroid.isDiscoveringNetworkService())
-//            nsdHelperAndroid.startNSDiscovery();
-//    }
-
-//    @Override
-//    public void stopClientMode() {
-//        WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-//        wifiDirectHandler.stopServiceDiscovery();
-//
-//        if(nsdHelperAndroid.isDiscoveringNetworkService())
-//            nsdHelperAndroid.stopNSDiscovery();
-//    }
 
     public synchronized void updateClientServices() {
         WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
@@ -687,30 +642,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void connectWifi(String ssid, String passphrase) {
-        /*
-         * Android 4.4 has been observed on Samsung Galaxy Ace (Andriod 4.4.2 - SM-G313F) to refuse to connect
-         * to any wifi access point after wifi direct service discovery has started. It will connect
-         * again only after wifi has been disabled, and then re-enabled.
-         *
-         * Our workaround is to programmatically disable and then re-enable the wifi on Android
-         * versions that could be affected.
-         */
-        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT && networkService.getWifiDirectHandlerAPI() != null){
-            //TODO: check that this is re-enabled
-            networkService.getWifiDirectHandlerAPI().stopServiceDiscovery();
-
-            wifiManager.setWifiEnabled(false);
-            try { Thread.sleep(100); }
-            catch(InterruptedException e) {}
-
-            wifiManager.setWifiEnabled(true);
-            long waitTime = 0;
-            do{
-                try {Thread.sleep(300); }
-                catch(InterruptedException e) {}
-            }while(waitTime < 10000 && wifiManager.getConfiguredNetworks() == null);
-        }
-
+        resetWifiIfRequired();
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = "\""+ ssid +"\"";
         wifiConfig.priority=(getMaxConfigurationPriority(wifiManager)+1);
@@ -734,6 +666,32 @@ public class NetworkManagerAndroid extends NetworkManager{
         boolean successful = wifiManager.enableNetwork(netId, true);
         UstadMobileSystemImpl.l(UMLog.INFO, 648, "Network: Connecting to wifi: " + ssid + " passphrase: '" + passphrase +"', " +
                 "successful?"  + successful +  " priority = " + wifiConfig.priority);
+    }
+
+    private void resetWifiIfRequired(){
+        /*
+         * Android 4.4 has been observed on Samsung Galaxy Ace (Andriod 4.4.2 - SM-G313F) to refuse to connect
+         * to any wifi access point after wifi direct service discovery has started. It will connect
+         * again only after wifi has been disabled, and then re-enabled.
+         *
+         * Our workaround is to programmatically disable and then re-enable the wifi on Android
+         * versions that could be affected.
+         */
+        if(Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT && networkService.getWifiDirectHandlerAPI() != null){
+            //TODO: check that this is re-enabled
+            networkService.getWifiDirectHandlerAPI().stopServiceDiscovery();
+
+            wifiManager.setWifiEnabled(false);
+            try { Thread.sleep(100); }
+            catch(InterruptedException e) {}
+
+            wifiManager.setWifiEnabled(true);
+            long waitTime = 0;
+            do{
+                try {Thread.sleep(300); }
+                catch(InterruptedException e) {}
+            }while(waitTime < 10000 && wifiManager.getConfiguredNetworks() == null);
+        }
     }
 
     @Override
@@ -765,6 +723,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         UstadMobileSystemImpl.l(UMLog.INFO, 339, "NetworkManager: restore wifi");
         wifiManager.disconnect();
         deleteTemporaryWifiDirectSsids();
+        resetWifiIfRequired();
         wifiManager.reconnect();
     }
 

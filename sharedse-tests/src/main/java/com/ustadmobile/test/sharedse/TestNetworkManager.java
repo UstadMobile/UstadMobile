@@ -194,20 +194,21 @@ public class TestNetworkManager {
                 }
             }
         }
+        manager.removeNetworkManagerListener(responseListener);
 
         node=manager.getNodeByIpAddress(ipAddress);
         Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;
         Assert.assertTrue("Was node discovered withing time range", isWithinDiscoveryTimeRange);
-        manager.removeNetworkManagerListener(responseListener);
+
     }
 
 
     /**
      * Test disabling wifi on the client
      */
-    @Test
+//    @Test
     public void testWifiDisabledOnClient() throws IOException {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         final Object nodeUpdateLock = new Object();

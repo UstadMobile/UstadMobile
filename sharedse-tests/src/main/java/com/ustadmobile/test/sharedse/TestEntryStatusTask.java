@@ -1,5 +1,6 @@
 package com.ustadmobile.test.sharedse;
 
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -16,8 +17,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by kileha3 on 16/05/2017.
@@ -36,6 +40,8 @@ public class TestEntryStatusTask{
 
     public static final Hashtable EXPECTED_AVAILABILITY = new Hashtable();
 
+    public static final int AVAILABILITY_MONITOR_TIMEOUT = 150000;//2.5 mins
+
     static {
         EXPECTED_AVAILABILITY.put(ENTRY_ID, Boolean.TRUE);
         EXPECTED_AVAILABILITY.put(ENTRY_ID_NOT_PRESENT, Boolean.FALSE);
@@ -51,6 +57,21 @@ public class TestEntryStatusTask{
         testEntryStatusBluetooth(EXPECTED_AVAILABILITY, TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         Assert.assertTrue("Supernod disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
+
+    @Test
+    public void testEntryStatusHttp() throws IOException, InterruptedException {
+        Assert.assertTrue("Test slave supernode enabled",
+                TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+        TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
+                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+        NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        NetworkNode remoteNode = networkManager.getNodeByIpAddress(
+                SharedSeTestSuite.REMOTE_SLAVE_SERVER);
+
+        testEntryStatus(EXPECTED_AVAILABILITY, remoteNode, false, true);
+        Assert.assertTrue("Supernode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+    }
+
 
     @Test
     public void testEntryStatusBluetoothOnFailure() throws IOException, InterruptedException {
@@ -84,6 +105,79 @@ public class TestEntryStatusTask{
         Assert.assertTrue("Task is stopped", task.isStopped());
     }
 
+//    @Test
+    public void testMonitoringAvailability() throws IOException{
+        final NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        manager.getKnownNodes().clear();
+        manager.getEntryResponses().clear();
+        final HashMap<String, Boolean> actualEntryStatuses = new HashMap();
+        Assert.assertTrue("Test slave supernode enabled",
+                TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+
+        final Object discoverLock = new Object();
+        NetworkManagerListener listener = new NetworkManagerListener() {
+            @Override
+            public void fileStatusCheckInformationAvailable(String[] fileIds) {
+                for(int i = 0; i < fileIds.length; i++) {
+                    actualEntryStatuses.put(fileIds[i], manager.isFileAvailable(fileIds[i]));
+                }
+
+                if(doesAvailabilityMatch(EXPECTED_AVAILABILITY, actualEntryStatuses)) {
+                    synchronized (discoverLock) {
+                        discoverLock.notify();
+                    }
+                }
+            }
+
+            @Override
+            public void networkNodeDiscovered(NetworkNode node) {
+
+            }
+
+            @Override
+            public void networkNodeUpdated(NetworkNode node) {
+
+            }
+
+            @Override
+            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
+
+            }
+
+            @Override
+            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+
+            }
+
+            @Override
+            public void networkTaskStatusChanged(NetworkTask networkTask) {
+
+            }
+        };
+        manager.addNetworkManagerListener(listener);
+
+        AvailabilityMonitorRequest request = new AvailabilityMonitorRequest(EXPECTED_AVAILABILITY.keySet());
+        manager.startMonitoringAvailability(request);
+        synchronized (discoverLock) {
+            try { discoverLock.wait(AVAILABILITY_MONITOR_TIMEOUT);}
+            catch(InterruptedException e) {}
+        }
+
+        manager.stopMonitoringAvailability(request);
+        manager.removeNetworkManagerListener(listener);
+
+        Iterator<String> keyIterator = EXPECTED_AVAILABILITY.keySet().iterator();
+        String currentKey;
+        while(keyIterator.hasNext()) {
+            currentKey = keyIterator.next();
+            Assert.assertEquals("Expected availability matches actual availability for " + currentKey,
+                    EXPECTED_AVAILABILITY.get(currentKey), actualEntryStatuses.get(currentKey));
+        }
+
+
+        Assert.assertTrue("Test slave supernode disabled",
+                TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+    }
 
 
     /**
@@ -104,7 +198,7 @@ public class TestEntryStatusTask{
      * @throws IOException
      * @throws InterruptedException
      */
-    public static void testEntryStatusBluetooth(Hashtable expectedAvailability, NetworkNode remoteNode) throws IOException, InterruptedException {
+    public static void testEntryStatus(Hashtable expectedAvailability, NetworkNode remoteNode, boolean useBluetooth, boolean useHttp) throws IOException, InterruptedException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         Assume.assumeTrue("Network test wifi and bluetooth enabled",
                 manager.isBluetoothEnabled() && manager.isWiFiEnabled());
@@ -162,7 +256,8 @@ public class TestEntryStatusTask{
             entryLIst.add(ENTRY_IDS[i]);
         }
 
-        taskId[0] = manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, true, false);
+        taskId[0] = manager.requestFileStatus(entryLIst,manager.getContext(),nodeList, useBluetooth,
+                useHttp);
         synchronized (statusRequestLock){
             statusRequestLock.wait(DEFAULT_WAIT_TIME*6);
         }
@@ -185,9 +280,23 @@ public class TestEntryStatusTask{
             Assert.assertEquals(message, expectedAvailability.get(currentIdKey),
                     actualAvailability.get(currentIdKey));
         }
+    }
 
+    public static void testEntryStatusBluetooth(Hashtable expectedAvailability, NetworkNode remoteNode) throws IOException, InterruptedException{
+        testEntryStatus(expectedAvailability, remoteNode, true, false);
+    }
 
+    static boolean doesAvailabilityMatch(Map expectedAvailability, Map actualAvailability){
+        Iterator expectedKeysIterator = expectedAvailability.keySet().iterator();
+        Object currentIdKey;
+        boolean availabilityMatch = true;
+        while(expectedKeysIterator.hasNext()) {
+            currentIdKey = expectedKeysIterator.next();
+            availabilityMatch &= actualAvailability.containsKey(currentIdKey)
+                    && actualAvailability.get(currentIdKey).equals(actualAvailability.get(currentIdKey));
+        }
 
+        return availabilityMatch;
     }
 
 
