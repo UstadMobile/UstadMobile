@@ -171,11 +171,13 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             umSyncService = ((UMSyncService.UMSyncBinder) iBinder).getService();
 
             loggedInUsername = UstadMobileSystemImpl.getInstance().getActiveUser(context);
-            List<User> users = userManager.findByUsername(context, loggedInUsername);
-            if(users!=null&&!users.isEmpty()){
-                loggedInUser = users.get(0);
-            }else{
-                loggedInUser = null;
+            //List<User> users = userManager.findByUsername(context, loggedInUsername);
+            //if(users!=null&&!users.isEmpty()){
+            //    loggedInUser = users.get(0);
+            //}else{
+            loggedInUser = userManager.findByUsername(context, loggedInUsername);
+            if(loggedInUser ==null){
+                //loggedInUser = null;
                 System.out.println("No user logged in. Setting null (will not proceed)");
             }
 
@@ -201,13 +203,16 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
         UserManager userManager =
                 PersistenceManager.getInstance().getManager(UserManager.class);
         User loggedInUser = null;
-        List<User> users = userManager.findByUsername(context, username);
-        if(users!=null&&!users.isEmpty()){
-            loggedInUser = users.get(0);
-        }else{
-            loggedInUser = null;
+        //List<User> users = userManager.findByUsername(context, username);
+        //if(users!=null&&!users.isEmpty()){
+        //    loggedInUser = users.get(0);
+        //}else{
+        loggedInUser = userManager.findByUsername(context, username);
+        if(loggedInUser == null){
+            //loggedInUser = null;
             System.out.println("No user logged in. Setting null (will not proceed)");
         }
+
         umSyncService.setLoggedInUser(loggedInUser);
 
     }

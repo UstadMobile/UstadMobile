@@ -22,7 +22,6 @@ allprojects {
         maven {
             url "http://devserver2.ustadmobile.com/repo-mvn"
         }
-
     }
 }
 
@@ -34,7 +33,7 @@ version = "0.2.4.44"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 120
-    nanoLrsVersion = "0.2.20"
+    nanoLrsVersion = "0.2.218"
 }
 
 ext.buildConfigProperties = new Properties()

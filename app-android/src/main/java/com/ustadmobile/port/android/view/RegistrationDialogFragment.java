@@ -11,6 +11,7 @@ import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.RegistrationPresenter;
@@ -56,12 +57,21 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         return mView;
     }
 
+    /*
+            {MessageID.field_university,
+            MessageID.field_fullname, MessageID.field_gender,
+            MessageID.field_email, MessageID.field_phonenumber,
+            MessageID.field_faculty}
+
+     */
+
     @Override
     public void addField(int fieldName, int fieldType) {
-        //TODO
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
         LinearLayout fieldLayout = (LinearLayout)mView.findViewById(
                 R.id.fragment_register_dialog_field_layout);
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
         TextInputLayout textInputLayout = new TextInputLayout(getContext());
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -76,7 +86,13 @@ public class RegistrationDialogFragment extends UstadDialogFragment implements R
         editText.setMaxLines(1);
 
         textInputLayout.addView(editText);
+
         fieldLayout.addView(textInputLayout, params);
+
+        /* Spinner spinner = new Spinner(getContext());
+        spinner.setId(fieldName);
+        spinner.*/
+
         TextInputEditText prevEl = fieldList.get(fieldList.size()-1);
         prevEl.setImeOptions(EditorInfo.IME_ACTION_NEXT);
         fieldList.add(editText);
