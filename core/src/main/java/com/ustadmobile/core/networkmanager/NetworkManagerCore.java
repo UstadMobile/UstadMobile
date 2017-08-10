@@ -32,6 +32,10 @@ public interface NetworkManagerCore {
 
     void removeNetworkManagerListener(NetworkManagerListener listener);
 
+    void startMonitoringAvailability(AvailabilityMonitorRequest request);
+
+    void stopMonitoringAvailability(AvailabilityMonitorRequest request);
+
     /* $if umplatform != 2  $ */
     List<EntryCheckResponse> getEntryResponsesWithLocalFile(String entryId);
     /* $else$

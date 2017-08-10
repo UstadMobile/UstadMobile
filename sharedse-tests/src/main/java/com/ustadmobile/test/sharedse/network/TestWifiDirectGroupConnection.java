@@ -1,4 +1,4 @@
-package com.ustadmobile.test.sharedse;
+package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
@@ -13,13 +13,9 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import org.json.JSONObject;
 import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  *
@@ -40,7 +36,8 @@ public class TestWifiDirectGroupConnection {
     @Test
     public void testWifiDirectGroupConnection() throws IOException{
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        Assume.assumeTrue("WiFi is available and enabled", manager.isWiFiEnabled());
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
+
         UstadMobileSystemImpl.l(UMLog.INFO, 324, "TestWifiDirectGroupConnection: start");
         String createGroupUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd="
                 + RemoteTestServerHttpd.CMD_CREATEGROUP;

@@ -2,7 +2,7 @@ package com.ustadmobile.test.port.sharedse;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
-import com.ustadmobile.test.sharedse.TestWifiDirectGroupConnection;
+import com.ustadmobile.test.sharedse.network.TestWifiDirectGroupConnection;
 
 import org.junit.BeforeClass;
 

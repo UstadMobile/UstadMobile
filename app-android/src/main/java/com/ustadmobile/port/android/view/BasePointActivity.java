@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,15 +26,20 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.CheckBox;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
-public class BasePointActivity extends UstadBaseActivity implements BasePointView, NavigationView.OnNavigationItemSelectedListener, DialogResultListener {
+public class BasePointActivity extends UstadBaseActivity implements BasePointView,
+        NavigationView.OnNavigationItemSelectedListener, DialogResultListener,
+        View.OnClickListener {
 
     protected BasePointController mBasePointController;
 
@@ -56,6 +62,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     private BasePointMenuItem openItemOnDrawerClose = null;
 
     private BasePointMenuItem[] mNavigationDrawerItems;
+
+    private AlertDialog shareAppDialog;
 
 
 
@@ -196,9 +204,19 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                     mDrawerLayout.openDrawer(mDrawerNavigationView);
                 }
                 return true;
+            case BasePointController.CMD_SHARE_APP:
+                mBasePointController.handleClickShareApp();
+                return true;
+
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        menu.add(Menu.NONE, BasePointController.CMD_SHARE_APP, 0, R.string.share_application);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -242,6 +260,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mBasePointController.onDestroy();
         super.onDestroy();
     }
+
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 
@@ -290,5 +309,45 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         }
 
 
+    }
+
+    @Override
+    public void showShareAppDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.share_application);
+        builder.setView(R.layout.fragment_share_app_dialog);
+        builder.setPositiveButton(R.string.share, null);
+        builder.setNegativeButton(R.string.cancel, null);
+        shareAppDialog = builder.create();
+        shareAppDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                Button okButton = shareAppDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                okButton.setOnClickListener(BasePointActivity.this);
+            }
+        });
+        shareAppDialog.show();
+    }
+
+    @Override
+    public void onClick(View view) {
+        CheckBox zipCheckbox = (CheckBox)shareAppDialog.findViewById(
+                R.id.fragment_share_app_zip_checkbox);
+        mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
+    }
+
+    public void setShareAppDialogProgressVisible(boolean visible) {
+        shareAppDialog.findViewById(R.id.fragment_share_app_progres_label).setVisibility(
+            visible ? View.VISIBLE: View.GONE);
+        shareAppDialog.findViewById(R.id.fragment_share_app_zip_progress_bar).setVisibility(
+                visible ? View.VISIBLE: View.GONE);
+        shareAppDialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(!visible);
+        shareAppDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(!visible);
+    }
+
+    @Override
+    public void dismissShareAppDialog() {
+        shareAppDialog.dismiss();
+        shareAppDialog = null;
     }
 }

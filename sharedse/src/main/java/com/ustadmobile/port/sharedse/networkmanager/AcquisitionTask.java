@@ -654,7 +654,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 currentDownloadUrl = "http://"+ currentGroupIPAddress +":"+
                         entryCheckResponse.getNetworkNode().getPort()+"/catalog/entry/"
                         +getFeed().entries[currentEntryIdIndex].id;
-                UstadMobileSystemImpl.l(UMLog.INFO, 318, getLogPrefix() + ": bluetooth says connected to '" +
+                UstadMobileSystemImpl.l(UMLog.INFO, 318, getLogPrefix() + ": bluetooth says connect to '" +
                     currentGroupSSID + "' download Url = " + currentDownloadUrl);
             }
         }catch(IOException e) {

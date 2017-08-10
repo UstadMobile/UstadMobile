@@ -10,6 +10,7 @@
     <string name='login_network_error'> خطای شبکه: لطفا شماچک کنید آنلاین هستید</string>
     <string name='authenticating'> تأیید اعتبار</string>
     <string name='course_catalog_load_error'> با عرض پوزش! خطا در بارگذاری</string>
+    <string name="download"> دانلود</string>
     <string name='download_q'> دانلود</string>
     <string name='download_all_q'> دانلود تمام ورودی ها</string>
     <string name='ok'>درست</string>

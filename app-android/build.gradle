@@ -50,6 +50,15 @@ task startTestSlaveServer(type: Exec) {
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity', '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.LAUNCHER'
 }
 
+/*
+ * Android emulators do not have bluetooth or wifi. Therefor when testing on an emulator we can
+ * only run tests that do not depend on the network.
+ */
+task testEmulatorLocalconfigDebug(type: Exec) {
+    def adb = android.getAdbExe().getAbsolutePath()
+    commandLine "$adb", "shell", "am", "instrument", "-w", "-e", "class", "com.ustadmobile.test.port.android.CoreTestSuiteRunAndroid,com.ustadmobile.test.port.android.SharedSeTestSuiteRunAndroid", project.ext.buildConfigProperties['android.applicationId']+ ".test" + "/android.support.test.runner.AndroidJUnitRunner"
+}
+
 afterEvaluate {
     android.applicationVariants.all { variant ->
         variant.javaCompiler.dependsOn(copyXmlLocaleFilesFromCore)
@@ -62,6 +71,12 @@ afterEvaluate {
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {
         startTestSlaveServer.dependsOn task
+    }
+
+    if(task.name == "installLocalconfigDebugAndroidTest") {
+        testEmulatorLocalconfigDebug.dependsOn task
+    }else if(task.name == "installLocalconfigDebug") {
+        testEmulatorLocalconfigDebug.dependsOn task
     }
 }
 
@@ -99,6 +114,7 @@ android {
          */
         localconfig {
             applicationId project.ext.buildConfigProperties['android.applicationId']
+            testApplicationId = project.ext.buildConfigProperties['android.applicationId']+ ".test"
             versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
             manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName']]
         }
@@ -112,12 +128,14 @@ android {
          */
         vanilla {
             applicationId "com.toughra.ustadmobile"
+            testApplicationId "com.toughra.ustadmobile.test"
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile"]
         }
 
         remotetestslave {
             applicationId "com.ustadmobile.testslave"
+            testApplicationId "com.toughra.testslave.test"
             manifestPlaceholders = ["appName": "UM Test Server"]
         }
 
@@ -233,7 +251,7 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha5'
-    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.25-SNAPSHOT'
+    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.28-SNAPSHOT'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.txusballesteros:FitChart:1.0'
     androidTestCompile 'junit:junit:4.12'

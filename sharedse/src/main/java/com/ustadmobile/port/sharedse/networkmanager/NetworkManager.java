@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
@@ -26,9 +27,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -192,6 +196,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private TimerTask updateServicesTimerTask;
 
+    private Vector<AvailabilityMonitorRequest> availabilityMonitorRequests = new Vector<>();
+
     private class UpdateTimerTask extends TimerTask {
         @Override
         public void run() {
@@ -254,8 +260,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             httpd.addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
-            UstadMobileSystemImpl.l(UMLog.INFO, 343, "Embedded httpd started on port: " +
-                    httpd.getListeningPort());
+//            UstadMobileSystemImpl.l(UMLog.INFO, 343, "Embedded httpd started on port: " +
+//                    httpd.getListeningPort());
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.CRITICAL, 1, "Failed to start http server");
             throw new RuntimeException("Failed to start http server", e);
@@ -381,6 +387,15 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return requestAcquisition(feed, this, localNetworkEnabled, wifiDirectEnabled);
     }
 
+    public void startMonitoringAvailability(AvailabilityMonitorRequest request){
+        availabilityMonitorRequests.addElement(request);
+    }
+
+    public void stopMonitoringAvailability(AvailabilityMonitorRequest request) {
+        availabilityMonitorRequests.removeElement(request);
+    }
+
+
     /**
      * Creating task que as per request received.
      * @param task Network task to be queued
@@ -489,12 +504,30 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
             if(newNode){
+                queueStatusChecksForNewNode(node);
                 fireNetworkNodeDiscovered(node);
             }else{
                 fireNetworkNodeUpdated(node);
             }
 
         }
+    }
+
+    protected void queueStatusChecksForNewNode(NetworkNode node) {
+        Set<String> entryIdsToQuery = new HashSet<>();
+        synchronized (availabilityMonitorRequests) {
+            for(AvailabilityMonitorRequest request: availabilityMonitorRequests) {
+                entryIdsToQuery.addAll(request.getEntryIdsToMonitor());
+            }
+        }
+
+        if(entryIdsToQuery.isEmpty())
+            return;
+
+        ArrayList entryIdList = new ArrayList(entryIdsToQuery);
+        ArrayList<NetworkNode> nodeList = new ArrayList<>();
+        nodeList.add(node);
+        requestFileStatus(entryIdList, getContext(), nodeList);
     }
 
     /**
@@ -526,6 +559,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
             if(newNode){
+                queueStatusChecksForNewNode(node);
                 fireNetworkNodeDiscovered(node);
             }else{
                 fireNetworkNodeUpdated(node);
@@ -883,6 +917,15 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     public Map<String,List<EntryCheckResponse>> getEntryResponses(){
         return entryResponses;
+    }
+
+    /**
+     * Reset all information about known nodes on the network. Use with care.
+     *
+     */
+    public void resetKnownNodeInfo() {
+        knownNetworkNodes.clear();
+        entryResponses.clear();
     }
 
     public Object getContext() {

@@ -93,6 +93,8 @@ public class MockNetworkManager extends NetworkManager {
 
     private boolean networkServiecDiscoveryEnabled;
 
+    private boolean supernodeEnabled = false;
+
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
 
@@ -138,7 +140,8 @@ public class MockNetworkManager extends NetworkManager {
     @Override
     public void init(Object mContext) {
         super.init(mContext);
-        setSuperNodeEnabled(mContext, false);
+        updateClientServices();
+        updateSupernodeServices();
     }
 
     public void startTestControlServer() {
@@ -195,62 +198,52 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
-        if(enabled && wifiDirectBroadcastTimer == null) {
-//            stopClientMode();
-//            startSuperNode();
-        }else if(!enabled) {
-//            stopSuperNode();
-//            startClientMode();
-        }
+        this.supernodeEnabled = enabled;
+        updateClientServices();
+        updateSupernodeServices();
     }
 
     @Override
     public void updateSupernodeServices() {
-
+        boolean shouldHaveLocalP2PService = isSuperNodeEnabled();
+        if(shouldHaveLocalP2PService && wifiDirectBroadcastTimer == null) {
+            HashMap<String, String> txtRecords = new HashMap<>();
+            txtRecords.put(NetworkManager.SD_TXT_KEY_BT_MAC, mockBluetoothAddr);
+            txtRecords.put(NetworkManager.SD_TXT_KEY_IP_ADDR,
+                    MockNetworkManager.this.getDeviceIPAddress());
+            txtRecords.put(NetworkManager.SD_TXT_KEY_PORT, String.valueOf(getHttpListeningPort()));
+            wifiDirectBroadcastTimer = new Timer();
+            wifiDirectBroadcastTimer.scheduleAtFixedRate(new WifiDirectBroadcastTimerTask(txtRecords),
+                    WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
+        }else if(!shouldHaveLocalP2PService && wifiDirectBroadcastTimer != null) {
+            wifiDirectBroadcastTimer.cancel();
+            wifiDirectBroadcastTimer = null;
+        }
     }
 
     @Override
     public void updateClientServices() {
+        boolean clientEnabled = !isSuperNodeEnabled();
+        boolean shouldRunP2PDiscovery = clientEnabled;
 
+        if(shouldRunP2PDiscovery && !isWifiDirectDiscoveryEnabled()) {
+            setWifiDirectDiscoveryEnabled(true);
+        }else if(!shouldRunP2PDiscovery && isWifiDirectDiscoveryEnabled()){
+            setWifiDirectDiscoveryEnabled(false);
+        }
+
+        boolean shouldRunNsd = clientEnabled;
+        if(shouldRunNsd && !isNetworkServiecDiscoveryEnabled()) {
+            setNetworkServiecDiscoveryEnabled(true);
+        }else if(!shouldRunNsd && isNetworkServiecDiscoveryEnabled()) {
+            setNetworkServiecDiscoveryEnabled(false);
+        }
     }
 
-    //    @Override
-//    public synchronized void startSuperNode() {
-//        if(wifiDirectBroadcastTimer == null) {
-//            HashMap<String, String> txtRecords = new HashMap<>();
-//            txtRecords.put(NetworkManager.SD_TXT_KEY_BT_MAC, mockBluetoothAddr);
-//            txtRecords.put(NetworkManager.SD_TXT_KEY_IP_ADDR,
-//                    MockNetworkManager.this.getDeviceIPAddress());
-//            txtRecords.put(NetworkManager.SD_TXT_KEY_PORT, String.valueOf(getHttpListeningPort()));
-//            wifiDirectBroadcastTimer = new Timer();
-//            wifiDirectBroadcastTimer.scheduleAtFixedRate(new WifiDirectBroadcastTimerTask(txtRecords),
-//                    WIFI_DIRECT_BROADCAST_DELAY, WIFI_DIRECT_BROADCAST_INTERVAL);
-//        }
-//    }
-//
-//    @Override
-//    public synchronized void stopSuperNode() {
-//        if(wifiDirectBroadcastTimer != null) {
-//            wifiDirectBroadcastTimer.cancel();
-//            wifiDirectBroadcastTimer = null;
-//        }
-//    }
-//
-//    @Override
-//    public void startClientMode() {
-//        setWifiDirectDiscoveryEnabled(true);
-//        setNetworkServiecDiscoveryEnabled(true);
-//    }
-//
-//    @Override
-//    public void stopClientMode() {
-//        setWifiDirectDiscoveryEnabled(false);
-//        setNetworkServiecDiscoveryEnabled(false);
-//    }
 
     @Override
     public synchronized boolean isSuperNodeEnabled() {
-        return wifiDirectBroadcastTimer != null;
+        return supernodeEnabled;
     }
 
 

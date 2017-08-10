@@ -1054,9 +1054,10 @@ public abstract class UstadMobileSystemImpl {
     /**
      * Return absolute path of the application setup file.
      * @param context System context
+     * @param zip
      * @return String: file absolute path
      */
-    public abstract String getAppSetupFile(Object context);
+    public abstract String getAppSetupFile(Object context, boolean zip);
 
 
     /**

@@ -193,19 +193,17 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         supportInvalidateOptionsMenu();
     }
 
+    //TODO: Fully disable this properly
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(displayName != null) {
-            MenuItem displayNameItem = menu.add(Menu.NONE, Menu.NONE, 0, displayName);
-        }
-
-        if(appMenuCommands != null && appMenuLabels != null) {
-            for(int i = 0; i < appMenuLabels.length; i++) {
-                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
-            }
-            return true;
-        }else {
-            return super.onCreateOptionsMenu(menu);
-        }
+//        if(appMenuCommands != null && appMenuLabels != null) {
+//            for(int i = 0; i < appMenuLabels.length; i++) {
+//                menu.add(Menu.NONE, appMenuCommands[i], i + 10, appMenuLabels[i]);
+//            }
+//            return true;
+//        }else {
+//            return super.onCreateOptionsMenu(menu);
+//        }
+        return super.onCreateOptionsMenu(menu);
     }
 
     public boolean handleClickAppMenuItem(MenuItem item, UstadBaseController controller) {

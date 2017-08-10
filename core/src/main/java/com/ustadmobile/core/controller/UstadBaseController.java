@@ -65,13 +65,11 @@ public abstract class UstadBaseController implements UstadController {
     
     public static final int CMD_HOME = 1004;
 
-    public static final int CMD_SHARE_APP=1005;
-    
     public static final int[] STANDARD_APPEMNU_CMDS = new int[]{CMD_HOME, 
-        CMD_ABOUT, CMD_SETTINGS, CMD_SHARE_APP,CMD_LOGOUT};
+        CMD_ABOUT, CMD_SETTINGS, CMD_LOGOUT};
     
     public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageID.home,
-        MessageID.about, MessageID.settings,MessageID.share_application,MessageID.logout};
+        MessageID.about, MessageID.settings,MessageID.logout};
 
 
     /**
@@ -212,9 +210,6 @@ public abstract class UstadBaseController implements UstadController {
             case CMD_LOGOUT:
                 LoginController.handleLogout(context);
                 return true;
-            case CMD_SHARE_APP:
-                handleClickShareAppSetupFile(context);
-                return true;
         }
         
         return false;
@@ -250,11 +245,19 @@ public abstract class UstadBaseController implements UstadController {
      * Method which is responsible for initiating UstadMobile application setup sharing
      * @param context System context
      */
-    public static void handleClickShareAppSetupFile(Object context){
-        UstadMobileSystemImpl impl=UstadMobileSystemImpl.getInstance();
-        impl.getNetworkManager().shareAppSetupFile(impl.getAppSetupFile(context),
-                impl.getString(MessageID.share_via, context));
-    }
+//    public static void handleClickShareAppSetupFile(final Object context){
+//        final UstadMobileSystemImpl impl=UstadMobileSystemImpl.getInstance();
+//        impl.getAppView(context).showProgressDialog(impl.getString(MessageID.loading, context));
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String appSetupFile = impl.getAppSetupFile(context);
+//                impl.getNetworkManager().shareAppSetupFile(appSetupFile,
+//                        impl.getString(MessageID.share_via, context));
+//                impl.getAppView(context).dismissProgressDialog();
+//            }
+//        }).start();
+//    }
 
     public void addLifecycleListener(ControllerLifecycleListener listener) {
         if(controllerLifecycleListeners == null)

@@ -1,4 +1,4 @@
-package com.ustadmobile.test.sharedse;
+package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
@@ -10,6 +10,8 @@ import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
+import com.ustadmobile.test.sharedse.SharedSeTestSuite;
+import com.ustadmobile.test.sharedse.TestUtilsSE;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import org.junit.Assert;
@@ -18,7 +20,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.List;
 
 /**
  * Created by kileha3 on 16/05/2017.
@@ -29,7 +30,8 @@ public class TestNetworkManager {
 
     @Test
     public void testWifiDirectDiscovery() throws IOException{
-        //enable supernode mode on the remote test device
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
+
         Assert.assertTrue("Supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE, NODE_DISCOVERY_TIMEOUT);
         Assert.assertTrue("Supernode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
@@ -46,8 +48,7 @@ public class TestNetworkManager {
     public static void testWifiDirectDiscovery(final String bluetoothAddr, final int timeout) throws IOException{
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 
-        Assume.assumeTrue("Network test is enabled: wifi and bluetooth enabled",
-                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
 
         final Object nodeDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
@@ -111,6 +112,8 @@ public class TestNetworkManager {
 
     @Test
     public void testNetworkServiceDiscovery() throws IOException{
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
+
         Assert.assertTrue("Test slave supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
         testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER, NODE_DISCOVERY_TIMEOUT);
         Assert.assertTrue("Test slave supernode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
@@ -131,8 +134,7 @@ public class TestNetworkManager {
     public static void testNetworkServiceDiscovery(String ipAddress, int timeout) {
         NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 
-        Assume.assumeTrue("Network test wifi and bluetooth enabled",
-                manager.isBluetoothEnabled() && manager.isWiFiEnabled());
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
 
         //enable supernode mode on the remote test device
 //        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
@@ -194,22 +196,25 @@ public class TestNetworkManager {
                 }
             }
         }
+        manager.removeNetworkManagerListener(responseListener);
 
         node=manager.getNodeByIpAddress(ipAddress);
         Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;
         Assert.assertTrue("Was node discovered withing time range", isWithinDiscoveryTimeRange);
-        manager.removeNetworkManagerListener(responseListener);
+
     }
 
 
     /**
      * Test disabling wifi on the client
      */
-    @Test
+//    @Test
     public void testWifiDisabledOnClient() throws IOException {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
+
         final Object nodeUpdateLock = new Object();
         final Object networkConnectedLock = new Object();
 
@@ -310,6 +315,8 @@ public class TestNetworkManager {
     //@Test
     public void testWifiDisabledOnServer() throws IOException {
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
+
         final Object nodeUpdateLock = new Object();
         final Object networkConnectedLock = new Object();
 

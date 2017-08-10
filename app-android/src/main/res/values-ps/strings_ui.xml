@@ -9,6 +9,7 @@
     <string name='login_network_error'>چک وکری په کرښه یی د جال تیروتنه! مهربانی</string>
     <string name='authenticating'> تصدیق كول</string>
     <string name='course_catalog_load_error'>بخښنه! تیروتنه په بارولو کښی </string>
+    <string name='download'> رالېښل</string>
     <string name='download_q'> رالېښل</string>
     <string name='download_all_q'>د تول ننوتونو رالیښل</string>
     <string name='ok'>صحیح</string>

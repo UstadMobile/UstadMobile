@@ -339,7 +339,7 @@ public class LoginController extends UstadBaseController{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String currentServer = impl.getAppPref(
                 UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
         
         //See if the user has changed hte xAPI Server
         if(!currentServer.equals(newServer)) {
@@ -542,10 +542,10 @@ public class LoginController extends UstadBaseController{
                 HTTPCacheDir.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                    impl.isHttpsSupported() ? UstadMobileDefaults.DEFAULT_XAPI_SERVER : UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL,
+                    impl.isHttpsSupported() ? CoreBuildConfig.DEFAULT_XAPI_SERVER : CoreBuildConfig.DEFAULT_XAPI_SERVER_NOSSL,
                     context);
-        if(xAPIURL.equals(UstadMobileDefaults.DEFAULT_XAPI_SERVER_NOSSL) && impl.isHttpsSupported())
-            xAPIURL = UstadMobileDefaults.DEFAULT_XAPI_SERVER;
+        if(xAPIURL.equals(CoreBuildConfig.DEFAULT_XAPI_SERVER_NOSSL) && impl.isHttpsSupported())
+            xAPIURL = CoreBuildConfig.DEFAULT_XAPI_SERVER;
         view.setXAPIServerURL(xAPIURL);
     }
 

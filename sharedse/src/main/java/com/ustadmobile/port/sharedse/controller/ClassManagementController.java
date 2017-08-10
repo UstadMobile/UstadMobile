@@ -3,6 +3,7 @@
  */
 package com.ustadmobile.port.sharedse.controller;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -104,7 +105,7 @@ public class ClassManagementController extends UstadBaseController {
                 String username = impl.getActiveUser(context);
                 String password = impl.getActiveUserAuth(context);
                 String classURL = UMFileUtil.resolveLink(
-                    UstadMobileDefaults.DEFAULT_XAPI_SERVER,
+                    CoreBuildConfig.DEFAULT_XAPI_SERVER,
                     UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
                         + classID;
 

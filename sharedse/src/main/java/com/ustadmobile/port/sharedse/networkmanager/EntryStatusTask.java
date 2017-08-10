@@ -6,12 +6,18 @@ import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMIOUtils;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +45,10 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     protected NetworkManager networkManager;
 
     private boolean stopped = false;
+
+    public static final String ENTRY_RESPONSE_KEY_AVAILABLE = "a";
+
+    public static final String ENTRY_RESPONSE_ENTRIES_KEY = "e";
 
     public EntryStatusTask(List<String> entryIdList, List<NetworkNode> networkNodeList, NetworkManager networkManager){
         super(networkManager);
@@ -79,14 +89,17 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         }else if(index < networkNodeList.size()) {
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index);
             currentNode = index;
-            if(networkManager.isBluetoothEnabled() && isUseBluetooth() && networkNodeList.get(currentNode).getDeviceBluetoothMacAddress() != null) {
+            NetworkNode node = networkNodeList.get(currentNode);
+            if(networkManager.isBluetoothEnabled() && isUseBluetooth()
+                    && node.getDeviceBluetoothMacAddress() != null) {
                 String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
                 UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index
                         + " to bluetooth addr " + bluetoothAddr);
                 networkManager.connectBluetooth(bluetoothAddr, this);
-            }else if(networkManager.isWiFiEnabled() && isUseHttp() && networkNodeList.get(currentNode).getDeviceIpAddress() != null) {
-                //TODO: Handle status acquisition over http
-                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - network - skip");
+            }else if(networkManager.isWiFiEnabled() && isUseHttp()
+                    && node.getDeviceIpAddress() != null) {
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - http");
+                getEntryStatusHttp(node);
                 connectNextNode(index+1);
             }else {
                 //skip it - not possible to query this node with the current setup
@@ -97,6 +110,67 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             setStatus(STATUS_COMPLETE);
             networkManager.networkTaskStatusChanged(this);
         }
+    }
+
+    protected void getEntryStatusHttp(NetworkNode node) {
+        HttpURLConnection connection = null;
+        OutputStream httpOut = null;
+        InputStream httpIn = null;
+        List<Boolean> statusResults = null;
+        try {
+            URL apiEndpointUrl = new URL("http://" + node.getDeviceIpAddress() + ":"
+                    + node.getPort() + "/catalog/entry_status");
+            JSONObject entryIds = new JSONObject();
+            JSONArray entryArr = new JSONArray(entryIdList);
+            entryIds.put(ENTRY_RESPONSE_ENTRIES_KEY, entryArr);
+            byte[] postPayload = entryIds.toString().getBytes("UTF-8");
+
+            connection = (HttpURLConnection)apiEndpointUrl.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+
+            httpOut = connection.getOutputStream();
+            httpOut.write(postPayload);
+            httpOut.flush();
+            httpOut.close();
+
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            if(responseCode >= 200 &&  responseCode < 300) {
+                httpIn = connection.getInputStream();
+                ByteArrayOutputStream responseBuf = new ByteArrayOutputStream();
+                UMIOUtils.readFully(httpIn, responseBuf, 1024);
+                httpIn.close();
+
+                JSONObject responseObj = new JSONObject(new String(responseBuf.toByteArray(),
+                        "UTF-8"));
+                JSONObject entriesMap = responseObj.getJSONObject(ENTRY_RESPONSE_ENTRIES_KEY);
+                JSONObject entryObj;
+
+                statusResults = new ArrayList<>();
+                boolean isAvailable;
+                for(int i = 0; i < entryIdList.size(); i++) {
+                    if(!entriesMap.has(entryIdList.get(i))) {
+                        isAvailable = false;
+                    }else {
+                        entryObj = entriesMap.getJSONObject(entryIdList.get(i));
+                        isAvailable = entryObj.getBoolean(ENTRY_RESPONSE_KEY_AVAILABLE);
+                    }
+
+                    statusResults.add(isAvailable);
+                }
+
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+        }finally {
+            UMIOUtils.closeOutputStream(httpOut);
+            UMIOUtils.closeInputStream(httpIn);
+
+        }
+
+        if(statusResults != null)
+            networkManager.handleEntriesStatusUpdate(node, entryIdList, statusResults);
     }
 
     /**

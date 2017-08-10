@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
@@ -232,7 +233,7 @@ public class UMTinCanUtil {
     public static String getXapiServer(Object context) {
         return UstadMobileSystemImpl.getInstance().getAppPref(
                 UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
     }
 
 

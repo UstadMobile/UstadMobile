@@ -65,5 +65,14 @@ public interface BasePointView extends UstadView{
      * @param menuItems
      */
     void setMenuItems(BasePointMenuItem[] menuItems);
+
+    /**
+     * Show a dialog used to share the application itself offline
+     */
+    void showShareAppDialog();
+
+    void setShareAppDialogProgressVisible(boolean visible);
+
+    void dismissShareAppDialog();
     
 }

@@ -10,6 +10,7 @@
     <string name='login_network_error'>Network error: please check you are online.</string>
     <string name='authenticating'>Authenticating</string>
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
+    <string name="download">Download</string>
     <string name='download_q'>Download?</string>
     <string name='download_all_q'>Download all %s entries?</string>
     <string name='ok'>OK</string>
@@ -95,7 +96,7 @@
     <string name='data_usage'>Data usage</string>
     <string name='app_interface_language'>App interface language</string>
     <string name='enable_supernode'>Enable supernode</string>
-    <string name="share_application">Share Application</string>
+    <string name="share_application">Share App</string>
     <string name="share_via">Share via...</string>
     <string name="share">Share</string>
     <string name="receive">Receive</string>
@@ -123,6 +124,12 @@
     <string name="field_gender" value="983">Gender</string>
     <string name="field_phonenumber" value="984">Phone Number</string>
     <string name="field_faculty" value="985">Faculty</string>
+
+    <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
+
+    <string name="share_offline_zip_checkbox_label">Send in zip file</string>
+    <string name="share_offline_dialog_message">On the device you want to share the app with, please open the Bluetooth settings to enable the device to be visible.</string>
+    <string name="preparing">Preparing</string>
 
 
     <string name="welcome">Welcome!</string>

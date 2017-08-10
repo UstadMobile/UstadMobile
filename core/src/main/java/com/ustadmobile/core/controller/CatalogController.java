@@ -2149,7 +2149,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         JSONArray retVal = null;
         String xAPIServer = UstadMobileSystemImpl.getInstance().getAppPref(
                 UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                UstadMobileDefaults.DEFAULT_XAPI_SERVER, context);
+                CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
         try {
             retVal = new JSONArray();
             JSONObject serverFeed = new JSONObject();
