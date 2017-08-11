@@ -36,7 +36,8 @@ package com.ustadmobile.test.core;
     import junit.framework.TestCase;
 /* $endif$ */
 
-import com.ustadmobile.core.controller.CatalogEntryInfo;
+    import com.ustadmobile.core.controller.CatalogController;
+    import com.ustadmobile.core.controller.CatalogEntryInfo;
 
 /**
  *
@@ -46,7 +47,7 @@ public abstract class TestCatalogEntryInfo extends TestCase {
     
     public void testCatalogEntryInfo() {
         CatalogEntryInfo testInfo = new CatalogEntryInfo();
-        testInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        testInfo.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
         testInfo.srcURLs = new String[]{"http://www.server1.com/file.epub",
             "http://www.server2.com/file.epub"};
         testInfo.fileURI = "/some/file/path/file.epub";

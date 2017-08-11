@@ -1228,6 +1228,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     @Override
     public NetworkTask getTaskById(long taskId, int queueType) {
+        if(taskId == -1)
+            return null;//to save time - there is no task id -1
+
         synchronized (tasksQueues[queueType]) {
             for(int i = 0; i < tasksQueues[queueType].size(); i++) {
                 if(tasksQueues[queueType].get(i).getTaskId() == taskId) {

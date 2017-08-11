@@ -104,9 +104,27 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                             && translatedEntryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED;
                 }
 
-
                 updateButtonsByStatus(isAcquired ? CatalogController.STATUS_ACQUIRED :
                         CatalogController.STATUS_NOT_ACQUIRED);
+
+
+                NetworkManagerCore networkManager = UstadMobileSystemImpl.getInstance().getNetworkManager();
+                boolean isDownloadInProgress = entryInfo != null
+                        &&  networkManager.getTaskById(entryInfo.downloadID,
+                            NetworkManagerCore.QUEUE_ENTRY_ACQUISITION) != null;
+
+                for(int i = 0; i < entryTranslationIds.length && !isDownloadInProgress; i++) {
+                    translatedEntryInfo = CatalogController.getEntryInfo(entryTranslationIds[i],
+                            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
+                            context);
+                    isDownloadInProgress = translatedEntryInfo != null
+                            && networkManager.getTaskById(translatedEntryInfo.downloadID,
+                                NetworkManagerCore.QUEUE_ENTRY_ACQUISITION) != null;
+                }
+
+                if(isDownloadInProgress) {
+                    catalogEntryView.setProgressVisible(true);
+                }
 
 
                 //TODO: as this is bound to the activity - this might not be ready - lifecycle implication needs handled

@@ -1454,7 +1454,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         for(int i = 0; i < entryInfoKeys.length; i++) {
             info = CatalogEntryInfo.fromString(
                 isShared ? impl.getAppPref(entryInfoKeys[i], context) : impl.getUserPref(entryInfoKeys[i], context));
-            if(info.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+            if(info.acquisitionStatus == STATUS_ACQUIRED) {
                 boolean canAccessFile = false;
                 try {
                     canAccessFile = impl.fileExists(info.fileURI);
@@ -1597,7 +1597,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
                     if(thisEntryInfo == null) {
                         impl.l(UMLog.VERBOSE, 409, containerFiles[i]);
                         thisEntryInfo = new CatalogEntryInfo();
-                        thisEntryInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+                        thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
                         thisEntryInfo.fileURI = containerFiles[i];
                         thisEntryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
                         thisEntryInfo.srcURLs = new String[] { containerFiles[i] };
@@ -1605,8 +1605,8 @@ public class CatalogController extends BaseCatalogController implements AppViewC
                                 resourceMode, context);
                     }
 
-                    if(thisEntryInfo.acquisitionStatus != CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
-                        thisEntryInfo.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+                    if(thisEntryInfo.acquisitionStatus != STATUS_ACQUIRED) {
+                        thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
                         setEntryInfo(containerFeed.entries[j].id, thisEntryInfo,
                                 resourceMode, context);
                     }
@@ -1869,18 +1869,18 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         if(info != null) {
             return info.acquisitionStatus;
         }else {
-            return CatalogEntryInfo.ACQUISITION_STATUS_NOTACQUIRED;
+            return STATUS_NOT_ACQUIRED;
         }
         
     }
     
-    public void registerDownloadingEntry(String entryID, String downloadID) {
-        downloadingEntries.put(entryID, downloadID);
+    public void registerDownloadingEntry(String entryID, long downloadID) {
+        downloadingEntries.put(entryID, new Long(downloadID));
         if(view != null) {
             view.setDownloadEntryProgressVisible(entryID, true);
         }
         
-        startDownloadTimer();
+//        startDownloadTimer();
     }
     
     /**
@@ -1894,6 +1894,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         CatalogEntryInfo info;
         UstadJSOPDSFeed feed = getModel().opdsFeed;
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final NetworkManagerCore networkManager = UstadMobileSystemImpl.getInstance().getNetworkManager();
 
         String lastCheckedDir = UstadMobileSystemImpl.getInstance().getAppPref(PREFKEY_STORAGE_DIR_CHECKTIME,
             getContext());
@@ -1914,30 +1915,17 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             }
 
             switch(info.acquisitionStatus) {
-                case CatalogEntryInfo.ACQUISITION_STATUS_INPROGRESS:
-                    int[] fileDownloadStatus = impl.getFileDownloadStatus(info.downloadID, getContext());
-                    if(fileDownloadStatus != null) {
-                        int downloadStatus = fileDownloadStatus[UstadMobileSystemImpl.IDX_STATUS];
-                        switch(downloadStatus) {
-                            case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
-                                registerItemAcquisitionCompleted(feed.entries[i].id);
-                                break;
-                            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
-                            case UstadMobileSystemImpl.DLSTATUS_PENDING:
-                            case UstadMobileSystemImpl.DLSTATUS_PAUSED:
-                                registerDownloadingEntry(feed.entries[i].id, info.downloadID);
-                        }
+                case STATUS_ACQUISITION_IN_PROGRESS:
+                    if(networkManager.getTaskById(info.downloadID, NetworkManagerCore.QUEUE_ENTRY_ACQUISITION)
+                            != null) {
+                        registerDownloadingEntry(feed.entries[i].id, info.downloadID);
                     }else {
-                        //perhaps the system is not tracking the download anymore and it's actually complete
-                        int downloadedSize =
-                                (int)UstadMobileSystemImpl.getInstance().fileSize(info.fileURI);
-                        if(downloadedSize != -1 && downloadedSize == info.downloadTotalSize)
-                            //this download has in fact completed
-                            registerItemAcquisitionCompleted(feed.entries[i].id);
+                        //the task has died...
+                        //TODO: what to do here?
                     }
                     break;
 
-                case CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED:
+                case STATUS_ACQUIRED:
                     try {
                         if(!impl.fileExists(info.fileURI)) {
                             setEntryInfo(feed.entries[i].id, null, resourceMode, context);
@@ -2024,40 +2012,11 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
     }
-
-    /**
-     * Starts a Timer to watch the status of downloads.  Calling this twice
-     * will have no effect - a new timer will only start if there is none currently
-     * running for this controller
-     */
-    private synchronized void startDownloadTimer() {
-        if(downloadUpdateTimer == null) {
-            downloadUpdateTimer = new Timer();
-            downloadUpdateTimer.schedule(new UpdateProgressTimerTask(), 
-                DOWNLOAD_UPDATE_INTERVAL, DOWNLOAD_UPDATE_INTERVAL);
-        }
-    }
-    
-    /**
-     * If the timer to run downloads is running - stop it
-     */
-    private synchronized void stopDownloadTimer() {
-        if(downloadUpdateTimer != null) {
-            downloadUpdateTimer.cancel();
-            downloadUpdateTimer = null;
-
-        }
-    }
-    
     
     public void unregisterDownloadingEntry(String entryID) {
         downloadingEntries.remove(entryID);
         if(view != null) {
             view.setDownloadEntryProgressVisible(entryID, false);
-        }
-        
-        if(downloadingEntries.size() < 1) {
-            stopDownloadTimer();
         }
     }
 
@@ -2086,7 +2045,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             entryAcquireResMode = SHARED_RESOURCE;
         }
         
-        info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        info.acquisitionStatus = STATUS_ACQUIRED;
         CatalogController.setEntryInfo(entryID, info, entryAcquireResMode, getContext());
         if(this.view != null) {
             this.view.setEntryStatus(entryID, info.acquisitionStatus);
@@ -2094,41 +2053,16 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         }
     }
 
-    private class UpdateProgressTimerTask extends TimerTask {
-
-        public void run() {
-            //here we actually go and set the progress bars...
-            Enumeration entries = CatalogController.this.downloadingEntries.keys();
-            String entryID;
-            String downloadID;
-            while(entries.hasMoreElements()) {
-                entryID = (String)entries.nextElement();
-                downloadID = (String)CatalogController.this.downloadingEntries.get(entryID);
-                int[] downloadStatus = UstadMobileSystemImpl.getInstance().getFileDownloadStatus(
-                    downloadID, CatalogController.this.getContext());
-                if(CatalogController.this.view != null) {
-                    CatalogController.this.view.updateDownloadEntryProgress(entryID, 
-                        downloadStatus[UstadMobileSystemImpl.IDX_DOWNLOADED_SO_FAR], 
-                        downloadStatus[UstadMobileSystemImpl.IDX_BYTES_TOTAL]);
-                }
-            }
-        }
-        
-    }
-    
     public void handleViewPause() {
         super.handleViewPause();
-        stopDownloadTimer();
     }
     
     public void handleViewResume() {
         super.handleViewResume();
-        startDownloadTimer();
     }
     
     public void handleViewDestroy() {
         super.handleViewDestroy();
-        stopDownloadTimer();
     }
     
     /**
@@ -2149,7 +2083,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     
     private static void actionRemoveEntry(String entryID, int resourceMode, Object context) {
         CatalogEntryInfo entry = getEntryInfo(entryID, resourceMode, context);
-        if(entry != null && entry.acquisitionStatus == CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED) {
+        if(entry != null && entry.acquisitionStatus == STATUS_ACQUIRED) {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
   	        impl.getLogger().l(UMLog.INFO, 520, entry.fileURI);
             impl.removeFile(entry.fileURI);
@@ -2331,7 +2265,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
         UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
-        if(entry != null) {
+        if(entry != null && view != null) {
             view.updateDownloadEntryProgress(entryId, (int)status.getDownloadedSoFar(), (int)status.getTotalSize());
         }
 

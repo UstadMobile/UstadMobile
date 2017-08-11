@@ -310,7 +310,7 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
         CatalogEntryInfo info = CatalogController.getEntryInfo(entryID, CatalogController.SHARED_RESOURCE,
                 getContext());
 
-        info.acquisitionStatus = CatalogEntryInfo.ACQUISITION_STATUS_ACQUIRED;
+        info.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
         CatalogController.setEntryInfo(entryID, info, entryAcquireResMode, getContext());
     }
 

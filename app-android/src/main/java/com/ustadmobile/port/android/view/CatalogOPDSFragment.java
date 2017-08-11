@@ -96,6 +96,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private Map<String, Integer> idToStatusMap = new Hashtable<>();
 
+    private Map<String, Boolean> idToProgressVisibleMap = new Hashtable<>();
+
     protected CatalogController mCatalogController;
 
     private UstadJSOPDSEntry[] mSelectedEntries;
@@ -502,6 +504,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setDownloadEntryProgressVisible(final String entryId, final boolean visible) {
+        this.idToProgressVisibleMap.put(entryId, visible);
         super.runOnUiThread(new Runnable() {
             public void run() {
                 if(idToCardMap.containsKey(entryId)) {
@@ -707,6 +710,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 holder.mEntryCard.setOPDSEntryOverlay(idToStatusMap.get(entryId));
             }else {
                 holder.mEntryCard.setOPDSEntryOverlay(CatalogController.STATUS_NOT_ACQUIRED);
+            }
+
+            if(idToProgressVisibleMap.containsKey(entryId) && idToProgressVisibleMap.get(entryId)) {
+                holder.mEntryCard.setProgressBarVisible(true);
+            }else {
+                holder.mEntryCard.setProgressBarVisible(false);
             }
 
             //check the acquisition status

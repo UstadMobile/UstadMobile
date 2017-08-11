@@ -333,6 +333,16 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             }
         }
 
+        CatalogEntryInfo info;
+        for(int i = 0; i < feed.size(); i++) {
+            info = CatalogController.getEntryInfo(
+                    feed.getEntry(i).id, CatalogController.SHARED_RESOURCE,
+                    networkManager.getContext());
+            info.downloadID = getTaskId();
+            CatalogController.setEntryInfo(feed.getEntry(i).id, info,
+                    CatalogController.SHARED_RESOURCE, networkManager.getContext());
+        }
+
         acquireFile(0);
     }
 
