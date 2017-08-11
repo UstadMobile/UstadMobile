@@ -189,6 +189,22 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private Vector<AvailabilityMonitorRequest> availabilityMonitorRequests = new Vector<>();
 
+    /**
+     * When an availability monitor is first added, it can request that upon being added the initial
+     * nodes are checked. It then creates new tasks when a node is discovered. Mapped as:
+     * request -> List of task ids.
+     *
+     * When the monitor is withdrawn, any tasks associated with that monitor, if active, should be
+     * stopped.
+     */
+    private HashMap<AvailabilityMonitorRequest, List<Long>> availabilityMonitorRequestToTaskIdMap = new HashMap<>();
+
+    /**
+     * Map the other way around : so that when the task is complete, we can easily remove it from the list
+     */
+    private HashMap<Long, AvailabilityMonitorRequest> availabilityMonitorTaskIdToRequestMap = new HashMap<>();
+
+
     private class UpdateTimerTask extends TimerTask {
         @Override
         public void run() {
@@ -228,8 +244,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             httpd.addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
-//            UstadMobileSystemImpl.l(UMLog.INFO, 343, "Embedded httpd started on port: " +
-//                    httpd.getListeningPort());
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.CRITICAL, 1, "Failed to start http server");
             throw new RuntimeException("Failed to start http server", e);
@@ -355,12 +369,34 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return requestAcquisition(feed, this, localNetworkEnabled, wifiDirectEnabled);
     }
 
-    public void startMonitoringAvailability(AvailabilityMonitorRequest request){
-        availabilityMonitorRequests.addElement(request);
+    public void startMonitoringAvailability(AvailabilityMonitorRequest request, boolean checkKnownNodes){
+        synchronized (availabilityMonitorRequests) {
+            availabilityMonitorRequests.addElement(request);
+            List<Long> monitorTaskList = new Vector<>();
+            availabilityMonitorRequestToTaskIdMap.put(request, monitorTaskList);
+            if(checkKnownNodes) {
+                long initCheckTaskId = requestFileStatus(new ArrayList<String>(request.getEntryIdsToMonitor()),
+                        getContext(), knownNetworkNodes, true, true);
+                monitorTaskList.add(initCheckTaskId);
+                availabilityMonitorTaskIdToRequestMap.put(initCheckTaskId, request);
+            }
+        }
     }
 
+
     public void stopMonitoringAvailability(AvailabilityMonitorRequest request) {
-        availabilityMonitorRequests.removeElement(request);
+        synchronized (availabilityMonitorRequests) {
+            availabilityMonitorRequests.removeElement(request);
+            List<Long> availabilityMonitorRequests = availabilityMonitorRequestToTaskIdMap.get(request);
+            NetworkTask task;
+            for(Long taskId : availabilityMonitorRequests) {
+                task = getTaskById(taskId, NetworkManagerCore.QUEUE_ENTRY_STATUS);
+                if(task != null)
+                    task.stop(NetworkTask.STATUS_STOPPED);
+            }
+
+            availabilityMonitorRequestToTaskIdMap.remove(request);
+        }
     }
 
 
@@ -855,18 +891,39 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     @Override
     public void networkTaskStatusChanged(NetworkTask task) {
         int taskType = task.getTaskType();
-        if(currentTaskIndex[taskType] != -1 && task.getTaskId() == tasksQueues[taskType].get(currentTaskIndex[taskType]).getTaskId()){
+        int taskId = task.getTaskId();
+        if(currentTaskIndex[taskType] != -1
+                && taskId == tasksQueues[taskType].get(currentTaskIndex[taskType]).getTaskId()){
             int status = task.getStatus();
             switch(status) {
                 case NetworkTask.STATUS_COMPLETE:
                 case NetworkTask.STATUS_FAILED:
+                case NetworkTask.STATUS_STOPPED:
                     //task is finished
                     tasksQueues[taskType].remove(currentTaskIndex[taskType]);
                     currentTaskIndex[taskType] = -1;
                     checkTaskQueue(taskType);
+
+                    /*
+                     * If this task is associated with an availability monitor request, update the
+                     * tracking information. We won't need to go and stop this task when the monitor
+                     * is stopped if the task has actually already finished.
+                     */
+                    synchronized (availabilityMonitorRequests) {
+                        if(availabilityMonitorTaskIdToRequestMap.containsKey(taskId)) {
+                            AvailabilityMonitorRequest request =
+                                    availabilityMonitorTaskIdToRequestMap.get(taskId);
+                            availabilityMonitorTaskIdToRequestMap.remove(taskId);
+                            List<Long> availabilityTaskIds = availabilityMonitorRequestToTaskIdMap.get(request);
+                            if(availabilityTaskIds != null && availabilityTaskIds.contains(taskId)) {
+                                availabilityTaskIds.remove(availabilityTaskIds.indexOf(taskId));
+                            }
+                        }
+                    }
+
+
                     break;
                 case NetworkTask.STATUS_RETRY_LATER:
-                case NetworkTask.STATUS_STOPPED:
                     //put task to back of queue
                     NetworkTask retryTask = tasksQueues[taskType].remove(currentTaskIndex[taskType]);
                     tasksQueues[taskType].addElement(retryTask);

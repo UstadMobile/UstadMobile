@@ -1,5 +1,6 @@
 package com.ustadmobile.core.networkmanager;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,5 +18,8 @@ public class AvailabilityMonitorRequest {
     public Set<String> getEntryIdsToMonitor() {
         return entryIdsToMonitor;
     }
+
+
+
 
 }

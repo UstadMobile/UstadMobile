@@ -115,11 +115,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 List<EntryCheckResponse> fileResponse = manager.getEntryResponsesWithLocalFile(entry.id);
                 if(fileResponse != null) {
                     catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_AVAILABLE);
-                    startMonitoringLocalAvailability();
-                }else {
-                    catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_IN_PROGRESS);
-                    entryCheckTaskId = manager.requestFileStatus(new String[]{entry.id}, true, true);
                 }
+                startMonitoringLocalAvailability();
                 /* $endif$ */
 
                 //set see also items
@@ -203,7 +200,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
             monitorIdSet.add(entry.id);
             availabilityMonitorRequest = new AvailabilityMonitorRequest(monitorIdSet);
             UstadMobileSystemImpl.getInstance().getNetworkManager().startMonitoringAvailability(
-                    availabilityMonitorRequest);
+                    availabilityMonitorRequest, true);
         }
     }
 

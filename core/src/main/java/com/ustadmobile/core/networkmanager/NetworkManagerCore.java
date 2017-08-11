@@ -43,7 +43,7 @@ public interface NetworkManagerCore {
 
     void removeNetworkManagerListener(NetworkManagerListener listener);
 
-    void startMonitoringAvailability(AvailabilityMonitorRequest request);
+    void startMonitoringAvailability(AvailabilityMonitorRequest request, boolean checkKnownNodes);
 
     void stopMonitoringAvailability(AvailabilityMonitorRequest request);
 

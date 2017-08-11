@@ -46,6 +46,7 @@ import com.ustadmobile.core.model.CatalogModel;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.core.opds.OPDSEntryFilter;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -347,6 +348,9 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      * language will be shown to the user
      */
     public static final String ARG_FILTER_BY_UI_LANG = "filter_by_lang";
+
+    private AvailabilityMonitorRequest availabilityMonitorRequest;
+
 
 
     private String footerButtonUrl;
@@ -1933,6 +1937,9 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             }
 
         }
+
+
+
     }
     
     /**

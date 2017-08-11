@@ -52,7 +52,9 @@ public class TestUtilsSE {
             }
         }
 
-        return result != null && result.getStatus() == 200;
+        boolean successful = result != null && result.getStatus() == 200;
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 659, "Send command to ./" + url + " successful ? " + successful);
+        return successful;
     }
 
     private static boolean sendBooleanCommand(String command, boolean value) {

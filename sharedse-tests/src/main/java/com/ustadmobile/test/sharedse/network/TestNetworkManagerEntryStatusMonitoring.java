@@ -73,7 +73,7 @@ public class TestNetworkManagerEntryStatusMonitoring {
         manager.addNetworkManagerListener(listener);
 
         AvailabilityMonitorRequest request = new AvailabilityMonitorRequest(TestEntryStatusTask.EXPECTED_AVAILABILITY.keySet());
-        manager.startMonitoringAvailability(request);
+        manager.startMonitoringAvailability(request, true);
         synchronized (discoverLock) {
             try { discoverLock.wait(TestEntryStatusTask.AVAILABILITY_MONITOR_TIMEOUT);}
             catch(InterruptedException e) {}
