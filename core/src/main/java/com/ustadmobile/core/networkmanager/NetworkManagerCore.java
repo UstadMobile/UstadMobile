@@ -16,6 +16,17 @@ public interface NetworkManagerCore {
 
     String LINK_REL_DOWNLOAD_DESTINATION = "http://www.ustadmobile.com/namespace/opds/download-dest";
 
+    /**
+     * Flag to indicate queue type status
+     */
+    public static final int QUEUE_ENTRY_STATUS=0;
+
+    /**
+     * Flag to indicate queue type acquisition.
+     */
+    public static final int QUEUE_ENTRY_ACQUISITION=1;
+
+
     void setSuperNodeEnabled(Object context,boolean enabled);
 
     long requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled);
@@ -42,4 +53,5 @@ public interface NetworkManagerCore {
     Vector getEntryResponsesWithLocalFile(String entryId);
      $endif$ */
 
+    NetworkTask getTaskById(long taskId, int queueType);
 }

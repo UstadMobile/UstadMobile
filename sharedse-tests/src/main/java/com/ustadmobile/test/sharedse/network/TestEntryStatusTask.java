@@ -1,6 +1,7 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
@@ -105,7 +106,7 @@ public class TestEntryStatusTask{
         List<NetworkNode> nodeList = new ArrayList<>();
         nodeList.add(remoteNode);
         long taskId = manager.requestFileStatus(Arrays.asList(ENTRY_IDS),manager.getContext(),nodeList, true, false);
-        NetworkTask task = manager.getNetworkTaskByTaskId(taskId, NetworkManager.QUEUE_ENTRY_STATUS);
+        NetworkTask task = manager.getTaskById(taskId, NetworkManagerCore.QUEUE_ENTRY_STATUS);
         task.stop(NetworkTask.STATUS_STOPPED);
         try { Thread.sleep(1000); }
         catch(InterruptedException e){}

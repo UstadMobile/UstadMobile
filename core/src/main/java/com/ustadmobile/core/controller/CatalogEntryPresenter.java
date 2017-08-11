@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
+import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -17,6 +18,7 @@ import com.ustadmobile.core.view.CatalogEntryView;
 
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -61,6 +63,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     private static final int CMD_DOWNLOAD_OTHER_LANG = 61;
 
     private static final int CMD_MODIFY_ENTRY = 62;
+
+    protected AvailabilityMonitorRequest availabilityMonitorRequest;
 
     public CatalogEntryPresenter(Object context) {
         super(context);
@@ -111,6 +115,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 List<EntryCheckResponse> fileResponse = manager.getEntryResponsesWithLocalFile(entry.id);
                 if(fileResponse != null) {
                     catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_AVAILABLE);
+                    startMonitoringLocalAvailability();
                 }else {
                     catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_IN_PROGRESS);
                     entryCheckTaskId = manager.requestFileStatus(new String[]{entry.id}, true, true);
@@ -182,6 +187,34 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
             catalogEntryView.setLearnerProgress(progress);
         }
     }
+
+    public void onStop() {
+        NetworkTask entryStatusTask = UstadMobileSystemImpl.getInstance().getNetworkManager().getTaskById(
+                entryCheckTaskId, NetworkManagerCore.QUEUE_ENTRY_STATUS);
+        if(entryStatusTask != null)
+            entryStatusTask.stop(NetworkTask.STATUS_STOPPED);
+
+        stopMonitoringLocalAvailability();
+    }
+
+    protected void startMonitoringLocalAvailability() {
+        if(availabilityMonitorRequest == null) {
+            HashSet<String> monitorIdSet = new HashSet<>();
+            monitorIdSet.add(entry.id);
+            availabilityMonitorRequest = new AvailabilityMonitorRequest(monitorIdSet);
+            UstadMobileSystemImpl.getInstance().getNetworkManager().startMonitoringAvailability(
+                    availabilityMonitorRequest);
+        }
+    }
+
+    protected void stopMonitoringLocalAvailability() {
+        if(availabilityMonitorRequest != null) {
+            UstadMobileSystemImpl.getInstance().getNetworkManager().stopMonitoringAvailability(
+                    availabilityMonitorRequest);
+            availabilityMonitorRequest = null;
+        }
+    }
+
 
     /**
      * Update which buttons are shown according to the acquisition status
@@ -368,11 +401,12 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     
     public void networkTaskStatusChanged(NetworkTask task) {
         /* $if umplatform != 2  $ */
-        if(task.getTaskId() == entryCheckTaskId) {
+        if(task.getTaskId() == entryCheckTaskId && task.getStatus() == NetworkTask.STATUS_COMPLETE) {
             boolean available =
                 UstadMobileSystemImpl.getInstance().getNetworkManager().getEntryResponsesWithLocalFile(entry.id) != null;
             updateViewLocallyAvailableStatus(available ?
                 CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
+            startMonitoringLocalAvailability();
         }
         /* $endif$ */
     }

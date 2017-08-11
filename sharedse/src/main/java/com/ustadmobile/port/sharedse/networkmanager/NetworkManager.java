@@ -49,22 +49,13 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * and WiFi direct connections e.t.c
  *
  * @author kileha3
+ * @author mike
  *
  * @see NetworkManagerTaskListener
  * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
 
 public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener, LocalMirrorFinder {
-
-    /**
-     * Flag to indicate queue type status
-     */
-    public static final int QUEUE_ENTRY_STATUS=0;
-
-    /**
-     * Flag to indicate queue type acquisition.
-     */
-    public static final int QUEUE_ENTRY_ACQUISITION=1;
 
     /**
      * Flag to indicate type of notification used when supernode is active
@@ -210,29 +201,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public NetworkManager() {
     }
 
-//    /**
-//     * Method used to enable super node
-//     */
-//    public abstract void startSuperNode();
-//
-//    /**
-//     * Method used to disable supper node
-//     */
-//    public abstract void stopSuperNode();
-//
-//
-//    /**
-//     * Run client services: discover nearby nodes
-//     */
-//    public abstract void startClientMode();
-//
-//    /**
-//     * Stop client services
-//     */
-//    public abstract void stopClientMode();
-
-
-
     /**
      * Method used to check if super node is enabled.
      * @return boolean: TRUE if enabled and FALSE otherwise
@@ -335,7 +303,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     //TODO: remove mContext parameter
     public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
         EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
-        task.setTaskType(QUEUE_ENTRY_STATUS);
+        task.setTaskType(NetworkManagerCore.QUEUE_ENTRY_STATUS);
         task.setUseBluetooth(useBluetooth);
         task.setUseHttp(useHttp);
         queueTask(task);
@@ -1187,7 +1155,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @return
      */
-    public NetworkTask getNetworkTaskByTaskId(long taskId, int queueType) {
+    @Override
+    public NetworkTask getTaskById(long taskId, int queueType) {
         synchronized (tasksQueues[queueType]) {
             for(int i = 0; i < tasksQueues[queueType].size(); i++) {
                 if(tasksQueues[queueType].get(i).getTaskId() == taskId) {

@@ -173,6 +173,12 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         mPresenter.onStart();
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        mPresenter.onStop();
+    }
+
     private int getButtonIdFromViewId(int viewId) {
         Enumeration<Integer> enumeration = BUTTON_ID_MAP.keys();
         Integer buttonId;

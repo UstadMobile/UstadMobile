@@ -146,7 +146,7 @@ public class TestAcquisitionTask {
 
         UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
         testTaskId[0] = manager.requestAcquisition(feed, mirrorFinder,localNetworkEnabled,wifiDirectEnabled);
-        AcquisitionTask task = (AcquisitionTask)manager.getNetworkTaskByTaskId(testTaskId[0],
+        AcquisitionTask task = (AcquisitionTask)manager.getTaskById(testTaskId[0],
                 NetworkManager.QUEUE_ENTRY_ACQUISITION);
         Assert.assertNotNull("Task created for acquisition", task);
         synchronized (acquireLock){
@@ -225,10 +225,10 @@ public class TestAcquisitionTask {
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
 
-        TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
-                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
         TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
                 TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+        //TODO: Test entry status over http here
+
 
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         testAcquisition(remoteNode, manager, true, false, NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);

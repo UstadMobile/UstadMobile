@@ -2,6 +2,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -235,7 +236,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public int getQueueId() {
-        return NetworkManager.QUEUE_ENTRY_STATUS;
+        return NetworkManagerCore.QUEUE_ENTRY_STATUS;
     }
 
     @Override
