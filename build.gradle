@@ -29,10 +29,10 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-version = "0.2.4.46"
+version = "0.2.4.47"
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 129
+    ustadVersionCode = 130
     nanoLrsVersion = "0.2.218"
 }
 
