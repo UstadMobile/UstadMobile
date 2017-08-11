@@ -24,6 +24,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.NotificationCompat;
@@ -463,8 +464,9 @@ public class NetworkManagerAndroid extends NetworkManager{
         mNotifyManager = (NotificationManager) networkService.getSystemService(Context.NOTIFICATION_SERVICE);
         mBuilder = new NotificationCompat.Builder(networkService);
         mBuilder.setContentTitle(title)
+                .setColor(ContextCompat.getColor(getContext(), R.color.accent))
                 .setContentText(message)
-                .setSmallIcon(R.drawable.launcher_icon);
+                .setSmallIcon(R.drawable.ic_notification_icon);
         if(notificationType==NOTIFICATION_TYPE_ACQUISITION){
             mBuilder.setProgress(100, 0, false);
         }
