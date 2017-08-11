@@ -350,14 +350,20 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     
     public void acquisitionProgressUpdate(String entryId, final AcquisitionTaskStatus status) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(entry != null && (entryId.equals(entry.id) || UMUtil.getIndexInArray(entryId, entryTranslationIds) != -1)) {
             catalogEntryView.runOnUiThread(new Runnable() {
                 
                 public void run() {
-                    if(status.getTotalSize() == -1)
+                    if(status.getTotalSize() == -1) {
                         catalogEntryView.setProgress(-1);
-                    else
-                        catalogEntryView.setProgress((float)status.getDownloadedSoFar() / (float)status.getTotalSize());
+                    }else {
+                        float completed = (float) status.getDownloadedSoFar() / (float) status.getTotalSize();
+                        String statusText = impl.getString(MessageID.downloading, getContext())
+                                + ": " + Math.round(completed * 100) + "%";
+                        catalogEntryView.setProgress(completed);
+                        catalogEntryView.setProgressStatusText(statusText);
+                    }
                 }
             });
         }
