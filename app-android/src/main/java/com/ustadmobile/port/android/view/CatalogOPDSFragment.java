@@ -74,6 +74,7 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -92,6 +93,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     private View rootContainer;
 
     private Map<String, OPDSEntryCard> idToCardMap;
+
+    private Map<String, Integer> idToStatusMap = new Hashtable<>();
 
     protected CatalogController mCatalogController;
 
@@ -262,6 +265,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(mCatalogController != null) {
+            mCatalogController.onStop();
+        }
+    }
 
     /**
      * Get the OPDSEntryCard for the given OPDS Entry ID
@@ -435,6 +445,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setEntryStatus(final String entryId, final int status) {
+        idToStatusMap.put(entryId, status);
         super.runOnUiThread(new Runnable() {
             public void run() {
                 if(idToCardMap.containsKey(entryId)) {
@@ -691,6 +702,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             holder.mEntryCard.setOPDSEntry(feed.entries[position]);
             holder.mEntryCard.setOnClickListener(CatalogOPDSFragment.this);
             holder.mEntryCard.setOnLongClickListener(CatalogOPDSFragment.this);
+            String entryId = feed.entries[position].id;
+            if(idToStatusMap.containsKey(entryId)){
+                holder.mEntryCard.setOPDSEntryOverlay(idToStatusMap.get(entryId));
+            }else {
+                holder.mEntryCard.setOPDSEntryOverlay(CatalogController.STATUS_NOT_ACQUIRED);
+            }
 
             //check the acquisition status
             int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);

@@ -389,7 +389,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     public void fileStatusCheckInformationAvailable(String[] fileIds) {
         if(UMUtil.getIndexInArray(entry.id, fileIds) != -1) {
-            final boolean available = manager.getEntryResponsesWithLocalFile(entry.id) != null;
+            final boolean available = manager.isEntryLocallyAvailable(entry.id);
             updateViewLocallyAvailableStatus(available ?
                     CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
         }

@@ -751,6 +751,20 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return responseList;
     }
 
+    @Override
+    public boolean isEntryLocallyAvailable(String entryId) {
+        List<EntryCheckResponse> responseList = getEntryResponsesWithLocalFile(entryId);
+        if(responseList == null)
+            return false;
+
+        for(int i = 0; i < responseList.size(); i++) {
+            if(responseList.get(i).isFileAvailable())
+                return true;
+        }
+
+        return false;
+    }
+
     /**
      * Method which will be called to fire all events when file acquisition information is available
      * @param entryId Entry Id under processing

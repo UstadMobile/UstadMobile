@@ -47,6 +47,10 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
+import com.ustadmobile.core.networkmanager.NetworkManagerListener;
+import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.OPDSEntryFilter;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -67,7 +71,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -104,13 +110,15 @@ import org.xmlpull.v1.XmlSerializer;
  * @author Varuna Singh <varuna@ustadmobile.com>
  * @author Mike Dawson <mike@ustadmobile.com>
  */
-public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable, AcquisitionListener {
+public class CatalogController extends BaseCatalogController implements AppViewChoiceListener, AsyncLoadableController, UMDownloadCompleteReceiver, Runnable, AcquisitionListener, NetworkManagerListener {
     
     public static final int STATUS_ACQUIRED = 0;
     
     public static final int STATUS_ACQUISITION_IN_PROGRESS = 1;
     
     public static final int STATUS_NOT_ACQUIRED = 2;
+
+    public static final int STATUS_AVAILABLE_LOCALLY = 3;
     
     //Begin flags
     
@@ -582,7 +590,11 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         newController.initEntryStatusCheck();
         return newController;
     }
-    
+
+    public void onStop() {
+        stopMonitoringLocalAvailability();
+    }
+
     /**
      * Asynchronously load thumbnails for this controller and set them on the
      * view accordingly.  This will fork a new thread using itself as the
@@ -1938,10 +1950,81 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
         }
 
+        startMonitoringLocalAvailability();
+    }
 
+    protected void startMonitoringLocalAvailability() {
+        if(availabilityMonitorRequest == null) {
+            Set<String> entryIds = new HashSet<>();
+            UstadJSOPDSFeed feed = getModel().opdsFeed;
+            for(int i = 0; i < feed.entries.length; i++) {
+                entryIds.add(feed.entries[i].id);
+            }
+            availabilityMonitorRequest = new AvailabilityMonitorRequest(entryIds);
+            NetworkManagerCore networkManager = UstadMobileSystemImpl.getInstance().getNetworkManager();
+            networkManager.addNetworkManagerListener(this);
+            networkManager.startMonitoringAvailability(availabilityMonitorRequest, true);
+        }
 
     }
-    
+
+    protected void stopMonitoringLocalAvailability() {
+        if(availabilityMonitorRequest != null) {
+            UstadMobileSystemImpl.getInstance().getNetworkManager().stopMonitoringAvailability(
+                    availabilityMonitorRequest);
+            availabilityMonitorRequest = null;
+            UstadMobileSystemImpl.getInstance().getNetworkManager().removeNetworkManagerListener(this);
+        }
+    }
+
+    @Override
+    public void networkTaskStatusChanged(NetworkTask networkTask) {
+
+    }
+
+    @Override
+    public void fileStatusCheckInformationAvailable(String[] fileIds) {
+        UstadJSOPDSFeed feed = getModel().opdsFeed;
+        UstadJSOPDSEntry entry;
+        for(int i = 0; i < fileIds.length; i++) {
+            entry = feed.getEntryById(fileIds[i]);
+            if(entry == null)
+                continue;
+
+            CatalogEntryInfo info = getEntryInfo(fileIds[i],
+                    CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+            if(info != null && info.acquisitionStatus == STATUS_ACQUIRED)
+                continue;
+
+            boolean isAvailable = UstadMobileSystemImpl.getInstance().getNetworkManager().isEntryLocallyAvailable(fileIds[i]);
+            if(isAvailable)
+                view.setEntryStatus(fileIds[i], STATUS_AVAILABLE_LOCALLY);
+            else
+                view.setEntryStatus(fileIds[i], STATUS_NOT_ACQUIRED);
+
+        }
+    }
+
+    @Override
+    public void networkNodeDiscovered(NetworkNode node) {
+
+    }
+
+    @Override
+    public void networkNodeUpdated(NetworkNode node) {
+
+    }
+
+    @Override
+    public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int downloadSource) {
+
+    }
+
+    @Override
+    public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+
+    }
+
     /**
      * Starts a Timer to watch the status of downloads.  Calling this twice
      * will have no effect - a new timer will only start if there is none currently

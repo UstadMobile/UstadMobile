@@ -53,5 +53,7 @@ public interface NetworkManagerCore {
     Vector getEntryResponsesWithLocalFile(String entryId);
      $endif$ */
 
+    boolean isEntryLocallyAvailable(String entryId);
+
     NetworkTask getTaskById(long taskId, int queueType);
 }

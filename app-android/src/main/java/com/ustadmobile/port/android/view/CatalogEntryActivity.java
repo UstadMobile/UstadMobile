@@ -289,7 +289,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
                 break;
             case CatalogEntryView.LOCAL_STATUS_AVAILABLE:
                 statusIconView.setImageDrawable(ContextCompat.getDrawable(this,
-                        R.drawable.ic_done_black_16dp));
+                        R.drawable.ic_nearby_black_24px));
                 statusIconView.setVisibility(View.VISIBLE);
                 statusTextView.setText(R.string.file_available_locally);
                 break;

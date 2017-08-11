@@ -11,6 +11,7 @@
     <string name='authenticating'>Authenticating</string>
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
+    <string name="downloaded">Downloaded</string>
     <string name='download_q'>Download?</string>
     <string name='download_all_q'>Download all %s entries?</string>
     <string name='ok'>OK</string>

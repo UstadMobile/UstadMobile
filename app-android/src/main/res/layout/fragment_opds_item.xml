@@ -106,11 +106,12 @@
             <ImageView
                 android:id="@+id/opds_item_status_icon"
                 android:src="@drawable/ic_done_black_16dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
                 />
             <TextView
-                android:text="Downloaded"
+                android:id="@+id/opds_item_status_text"
+                android:text="@string/downloaded"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 />
