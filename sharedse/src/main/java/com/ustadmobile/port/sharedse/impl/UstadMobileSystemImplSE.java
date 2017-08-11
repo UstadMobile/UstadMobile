@@ -22,6 +22,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
+import com.ustadmobile.nanolrs.core.manager.ChangeSeqManager;
 import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
 import com.ustadmobile.nanolrs.core.manager.UserManager;
 import com.ustadmobile.nanolrs.core.manager.XapiStatementManager;
@@ -29,6 +30,7 @@ import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.model.XapiAgent;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
 import com.ustadmobile.port.sharedse.impl.zip.*;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
@@ -489,10 +491,11 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         //to log in..
 
         User loggedInUser = null;
-        List<User> users = userManager.findByUsername(context, username);
-        if(users!= null && !users.isEmpty()){
-            loggedInUser = users.get(0);
-        }else{
+        //List<User> users = userManager.findByUsername(context, username);
+        //if(users!= null && !users.isEmpty()){
+        //    loggedInUser = users.get(0);
+        loggedInUser = userManager.findByUsername(context, username);
+        if(loggedInUser == null){
             //create the user
             try {
                 loggedInUser = (User)userManager.makeNew();
@@ -501,7 +504,15 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
                 loggedInUser.setPassword(password);
                 loggedInUser.setNotes("User Created via Registration Page");
                 loggedInUser.setDateCreated(System.currentTimeMillis());
-                userManager.persist(context, loggedInUser);
+                loggedInUser.setMasterSequence(-1); //This is needed to check is new user or not.
+                //However, normal persist will over ride this to local sequence.
+                ChangeSeqManager changeSeqManager =
+                        PersistenceManager.getInstance().getManager(ChangeSeqManager.class);
+                String tableName = UMSyncEndpoint.getTableNameFromClass(User.class);
+                long setThis = changeSeqManager.getNextChangeAddSeqByTableName(tableName, 1, context);
+                loggedInUser.setMasterSequence(-1);
+                loggedInUser.setLocalSequence(setThis);
+                userManager.persist(context, loggedInUser, false);
                 userCustomFieldsManager.createUserCustom(fields,loggedInUser, context);
             } catch (SQLException e) {
                 e.printStackTrace();
