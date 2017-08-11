@@ -31,6 +31,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml" title="Cover Letter Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml" title="Job Search Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml" title="Job Interview Skills" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="1-cvwriting-en.epub"
@@ -63,6 +66,10 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml" title="نوشتن نامۀ درخواستی"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml" title="مهارت‌های جستجوی وظیفه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml" title="مهارت‌های مصاحبۀ کاری" />
+
         <link rel="http://opds-spec.org/acquisition"
             href="1-cvwriting-fa.epub"
             type="application/epub+zip"/>
@@ -93,6 +100,10 @@
             hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml"/>
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml" title="د غوښتنلیک لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml" title="د دندې لټولو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml" title="د کاري مرکې مهارتونه" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="1-cvwriting-ps.epub"
@@ -128,6 +139,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml" title="CV Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml" title="Job Search Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml" title="Job Interview Skills" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="2-coverletter-en.epub"
@@ -160,6 +174,10 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml" title="نوشتن خلص سوانح"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml" title="مهارت‌های جستجوی وظیفه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml" title="مهارت‌های مصاحبۀ کاری" />
+
         <link rel="http://opds-spec.org/acquisition"
             href="2-coverletter-fa.epub"
             type="application/epub+zip"/>
@@ -190,6 +208,10 @@
             hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml"/>
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml" title="د سي وي لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml" title="د دندې لټولو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml" title="د کاري مرکې مهارتونه" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="2-coverletter-ps.epub"
@@ -225,6 +247,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml" title="CV Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml" title="Cover Letter Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml" title="Job Interview Skills" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="3-jobsearch-en.epub"
@@ -258,6 +283,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml" title="نوشتن خلص سوانح"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml" title="نوشتن نامۀ درخواستی"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml" title="مهارت‌های مصاحبۀ کاری" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="3-jobsearch-fa.epub"
@@ -290,6 +318,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml" title="د سي وي لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml" title="د غوښتنلیک لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml" title="د کاري مرکې مهارتونه" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="3-jobsearch-ps.epub"
@@ -324,6 +355,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml" title="CV Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml" title="Cover Letter Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml" title="Job Search Skills"/>
 
         <link rel="http://opds-spec.org/acquisition"
             href="4-interview-en.epub"
@@ -357,6 +391,10 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml" title="نوشتن خلص سوانح"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml" title="نوشتن نامۀ درخواستی"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml" title="مهارت‌های جستجوی وظیفه"/>
+
 
         <link rel="http://opds-spec.org/acquisition"
             href="4-interview-fa.epub"
@@ -389,6 +427,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml" title="د سي وي لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml" title="د غوښتنلیک لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml" title="د دندې لټولو مهارتونه"/>
 
         <link rel="http://opds-spec.org/acquisition"
             href="4-interview-ps.epub"
