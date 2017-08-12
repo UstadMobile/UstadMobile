@@ -546,4 +546,9 @@ public class MockNetworkManager extends NetworkManager {
     public boolean setWifiEnabled(boolean enabled) {
         return false;
     }
+
+    @Override
+    public int getWifiConnectionTimeout() {
+        return 20000;
+    }
 }

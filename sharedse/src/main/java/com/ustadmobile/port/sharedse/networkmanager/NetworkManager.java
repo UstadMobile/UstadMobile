@@ -1395,4 +1395,13 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public int getActionRequiredAfterGroupConnection() {
         return actionRequiredAfterGroupConnection;
     }
+
+    /**
+     * To be implemented by the underlying platform.
+     *
+     * @return The timeout after which a connection request for a wifi network will be considered to
+     * have failed (in ms).
+     */
+    public abstract int getWifiConnectionTimeout();
+
 }

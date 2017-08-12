@@ -207,13 +207,6 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     }
 
 
-    /**
-     * The timeout (in ms) for connecting to a WiFi network. On Android there is no explicit
-     * connection failed event.
-     */
-    public static final int WIFI_CONNECT_TIMEOUT = (45 * 1000);
-
-
     public static class Status implements AcquisitionTaskStatus{
 
         long downloadedSoFar;
@@ -548,6 +541,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     currentEntryStatus.setTotalSize(httpDownload.getTotalSize());
                     downloadCompleted = httpDownload.download();
                 } catch (IOException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 661, getLogPrefix() + " : item " + currentEntryIdIndex +
+                            " : IOException", e);
                     currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_FAILED);
                     networkManager.fireAcquisitionStatusChanged(getFeed().entries[currentEntryIdIndex].id,
                         currentEntryStatus);
@@ -578,6 +573,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     entryAcquisitionThread =null;
                     acquireFile(currentEntryIdIndex + 1);
                 }else {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " + currentEntryIdIndex +
+                        " : Download did not complete");
                     handleAttemptFailed();
                 }
 
@@ -693,6 +690,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 networkManager.connectToWifiDirectGroup(currentGroupSSID, passphrase);
             }
         }else {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 662, getLogPrefix() +
+                    " bluetooth connection did not provide group ssid and passphrase");
             handleAttemptFailed();
         }
     }
@@ -826,7 +825,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 wifiConnectTimeoutTimer = new Timer();
 
             wifiConnectTimeoutTimerTask = new WifiConnectTimeoutTimerTask();
-            wifiConnectTimeoutTimer.schedule(wifiConnectTimeoutTimerTask, WIFI_CONNECT_TIMEOUT);
+            wifiConnectTimeoutTimer.schedule(wifiConnectTimeoutTimerTask,
+                    networkManager.getWifiConnectionTimeout());
         }
     }
 

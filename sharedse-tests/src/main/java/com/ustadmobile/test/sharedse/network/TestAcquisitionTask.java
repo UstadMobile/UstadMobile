@@ -361,7 +361,7 @@ public class TestAcquisitionTask {
         try {
             Assert.assertTrue("Mangle wifi direct group enabled", TestUtilsSE.setRemoteTestMangleWifi(true));
             testAcquisition(remoteNode, manager, false, true, NetworkManager.DOWNLOAD_FROM_CLOUD,
-                    (AcquisitionTask.WIFI_CONNECT_TIMEOUT * 5) + 60000);
+                    (manager.getWifiConnectionTimeout() * 5) + 60000);
         }catch(Exception e2) {
             e = e2;
         }finally {

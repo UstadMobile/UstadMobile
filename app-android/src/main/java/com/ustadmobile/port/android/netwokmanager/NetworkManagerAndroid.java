@@ -36,6 +36,7 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.android.impl.UMLogAndroid;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
@@ -60,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
+import edu.rit.se.wifibuddy.FailureReason;
 import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
@@ -781,12 +783,14 @@ public class NetworkManagerAndroid extends NetworkManager{
                 @Override
                 public void onSuccess() {
                     currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
-
+                    UstadMobileSystemImpl.l(UMLog.INFO, 360, "wifi direct group: reported on success");
                 }
 
                 @Override
                 public void onFailure(int reason) {
                     currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+                    UstadMobileSystemImpl.l(UMLog.INFO, 362, "wifi direct group: reported on failure: "
+                        + FailureReason.fromInteger(reason));
                 }
             });
         }
@@ -846,5 +850,10 @@ public class NetworkManagerAndroid extends NetworkManager{
     public String getHttpAndroidAssetsUrl() {
         return UMFileUtil.joinPaths(new String[]{"http://127.0.0.1:" + httpd.getListeningPort()
             + "/" + httpAndroidAssetsPath});
+    }
+
+    @Override
+    public int getWifiConnectionTimeout() {
+        return 60000;
     }
 }

@@ -3,8 +3,11 @@ package com.ustadmobile.port.android.netwokmanager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Intent;
 import android.util.Log;
 
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -60,6 +63,11 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
         try {
             mServerSocket=mBluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(
                     BluetoothServer.SERVICE_NAME, BluetoothServer.SERVICE_UUID);
+            UstadMobileSystemImpl.l(UMLog.INFO, 344, "Android bluetooth server listening : service name" +
+                BluetoothServer.SERVICE_NAME + " on UUID : " + BluetoothServer.SERVICE_UUID);
+
+
+
             while(running) {
                 final BluetoothSocket clientSocket = mServerSocket.accept();
                 new Thread(new Runnable() {
@@ -88,7 +96,7 @@ public class BluetoothServerAndroid extends BluetoothServer implements Runnable{
                 }).start();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            UstadMobileSystemImpl.l(UMLog.ERROR, 76, "Exception starting bluetooth server", e);
         }
     }
 
