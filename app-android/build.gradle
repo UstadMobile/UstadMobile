@@ -45,6 +45,42 @@ task startTestSlaveServer(type: Exec) {
         exec {
             commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'push', "$projectDir/../sharedse-tests/src/main/resources/com/ustadmobile/test/sharedse/thelittlechicks.epub", "/sdcard/ustadMobileContent/"
         }
+
+        //Get the bluetooth address of the remote test slave server
+        def btAddrStdOut = new ByteArrayOutputStream()
+        exec {
+            commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], "shell", "settings", "get", "secure", "bluetooth_address"
+            standardOutput = btAddrStdOut
+        }
+
+        //Get the ip address of teh remote test slave server
+        def ipAddrStdOut = new ByteArrayOutputStream()
+        exec {
+            commandLine "$adb", "-s", (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], "shell", "ip", "route"
+            standardOutput = ipAddrStdOut
+        }
+
+        String ipAddr = null
+        String[] ipAddrParts = ipAddrStdOut.toString().split()
+        if(ipAddrParts.length >= 9) {
+            ipAddr = ipAddrParts[8]
+            println("Remote test slave IP address is: " + ipAddr)
+        }
+
+        //Write those values to the buildconfig.local.properties
+        File mainLocalPropertiesFile = rootProject.file("buildconfig.local.properties")
+        String propertiesStr = mainLocalPropertiesFile.getText("UTF-8")
+        propertiesStr = propertiesStr.replaceAll("test.remote_bluetooth_device=([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", "test.remote_bluetooth_device=" + btAddrStdOut.toString())
+        println("Remote test slave bluetooth address = " + btAddrStdOut.toString())
+
+        if(ipAddr != null) {
+            propertiesStr = propertiesStr.replaceAll("test.remote_slave_server=(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})", "test.remote_slave_server=" + ipAddr)
+        }
+
+        FileOutputStream propertiesOut = new FileOutputStream(mainLocalPropertiesFile)
+        propertiesOut.write(propertiesStr.getBytes("UTF-8"))
+        propertiesOut.flush()
+        propertiesOut.close()
     }
 
     commandLine "$adb", '-s', (String) project.ext.buildConfigProperties['test.remote_slave_server_serial'], 'shell', 'am', 'start', '-n', 'com.ustadmobile.testslave/com.ustadmobile.port.android.view.RemoteTestSlaveServerActivity', '-a', 'android.intent.action.MAIN', '-c', 'android.intent.category.LAUNCHER'
