@@ -22,6 +22,10 @@ allprojects {
         maven {
             url "http://devserver2.ustadmobile.com/repo-mvn"
         }
+
+        maven {
+            url "https://maven.google.com"
+        }
     }
 }
 
