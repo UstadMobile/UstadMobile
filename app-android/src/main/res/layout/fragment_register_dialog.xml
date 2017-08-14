@@ -68,6 +68,7 @@
     </ScrollView>
 
     <Button
+        android:textAllCaps="true"
         android:clickable="true"
         android:id="@+id/fragment_register_dialog_register_button"
         android:layout_alignParentBottom="true"

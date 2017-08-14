@@ -214,6 +214,7 @@
             android:text="@string/ok_got_it"
             android:background="@color/primary"
             android:layout_width="match_parent"
+            android:textAllCaps="true"
             android:layout_height="@dimen/dimen_40dp"/>
 
         <RelativeLayout

@@ -78,7 +78,7 @@
             <Button
                 android:clickable="true"
                 android:id="@+id/fragment_login_dialog_login_button"
-                android:padding="@dimen/dimen_16dp"
+                android:paddingLeft="@dimen/dimen_16dp"
                 android:gravity="center"
                 android:text="@string/login"
                 android:textColor="@android:color/white"
@@ -87,7 +87,8 @@
                 android:drawableLeft="@drawable/ic_exit_to_app_white_18dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"/>
 
             <Button
                 android:layout_marginBottom="@dimen/dimen_16dp"
@@ -102,7 +103,8 @@
                 android:drawableLeft="@drawable/ic_launch_white_18dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"/>
 
         </LinearLayout>
     </RelativeLayout>

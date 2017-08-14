@@ -39,7 +39,6 @@
     <Button
         android:background="@color/primary"
         android:textColor="@color/primary_text"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textAllCaps="true"
         android:id="@+id/fragment_catalog_footer_button"
         android:layout_alignParentBottom="true"
