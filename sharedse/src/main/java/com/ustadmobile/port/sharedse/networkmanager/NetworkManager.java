@@ -204,6 +204,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     private HashMap<Long, AvailabilityMonitorRequest> availabilityMonitorTaskIdToRequestMap = new HashMap<>();
 
+    private Vector<NetworkNode> knownPeers = new Vector<>();
+
+    private Vector<WifiP2pPeerListener> peerChangeListeners = new Vector<>();
+
 
     private class UpdateTimerTask extends TimerTask {
         @Override
@@ -516,6 +520,36 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         }
     }
+
+    public void handleWifiDirectPeersChanged(List<NetworkNode> peers) {
+        synchronized (this.knownPeers) {
+            knownPeers.clear();
+            knownPeers.addAll(peers);
+        }
+    }
+
+    public List<NetworkNode> getKnownWifiDirectPeers() {
+        return knownPeers;
+    }
+
+    protected void fireWifiDirectPeersChanged() {
+        synchronized (peerChangeListeners) {
+            for(WifiP2pPeerListener listener: peerChangeListeners) {
+                listener.peersChanged(knownPeers);
+            }
+        }
+
+        fireWifiDirectPeersChanged();
+    }
+
+    public void addWifiDirectPeersListener(WifiP2pPeerListener listener) {
+        peerChangeListeners.add(listener);
+    }
+
+    public void removeWifiDirectPeersListener(WifiP2pPeerListener listener) {
+        peerChangeListeners.remove(listener);
+    }
+
 
     protected void queueStatusChecksForNewNode(NetworkNode node) {
         Set<String> entryIdsToQuery = new HashSet<>();

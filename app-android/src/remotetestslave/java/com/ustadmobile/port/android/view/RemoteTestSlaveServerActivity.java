@@ -4,8 +4,12 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
@@ -19,7 +23,9 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
 import java.io.IOException;
 
-public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements ServiceConnection {
+import static com.ustadmobile.port.android.view.SplashScreenActivity.REQUIRED_PERMISSIONS;
+
+public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements ServiceConnection, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private RemoteTestServerHttpd serverHttpd;
 
@@ -27,16 +33,36 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_remote_test_slave_server_acitivity);
+        ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, 1);
+    }
+
+
+    protected void checkPermissions() {
+        boolean hasRequiredPermissions = true;
+        for(int i = 0; i < REQUIRED_PERMISSIONS.length; i++) {
+            hasRequiredPermissions &= ContextCompat.checkSelfPermission(this, REQUIRED_PERMISSIONS[i]) == PackageManager.PERMISSION_GRANTED;
+        }
+        if(hasRequiredPermissions) {
+            scanFeed();
+        }else {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, 1);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        checkPermissions();
+    }
+
+    protected void scanFeed() {
         try {
             CatalogController.makeDeviceFeed(
                     UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogController.SHARED_RESOURCE, this),
                     CatalogController.SHARED_RESOURCE, this);
             Toast.makeText(this, "Device feed scanned.", Toast.LENGTH_LONG).show();
         }catch(IOException e) {
-            UstadMobileSystemImpl.getInstance().getAppView(this).showAlertDialog("Scan error",
-                    "Error calling makeDeviceFeed");
-        }
 
+        }
     }
 
     /**

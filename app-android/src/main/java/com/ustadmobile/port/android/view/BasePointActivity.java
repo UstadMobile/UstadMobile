@@ -125,11 +125,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 R.string.drawer_close);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         setMenuItems(this.mNavigationDrawerItems);
-
-        Intent discoverableIntent =
-                new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 600);
-        startActivity(discoverableIntent);
     }
 
     public void setWelcomeScreenDisplayed(boolean displayed) {

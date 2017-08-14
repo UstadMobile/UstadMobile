@@ -57,6 +57,7 @@ task generateCoreTestConstantsBuildConfig (type: de.fuerstenau.gradle.buildconfi
     buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER", project.ext.buildConfigProperties["test.remote_slave_server"]
     buildConfigField "String", "TEST_REMOTE_MOCK_SLAVE_SERVER", project.ext.buildConfigProperties["test.mock_remote_slave_server"]
     buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER_SERIAL", project.ext.buildConfigProperties["test.remote_slave_server_serial"]
+    buildConfigField "String", "TEST_REMOTE_SLAVE_SERVER_WLAN_MAC", project.ext.buildConfigProperties["test.remote_wlan_mac_addr"]
 }
 
 compileJava.dependsOn(generateCoreTestConstantsBuildConfig)

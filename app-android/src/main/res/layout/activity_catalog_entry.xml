@@ -151,7 +151,6 @@
 
                             <ImageView
                                 android:id="@+id/activity_catalog_entry_local_availability_icon"
-                                android:src="@drawable/ic_done_black_16dp"
                                 android:tint="@android:color/black"
                                 android:layout_below="@+id/activity_catalog_entry_size_text"
                                 android:paddingRight="@dimen/catalog_entry_local_availability_icon_margin"
@@ -164,7 +163,6 @@
                                 android:layout_height="wrap_content"
                                 android:maxLines="3"
                                 android:scrollHorizontally="false"
-                                android:text="AVAILABLE"
                                 android:layout_toEndOf="@+id/activity_catalog_entry_local_availability_icon"
                                 android:layout_toRightOf="@+id/activity_catalog_entry_local_availability_icon"
                                 android:layout_below="@+id/activity_catalog_entry_size_text"

@@ -26,13 +26,16 @@ To test network functionality two devices are required.
 One to run the tests and a second "slave" device that
 is communicated with.
 
-Set remote test slave server device serial, port, bluetooth address and IP address as indicated below:-
-* app-android/buildconfig.default.properties (device serial)
-* buildconfig.default.properties (port,bluetooth address,IP address)<br/>
+Set remote test slave server device serial in app-android/buildconfig.default.properties 
+using the serial as listed by the adb devices command.
+
 
 Start the remote test slave server device:
  >$./gradlew startTestSlaveServer
  
+This automatically updates buildconfig.local.properties with the ip address, mac address, and
+bluetooth mac of the device being used as the test slave server.
+
  Run the tests:
  >export ANDROID_SERIAL="TESTDEVICESERIAL" <br/>
  >$./gradlew connectedAndroidTest

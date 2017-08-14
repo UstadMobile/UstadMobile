@@ -18,6 +18,8 @@ import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -34,6 +36,7 @@ import android.widget.Toast;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
@@ -54,9 +57,11 @@ import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -189,6 +194,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
         filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
+        filter.addAction(WifiDirectHandler.Action.PEERS_CHANGED);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
 
         IntentFilter intentFilter = new IntentFilter();
@@ -242,6 +248,19 @@ public class NetworkManagerAndroid extends NetworkManager{
                         handleWifiDirectGroupCreated(new WiFiDirectGroup(wifiP2pGroup.getNetworkName(),
                                 wifiP2pGroup.getPassphrase()));
                     }
+                    break;
+
+                case WifiDirectHandler.Action.PEERS_CHANGED:
+                    WifiP2pDeviceList devices = intent.getParcelableExtra("peers");//TODO: Make a flag for this
+                    Collection<WifiP2pDevice> deviceCollection = devices.getDeviceList();
+                    ArrayList<NetworkNode> list = new ArrayList(deviceCollection.size());
+                    for(WifiP2pDevice device: deviceCollection) {
+                        NetworkNode node = new NetworkNode(device.deviceAddress, null);
+                        list.add(node);
+                    }
+                    handleWifiDirectPeersChanged(list);
+
+                    break;
             }
 
         }
