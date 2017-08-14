@@ -203,7 +203,7 @@
 
                             <ProgressBar
                                 android:id="@+id/activity_catalog_entry_progress_bar"
-                                android:progress="50"
+                                android:progress="0"
                                 android:max="100"
                                 style="?android:attr/progressBarStyleHorizontal"
                                 android:layout_width="match_parent"
