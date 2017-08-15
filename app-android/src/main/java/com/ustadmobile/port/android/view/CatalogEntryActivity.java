@@ -10,6 +10,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -179,6 +182,13 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         mPresenter.onStop();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.catalog_entry_presenter, menu);
+        return true;
+    }
+
     private int getButtonIdFromViewId(int viewId) {
         Enumeration<Integer> enumeration = BUTTON_ID_MAP.keys();
         Integer buttonId;
@@ -300,6 +310,17 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
                 statusIconView.setVisibility(View.VISIBLE);
                 break;
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.menu_catalog_entry_presenter_share:
+                mPresenter.handleClickShare();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

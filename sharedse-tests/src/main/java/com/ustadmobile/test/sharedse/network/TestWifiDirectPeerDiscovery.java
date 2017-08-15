@@ -33,6 +33,7 @@ public class TestWifiDirectPeerDiscovery {
         };
 
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        manager.setSendingOn(true);
         manager.addWifiDirectPeersListener(listener);
         synchronized (lock) {
             try { lock.wait(PEER_DISCOVERY_TIMEOUT); }

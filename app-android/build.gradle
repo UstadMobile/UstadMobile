@@ -26,6 +26,9 @@ repositories {
         url "http://devserver2.ustadmobile.com/repo-mvn"
     }
 
+    maven {
+        url "/home/mike/src/repo"
+    }
 }
 
 ext.buildConfigProperties = new Properties()
@@ -73,14 +76,28 @@ task startTestSlaveServer(type: Exec) {
             ipAddr = ipAddrParts[8]
         }
 
-        String macAddr = null
+        /*
+         * Try and get the WiFi mac address - normally there is an interface called p2p0. If this isn't
+         * found (as per the Yoga Tablet 2 Pro), fall back to using the main wlan mac address.
+         */
+        String wlanMacAddr = null
+        String p2pMacAddr = null
         String[] macAddrLines = macAddrStdOut.toString().split("\n")
-        for(int i = 0; i < macAddrLines.length && macAddr == null; i++) {
-            if(macAddrLines[i].contains("link/ether")) {
-                macAddr = macAddrLines[i].split()[1].toUpperCase()
+        boolean lastLineWasDummy = false
+        boolean lastLineWasP2p = false
+        for(int i = 0; i < macAddrLines.length; i++) {
+            if(wlanMacAddr == null && macAddrLines[i].contains("link/ether") && !lastLineWasDummy) {
+                wlanMacAddr = macAddrLines[i].split()[1].toUpperCase()
             }
-        }
 
+            if(macAddrLines[i].contains("link/ether") && lastLineWasP2p) {
+                p2pMacAddr = macAddrLines[i].split()[1].toUpperCase()
+            }
+
+            lastLineWasP2p = macAddrLines[i].contains("p2p")
+            lastLineWasDummy = macAddrLines[i].contains("dummy")
+        }
+        String macAddr = (p2pMacAddr != null) ? p2pMacAddr : wlanMacAddr
 
         //Write those values to the buildconfig.local.properties
         File mainLocalPropertiesFile = rootProject.file("buildconfig.local.properties")
@@ -310,7 +327,7 @@ dependencies {
     compile 'com.android.support:support-v4:26.0.1'
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha5'
-    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.28-SNAPSHOT'
+    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.31-SNAPSHOT'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.txusballesteros:FitChart:1.0'
     androidTestCompile 'junit:junit:4.12'

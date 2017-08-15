@@ -30,6 +30,8 @@ public class NetworkNode {
 
     private String deviceWifiDirectMacAddress;
 
+    private String deviceWifiDirectName;
+
     private long wifiDirectLastUpdated;
 
     private long networkServiceLastUpdated;
@@ -99,6 +101,24 @@ public class NetworkNode {
      */
     public void setDeviceWifiDirectMacAddress(String deviceWifiDirectMacAddress) {
         this.deviceWifiDirectMacAddress = deviceWifiDirectMacAddress;
+    }
+
+    /**
+     * The name of the device as specified by WiFi direct (normally the same as it's bluetooth name)
+     *
+     * @return Name of the device as specified by WiFi direct
+     */
+    public String getDeviceWifiDirectName() {
+        return deviceWifiDirectName;
+    }
+
+    /**
+     * The name of the device as specified by WiFi direct (normally the same as it's bluetooth name)
+     *
+     * @param deviceWifiDirectName Name of the device as specified by WiFi direct
+     */
+    public void setDeviceWifiDirectName(String deviceWifiDirectName) {
+        this.deviceWifiDirectName = deviceWifiDirectName;
     }
 
     /**

@@ -129,7 +129,7 @@
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
     <string name="share_offline_zip_checkbox_label">Send in zip file</string>
-    <string name="share_offline_dialog_message">On the device you want to share the app with, please open the Bluetooth settings to enable the device to be visible.</string>
+    <string name="share_offline_dialog_message">On the device that you want to share the app with, please open the Bluetooth settings to enable the device to be visible.</string>
     <string name="preparing">Preparing</string>
 
 
@@ -146,5 +146,7 @@
 
     <string name="login_successful">Login successful</string>
     <string name="registration_successful">Registration successful</string>
+
+    <string name="send_course_instructions">Send course instructions here.</string>
 
 </resources>

@@ -130,7 +130,7 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            wifiDirectHandler.setServiceDiscoveryRebroadcastingTime(SERVICE_REBROADCASTING_TIMER);
+            wifiDirectHandler.setPeerDiscoveryInterval(SERVICE_REBROADCASTING_TIMER);
 
             boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
                     PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));
@@ -174,7 +174,8 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             //List<User> users = userManager.findByUsername(context, loggedInUsername);
             //if(users!=null&&!users.isEmpty()){
             //    loggedInUser = users.get(0);
-            //}else{
+            //}else{)
+
             loggedInUser = userManager.findByUsername(context, loggedInUsername);
             if(loggedInUser ==null){
                 //loggedInUser = null;

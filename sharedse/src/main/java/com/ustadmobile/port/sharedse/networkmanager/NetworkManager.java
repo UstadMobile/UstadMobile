@@ -208,6 +208,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private Vector<WifiP2pPeerListener> peerChangeListeners = new Vector<>();
 
+    private boolean sendingOn = false;
+
+    private boolean receivingOn = false;
+
 
     private class UpdateTimerTask extends TimerTask {
         @Override
@@ -526,6 +530,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             knownPeers.clear();
             knownPeers.addAll(peers);
         }
+
+        fireWifiDirectPeersChanged();
     }
 
     public List<NetworkNode> getKnownWifiDirectPeers() {
@@ -538,8 +544,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                 listener.peersChanged(knownPeers);
             }
         }
-
-        fireWifiDirectPeersChanged();
     }
 
     public void addWifiDirectPeersListener(WifiP2pPeerListener listener) {
@@ -1099,6 +1103,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     /**
+     * Connect to the given wifi direct node.
+     *
+     * @param deviceAddress
+     */
+    public abstract void connectToWifiDirectNode(String deviceAddress);
+
+
+    /**
      * Determine if the device is currently connected to a wifi direct network or not
      * @return
      */
@@ -1438,4 +1450,21 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public abstract int getWifiConnectionTimeout();
 
+    public boolean isSendingOn() {
+        return sendingOn;
+    }
+
+    public void setSendingOn(boolean sendingOn) {
+        this.sendingOn = sendingOn;
+        updateClientServices();
+    }
+
+    public boolean isReceivingOn() {
+        return receivingOn;
+    }
+
+    public void setReceivingOn(boolean receivingOn) {
+        this.receivingOn = receivingOn;
+        updateClientServices();
+    }
 }

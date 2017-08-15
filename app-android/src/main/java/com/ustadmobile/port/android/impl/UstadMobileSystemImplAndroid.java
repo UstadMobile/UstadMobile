@@ -80,6 +80,7 @@ import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.CatalogEntryActivity;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
+import com.ustadmobile.port.android.view.SendCourseDialogFragment;
 import com.ustadmobile.port.android.view.UserSettingsActivity2;
 import com.ustadmobile.port.android.view.WelcomeDialogFragment;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -108,6 +109,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.view.ClassManagementView;
 import com.ustadmobile.port.sharedse.view.ClassManagementView2;
 import com.ustadmobile.port.sharedse.view.EnrollStudentView;
+import com.ustadmobile.port.sharedse.view.SendCourseView;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlSerializer;
@@ -175,6 +177,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(UserSettingsView2.VIEW_NAME, UserSettingsActivity2.class);
         viewNameToAndroidImplMap.put(WelcomeView.VIEW_NAME, WelcomeDialogFragment.class);
         viewNameToAndroidImplMap.put(RegistrationView.VIEW_NAME, RegistrationDialogFragment.class);
+        viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
     }
 
 

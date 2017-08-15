@@ -263,6 +263,12 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
         }
     }
 
+    public void handleClickShare() {
+        Hashtable args = new Hashtable();
+        UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
+    }
+
+
     protected void handleClickModify() {
         modifyAcquiredEntries = getTranslatedAlternativesLangVectors(entry,
                 CatalogController.STATUS_ACQUIRED);

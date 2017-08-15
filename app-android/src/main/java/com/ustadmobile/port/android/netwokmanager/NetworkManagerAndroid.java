@@ -251,12 +251,20 @@ public class NetworkManagerAndroid extends NetworkManager{
                     break;
 
                 case WifiDirectHandler.Action.PEERS_CHANGED:
-                    WifiP2pDeviceList devices = intent.getParcelableExtra("peers");//TODO: Make a flag for this
+                    WifiP2pDeviceList devices = intent.getParcelableExtra(WifiDirectHandler.Extra.PEERS);
                     Collection<WifiP2pDevice> deviceCollection = devices.getDeviceList();
                     ArrayList<NetworkNode> list = new ArrayList(deviceCollection.size());
                     for(WifiP2pDevice device: deviceCollection) {
-                        NetworkNode node = new NetworkNode(device.deviceAddress, null);
+                        if(device.deviceAddress == null) {
+                            //This should NEVER happen, but this is local networking on Android
+                            continue;
+                        }
+
+                        NetworkNode node = new NetworkNode(device.deviceAddress.toUpperCase(), null);
                         list.add(node);
+                        node.setDeviceWifiDirectName(device.deviceName);
+                        UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
+                                + device.deviceAddress + " (" + device.deviceName + ")");
                     }
                     handleWifiDirectPeersChanged(list);
 
@@ -352,6 +360,13 @@ public class NetworkManagerAndroid extends NetworkManager{
             nsdHelperAndroid.startNSDiscovery();
         }else if(!shouldRunNsdDiscovery && nsdHelperAndroid.isDiscoveringNetworkService()) {
             nsdHelperAndroid.stopNSDiscovery();
+        }
+
+        //if we are looking to send a file - enable wifi direct peer discovery
+        if(isSendingOn() && wifiDirectHandler != null) {
+            wifiDirectHandler.continuouslyDiscoverPeers();
+        }else if(!isSendingOn() && wifiDirectHandler != null){
+            wifiDirectHandler.stopPeerDiscovery();
         }
     }
 
@@ -721,6 +736,11 @@ public class NetworkManagerAndroid extends NetworkManager{
     public void connectToWifiDirectGroup(String ssid, String passphrase) {
         temporaryWifiDirectSsids.add(ssid);
         super.connectToWifiDirectGroup(ssid, passphrase);
+    }
+
+    @Override
+    public void connectToWifiDirectNode(String deviceAddress) {
+        networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress);
     }
 
     private void deleteTemporaryWifiDirectSsids() {
