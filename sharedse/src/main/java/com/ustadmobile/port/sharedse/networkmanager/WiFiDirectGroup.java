@@ -14,6 +14,8 @@ public class WiFiDirectGroup {
 
     private String passphrase;
 
+    private boolean owner;
+
     /**
      * Create Wi-Fi Direct group
      * @param ssid Group SSID
@@ -38,5 +40,13 @@ public class WiFiDirectGroup {
      */
     public String getPassphrase() {
         return passphrase;
+    }
+
+    public boolean isOwner() {
+        return owner;
+    }
+
+    public void setOwner(boolean owner) {
+        this.owner = owner;
     }
 }

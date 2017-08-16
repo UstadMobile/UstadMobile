@@ -96,7 +96,7 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
         recyclerViewAdapter = new SendCourseRecyclerAdapter();
         receiversRecyclerView.setAdapter(recyclerViewAdapter);
 
-        mPresenter = new SendCoursePresenter(this, UMAndroidUtil.bundleToHashtable(getArguments()),
+        mPresenter = new SendCoursePresenter(getContext(), UMAndroidUtil.bundleToHashtable(getArguments()),
                 this);
         mPresenter.onCreate(null);
         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(

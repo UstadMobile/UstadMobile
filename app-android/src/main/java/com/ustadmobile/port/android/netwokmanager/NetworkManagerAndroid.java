@@ -193,8 +193,9 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.DEVICE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_STATE_CHANGED);
         filter.addAction(WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE);
-        filter.addAction(WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION);
+        filter.addAction(WifiDirectHandler.Action.GROUP_INFO_AVAILABLE);//WAS GROUP CREATION
         filter.addAction(WifiDirectHandler.Action.PEERS_CHANGED);
+        filter.addAction(WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
 
         IntentFilter intentFilter = new IntentFilter();
@@ -240,13 +241,15 @@ public class NetworkManagerAndroid extends NetworkManager{
                     handleWifiDirectSdTxtRecordsAvailable(txtRecord.getFullDomain(),deviceMac, (HashMap<String, String>) txtRecord.getRecord());
 
                     break;
-                case WifiDirectHandler.Action.NOPROMPT_GROUP_CREATION_ACTION:
+                case WifiDirectHandler.Action.GROUP_INFO_AVAILABLE:
                     boolean informationAvailable=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup().isGroupOwner();
                     if(informationAvailable){
                         currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
                         WifiP2pGroup wifiP2pGroup=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
-                        handleWifiDirectGroupCreated(new WiFiDirectGroup(wifiP2pGroup.getNetworkName(),
-                                wifiP2pGroup.getPassphrase()));
+                        WiFiDirectGroup group = new WiFiDirectGroup(wifiP2pGroup.getNetworkName(),
+                                wifiP2pGroup.getPassphrase());
+                        group.setOwner(wifiP2pGroup.isGroupOwner());
+                        handleWifiDirectGroupCreated(group);
                     }
                     break;
 
@@ -260,7 +263,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                             continue;
                         }
 
-                        NetworkNode node = new NetworkNode(device.deviceAddress.toUpperCase(), null);
+                        NetworkNode node = new NetworkNode(device.deviceAddress, null);
                         list.add(node);
                         node.setDeviceWifiDirectName(device.deviceName);
                         UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
@@ -269,6 +272,12 @@ public class NetworkManagerAndroid extends NetworkManager{
                     handleWifiDirectPeersChanged(list);
 
                     break;
+
+                case WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED:
+                    if(intent.hasExtra(WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED)) {
+                        //wifi direct connection has succeeded.
+                    }
+
             }
 
         }

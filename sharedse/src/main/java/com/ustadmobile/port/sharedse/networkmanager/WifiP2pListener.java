@@ -8,7 +8,7 @@ import java.util.List;
  * Created by mike on 8/14/17.
  */
 
-public interface WifiP2pPeerListener {
+public interface WifiP2pListener {
 
     void peersChanged(List<NetworkNode> peers);
 

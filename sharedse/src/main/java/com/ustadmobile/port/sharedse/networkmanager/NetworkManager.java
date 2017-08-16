@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -206,7 +205,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private Vector<NetworkNode> knownPeers = new Vector<>();
 
-    private Vector<WifiP2pPeerListener> peerChangeListeners = new Vector<>();
+    private Vector<WifiP2pListener> peerChangeListeners = new Vector<>();
 
     private boolean sendingOn = false;
 
@@ -540,17 +539,17 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     protected void fireWifiDirectPeersChanged() {
         synchronized (peerChangeListeners) {
-            for(WifiP2pPeerListener listener: peerChangeListeners) {
+            for(WifiP2pListener listener: peerChangeListeners) {
                 listener.peersChanged(knownPeers);
             }
         }
     }
 
-    public void addWifiDirectPeersListener(WifiP2pPeerListener listener) {
+    public void addWifiDirectPeersListener(WifiP2pListener listener) {
         peerChangeListeners.add(listener);
     }
 
-    public void removeWifiDirectPeersListener(WifiP2pPeerListener listener) {
+    public void removeWifiDirectPeersListener(WifiP2pListener listener) {
         peerChangeListeners.remove(listener);
     }
 

@@ -93,7 +93,9 @@ public class AppViewAndroid implements AppView{
         new AppViewAsyncTask() {
             @Override
             protected void onPostExecute(Void aVoid) {
-                progressDialog.setTitle(title);
+                if(progressDialog != null) {
+                    progressDialog.setTitle(title);
+                }
             }
         }.execute();
     }

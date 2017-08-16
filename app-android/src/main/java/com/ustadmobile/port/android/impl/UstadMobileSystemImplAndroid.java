@@ -197,7 +197,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     public static final String START_AUTH = "START_AUTH";
 
-    private WeakHashMap<Activity, AppViewAndroid> appViews;
+    private WeakHashMap<Context, AppViewAndroid> appViews;
 
     private HashMap<UMDownloadCompleteReceiver, BroadcastReceiver> downloadCompleteReceivers;
 
@@ -688,11 +688,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public AppView getAppView(Object context) {
-        Activity activity = (Activity)context;
-        AppViewAndroid view = appViews.get(activity);
+        Context ctx = (Context)context;
+        AppViewAndroid view = appViews.get(ctx);
         if(view == null) {
-            view = new AppViewAndroid(this, activity);
-            appViews.put(activity, view);
+            view = new AppViewAndroid(this, ctx);
+            appViews.put(ctx, view);
         }
 
         return view;

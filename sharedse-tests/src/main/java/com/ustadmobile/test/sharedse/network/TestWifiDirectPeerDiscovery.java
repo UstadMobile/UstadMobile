@@ -3,7 +3,7 @@ package com.ustadmobile.test.sharedse.network;
 import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-import com.ustadmobile.port.sharedse.networkmanager.WifiP2pPeerListener;
+import com.ustadmobile.port.sharedse.networkmanager.WifiP2pListener;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 
 import org.junit.Test;
@@ -21,7 +21,7 @@ public class TestWifiDirectPeerDiscovery {
     @Test
     public void testPeerDiscovery() {
         final Object lock = new Object();
-        WifiP2pPeerListener listener = new WifiP2pPeerListener() {
+        WifiP2pListener listener = new WifiP2pListener() {
             @Override
             public void peersChanged(List<NetworkNode> peers) {
                 if(isMacAddrInList(peers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC)){
@@ -47,7 +47,7 @@ public class TestWifiDirectPeerDiscovery {
         String nodeMacAddr;
         for(NetworkNode node : list) {
             nodeMacAddr = node.getDeviceWifiDirectMacAddress();
-            if(nodeMacAddr != null && nodeMacAddr.equals(macAddr))
+            if(nodeMacAddr != null && nodeMacAddr.equalsIgnoreCase(macAddr))
                 return true;
         }
 
