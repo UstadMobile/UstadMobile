@@ -35,11 +35,13 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 /**
@@ -55,53 +57,67 @@ public class AppViewAndroid implements AppView{
 
     private AlertDialog choiceDialog;
 
-    private Activity activity;
+    private UstadView view;
 
-    public AppViewAndroid(UstadMobileSystemImplAndroid impl, Activity activity) {
+    private Context context;
+
+    private static class AppViewAsyncTask extends android.os.AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
+    }
+
+    public AppViewAndroid(UstadMobileSystemImplAndroid impl, Context context) {
         this.impl = impl;
-        this.activity = activity;
+        this.context = context;
+        if(context instanceof UstadView) {
+            view = (UstadView)context;
+        }
     }
 
 
     @Override
     public void showProgressDialog(final String title) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
+        new AppViewAsyncTask() {
+            @Override
+            protected void onPostExecute(Void aVoid) {
                 dismissProgressDialog();
-
-                progressDialog = ProgressDialog.show(activity, title, "");
+                progressDialog = ProgressDialog.show(context, title, "");
             }
-        });
-
+        }.execute();
     }
 
     @Override
     public void setProgressDialogTitle(final String title) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
+        new AppViewAsyncTask() {
+            @Override
+            protected void onPostExecute(Void aVoid) {
                 progressDialog.setTitle(title);
             }
-        });
+        }.execute();
     }
 
     @Override
     public boolean dismissProgressDialog() {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
+        new AppViewAsyncTask(){
+            @Override
+            protected void onPostExecute(Void aVoid) {
                 if (progressDialog != null) {
                     progressDialog.dismiss();
                     progressDialog = null;
                 }
             }
-        });
+        }.execute();
         return progressDialog != null;
     }
 
     @Override
     public void showAlertDialog(final String title, final String text) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        new AppViewAsyncTask() {
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setMessage(text).setTitle(title);
                 builder.setPositiveButton("OK", new AlertDialog.OnClickListener() {
                     @Override
@@ -111,13 +127,14 @@ public class AppViewAndroid implements AppView{
                 });
                 alertDialog = builder.create();
                 alertDialog.show();
+
             }
-        });
+        }.execute();
     }
 
     @Override
     public void dismissAlertDialog() {
-        activity.runOnUiThread(new Runnable() {
+        view.runOnUiThread(new Runnable() {
             public void run(){
                 if(alertDialog != null) {
                     alertDialog.dismiss();
@@ -129,25 +146,24 @@ public class AppViewAndroid implements AppView{
 
     @Override
     public void showNotification(final String text, final int length) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(activity, text, length).show();
+        new AppViewAsyncTask(){
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                Toast.makeText(context, text, length).show();
             }
-        });
-
-
+        }.execute();
     }
 
     @Override
     public void showChoiceDialog(final String title, final String[] choices, final int commandId, final AppViewChoiceListener listener) {
-        activity.runOnUiThread(new Runnable() {
+        new AppViewAsyncTask(){
             @Override
-            public void run() {
+            protected void onPostExecute(Void aVoid) {
                 if(choiceDialog != null) {
                     choiceDialog.dismiss();
                 }
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle(title).setItems(choices, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         listener.appViewChoiceSelected(commandId, which);
@@ -156,18 +172,19 @@ public class AppViewAndroid implements AppView{
                 choiceDialog = builder.create();
                 choiceDialog.show();
             }
-        });
+        }.execute();
     }
 
     @Override
     public void dismissChoiceDialog() {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
+        new AppViewAsyncTask(){
+            @Override
+            protected void onPostExecute(Void aVoid) {
                 if(choiceDialog != null) {
                     choiceDialog.dismiss();
                     choiceDialog = null;
                 }
             }
-        });
+        }.execute();
     }
 }
