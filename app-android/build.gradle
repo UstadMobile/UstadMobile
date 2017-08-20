@@ -71,9 +71,12 @@ task startTestSlaveServer(type: Exec) {
         }
 
         String ipAddr = null
-        String[] ipAddrParts = ipAddrStdOut.toString().split()
-        if(ipAddrParts.length >= 9) {
-            ipAddr = ipAddrParts[8]
+        String[] ipAddrLines = ipAddrStdOut.toString().split("\n")
+        for(int i = 0; i < ipAddrLines.length; i++) {
+            String[] ipAddrParts = ipAddrLines[i].split()
+            if(ipAddrParts.length >= 9) {
+                ipAddr = ipAddrParts[8]
+            }
         }
 
         /*
@@ -104,7 +107,7 @@ task startTestSlaveServer(type: Exec) {
         String propertiesStr = mainLocalPropertiesFile.getText("UTF-8")
         propertiesStr = propertiesStr.replaceAll("test.remote_bluetooth_device=([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", "test.remote_bluetooth_device=" + btAddrStdOut.toString())
         println("Remote test slave bluetooth address: " + btAddrStdOut.toString())
-        println("Remote test slave WLAN mac address: " + macAddr)
+        println("Remote test slave WiFi P2P mac address: " + macAddr)
         println("Remote test slave IP address: " + ipAddr)
 
         if(ipAddr != null) {
