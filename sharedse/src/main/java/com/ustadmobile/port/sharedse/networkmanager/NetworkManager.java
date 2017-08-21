@@ -15,14 +15,18 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -37,6 +41,8 @@ import java.util.TimerTask;
 import java.util.Vector;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
+
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
@@ -80,6 +86,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Flag to indicate file acquisition source is peer on different network
      */
     public static final int DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK =3;
+
+    /**
+     * Flag to indicate file acquisition source is a wifi direct connection between two devices
+     */
+    public static final int DOWNLOAD_FROM_PEER_WIFIDIRECT = 4;
 
     public BluetoothServer bluetoothServer;
 
@@ -141,7 +152,22 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private Map<String,AcquisitionTask> entryAcquisitionTaskMap=new HashMap<>();
 
+    /**
+     * The main HTTP server which runs on a dynamic port
+     */
     protected EmbeddedHTTPD httpd;
+
+    /**
+     * The fixed port HTTP server that is used only for sharing courses.
+     */
+    protected RouterNanoHTTPD sharedFeedHttpd;
+
+    /**
+     * The feed that the user wants to share at the moment
+     */
+    protected UstadJSOPDSFeed sharedFeed;
+
+    public static final int SHARED_FEED_PORT = 8006;
 
     public static final int AFTER_GROUP_CONNECTION_DO_NOTHING = 0;
 
@@ -206,8 +232,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     private Vector<NetworkNode> knownPeers = new Vector<>();
 
     private Vector<WifiP2pListener> peerChangeListeners = new Vector<>();
-
-    private boolean sendingOn = false;
 
     private boolean receivingOn = false;
 
@@ -541,6 +565,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         synchronized (peerChangeListeners) {
             for(WifiP2pListener listener: peerChangeListeners) {
                 listener.peersChanged(knownPeers);
+            }
+        }
+    }
+
+    protected void fireWifiP2pConnectionChanged(boolean connected) {
+        synchronized (peerChangeListeners) {
+            for(WifiP2pListener listener : peerChangeListeners) {
+                listener.wifiP2pConnectionChanged(connected);
             }
         }
     }
@@ -1392,7 +1424,29 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param sharedFeed
      */
     public void setSharedFeed(UstadJSOPDSFeed sharedFeed) {
+        this.sharedFeed = sharedFeed;
+
+        if(sharedFeed != null && sharedFeedHttpd == null) {
+            sharedFeedHttpd = new RouterNanoHTTPD(SHARED_FEED_PORT);
+            try {
+                sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeed);
+                sharedFeedHttpd.start();
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 663, "setSendingOn: Exception starting http server");
+                sharedFeedHttpd = null;
+            }
+            updateClientServices();
+        }else if(sharedFeed == null && sharedFeedHttpd != null) {
+            sharedFeedHttpd.stop();
+            sharedFeedHttpd = null;
+            updateClientServices();
+        }
+
         httpd.addRoute(CATALOG_HTTP_SHARED_URI, OPDSFeedUriResponder.class, sharedFeed);
+    }
+
+    public UstadJSOPDSFeed getSharedFeed() {
+        return sharedFeed;
     }
 
     /**
@@ -1401,8 +1455,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param entryIds
      */
     public void setSharedFeed(String[] entryIds) {
-        String feedSrcHref = UMFileUtil.joinPaths(new String[] {getLocalHttpUrl(),
-                "/shared/shared.opds"});
+        String feedSrcHref = "p2p://192.168.49.1:" + getHttpListeningPort() + "/";
         UstadJSOPDSFeed feed = new UstadJSOPDSFeed(feedSrcHref, "Shared courses",
                 UMUUID.randomUUID().toString());
         UstadJSOPDSEntry entry;
@@ -1415,7 +1468,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                 continue;//cannot be shared if it has not been acquired.
 
             entry = new UstadJSOPDSEntry(feed, "Shared: " + entryInfo.fileURI, entryIds[i],
-                    UstadJSOPDSFeed.LINK_ACQUIRE, entryInfo.mimeType, CATALOG_HTTP_ENDPOINT_PREFIX);
+                    UstadJSOPDSFeed.LINK_ACQUIRE, entryInfo.mimeType,
+                    UMFileUtil.joinPaths(new String[] {CATALOG_HTTP_ENDPOINT_PREFIX, "entry",
+                            entryIds[i]}));
             feed.addEntry(entry);
         }
 
@@ -1449,14 +1504,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public abstract int getWifiConnectionTimeout();
 
-    public boolean isSendingOn() {
-        return sendingOn;
-    }
-
-    public void setSendingOn(boolean sendingOn) {
-        this.sendingOn = sendingOn;
-        updateClientServices();
-    }
 
     public boolean isReceivingOn() {
         return receivingOn;
@@ -1466,4 +1513,85 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         this.receivingOn = receivingOn;
         updateClientServices();
     }
+
+    /**
+     * Return info about this wifi direct device as a NetworkNode object
+     *
+     * @return
+     */
+    public abstract NetworkNode getThisWifiDirectDevice();
+
+    public abstract String getWifiDirectGroupOwnerIp();
+
+    /**
+     * Check if there is an active wifi direct connection with the given other device
+     *
+     * @param otherDevice Mac address of the other device
+     *
+     * @return true if the given device is already a member of the same wifi direct group, false otherwise
+     */
+    public abstract boolean isWifiDirectConnectionEstablished(String otherDevice);
+
+    /**
+     * Share the given feed using WiFi direct to the specified destination mac address.
+     *
+     * @param feed
+     * @param destinationMacAddr
+     */
+    public void shareFeed(UstadJSOPDSFeed feed, String destinationMacAddr) {
+        setSharedFeed(feed);
+        if(!isWifiDirectConnectionEstablished(destinationMacAddr))
+            connectToWifiDirectNode(destinationMacAddr);
+    }
+
+    public void shareEntries(String[] entryIds, String destinationMacAddr) {
+        setSharedFeed(entryIds);
+        if(!isWifiDirectConnectionEstablished(destinationMacAddr))
+            connectToWifiDirectNode(destinationMacAddr);
+    }
+
+    /**
+     * Get the OPDS feed that is being shared by the group owner, if any. This feed can then be
+     * acquired the normal way using requestAcquisition
+     *
+     * @return
+     */
+    public UstadJSOPDSFeed getOpdsFeedSharedByWifiP2pGroupOwner()throws IOException, XmlPullParserException {
+        String groupOwner = getWifiDirectGroupOwnerIp();
+        if(groupOwner == null) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 664,
+                    "getOpdsFeedSharedByWifiP2pGroupOwner: group owner ip is null");
+            return null;
+        }
+
+        UstadMobileSystemImpl.l(UMLog.INFO, 700, "Found group owner: " + groupOwner);
+
+        //now get the feed itself
+        IOException ioe = null;
+        XmlPullParserException xe = null;
+        InputStream feedIn = null;
+        UstadJSOPDSFeed feed = null;
+        String feedUrl = "http://" + groupOwner + ":" + NetworkManager.SHARED_FEED_PORT +"/";
+
+
+        try {
+            URL feedUrlObj = new URL(feedUrl);
+            feedIn = feedUrlObj.openStream();
+            feed = new UstadJSOPDSFeed(feedUrl, feedIn, "UTF-8");
+        }catch(IOException e) {
+            ioe = e;
+            UstadMobileSystemImpl.l(UMLog.ERROR, 665, "Exception loading opds shared feed", e);
+        }catch(XmlPullParserException x) {
+            xe = x;
+            UstadMobileSystemImpl.l(UMLog.ERROR, 665, "Exception loading opds shared feed", x);
+        }finally{
+            UMIOUtils.closeInputStream(feedIn);
+            UMIOUtils.throwIfNotNullIO(ioe);
+            if(xe != null)
+                throw xe;
+        }
+
+        return feed;
+    }
+
 }

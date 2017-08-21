@@ -196,6 +196,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.GROUP_INFO_AVAILABLE);//WAS GROUP CREATION
         filter.addAction(WifiDirectHandler.Action.PEERS_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED);
+        filter.addAction(WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
 
         IntentFilter intentFilter = new IntentFilter();
@@ -253,6 +254,8 @@ public class NetworkManagerAndroid extends NetworkManager{
                     }
                     break;
 
+//                case WifiDirectHandler.Action.GROUP_REMOVED
+
                 case WifiDirectHandler.Action.PEERS_CHANGED:
                     WifiP2pDeviceList devices = intent.getParcelableExtra(WifiDirectHandler.Extra.PEERS);
                     Collection<WifiP2pDevice> deviceCollection = devices.getDeviceList();
@@ -274,9 +277,17 @@ public class NetworkManagerAndroid extends NetworkManager{
                     break;
 
                 case WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED:
-                    if(intent.hasExtra(WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED)) {
-                        //wifi direct connection has succeeded.
+                    boolean isConnected = intent.getBooleanExtra(
+                            WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED, false);
+                    if(!isConnected) {
+                        fireWifiP2pConnectionChanged(false);
                     }
+                    break;
+
+                case WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE:
+                    //the device should have connected
+                    fireWifiP2pConnectionChanged(true);
+                    break;
 
             }
 
@@ -372,9 +383,9 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
 
         //if we are looking to send a file - enable wifi direct peer discovery
-        if(isSendingOn() && wifiDirectHandler != null) {
+        if(getSharedFeed() != null && wifiDirectHandler != null) {
             wifiDirectHandler.continuouslyDiscoverPeers();
-        }else if(!isSendingOn() && wifiDirectHandler != null){
+        }else if(getSharedFeed() == null && wifiDirectHandler != null){
             wifiDirectHandler.stopPeerDiscovery();
         }
     }
@@ -749,7 +760,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void connectToWifiDirectNode(String deviceAddress) {
-        networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress);
+        networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress, 15);
     }
 
     private void deleteTemporaryWifiDirectSsids() {
@@ -844,24 +855,22 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
     }
 
+
     //TODO: Add a status flag for removal requested
     @Override
     public synchronized void removeWiFiDirectGroup() {
-        if(currentWifiDirectGroupStatus == WIFI_DIRECT_GROUP_STATUS_ACTIVE) {
-            networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
-                @Override
-                public void onSuccess() {
-                    currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
-                    handleWifiDirectGroupRemoved(true);
-                }
+        networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+                handleWifiDirectGroupRemoved(true);
+            }
 
-                @Override
-                public void onFailure(int reason) {
-                    handleWifiDirectGroupRemoved(false);
-                }
-            });
-        }
-
+            @Override
+            public void onFailure(int reason) {
+                handleWifiDirectGroupRemoved(false);
+            }
+        });
     }
 
     @Override
@@ -903,5 +912,56 @@ public class NetworkManagerAndroid extends NetworkManager{
     @Override
     public int getWifiConnectionTimeout() {
         return 60000;
+    }
+
+    @Override
+    public NetworkNode getThisWifiDirectDevice() {
+        if(networkService.getWifiDirectHandlerAPI() == null)
+            return null;
+
+        WifiP2pDevice thisDevice = networkService.getWifiDirectHandlerAPI().getThisDevice();
+        if(thisDevice == null)
+            return null;
+
+        NetworkNode thisNode = new NetworkNode(thisDevice.deviceAddress, null);
+        thisNode.setDeviceWifiDirectName(thisDevice.deviceName);
+
+        return thisNode;
+    }
+
+
+    @Override
+    public String getWifiDirectGroupOwnerIp() {
+        if(networkService.getWifiDirectHandlerAPI() == null
+                || networkService.getWifiDirectHandlerAPI().getWifiP2pInfo() == null
+                || networkService.getWifiDirectHandlerAPI().getWifiP2pInfo().groupOwnerAddress == null)
+            return null;
+
+        return networkService.getWifiDirectHandlerAPI().getWifiP2pInfo().groupOwnerAddress.getHostAddress();
+    }
+
+    @Override
+    public boolean isWifiDirectConnectionEstablished(String otherDevice) {
+        if(networkService.getWifiDirectHandlerAPI() == null)
+            return false;
+
+        WifiP2pGroup activeGroup = networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
+        if(activeGroup == null)
+            return false;
+
+        WifiP2pDevice ownerDevice = activeGroup.getOwner();
+        if(ownerDevice != null && otherDevice.equalsIgnoreCase(ownerDevice.deviceAddress))
+            return true;
+
+        Collection<WifiP2pDevice> groupMembers = activeGroup.getClientList();
+        if(groupMembers == null)
+            return false;
+
+        for(WifiP2pDevice device : groupMembers) {
+            if(otherDevice.equalsIgnoreCase(device.deviceAddress))
+                return true;
+        }
+
+        return false;
     }
 }

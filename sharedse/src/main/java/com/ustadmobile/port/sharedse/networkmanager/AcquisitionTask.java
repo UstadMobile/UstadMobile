@@ -131,6 +131,11 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
     public static final String TARGET_NETWORK_MOBILE_DATA = "com.ustadmobile.network.mobiledata";
 
     /**
+     * The task wants to use a "normal" wifi direct connection between two devices
+     */
+    public static final String TARGET_NETWORK_WIFIDIRECT = "com.ustadmobile.network.wifidirect";
+
+    /**
      * The network that this task wants to connect with for the upcoming/current download
      */
     private String targetNetwork;
@@ -369,6 +374,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
         setWaitingForWifiConnection(false);
 
+        String feedSelfUrl = feed.getAbsoluteSelfLink()[UstadJSOPDSFeed.ATTR_HREF];
+        if(feedSelfUrl.startsWith("p2p://")) {
+            networkManager.removeWiFiDirectGroup();
+        }
+
+
         if(wifiConnectTimeoutTimer != null) {
             wifiConnectTimeoutTimer.cancel();
             wifiConnectTimeoutTimer = null;
@@ -436,7 +447,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             String currentSsid = networkManager.getCurrentWifiSsid();
             boolean wifiAvailable = currentSsid != null
                     || networkManager.getActionRequiredAfterGroupConnection() == NetworkManager.AFTER_GROUP_CONNECTION_RESTORE;
-            if(localNetworkDownloadEnabled && entryCheckResponse != null
+            String feedEntryAcquisitionUrl =  UMFileUtil.resolveLink(
+                    feed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF],
+                    feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(null)[UstadJSOPDSEntry.LINK_HREF]);
+
+            if(feedEntryAcquisitionUrl.startsWith("p2p://")) {
+                targetNetwork = TARGET_NETWORK_WIFIDIRECT;
+                currentDownloadUrl = feedEntryAcquisitionUrl.replace("p2p://", "http://");
+            }else if(localNetworkDownloadEnabled && entryCheckResponse != null
                     && networkManager.getCurrentWifiSsid() != null
                     && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 targetNetwork = TARGET_NETWORK_NORMAL;
@@ -451,9 +469,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             }else if(wifiAvailable|| isDownloadOnMobileDataEnabled()){
                 //download from cloud
                 targetNetwork = wifiAvailable ? TARGET_NETWORK_NORMAL : TARGET_NETWORK_MOBILE_DATA;
-                currentDownloadUrl = UMFileUtil.resolveLink(
-                    feed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF],
-                    feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(null)[UstadJSOPDSEntry.LINK_HREF]);
+                currentDownloadUrl = feedEntryAcquisitionUrl;
                 currentDownloadMode = DOWNLOAD_FROM_CLOUD;
             }else {
                 //we're stuck -
@@ -471,7 +487,10 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                     "  id " + feed.entries[index].id + " Mode = " + currentDownloadMode
                     + " target network = " + targetNetwork);
 
-            if(targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT_GROUP)) {
+            if(targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT)) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + " : use WiFi direct");
+                downloadCurrentFile(currentDownloadUrl, NetworkManager.DOWNLOAD_FROM_PEER_WIFIDIRECT);
+            }else if(targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT_GROUP)) {
                 UstadMobileSystemImpl.l(UMLog.INFO, 316,getLogPrefix() +  ": Connect bluetooth");
                 networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
                         currentDownloadMode);

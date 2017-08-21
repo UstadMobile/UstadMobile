@@ -10,6 +10,18 @@ import java.util.List;
 
 public interface WifiP2pListener {
 
+    /**
+     * Fired when the list of other devices around nearby has changed
+     *
+     * @param peers List of peers available. NetworkNode objects with the hardware address and
+     *              wifi direct mac address fields.
+     */
     void peersChanged(List<NetworkNode> peers);
+
+    /**
+     * Fired when the device is connected, disconnected, or when another peers joins the group.
+     */
+    void wifiP2pConnectionChanged(boolean connected);
+
 
 }

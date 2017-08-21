@@ -2,6 +2,7 @@ package com.ustadmobile.test.sharedse.http;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
@@ -29,6 +30,8 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
     public static final String CMD_MANGLE_BLUETOOTH = "MANGLEBLUETOOTH";
 
     public static final String CMD_DISABLE_WIFI = "DISABLEWIFI";
+
+    public static final String CMD_SEND_COURSE = "SENDCOURSE";
 
     public static final String CMD_MANGLE_WIFI_DIRECT_GROUP = "";
 
@@ -74,6 +77,16 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
                                 + (opSuccess ? " succeeded" : " failed"));
                     }
                 }).start();
+                return newFixedLengthResponse("OK");
+            }else if(CMD_SEND_COURSE.equals(command)){
+                String destMacAddr = decodedParams.get("dst").get(0);
+                List<String> entryIdsToSend = decodedParams.get("entryId");
+                String[] entryIdsToSendArr = new String[entryIdsToSend.size()];
+                entryIdsToSend.toArray(entryIdsToSendArr);
+                NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+                networkManager.setSharedFeed(entryIdsToSendArr);
+                TestServerFileSender sender = new TestServerFileSender(destMacAddr, entryIdsToSendArr);
+                sender.start();
                 return newFixedLengthResponse("OK");
             }else if(CMD_CREATEGROUP.equals(command)) {
                 int groupStatus = networkManager.getWifiDirectGroupStatus();
