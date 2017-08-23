@@ -820,7 +820,8 @@ public class HTTPCacheDir {
         }
         
         String contentType = result.getHeaderValue("content-type");
-        int sepIndex = contentType.indexOf(';');
+
+        int sepIndex = contentType != null ? contentType.indexOf(';') : -1;
         if(sepIndex != -1) {
             contentType = contentType.substring(0, sepIndex).trim();
         }

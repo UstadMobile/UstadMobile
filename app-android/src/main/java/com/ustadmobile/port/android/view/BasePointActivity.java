@@ -210,6 +210,10 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 mBasePointController.handleClickShareApp();
                 return true;
 
+            case BasePointController.CMD_RECEIVE_ENTRY:
+                mBasePointController.handleClickReceive();
+                return true;
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -218,6 +222,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.NONE, BasePointController.CMD_SHARE_APP, 0, R.string.share_application);
+        menu.add(Menu.NONE, BasePointController.CMD_RECEIVE_ENTRY, 1, R.string.receive);
         return super.onCreateOptionsMenu(menu);
     }
 

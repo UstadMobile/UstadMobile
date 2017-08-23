@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http;
 import com.ustadmobile.core.util.UMFileUtil;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -92,7 +93,7 @@ public abstract class FileResponder {
 
         @Override
         public InputStream getInputStream() throws IOException{
-            return new FileInputStream(src);
+            return new BufferedInputStream(new FileInputStream(src));
         }
 
         @Override
@@ -222,7 +223,7 @@ public abstract class FileResponder {
             }else {
                 //Workaround : NanoHTTPD is using the InputStream.available method incorrectly
                 // see RangeInputStream.available
-                retInputStream = isHeadRequest ? null : new RangeInputStream(retInputStream, 0, totalLength);
+                retInputStream = isHeadRequest ? null : retInputStream;
                 NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
                     EmbeddedHTTPD.getMimeType(fileName), retInputStream, totalLength);
 

@@ -79,6 +79,7 @@ import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.CatalogEntryActivity;
+import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
 import com.ustadmobile.port.android.view.SendCourseDialogFragment;
 import com.ustadmobile.port.android.view.UserSettingsActivity2;
@@ -109,6 +110,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.view.ClassManagementView;
 import com.ustadmobile.port.sharedse.view.ClassManagementView2;
 import com.ustadmobile.port.sharedse.view.EnrollStudentView;
+import com.ustadmobile.port.sharedse.view.ReceiveCourseView;
 import com.ustadmobile.port.sharedse.view.SendCourseView;
 
 import org.json.JSONObject;
@@ -178,6 +180,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(WelcomeView.VIEW_NAME, WelcomeDialogFragment.class);
         viewNameToAndroidImplMap.put(RegistrationView.VIEW_NAME, RegistrationDialogFragment.class);
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
+        viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
     }
 
 
@@ -425,6 +428,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             String toastMsg = null;
             try {
                 DialogFragment dialog = (DialogFragment)androidImplClass.newInstance();
+                if(args != null)
+                    dialog.setArguments(UMAndroidUtil.hashtableToBundle(args));
                 AppCompatActivity activity = (AppCompatActivity)context;
                 dialog.show(activity.getSupportFragmentManager(),TAG_DIALOG_FRAGMENT);
             }catch(InstantiationException e) {

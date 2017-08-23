@@ -275,6 +275,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             httpd.addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
+            UstadMobileSystemImpl.l(UMLog.INFO, 345, "Started embedded HTTP on port "
+                    + httpd.getListeningPort());
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.CRITICAL, 1, "Failed to start http server");
             throw new RuntimeException("Failed to start http server", e);
@@ -1454,9 +1456,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @param entryIds
      */
-    public void setSharedFeed(String[] entryIds) {
+    public void setSharedFeed(String[] entryIds, String title) {
+        //TODO: replace this hardcoded value with something generic that gets replaced by client
         String feedSrcHref = "p2p://192.168.49.1:" + getHttpListeningPort() + "/";
-        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(feedSrcHref, "Shared courses",
+        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(feedSrcHref, title,
                 UMUUID.randomUUID().toString());
         UstadJSOPDSEntry entry;
         CatalogEntryInfo entryInfo;
@@ -1544,8 +1547,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             connectToWifiDirectNode(destinationMacAddr);
     }
 
-    public void shareEntries(String[] entryIds, String destinationMacAddr) {
-        setSharedFeed(entryIds);
+    public void shareEntries(String[] entryIds, String title, String destinationMacAddr) {
+        setSharedFeed(entryIds, title);
         if(!isWifiDirectConnectionEstablished(destinationMacAddr))
             connectToWifiDirectNode(destinationMacAddr);
     }

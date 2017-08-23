@@ -561,8 +561,9 @@ public class NetworkManagerAndroid extends NetworkManager{
      * @return HashMap : Constructed DNS-Text records.
      */
     private HashMap<String,String> localService(){
-        boolean isConnected= connectivityManager!=null &&
-                connectivityManager.getActiveNetworkInfo().getType()
+        boolean isConnected= connectivityManager!=null
+                && connectivityManager.getActiveNetworkInfo() != null
+                && connectivityManager.getActiveNetworkInfo().getType()
                 == ConnectivityManager.TYPE_WIFI;
         String deviceBluetoothMacAddress=getBluetoothMacAddress();
         String deviceIpAddress=isConnected ? getDeviceIPAddress():"";

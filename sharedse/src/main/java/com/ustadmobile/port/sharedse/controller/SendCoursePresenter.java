@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -24,9 +25,19 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     private SendCourseView view;
 
+    private String sendTitle;
+
+    private String[] sharedEntries;
+
+    public static final String ARG_SEND_TITLE = "title";
+
+    public static final String ARG_ENTRY_IDS = "entries";
+
     public SendCoursePresenter(Object context, Hashtable args, SendCourseView view) {
         super(context);
         this.view = view;
+        sendTitle = args.containsKey(ARG_SEND_TITLE) ? args.get(ARG_SEND_TITLE).toString() : "Shared courses";
+        sharedEntries = (String[])args.get(ARG_ENTRY_IDS);
     }
 
     public void onCreate(Hashtable savedState) {
@@ -35,16 +46,17 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     public void onStart() {
         NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        peersChanged(networkManager.getKnownWifiDirectPeers());
         networkManager.addWifiDirectPeersListener(this);
         networkManager.addWifiDirectGroupListener(this);
-        //networkManager.setSendingOn(true);
-
+        networkManager.setSharedFeed(sharedEntries, sendTitle);
     }
 
     public void onStop() {
         NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         networkManager.removeWifiDirectPeersListener(this);
-        //networkManager.setSendingOn(false);
+        UstadJSOPDSFeed nullFeed = null;
+        networkManager.setSharedFeed(nullFeed);
     }
 
     @Override

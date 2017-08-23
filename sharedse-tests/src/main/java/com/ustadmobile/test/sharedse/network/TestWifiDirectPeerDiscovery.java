@@ -58,7 +58,7 @@ public class TestWifiDirectPeerDiscovery {
         };
 
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        manager.setSharedFeed(new String[]{TestEntryStatusTask.ENTRY_ID});
+        manager.setSharedFeed(new String[]{TestEntryStatusTask.ENTRY_ID}, "Test Entry Status");
         manager.addWifiDirectPeersListener(listener);
         List<NetworkNode> knownPeers = manager.getKnownWifiDirectPeers();
         if(!isMacAddrInList(knownPeers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC)) {

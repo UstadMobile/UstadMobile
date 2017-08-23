@@ -56,7 +56,7 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
                 return;
 
             }
-            manager.shareEntries(entryIdsToSend, destMacAddr);
+            manager.shareEntries(entryIdsToSend, "Test incoming files", destMacAddr);
 
 //            manager.connectToWifiDirectNode(destMacAddr);
         }catch(Exception e) {

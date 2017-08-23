@@ -72,8 +72,6 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
                 UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
         UstadMobileSystemImplSE.getInstanceSE().addActiveUserListener(this);
         bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
-
-
     }
 
     @Override

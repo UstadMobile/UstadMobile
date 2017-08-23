@@ -32,8 +32,6 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.AcquisitionStatusEvent;
-import com.ustadmobile.core.impl.AcquisitionStatusListener;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -61,10 +59,12 @@ import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.UstadView;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -994,6 +994,34 @@ public class CatalogController extends BaseCatalogController implements AppViewC
                 this.handleConfirmDeleteEntries();
                 break;
         }
+    }
+
+    public void handleClickShare() {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        Vector entriesToShare = new Vector();
+        UstadJSOPDSFeed displayFeed = getDisplayFeed();
+        CatalogEntryInfo info;
+        UstadJSOPDSEntry entry;
+        for(int i = 0; i < displayFeed.size(); i++) {
+            entry = displayFeed.getEntry(i);
+            info = CatalogController.getEntryInfo(entry.id, CatalogController.SHARED_RESOURCE,
+                    getContext());
+            if(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED)
+                entriesToShare.addElement(entry.id);
+        }
+        if(entriesToShare.size() > 0) {
+            String[] entriesToShareArr = new String[entriesToShare.size()];
+            entriesToShare.toArray(entriesToShareArr);
+            Hashtable shareArgs = new Hashtable();
+            shareArgs.put("title", displayFeed.title);
+            shareArgs.put("entries", entriesToShareArr);
+            impl.go("SendCourse", shareArgs, getContext());
+        }else {
+            impl.getAppView(getContext()).showNotification("No entries downloaded to share yet",
+                    AppView.LENGTH_LONG);
+        }
+
+
     }
     
     /**

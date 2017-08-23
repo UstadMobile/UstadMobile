@@ -77,6 +77,8 @@ public class BasePointController extends UstadBaseController implements DialogRe
 
     public static final int CMD_SHARE_APP=1005;
 
+    public static final int CMD_RECEIVE_ENTRY = 1006;
+
     public BasePointController(Object context) {
         super(context);
     }
@@ -272,6 +274,10 @@ public class BasePointController extends UstadBaseController implements DialogRe
 
     public void handleClickShareApp() {
         basePointView.showShareAppDialog();
+    }
+
+    public void handleClickReceive() {
+        UstadMobileSystemImpl.getInstance().go("ReceiveCourse", null, getContext());
     }
 
     public void handleClickConfirmShareApp(final boolean zip) {

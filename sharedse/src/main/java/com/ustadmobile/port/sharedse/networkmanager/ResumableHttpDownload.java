@@ -2,6 +2,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.util.UMIOUtils;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -52,15 +53,27 @@ public class ResumableHttpDownload {
      */
     public static final String HTTP_ENCODING_IDENTITY = "identity";
 
-    private int bufferSize = 10 *1024;//10KB
+    private int bufferSize = 8 *1024;//8KB
 
     private boolean overwriteDestination = true;
 
-    private long totalSize = -1;
+    private volatile long totalSize = -1;
 
-    private long downloadedSoFar;
+    private volatile long downloadedSoFar;
 
     private boolean stopped = false;
+
+    /**
+     * The timeout to read data. The HttpUrlConnection client on Android by default seems to leave
+     * this as being infinite
+     */
+    private static final int HTTP_READ_TIMEOUT = 5000;
+
+    /**
+     * The timeout to connect to an http server. The HttpUrlConnection client on Android by default
+     * seems to leave this as being infinite
+     */
+    private static final int HTTP_CONNECT_TIMEOUT = 10000;
 
     public ResumableHttpDownload(String httpSrc, String destinationFile){
         this.httpSrc = httpSrc;
@@ -106,6 +119,8 @@ public class ResumableHttpDownload {
             if(dlPartFileExists && dlPartFileSize > 0 && (dlInfoProperties.containsKey(HTTP_HEADER_LAST_MODIFIED)
                     || dlInfoProperties.containsKey(HTTP_HEADER_ETAG))) {
                 con = (HttpURLConnection) url.openConnection();
+                con.setConnectTimeout(HTTP_CONNECT_TIMEOUT);
+                con.setReadTimeout(HTTP_READ_TIMEOUT);
                 con.setRequestMethod("HEAD");
                 con.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, HTTP_ENCODING_IDENTITY);
                 con.connect();
@@ -138,6 +153,9 @@ public class ResumableHttpDownload {
 
             con = (HttpURLConnection)url.openConnection();
             con.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, HTTP_ENCODING_IDENTITY);
+            con.setConnectTimeout(HTTP_CONNECT_TIMEOUT);
+            con.setReadTimeout(HTTP_READ_TIMEOUT);
+
             if(startFrom > 0){
                 con.setRequestProperty("Range", "bytes=" + String.valueOf(dlPartFileSize) + '-');
             }
@@ -173,7 +191,7 @@ public class ResumableHttpDownload {
 
             int responseCode = con.getResponseCode();
             boolean appendToPartFileOutput = responseCode == HttpURLConnection.HTTP_PARTIAL;
-            fileOut = new FileOutputStream(dlPartFile, appendToPartFileOutput);
+            fileOut = new BufferedOutputStream(new FileOutputStream(dlPartFile, appendToPartFileOutput));
             synchronized (this) {
                 downloadedSoFar = appendToPartFileOutput ? dlPartFileSize : 0L;
             }
@@ -228,7 +246,7 @@ public class ResumableHttpDownload {
      *
      * @return long: Total bytes downloaded
      */
-    public synchronized long getDownloadedSoFar() {
+    public long getDownloadedSoFar() {
         return downloadedSoFar;
     }
 
@@ -237,7 +255,7 @@ public class ResumableHttpDownload {
      *
      * @return long: Total bytes in a file
      */
-    public synchronized long getTotalSize() {
+    public long getTotalSize() {
         return totalSize;
     }
 

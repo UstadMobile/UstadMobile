@@ -119,7 +119,8 @@ public class RangeInputStream extends FilterInputStream {
      * blocking
      */
     public int available() throws IOException {
-        return (int)((end +1)- pos);
+//        return (int)((end +1)- pos);
+        return super.available();
     }
 
     @Override
