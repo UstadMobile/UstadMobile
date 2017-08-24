@@ -24,9 +24,12 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
 
     public static final int SEND_DISCOVERY_TIMEOUT = 60000;
 
-    public TestServerFileSender(String destMacAddr, String[] entryIdsToSend) {
+    private NetworkManager networkManager;
+
+    public TestServerFileSender(String destMacAddr, String[] entryIdsToSend, NetworkManager networkManager) {
         this.destMacAddr = destMacAddr;
         this.entryIdsToSend = entryIdsToSend;
+        this.networkManager = networkManager;
     }
 
     public void start() {
@@ -38,11 +41,10 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
 
     @Override
     public void run() {
-        NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        manager.addWifiDirectPeersListener(this);
+        networkManager.addWifiDirectPeersListener(this);
         try {
             //wait for discovery
-            List<NetworkNode> knownPeers = manager.getKnownWifiDirectPeers();
+            List<NetworkNode> knownPeers = networkManager.getKnownWifiDirectPeers();
             if(!TestWifiDirectPeerDiscovery.isMacAddrInList(knownPeers, destMacAddr)) {
                 synchronized (this) {
                     try { wait(SEND_DISCOVERY_TIMEOUT); }
@@ -50,20 +52,18 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
                 }
             }
 
-            knownPeers = manager.getKnownWifiDirectPeers();
+            knownPeers = networkManager.getKnownWifiDirectPeers();
             if(!TestWifiDirectPeerDiscovery.isMacAddrInList(knownPeers, destMacAddr)) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 662, "Did not discover destination: " + destMacAddr);
                 return;
 
             }
-            manager.shareEntries(entryIdsToSend, "Test incoming files", destMacAddr);
-
-//            manager.connectToWifiDirectNode(destMacAddr);
+            networkManager.shareEntries(entryIdsToSend, "Test incoming files", destMacAddr);
         }catch(Exception e) {
 
         }
 
-        manager.removeWifiDirectPeersListener(this);
+        networkManager.removeWifiDirectPeersListener(this);
     }
 
     @Override

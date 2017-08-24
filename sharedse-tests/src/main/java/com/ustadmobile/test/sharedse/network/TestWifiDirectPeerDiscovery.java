@@ -69,6 +69,7 @@ public class TestWifiDirectPeerDiscovery {
         }
         knownPeers = manager.getKnownWifiDirectPeers();
         manager.removeWifiDirectPeersListener(listener);
+        manager.setSharedFeed(null);
 
         Assert.assertTrue("Discovered peer for remote test slave server",
                 isMacAddrInList(knownPeers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC));

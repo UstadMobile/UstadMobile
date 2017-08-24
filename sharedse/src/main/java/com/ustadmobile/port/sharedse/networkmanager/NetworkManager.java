@@ -271,12 +271,15 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         this.mContext = mContext;
 
         try {
+            /*
+             * Do not log here: when running sharedse mock tests, this gets called in the
+             * UstadMobileSystemImpl constructor. Calling the system log here thus results in a
+             * stack overflow.
+             */
             httpd = new EmbeddedHTTPD(0);
             httpd.addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
-            UstadMobileSystemImpl.l(UMLog.INFO, 345, "Started embedded HTTP on port "
-                    + httpd.getListeningPort());
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.CRITICAL, 1, "Failed to start http server");
             throw new RuntimeException("Failed to start http server", e);
@@ -1136,7 +1139,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     /**
-     * Connect to the given wifi direct node.
+     * Connect to the given wifi direct node. This node should be the owner, and the other node
+     * should be a client of the group.
      *
      * @param deviceAddress
      */
@@ -1458,7 +1462,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public void setSharedFeed(String[] entryIds, String title) {
         //TODO: replace this hardcoded value with something generic that gets replaced by client
-        String feedSrcHref = "p2p://192.168.49.1:" + getHttpListeningPort() + "/";
+        String feedSrcHref = "p2p://groupowner:" + getHttpListeningPort() + "/";
         UstadJSOPDSFeed feed = new UstadJSOPDSFeed(feedSrcHref, title,
                 UMUUID.randomUUID().toString());
         UstadJSOPDSEntry entry;

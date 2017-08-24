@@ -53,6 +53,8 @@ public class MockNetworkManager extends NetworkManager {
 
     public static final String TMP_MOCK_WIFIDIRECT_MAC = "01:00:00:00:00:00";
 
+    private static AtomicInteger macAddrCounter = new AtomicInteger(1);
+
     private static AtomicInteger ipAddrCounter = new AtomicInteger(10);
 
     public static final String MOCK_WIRELESS_DEFAULT_WIRELESS_SSID = "mocknet";
@@ -75,7 +77,7 @@ public class MockNetworkManager extends NetworkManager {
 
     private static SecureRandom passphraseSecureRandom = new SecureRandom();
 
-    private WiFiDirectGroup mockWifiDirectGroup;
+    private MockWifiDirectGroup mockWifiDirectGroup;
 
     private MockWifiNetwork mockWifiDirectGroupNetwork;
 
@@ -89,11 +91,13 @@ public class MockNetworkManager extends NetworkManager {
 
     private static final AtomicInteger connectionChangeAtomicInteger = new AtomicInteger();
 
-    private boolean wifiDirectDiscoveryEnabled;
+    private volatile boolean wifiDirectDiscoveryEnabled;
 
     private boolean networkServiecDiscoveryEnabled;
 
     private boolean supernodeEnabled = false;
+
+    private String wifiDirectMac;
 
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
@@ -316,7 +320,15 @@ public class MockNetworkManager extends NetworkManager {
     }
 
     public String getWifiDirectMacAddr() {
-        return TMP_MOCK_WIFIDIRECT_MAC;
+        if(wifiDirectMac == null) {
+            wifiDirectMac = Integer.toHexString(macAddrCounter.getAndIncrement());
+        }
+
+        return wifiDirectMac;
+    }
+
+    public void setWifiDirectMacAddr(String wifiDirectMacAddr) {
+        this.wifiDirectMac = wifiDirectMacAddr;
     }
 
     @Override
@@ -325,18 +337,22 @@ public class MockNetworkManager extends NetworkManager {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String wirelessId = "DIRECT-" + MockNetworkManager.this.mockDeviceName + '-' +
-                    MockNetworkManager.this.mockNetworkCounter.getAndIncrement();
-                String passphrase = new BigInteger(130, passphraseSecureRandom).toString(32);
-                mockWifiDirectGroup = new WiFiDirectGroup(wirelessId, passphrase);
-                mockWifiDirectIpAddr = MockNetworkManager.makeNextMockIpAddr();
-                mockWifiDirectGroupNetwork = new MockWifiNetwork(wirelessId,passphrase);
-                mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_ACTIVE;
-                wirelessArea.addWifiNetwork(mockWifiDirectGroupNetwork);
-
+                formNewMockWifiDirectGroup();
                 fireWifiDirectGroupCreated(MockNetworkManager.this.mockWifiDirectGroup, null);
             }
         }).start();
+    }
+
+    private void formNewMockWifiDirectGroup() {
+        String wirelessId = "DIRECT-" + MockNetworkManager.this.mockDeviceName + '-' +
+                MockNetworkManager.this.mockNetworkCounter.getAndIncrement();
+        String passphrase = new BigInteger(130, passphraseSecureRandom).toString(32);
+        mockWifiDirectGroup = new MockWifiDirectGroup(this, wirelessId, passphrase);
+        mockWifiDirectIpAddr = MockNetworkManager.makeNextMockIpAddr();
+        mockWifiDirectGroupNetwork = new MockWifiNetwork(wirelessId,passphrase);
+        mockWifiDirectStatus = WIFI_DIRECT_GROUP_STATUS_ACTIVE;
+        wirelessArea.addWifiNetwork(mockWifiDirectGroupNetwork);
+        mockWifiDirectGroup.setOwner(true);
     }
 
     @Override
@@ -363,6 +379,10 @@ public class MockNetworkManager extends NetworkManager {
         }else {
             return new WiFiDirectGroup(mockWifiDirectGroup.getSsid() + "-mangle", mockWifiDirectGroup.getPassphrase());
         }
+    }
+
+    public void setWifiDirectGroup(MockWifiDirectGroup group) {
+        this.mockWifiDirectGroup = group;
     }
 
     @Override
@@ -551,4 +571,60 @@ public class MockNetworkManager extends NetworkManager {
     public int getWifiConnectionTimeout() {
         return 20000;
     }
+
+    @Override
+    public void connectToWifiDirectNode(final String deviceAddress) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try { Thread.sleep(1000); }
+                catch(InterruptedException e) {}
+
+                MockNetworkManager otherNode = wirelessArea.getDeviceByWifiDirectMacAddr(deviceAddress);
+                if(otherNode == null) {
+                    return;
+                }
+
+                if(mockWifiDirectGroup == null) {
+                    formNewMockWifiDirectGroup();
+                }
+
+                mockWifiDirectGroup.addClient(otherNode);
+                otherNode.fireWifiDirectGroupCreated(mockWifiDirectGroup, null);
+                fireWifiDirectGroupCreated(MockNetworkManager.this.mockWifiDirectGroup, null);
+
+                fireWifiP2pConnectionChanged(true);
+                otherNode.fireWifiP2pConnectionChanged(true);
+            }
+        }).start();
+    }
+
+    @Override
+    public NetworkNode getThisWifiDirectDevice() {
+        NetworkNode node = new NetworkNode(getWifiDirectMacAddr(), null);
+        node.setDeviceWifiDirectName(mockDeviceName);
+        return node;
+    }
+
+    @Override
+    public String getWifiDirectGroupOwnerIp() {
+        if(mockWifiDirectGroup != null) {
+            return mockWifiDirectGroup.getGroupOwnerIp();
+        }else {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean isWifiDirectConnectionEstablished(String otherDevice) {
+        return false;
+    }
+
+//    public MockWifiDirectGroup getGroup() {
+//        return group;
+//    }
+//
+//    public void setGroup(MockWifiDirectGroup group) {
+//        this.group = group;
+//    }
 }

@@ -46,6 +46,7 @@ public class UstadMobileSystemImplTestSE extends UstadMobileSystemImplTest {
         testDriver = new MockNetworkManager(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
             wirelessArea, "MockTestDriver");
         testDriverContext = new TestContext("testdriver");
+        testDriver.setWifiDirectMacAddr(TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC);
         testDriver.init(testDriverContext);
         testDriver.startTestControlServer();
     }

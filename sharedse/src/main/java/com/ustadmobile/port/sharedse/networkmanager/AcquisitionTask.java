@@ -454,6 +454,8 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             if(feedEntryAcquisitionUrl.startsWith("p2p://")) {
                 targetNetwork = TARGET_NETWORK_WIFIDIRECT;
                 currentDownloadUrl = feedEntryAcquisitionUrl.replace("p2p://", "http://");
+                currentDownloadUrl = currentDownloadUrl.replace("groupowner",
+                        networkManager.getWifiDirectGroupOwnerIp());
             }else if(localNetworkDownloadEnabled && entryCheckResponse != null
                     && networkManager.getCurrentWifiSsid() != null
                     && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){

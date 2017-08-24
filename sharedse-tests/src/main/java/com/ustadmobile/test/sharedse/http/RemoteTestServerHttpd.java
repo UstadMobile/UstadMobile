@@ -83,9 +83,9 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
                 List<String> entryIdsToSend = decodedParams.get("entryId");
                 String[] entryIdsToSendArr = new String[entryIdsToSend.size()];
                 entryIdsToSend.toArray(entryIdsToSendArr);
-                NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
                 networkManager.setSharedFeed(entryIdsToSendArr, "Remote test server shared feed");
-                TestServerFileSender sender = new TestServerFileSender(destMacAddr, entryIdsToSendArr);
+                TestServerFileSender sender = new TestServerFileSender(destMacAddr, entryIdsToSendArr,
+                        networkManager);
                 sender.start();
                 return newFixedLengthResponse("OK");
             }else if(CMD_CREATEGROUP.equals(command)) {
