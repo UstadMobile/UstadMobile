@@ -45,7 +45,7 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
         try {
             //wait for discovery
             List<NetworkNode> knownPeers = networkManager.getKnownWifiDirectPeers();
-            if(!TestWifiDirectPeerDiscovery.isMacAddrInList(knownPeers, destMacAddr)) {
+            if(!NetworkManager.isMacAddrInList(knownPeers, destMacAddr)) {
                 synchronized (this) {
                     try { wait(SEND_DISCOVERY_TIMEOUT); }
                     catch(InterruptedException e) {}
@@ -53,7 +53,7 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
             }
 
             knownPeers = networkManager.getKnownWifiDirectPeers();
-            if(!TestWifiDirectPeerDiscovery.isMacAddrInList(knownPeers, destMacAddr)) {
+            if(!NetworkManager.isMacAddrInList(knownPeers, destMacAddr)) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 662, "Did not discover destination: " + destMacAddr);
                 return;
 
@@ -68,7 +68,7 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
 
     @Override
     public void peersChanged(List<NetworkNode> peers) {
-        if(TestWifiDirectPeerDiscovery.isMacAddrInList(peers, destMacAddr)) {
+        if(NetworkManager.isMacAddrInList(peers, destMacAddr)) {
             synchronized (this) {
                 notify();
             }

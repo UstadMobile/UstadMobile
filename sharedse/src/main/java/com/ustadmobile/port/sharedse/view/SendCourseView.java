@@ -21,4 +21,21 @@ public interface SendCourseView extends UstadView, DismissableDialog {
 
     void removeReceiver(String id);
 
+    /**
+     * Sets whether or not the receivers are enabled. Once a user clicks on a receiver they are
+     * disabled until the connection is successful or it fails.
+     *
+     * @param enabled
+     */
+    void setReceiversListEnabled(boolean enabled);
+
+    /**
+     * Set the status text e.g. Scanning, Connecting etc.
+     *
+     * @param statusText
+     */
+    void setStatusText(String statusText);
+
+    void setReceiverEnabled(String receiverId, boolean enabled);
+
 }

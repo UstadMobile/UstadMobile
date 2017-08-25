@@ -1440,19 +1440,26 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public void setSharedFeed(UstadJSOPDSFeed sharedFeed) {
         this.sharedFeed = sharedFeed;
 
-        if(sharedFeed != null && sharedFeedHttpd == null) {
-            sharedFeedHttpd = new RouterNanoHTTPD(SHARED_FEED_PORT);
-            try {
-                sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeed);
-                sharedFeedHttpd.start();
-                UstadMobileSystemImpl.l(UMLog.INFO, 302,
-                        "setSharedFeed: Shared feed listening port = "
-                                + sharedFeedHttpd.getListeningPort());
-            }catch(IOException e) {
-                //TODO: If we can't start the http server - nothing will work, show error and give up
-                UstadMobileSystemImpl.l(UMLog.ERROR, 663, "setSendingOn: Exception starting http server");
-                sharedFeedHttpd = null;
+        if(sharedFeed != null) {
+            if(sharedFeedHttpd == null) {
+                sharedFeedHttpd = new RouterNanoHTTPD(SHARED_FEED_PORT);
+                try {
+                    sharedFeedHttpd.start();
+                    UstadMobileSystemImpl.l(UMLog.INFO, 302,
+                            "setSharedFeed: Shared feed listening port = "
+                                    + sharedFeedHttpd.getListeningPort());
+                }catch(IOException e) {
+                    //TODO: If we can't start the http server - nothing will work, show error and give up
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 663, "setSendingOn: Exception starting http server");
+                    sharedFeedHttpd = null;
+                    return;
+                }
+            }else {
+                sharedFeedHttpd.removeRoute("(.*)");
             }
+
+            sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeed);
+
             updateClientServices();
         }else if(sharedFeed == null && sharedFeedHttpd != null) {
             sharedFeedHttpd.stop();
@@ -1612,6 +1619,27 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
 
         return feed;
+    }
+
+    /**
+     * Simple utility method to check if a wifi direct mac address is in the given list
+     *
+     * @param list
+     * @param macAddr
+     * @return
+     */
+    public static boolean isMacAddrInList(List<NetworkNode> list, String macAddr) {
+        if(list == null)
+            return false;
+
+        String nodeMacAddr;
+        for(NetworkNode node : list) {
+            nodeMacAddr = node.getDeviceWifiDirectMacAddress();
+            if(nodeMacAddr != null && nodeMacAddr.equalsIgnoreCase(macAddr))
+                return true;
+        }
+
+        return false;
     }
 
 }

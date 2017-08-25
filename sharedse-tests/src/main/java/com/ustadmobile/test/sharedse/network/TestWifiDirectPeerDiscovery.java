@@ -44,7 +44,7 @@ public class TestWifiDirectPeerDiscovery {
         WifiP2pListener listener = new WifiP2pListener() {
             @Override
             public void peersChanged(List<NetworkNode> peers) {
-                if(isMacAddrInList(peers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC)){
+                if(NetworkManager.isMacAddrInList(peers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC)){
                     synchronized (lock) {
                         lock.notify();
                     }
@@ -66,7 +66,7 @@ public class TestWifiDirectPeerDiscovery {
         manager.setSharedFeed(new String[]{TestEntryStatusTask.ENTRY_ID}, "Test Entry Status");
         manager.addWifiDirectPeersListener(listener);
         List<NetworkNode> knownPeers = manager.getKnownWifiDirectPeers();
-        if(!isMacAddrInList(knownPeers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC)) {
+        if(!NetworkManager.isMacAddrInList(knownPeers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC)) {
             synchronized (lock) {
                 try { lock.wait(PEER_DISCOVERY_TIMEOUT); }
                 catch(InterruptedException e) {}
@@ -77,7 +77,7 @@ public class TestWifiDirectPeerDiscovery {
         manager.setSharedFeed(null);
 
         Assert.assertTrue("Discovered peer for remote test slave server",
-                isMacAddrInList(knownPeers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC));
+                NetworkManager.isMacAddrInList(knownPeers, TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC));
     }
 
     @Test
@@ -166,17 +166,5 @@ public class TestWifiDirectPeerDiscovery {
     }
 
 
-    public static boolean isMacAddrInList(List<NetworkNode> list, String macAddr) {
-        if(list == null)
-            return false;
 
-        String nodeMacAddr;
-        for(NetworkNode node : list) {
-            nodeMacAddr = node.getDeviceWifiDirectMacAddress();
-            if(nodeMacAddr != null && nodeMacAddr.equalsIgnoreCase(macAddr))
-                return true;
-        }
-
-        return false;
-    }
 }

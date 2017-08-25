@@ -62,7 +62,7 @@ public class WiFiDirectGroup {
         return groupClients;
     }
 
-    protected void setGroupClients(List<NetworkNode> clients) {
+    protected void setGroupClients(List<NetworkNode> groupClients) {
         this.groupClients = groupClients;
     }
 
@@ -72,5 +72,14 @@ public class WiFiDirectGroup {
 
     protected void setGroupOwner(NetworkNode groupOwner) {
         this.groupOwner = groupOwner;
+    }
+
+    public boolean groupIncludes(String deviceMacAddr){
+        NetworkNode owner = getGroupOwner();
+        if(owner != null && owner.getDeviceWifiDirectMacAddress() != null
+                && owner.getDeviceWifiDirectMacAddress().equalsIgnoreCase(deviceMacAddr))
+            return true;
+
+        return NetworkManager.isMacAddrInList(getGroupClients(), deviceMacAddr);
     }
 }

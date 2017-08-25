@@ -28,6 +28,7 @@ public class WifiDirectGroupAndroid extends WiFiDirectGroup {
                 groupClients.add(node);
             }
         }
+        setGroupClients(groupClients);
 
         WifiP2pDevice ownerDevice = group.getOwner();
         if(ownerDevice != null) {
@@ -36,7 +37,7 @@ public class WifiDirectGroupAndroid extends WiFiDirectGroup {
             setGroupOwner(ownerNode);
         }
 
-        setGroupClients(groupClients);
+
 
 
     }

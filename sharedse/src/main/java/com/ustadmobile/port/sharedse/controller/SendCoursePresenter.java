@@ -1,6 +1,8 @@
 package com.ustadmobile.port.sharedse.controller;
 
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -57,6 +59,7 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
     public void onStop() {
         NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         networkManager.removeWifiDirectPeersListener(this);
+        networkManager.removeWifiDirectGroupListener(this);
     }
 
     @Override
@@ -72,7 +75,25 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
             ids.add(peer.getDeviceWifiDirectMacAddress());
             names.add(peer.getDeviceWifiDirectName());
         }
+
         view.setReceivers(ids, names);
+        for(NetworkNode peer : peers) {
+            view.setReceiverEnabled(peer.getDeviceWifiDirectMacAddress(),
+                    peer.getWifiDirectDeviceStatus() == NetworkNode.STATUS_AVAILABLE);
+
+            if(chosenMacAddr != null
+                    && chosenMacAddr.equalsIgnoreCase(peer.getDeviceWifiDirectMacAddress())) {
+
+                switch(peer.getWifiDirectDeviceStatus()) {
+                    case NetworkNode.STATUS_FAILED:
+                    case NetworkNode.STATUS_UNAVAILABLE:
+                    case NetworkNode.STATUS_AVAILABLE:
+                        //connection has actually failed
+                        handleAttemptFailed();
+                        break;
+                }
+            }
+        }
     }
 
     @Override
@@ -82,7 +103,12 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     @Override
     public void groupCreated(WiFiDirectGroup group, Exception err) {
-
+        if(chosenMacAddr != null && group.groupIncludes(chosenMacAddr)){
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            impl.getAppView(getContext()).showNotification(
+                    impl.getString(MessageID.sent, getContext()), AppView.LENGTH_LONG);
+            view.dismiss();
+        }
     }
 
     @Override
@@ -91,19 +117,33 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
     }
 
     public void handleClickReceiver(String id) {
-        chosenMacAddr = id;
-        UstadMobileSystemImplSE.getInstanceSE().getNetworkManager().connectToWifiDirectNode(id);
+        if(chosenMacAddr == null) {
+            UstadMobileSystemImplSE instanceSE = UstadMobileSystemImplSE.getInstanceSE();
+            chosenMacAddr = id;
+            view.setStatusText(instanceSE.getString(MessageID.connecting, getContext()));
+            view.setReceiversListEnabled(false);
+            UstadMobileSystemImplSE.getInstanceSE().getNetworkManager().connectToWifiDirectNode(id);
+        }
     }
 
     @Override
     public void wifiP2pConnectionResult(String macAddr, boolean connected) {
         if(chosenMacAddr != null && chosenMacAddr.equalsIgnoreCase(macAddr)) {
+            final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
             if(connected) {
-                //finished
-                view.dismiss();
+                UstadMobileSystemImpl.l(UMLog.INFO, 300, "SendCourse: wifi direct connection result: success");
             }else {
-                //show failed
+                handleAttemptFailed();
             }
         }
+    }
+
+    protected void handleAttemptFailed(){
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.getAppView(getContext()).showNotification(
+                impl.getString(MessageID.error, getContext()), AppView.LENGTH_LONG);
+        view.setReceiversListEnabled(true);
+        view.setStatusText(impl.getString(MessageID.scanning, getContext()));
+        chosenMacAddr = null;
     }
 }

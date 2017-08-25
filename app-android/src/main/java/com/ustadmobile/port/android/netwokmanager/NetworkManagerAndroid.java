@@ -271,8 +271,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                     if(informationAvailable){
                         currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
                         WifiP2pGroup wifiP2pGroup=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
-                        WiFiDirectGroup group = new WiFiDirectGroup(wifiP2pGroup.getNetworkName(),
-                                wifiP2pGroup.getPassphrase());
+                        WiFiDirectGroup group = new WifiDirectGroupAndroid(wifiP2pGroup);
                         group.setOwner(wifiP2pGroup.isGroupOwner());
                         handleWifiDirectGroupCreated(group);
                     }
@@ -293,8 +292,12 @@ public class NetworkManagerAndroid extends NetworkManager{
                         NetworkNode node = new NetworkNode(device.deviceAddress, null);
                         list.add(node);
                         node.setDeviceWifiDirectName(device.deviceName);
+                        node.setWifiDirectDeviceStatus(device.status);
+
                         UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
-                                + device.deviceAddress + " (" + device.deviceName + ")");
+                                + device.deviceAddress + " (" + device.deviceName + ") Status: "
+                                + networkService.getWifiDirectHandlerAPI().deviceStatusToString(
+                                        device.status));
                     }
                     handleWifiDirectPeersChanged(list);
 

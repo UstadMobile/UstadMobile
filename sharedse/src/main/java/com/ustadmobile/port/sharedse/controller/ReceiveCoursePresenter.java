@@ -21,7 +21,7 @@ import java.util.List;
  * Created by mike on 8/22/17.
  */
 
-public class ReceiveCoursePresenter extends UstadBaseController implements WifiP2pListener {
+public class ReceiveCoursePresenter extends UstadBaseController implements WifiP2pListener, Runnable {
 
     private ReceiveCourseView view;
 
@@ -68,25 +68,29 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
             }
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    sharedFeed = networkManager.getOpdsFeedSharedByWifiP2pGroupOwner();
-                    view.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            view.setSharedCourseName(sharedFeed.title);
-                            view.setMode(ReceiveCourseView.MODE_ACCEPT_DECLINE);
-                        }
-                    });
-                }catch(IOException e) {
-                    e.printStackTrace();
-                }catch(XmlPullParserException x) {
-                    x.printStackTrace();
+        new Thread(this).start();
+    }
+
+    public void run() {
+        try {
+            sharedFeed = networkManager.getOpdsFeedSharedByWifiP2pGroupOwner();
+
+            //TODO: Handle when this is null (when there is no group owner IP address
+            if(sharedFeed == null)
+                return;
+
+            view.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    view.setSharedCourseName(sharedFeed.title);
+                    view.setMode(ReceiveCourseView.MODE_ACCEPT_DECLINE);
                 }
-            }
-        }).start();
+            });
+        }catch(IOException e) {
+            e.printStackTrace();
+        }catch(XmlPullParserException x) {
+            x.printStackTrace();
+        }
     }
 
 
