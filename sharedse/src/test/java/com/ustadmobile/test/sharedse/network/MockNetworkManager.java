@@ -620,11 +620,4 @@ public class MockNetworkManager extends NetworkManager {
         return false;
     }
 
-//    public MockWifiDirectGroup getGroup() {
-//        return group;
-//    }
-//
-//    public void setGroup(MockWifiDirectGroup group) {
-//        this.group = group;
-//    }
 }

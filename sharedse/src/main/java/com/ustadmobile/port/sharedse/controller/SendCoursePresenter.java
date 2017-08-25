@@ -33,6 +33,8 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     public static final String ARG_ENTRY_IDS = "entries";
 
+    private String chosenMacAddr = null;
+
     public SendCoursePresenter(Object context, Hashtable args, SendCourseView view) {
         super(context);
         this.view = view;
@@ -55,8 +57,6 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
     public void onStop() {
         NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         networkManager.removeWifiDirectPeersListener(this);
-        UstadJSOPDSFeed nullFeed = null;
-        networkManager.setSharedFeed(nullFeed);
     }
 
     @Override
@@ -82,9 +82,7 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     @Override
     public void groupCreated(WiFiDirectGroup group, Exception err) {
-        //check if the client is in the list
-        UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                "Group created: ", AppView.LENGTH_LONG);
+
     }
 
     @Override
@@ -93,6 +91,19 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
     }
 
     public void handleClickReceiver(String id) {
+        chosenMacAddr = id;
         UstadMobileSystemImplSE.getInstanceSE().getNetworkManager().connectToWifiDirectNode(id);
+    }
+
+    @Override
+    public void wifiP2pConnectionResult(String macAddr, boolean connected) {
+        if(chosenMacAddr != null && chosenMacAddr.equalsIgnoreCase(macAddr)) {
+            if(connected) {
+                //finished
+                view.dismiss();
+            }else {
+                //show failed
+            }
+        }
     }
 }

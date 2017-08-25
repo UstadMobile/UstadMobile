@@ -62,7 +62,7 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View receiverView = LayoutInflater.from(getContext()).inflate(
-                    R.layout.item_send_course_receiver, null);
+                    R.layout.item_send_course_receiver, parent, false);
             receiverView.setOnClickListener(SendCourseDialogFragment.this);
             return new ViewHolder(receiverView);
         }

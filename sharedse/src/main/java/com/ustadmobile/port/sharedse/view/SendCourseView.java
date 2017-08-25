@@ -1,5 +1,6 @@
 package com.ustadmobile.port.sharedse.view;
 
+import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
  * Created by mike on 8/15/17.
  */
 
-public interface SendCourseView extends UstadView {
+public interface SendCourseView extends UstadView, DismissableDialog {
 
     String VIEW_NAME = "SendCourse";
 

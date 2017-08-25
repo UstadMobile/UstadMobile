@@ -106,6 +106,11 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
             loadSharedCourse();
     }
 
+    @Override
+    public void wifiP2pConnectionResult(String macAddr, boolean connected) {
+
+    }
+
     public void handleClickAccept() {
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogController.SHARED_RESOURCE, getContext())[0].getDirURI();

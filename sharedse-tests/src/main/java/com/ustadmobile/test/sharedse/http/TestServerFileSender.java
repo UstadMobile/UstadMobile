@@ -79,4 +79,9 @@ public class TestServerFileSender implements Runnable, WifiP2pListener{
     public void wifiP2pConnectionChanged(boolean connected) {
 
     }
+
+    @Override
+    public void wifiP2pConnectionResult(String macAddr, boolean connected) {
+
+    }
 }

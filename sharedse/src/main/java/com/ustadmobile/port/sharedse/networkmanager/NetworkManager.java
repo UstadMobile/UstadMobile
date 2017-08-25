@@ -582,6 +582,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
     }
 
+    protected void fireWifiP2pConnectionResult(String macAddress, boolean successful) {
+        synchronized (peerChangeListeners) {
+            for(WifiP2pListener listener: peerChangeListeners) {
+                listener.wifiP2pConnectionResult(macAddress, successful);
+            }
+        }
+    }
+
     public void addWifiDirectPeersListener(WifiP2pListener listener) {
         peerChangeListeners.add(listener);
     }
@@ -1437,7 +1445,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             try {
                 sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeed);
                 sharedFeedHttpd.start();
+                UstadMobileSystemImpl.l(UMLog.INFO, 302,
+                        "setSharedFeed: Shared feed listening port = "
+                                + sharedFeedHttpd.getListeningPort());
             }catch(IOException e) {
+                //TODO: If we can't start the http server - nothing will work, show error and give up
                 UstadMobileSystemImpl.l(UMLog.ERROR, 663, "setSendingOn: Exception starting http server");
                 sharedFeedHttpd = null;
             }
@@ -1445,6 +1457,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }else if(sharedFeed == null && sharedFeedHttpd != null) {
             sharedFeedHttpd.stop();
             sharedFeedHttpd = null;
+            UstadMobileSystemImpl.l(UMLog.INFO, 301, "setSharedFeed: shared feed httpd stopped");
             updateClientServices();
         }
 

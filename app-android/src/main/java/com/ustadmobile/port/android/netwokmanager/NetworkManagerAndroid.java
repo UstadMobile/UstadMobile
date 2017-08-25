@@ -25,6 +25,7 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -37,6 +38,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
@@ -61,9 +63,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.FailureReason;
@@ -171,6 +176,25 @@ public class NetworkManagerAndroid extends NetworkManager{
      */
     public static final int P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT = 25000;
 
+    private Set activeWifiObjects = new HashSet();
+
+    private WifiManager.WifiLock wifiLock;
+
+    private Handler wifiLockCheckHandler;
+
+    private Runnable checkWifiLocksRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (activeWifiObjects) {
+                if(activeWifiObjects.isEmpty() && wifiLock != null) {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 364, "NetworkManager:WifiLock : release lock");
+                    wifiLock.release();
+                    wifiLock = null;
+                }
+            }
+        }
+    };
+
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
      * method from it's onCreate
@@ -197,6 +221,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.PEERS_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED);
         filter.addAction(WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE);
+        filter.addAction(WifiDirectHandler.Action.CONNECT_TO_NORMAL_WIFI_DIRECT_RESULT);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
 
         IntentFilter intentFilter = new IntentFilter();
@@ -209,6 +234,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
+        wifiLockCheckHandler = new Handler();
     }
 
     /**
@@ -232,8 +258,6 @@ public class NetworkManagerAndroid extends NetworkManager{
     private BroadcastReceiver mBroadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //Toast.makeText(networkService,intent.getAction(),Toast.LENGTH_LONG).show();
-            //TODO: add logs instead
             switch (intent.getAction()){
                 case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
@@ -287,6 +311,14 @@ public class NetworkManagerAndroid extends NetworkManager{
                 case WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE:
                     //the device should have connected
                     fireWifiP2pConnectionChanged(true);
+                    break;
+
+                case WifiDirectHandler.Action.CONNECT_TO_NORMAL_WIFI_DIRECT_RESULT:
+                    String macAddr = intent.getStringExtra(
+                            WifiDirectHandler.EXTRA_CONNECT_TO_NORMAL_WIFI_DIRECT_MAC_ADDR);
+                    boolean succeeded = intent.getBooleanExtra(
+                            WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED, false);
+                    fireWifiP2pConnectionResult(macAddr, succeeded);
                     break;
 
             }
@@ -965,4 +997,47 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         return false;
     }
+
+    @Override
+    public void networkTaskStatusChanged(NetworkTask task) {
+        if(task.getTaskType() != QUEUE_ENTRY_ACQUISITION)
+            return;
+
+        switch(task.getStatus()) {
+            case NetworkTask.STATUS_RUNNING:
+                addActiveWifiObject(task);
+                break;
+
+            default:
+                //it's not running - lock not needed
+                removeActiveWifiObject(task);
+                break;
+        }
+
+        super.networkTaskStatusChanged(task);
+    }
+
+    protected void addActiveWifiObject(Object lockObject) {
+        synchronized (activeWifiObjects) {
+            UstadMobileSystemImpl.l(UMLog.INFO, 356, "NetworkManager:WifiLock: "
+                    + lockObject.toString() + " to active wifi objects");
+            activeWifiObjects.add(lockObject);
+            if(wifiLock == null) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 352, "NetworkManager:WifiLock Acquire wifi lock");
+                wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
+                wifiLock.acquire();
+            }
+        }
+    }
+
+    protected void removeActiveWifiObject(Object lockObject) {
+        synchronized (activeWifiObjects) {
+            UstadMobileSystemImpl.l(UMLog.INFO, 358, "NetworkManager:WifiLock: Remove "
+                + lockObject.toString() + " from active wifi objects");
+            activeWifiObjects.remove(lockObject);
+            if(activeWifiObjects.isEmpty())
+                wifiLockCheckHandler.postDelayed(checkWifiLocksRunnable, 10000);
+        }
+    }
+
 }

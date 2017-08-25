@@ -55,6 +55,11 @@ public class TestWifiDirectPeerDiscovery {
             public void wifiP2pConnectionChanged(boolean connected) {
 
             }
+
+            @Override
+            public void wifiP2pConnectionResult(String macAddr, boolean connected) {
+
+            }
         };
 
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
@@ -95,6 +100,11 @@ public class TestWifiDirectPeerDiscovery {
                         groupInfoLock.notify();
                     }
                 }
+            }
+
+            @Override
+            public void wifiP2pConnectionResult(String macAddr, boolean connected) {
+
             }
         };
         manager.addWifiDirectPeersListener(listener);

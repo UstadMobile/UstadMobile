@@ -20,8 +20,17 @@ public interface WifiP2pListener {
 
     /**
      * Fired when the device is connected, disconnected, or when another peers joins the group.
+     * This is fired for both incoming and outgoing connections
      */
     void wifiP2pConnectionChanged(boolean connected);
+
+    /**
+     * Fired when an outgoing connection request to another peer is made.
+     *
+     * @param macAddr Mac address that a connection was requested for
+     * @param connected true if connected, false otherwise
+     */
+    void wifiP2pConnectionResult(String macAddr, boolean connected);
 
 
 }

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/dimen_8dp">
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/dimen_12dp"
+    android:background="?attr/selectableItemBackground"
+    android:paddingTop="@dimen/dimen_12dp">
 
     <ImageView
         android:id="@+id/item_send_course_receiver_icon"
