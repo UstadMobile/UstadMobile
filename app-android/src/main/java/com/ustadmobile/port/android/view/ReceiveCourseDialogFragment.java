@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.controller.ReceiveCoursePresenter;
 import com.ustadmobile.port.sharedse.view.ReceiveCourseView;
 
@@ -20,7 +20,7 @@ import com.ustadmobile.port.sharedse.view.ReceiveCourseView;
  * Created by mike on 8/22/17.
  */
 
-public class ReceiveCourseDialogFragment extends UstadDialogFragment implements ReceiveCourseView, DialogInterface.OnClickListener {
+public class ReceiveCourseDialogFragment extends UstadDialogFragment implements ReceiveCourseView, DialogInterface.OnClickListener, View.OnClickListener {
 
     private View rootView;
 
@@ -33,6 +33,7 @@ public class ReceiveCourseDialogFragment extends UstadDialogFragment implements 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         rootView = inflater.inflate(R.layout.fragment_receive_dialog, null);
+        rootView.findViewById(R.id.fragment_receive_dialog_connected_but_not_sharing_button).setOnClickListener(this);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(R.string.receive);
@@ -70,12 +71,23 @@ public class ReceiveCourseDialogFragment extends UstadDialogFragment implements 
     }
 
     @Override
+    public void onClick(View view) {
+        switch(view.getId()) {
+            case R.id.fragment_receive_dialog_connected_but_not_sharing_button:
+                mPresenter.handleClickDisconnect();
+                break;
+        }
+    }
+
+    @Override
     public void setMode(int mode) {
         setButtonsEnabled(mode == MODE_ACCEPT_DECLINE);
         rootView.findViewById(R.id.fragment_receive_dialog_waiting_layout).setVisibility(
                 mode == MODE_WAITING ? View.VISIBLE : View.GONE);
         rootView.findViewById(R.id.fragment_receive_dialog_info_layout).setVisibility(
                 mode == MODE_ACCEPT_DECLINE ? View.VISIBLE : View.GONE);
+        rootView.findViewById(R.id.fragment_receive_dialog_connected_but_not_sharing_layout).setVisibility(
+                mode == MODE_CONNECTED_BUT_NOT_SHARING ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -86,7 +98,8 @@ public class ReceiveCourseDialogFragment extends UstadDialogFragment implements 
 
     @Override
     public void setWaitingStatusText(int messageCode) {
-
+        TextView textView = rootView.findViewById(R.id.fragment_receive_dialog_waiting_status_text);
+        textView.setText(UstadMobileSystemImpl.getInstance().getString(messageCode, getContext()));
     }
 
     @Override

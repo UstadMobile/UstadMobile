@@ -26,6 +26,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1608,9 +1610,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         String feedUrl = "http://" + groupOwner + ":" + NetworkManager.SHARED_FEED_PORT +"/";
 
 
+        HttpURLConnection feedConnection = null;
         try {
             URL feedUrlObj = new URL(feedUrl);
-            feedIn = feedUrlObj.openStream();
+            feedConnection = (HttpURLConnection)feedUrlObj.openConnection(Proxy.NO_PROXY);
+            feedConnection.setUseCaches(false);
+            feedConnection.setConnectTimeout(3000);
+            feedConnection.setReadTimeout(3000);
+            feedIn = feedConnection.getInputStream();
             feed = new UstadJSOPDSFeed(feedUrl, feedIn, "UTF-8");
         }catch(IOException e) {
             ioe = e;
@@ -1621,6 +1628,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }finally{
             UMIOUtils.closeInputStream(feedIn);
             UMIOUtils.throwIfNotNullIO(ioe);
+            if(feedConnection != null)
+                feedConnection.disconnect();
+
             if(xe != null)
                 throw xe;
         }

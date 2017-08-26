@@ -23,6 +23,7 @@
             android:layout_height="48dp" />
 
         <TextView
+            android:id="@+id/fragment_receive_dialog_waiting_status_text"
             android:layout_gravity="center_horizontal"
             android:text="@string/waiting"
             android:layout_width="match_parent"
@@ -45,6 +46,34 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/fragment_receive_dialog_connected_but_not_sharing_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_error_outline_black_48dp"/>
+
+        <TextView
+            android:text="@string/connected_but_host_not_sharing"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/fragment_receive_dialog_connected_but_not_sharing_button"
+            android:text="@string/try_again"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
 

@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.controller;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -28,6 +29,10 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
     private UstadJSOPDSFeed sharedFeed;
 
     private NetworkManager networkManager;
+
+    public static final int MAX_LOAD_COURSE_ATTEMPTS = 3;
+
+    public static final int LOAD_COURSE_RETRY_INTERVAL = 2000;
 
     public ReceiveCoursePresenter(Object context, ReceiveCourseView view) {
         super(context);
@@ -72,13 +77,24 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
     }
 
     public void run() {
-        try {
-            sharedFeed = networkManager.getOpdsFeedSharedByWifiP2pGroupOwner();
+        UstadJSOPDSFeed loadedFeed = null;
+        for(int i = 0; loadedFeed == null && i < MAX_LOAD_COURSE_ATTEMPTS; i++) {
+            try {
+                loadedFeed = networkManager.getOpdsFeedSharedByWifiP2pGroupOwner();
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 665, "ReceiveCoursePresenter: exception", e);
+            }catch(XmlPullParserException x) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 665, "ReceiveCoursePresenter: exception", x);
+            }
 
-            //TODO: Handle when this is null (when there is no group owner IP address
-            if(sharedFeed == null)
-                return;
+            if(loadedFeed == null) {
+                try { Thread.sleep(LOAD_COURSE_RETRY_INTERVAL); }
+                catch(InterruptedException e) {}
+            }
+        }
 
+        if(loadedFeed != null) {
+            sharedFeed = loadedFeed;
             view.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -86,10 +102,13 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
                     view.setMode(ReceiveCourseView.MODE_ACCEPT_DECLINE);
                 }
             });
-        }catch(IOException e) {
-            e.printStackTrace();
-        }catch(XmlPullParserException x) {
-            x.printStackTrace();
+        }else {
+            view.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    view.setMode(ReceiveCourseView.MODE_CONNECTED_BUT_NOT_SHARING);
+                }
+            });
         }
     }
 
@@ -106,7 +125,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
     @Override
     public void wifiP2pConnectionChanged(boolean connected) {
-        if(connected)
+        if(connected && networkManager.getWifiDirectGroupOwnerIp() != null)
             loadSharedCourse();
     }
 
@@ -127,5 +146,10 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
         networkManager.removeWiFiDirectGroup();
     }
 
+    public void handleClickDisconnect() {
+        networkManager.removeWiFiDirectGroup();
+        view.setWaitingStatusText(MessageID.waiting);
+        view.setMode(ReceiveCourseView.MODE_WAITING);
+    }
 
 }
