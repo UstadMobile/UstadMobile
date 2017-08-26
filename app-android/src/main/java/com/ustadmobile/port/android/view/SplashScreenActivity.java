@@ -39,16 +39,14 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
 
-public class SplashScreenActivity extends UstadBaseActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
-
-    UstadMobileSystemImplAndroid impl;
+public class SplashScreenActivity extends AppCompatActivity implements DialogInterface.OnClickListener, ActivityCompat.OnRequestPermissionsResultCallback{
 
     public static final int EXTERNAL_STORAGE_REQUESTED = 1;
 
@@ -61,7 +59,6 @@ public class SplashScreenActivity extends UstadBaseActivity implements DialogInt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_screen);
-        impl = UstadMobileSystemImplAndroid.getInstanceAndroid();
         checkPermissions();
     }
 
@@ -86,7 +83,7 @@ public class SplashScreenActivity extends UstadBaseActivity implements DialogInt
             }
         }
 
-        impl.startUI(this);
+        UstadMobileSystemImpl.getInstance().startUI(this);
     }
 
     @Override
@@ -102,7 +99,6 @@ public class SplashScreenActivity extends UstadBaseActivity implements DialogInt
     @Override
     public void onStart() {
         super.onStart();
-        UstadMobileSystemImpl.getInstance();
         checkPermissions();
 
     }

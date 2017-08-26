@@ -22,7 +22,7 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="fal\se" />
+        android:required="false" />
 
     <application
         android:name="com.ustadmobile.port.android.App"
