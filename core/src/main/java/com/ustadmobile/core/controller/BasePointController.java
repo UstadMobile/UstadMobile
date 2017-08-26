@@ -250,7 +250,7 @@ public class BasePointController extends UstadBaseController implements DialogRe
 
     public void onResume() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(!welcomeScreenDisplayed
+        if(CoreBuildConfig.WELCOME_DIALOG_ENABLED && !welcomeScreenDisplayed
                 && impl.getAppPref(WelcomeController.PREF_KEY_WELCOME_DONT_SHOW, "false",getContext()).equals("false")) {
             setWelcomeScreenDisplayed(true);
             UstadMobileSystemImpl.getInstance().go(WelcomeView.VIEW_NAME, getContext());

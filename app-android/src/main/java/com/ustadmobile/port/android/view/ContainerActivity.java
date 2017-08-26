@@ -23,6 +23,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.ContainerController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
@@ -117,7 +118,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
         setContentView(R.layout.activity_container_epubpager);
         DrawerLayout drawerLayout = (DrawerLayout)findViewById(R.id.container_drawer_layout);
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
 
         InputStream is = null;
@@ -174,7 +174,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             }
 
         };
-        mDrawerToggle.setDrawerIndicatorEnabled(false);
+
+        if(!CoreBuildConfig.EPUB_TOC_ENABLED) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            mDrawerToggle.setDrawerIndicatorEnabled(false);
+        }
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 

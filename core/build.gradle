@@ -146,6 +146,8 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     buildConfigField "String", "NETWORK_SERVICE_NAME", project.ext.buildConfigProperties["appNetworkServiceName"]
     buildConfigField "String", "DEFAULT_XAPI_SERVER", project.ext.buildConfigProperties["appDefaultXapiServer"]
     buildConfigField "String", "DEFAULT_XAPI_SERVER_NOSSL", project.ext.buildConfigProperties["appDefaultXapiServerNoSsl"]
+    buildConfigField "boolean", "WELCOME_DIALOG_ENABLED", project.ext.buildConfigProperties["appWelcomeDialgEnabled"]
+    buildConfigField "boolean", "EPUB_TOC_ENABLED", project.ext.buildConfigProperties["appEpubTocEnabled"]
 
 }
 compileJava.dependsOn(generateCoreBuildConfig)
