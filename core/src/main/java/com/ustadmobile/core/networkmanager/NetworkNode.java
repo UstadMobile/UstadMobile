@@ -38,6 +38,18 @@ public class NetworkNode {
 
     private int port;
 
+    private int wifiDirectDeviceStatus;
+
+    public static final int STATUS_CONNECTED = 0;
+
+    public static final int STATUS_INVITED = 1;
+
+    public static final int STATUS_FAILED = 2;
+
+    public static final int STATUS_AVAILABLE = 3;
+
+    public static final int STATUS_UNAVAILABLE = 4;
+
     /**
      * List of acquisition operations that have been performed from this node - used by the
      * acquisition task to determine how successful a node has been and avoid nodes that frequently
@@ -230,6 +242,14 @@ public class NetworkNode {
         }
 
         return numFailures;
+    }
+
+    public int getWifiDirectDeviceStatus() {
+        return wifiDirectDeviceStatus;
+    }
+
+    public void setWifiDirectDeviceStatus(int wifiDirectDeviceStatus) {
+        this.wifiDirectDeviceStatus = wifiDirectDeviceStatus;
     }
 
     /* $endif */

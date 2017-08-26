@@ -3,6 +3,7 @@ package com.ustadmobile.test.sharedse;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
@@ -37,6 +38,15 @@ public class TestUtilsSE {
         String url = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + RemoteTestServerHttpd.CMD_DISABLE_WIFI
                 + "&duration=" + duration;
         return sendCommand(url);
+    }
+
+    public static boolean requestSendFileViaWifiDirect(String macAddr, String[] entryIds) {
+        String commandUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=" + RemoteTestServerHttpd.CMD_SEND_COURSE +
+                "&dst=" + URLTextUtil.urlEncode(macAddr, "UTF-8");
+        for(int i = 0; i < entryIds.length; i++) {
+            commandUrl += "&entryId=" + URLTextUtil.urlEncodeUTF8(entryIds[i]);
+        }
+        return sendCommand(commandUrl);
     }
 
     private static boolean sendCommand(String url) {

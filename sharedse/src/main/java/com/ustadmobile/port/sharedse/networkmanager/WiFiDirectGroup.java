@@ -1,5 +1,9 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.ustadmobile.core.networkmanager.NetworkNode;
+
+import java.util.List;
+
 /**
  * <h1>WiFiDirectGroup</h1>
  *
@@ -13,6 +17,10 @@ public class WiFiDirectGroup {
     private String ssid;
 
     private String passphrase;
+
+    private List<NetworkNode> groupClients;
+
+    private NetworkNode groupOwner;
 
     private boolean owner;
 
@@ -48,5 +56,30 @@ public class WiFiDirectGroup {
 
     public void setOwner(boolean owner) {
         this.owner = owner;
+    }
+
+    public List<NetworkNode> getGroupClients() {
+        return groupClients;
+    }
+
+    protected void setGroupClients(List<NetworkNode> groupClients) {
+        this.groupClients = groupClients;
+    }
+
+    public NetworkNode getGroupOwner() {
+        return groupOwner;
+    }
+
+    protected void setGroupOwner(NetworkNode groupOwner) {
+        this.groupOwner = groupOwner;
+    }
+
+    public boolean groupIncludes(String deviceMacAddr){
+        NetworkNode owner = getGroupOwner();
+        if(owner != null && owner.getDeviceWifiDirectMacAddress() != null
+                && owner.getDeviceWifiDirectMacAddress().equalsIgnoreCase(deviceMacAddr))
+            return true;
+
+        return NetworkManager.isMacAddrInList(getGroupClients(), deviceMacAddr);
     }
 }

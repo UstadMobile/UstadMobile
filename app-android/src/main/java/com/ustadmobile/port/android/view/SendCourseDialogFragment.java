@@ -17,8 +17,10 @@ import com.ustadmobile.port.sharedse.controller.SendCoursePresenter;
 import com.ustadmobile.port.sharedse.view.SendCourseView;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by mike on 8/15/17.
@@ -36,11 +38,17 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
 
     private HashMap<View, String> receiverItemViewToIdMap = new HashMap<>();
 
+    private HashMap<String, View> receiverIdToItemMap = new HashMap<>();
+
+    private HashMap<String, Boolean> receiverIdsEnabledMap = new HashMap<>();
+
     private ArrayList<String> receiverNames = new ArrayList<>();
 
     private ArrayList<String> receiverIds =new ArrayList<>();
 
     private SendCoursePresenter mPresenter;
+
+    private boolean receiversListEnabled = true;
 
     private class SendCourseRecyclerAdapter extends RecyclerView.Adapter<SendCourseRecyclerAdapter.ViewHolder>{
 
@@ -49,11 +57,11 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
-            View itemView;
+            ReceiverDeviceView itemView;
 
             String receiverId;
 
-            public ViewHolder(View itemView) {
+            public ViewHolder(ReceiverDeviceView itemView) {
                 super(itemView);
                 this.itemView = itemView;
             }
@@ -61,21 +69,32 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View receiverView = LayoutInflater.from(getContext()).inflate(
-                    R.layout.item_send_course_receiver, null);
+            ReceiverDeviceView receiverView = new ReceiverDeviceView(getContext());
             receiverView.setOnClickListener(SendCourseDialogFragment.this);
             return new ViewHolder(receiverView);
         }
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            TextView nameView = holder.itemView.findViewById(R.id.item_send_course_receiver_name);
-            nameView.setText(receiverNames.get(position));
+            holder.itemView.setDeviceName(receiverNames.get(position));
             holder.receiverId = receiverIds.get(position);
             if(receiverItemViewToIdMap.containsKey(holder.itemView)){
                 receiverItemViewToIdMap.remove(holder.itemView);
             }
+
+            Boolean receiverEnabled = receiverIdsEnabledMap.get(holder.receiverId);
+            Collection<View> receiverIdToItemMapValues= receiverIdToItemMap.values();
+            if(receiverIdToItemMapValues.contains(holder.itemView))
+                receiverIdToItemMapValues.remove(holder.itemView);
+
+            if(receiverEnabled != null && receiversListEnabled && receiverEnabled.equals(Boolean.TRUE)) {
+                holder.itemView.setEnabled(true);
+            }else {
+                holder.itemView.setEnabled(false);
+            }
+
             receiverItemViewToIdMap.put(holder.itemView, holder.receiverId);
+            receiverIdToItemMap.put(holder.receiverId, holder.itemView);
         }
 
         @Override
@@ -163,6 +182,48 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
         String deviceId = receiverItemViewToIdMap.get(view);
         if(deviceId != null){
             mPresenter.handleClickReceiver(deviceId);
+        }
+    }
+
+    @Override
+    public void setReceiversListEnabled(boolean enabled) {
+        receiversListEnabled = enabled;
+        synchronized (receiverIds) {
+            for(String receiverId : receiverIds) {
+                View receiverView = receiverIdToItemMap.get(receiverId);
+                if(receiverView == null)
+                    continue;
+
+                setViewEnabledRecursive(receiverView,
+                    enabled && receiverIdsEnabledMap.containsKey(receiverId)
+                        && receiverIdsEnabledMap.get(receiverId));
+            }
+        }
+    }
+
+    private void setViewEnabledRecursive(View view, boolean enabled) {
+        view.setEnabled(enabled);
+        if(view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup)view;
+            for(int i = 0; i < viewGroup.getChildCount(); i++) {
+                setViewEnabledRecursive(viewGroup.getChildAt(i), enabled);
+            }
+        }
+    }
+
+    @Override
+    public void setStatusText(String statusText) {
+        TextView statusTextView = rootView.findViewById(R.id.fragment_send_course_status_text);
+        statusTextView.setText(statusText);
+    }
+
+
+    @Override
+    public void setReceiverEnabled(String receiverId, boolean enabled) {
+        receiverIdsEnabledMap.put(receiverId, enabled);
+        View receiverView = receiverIdToItemMap.get(receiverId);
+        if(receiverView != null){
+            setViewEnabledRecursive(receiverView, receiversListEnabled && enabled);
         }
     }
 }

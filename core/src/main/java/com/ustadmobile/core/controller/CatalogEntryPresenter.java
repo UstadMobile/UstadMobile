@@ -14,6 +14,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
 
 
@@ -264,8 +265,18 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
     public void handleClickShare() {
-        Hashtable args = new Hashtable();
-        UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
+        CatalogEntryInfo info = CatalogController.getEntryInfo(entry.id, CatalogController.SHARED_RESOURCE,
+                getContext());
+        if(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
+            Hashtable args = new Hashtable();
+            args.put("title", entry.title);
+            args.put("entries", new String[]{entry.id});
+            UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
+        }else {
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
+                    "Not downloaded (in this language)!", AppView.LENGTH_LONG);
+        }
+
     }
 
 

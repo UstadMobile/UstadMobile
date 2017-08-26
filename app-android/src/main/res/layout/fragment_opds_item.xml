@@ -59,6 +59,8 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:text="status"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:id="@+id/opds_item_detail_text"
             android:layout_below="@+id/opdsitem_title_text"
             android:layout_alignLeft="@+id/opdsitem_title_text"

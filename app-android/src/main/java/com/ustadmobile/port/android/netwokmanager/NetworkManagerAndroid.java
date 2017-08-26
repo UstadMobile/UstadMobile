@@ -25,6 +25,7 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -37,6 +38,7 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
@@ -61,9 +63,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.FailureReason;
@@ -171,6 +176,25 @@ public class NetworkManagerAndroid extends NetworkManager{
      */
     public static final int P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT = 25000;
 
+    private Set activeWifiObjects = new HashSet();
+
+    private WifiManager.WifiLock wifiLock;
+
+    private Handler wifiLockCheckHandler;
+
+    private Runnable checkWifiLocksRunnable = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (activeWifiObjects) {
+                if(activeWifiObjects.isEmpty() && wifiLock != null) {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 364, "NetworkManager:WifiLock : release lock");
+                    wifiLock.release();
+                    wifiLock = null;
+                }
+            }
+        }
+    };
+
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
      * method from it's onCreate
@@ -196,6 +220,8 @@ public class NetworkManagerAndroid extends NetworkManager{
         filter.addAction(WifiDirectHandler.Action.GROUP_INFO_AVAILABLE);//WAS GROUP CREATION
         filter.addAction(WifiDirectHandler.Action.PEERS_CHANGED);
         filter.addAction(WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED);
+        filter.addAction(WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE);
+        filter.addAction(WifiDirectHandler.Action.CONNECT_TO_NORMAL_WIFI_DIRECT_RESULT);
         LocalBroadcastManager.getInstance(networkService).registerReceiver(mBroadcastReceiver, filter);
 
         IntentFilter intentFilter = new IntentFilter();
@@ -208,6 +234,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
+        wifiLockCheckHandler = new Handler();
     }
 
     /**
@@ -231,8 +258,6 @@ public class NetworkManagerAndroid extends NetworkManager{
     private BroadcastReceiver mBroadcastReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //Toast.makeText(networkService,intent.getAction(),Toast.LENGTH_LONG).show();
-            //TODO: add logs instead
             switch (intent.getAction()){
                 case WifiDirectHandler.Action.DNS_SD_TXT_RECORD_AVAILABLE:
                     String deviceMac = intent.getStringExtra(WifiDirectHandler.TXT_MAP_KEY);
@@ -246,12 +271,13 @@ public class NetworkManagerAndroid extends NetworkManager{
                     if(informationAvailable){
                         currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_ACTIVE;
                         WifiP2pGroup wifiP2pGroup=networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
-                        WiFiDirectGroup group = new WiFiDirectGroup(wifiP2pGroup.getNetworkName(),
-                                wifiP2pGroup.getPassphrase());
+                        WiFiDirectGroup group = new WifiDirectGroupAndroid(wifiP2pGroup);
                         group.setOwner(wifiP2pGroup.isGroupOwner());
                         handleWifiDirectGroupCreated(group);
                     }
                     break;
+
+//                case WifiDirectHandler.Action.GROUP_REMOVED
 
                 case WifiDirectHandler.Action.PEERS_CHANGED:
                     WifiP2pDeviceList devices = intent.getParcelableExtra(WifiDirectHandler.Extra.PEERS);
@@ -266,17 +292,37 @@ public class NetworkManagerAndroid extends NetworkManager{
                         NetworkNode node = new NetworkNode(device.deviceAddress, null);
                         list.add(node);
                         node.setDeviceWifiDirectName(device.deviceName);
+                        node.setWifiDirectDeviceStatus(device.status);
+
                         UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
-                                + device.deviceAddress + " (" + device.deviceName + ")");
+                                + device.deviceAddress + " (" + device.deviceName + ") Status: "
+                                + networkService.getWifiDirectHandlerAPI().deviceStatusToString(
+                                        device.status));
                     }
                     handleWifiDirectPeersChanged(list);
 
                     break;
 
                 case WifiDirectHandler.Action.WIFI_DIRECT_CONNECTION_CHANGED:
-                    if(intent.hasExtra(WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED)) {
-                        //wifi direct connection has succeeded.
+                    boolean isConnected = intent.getBooleanExtra(
+                            WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED, false);
+                    if(!isConnected) {
+                        fireWifiP2pConnectionChanged(false);
                     }
+                    break;
+
+                case WifiDirectHandler.Action.CONNECTION_INFO_AVAILABLE:
+                    //the device should have connected
+                    fireWifiP2pConnectionChanged(true);
+                    break;
+
+                case WifiDirectHandler.Action.CONNECT_TO_NORMAL_WIFI_DIRECT_RESULT:
+                    String macAddr = intent.getStringExtra(
+                            WifiDirectHandler.EXTRA_CONNECT_TO_NORMAL_WIFI_DIRECT_MAC_ADDR);
+                    boolean succeeded = intent.getBooleanExtra(
+                            WifiDirectHandler.EXTRA_WIFIDIRECT_CONNECTION_SUCCEEDED, false);
+                    fireWifiP2pConnectionResult(macAddr, succeeded);
+                    break;
 
             }
 
@@ -372,9 +418,9 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
 
         //if we are looking to send a file - enable wifi direct peer discovery
-        if(isSendingOn() && wifiDirectHandler != null) {
+        if(getSharedFeed() != null && wifiDirectHandler != null) {
             wifiDirectHandler.continuouslyDiscoverPeers();
-        }else if(!isSendingOn() && wifiDirectHandler != null){
+        }else if(getSharedFeed() == null && wifiDirectHandler != null){
             wifiDirectHandler.stopPeerDiscovery();
         }
     }
@@ -550,8 +596,9 @@ public class NetworkManagerAndroid extends NetworkManager{
      * @return HashMap : Constructed DNS-Text records.
      */
     private HashMap<String,String> localService(){
-        boolean isConnected= connectivityManager!=null &&
-                connectivityManager.getActiveNetworkInfo().getType()
+        boolean isConnected= connectivityManager!=null
+                && connectivityManager.getActiveNetworkInfo() != null
+                && connectivityManager.getActiveNetworkInfo().getType()
                 == ConnectivityManager.TYPE_WIFI;
         String deviceBluetoothMacAddress=getBluetoothMacAddress();
         String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
@@ -749,7 +796,7 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void connectToWifiDirectNode(String deviceAddress) {
-        networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress);
+        networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress, 15);
     }
 
     private void deleteTemporaryWifiDirectSsids() {
@@ -844,24 +891,22 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
     }
 
+
     //TODO: Add a status flag for removal requested
     @Override
     public synchronized void removeWiFiDirectGroup() {
-        if(currentWifiDirectGroupStatus == WIFI_DIRECT_GROUP_STATUS_ACTIVE) {
-            networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
-                @Override
-                public void onSuccess() {
-                    currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
-                    handleWifiDirectGroupRemoved(true);
-                }
+        networkService.getWifiDirectHandlerAPI().removeGroup(new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                currentWifiDirectGroupStatus=WIFI_DIRECT_GROUP_STATUS_INACTIVE;
+                handleWifiDirectGroupRemoved(true);
+            }
 
-                @Override
-                public void onFailure(int reason) {
-                    handleWifiDirectGroupRemoved(false);
-                }
-            });
-        }
-
+            @Override
+            public void onFailure(int reason) {
+                handleWifiDirectGroupRemoved(false);
+            }
+        });
     }
 
     @Override
@@ -904,4 +949,98 @@ public class NetworkManagerAndroid extends NetworkManager{
     public int getWifiConnectionTimeout() {
         return 60000;
     }
+
+    @Override
+    public NetworkNode getThisWifiDirectDevice() {
+        if(networkService.getWifiDirectHandlerAPI() == null)
+            return null;
+
+        WifiP2pDevice thisDevice = networkService.getWifiDirectHandlerAPI().getThisDevice();
+        if(thisDevice == null)
+            return null;
+
+        NetworkNode thisNode = new NetworkNode(thisDevice.deviceAddress, null);
+        thisNode.setDeviceWifiDirectName(thisDevice.deviceName);
+
+        return thisNode;
+    }
+
+
+    @Override
+    public String getWifiDirectGroupOwnerIp() {
+        if(networkService.getWifiDirectHandlerAPI() == null
+                || networkService.getWifiDirectHandlerAPI().getWifiP2pInfo() == null
+                || networkService.getWifiDirectHandlerAPI().getWifiP2pInfo().groupOwnerAddress == null)
+            return null;
+
+        return networkService.getWifiDirectHandlerAPI().getWifiP2pInfo().groupOwnerAddress.getHostAddress();
+    }
+
+    @Override
+    public boolean isWifiDirectConnectionEstablished(String otherDevice) {
+        if(networkService.getWifiDirectHandlerAPI() == null)
+            return false;
+
+        WifiP2pGroup activeGroup = networkService.getWifiDirectHandlerAPI().getWifiP2pGroup();
+        if(activeGroup == null)
+            return false;
+
+        WifiP2pDevice ownerDevice = activeGroup.getOwner();
+        if(ownerDevice != null && otherDevice.equalsIgnoreCase(ownerDevice.deviceAddress))
+            return true;
+
+        Collection<WifiP2pDevice> groupMembers = activeGroup.getClientList();
+        if(groupMembers == null)
+            return false;
+
+        for(WifiP2pDevice device : groupMembers) {
+            if(otherDevice.equalsIgnoreCase(device.deviceAddress))
+                return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void networkTaskStatusChanged(NetworkTask task) {
+        if(task.getTaskType() != QUEUE_ENTRY_ACQUISITION)
+            return;
+
+        switch(task.getStatus()) {
+            case NetworkTask.STATUS_RUNNING:
+                addActiveWifiObject(task);
+                break;
+
+            default:
+                //it's not running - lock not needed
+                removeActiveWifiObject(task);
+                break;
+        }
+
+        super.networkTaskStatusChanged(task);
+    }
+
+    protected void addActiveWifiObject(Object lockObject) {
+        synchronized (activeWifiObjects) {
+            UstadMobileSystemImpl.l(UMLog.INFO, 356, "NetworkManager:WifiLock: "
+                    + lockObject.toString() + " to active wifi objects");
+            activeWifiObjects.add(lockObject);
+            if(wifiLock == null) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 352, "NetworkManager:WifiLock Acquire wifi lock");
+                wifiLock = wifiManager.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, TAG);
+                wifiLock.acquire();
+            }
+        }
+    }
+
+    protected void removeActiveWifiObject(Object lockObject) {
+        synchronized (activeWifiObjects) {
+            UstadMobileSystemImpl.l(UMLog.INFO, 358, "NetworkManager:WifiLock: Remove "
+                + lockObject.toString() + " from active wifi objects");
+            activeWifiObjects.remove(lockObject);
+            if(activeWifiObjects.isEmpty())
+                wifiLockCheckHandler.postDelayed(checkWifiLocksRunnable, 10000);
+        }
+    }
+
 }

@@ -129,7 +129,10 @@
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Sorry, this device does not support sending files over Bluetooth.</string>
 
     <string name="share_offline_zip_checkbox_label">Send in zip file</string>
-    <string name="share_offline_dialog_message">On the device that you want to share the app with, please open the Bluetooth settings to enable the device to be visible.</string>
+    <string name="share_offline_dialog_message">You can share this app offline. On the device that you want to share with:
+
+        1. Open Settings > Bluetooth Settings.
+        2. Make sure the device is visible.</string>
     <string name="preparing">Preparing</string>
 
 
@@ -147,6 +150,12 @@
     <string name="login_successful">Login successful</string>
     <string name="registration_successful">Registration successful</string>
 
-    <string name="send_course_instructions">Send course instructions here.</string>
+    <string name="send_course_instructions">On the other device, open the  app, and select receive from the top right menu.</string>
+
+    <string name="cancel_invite">Cancel invite</string>
+
+    <string name="device_name">Device name</string>
+    <string name="scanning">Scanning</string>
+    <string name="connecting">Connecting</string>
 
 </resources>

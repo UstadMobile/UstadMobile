@@ -28,8 +28,9 @@
             android:layout_width="14dp"
             android:layout_height="14dp" />
         <TextView
+            android:id="@+id/fragment_send_course_status_text"
             android:layout_weight="1"
-            android:text="Scanning"
+            android:text="@string/scanning"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 

@@ -34,6 +34,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
@@ -78,6 +79,25 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         this.entries = new UstadJSOPDSEntry[0];
         this.title = title;
         this.id = id;
+    }
+
+    /**
+     * Construct the feed using an inputstream that contains the body of the feed itself. This method
+     * does not close any input streams.
+     *
+     * @param srcHref The href that this feed was loaded from
+     * @param in InputStream containing the body of the feed
+     * @param encoding Encoding to use e.g. UTF-8
+     *
+     * @throws IOException
+     * @throws XmlPullParserException
+     */
+    public UstadJSOPDSFeed(String srcHref, InputStream in, String encoding) throws IOException, XmlPullParserException{
+        this.href = srcHref;
+
+        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser();
+        xpp.setInput(in, encoding);
+        loadFromXpp(xpp);
     }
 
 
