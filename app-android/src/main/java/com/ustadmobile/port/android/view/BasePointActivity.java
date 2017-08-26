@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view;
 
 
+import com.evernote.android.job.JobManager;
+import com.evernote.android.job.JobRequest;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.BasePointController;
@@ -11,6 +13,7 @@ import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
+import com.ustadmobile.nanolrs.android.job.SyncJobCreator;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
@@ -38,6 +41,9 @@ import android.widget.CheckBox;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
+import java.util.concurrent.TimeUnit;
+
+import com.ustadmobile.nanolrs.android.job.SyncJob;
 
 public class BasePointActivity extends UstadBaseActivity implements BasePointView,
         NavigationView.OnNavigationItemSelectedListener, DialogResultListener,
@@ -67,6 +73,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     private AlertDialog shareAppDialog;
 
+    private int syncJobId;
+
+    private JobManager mJobManager;
 
 
     @Override
@@ -125,6 +134,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 R.string.drawer_close);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         setMenuItems(this.mNavigationDrawerItems);
+
     }
 
     public void setWelcomeScreenDisplayed(boolean displayed) {

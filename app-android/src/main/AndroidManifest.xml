@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <!-- To obtain wifi lock -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -24,6 +25,7 @@
         android:required="false" />
 
     <application
+        android:name="com.ustadmobile.port.android.App"
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme">
@@ -88,6 +90,16 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/settings"
             android:theme="@style/Theme.UstadTheme"></activity>
+
+        <!-- SyncJob receiver (May not be doing anything)-->
+        <receiver
+            android:name="com.ustadmobile.nanolrs.android.job.SyncJobCreator$AddReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.evernote.android.job.ADD_JOB_CREATOR"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
