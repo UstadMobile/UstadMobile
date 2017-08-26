@@ -26,6 +26,10 @@ allprojects {
         maven {
             url "https://maven.google.com"
         }
+
+        maven{
+            url "C:\\Users\\lenovo\\UstadMobile\\NanoLRS\\nanolrs-repo"
+        }
     }
 }
 
@@ -37,7 +41,7 @@ version = "0.2.4.49"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 132
-    nanoLrsVersion = "0.2.218"
+    nanoLrsVersion = "0.2.222"
 }
 
 ext.buildConfigProperties = new Properties()

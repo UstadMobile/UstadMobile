@@ -176,7 +176,10 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             //    loggedInUser = users.get(0);
             //}else{)
 
-            loggedInUser = userManager.findByUsername(context, loggedInUsername);
+            if(loggedInUsername != null && !loggedInUsername.isEmpty()) {
+                loggedInUser = userManager.findByUsername(context, loggedInUsername);
+            }
+
             if(loggedInUser ==null){
                 //loggedInUser = null;
                 System.out.println("No user logged in. Setting null (will not proceed)");
