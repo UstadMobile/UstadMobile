@@ -1154,12 +1154,19 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public abstract void connectToWifiDirectNode(String deviceAddress);
 
+    /**
+     * Cancel all outgoing wifi direct connections e.g. group invitations
+     */
+    public abstract void cancelWifiDirectConnection();
+
 
     /**
-     * Determine if the device is currently connected to a wifi direct network or not
+     * Determine if the device is currently connected to a wifi direct legacy network or not -
+     * e.g. the main wifi is connected to a network and the network has the prefix DIRECT-
+     *
      * @return
      */
-    public boolean isConnectedToWifiDirectGroup() {
+    public boolean isConnectedToWifiDirectLegacyGroup() {
         String ssid = getCurrentWifiSsid();
         return ssid != null && ssid.toUpperCase().startsWith(WIFI_DIRECT_GROUP_SSID_PREFIX);
     }

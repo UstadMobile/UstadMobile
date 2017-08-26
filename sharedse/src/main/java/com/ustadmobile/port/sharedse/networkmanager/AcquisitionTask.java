@@ -503,7 +503,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                         ,this);
             }else if(targetNetwork.equals(TARGET_NETWORK_NORMAL)) {
                 //String currentSsid = networkManager.getCurrentWifiSsid();
-                boolean isConnectedToWifiDirectGroup = networkManager.isConnectedToWifiDirectGroup();
+                boolean isConnectedToWifiDirectGroup = networkManager.isConnectedToWifiDirectLegacyGroup();
 
                 if(currentSsid != null && !isConnectedToWifiDirectGroup){
                     UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + ": use current normal network");
