@@ -22,7 +22,7 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="false" />
+        android:required="fal\se" />
 
     <application
         android:name="com.ustadmobile.port.android.App"
@@ -93,7 +93,7 @@
 
         <!-- SyncJob receiver (May not be doing anything)-->
         <receiver
-            android:name="com.ustadmobile.nanolrs.android.job.SyncJobCreator$AddReceiver"
+            android:name="com.ustadmobile.port.android.job.UMSyncJobCreator$AddReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.evernote.android.job.ADD_JOB_CREATOR"/>
