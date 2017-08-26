@@ -37,6 +37,8 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     private String chosenMacAddr = null;
 
+    private boolean invitationCancelled = false;
+
     public SendCoursePresenter(Object context, Hashtable args, SendCourseView view) {
         super(context);
         this.view = view;
@@ -78,8 +80,9 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
         view.setReceivers(ids, names);
         for(NetworkNode peer : peers) {
-            view.setReceiverEnabled(peer.getDeviceWifiDirectMacAddress(),
-                    peer.getWifiDirectDeviceStatus() == NetworkNode.STATUS_AVAILABLE);
+            view.setReceiverStatus(peer.getDeviceWifiDirectMacAddress(),
+                    peer.getWifiDirectDeviceStatus());
+
 
             if(chosenMacAddr != null
                     && chosenMacAddr.equalsIgnoreCase(peer.getDeviceWifiDirectMacAddress())) {
@@ -89,7 +92,7 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
                     case NetworkNode.STATUS_UNAVAILABLE:
                     case NetworkNode.STATUS_AVAILABLE:
                         //connection has actually failed
-                        handleAttemptFailed();
+                        handleAttemptFailed(invitationCancelled);
                         break;
                 }
             }
@@ -120,7 +123,7 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
         if(chosenMacAddr == null) {
             UstadMobileSystemImplSE instanceSE = UstadMobileSystemImplSE.getInstanceSE();
             chosenMacAddr = id;
-            view.setStatusText(instanceSE.getString(MessageID.connecting, getContext()));
+            view.setStatusText(instanceSE.getString(MessageID.inviting, getContext()));
             view.setReceiversListEnabled(false);
             UstadMobileSystemImplSE.getInstanceSE().getNetworkManager().connectToWifiDirectNode(id);
         }
@@ -133,17 +136,25 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
             if(connected) {
                 UstadMobileSystemImpl.l(UMLog.INFO, 300, "SendCourse: wifi direct connection result: success");
             }else {
-                handleAttemptFailed();
+                handleAttemptFailed(false);
             }
         }
     }
 
-    protected void handleAttemptFailed(){
+    protected void handleAttemptFailed(boolean wasCancelled){
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.getAppView(getContext()).showNotification(
-                impl.getString(MessageID.error, getContext()), AppView.LENGTH_LONG);
+        if(!wasCancelled)
+            impl.getAppView(getContext()).showNotification(
+                    impl.getString(MessageID.error, getContext()), AppView.LENGTH_LONG);
+
         view.setReceiversListEnabled(true);
         view.setStatusText(impl.getString(MessageID.scanning, getContext()));
         chosenMacAddr = null;
+        invitationCancelled = false;
+    }
+
+    public void handleClickCancelInvite(String deviceId) {
+        UstadMobileSystemImplSE.getInstanceSE().getNetworkManager().cancelWifiDirectConnection();
+        invitationCancelled = true;
     }
 }

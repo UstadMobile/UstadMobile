@@ -799,6 +799,11 @@ public class NetworkManagerAndroid extends NetworkManager{
         networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress, 15);
     }
 
+    @Override
+    public void cancelWifiDirectConnection() {
+        networkService.getWifiDirectHandlerAPI().cancelConnectToNormalWifiDirect();
+    }
+
     private void deleteTemporaryWifiDirectSsids() {
         List<WifiConfiguration> configuredNetworks = wifiManager.getConfiguredNetworks();
 
@@ -1042,5 +1047,7 @@ public class NetworkManagerAndroid extends NetworkManager{
                 wifiLockCheckHandler.postDelayed(checkWifiLocksRunnable, 10000);
         }
     }
+
+
 
 }

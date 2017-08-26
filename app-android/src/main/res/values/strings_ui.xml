@@ -153,6 +153,7 @@
     <string name="send_course_instructions">On the other device, open the  app, and select receive from the top right menu.</string>
 
     <string name="cancel_invite">Cancel invite</string>
+    <string name="inviting">Inviting</string>
 
     <string name="device_name">Device name</string>
     <string name="scanning">Scanning</string>

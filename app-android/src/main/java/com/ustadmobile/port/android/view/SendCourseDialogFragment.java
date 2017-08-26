@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,13 +19,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by mike on 8/15/17.
  */
 
-public class SendCourseDialogFragment extends UstadDialogFragment implements SendCourseView, View.OnClickListener {
+public class SendCourseDialogFragment extends UstadDialogFragment implements SendCourseView, View.OnClickListener, ReceiverDeviceView.OnClickCancelInviteListener {
 
     private RecyclerView receiversRecyclerView;
 
@@ -38,9 +36,9 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
 
     private HashMap<View, String> receiverItemViewToIdMap = new HashMap<>();
 
-    private HashMap<String, View> receiverIdToItemMap = new HashMap<>();
+    private HashMap<String, ReceiverDeviceView> receiverIdToItemMap = new HashMap<>();
 
-    private HashMap<String, Boolean> receiverIdsEnabledMap = new HashMap<>();
+    private HashMap<String, Integer> receiverIdsToStatusMap = new HashMap<>();
 
     private ArrayList<String> receiverNames = new ArrayList<>();
 
@@ -69,8 +67,12 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
 
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            RecyclerView.LayoutParams lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
             ReceiverDeviceView receiverView = new ReceiverDeviceView(getContext());
+            receiverView.setLayoutParams(lp);
             receiverView.setOnClickListener(SendCourseDialogFragment.this);
+            receiverView.setOnCancelInviteListener(SendCourseDialogFragment.this);
             return new ViewHolder(receiverView);
         }
 
@@ -82,16 +84,19 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
                 receiverItemViewToIdMap.remove(holder.itemView);
             }
 
-            Boolean receiverEnabled = receiverIdsEnabledMap.get(holder.receiverId);
-            Collection<View> receiverIdToItemMapValues= receiverIdToItemMap.values();
+            Integer deviceStatus = receiverIdsToStatusMap.get(holder.receiverId);
+            Collection<ReceiverDeviceView> receiverIdToItemMapValues= receiverIdToItemMap.values();
             if(receiverIdToItemMapValues.contains(holder.itemView))
                 receiverIdToItemMapValues.remove(holder.itemView);
 
-            if(receiverEnabled != null && receiversListEnabled && receiverEnabled.equals(Boolean.TRUE)) {
-                holder.itemView.setEnabled(true);
-            }else {
-                holder.itemView.setEnabled(false);
-            }
+            holder.itemView.setDeviceStatus(deviceStatus);
+            holder.itemView.setEnabled(receiversListEnabled);
+
+//            if(receiversListEnabled && deviceStatus.equals(Boolean.TRUE)) {
+//                holder.itemView.setEnabled(true);
+//            }else {
+//                holder.itemView.setEnabled(false);
+//            }
 
             receiverItemViewToIdMap.put(holder.itemView, holder.receiverId);
             receiverIdToItemMap.put(holder.receiverId, holder.itemView);
@@ -186,6 +191,11 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
     }
 
     @Override
+    public void onClickCancelInvite(ReceiverDeviceView src) {
+        mPresenter.handleClickCancelInvite(src.getDeviceId());
+    }
+
+    @Override
     public void setReceiversListEnabled(boolean enabled) {
         receiversListEnabled = enabled;
         synchronized (receiverIds) {
@@ -193,10 +203,7 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
                 View receiverView = receiverIdToItemMap.get(receiverId);
                 if(receiverView == null)
                     continue;
-
-                setViewEnabledRecursive(receiverView,
-                    enabled && receiverIdsEnabledMap.containsKey(receiverId)
-                        && receiverIdsEnabledMap.get(receiverId));
+                receiverView.setEnabled(enabled);
             }
         }
     }
@@ -219,11 +226,11 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
 
 
     @Override
-    public void setReceiverEnabled(String receiverId, boolean enabled) {
-        receiverIdsEnabledMap.put(receiverId, enabled);
-        View receiverView = receiverIdToItemMap.get(receiverId);
+    public void setReceiverStatus(String receiverId, int status) {
+        receiverIdsToStatusMap.put(receiverId, status);
+        ReceiverDeviceView receiverView = receiverIdToItemMap.get(receiverId);
         if(receiverView != null){
-            setViewEnabledRecursive(receiverView, receiversListEnabled && enabled);
+            receiverView.setDeviceStatus(status);
         }
     }
 }

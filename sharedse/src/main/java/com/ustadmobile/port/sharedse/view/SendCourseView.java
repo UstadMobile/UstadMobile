@@ -36,6 +36,6 @@ public interface SendCourseView extends UstadView, DismissableDialog {
      */
     void setStatusText(String statusText);
 
-    void setReceiverEnabled(String receiverId, boolean enabled);
+    void setReceiverStatus(String receiverId, int receiverStatus);
 
 }
