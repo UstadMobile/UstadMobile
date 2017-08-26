@@ -160,5 +160,4 @@
     <string name="connecting">Connecting</string>
     <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
     <string name="try_again">Try again</string>
-    <string name="disconnect">Disconnect</string>
 </resources>

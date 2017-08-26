@@ -1,19 +1,13 @@
 package com.ustadmobile.port.android.job;
 
-import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
 import com.evernote.android.job.JobManager;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.nanolrs.android.job.SyncJob;
-import com.ustadmobile.nanolrs.core.manager.NodeManager;
-import com.ustadmobile.nanolrs.core.manager.UserManager;
 import com.ustadmobile.nanolrs.core.model.Node;
 import com.ustadmobile.nanolrs.core.model.User;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
 /**
  * Created by varuna on 8/24/2017.

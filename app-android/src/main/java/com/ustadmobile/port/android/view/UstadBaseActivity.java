@@ -18,8 +18,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.evernote.android.job.JobManager;
-import com.evernote.android.job.JobRequest;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UMLog;
@@ -27,8 +25,6 @@ import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.nanolrs.android.job.SyncJob;
-import com.ustadmobile.nanolrs.android.job.SyncJobCreator;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -39,7 +35,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Base activity to handle interacting with UstadMobileSystemImpl
