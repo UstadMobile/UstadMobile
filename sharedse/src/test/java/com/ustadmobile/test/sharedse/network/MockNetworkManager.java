@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -98,6 +99,10 @@ public class MockNetworkManager extends NetworkManager {
     private boolean supernodeEnabled = false;
 
     private String wifiDirectMac;
+
+    private Timer wifiDirectNodeConnectionTimer = new Timer();
+
+    private Vector<TimerTask> wifiDirectNodeConnectionPendingTasks = new Vector<>();
 
 
     class WifiDirectBroadcastTimerTask extends TimerTask{
@@ -574,12 +579,10 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void connectToWifiDirectNode(final String deviceAddress) {
-        new Thread(new Runnable() {
+        TimerTask connectTask = new TimerTask(){
             @Override
             public void run() {
-                try { Thread.sleep(1000); }
-                catch(InterruptedException e) {}
-
+                wifiDirectNodeConnectionPendingTasks.remove(this);
                 MockNetworkManager otherNode = wirelessArea.getDeviceByWifiDirectMacAddr(deviceAddress);
                 if(otherNode == null) {
                     return;
@@ -596,7 +599,9 @@ public class MockNetworkManager extends NetworkManager {
                 fireWifiP2pConnectionChanged(true);
                 otherNode.fireWifiP2pConnectionChanged(true);
             }
-        }).start();
+        };
+        wifiDirectNodeConnectionPendingTasks.add(connectTask);
+        wifiDirectNodeConnectionTimer.schedule(connectTask, 1000);
     }
 
     @Override
@@ -620,4 +625,17 @@ public class MockNetworkManager extends NetworkManager {
         return false;
     }
 
+    @Override
+    public void cancelWifiDirectConnection() {
+        synchronized (wifiDirectNodeConnectionPendingTasks) {
+            Iterator<TimerTask> iterator = wifiDirectNodeConnectionPendingTasks.iterator();
+            TimerTask task;
+            while(iterator.hasNext()) {
+                task = iterator.next();
+                task.cancel();
+                iterator.remove();
+            }
+            wifiDirectNodeConnectionPendingTasks.clear();
+        }
+    }
 }
