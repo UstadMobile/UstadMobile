@@ -607,6 +607,9 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         String imageUrl;
         for(int i = 0; i < feed.entries.length && !isDestroyed(); i++) {
             imageLinks = feed.entries[i].getThumbnailLink(false);
+            if(imageLinks == null)
+                continue;
+
             imageUrl = UMFileUtil.resolveLink(feed.href, imageLinks[UstadJSOPDSEntry.LINK_HREF]);
             view.setEntrythumbnail(feed.entries[i].id, imageUrl);
         }
