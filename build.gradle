@@ -37,7 +37,7 @@ version = "0.2.4.51"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 132
-    nanoLrsVersion = "0.2.222"
+    nanoLrsVersion = "0.2.223"
 
 }
 
