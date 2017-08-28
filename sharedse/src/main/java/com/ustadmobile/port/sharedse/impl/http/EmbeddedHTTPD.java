@@ -21,12 +21,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.Vector;
+import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import fi.iki.elonen.*;
 import fi.iki.elonen.router.RouterNanoHTTPD;
+
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.CATALOG_HTTP_ENDPOINT_PREFIX;
 
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
@@ -39,7 +43,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  *
  * Created by mike on 8/14/15.
  */
-public class EmbeddedHTTPD extends RouterNanoHTTPD {
+public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredInputStream.OnCloseListener{
 
     //private HashMap<String, MountedZip> mountedEPUBs;
 
@@ -48,6 +52,16 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
     public static int idCounter = 0;
 
     public static final String PREFIX_MOUNT = "/mount/";
+
+    public interface ResponseListener {
+
+        void responseStarted(NanoHTTPD.Response response);
+
+        void responseFinished(NanoHTTPD.Response response);
+
+    }
+
+    private Vector<ResponseListener> responseListeners = new Vector<>();
 
     /**
      * Hashtable mapping (String)FILENAME_EXTENSION -> (String)MIME_TYPE
@@ -95,12 +109,14 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
 
 
 
-    public EmbeddedHTTPD(int portNum) {
+    public EmbeddedHTTPD(int portNum, Object context) {
         super(portNum);
         //mountedEPUBs = new HashMap<>();
         id = idCounter;
         idCounter++;
 
+        addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, context,
+                new WeakHashMap(), this);
         //TODO: Setup 404 handling
     }
 
@@ -177,4 +193,54 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD {
         return "http://localhost:" + getListeningPort() + "/";
     }
 
+    /**
+     * Add an entry response listener. This will receive response events when entries are sent to
+     * clients.
+     *
+     * @param listener
+     */
+    public void addResponseListener(ResponseListener listener) {
+        responseListeners.add(listener);
+    }
+
+    /**
+     * Remove an entry response listener.
+     *
+     * @param listener
+     */
+    public void removeResponseListener(ResponseListener listener) {
+        responseListeners.remove(listener);
+    }
+
+    protected void fireResponseStarted(NanoHTTPD.Response response) {
+        synchronized (responseListeners) {
+            for(ResponseListener listener : responseListeners) {
+                listener.responseStarted(response);
+            }
+        }
+    }
+
+    protected void fireResponseFinished(NanoHTTPD.Response response) {
+        synchronized (responseListeners) {
+            for(ResponseListener listener: responseListeners) {
+                listener.responseFinished(response);
+            }
+        }
+    }
+
+    /**
+     * Called when a response has started. Because NanoHTTPD's router will create a new
+     * CatalogUriResponder for each response, we provide this EmbeddedHTTP instance as a parameter to
+     * the responder, which in turn calls this method.
+     *
+     * @param response
+     */
+    protected void handleResponseStarted(NanoHTTPD.Response response) {
+        fireResponseStarted(response);
+    }
+
+    @Override
+    public void onStreamClosed(NanoHTTPD.Response response) {
+        fireResponseFinished(response);
+    }
 }

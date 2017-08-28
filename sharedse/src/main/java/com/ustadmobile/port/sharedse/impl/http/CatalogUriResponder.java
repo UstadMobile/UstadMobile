@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +42,12 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
 public class CatalogUriResponder extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
     public static final String ENTRY_PATH_COMPONENT = "/entry/";
+
+    public static final int INIT_PARAM_INDEX_CONTEXT = 0;
+
+    public static final int INIT_PARAM_INDEX_HASHMAP = 1;
+
+    public static final int INIT_PARAM_INDEX_EMBEDDEDHTTPD = 2;
 
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
@@ -99,13 +106,17 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
     }
 
     private Object getContext(RouterNanoHTTPD.UriResource uriResource) {
-        return uriResource.initParameter(0, Object.class);
+        return uriResource.initParameter(INIT_PARAM_INDEX_CONTEXT, Object.class);
     }
 
     public NanoHTTPD.Response handleEntryRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session, String normalizedUri) throws IOException{
         normalizedUri = normalizedUri != null ? normalizedUri : RouterNanoHTTPD.normalizeUri(session.getUri());
         int[] containerIdRange = getEntryUuidSubstringRange(normalizedUri);
         String uuid = normalizedUri.substring(containerIdRange[0], containerIdRange[1]);
+        EmbeddedHTTPD httpd = uriResource.initParameter(INIT_PARAM_INDEX_EMBEDDEDHTTPD,
+                EmbeddedHTTPD.class);
+
+
         CatalogEntryInfo info = CatalogController.getEntryInfo(uuid, CatalogController.SHARED_RESOURCE,
                 getContext(uriResource));
         if(info == null) {
@@ -116,12 +127,24 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
 
         File containerFile = new File(info.fileURI);
         if(containerIdRange[1] == normalizedUri.length()) {
-            //this is the end of the path : serve the container itself
-            return newResponseFromFile(method, uriResource, session, new FileSource(containerFile));
+            //this is the end of the path : serve the container file itself
+            NanoHTTPD.Response entryResponse = newResponseFromFile(method, uriResource,
+                    session, new FileSource(containerFile));
+
+            if(entryResponse.getData() != null) { //null data = HEAD method response with no data
+                ResponseMonitoredInputStream streamMonitor = new ResponseMonitoredInputStream(
+                        entryResponse.getData(), entryResponse);
+                streamMonitor.setOnCloseListener(httpd);
+                entryResponse.setData(streamMonitor);
+                httpd.handleResponseStarted(entryResponse);
+                return entryResponse;
+            }
+
+            return entryResponse;
         }else {
             //serve a particular file from the container
             String pathInZip = normalizedUri.substring(containerIdRange[1] + 1);
-            WeakHashMap zipMap = uriResource.initParameter(1, WeakHashMap.class);
+            WeakHashMap zipMap = uriResource.initParameter(INIT_PARAM_INDEX_HASHMAP, WeakHashMap.class);
             ZipFile zipFile;
             if(zipMap.containsKey(info.fileURI)) {
                 zipFile = (ZipFile)zipMap.get(info.fileURI);

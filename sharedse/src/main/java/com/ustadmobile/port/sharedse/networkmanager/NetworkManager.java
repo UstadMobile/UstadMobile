@@ -278,8 +278,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
              * UstadMobileSystemImpl constructor. Calling the system log here thus results in a
              * stack overflow.
              */
-            httpd = new EmbeddedHTTPD(0);
-            httpd.addRoute(CATALOG_HTTP_ENDPOINT_PREFIX + "(.)+", CatalogUriResponder.class, mContext, new WeakHashMap());
+            httpd = new EmbeddedHTTPD(0, mContext);
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
         }catch(IOException e) {
