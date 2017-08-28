@@ -1973,6 +1973,12 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     }
 
     protected void startMonitoringLocalAvailability() {
+        //don't monitor availability of downloaded files
+        if(getModel() != null && getModel().opdsFeed != null && getModel().opdsFeed.href != null
+                && getModel().opdsFeed.href.startsWith("opds:///")) {
+            return;
+        }
+
         if(availabilityMonitorRequest == null) {
             Set<String> entryIds = new HashSet<>();
             UstadJSOPDSFeed feed = getModel().opdsFeed;
