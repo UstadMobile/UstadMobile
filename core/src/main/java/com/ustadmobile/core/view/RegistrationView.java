@@ -13,6 +13,6 @@ public interface RegistrationView extends UstadView, DismissableDialog {
      * @param fieldName Name corresponding to String
      * @param fieldType Extra info on this field tpye.
      */
-    void addField(int fieldName, int fieldType);
+    void addField(int fieldName, int fieldType, String[] options);
 
 }
