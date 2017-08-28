@@ -73,6 +73,11 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
      */
     public static final String CMD_ACQUIRE_ENTRY_FEEDBACK = "ACQUIRE_FEEDBACK";
 
+    /**
+     * String command tag that indicates an error has occurred
+     */
+    public static final String CMD_ERROR_RESPONSE = "ERROR";
+
     private NetworkManager networkManager;
 
     private final Object bluetoothLock=new Object();
@@ -143,7 +148,14 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
                synchronized (bluetoothLock){
                    try {
                        bluetoothLock.wait(GROUP_INFO_AVAILABLE_WAITING_TIME);
-                       writeToStream(outputStream,networkManager.getWifiDirectGroup());
+                       group = networkManager.getWifiDirectGroup();
+                       if(group != null) {
+                           writeToStream(outputStream, group);
+                       }else {
+                           outputStream.write(CMD_ERROR_RESPONSE.getBytes("UTF-8"));
+                           outputStream.flush();
+                       }
+
                    } catch (InterruptedException e) {
                        e.printStackTrace();
                    }

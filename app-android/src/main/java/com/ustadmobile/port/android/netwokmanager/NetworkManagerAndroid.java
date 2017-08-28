@@ -796,7 +796,24 @@ public class NetworkManagerAndroid extends NetworkManager{
 
     @Override
     public void connectToWifiDirectNode(String deviceAddress) {
+        /*
+         * Our wifi direct send/receive relies on the sender being the group owner, and the receiver
+         * being the group client. If there is a persistent group, it might remember the previous
+         * roles and use those instead.
+         */
+        networkService.getWifiDirectHandlerAPI().removePersistentGroups();
         networkService.getWifiDirectHandlerAPI().connectToNormalWifiDirect(deviceAddress, 15);
+    }
+
+    @Override
+    public void setReceivingOn(boolean receivingOn) {
+        super.setReceivingOn(receivingOn);
+        /*
+         * Our wifi direct send/receive relies on the sender being the group owner, and the receiver
+         * being the group client. If there is a persistent group, it might remember the previous
+         * roles and use those instead.
+         */
+        networkService.getWifiDirectHandlerAPI().removePersistentGroups();
     }
 
     @Override
