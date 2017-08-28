@@ -43,6 +43,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
+import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -75,6 +76,7 @@ import edu.rit.se.wifibuddy.FailureReason;
 import edu.rit.se.wifibuddy.ServiceData;
 import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
+import fi.iki.elonen.NanoHTTPD;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
@@ -94,7 +96,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
 
 
 
-public class NetworkManagerAndroid extends NetworkManager{
+public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTTPD.ResponseListener{
 
     public static final String TAG="NetworkManagerAndroid";
 
@@ -235,6 +237,7 @@ public class NetworkManagerAndroid extends NetworkManager{
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
         wifiLockCheckHandler = new Handler();
+        httpd.addResponseListener(this);
     }
 
     /**
@@ -1040,6 +1043,16 @@ public class NetworkManagerAndroid extends NetworkManager{
         }
 
         super.networkTaskStatusChanged(task);
+    }
+
+    @Override
+    public void responseStarted(NanoHTTPD.Response response) {
+        addActiveWifiObject(response);
+    }
+
+    @Override
+    public void responseFinished(NanoHTTPD.Response response) {
+        removeActiveWifiObject(response);
     }
 
     protected void addActiveWifiObject(Object lockObject) {
