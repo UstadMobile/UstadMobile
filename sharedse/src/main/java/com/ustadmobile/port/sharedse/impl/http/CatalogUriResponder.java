@@ -208,7 +208,7 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
     @Override
     public NanoHTTPD.Response other(String method, RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
         try {
-            if(NanoHTTPD.Method.HEAD.equals(method)) {
+            if(NanoHTTPD.Method.HEAD.toString().equalsIgnoreCase(method)) {
                 String normalizedUri = RouterNanoHTTPD.normalizeUri(session.getUri());
                 if(normalizedUri.contains(ENTRY_PATH_COMPONENT)) {
                     return handleEntryRequest(uriResource, NanoHTTPD.Method.HEAD, session);
@@ -220,6 +220,6 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         }
 
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "text/plain",
-                "Request not understood by .other method");
+                "Request not understood by .other method: " + method);
     }
 }
