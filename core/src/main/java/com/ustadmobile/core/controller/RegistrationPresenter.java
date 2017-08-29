@@ -30,6 +30,7 @@ public class RegistrationPresenter extends UstadBaseController {
     public static final int TYPE_TEXT_VARIATION_PASSWORD = 96;
 
     public static final int TYPE_AUTOCOMPETE_TEXT_VIEW = 4070;
+    public static final int TYPE_SPINNER = 555;
 
     //Hashed user authentication to cache in case they login next time when offline
     //TODO
@@ -37,18 +38,11 @@ public class RegistrationPresenter extends UstadBaseController {
 
     private DialogResultListener resultListener;
 
-    Map<Integer, Integer> extraFieldsMap;
-    Map<Integer, String[]> extraFieldsOptions;
+    public Map<Integer, Integer> extraFieldsMap;
+    public Map<Integer, String[]> extraFieldsOptions;
 
-
-    //TODO: Remove. Instead get it from build config
-    public int[] extraFields = new int[]{MessageID.field_university,
-            MessageID.field_fullname, MessageID.field_gender,
-            MessageID.field_email, MessageID.field_phonenumber,
-            MessageID.field_faculty};
-
-    String[] universities = {"Kabul University",
-            "Kabul Polytechnic University", "Kabul Education University"};
+    String[] universities = {"Kabul University", "Kabul Polytechnic University",
+            "Kabul Education University", "Other", "I don't know"};
     String[] gender = {"Female", "Male"};
     String[] faculty = {};
 
@@ -58,9 +52,9 @@ public class RegistrationPresenter extends UstadBaseController {
         extraFieldsMap.put(MessageID.field_university, TYPE_AUTOCOMPETE_TEXT_VIEW);
         extraFieldsMap.put(MessageID.field_fullname, TYPE_CLASS_TEXT);
         extraFieldsMap.put(MessageID.field_gender, TYPE_AUTOCOMPETE_TEXT_VIEW);
-        extraFieldsMap.put(MessageID.field_email, TYPE_CLASS_TEXT);
-        extraFieldsMap.put(MessageID.field_phonenumber, TYPE_CLASS_TEXT);
-        extraFieldsMap.put(MessageID.field_faculty, TYPE_AUTOCOMPETE_TEXT_VIEW);
+        extraFieldsMap.put(MessageID.field_email, TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        extraFieldsMap.put(MessageID.field_phonenumber, TYPE_CLASS_PHONE);
+        extraFieldsMap.put(MessageID.field_faculty, TYPE_CLASS_TEXT);
 
         extraFieldsOptions = new HashMap<>();
         extraFieldsOptions.put(MessageID.field_university, universities);
@@ -83,13 +77,6 @@ public class RegistrationPresenter extends UstadBaseController {
             }
             view.addField(name, type, options);
         }
-
-        /*
-        //TODO: Replace with values from build config
-        for(int i=0; i < extraFields.length; i++){
-            view.addField(extraFields[i], 0);
-        }
-        */
     }
     public void setUIStrings() {
         //Doesn't do much
