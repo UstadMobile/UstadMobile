@@ -59,11 +59,15 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     private Vector[] modifyUnacquiredEntries;
 
+    private Vector[] sharedAcquiredEntries;
+
     private static final int CMD_REMOVE_PRESENTER_ENTRY = 60;
 
     private static final int CMD_DOWNLOAD_OTHER_LANG = 61;
 
     private static final int CMD_MODIFY_ENTRY = 62;
+
+    private static final int CMD_SHARE_ENTRY = 63;
 
     protected AvailabilityMonitorRequest availabilityMonitorRequest;
 
@@ -265,18 +269,29 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
     public void handleClickShare() {
-        CatalogEntryInfo info = CatalogController.getEntryInfo(entry.id, CatalogController.SHARED_RESOURCE,
-                getContext());
-        if(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
-            Hashtable args = new Hashtable();
-            args.put("title", entry.title);
-            args.put("entries", new String[]{entry.id});
-            UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
-        }else {
+        sharedAcquiredEntries = getTranslatedAlternativesLangVectors(entry,
+                CatalogController.STATUS_ACQUIRED);
+        if(sharedAcquiredEntries[0].size() == 0) {
             UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
                     "Not downloaded (in this language)!", AppView.LENGTH_LONG);
+        }else if(sharedAcquiredEntries[0].size() == 1) {
+            UstadJSOPDSEntry entry = (UstadJSOPDSEntry)sharedAcquiredEntries[1].elementAt(0);
+            handleShareSelectedEntry(entry.id);
+        }else {
+            String[] languagesToShare = new String[sharedAcquiredEntries[0].size()];
+            sharedAcquiredEntries[0].copyInto(languagesToShare);
+            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            impl.getAppView(getContext()).showChoiceDialog(
+                    impl.getString(MessageID.share, getContext()), languagesToShare,
+                    CMD_SHARE_ENTRY,this);
         }
+    }
 
+    protected void handleShareSelectedEntry(String entryId) {
+        Hashtable args = new Hashtable();
+        args.put("title", entry.title);
+        args.put("entries", new String[]{entryId});
+        UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
     }
 
 
@@ -351,6 +366,11 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         break;
                 }
 
+                break;
+
+            case CMD_SHARE_ENTRY:
+                UstadJSOPDSEntry entryToShare = (UstadJSOPDSEntry)sharedAcquiredEntries[1].elementAt(choice);
+                handleShareSelectedEntry(entryToShare.id);
                 break;
 
             case CMD_REMOVE_PRESENTER_ENTRY:
