@@ -45,6 +45,11 @@ public class RegistrationPresenter extends UstadBaseController {
             "Kabul Education University", "Other", "I don't know"};
     String[] gender = {"Female", "Male"};
     String[] faculty = {};
+    String[] relationship={"Single", "Married"};
+    String[] academic_year={};
+    String[] english_proficiency = {"Fluent", "Good", "Fair", "Poor"};
+    String[] yes_no_choices = {"Yes", "No"};
+    String[] job_type = {"Short-term", "Long-term", "Part-time", "Full-time"};
 
     //TODO: Remove. Instead get it from properties
     public void setExtraFields(){
