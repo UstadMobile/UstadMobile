@@ -154,7 +154,10 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
     }
 
     public void handleClickCancelInvite(String deviceId) {
-        UstadMobileSystemImplSE.getInstanceSE().getNetworkManager().cancelWifiDirectConnection();
+        UstadMobileSystemImplSE implSe = UstadMobileSystemImplSE.getInstanceSE();
+        implSe.getNetworkManager().cancelWifiDirectConnection();
         invitationCancelled = true;
+        view.setReceiversListEnabled(true);
+        view.setStatusText(implSe.getString(MessageID.scanning, getContext()));
     }
 }

@@ -75,6 +75,8 @@ public class ResumableHttpDownload {
      */
     private static final int HTTP_CONNECT_TIMEOUT = 10000;
 
+    private boolean keepAliveEnabled = true;
+
     public ResumableHttpDownload(String httpSrc, String destinationFile){
         this.httpSrc = httpSrc;
         this.destinationFile = destinationFile;
@@ -123,9 +125,13 @@ public class ResumableHttpDownload {
                 con.setReadTimeout(HTTP_READ_TIMEOUT);
                 con.setRequestMethod("HEAD");
                 con.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, HTTP_ENCODING_IDENTITY);
+
                 con.connect();
                 String serverLastModified = con.getHeaderField(HTTP_HEADER_LAST_MODIFIED);
                 String serverEtag = con.getHeaderField(HTTP_HEADER_ETAG);
+                httpIn = con.getInputStream();
+
+                httpIn.close();
                 con.disconnect();
 
                 boolean etagInfoPresent = serverEtag != null && dlInfoProperties.containsKey(HTTP_HEADER_ETAG);

@@ -11,8 +11,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.controller.SendCoursePresenter;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.view.SendCourseView;
 
 import java.util.ArrayList;
@@ -73,6 +76,7 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
             receiverView.setLayoutParams(lp);
             receiverView.setOnClickListener(SendCourseDialogFragment.this);
             receiverView.setOnCancelInviteListener(SendCourseDialogFragment.this);
+
             return new ViewHolder(receiverView);
         }
 
@@ -91,12 +95,6 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
 
             holder.itemView.setDeviceStatus(deviceStatus);
             holder.itemView.setEnabled(receiversListEnabled);
-
-//            if(receiversListEnabled && deviceStatus.equals(Boolean.TRUE)) {
-//                holder.itemView.setEnabled(true);
-//            }else {
-//                holder.itemView.setEnabled(false);
-//            }
 
             receiverItemViewToIdMap.put(holder.itemView, holder.receiverId);
             receiverIdToItemMap.put(holder.receiverId, holder.itemView);
@@ -134,12 +132,16 @@ public class SendCourseDialogFragment extends UstadDialogFragment implements Sen
     @Override
     public void onStop() {
         mPresenter.onStop();
+        NetworkManagerAndroid nmAndroid = (NetworkManagerAndroid)UstadMobileSystemImpl.getInstance().getNetworkManager();
+        nmAndroid.removeActiveWifiObject(this);
         super.onStop();
     }
 
     @Override
     public void onStart() {
         mPresenter.onStart();
+        NetworkManagerAndroid nmAndroid = (NetworkManagerAndroid)UstadMobileSystemImpl.getInstance().getNetworkManager();
+        nmAndroid.addActiveWifiObject(this);
         super.onStart();
     }
 

@@ -92,9 +92,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     private EntryCheckResponse entryCheckResponse;
 
-    private static final int MAXIMUM_ATTEMPT_COUNT = 5;
+    private static final int MAXIMUM_ATTEMPT_COUNT = 10;
 
-    private static final int WAITING_TIME_BEFORE_RETRY =10 * 1000;
+    private static final int WAITING_TIME_BEFORE_RETRY = 2 * 1000;
 
     private int attemptCount = 0;
 
@@ -457,8 +457,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             if(feedEntryAcquisitionUrl.startsWith("p2p://")) {
                 targetNetwork = TARGET_NETWORK_WIFIDIRECT;
                 currentDownloadUrl = feedEntryAcquisitionUrl.replace("p2p://", "http://");
-                currentDownloadUrl = currentDownloadUrl.replace("groupowner",
-                        networkManager.getWifiDirectGroupOwnerIp());
+                String groupOwnerIp = networkManager.getWifiDirectGroupOwnerIp();
+                if(groupOwnerIp != null) {
+                    currentDownloadUrl = currentDownloadUrl.replace("groupowner", groupOwnerIp);
+                }else {
+                    //TODO: If this happens - try to reconnect to the group owner.
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 667, getLogPrefix() + " p2p download, group owner IP is null!");
+                    handleAttemptFailed();
+                }
             }else if(localNetworkDownloadEnabled && entryCheckResponse != null
                     && networkManager.getCurrentWifiSsid() != null
                     && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){

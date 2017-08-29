@@ -182,6 +182,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     private WifiManager.WifiLock wifiLock;
 
+    private Object receiveWifiLockObj = new Object();
+
     private Handler wifiLockCheckHandler;
 
     private Runnable checkWifiLocksRunnable = new Runnable() {
@@ -816,7 +818,9 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
          * being the group client. If there is a persistent group, it might remember the previous
          * roles and use those instead.
          */
-        networkService.getWifiDirectHandlerAPI().removePersistentGroups();
+        if(receivingOn == true) {
+            networkService.getWifiDirectHandlerAPI().removePersistentGroups();
+        }
     }
 
     @Override
@@ -1055,7 +1059,19 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         removeActiveWifiObject(response);
     }
 
-    protected void addActiveWifiObject(Object lockObject) {
+    /**
+     * Control use of the Android WiFi lock to keep wifi in high performance mode when operations
+     * are ongoing (even if the screen dims, etc). When an object is added, if the Android WiFi lock
+     * has not already been acquired, it will be acquired then. It will be released when there are
+     * no active objects left.
+     *
+     * When an element of the app wants to conduct a wifi operation that requires high performance
+     * mode to remain on, it should call addActiveWifiObject. When it is finished, it should call
+     * removeActiveWifiObject with that same object reference.
+     *
+     * @param lockObject
+     */
+    public void addActiveWifiObject(Object lockObject) {
         synchronized (activeWifiObjects) {
             UstadMobileSystemImpl.l(UMLog.INFO, 356, "NetworkManager:WifiLock: "
                     + lockObject.toString() + " to active wifi objects");
@@ -1068,7 +1084,14 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         }
     }
 
-    protected void removeActiveWifiObject(Object lockObject) {
+    /**
+     * Control use of the Android WiFi lock as per addActiveWifiObject. If there are no active objects
+     * left a 10 second timer is started. If at the end of that 10 second timer there are still no
+     * active objects left, the lock is released.
+     *
+     * @param lockObject
+     */
+    public void removeActiveWifiObject(Object lockObject) {
         synchronized (activeWifiObjects) {
             UstadMobileSystemImpl.l(UMLog.INFO, 358, "NetworkManager:WifiLock: Remove "
                 + lockObject.toString() + " from active wifi objects");

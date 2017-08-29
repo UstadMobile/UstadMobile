@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.sharedse.controller.ReceiveCoursePresenter;
 import com.ustadmobile.port.sharedse.view.ReceiveCourseView;
 
@@ -49,12 +50,16 @@ public class ReceiveCourseDialogFragment extends UstadDialogFragment implements 
     public void onStart() {
         super.onStart();
         mPresenter.onStart();
+        NetworkManagerAndroid nmAndroid = (NetworkManagerAndroid)UstadMobileSystemImpl.getInstance().getNetworkManager();
+        nmAndroid.addActiveWifiObject(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         mPresenter.onStop();
+        NetworkManagerAndroid nmAndroid = (NetworkManagerAndroid)UstadMobileSystemImpl.getInstance().getNetworkManager();
+        nmAndroid.removeActiveWifiObject(this);
     }
 
     @Override
