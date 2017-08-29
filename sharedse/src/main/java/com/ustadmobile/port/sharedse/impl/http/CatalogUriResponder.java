@@ -195,7 +195,7 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
     }
 
     public NanoHTTPD.Response handleEntryRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session) throws IOException {
-        return handleEntryRequest(uriResource, method, session, RouterNanoHTTPD.normalizeUri(uriResource.getUri()));
+        return handleEntryRequest(uriResource, method, session, RouterNanoHTTPD.normalizeUri(session.getUri()));
     }
 
 
