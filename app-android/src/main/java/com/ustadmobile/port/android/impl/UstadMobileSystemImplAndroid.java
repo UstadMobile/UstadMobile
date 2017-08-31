@@ -770,10 +770,14 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         File apkFile = new File(((Context)context).getApplicationInfo().sourceDir);
         String baseName = CoreBuildConfig.BASE_NAME + "-" + CoreBuildConfig.VERSION;
         FileInputStream apkFileIn = null;
+        Context ctx = (Context)context;
+        File outDir = new File(ctx.getFilesDir(), "shared");
+        if(!outDir.isDirectory())
+            outDir.mkdirs();
+
         if(zip) {
             ZipOutputStream zipOut = null;
-            File outZipFile = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS), baseName  +".zip");
+            File outZipFile = new File(outDir, baseName + ".zip");
             try {
                 zipOut = new ZipOutputStream(new FileOutputStream(outZipFile));
                 zipOut.putNextEntry(new ZipEntry(baseName + ".apk"));
@@ -790,8 +794,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             return outZipFile.getAbsolutePath();
         }else {
             FileOutputStream fout = null;
-            File outApkFile = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS), baseName + ".apk");
+            File outApkFile = new File(outDir, baseName + ".apk");
             try {
                 apkFileIn = new FileInputStream(apkFile);
                 fout = new FileOutputStream(outApkFile);
