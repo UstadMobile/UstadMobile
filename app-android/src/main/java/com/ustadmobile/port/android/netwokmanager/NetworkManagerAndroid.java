@@ -811,13 +811,17 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     @Override
     public void setReceivingOn(boolean receivingOn) {
         super.setReceivingOn(receivingOn);
+        WifiDirectHandler handler = networkService != null
+                ? networkService.getWifiDirectHandlerAPI() : null;
         /*
          * Our wifi direct send/receive relies on the sender being the group owner, and the receiver
          * being the group client. If there is a persistent group, it might remember the previous
          * roles and use those instead.
          */
-        if(receivingOn == true) {
-            networkService.getWifiDirectHandlerAPI().removePersistentGroups();
+        if(handler != null) {
+            networkService.getWifiDirectHandlerAPI().setAutoAccept(receivingOn);
+            if(receivingOn)
+                networkService.getWifiDirectHandlerAPI().removePersistentGroups();
         }
     }
 
