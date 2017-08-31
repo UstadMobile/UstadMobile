@@ -148,7 +148,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
     public void handleClickDisconnect() {
         networkManager.removeWiFiDirectGroup();
-        view.setWaitingStatusText(MessageID.waiting);
+        view.setWaitingStatusText(MessageID.waiting_for_sender);
         view.setMode(ReceiveCourseView.MODE_WAITING);
     }
 
