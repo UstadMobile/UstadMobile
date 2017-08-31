@@ -20,6 +20,7 @@ import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.RegistrationPresenter;
+import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
@@ -193,6 +194,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
     @Override
     public void onClick(View v) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         switch(v.getId()){
             case R.id.fragment_register_dialog_register_button:
                 boolean allgood = true;
@@ -203,7 +205,8 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
                 for(AutoCompleteTextView field: fieldList){
                     if(field.getText().toString().trim().equals("")){
-                        field.setError("This field is Required");
+
+                        field.setError(impl.getString(MessageID.field_required_prompt, getContext()));
                         allgood = false;
                     }
                 }
