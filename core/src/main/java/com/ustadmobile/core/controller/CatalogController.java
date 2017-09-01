@@ -256,6 +256,9 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     private static final int CHOICE_DOWNLOAD_USER = 1;
     
     private static final int CHOICE_DOWNLOAD_CANCEL = 2;
+
+    private static final int CMD_SELECT_SHARE_LANGUAGE = 40;
+
     
     
     public static final String KEY_URL = "url";
@@ -359,9 +362,10 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
     private AvailabilityMonitorRequest availabilityMonitorRequest;
 
-
-
     private String footerButtonUrl;
+
+    private Vector shareLanguageChoices;
+
 
     public CatalogController(Object context) {
         super(context);
@@ -1001,17 +1005,78 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
     public void handleClickShare() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        shareLanguageChoices = new Vector();
+        UstadJSOPDSFeed feed = getModel().opdsFeed;
+
+        UstadJSOPDSEntry entry;
+        String lang;
+        CatalogEntryInfo info;
+        for(int i = 0; i < feed.size(); i++) {
+            entry = feed.getEntry(i);
+            lang = entry.getLanguage();
+            if(lang == null)
+                continue;
+
+            info = CatalogController.getEntryInfo(entry.id, CatalogController.SHARED_RESOURCE,
+                    getContext());
+            if(info == null || info.acquisitionStatus != CatalogController.STATUS_ACQUIRED)
+                continue;
+
+            if(shareLanguageChoices.indexOf(lang) == -1)
+                shareLanguageChoices.addElement(lang);
+        }
+
+        if(shareLanguageChoices.size() == 1) {
+            handleSelectShareLanguage((String)shareLanguageChoices.elementAt(0));
+        }else {
+            String[] availableLangsArr = new String[shareLanguageChoices.size()];
+            Object langNameObj;
+            String langCode;
+            for(int i = 0; i < availableLangsArr.length; i++) {
+                langCode = (String)shareLanguageChoices.elementAt(i);
+                langNameObj = UstadMobileConstants.LANGUAGE_NAMES.get(langCode);
+                if(langNameObj != null) {
+                    availableLangsArr[i] = (String)langNameObj;
+                }else {
+                    availableLangsArr[i] = langCode;
+                }
+            }
+
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showChoiceDialog(
+                    impl.getString(MessageID.share, getContext()), availableLangsArr,
+                    CMD_SELECT_SHARE_LANGUAGE, this);
+        }
+    }
+
+    @Override
+    public void appViewChoiceSelected(int commandId, int choice) {
+        switch(commandId) {
+            case CMD_SELECT_SHARE_LANGUAGE:
+                handleSelectShareLanguage((String)shareLanguageChoices.elementAt(choice));
+                break;
+        }
+
+        super.appViewChoiceSelected(commandId, choice);
+    }
+
+    protected void handleSelectShareLanguage(String language) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Vector entriesToShare = new Vector();
-        UstadJSOPDSFeed displayFeed = getDisplayFeed();
+
+        UstadJSOPDSFeed catalogFeed = getModel().opdsFeed;
         CatalogEntryInfo info;
         UstadJSOPDSEntry entry;
-        for(int i = 0; i < displayFeed.size(); i++) {
-            entry = displayFeed.getEntry(i);
+        for(int i = 0; i < catalogFeed.size(); i++) {
+            entry = catalogFeed.getEntry(i);
+            if(!UMUtil.isSameLanguage(language, entry.getLanguage()))
+                continue;
+
             info = CatalogController.getEntryInfo(entry.id, CatalogController.SHARED_RESOURCE,
                     getContext());
             if(info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED)
                 entriesToShare.addElement(entry.id);
         }
+
         if(entriesToShare.size() > 0) {
             String[] entriesToShareArr = new String[entriesToShare.size()];
             entriesToShare.toArray(entriesToShareArr);
@@ -1023,7 +1088,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             impl.getAppView(getContext()).showNotification("No entries downloaded to share yet",
                     AppView.LENGTH_LONG);
         }
-
 
     }
     
