@@ -78,7 +78,6 @@
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
     <string name='students'>Account</string>
-    <string name='language_preference'>Language Preference</string>
     <string name='forgot_password'>Forgot password</string>
     <string name='connections'>Connection</string>
     <string name='notifications'>Notifications</string>
@@ -162,4 +161,6 @@
     <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
     <string name="try_again">Try again</string>
     <string name="field_required_prompt">This field is required</string>
+    <string name="catalog">Catalog</string>
+    <string name="closed">Closed</string>
 </resources>

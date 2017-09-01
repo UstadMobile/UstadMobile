@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.netwokmanager;
 
+import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;

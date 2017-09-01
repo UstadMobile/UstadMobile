@@ -150,7 +150,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.container_drawer_layout);
         mDrawerToggle = new ActionBarDrawerToggle(this,
-                mDrawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close) {
+                mDrawerLayout, toolbar, R.string.open, R.string.closed) {
 
             public void onDrawerOpened(View drawerView) {
                 drawerSelectedIndex = -1;

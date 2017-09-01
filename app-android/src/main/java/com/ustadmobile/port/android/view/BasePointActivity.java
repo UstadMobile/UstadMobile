@@ -117,8 +117,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
         mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
         mDrawerNavigationView.setNavigationItemSelectedListener(this);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
-                R.string.drawer_close);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open,
+                R.string.closed);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         setMenuItems(this.mNavigationDrawerItems);
 
