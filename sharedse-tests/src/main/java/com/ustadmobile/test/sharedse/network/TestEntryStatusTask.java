@@ -62,7 +62,7 @@ public class TestEntryStatusTask{
         TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
                 TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
         testEntryStatusBluetooth(EXPECTED_AVAILABILITY, TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-        Assert.assertTrue("Supernod disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+        Assert.assertTrue("Supernode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
 
     @Test

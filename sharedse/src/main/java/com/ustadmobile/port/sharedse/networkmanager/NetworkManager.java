@@ -18,7 +18,6 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
-import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
@@ -41,9 +40,9 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
-import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
+import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
@@ -62,7 +61,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
 
-public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener, LocalMirrorFinder {
+public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener, LocalMirrorFinder, EmbeddedHTTPD.ResponseListener {
 
     /**
      * Flag to indicate type of notification used when supernode is active
@@ -165,6 +164,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     protected RouterNanoHTTPD sharedFeedHttpd;
 
     /**
+     * Object to use for threading safety on sharedFeedHttpd operations
+     */
+    protected Object sharedFeedLock = new Object();
+
+    /**
      * The feed that the user wants to share at the moment
      */
     protected UstadJSOPDSFeed sharedFeed;
@@ -237,6 +241,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private boolean receivingOn = false;
 
+    /**
+     * The time that the shared feed will be available
+     */
+    public static final int SHARED_FEED_HTTPD_TIMEOUT = 30000;
 
     private class UpdateTimerTask extends TimerTask {
         @Override
@@ -245,6 +253,25 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             NetworkManager.this.updateSupernodeServices();
         }
     }
+
+    /**
+     * Timer task which will stop the shared feed httpd server after SHARED_FEED_HTTPD_TIMEOUT has
+     * elapsed since the send course presenter has been closed or the last http response sent.
+     */
+    private class StopSharedFeedHttpdTimerTask extends TimerTask {
+        @Override
+        public void run() {
+            synchronized (sharedFeedLock) {
+                if(sharedFeedHttpd != null) {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 374, "Stop shared feed httpd");
+                    sharedFeedHttpd.stop();
+                    sharedFeedHttpd = null;
+                }
+            }
+        }
+    }
+
+    private TimerTask stopSharedFeedHttpdTimerTask;
 
 
     public NetworkManager() {
@@ -255,6 +282,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @return boolean: TRUE if enabled and FALSE otherwise
      */
     public abstract boolean isSuperNodeEnabled();
+
+    public abstract boolean isBroadcastEnabled();
+
+    public abstract boolean isDiscoveryEnabled();
+
 
     public abstract void updateSupernodeServices();
 
@@ -1446,41 +1478,74 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param sharedFeed
      */
     public void setSharedFeed(UstadJSOPDSFeed sharedFeed) {
-        this.sharedFeed = sharedFeed;
+        synchronized (sharedFeedLock) {
+            this.sharedFeed = sharedFeed;
 
-        if(sharedFeed != null) {
-            if(sharedFeedHttpd == null) {
-                sharedFeedHttpd = new RouterNanoHTTPD(SHARED_FEED_PORT);
-                try {
-                    sharedFeedHttpd.start();
-                    UstadMobileSystemImpl.l(UMLog.INFO, 302,
-                            "setSharedFeed: Shared feed listening port = "
-                                    + sharedFeedHttpd.getListeningPort());
-                }catch(IOException e) {
-                    //TODO: If we can't start the http server - nothing will work, show error and give up
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 663, "setSendingOn: Exception starting http server");
-                    sharedFeedHttpd = null;
-                    return;
+            cancelStopSharedFeedHttpdTimerTask();
+            if(sharedFeed != null) {
+                if(sharedFeedHttpd == null) {
+                    sharedFeedHttpd = new RouterNanoHTTPD(SHARED_FEED_PORT);
+                    try {
+                        sharedFeedHttpd.start();
+                        UstadMobileSystemImpl.l(UMLog.INFO, 302,
+                                "setSharedFeed: Shared feed listening port = "
+                                        + sharedFeedHttpd.getListeningPort());
+                    }catch(IOException e) {
+                        //TODO: If we can't start the http server - nothing will work, show error and give up
+                        UstadMobileSystemImpl.l(UMLog.ERROR, 663, "setSendingOn: Exception starting http server");
+                        sharedFeedHttpd = null;
+                        return;
+                    }
+                }else {
+                    sharedFeedHttpd.removeRoute("(.*)");
                 }
-            }else {
-                sharedFeedHttpd.removeRoute("(.*)");
+
+                sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeed, this);
+
+                updateClientServices();
+            }else if(sharedFeed == null) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 301, "setSharedFeed: shared feed is now null");
+                updateClientServices();
+                cancelStopSharedFeedHttpdTimerTask();
+                submitCancelSharedFeedHttpdTimerTask();
             }
 
-            sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeed);
-
-            updateClientServices();
-        }else if(sharedFeed == null && sharedFeedHttpd != null) {
-            sharedFeedHttpd.stop();
-            sharedFeedHttpd = null;
-            UstadMobileSystemImpl.l(UMLog.INFO, 301, "setSharedFeed: shared feed httpd stopped");
-            updateClientServices();
+            httpd.addRoute(CATALOG_HTTP_SHARED_URI, OPDSFeedUriResponder.class, sharedFeed);
         }
-
-        httpd.addRoute(CATALOG_HTTP_SHARED_URI, OPDSFeedUriResponder.class, sharedFeed);
     }
 
     public UstadJSOPDSFeed getSharedFeed() {
         return sharedFeed;
+    }
+
+    private void cancelStopSharedFeedHttpdTimerTask() {
+        synchronized (sharedFeedLock) {
+            if(stopSharedFeedHttpdTimerTask != null) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 366, "Cancel stop shared feed httpd");
+                stopSharedFeedHttpdTimerTask.cancel();
+                stopSharedFeedHttpdTimerTask = null;
+            }
+        }
+    }
+
+    private void submitCancelSharedFeedHttpdTimerTask() {
+        synchronized (sharedFeedLock) {
+            cancelStopSharedFeedHttpdTimerTask();
+            stopSharedFeedHttpdTimerTask = new StopSharedFeedHttpdTimerTask();
+            updateServicesTimer.schedule(stopSharedFeedHttpdTimerTask, SHARED_FEED_HTTPD_TIMEOUT);
+            UstadMobileSystemImpl.l(UMLog.INFO, 368, "Submit cancel stop shared feed httpd task");
+        }
+    }
+
+    @Override
+    public void responseStarted(NanoHTTPD.Response response) {
+
+    }
+
+    @Override
+    public void responseFinished(NanoHTTPD.Response response) {
+        //The device we are sharing should have downloaded the course
+        submitCancelSharedFeedHttpdTimerTask();
     }
 
     /**

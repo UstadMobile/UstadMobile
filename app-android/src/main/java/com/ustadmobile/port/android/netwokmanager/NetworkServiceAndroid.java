@@ -52,7 +52,9 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
-    public static final int SERVICE_REBROADCASTING_TIMER=30000;
+//    public static final int SERVICE_REBROADCASTING_TIMER=30000;
+
+    public static final int SERVICE_REBROADCASTING_TIMER=120000;
 
 
     public NetworkServiceAndroid(){
@@ -62,10 +64,11 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
     @Override
     public void onCreate() {
         super.onCreate();
-        Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
-        bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
         networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
+
+        Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
+        bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
 
         //Sync:
         Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
@@ -130,6 +133,7 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
             wifiDirectHandler.setPeerDiscoveryInterval(SERVICE_REBROADCASTING_TIMER);
+            wifiDirectHandler.setLocalServiceRequiresPeerDiscoveryKick(false);
 
             boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
                     PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));
