@@ -133,7 +133,7 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             wifiDirectHandler = ((WifiDirectHandler.WifiTesterBinder) iBinder).getService();
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
             wifiDirectHandler.setPeerDiscoveryInterval(SERVICE_REBROADCASTING_TIMER);
-            wifiDirectHandler.setLocalServiceRequiresPeerDiscoveryKick(false);
+            wifiDirectHandler.setLocalServicePeerDiscoveryKickEnabled(false);
 
             boolean isSuperNodeEnabled = Boolean.parseBoolean(UstadMobileSystemImpl.getInstance().getAppPref(
                     PREF_KEY_SUPERNODE, "false", NetworkServiceAndroid.this.getApplicationContext()));

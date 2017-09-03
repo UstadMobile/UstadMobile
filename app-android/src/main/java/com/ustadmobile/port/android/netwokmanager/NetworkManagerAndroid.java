@@ -24,6 +24,7 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,6 +38,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -457,7 +459,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
         boolean shouldRunWifiP2pDiscovery = discoveryEnabled && wifiDirectHandler != null && isWiFiEnabled();
         if(shouldRunWifiP2pDiscovery) {
-            wifiDirectHandler.continuouslyDiscoverServices();
+            wifiDirectHandler.continuouslyDiscoverServices(WifiP2pDnsSdServiceRequest.newInstance(
+                    CoreBuildConfig.NETWORK_SERVICE_NAME, ServiceType.PRESENCE_TCP.toString()));
         }else if(wifiDirectHandler != null) {
             wifiDirectHandler.stopServiceDiscovery();
         }
