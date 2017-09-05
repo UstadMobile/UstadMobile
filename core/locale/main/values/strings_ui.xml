@@ -161,6 +161,24 @@
     <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
     <string name="try_again">Try again</string>
     <string name="field_required_prompt">This field is required</string>
+    <string name="field_password_min">Minimum 5 characters</string>
+
+    <string name="field_father_name" value="986">Father Name</string>
+    <string name="field_address" value="987">Address</string>
+    <string name="field_tazkira_id" value="988">Tazkira Number</string>
+    <string name="field_relationship" value="989">Relationship</string>
+    <string name="field_department" value="990">Department</string>
+    <string name="field_academic_year" value="991">Academic Year</string>
+    <string name="field_gpa" value="992">GPA in %</string>
+    <string name="field_would_work" value="993">Would you like to work?</string>
+    <string name="field_would_work_elaborate" value="994">Why do you want or dont want to work?</string>
+    <string name="field_have_work_experience" value="995">Do you have work experience?</string>
+    <string name="field_type_job" value="996">What type of Job would you like?</string>
+    <string name="field_english_proficiency" value="997">What is your English proficiency?</string>
+    <string name="field_computer_application" value="998">What computer applications are you able to use?</string>
+    <string name="field_post_graduate" value="999">What is your plan after you graduate?</string>
+    <string name="field_comments" value="1000">Comments and/or questions</string>
+    <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
     <string name="catalog">Catalog</string>
     <string name="closed">Closed</string>
 </resources>

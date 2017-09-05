@@ -102,6 +102,7 @@
             android:theme="@style/Theme.UstadTheme"></activity>
 
         <!-- SyncJob receiver (May not be doing anything)-->
+        <!--
         <receiver
             android:name="com.ustadmobile.port.android.job.UMSyncJobCreator$AddReceiver"
             android:exported="false">
@@ -109,6 +110,7 @@
                 <action android:name="com.evernote.android.job.ADD_JOB_CREATOR"/>
             </intent-filter>
         </receiver>
+        -->
 
     </application>
 
