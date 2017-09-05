@@ -21,18 +21,28 @@ public class App extends Application {
 
     @Override
     public void onCreate() {
-        System.out.println("UMSyncJob: App.java..");
+        System.out.println("UMSyncJob:App:");
         super.onCreate();
-        JobManager.create(this).addJobCreator(new UMSyncJobCreator());
+
         if(mJobManager == null){
+            JobManager.create(this).addJobCreator(new UMSyncJobCreator());
             mJobManager = JobManager.instance();
         }
 
+        System.out.println("UMSyncJob:App: Currently there are :"
+                + mJobManager.getAllJobs().size() + " jobs running.");
+        System.out.println("UMSyncJob:App: Currently there are :"
+            + mJobManager.getAllJobsForTag(UMSyncJob.TAG).size() +
+                " UMSyncJobs running.");
+
+
         if(syncJobId > -1 && mJobManager.getJobRequest(syncJobId) == null){
-            System.out.println("UMSyncJob: Job not running. Scheduling it ..");
+            System.out.println("UMSyncJob:App: Job : " + syncJobId + " not running. Scheduling it..");
             scheduleJob();
+            System.out.print("\n");
         }else{
-            System.out.println("UMSyncJob: Job: " + syncJobId + " is already running. Not scheduling again.");
+            System.out.println("UMSyncJob:App: Job: " + syncJobId + " is already running. " +
+                    "Not scheduling again.");
         }
     }
 
@@ -51,7 +61,7 @@ public class App extends Application {
                 .setPersisted(true)
                 .build()
                 .schedule();
-        System.out.println("UMSyncJob: Job scheduled. ID: " + syncJobId);
+        System.out.println("UMSyncJob:App: Job scheduled. ID: " + syncJobId);
     }
 }
 

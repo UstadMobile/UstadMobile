@@ -47,7 +47,7 @@ public class UMSyncJob extends Job {
     @NonNull
     @Override
     protected Result onRunJob(Params params) {
-        System.out.println("UMSyncJob: Running ..");
+        System.out.println("UMSyncJob: onRunJob()..");
 
         Object context = getContext();
         String loggedInUsername = null;
@@ -56,41 +56,41 @@ public class UMSyncJob extends Job {
         NodeManager nodeManager =
                 PersistenceManager.getInstance().getManager(NodeManager.class);
 
-        System.out.println("UMSyncJob: Getting logged in username..");
+        System.out.println("  UMSyncJob: Getting logged in username..");
         loggedInUsername = UstadMobileSystemImpl.getInstance().getActiveUser(context);
 
-        System.out.println("UMSyncJob: Checking Shared Pref..");
+        System.out.println("  UMSyncJob: Checking Shared Pref..");
         SharedPreferences appPrefs = getAppSharedPreferences((Context)context);
         String currentUsername = appPrefs.getString(KEY_CURRENTUSER, null);
 
         if(currentUsername!=null && !currentUsername.isEmpty()){
-            System.out.println("UMSyncJob: Got username from shared pref: " + currentUsername );
+            System.out.println("  UMSyncJob: Got username from shared pref: " + currentUsername );
             loggedInUsername = currentUsername;
         }
 
         if(loggedInUsername != null && !loggedInUsername.isEmpty()) {
-            System.out.println("Logged in username is : " + loggedInUsername);
+            System.out.println("  UMSyncJob: Logged in username is : " + loggedInUsername);
             loggedInUser = userManager.findByUsername(context, loggedInUsername);
 
         }else{
-            System.out.println("UMSyncJob: logged in username is null..");
+            System.out.println("  !UMSyncJob: logged in username is null..!");
         }
 
-        System.out.println("UMSyncJob: Getting endNode (in this case, main node)..");
+        System.out.println("  UMSyncJob: Getting endNode (in this case, main node)..");
         try {
             endNode = nodeManager.getMainNode(DEFAULT_MAIN_SERVER_HOST_NAME, context);
-            System.out.println("UMSyncJob: Got endNode!");
+            System.out.println("  UMSyncJob: Got endNode!");
         } catch (SQLException e) {
-            System.out.println("UMSyncJob: Could not get node..");
+            System.out.println("  UMSyncJob: Could not get node..");
             e.printStackTrace();
         }
 
         try {
             if(loggedInUser != null && endNode != null) {
-                System.out.println("UMSyncJob: Logged in user and end node is NOT null. Syncing..");
+                System.out.println("  UMSyncJob: Logged in user and end node is NOT null. Syncing..");
                 UMSyncEndpoint.startSync(loggedInUser, endNode, getContext());
             }else{
-                System.out.println("UMSyncJob: Logged in user and end node is null, skipping..");
+                System.out.println("  !UMSyncJob: Logged in user and end node is null, skipping..!");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -115,13 +115,5 @@ public class UMSyncJob extends Job {
         System.out.println("UMSyncJob: on Reschedule ..");
         super.onReschedule(newJobId);
         //the rescheduled job has a new ID.
-    }
-
-    public static void scheduleJob(){
-        new JobRequest.Builder(UMSyncJob.TAG)
-                .setPeriodic(TimeUnit.MINUTES.toMillis(3), TimeUnit.MINUTES.toMillis(2))
-                .setPersisted(true)
-                .build()
-                .schedule();
     }
 }
