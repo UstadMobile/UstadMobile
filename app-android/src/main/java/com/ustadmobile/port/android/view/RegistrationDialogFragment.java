@@ -2,20 +2,21 @@ package com.ustadmobile.port.android.view;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
+import android.text.InputFilter;
 import android.text.InputType;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
@@ -26,6 +27,7 @@ import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Set;
 
@@ -34,7 +36,7 @@ import java.util.Set;
  */
 
 public class RegistrationDialogFragment extends UstadDialogFragment
-        implements RegistrationView, DismissableDialog, View.OnClickListener {
+        implements RegistrationView, DismissableDialog, View.OnClickListener{
 
     private View mView;
 
@@ -46,22 +48,64 @@ public class RegistrationDialogFragment extends UstadDialogFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final String minPassPrompt = impl.getString(MessageID.field_password_min, getContext());
         // Inflate the layout for this fragment
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         mView = inflater.inflate(R.layout.fragment_register_dialog, container, false);
 
         mView.findViewById(R.id.fragment_register_dialog_register_button).setOnClickListener(this);
 
-        fieldList.add((AutoCompleteTextView) mView.findViewById(
-                R.id.fragment_register_dialog_username_text));
-        fieldList.add((AutoCompleteTextView) mView.findViewById(
-                R.id.fragment_register_dialog_password_text));
+        AutoCompleteTextView usernameFragment = mView.findViewById(R.id.fragment_register_dialog_username_text);
+        final AutoCompleteTextView passwordFragment = mView.findViewById(R.id.fragment_register_dialog_password_text);
+
+        usernameFragment.setFilters(new InputFilter[] {
+                new InputFilter.AllCaps() {
+                    @Override
+                    public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+                        return String.valueOf(source).toLowerCase().replace(" ", "");
+                    }
+                }
+        });
+
+        passwordFragment.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    if (passwordFragment.getText().toString().trim().length() < 5) {
+                        passwordFragment.setError(minPassPrompt);
+                    } else {
+                        // your code here
+                        passwordFragment.setError(null);
+                    }
+                } else {
+                    if (passwordFragment.getText().toString().trim().length() < 5) {
+                        passwordFragment.setError(minPassPrompt);
+                    } else {
+                        // your code here
+                        passwordFragment.setError(null);
+                    }
+                }
+
+            }});
+
+        fieldList.add(usernameFragment);
+        fieldList.add(passwordFragment);
 
         mPresenter = new RegistrationPresenter(getContext(), this);
         if(mResultListener != null)
             mPresenter.setResultListener(mResultListener);
 
         return mView;
+    }
+
+    /**
+     * Hides keyboard
+     */
+    public void hideKeyboard(){
+        InputMethodManager imm =
+                (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mView.getWindowToken(), 0);
     }
 
     /**
@@ -74,6 +118,9 @@ public class RegistrationDialogFragment extends UstadDialogFragment
      */
     public boolean showOptions(View paramView, MotionEvent paramMotionEvent,
                                String[] options, AutoCompleteTextView autoTextField ) {
+
+        hideKeyboard();
+
         if (options.length > 0) {
             final ArrayAdapter<String> adapterT = new ArrayAdapter<>(getActivity(),
                     android.R.layout.select_dialog_singlechoice, options);
@@ -85,6 +132,35 @@ public class RegistrationDialogFragment extends UstadDialogFragment
         return false;
     }
 
+    public class InputFilterMinMax implements InputFilter {
+
+        private int min, max;
+
+        public InputFilterMinMax(int min, int max) {
+            this.min = min;
+            this.max = max;
+        }
+
+        public InputFilterMinMax(String min, String max) {
+            this.min = Integer.parseInt(min);
+            this.max = Integer.parseInt(max);
+        }
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest,
+                                   int dstart, int dend) {
+            try {
+                int input = Integer.parseInt(dest.toString() + source.toString());
+                if (isInRange(min, max, input))
+                    return null;
+            } catch (NumberFormatException nfe) { }
+            return "";
+        }
+
+        private boolean isInRange(int a, int b, int c) {
+            return b > a ? c >= a && c <= b : c >= b && c <= a;
+        }
+    }
 
     @Override
     public void addField(int fieldName, int fieldType, final String[] options) {
@@ -116,6 +192,17 @@ public class RegistrationDialogFragment extends UstadDialogFragment
         autoTextField.setMinLines(1);
         autoTextField.setMaxLines(1);
 
+
+        // TODO Auto-generated method stub
+
+        Calendar myCalendar = Calendar.getInstance();
+        int year = Calendar.getInstance().get(Calendar.YEAR);
+        myCalendar.set(Calendar.YEAR, year);
+        int minYear = year - 10;
+        int maxYear = year + 10;
+        System.out.println("year: min/max" + year + " " + minYear + "/" + maxYear);
+
+
         switch(fieldType){
             case RegistrationPresenter.TYPE_AUTOCOMPETE_TEXT_VIEW:
                 autoTextField.setInputType(InputType.TYPE_NULL);
@@ -123,7 +210,9 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
                     @Override
                     public boolean onTouch(View paramView, MotionEvent paramMotionEvent) {
-                        return showOptions(paramView, paramMotionEvent, options, autoTextField);
+                        if (paramMotionEvent.getAction() == MotionEvent.ACTION_UP)
+                            return showOptions(paramView, paramMotionEvent, options, autoTextField);
+                        return false;
                     }
 
                     public boolean showMe(View paramView, MotionEvent paramMotionEvent) {
@@ -141,6 +230,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment
                 autoTextField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
                     @Override
                     public void onFocusChange(View view, boolean b) {
+                        hideKeyboard();
                         if (options.length > 0) {
                             final ArrayAdapter<String> adapterT = new ArrayAdapter<>(getActivity(),
                                     android.R.layout.select_dialog_singlechoice, options);
@@ -180,6 +270,19 @@ public class RegistrationDialogFragment extends UstadDialogFragment
             case RegistrationPresenter.TYPE_TEXT_VARIATION_EMAIL_ADDRESS:
                 autoTextField.setInputType(InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS);
                 break;
+            case RegistrationPresenter.TYPE_CLASS_PERCENTAGE:
+                autoTextField.setInputType(InputType.TYPE_CLASS_NUMBER);
+                autoTextField.setFilters(new InputFilter[]{new InputFilterMinMax("0", "100")});
+                break;
+            case RegistrationPresenter.TYPE_CLASS_YEAR:
+                autoTextField.setInputType(InputType.TYPE_CLASS_NUMBER);
+                autoTextField.setFilters(
+                        new InputFilter[]{
+                                new InputFilterMinMax(minYear, maxYear)
+                        }
+                );
+
+                break;
             default:
                 break;
         }
@@ -207,6 +310,9 @@ public class RegistrationDialogFragment extends UstadDialogFragment
                     if(field.getText().toString().trim().equals("")){
 
                         field.setError(impl.getString(MessageID.field_required_prompt, getContext()));
+                        allgood = false;
+                    }
+                    if(field.getError() != null){
                         allgood = false;
                     }
                 }
@@ -245,3 +351,5 @@ public class RegistrationDialogFragment extends UstadDialogFragment
             mPresenter.setResultListener(mResultListener);
     }
 }
+
+

@@ -26,6 +26,8 @@ public class RegistrationPresenter extends UstadBaseController {
     public static final int TYPE_CLASS_DATETIME = 4;
     public static final int TYPE_CLASS_NUMBER = 2;
     public static final int TYPE_CLASS_PHONE = 3;
+    public static final int TYPE_CLASS_YEAR = 6;
+    public static final int TYPE_CLASS_PERCENTAGE = 5;
     public static final int TYPE_TEXT_VARIATION_EMAIL_ADDRESS = 32;
     public static final int TYPE_TEXT_VARIATION_PASSWORD = 96;
 
@@ -41,6 +43,7 @@ public class RegistrationPresenter extends UstadBaseController {
     public Map<Integer, Integer> extraFieldsMap;
     public Map<Integer, String[]> extraFieldsOptions;
 
+    //TODO: Remove. Instead get it from properties
     String[] universities = {"Kabul University", "Kabul Polytechnic University",
             "Kabul Education University", "Other", "I don't know"};
     String[] gender = {"Female", "Male"};
@@ -61,10 +64,36 @@ public class RegistrationPresenter extends UstadBaseController {
         extraFieldsMap.put(MessageID.field_phonenumber, TYPE_CLASS_PHONE);
         extraFieldsMap.put(MessageID.field_faculty, TYPE_CLASS_TEXT);
 
+        extraFieldsMap.put(MessageID.field_father_name, TYPE_CLASS_TEXT);
+        extraFieldsMap.put(MessageID.field_address, TYPE_CLASS_TEXT);
+        extraFieldsMap.put(MessageID.field_tazkira_id, TYPE_CLASS_TEXT);
+        extraFieldsMap.put(MessageID.field_relationship, TYPE_AUTOCOMPETE_TEXT_VIEW);
+        extraFieldsMap.put(MessageID.field_department, TYPE_CLASS_TEXT);
+        extraFieldsMap.put(MessageID.field_academic_year, TYPE_CLASS_PHONE);
+        extraFieldsMap.put(MessageID.field_gpa, TYPE_CLASS_PERCENTAGE);
+
+        extraFieldsMap.put(MessageID.field_would_work, TYPE_AUTOCOMPETE_TEXT_VIEW);
+        extraFieldsMap.put(MessageID.field_would_work_elaborate, TYPE_CLASS_TEXT);
+
+        extraFieldsMap.put(MessageID.field_have_work_experience, TYPE_AUTOCOMPETE_TEXT_VIEW);
+        extraFieldsMap.put(MessageID.field_work_experience_elaborate, TYPE_CLASS_TEXT);
+
+        extraFieldsMap.put(MessageID.field_type_job, TYPE_AUTOCOMPETE_TEXT_VIEW);
+        extraFieldsMap.put(MessageID.field_english_proficiency, TYPE_AUTOCOMPETE_TEXT_VIEW);
+        extraFieldsMap.put(MessageID.field_computer_application, TYPE_CLASS_TEXT);
+        extraFieldsMap.put(MessageID.field_post_graduate, TYPE_CLASS_TEXT);
+        extraFieldsMap.put(MessageID.field_comments, TYPE_CLASS_TEXT);
+
+
         extraFieldsOptions = new HashMap<>();
         extraFieldsOptions.put(MessageID.field_university, universities);
         extraFieldsOptions.put(MessageID.field_gender, gender);
         extraFieldsOptions.put(MessageID.field_faculty, faculty);
+        extraFieldsOptions.put(MessageID.field_english_proficiency, english_proficiency);
+        extraFieldsOptions.put(MessageID.field_type_job, job_type);
+        extraFieldsOptions.put(MessageID.field_have_work_experience, yes_no_choices);
+        extraFieldsOptions.put(MessageID.field_would_work, yes_no_choices);
+        extraFieldsOptions.put(MessageID.field_relationship, relationship);
     }
 
 
@@ -72,6 +101,8 @@ public class RegistrationPresenter extends UstadBaseController {
         super(context);
         setExtraFields();
         this.view = view;
+
+
 
         for (Map.Entry<Integer, Integer> entry : extraFieldsMap.entrySet()) {
             int name = entry.getKey();
