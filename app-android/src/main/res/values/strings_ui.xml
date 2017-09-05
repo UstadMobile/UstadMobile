@@ -78,7 +78,6 @@
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
     <string name='students'>Account</string>
-    <string name='language_preference'>Language Preference</string>
     <string name='forgot_password'>Forgot password</string>
     <string name='connections'>Connection</string>
     <string name='notifications'>Notifications</string>
@@ -115,6 +114,7 @@
     <string name="in_progress">In progress</string>
     <string name="downloading">Downloading</string>
     <string name="waiting">Waiting</string>
+    <string name="waiting_for_sender">Waiting for sender</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
     <string name="university_name" value="10001">University name</string>
@@ -130,9 +130,8 @@
 
     <string name="share_offline_zip_checkbox_label">Send in zip file</string>
     <string name="share_offline_dialog_message">You can share this app offline. On the device that you want to share with:
-
-        1. Open Settings > Bluetooth Settings.
-        2. Make sure the device is visible.</string>
+        \n1. Open Settings > Bluetooth Settings.
+        \n2. Make sure that the device is visible.</string>
     <string name="preparing">Preparing</string>
 
 
@@ -150,7 +149,8 @@
     <string name="login_successful">Login successful</string>
     <string name="registration_successful">Registration successful</string>
 
-    <string name="send_course_instructions">On the other device, open the  app, and select receive from the top right menu.</string>
+    <string name="send_course_instructions">1. On the other device, open the app, and select receive from the top right menu.
+        \n2. Select the other device from the list below:</string>
 
     <string name="cancel_invite">Cancel invite</string>
     <string name="inviting">Inviting</string>
@@ -161,6 +161,7 @@
     <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
     <string name="try_again">Try again</string>
     <string name="field_required_prompt">This field is required</string>
+<<<<<<< HEAD
     <string name="field_password_min">Minimum 5 characters</string>
 
     <string name="field_father_name" value="986">Father Name</string>
@@ -179,4 +180,8 @@
     <string name="field_post_graduate" value="999">What is your plan after you graduate?</string>
     <string name="field_comments" value="1000">Comments and/or questions</string>
     <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
+=======
+    <string name="catalog">Catalog</string>
+    <string name="closed">Closed</string>
+>>>>>>> 8a2b1e567ebecdbfbbf222de268bbf7bada299a3
 </resources>

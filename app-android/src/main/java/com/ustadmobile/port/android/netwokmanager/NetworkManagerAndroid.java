@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -28,8 +27,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -41,7 +40,6 @@ import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.port.android.impl.UMLogAndroid;
 import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
@@ -65,11 +63,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.FailureReason;
@@ -658,11 +654,14 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     @Override
     public void shareAppSetupFile(String filePath, String shareTitle) {
+        String applicationId = getContext().getPackageName();
+        Uri sharedUri = FileProvider.getUriForFile(getContext(), applicationId+".fileprovider",
+                new File(filePath));
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("*/*");
-        shareIntent.setPackage("com.android.bluetooth");
+        shareIntent.putExtra(Intent.EXTRA_STREAM, sharedUri);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePath)));
+        shareIntent.setPackage("com.android.bluetooth");
 
         if(shareIntent.resolveActivity(getContext().getPackageManager()) != null) {
             getContext().startActivity(shareIntent);
@@ -681,7 +680,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                 }
             }.execute();
         }
-
     }
 
 
@@ -813,13 +811,17 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     @Override
     public void setReceivingOn(boolean receivingOn) {
         super.setReceivingOn(receivingOn);
+        WifiDirectHandler handler = networkService != null
+                ? networkService.getWifiDirectHandlerAPI() : null;
         /*
          * Our wifi direct send/receive relies on the sender being the group owner, and the receiver
          * being the group client. If there is a persistent group, it might remember the previous
          * roles and use those instead.
          */
-        if(receivingOn == true) {
-            networkService.getWifiDirectHandlerAPI().removePersistentGroups();
+        if(handler != null) {
+            networkService.getWifiDirectHandlerAPI().setAutoAccept(receivingOn);
+            if(receivingOn)
+                networkService.getWifiDirectHandlerAPI().removePersistentGroups();
         }
     }
 

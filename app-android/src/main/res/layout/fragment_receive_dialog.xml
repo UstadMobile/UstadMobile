@@ -25,7 +25,7 @@
         <TextView
             android:id="@+id/fragment_receive_dialog_waiting_status_text"
             android:layout_gravity="center_horizontal"
-            android:text="@string/waiting"
+            android:text="@string/waiting_for_sender"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAlignment="center"/>

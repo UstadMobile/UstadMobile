@@ -29,6 +29,18 @@
         android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.UstadTheme">
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_path"/>
+        </provider>
+
         <activity
             android:name=".UstadMobileActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
@@ -36,11 +48,11 @@
         <activity
             android:name="com.ustadmobile.port.android.view.LoginActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="@string/title_activity_login" />
+            android:label="@string/login" />
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:label="${appName}"
+            android:label="@string/app_name"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -51,7 +63,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.CatalogActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label="@string/title_activity_catalog"
+            android:label="@string/catalog"
             android:theme="@style/Theme.UstadTheme" />
 
         <service android:name="com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid" />
@@ -62,7 +74,7 @@
             android:label="" />
         <activity
             android:name="com.ustadmobile.port.android.view.UserSettingsActivity"
-            android:label="@string/title_activity_user_settings"
+            android:label="@string/settings"
             android:theme="@style/Theme.UstadTheme" />
         <activity android:name="com.ustadmobile.port.android.view.BasePointActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"/>
@@ -72,11 +84,9 @@
             android:screenOrientation="portrait" />
         <activity
             android:name="com.ustadmobile.port.android.view.ClassManagementActivity"
-            android:label="@string/title_activity_class_management"
             android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.EnrollStudentActivity"
-            android:label="@string/title_activity_enroll_student"
             android:theme="@style/Theme.UstadTheme" />
         <activity android:name="com.ustadmobile.port.android.view.ClassManagementActivity2" />
         <activity android:name="com.ustadmobile.port.android.view.AboutActivity"

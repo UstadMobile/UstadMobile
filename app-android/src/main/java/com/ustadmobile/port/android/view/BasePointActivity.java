@@ -1,10 +1,8 @@
 package com.ustadmobile.port.android.view;
 
 
-import com.evernote.android.job.JobManager;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BasePointController;
-import com.ustadmobile.core.controller.WelcomeController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
@@ -14,9 +12,7 @@ import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -121,8 +117,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
         mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
         mDrawerNavigationView.setNavigationItemSelectedListener(this);
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open,
-                R.string.drawer_close);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open,
+                R.string.closed);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
         setMenuItems(this.mNavigationDrawerItems);
 
@@ -339,7 +335,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     @Override
     public void onClick(View view) {
-        CheckBox zipCheckbox = (CheckBox)shareAppDialog.findViewById(
+        CheckBox zipCheckbox = shareAppDialog.findViewById(
                 R.id.fragment_share_app_zip_checkbox);
         mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
     }
