@@ -161,7 +161,6 @@
     <string name="connected_but_host_not_sharing">A connection has been established, but the other device is not sharing anything using this app.</string>
     <string name="try_again">Try again</string>
     <string name="field_required_prompt">This field is required</string>
-<<<<<<< HEAD
     <string name="field_password_min">Minimum 5 characters</string>
 
     <string name="field_father_name" value="986">Father Name</string>
@@ -180,8 +179,6 @@
     <string name="field_post_graduate" value="999">What is your plan after you graduate?</string>
     <string name="field_comments" value="1000">Comments and/or questions</string>
     <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
-=======
     <string name="catalog">Catalog</string>
     <string name="closed">Closed</string>
->>>>>>> 8a2b1e567ebecdbfbbf222de268bbf7bada299a3
 </resources>
