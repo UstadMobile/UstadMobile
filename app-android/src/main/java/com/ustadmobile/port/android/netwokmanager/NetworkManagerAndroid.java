@@ -62,6 +62,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -215,6 +216,21 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     private int p2pSwitchOffLagTime = (10 * 60 * 1000);
 
+    /**
+     * As per the wifi direct spec these are primary device types we are not interested in
+     */
+    private static final List<String> HIDDEN_WIFI_P2P_DEVICE_TYPES = Arrays.asList(new String[]{
+            "2",//input device
+            "3",//printers, scanners, fax machines
+            "4",//camera
+            "5",//storage
+            "6",//network infrastructure e.g. access points
+            "7",//displays
+            "8",//multimedia devices
+            "9",//gaming devices
+            "11"//audio devices
+    });
+
     private Runnable checkWifiLocksRunnable = new Runnable() {
         @Override
         public void run() {
@@ -334,22 +350,30 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                 case WifiDirectHandler.Action.PEERS_CHANGED:
                     WifiP2pDeviceList devices = intent.getParcelableExtra(WifiDirectHandler.Extra.PEERS);
                     Collection<WifiP2pDevice> deviceCollection = devices.getDeviceList();
-                    ArrayList<NetworkNode> list = new ArrayList(deviceCollection.size());
+                    ArrayList<NetworkNode> list = new ArrayList();
                     for(WifiP2pDevice device: deviceCollection) {
                         if(device.deviceAddress == null) {
                             //This should NEVER happen, but this is local networking on Android
                             continue;
                         }
 
+                        UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
+                                + device.deviceAddress + " (" + device.deviceName + ") Status: "
+                                + networkService.getWifiDirectHandlerAPI().deviceStatusToString(
+                                device.status) + " device type " + device.primaryDeviceType);
+
+                        //filter out devices we aren't interested in eg. printers
+                        String primaryDeviceType = device.primaryDeviceType;
+                        String category = primaryDeviceType.contains("-")
+                                ? primaryDeviceType.substring(0, primaryDeviceType.indexOf('-'))
+                                : null;
+                        if(category != null && HIDDEN_WIFI_P2P_DEVICE_TYPES.contains(category))
+                            continue;
+
                         NetworkNode node = new NetworkNode(device.deviceAddress, null);
                         list.add(node);
                         node.setDeviceWifiDirectName(device.deviceName);
                         node.setWifiDirectDeviceStatus(device.status);
-
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
-                                + device.deviceAddress + " (" + device.deviceName + ") Status: "
-                                + networkService.getWifiDirectHandlerAPI().deviceStatusToString(
-                                        device.status));
                     }
                     handleWifiDirectPeersChanged(list);
 
@@ -468,12 +492,13 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         //starting and stopping NSD when the wifi is enabled or disabled was causing issues on 4.4.
         // For now run discovery as long as client mode is enabled
 //        boolean shouldRunNsdDiscovery = discoveryEnabled;
-//        if(shouldRunNsdDiscovery && !nsdHelperAndroid.isDiscoveringNetworkService()) {
-//            UstadMobileSystemImpl.l(UMLog.INFO, 301, "NetworkManager: start network service discovery");
-//            nsdHelperAndroid.startNSDiscovery();
-//        }else if(!shouldRunNsdDiscovery && nsdHelperAndroid.isDiscoveringNetworkService()) {
-//            nsdHelperAndroid.stopNSDiscovery();
-//        }
+        boolean shouldRunNsdDiscovery = isDiscoveryEnabled();
+        if(shouldRunNsdDiscovery && !nsdHelperAndroid.isDiscoveringNetworkService()) {
+            UstadMobileSystemImpl.l(UMLog.INFO, 301, "NetworkManager: start network service discovery");
+            nsdHelperAndroid.startNSDiscovery();
+        }else if(!shouldRunNsdDiscovery && nsdHelperAndroid.isDiscoveringNetworkService()) {
+            nsdHelperAndroid.stopNSDiscovery();
+        }
 
         //if we are looking to send a file - enable wifi direct peer discovery
         if(getSharedFeed() != null && wifiDirectHandler != null) {
@@ -501,13 +526,14 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         //Starting/stopping NSD when wifi was enabled or disabled was causing issues for connecting
         //to networks on Android 4.4.
 //        boolean shouldHaveLocalNsdService = broadcastEnabled;
-//        if(shouldHaveLocalNsdService && nsdLocalServiceStatus ==LOCAL_SERVICE_STATUS_INACTIVE) {
-//            nsdHelperAndroid.registerNSDService();
-//            nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;
-//        }else if(!shouldHaveLocalNsdService && nsdLocalServiceStatus != LOCAL_SERVICE_STATUS_INACTIVE) {
-//            nsdHelperAndroid.unregisterNSDService();
-//            nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
-//        }
+        boolean shouldHaveLocalNsdService = broadcastEnabled;
+        if(shouldHaveLocalNsdService && nsdLocalServiceStatus ==LOCAL_SERVICE_STATUS_INACTIVE) {
+            nsdHelperAndroid.registerNSDService();
+            nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;
+        }else if(!shouldHaveLocalNsdService && nsdLocalServiceStatus != LOCAL_SERVICE_STATUS_INACTIVE) {
+            nsdHelperAndroid.unregisterNSDService();
+            nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
+        }
 
         boolean shouldRunBluetoothServer = broadcastEnabled && isBluetoothEnabled();
         if(shouldRunBluetoothServer && !bluetoothServerAndroid.isRunning()) {
@@ -1048,7 +1074,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     @Override
     public int getWifiConnectionTimeout() {
-        return 60000;
+        return 75000;
     }
 
     @Override
@@ -1104,18 +1130,17 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     @Override
     public void networkTaskStatusChanged(NetworkTask task) {
-        if(task.getTaskType() != QUEUE_ENTRY_ACQUISITION)
-            return;
+        if(task.getTaskType() == QUEUE_ENTRY_ACQUISITION) {
+            switch(task.getStatus()) {
+                case NetworkTask.STATUS_RUNNING:
+                    addActiveWifiObject(task);
+                    break;
 
-        switch(task.getStatus()) {
-            case NetworkTask.STATUS_RUNNING:
-                addActiveWifiObject(task);
-                break;
-
-            default:
-                //it's not running - lock not needed
-                removeActiveWifiObject(task);
-                break;
+                default:
+                    //it's not running - lock not needed
+                    removeActiveWifiObject(task);
+                    break;
+            }
         }
 
         super.networkTaskStatusChanged(task);

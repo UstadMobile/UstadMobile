@@ -26,7 +26,7 @@ import java.util.Calendar;
  */
 
 public class TestNetworkManager {
-    public static final int NODE_DISCOVERY_TIMEOUT =(2*60 * 1000)+2000;//2min2sec in ms
+    public static final int NODE_DISCOVERY_TIMEOUT =(5*60 * 1000)+2000;//2min2sec in ms
 
     @Test
     public void testWifiDirectDiscovery() throws IOException{

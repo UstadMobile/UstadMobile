@@ -133,6 +133,15 @@ task testEmulatorLocalconfigDebug(type: Exec) {
     commandLine "$adb", "shell", "am", "instrument", "-w", "-e", "class", "com.ustadmobile.test.port.android.CoreTestSuiteRunAndroid,com.ustadmobile.test.port.android.SharedSeTestSuiteRunAndroid", project.ext.buildConfigProperties['android.applicationId']+ ".test" + "/android.support.test.runner.AndroidJUnitRunner"
 }
 
+task grantTestPermissionsLocalconfigDebug(type: Exec) {
+    def adb = android.getAdbExe().getAbsolutePath()
+    doFirst {
+        exec {
+
+        }
+    }
+}
+
 afterEvaluate {
     android.applicationVariants.all { variant ->
         variant.javaCompiler.dependsOn(copyXmlLocaleFilesFromCore)

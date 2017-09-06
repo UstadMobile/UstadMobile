@@ -255,7 +255,17 @@ public class MockNetworkManager extends NetworkManager {
         return supernodeEnabled;
     }
 
+    @Override
+    public boolean isBroadcastEnabled() {
+        //TODO: implement
+        return true;
+    }
 
+    @Override
+    public boolean isDiscoveryEnabled() {
+        //TODO: implement
+        return true;
+    }
 
     @Override
     public boolean isBluetoothEnabled() {

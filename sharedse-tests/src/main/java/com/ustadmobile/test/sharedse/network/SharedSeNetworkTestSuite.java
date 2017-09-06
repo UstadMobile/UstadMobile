@@ -16,7 +16,7 @@ import org.junit.runners.Suite;
         TestNetworkManager.class,
 //        TestWifiDirectPeerDiscovery.class,
         TestEntryStatusTask.class,
-        TestNetworkManagerEntryStatusMonitoring.class,
+//        TestNetworkManagerEntryStatusMonitoring.class,
         TestAcquisitionTask.class,
         TestWifiDirectGroupConnection.class
 })

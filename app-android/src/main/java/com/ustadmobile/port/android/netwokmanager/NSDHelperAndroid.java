@@ -150,7 +150,7 @@ public class NSDHelperAndroid {
 
             @Override
             public void onServiceFound(final NsdServiceInfo service) {
-                Log.d(NetworkManagerAndroid.TAG, "Device found -> " + service.getServiceName()+" "+service.getHost());
+                Log.d(NetworkManagerAndroid.TAG, "serviceFound " + service.getServiceName()+" "+service.getHost());
 
                 /*Found the right service type, resolve it to get the appropriate details.*/
                 if(service.getServiceName() != null
@@ -161,7 +161,8 @@ public class NSDHelperAndroid {
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
-                Log.e(NetworkManagerAndroid.TAG, "Network Service lost" + service);
+                Log.i(NetworkManagerAndroid.TAG, "Network Service lost: " + service.getServiceName()
+                        + " from host " + service.getHost());
             }
 
             @Override

@@ -98,7 +98,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * Maximum time for the device to wait other peer services to be discovered.
      */
-    public  static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT =2 * 60 * 1000;
+    public  static final int ALLOWABLE_DISCOVERY_RANGE_LIMIT = 5 * 60 * 1000;
 
     /**
      * Tag to hold device IP address value in DNS-Text record
