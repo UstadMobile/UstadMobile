@@ -26,10 +26,6 @@ repositories {
         url "http://devserver2.ustadmobile.com/repo-mvn"
     }
 
-    maven {
-        url  "/home/mike/src/repo"
-    }
-
 }
 
 ext.buildConfigProperties = new Properties()
@@ -135,6 +131,15 @@ task startTestSlaveServer(type: Exec) {
 task testEmulatorLocalconfigDebug(type: Exec) {
     def adb = android.getAdbExe().getAbsolutePath()
     commandLine "$adb", "shell", "am", "instrument", "-w", "-e", "class", "com.ustadmobile.test.port.android.CoreTestSuiteRunAndroid,com.ustadmobile.test.port.android.SharedSeTestSuiteRunAndroid", project.ext.buildConfigProperties['android.applicationId']+ ".test" + "/android.support.test.runner.AndroidJUnitRunner"
+}
+
+task grantTestPermissionsLocalconfigDebug(type: Exec) {
+    def adb = android.getAdbExe().getAbsolutePath()
+    doFirst {
+        exec {
+
+        }
+    }
 }
 
 afterEvaluate {
@@ -331,7 +336,7 @@ dependencies {
     compile 'com.android.support:support-v4:26.0.1'
     compile 'com.github.clans:fab:1.6.4'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha5'
-    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.40-SNAPSHOT'
+    compile 'com.ustadmobile.wifibuddy:wifibuddy:1.1.41-SNAPSHOT'
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.txusballesteros:FitChart:1.0'
     androidTestCompile 'junit:junit:4.12'

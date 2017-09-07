@@ -2085,12 +2085,16 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             if(info != null && info.acquisitionStatus == STATUS_ACQUIRED)
                 continue;
 
-            boolean isAvailable = UstadMobileSystemImpl.getInstance().getNetworkManager().isEntryLocallyAvailable(fileIds[i]);
-            if(isAvailable)
-                view.setEntryStatus(fileIds[i], STATUS_AVAILABLE_LOCALLY);
-            else
-                view.setEntryStatus(fileIds[i], STATUS_NOT_ACQUIRED);
+            boolean isAvailable = UstadMobileSystemImpl.getInstance().getNetworkManager()
+                    .isEntryLocallyAvailable(fileIds[i]);
+            if(view == null)
+                continue;
 
+            if(isAvailable) {
+                view.setEntryStatus(fileIds[i], STATUS_AVAILABLE_LOCALLY);
+            }else {
+                view.setEntryStatus(fileIds[i], STATUS_NOT_ACQUIRED);
+            }
         }
     }
 

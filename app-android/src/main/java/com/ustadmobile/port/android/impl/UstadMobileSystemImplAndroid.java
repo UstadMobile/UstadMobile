@@ -83,6 +83,7 @@ import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
 import com.ustadmobile.port.android.view.SendCourseDialogFragment;
 import com.ustadmobile.port.android.view.UserSettingsActivity2;
+import com.ustadmobile.port.android.view.UstadBaseActivity;
 import com.ustadmobile.port.android.view.WelcomeDialogFragment;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
@@ -238,6 +239,23 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         @Override
         public void onServiceConnected(ComponentName name, IBinder iBinder) {
             this.iBinder = iBinder;
+
+            /*
+             * NetworkServiceAndroid will register itself using the Application to receive lifecycle
+             * callbacks. That however happens when the service is created, by which point an activity
+             * might have already started. This check happens when the NetworkService is bound to
+             * each activity.
+             */
+            if(context instanceof UstadBaseActivity
+                    && name.getClassName().equals(NetworkServiceAndroid.class.getName())) {
+                UstadBaseActivity activity = (UstadBaseActivity)context;
+                if(activity.isStarted()) {
+                    NetworkServiceAndroid networkService = ((NetworkServiceAndroid.LocalServiceBinder)iBinder)
+                            .getService();
+                    networkService.getNetworkManager().onActivityStarted(activity);
+                }
+            }
+
             if(context instanceof ServiceConnection) {
                 ((ServiceConnection)context).onServiceConnected(name, iBinder);
             }
@@ -395,6 +413,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         mContext.bindService(networkIntent, connection, Context.BIND_AUTO_CREATE|Context.BIND_ADJUST_WITH_ACTIVITY);
     }
 
+    /**
+     *
+     * @param mContext
+     */
     public void handleActivityStart(Activity mContext) {
 
     }

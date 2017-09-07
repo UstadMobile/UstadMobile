@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.netwokmanager;
 
+import android.app.Activity;
+import android.app.Application;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -22,8 +24,10 @@ import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
@@ -34,6 +38,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkNode;
@@ -57,6 +62,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -82,17 +88,26 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * This is a class wrapper which defines all the platform dependent operation
  * on android platform. It is responsible for registering all network listeners, register all services,
  * getting right device address like MAC address and IP address, handle bluetooth
- * and WiFi direct connections e.t.c.
+ * and WiFi direct connections etc.
+ *
+ * Android implementation notes:
+ *  - This is maintained as a singleton by all activities binding to NetworkServiceAndroid, which
+ *    is responsible to call the init method of this class.
+ *
+ *  - The wifi performance lock is maintained during any active transfer. When something requires
+ *    the wifi lock, it must call addActiveWifiObject and call removeActiveWifiObject when finished.
+ *    When there are no active wifi objects left, the lock is released.
+ *
+ *  - Broadcast and discovery will run
+ *    - When an activity from our application is in the foreground, and for 10 minutes thereafter
+ *    - Continuously if supernode (e.g. always share) is enabled.
  *
  * @see com.ustadmobile.port.sharedse.networkmanager.NetworkManager
  *
- *
  * @author kileha3
+ * @author mike
  */
-
-
-
-public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTTPD.ResponseListener{
+public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTTPD.ResponseListener, Application.ActivityLifecycleCallbacks{
 
     public static final String TAG="NetworkManagerAndroid";
 
@@ -174,13 +189,47 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
      */
     public static final int P2P_STARTUP_AFTER_WIFI_ENABLED_WAIT = 25000;
 
+    /**
+     * A set of objects that is actively using the wifi connections, maintained to track if we need
+     * the wifi performance lock (or not). This includes download (e.g. acquisition) tasks and
+     * http responses being sent to other nodes.
+     */
     private Set activeWifiObjects = new HashSet();
 
     private WifiManager.WifiLock wifiLock;
 
     private Object receiveWifiLockObj = new Object();
 
-    private Handler wifiLockCheckHandler;
+    private Handler timeoutCheckHandler;
+
+    /**
+     * A set of objects that require wifi service broadcast and discovery to be kept active. This can
+     * include activities, sync tasks, or download tasks waiting for a connection etc.
+     */
+    private Set activeP2pNetworkObjects = new HashSet();
+
+    /**
+     * Boolean indicating if p2p is active. P2P is active if from when a the first object is added
+     * through addActiveP2pNetworkObject until p2pSwitchOffLagTime after the last object was removed
+     */
+    private volatile boolean p2pActive = false;
+
+    private int p2pSwitchOffLagTime = (10 * 60 * 1000);
+
+    /**
+     * As per the wifi direct spec these are primary device types we are not interested in
+     */
+    private static final List<String> HIDDEN_WIFI_P2P_DEVICE_TYPES = Arrays.asList(new String[]{
+            "2",//input device
+            "3",//printers, scanners, fax machines
+            "4",//camera
+            "5",//storage
+            "6",//network infrastructure e.g. access points
+            "7",//displays
+            "8",//multimedia devices
+            "9",//gaming devices
+            "11"//audio devices
+    });
 
     private Runnable checkWifiLocksRunnable = new Runnable() {
         @Override
@@ -194,6 +243,22 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
             }
         }
     };
+
+    private class CheckActiveP2pObjectsRunnable implements Runnable {
+        @Override
+        public void run() {
+            synchronized (activeP2pNetworkObjects) {
+                if(activeP2pNetworkObjects.isEmpty()) {
+                    p2pActive = false;
+                    UstadMobileSystemImpl.l(UMLog.INFO, 348,
+                            "NetworkManagerAndroid: track active p2p objects: Runnable check: no active objects left");
+                    updateNetworkServices();
+                }
+            }
+        }
+    }
+
+    private Runnable checkActiveP2pObjectsRunnable;
 
     /**
      * All activities bind to NetworkServiceAndroid. NetworkServiceAndroid will call this init
@@ -234,8 +299,10 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
         httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
-        wifiLockCheckHandler = new Handler();
+        timeoutCheckHandler = new Handler();
         httpd.addResponseListener(this);
+
+        networkService.getApplication().registerActivityLifecycleCallbacks(this);
     }
 
     /**
@@ -283,22 +350,30 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                 case WifiDirectHandler.Action.PEERS_CHANGED:
                     WifiP2pDeviceList devices = intent.getParcelableExtra(WifiDirectHandler.Extra.PEERS);
                     Collection<WifiP2pDevice> deviceCollection = devices.getDeviceList();
-                    ArrayList<NetworkNode> list = new ArrayList(deviceCollection.size());
+                    ArrayList<NetworkNode> list = new ArrayList();
                     for(WifiP2pDevice device: deviceCollection) {
                         if(device.deviceAddress == null) {
                             //This should NEVER happen, but this is local networking on Android
                             continue;
                         }
 
+                        UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
+                                + device.deviceAddress + " (" + device.deviceName + ") Status: "
+                                + networkService.getWifiDirectHandlerAPI().deviceStatusToString(
+                                device.status) + " device type " + device.primaryDeviceType);
+
+                        //filter out devices we aren't interested in eg. printers
+                        String primaryDeviceType = device.primaryDeviceType;
+                        String category = primaryDeviceType.contains("-")
+                                ? primaryDeviceType.substring(0, primaryDeviceType.indexOf('-'))
+                                : null;
+                        if(category != null && HIDDEN_WIFI_P2P_DEVICE_TYPES.contains(category))
+                            continue;
+
                         NetworkNode node = new NetworkNode(device.deviceAddress, null);
                         list.add(node);
                         node.setDeviceWifiDirectName(device.deviceName);
                         node.setWifiDirectDeviceStatus(device.status);
-
-                        UstadMobileSystemImpl.l(UMLog.DEBUG, 670, "Peers changed: found: "
-                                + device.deviceAddress + " (" + device.deviceName + ") Status: "
-                                + networkService.getWifiDirectHandlerAPI().deviceStatusToString(
-                                        device.status));
                     }
                     handleWifiDirectPeersChanged(list);
 
@@ -389,6 +464,11 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     }
 
 
+    public void updateNetworkServices() {
+        updateClientServices();
+        updateSupernodeServices();
+    }
+
     @Override
     public void setSuperNodeEnabled(Object context, boolean enabled) {
         this.isSuperNodeEnabled = enabled;
@@ -399,18 +479,20 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     public synchronized void updateClientServices() {
         WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
-        boolean clientEnabled = !isSuperNodeEnabled();
+        boolean discoveryEnabled = isDiscoveryEnabled();
 
-        boolean shouldRunWifiP2pDiscovery = clientEnabled && wifiDirectHandler != null && isWiFiEnabled();
+        boolean shouldRunWifiP2pDiscovery = discoveryEnabled && wifiDirectHandler != null && isWiFiEnabled();
         if(shouldRunWifiP2pDiscovery) {
-            wifiDirectHandler.continuouslyDiscoverServices();
+            wifiDirectHandler.continuouslyDiscoverServices(WifiP2pDnsSdServiceRequest.newInstance(
+                    CoreBuildConfig.NETWORK_SERVICE_NAME, ServiceType.PRESENCE_TCP.toString()));
         }else if(wifiDirectHandler != null) {
             wifiDirectHandler.stopServiceDiscovery();
         }
 
         //starting and stopping NSD when the wifi is enabled or disabled was causing issues on 4.4.
         // For now run discovery as long as client mode is enabled
-        boolean shouldRunNsdDiscovery = clientEnabled;
+//        boolean shouldRunNsdDiscovery = discoveryEnabled;
+        boolean shouldRunNsdDiscovery = isDiscoveryEnabled();
         if(shouldRunNsdDiscovery && !nsdHelperAndroid.isDiscoveringNetworkService()) {
             UstadMobileSystemImpl.l(UMLog.INFO, 301, "NetworkManager: start network service discovery");
             nsdHelperAndroid.startNSDiscovery();
@@ -427,7 +509,10 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     }
 
     public synchronized void updateSupernodeServices() {
-        boolean shouldHaveLocalP2PService = isSuperNodeEnabled() && isWiFiEnabled() && networkService.getWifiDirectHandlerAPI() != null;
+        boolean broadcastEnabled = isBroadcastEnabled();
+
+        //TODO: If wifi direct is required for a wifi p2p connection to work, we should check that is also enabled.
+        boolean shouldHaveLocalP2PService = broadcastEnabled && isWiFiEnabled() && networkService.getWifiDirectHandlerAPI() != null;
         WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
         if(shouldHaveLocalP2PService && wifiDirectHandler != null && p2pLocalServiceStatus == LOCAL_SERVICE_STATUS_INACTIVE ) {
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
@@ -440,7 +525,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
         //Starting/stopping NSD when wifi was enabled or disabled was causing issues for connecting
         //to networks on Android 4.4.
-        boolean shouldHaveLocalNsdService = isSuperNodeEnabled();
+//        boolean shouldHaveLocalNsdService = broadcastEnabled;
+        boolean shouldHaveLocalNsdService = broadcastEnabled;
         if(shouldHaveLocalNsdService && nsdLocalServiceStatus ==LOCAL_SERVICE_STATUS_INACTIVE) {
             nsdHelperAndroid.registerNSDService();
             nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;
@@ -449,7 +535,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
             nsdLocalServiceStatus = LOCAL_SERVICE_STATUS_INACTIVE;
         }
 
-        boolean shouldRunBluetoothServer = isSuperNodeEnabled() && isBluetoothEnabled();
+        boolean shouldRunBluetoothServer = broadcastEnabled && isBluetoothEnabled();
         if(shouldRunBluetoothServer && !bluetoothServerAndroid.isRunning()) {
             bluetoothServerAndroid.start();
         }else if(!shouldRunBluetoothServer && bluetoothServerAndroid.isRunning()) {
@@ -468,6 +554,16 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         return isSuperNodeEnabled;
     }
 
+    @Override
+    public boolean isBroadcastEnabled() {
+        return p2pActive || isSuperNodeEnabled;
+//        return isSuperNodeEnabled;
+    }
+
+    @Override
+    public boolean isDiscoveryEnabled() {
+        return p2pActive || isSuperNodeEnabled;
+    }
 
     @Override
     public boolean isBluetoothEnabled() {
@@ -648,8 +744,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         }
 
         networkService.unregisterReceiver(mWifiBroadcastReceiver);
+        networkService.getApplication().unregisterActivityLifecycleCallbacks(this);
         super.onDestroy();
-
     }
 
     @Override
@@ -978,7 +1074,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     @Override
     public int getWifiConnectionTimeout() {
-        return 60000;
+        return 75000;
     }
 
     @Override
@@ -1034,18 +1130,17 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     @Override
     public void networkTaskStatusChanged(NetworkTask task) {
-        if(task.getTaskType() != QUEUE_ENTRY_ACQUISITION)
-            return;
+        if(task.getTaskType() == QUEUE_ENTRY_ACQUISITION) {
+            switch(task.getStatus()) {
+                case NetworkTask.STATUS_RUNNING:
+                    addActiveWifiObject(task);
+                    break;
 
-        switch(task.getStatus()) {
-            case NetworkTask.STATUS_RUNNING:
-                addActiveWifiObject(task);
-                break;
-
-            default:
-                //it's not running - lock not needed
-                removeActiveWifiObject(task);
-                break;
+                default:
+                    //it's not running - lock not needed
+                    removeActiveWifiObject(task);
+                    break;
+            }
         }
 
         super.networkTaskStatusChanged(task);
@@ -1099,10 +1194,114 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                 + lockObject.toString() + " from active wifi objects");
             activeWifiObjects.remove(lockObject);
             if(activeWifiObjects.isEmpty())
-                wifiLockCheckHandler.postDelayed(checkWifiLocksRunnable, 10000);
+                timeoutCheckHandler.postDelayed(checkWifiLocksRunnable, 10000);
+        }
+    }
+
+    /**
+     * Add an object to the list of those that require wifi p2p services to be maintained. When no
+     * objects are left, after a timeout period, p2p services will be switched off to save power.
+     *
+     * @param object Object that requires p2p broadcast and discovery services to be maintained e.g.
+     *               an activity in this application, a download task, a sync task, etc.
+     */
+    public void addActiveP2pNetworkObject(Object object) {
+        synchronized (activeP2pNetworkObjects) {
+            if(activeP2pNetworkObjects.contains(object))
+                return;
+
+            p2pActive = true;
+            cancelCheckActiveP2pObjects();
+            UstadMobileSystemImpl.l(UMLog.INFO, 346,
+                    "NetworkManagerAndroid: track active p2p objects: activity started:"
+                    + object.toString());
+            activeP2pNetworkObjects.add(object);
+            if(activeP2pNetworkObjects.size() == 1)
+                updateNetworkServices();
         }
     }
 
 
+    /**
+     * Remove an object from the list of those that require wifi p2p services to be maintained. When
+     * no objects are left, after a timeout period, p2p services will be switched off to save power.
+     *
+     * @param object Object that requires p2p broadcast and discovery services to be maintained e.g.
+     *               an activity in this application, a download task, a sync task, etc.
+     */
+    public void removeActiveP2pNetworkObject(Object object) {
+        synchronized (activeP2pNetworkObjects) {
+            if(!activeP2pNetworkObjects.contains(object))
+                return;
 
+            activeP2pNetworkObjects.remove(object);
+            UstadMobileSystemImpl.l(UMLog.INFO, 347,
+                    "NetworkManagerAndroid: track active p2p objects: remove object:"
+                    + object.toString());
+            if(activeP2pNetworkObjects.isEmpty()) {
+                cancelCheckActiveP2pObjects();
+                checkActiveP2pObjectsRunnable =new CheckActiveP2pObjectsRunnable();
+                timeoutCheckHandler.postDelayed(checkActiveP2pObjectsRunnable, p2pSwitchOffLagTime);
+                UstadMobileSystemImpl.l(UMLog.INFO, 347, "NetworkManagerAndroid: track foreground: no active activities");
+            }
+        }
+    }
+
+    /**
+     * Used to determine if there are active objects using the p2p framework.
+     * @return
+     */
+    protected boolean isP2pActive() {
+        return p2pActive;
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, Bundle bundle) {
+
+    }
+
+    /**
+     * We register for lifecycle callbacks when NetworkServiceAndroid is created. By this point it
+     * is possible that an activity was already started. Therefor we use the
+     * BaseServiceConnection.onServiceConnected to check if the activity is started, and if so, it
+     * will call this method itself. This method therefor can be called twice.
+     *
+     * @param activity The activity that has been started
+     */
+    @Override
+    public void onActivityStarted(Activity activity) {
+        addActiveP2pNetworkObject(activity);
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity) {
+        removeActiveP2pNetworkObject(activity);
+    }
+
+    private void cancelCheckActiveP2pObjects() {
+        if(checkActiveP2pObjectsRunnable != null) {
+            timeoutCheckHandler.removeCallbacks(checkActiveP2pObjectsRunnable);
+            checkActiveP2pObjectsRunnable = null;
+        }
+    }
+
+    @Override
+    public void onActivitySaveInstanceState(Activity activity, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onActivityDestroyed(Activity activity) {
+
+    }
 }

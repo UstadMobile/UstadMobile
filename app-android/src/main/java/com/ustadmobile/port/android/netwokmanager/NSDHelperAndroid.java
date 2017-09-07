@@ -6,6 +6,7 @@ import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import java.util.Vector;
 
 import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
 
@@ -33,9 +34,28 @@ public class NSDHelperAndroid {
     private NetworkManagerAndroid managerAndroid;
     private boolean isDiscoveringNetworkService=false;
 
+
+
+    private NSDHelperResolveQueueEntry currentEntry;
+
+    private Vector<NSDHelperResolveQueueEntry> backlog = new Vector<>();
+
+
     private NsdManager.DiscoveryListener networkDiscoveryListener;
     private NsdManager.RegistrationListener networkRegistrationListener;
 
+
+    private class NSDHelperResolveQueueEntry {
+
+        private NsdServiceInfo serviceInfo;
+
+        private int numAttempts;
+
+        private NSDHelperResolveQueueEntry(NsdServiceInfo serviceInfo) {
+            this.serviceInfo = serviceInfo;
+        }
+
+    }
 
     public NSDHelperAndroid(NetworkManagerAndroid managerAndroid){
         this.managerAndroid=managerAndroid;
@@ -45,6 +65,59 @@ public class NSDHelperAndroid {
         if(mNsdManager == null)
             mNsdManager = (NsdManager) managerAndroid.getContext().getSystemService(Context.NSD_SERVICE);
     }
+
+    private synchronized void queueResolveService(NsdServiceInfo serviceInfo) {
+        backlog.addElement(new NSDHelperResolveQueueEntry(serviceInfo));
+        checkQueue();
+    }
+
+    /**
+     * Even though NsdManager.resolveService is asynchronous it will fail if something is already
+     * in progress with FAILURE_ALREADY_ACTIVE.
+     */
+    private synchronized void checkQueue(){
+        //remove previous entry if it has failed too many times
+        if(currentEntry == null && backlog.size() > 0 && backlog.elementAt(0).numAttempts > 4) {
+            Log.e(NetworkManagerAndroid.TAG, "Network Service: failed to resolve "
+                + backlog.elementAt(0).serviceInfo + " after "
+                + backlog.elementAt(0).numAttempts + " attempts.");
+            backlog.removeElementAt(0);
+        }
+
+        if(currentEntry == null && backlog.size() > 0) {
+            currentEntry = backlog.elementAt(0);
+            currentEntry.numAttempts++;
+
+            mNsdManager.resolveService(currentEntry.serviceInfo, new NsdManager.ResolveListener() {
+                @Override
+                public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                    Log.d(NetworkManagerAndroid.TAG, "Network Service Resolved Successfully. " + serviceInfo);
+
+                    synchronized(NSDHelperAndroid.this) {
+                        managerAndroid.handleNetworkServerDiscovered(serviceInfo.getServiceName(),
+                                serviceInfo.getHost().getHostAddress(), serviceInfo.getPort());
+                        backlog.removeElementAt(0);
+                        currentEntry = null;
+                        checkQueue();
+                    }
+                }
+
+                @Override
+                public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                    Log.e(NetworkManagerAndroid.TAG, "Network Service Failed to resolve"
+                            + serviceInfo.getServiceName() + "  error "
+                            + getFailureReasonName(errorCode));
+                    synchronized (NSDHelperAndroid.this) {
+                        currentEntry = null;
+                        checkQueue();
+                    }
+                }
+            });
+        }
+    }
+
+
+
 
     /**
      * This method initialize all service discovery listeners,
@@ -77,34 +150,19 @@ public class NSDHelperAndroid {
 
             @Override
             public void onServiceFound(final NsdServiceInfo service) {
-                Log.d(NetworkManagerAndroid.TAG, "Device found -> " + service.getServiceName()+" "+service.getHost());
+                Log.d(NetworkManagerAndroid.TAG, "serviceFound " + service.getServiceName()+" "+service.getHost());
 
                 /*Found the right service type, resolve it to get the appropriate details.*/
-
                 if(service.getServiceName() != null
                         && service.getServiceName().contains(CoreBuildConfig.NETWORK_SERVICE_NAME)) {
-                    mNsdManager.resolveService(service, new NsdManager.ResolveListener() {
-                        @Override
-                        public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                            Log.d(NetworkManagerAndroid.TAG, "Network Service Resolved Successfully. " + serviceInfo);
-
-                            managerAndroid.handleNetworkServerDiscovered(serviceInfo.getServiceName(),
-                                    serviceInfo.getHost().getHostAddress(), serviceInfo.getPort());
-                        }
-
-                        @Override
-                        public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                            Log.e(NetworkManagerAndroid.TAG, "Network Service Failed to resolve"
-                                    + service.getServiceName() + "  error "
-                                    + getFailureReasonName(errorCode));
-                        }
-                    });
+                    queueResolveService(service);
                 }
             }
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
-                Log.e(NetworkManagerAndroid.TAG, "Network Service lost" + service);
+                Log.i(NetworkManagerAndroid.TAG, "Network Service lost: " + service.getServiceName()
+                        + " from host " + service.getHost());
             }
 
             @Override

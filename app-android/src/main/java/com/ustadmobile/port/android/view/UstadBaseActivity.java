@@ -67,6 +67,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     private String localeOnCreate = null;
 
+    private boolean isStarted = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //bind to the LRS forwarding service
@@ -235,13 +237,24 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
 
     @Override
     public void onStart() {
+        isStarted = true;
         super.onStart();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStart(this);
     }
 
     public void onStop() {
+        isStarted = false;
         super.onStop();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
+    }
+
+    /**
+     * Can be used to check if the activity has been started.
+     *
+     * @return true if the activity is started. false if it has not been started yet, or it was started, but has since stopped
+     */
+    public boolean isStarted() {
+        return isStarted;
     }
 
     public void onDestroy() {
