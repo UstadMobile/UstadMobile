@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
-import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
+import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE_NAME;
 
 /**
  * <h1>NetworkManager</h1>
@@ -548,7 +548,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param txtRecords Map of DNS-Text records
      */
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
-        if(serviceFullDomain.contains(NETWORK_SERVICE_NAME)){
+        if(serviceFullDomain.contains(WIFI_P2P_INSTANCE_NAME)){
             String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
             String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
             int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
@@ -650,38 +650,51 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     /**
-     * Method which will be invoked when new node is found using network service discovery
+     * Method which will be invoked when new node is found using network service discovery.
+     * This should be called by the underlying system implementation when a service is found that
+     * matches the network service type.
+     *
      * @param serviceName application service name
-     * @param ipAddress Host device IP address
+     * @param ipAddress Host device IP address (must not be null)
      * @param port Service port on host device
      */
     public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
-        if(serviceName.contains(NETWORK_SERVICE_NAME)){
-            NetworkNode node = null;
-            boolean newNode = false;
-            synchronized (knownNetworkNodes) {
-                newNode = true;
-                if(ipAddress != null) {
-                    node = getNodeByIpAddress(ipAddress);
-                    newNode = (node == null);
-                }
+        NetworkNode node;
+        boolean newNode;
+        synchronized (knownNetworkNodes) {
+            node = getNodeByIpAddress(ipAddress);
+            newNode = (node == null);
 
-
-                if(node == null) {
-                    node = new NetworkNode(null,ipAddress);
-                    knownNetworkNodes.add(node);
-                }
-
-                node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
-                node.setPort(port);
+            if(node == null) {
+                node = new NetworkNode(null,ipAddress);
+                knownNetworkNodes.add(node);
             }
 
+            node.setNsdServiceName(serviceName);
+            node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
+            node.setPort(port);
+        }
 
-            if(newNode){
-                queueStatusChecksForNewNode(node);
-                fireNetworkNodeDiscovered(node);
-            }else{
-                fireNetworkNodeUpdated(node);
+
+        if(newNode){
+            queueStatusChecksForNewNode(node);
+            fireNetworkNodeDiscovered(node);
+        }else{
+            fireNetworkNodeUpdated(node);
+        }
+
+    }
+
+    public void handleNetworkServiceRemoved(String serviceName) {
+        synchronized (knownNetworkNodes) {
+            String nodeServiceName;
+            NetworkNode removedNode;
+            for(NetworkNode node : knownNetworkNodes) {
+                nodeServiceName = node.getNsdServiceName();
+                if(nodeServiceName != null && serviceName.equals(nodeServiceName)) {
+                    node.setNsdServiceName(null);
+                    break;
+                }
             }
         }
     }

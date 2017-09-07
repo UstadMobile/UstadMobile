@@ -1,14 +1,14 @@
 package com.ustadmobile.port.android.netwokmanager;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import java.util.Vector;
 
-import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
+import java.util.Vector;
 
 
 /**
@@ -22,13 +22,13 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_N
  * @author kileha3
  */
 
-public class NSDHelperAndroid {
+public class NSDHelperAndroid implements INsdHelperAndroid {
 
     private NsdManager mNsdManager;
     /**
      * Network service type which is the combination of Protocol and transport layer used.
      */
-    private static final String SERVICE_TYPE = "_http._tcp.";
+    private static final String SERVICE_TYPE = "_ustad._tcp.";
 
     private NsdServiceInfo nsdServiceInfo;
     private NetworkManagerAndroid managerAndroid;
@@ -151,18 +151,14 @@ public class NSDHelperAndroid {
             @Override
             public void onServiceFound(final NsdServiceInfo service) {
                 Log.d(NetworkManagerAndroid.TAG, "serviceFound " + service.getServiceName()+" "+service.getHost());
-
-                /*Found the right service type, resolve it to get the appropriate details.*/
-                if(service.getServiceName() != null
-                        && service.getServiceName().contains(CoreBuildConfig.NETWORK_SERVICE_NAME)) {
-                    queueResolveService(service);
-                }
+                queueResolveService(service);
             }
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
                 Log.i(NetworkManagerAndroid.TAG, "Network Service lost: " + service.getServiceName()
                         + " from host " + service.getHost());
+                managerAndroid.handleNetworkServiceRemoved(service.getServiceName());
             }
 
             @Override
@@ -209,7 +205,9 @@ public class NSDHelperAndroid {
             @Override
             public void onServiceRegistered(NsdServiceInfo serviceInfo) {
                 nsdServiceInfo=serviceInfo;
-                Log.d(NetworkManagerAndroid.TAG,"Network Service discovery service registered successfully "+serviceInfo.getServiceName()+" port:"+serviceInfo.getPort());
+                Log.d(NetworkManagerAndroid.TAG,"Network Service discovery service registered successfully:"
+                        + " "+serviceInfo.getServiceName()+  "." + serviceInfo.getServiceType()
+                        + " port:"+serviceInfo.getPort());
 
             }
 
@@ -245,11 +243,14 @@ public class NSDHelperAndroid {
         if(networkRegistrationListener!=null){
             unregisterNSDService();
         }
-        final String networkServiceName=NETWORK_SERVICE_NAME+"NSD";
+
+        String networkServiceName = BluetoothAdapter.getDefaultAdapter() != null
+                    ? BluetoothAdapter.getDefaultAdapter().getName()
+                    : CoreBuildConfig.NETWORK_SERVICE_TYPE + (int)(Math.random() * 5000);
         initializeServiceRegistrationListener();
         final NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setServiceName(networkServiceName);
-        serviceInfo.setServiceType(SERVICE_TYPE);
+        serviceInfo.setServiceType(CoreBuildConfig.NETWORK_SERVICE_TYPE + "._tcp");
         serviceInfo.setPort(managerAndroid.getHttpListeningPort());
         lookupNsdManager();
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD,networkRegistrationListener);
@@ -327,5 +328,8 @@ public class NSDHelperAndroid {
         return "UNKNOWN";
     }
 
+    @Override
+    public void onDestroy() {
 
+    }
 }
