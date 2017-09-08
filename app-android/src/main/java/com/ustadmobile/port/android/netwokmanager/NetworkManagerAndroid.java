@@ -80,7 +80,7 @@ import edu.rit.se.wifibuddy.ServiceType;
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 import fi.iki.elonen.NanoHTTPD;
 
-import static com.ustadmobile.core.buildconfig.CoreBuildConfig.NETWORK_SERVICE_NAME;
+import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE_NAME;
 
 /**
  * <h1>NetworkManagerAndroid</h1>
@@ -130,8 +130,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
      */
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
 
-    private static final String SERVICE_DEVICE_AVAILABILITY = "av";
-
     private int nodeStatus = -1;
 
     public static final int LOCAL_SERVICE_STATUS_INACTIVE = 0;
@@ -167,7 +165,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     private ConnectivityManager connectivityManager;
 
-    private NSDHelperAndroid nsdHelperAndroid;
+    private INsdHelperAndroid nsdHelperAndroid;
 
     private int currentWifiDirectGroupStatus= WIFI_DIRECT_GROUP_STATUS_INACTIVE;
 
@@ -271,7 +269,10 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         super.init(context);
         networkService = (NetworkServiceAndroid)context;
         bluetoothServerAndroid=new BluetoothServerAndroid(this);
-        nsdHelperAndroid=new NSDHelperAndroid(this);
+        boolean useJmDns = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
+
+        nsdHelperAndroid= useJmDns ? new JmDnsHelperAndroid(networkService, this)
+                : new NSDHelperAndroid(this);
 
         wifiManager= (WifiManager) networkService.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         connectivityManager= (ConnectivityManager) networkService.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -484,7 +485,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         boolean shouldRunWifiP2pDiscovery = discoveryEnabled && wifiDirectHandler != null && isWiFiEnabled();
         if(shouldRunWifiP2pDiscovery) {
             wifiDirectHandler.continuouslyDiscoverServices(WifiP2pDnsSdServiceRequest.newInstance(
-                    CoreBuildConfig.NETWORK_SERVICE_NAME, ServiceType.PRESENCE_TCP.toString()));
+                    CoreBuildConfig.WIFI_P2P_INSTANCE_NAME, ServiceType.PRESENCE_TCP.toString()));
         }else if(wifiDirectHandler != null) {
             wifiDirectHandler.stopServiceDiscovery();
         }
@@ -511,12 +512,12 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     public synchronized void updateSupernodeServices() {
         boolean broadcastEnabled = isBroadcastEnabled();
 
-        //TODO: If wifi direct is required for a wifi p2p connection to work, we should check that is also enabled.
+        //TODO: If bluetooth is required to complete the transaction, we should check that is also enabled.
         boolean shouldHaveLocalP2PService = broadcastEnabled && isWiFiEnabled() && networkService.getWifiDirectHandlerAPI() != null;
         WifiDirectHandler wifiDirectHandler = networkService.getWifiDirectHandlerAPI();
         if(shouldHaveLocalP2PService && wifiDirectHandler != null && p2pLocalServiceStatus == LOCAL_SERVICE_STATUS_INACTIVE ) {
             wifiDirectHandler.setStopDiscoveryAfterGroupFormed(false);
-            wifiDirectHandler.addLocalService(NETWORK_SERVICE_NAME, localService());
+            wifiDirectHandler.addLocalService(WIFI_P2P_INSTANCE_NAME, localService());
             p2pLocalServiceStatus = LOCAL_SERVICE_STATUS_ADDED;//TODO: This should only really be changed when the request to add service succeeds
         }else if(!shouldHaveLocalP2PService && p2pLocalServiceStatus != LOCAL_SERVICE_STATUS_INACTIVE && wifiDirectHandler != null) {
             networkService.getWifiDirectHandlerAPI().removeService();
@@ -525,7 +526,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
         //Starting/stopping NSD when wifi was enabled or disabled was causing issues for connecting
         //to networks on Android 4.4.
-//        boolean shouldHaveLocalNsdService = broadcastEnabled;
         boolean shouldHaveLocalNsdService = broadcastEnabled;
         if(shouldHaveLocalNsdService && nsdLocalServiceStatus ==LOCAL_SERVICE_STATUS_INACTIVE) {
             nsdHelperAndroid.registerNSDService();
@@ -557,7 +557,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     @Override
     public boolean isBroadcastEnabled() {
         return p2pActive || isSuperNodeEnabled;
-//        return isSuperNodeEnabled;
     }
 
     @Override
@@ -700,7 +699,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         String deviceBluetoothMacAddress=getBluetoothMacAddress();
         String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
         HashMap<String,String> record=new HashMap<>();
-        record.put(SERVICE_DEVICE_AVAILABILITY,"available");
         record.put(SD_TXT_KEY_PORT,String.valueOf(getHttpListeningPort()));
         record.put(SD_TXT_KEY_BT_MAC, deviceBluetoothMacAddress);
         record.put(SD_TXT_KEY_IP_ADDR, deviceIpAddress);
@@ -741,6 +739,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         if(nsdHelperAndroid!=null){
             nsdHelperAndroid.unregisterNSDService();
             nsdHelperAndroid.stopNSDiscovery();
+            nsdHelperAndroid.onDestroy();
         }
 
         networkService.unregisterReceiver(mWifiBroadcastReceiver);
@@ -828,6 +827,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
         return null;
     }
+
+
 
     /**
      * @exception InterruptedException
@@ -999,7 +1000,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
             currentWifiDirectGroupStatus = WIFI_DIRECT_GROUP_STATUS_UNDER_CREATION;
 
             networkService.getWifiDirectHandlerAPI().setAddLocalServiceAfterGroupCreation(false);
-            ServiceData serviceData= new ServiceData(NETWORK_SERVICE_NAME, getHttpListeningPort(),
+            ServiceData serviceData= new ServiceData(WIFI_P2P_INSTANCE_NAME, getHttpListeningPort(),
                     new HashMap<String,String>() ,ServiceType.PRESENCE_TCP);
             networkService.getWifiDirectHandlerAPI().startAddingNoPromptService(serviceData, new WifiP2pManager.ActionListener() {
                 @Override

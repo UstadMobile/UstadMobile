@@ -115,7 +115,7 @@ public class MockNetworkManager extends NetworkManager {
 
         @Override
         public void run() {
-            MockNetworkManager.this.wirelessArea.sendSdTxtRecords(CoreBuildConfig.NETWORK_SERVICE_NAME,
+            MockNetworkManager.this.wirelessArea.sendSdTxtRecords(CoreBuildConfig.WIFI_P2P_INSTANCE_NAME,
                     txtRecords, MockNetworkManager.this);
         }
     };
@@ -125,7 +125,7 @@ public class MockNetworkManager extends NetworkManager {
             synchronized (wifiLockObj) {
                 if (MockNetworkManager.this.connectedWifiNetwork != null) {
                     MockNetworkManager.this.connectedWifiNetwork.sendWirelessServiceBroadcast(
-                        CoreBuildConfig.NETWORK_SERVICE_NAME, MockNetworkManager.this.getDeviceIPAddress(),
+                        CoreBuildConfig.WIFI_P2P_INSTANCE_NAME, MockNetworkManager.this.getDeviceIPAddress(),
                         MockNetworkManager.this.getHttpListeningPort());
                 }
             }

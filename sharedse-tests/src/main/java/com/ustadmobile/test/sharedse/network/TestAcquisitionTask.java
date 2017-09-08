@@ -219,7 +219,7 @@ public class TestAcquisitionTask {
      * @throws InterruptedException
      * @throws XmlPullParserException
      */
-    @Test
+//    @Test
     public void testAcquisitionLocalWifi() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
@@ -389,6 +389,8 @@ public class TestAcquisitionTask {
 
         NetworkNode sameNetworkNode = new NetworkNode(null, "127.0.0.2");
         sameNetworkNode.setNetworkServiceLastUpdated(timeNow);
+        sameNetworkNode.setNsdServiceName("lan-node");
+
         EntryCheckResponse sameNetworkResponse = new EntryCheckResponse(sameNetworkNode);
         sameNetworkResponse.setFileAvailable(true);
 
@@ -408,11 +410,13 @@ public class TestAcquisitionTask {
          */
         NetworkNode nodeWithoutFailures = new NetworkNode(null, "127.0.0.1");
         nodeWithoutFailures.setNetworkServiceLastUpdated(timeNow);
+        nodeWithoutFailures.setNsdServiceName("without-failures");
         EntryCheckResponse nodeWithoutFailuresResponse = new EntryCheckResponse(nodeWithoutFailures);
         nodeWithoutFailuresResponse.setFileAvailable(true);
 
         NetworkNode nodeWithFailures= new NetworkNode(null, "127.0.0.2");
         nodeWithFailures.setNetworkServiceLastUpdated(timeNow);
+        nodeWithoutFailures.setNsdServiceName("with-failures");
         EntryCheckResponse nodeWithFailuresResponse = new EntryCheckResponse(nodeWithFailures);
         nodeWithFailuresResponse.setFileAvailable(true);
         long failureTime = timeNow - 20000;//20 seconds ago
@@ -437,6 +441,7 @@ public class TestAcquisitionTask {
         for(int i = 0; i < nodesWithFailures.length; i++) {
             nodesWithFailures[i] = new NetworkNode(null, "127.0.0." + i);
             nodesWithFailures[i].setNetworkServiceLastUpdated(timeNow);
+            nodesWithFailures[i].setNsdServiceName("node-with-failures-"+i);
             failureTime = timeNow - (((long)AcquisitionTask.FAILURE_MEMORY_TIME / 4)*i);
             AcquisitionTaskHistoryEntry nodeWithFailuresEntry = new AcquisitionTaskHistoryEntry(
                 acquisitionFeed.entries[0].id, "http://127.0.0." + i +":8000/catalog/foo",

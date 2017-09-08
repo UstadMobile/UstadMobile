@@ -36,6 +36,8 @@ public class NetworkNode {
 
     private long networkServiceLastUpdated;
 
+    private String nsdServiceName;
+
     private int port;
 
     private int wifiDirectDeviceStatus;
@@ -49,6 +51,12 @@ public class NetworkNode {
     public static final int STATUS_AVAILABLE = 3;
 
     public static final int STATUS_UNAVAILABLE = 4;
+
+    /**
+     * The timeout after which if we have heard nothing we consider a wifi direct node inactive.
+     * Normally we should hear from the node every 2min.
+     */
+    public static final int WIFI_DIRECT_TIMEOUT = (6 * 60 * 1000) + 30000;
 
     /**
      * List of acquisition operations that have been performed from this node - used by the
@@ -197,6 +205,21 @@ public class NetworkNode {
         return Calendar.getInstance().getTimeInMillis() - networkServiceLastUpdated;
     }
 
+    /**
+     * True if the node is expected to be active on the local network, false otherwise. This is set
+     * to true when it is discovered, and false when the service is lost (if the device has not been
+     * heard from, or if the network is changed)
+     *
+     * @return true if the node is expected to be active on the local network, false otherwise.
+     */
+    public boolean isNsdActive() {
+        return nsdServiceName != null;
+    }
+
+    public boolean isWifiDirectActive() {
+        return getTimeSinceWifiDirectLastUpdated() < WIFI_DIRECT_TIMEOUT;
+    }
+
     public boolean equals(Object object) {
         return object instanceof NetworkNode &&
                 ((deviceWifiDirectMacAddress!=null && getDeviceWifiDirectMacAddress().equals(deviceWifiDirectMacAddress))
@@ -250,6 +273,24 @@ public class NetworkNode {
 
     public void setWifiDirectDeviceStatus(int wifiDirectDeviceStatus) {
         this.wifiDirectDeviceStatus = wifiDirectDeviceStatus;
+    }
+
+    /**
+     * The name of the nsd service as it was discovered. Normally the bluetooth name of the device.
+     *
+     * @return Nsd service name if present, null if not available.
+     */
+    public String getNsdServiceName() {
+        return nsdServiceName;
+    }
+
+    /**
+     * The name of the nsd service as it was discovered. Normally the bluetooth name of the device.
+     *
+     * @param nsdServiceName Nsd service name as above.
+     */
+    public void setNsdServiceName(String nsdServiceName) {
+        this.nsdServiceName = nsdServiceName;
     }
 
     /* $endif */

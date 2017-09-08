@@ -967,10 +967,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
         int score = 0;
         NetworkNode node = response.getNetworkNode();
-        long timeNow = Calendar.getInstance().getTimeInMillis();
-        if(timeNow - response.getNetworkNode().getNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
+        if(response.getNetworkNode().isNsdActive()) {
             score += SAME_NET_SCORE;
-        }else if(timeNow - response.getNetworkNode().getWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
+        }else if(response.getNetworkNode().isWifiDirectActive()) {
             score += WIFI_DIRECT_SCORE;
         }
 
