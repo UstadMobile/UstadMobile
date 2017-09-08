@@ -662,6 +662,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         NetworkNode node;
         boolean newNode;
         synchronized (knownNetworkNodes) {
+            if(ipAddress.equals(getDeviceIPAddress()) || ipAddress.startsWith("127."))
+                return;
+
+
             node = getNodeByIpAddress(ipAddress);
             newNode = (node == null);
 

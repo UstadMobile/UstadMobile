@@ -91,17 +91,20 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index);
             currentNode = index;
             NetworkNode node = networkNodeList.get(currentNode);
-            if(networkManager.isBluetoothEnabled() && isUseBluetooth()
-                    && node.getDeviceBluetoothMacAddress() != null) {
+
+            //TODO : check if node is on same subnet
+            if(networkManager.isWiFiEnabled() && isUseHttp()
+                    && networkManager.getDeviceIPAddress() != null
+                    && node.getDeviceIpAddress() != null) {
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - http");
+                getEntryStatusHttp(node);
+                connectNextNode(index + 1);
+            }else if(networkManager.isBluetoothEnabled() && isUseBluetooth()
+                        && node.getDeviceBluetoothMacAddress() != null) {
                 String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
                 UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index
                         + " to bluetooth addr " + bluetoothAddr);
                 networkManager.connectBluetooth(bluetoothAddr, this);
-            }else if(networkManager.isWiFiEnabled() && isUseHttp()
-                    && node.getDeviceIpAddress() != null) {
-                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - http");
-                getEntryStatusHttp(node);
-                connectNextNode(index+1);
             }else {
                 //skip it - not possible to query this node with the current setup
                 UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - no suitable method to connect");
