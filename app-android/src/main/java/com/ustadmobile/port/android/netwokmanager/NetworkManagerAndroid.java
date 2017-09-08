@@ -130,8 +130,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
      */
     public static final String PREF_KEY_SUPERNODE = "supernode_enabled";
 
-    private static final String SERVICE_DEVICE_AVAILABILITY = "av";
-
     private int nodeStatus = -1;
 
     public static final int LOCAL_SERVICE_STATUS_INACTIVE = 0;
@@ -701,7 +699,6 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         String deviceBluetoothMacAddress=getBluetoothMacAddress();
         String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
         HashMap<String,String> record=new HashMap<>();
-        record.put(SERVICE_DEVICE_AVAILABILITY,"available");
         record.put(SD_TXT_KEY_PORT,String.valueOf(getHttpListeningPort()));
         record.put(SD_TXT_KEY_BT_MAC, deviceBluetoothMacAddress);
         record.put(SD_TXT_KEY_IP_ADDR, deviceIpAddress);

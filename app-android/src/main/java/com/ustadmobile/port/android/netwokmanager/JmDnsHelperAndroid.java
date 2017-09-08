@@ -56,7 +56,6 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
         public void onReceive(Context context, Intent intent) {
             NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
             boolean connected = info.isConnected();
-            boolean isConnecting = info.isConnectedOrConnecting();
 
             synchronized (JmDnsHelperAndroid.this) {
                 if(connected && jmDns == null) {
@@ -169,7 +168,7 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
     }
 
     @Override
-    public void registerNSDService() {
+    public synchronized void registerNSDService() {
         broadcastEnabled = true;
         if(jmDns != null && !broadcastActive) {
             String networkServiceName = BluetoothAdapter.getDefaultAdapter() != null
@@ -180,6 +179,9 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
                     networkManager.getHttpListeningPort(), "path=/");
             try {
                 jmDns.registerService(localServiceInfo );
+                Log.i(NetworkManagerAndroid.TAG, "JmDnsHelperAndroid: service registered: "
+                    + "type: " + localServiceInfo.getType() + " name: " + localServiceInfo.getName()
+                    + " port: " + localServiceInfo.getPort());
                 broadcastActive = true;
             }catch(IOException e) {
                 Log.e(NetworkManagerAndroid.TAG, "JmDnsHelperAndroid: exception registering service", e);
@@ -188,11 +190,13 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
     }
 
     @Override
-    public void unregisterNSDService() {
+    public synchronized void unregisterNSDService() {
         broadcastEnabled = false;
         if(broadcastActive && jmDns != null) {
             jmDns.unregisterService(localServiceInfo);
+            Log.i(NetworkManagerAndroid.TAG, "JmDnsHelperAndroid: unregistered local service");
             broadcastActive = false;
+            checkLock();
         }
     }
 

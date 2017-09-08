@@ -914,6 +914,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             actionRequiredAfterGroupConnection = AFTER_GROUP_CONNECTION_DO_NOTHING;
         }
 
+        if(!connected) {
+            synchronized (knownNetworkNodes) {
+                for(NetworkNode node : knownNetworkNodes) {
+                    node.setNsdServiceName(null);
+                }
+            }
+        }
+
         fireWiFiConnectionChanged(ssid, connected, connectedOrConnecting);
     }
 
