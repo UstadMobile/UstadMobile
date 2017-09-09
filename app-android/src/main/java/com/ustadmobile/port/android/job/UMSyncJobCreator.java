@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import com.evernote.android.job.Job;
 import com.evernote.android.job.JobCreator;
 import com.evernote.android.job.JobManager;
+import com.evernote.android.job.JobRequest;
 
 import java.util.Set;
 
@@ -43,10 +44,19 @@ public class UMSyncJobCreator implements JobCreator {
             case UMSyncJob.TAG:
                 Set<Job> allJobs = JobManager.instance().getAllJobs();
                 Set<Job> allUMSyncJobs = JobManager.instance().getAllJobsForTag(UMSyncJob.TAG);
+                Set<JobRequest> allJobRequests = JobManager.instance().getAllJobRequests();
+                Set<JobRequest> allUMSyncJobRequests =
+                        JobManager.instance().getAllJobRequestsForTag(UMSyncJob.TAG);
                 System.out.println("UMSyncJobCreator: Already running: " +
                         allJobs.size() + " jobs");
                 System.out.println("UMSyncJobCreator: Already running: " +
                         allUMSyncJobs.size() + " UMSyncJob jobs");
+                System.out.println("UMSyncJobCreator: Already running: " +
+                        allJobRequests.size() + " UMSyncJob REQUESTS");
+                System.out.println("UMSyncJobCreator: Already running: " +
+                        allUMSyncJobRequests.size() + " UMSyncJobREQUESTS");
+
+                //if(!haveJobsFinished(allUMSyncJobs) && allUMSyncJobRequests.size() < 2) {
                 if(!haveJobsFinished(allUMSyncJobs)) {
 
                     /*

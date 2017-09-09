@@ -2,11 +2,13 @@ package com.ustadmobile.port.android;
 
 import android.app.Application;
 
+import com.evernote.android.job.Job;
 import com.evernote.android.job.JobManager;
 import com.evernote.android.job.JobRequest;
 import com.ustadmobile.port.android.job.UMSyncJob;
 import com.ustadmobile.port.android.job.UMSyncJobCreator;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,14 +31,34 @@ public class App extends Application {
             mJobManager = JobManager.instance();
         }
 
+
+        Set<Job> allJobs = mJobManager.getAllJobs();
+        Set<Job> allUMSyncJobs = mJobManager.getAllJobsForTag(UMSyncJob.TAG);
+        Set<JobRequest> allJobRequests = mJobManager.getAllJobRequests();
+        Set<JobRequest> allUMSyncJobRequests = mJobManager.getAllJobRequestsForTag(UMSyncJob.TAG);
+
         System.out.println("UMSyncJob:App: Currently there are :"
-                + mJobManager.getAllJobs().size() + " jobs running.");
+                + allJobs.size() + " jobs running.");
         System.out.println("UMSyncJob:App: Currently there are :"
-            + mJobManager.getAllJobsForTag(UMSyncJob.TAG).size() +
+                + allUMSyncJobs.size() +
                 " UMSyncJobs running.");
 
+        System.out.println("UMSyncJob:App: Currently there are: "
+                + allJobRequests.size() + " job REQUESTS.");
+        System.out.println("UMSyncJob:App: Currently there are: "
+                + allUMSyncJobRequests.size() + " UMSyncJob REQUESTS.");
 
-        if(syncJobId > -1 && mJobManager.getJobRequest(syncJobId) == null){
+        for(JobRequest thisJobRequest:allUMSyncJobRequests){
+            //sup?
+        }
+
+        if(mJobManager.getAllJobRequestsForTag(UMSyncJob.TAG).size() > 0){
+            System.out.println("UMSyncJob:App UMSyncJob Requests running. Monitor this: size: "
+                    + allUMSyncJobRequests.size());
+        }
+
+        if(syncJobId > -1 && mJobManager.getJobRequest(syncJobId) == null
+                && mJobManager.getJob(syncJobId) == null){
             System.out.println("UMSyncJob:App: Job : " + syncJobId + " not running. Scheduling it..");
             scheduleJob();
             System.out.print("\n");
