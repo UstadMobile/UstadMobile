@@ -1,13 +1,13 @@
 package com.ustadmobile.test.sharedse.impl;
 
-import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
+import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.test.core.impl.TestContext;
 
 import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
@@ -240,4 +240,8 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         return null;
     }
 
+    @Override
+    public Class[] getSupportedContentTypePlugins() {
+        return new Class[] {EPUBTypePlugin.class};
+    }
 }

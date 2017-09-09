@@ -817,6 +817,7 @@ public class CatalogController extends BaseCatalogController implements AppViewC
      * @return CatalogController representing files on the device
      */
     public static UstadJSOPDSFeed makeDeviceFeed(UMStorageDir[] dirs, int dirFlags, Object context) throws IOException {
+        //TODO: Replace this with new directory scanner
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String generatedHREFBase =  (dirFlags & USER_RESOURCE) == USER_RESOURCE ? impl.getUserContentDirectory(
                 impl.getActiveUser(context)) : impl.getSharedContentDir();

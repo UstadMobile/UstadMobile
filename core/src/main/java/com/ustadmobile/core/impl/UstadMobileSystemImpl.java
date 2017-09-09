@@ -1095,6 +1095,13 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract boolean createUserLocally(String username, String password, String uuid, Object context);
 
+    /**
+     * Provides a list of the content types which are supported on this platform.
+     *
+     * @return Array of Class objects representing the ContentTypePlugin
+     */
+    public abstract Class[] getSupportedContentTypePlugins();
+
 }
 
 

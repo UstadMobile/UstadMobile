@@ -3,8 +3,6 @@ package com.ustadmobile.test.core.impl;
 
 import android.support.test.InstrumentationRegistry;
 
-import com.ustadmobile.test.sharedse.impl.TestContext;
-
 import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER;
 import static com.ustadmobile.test.core.buildconfig.TestConstants.TEST_REMOTE_SLAVE_SERVER_PORT;
 
