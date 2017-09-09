@@ -60,7 +60,8 @@ public class App extends Application {
         if(syncJobId > -1 && mJobManager.getJobRequest(syncJobId) == null
                 && mJobManager.getJob(syncJobId) == null){
             System.out.println("UMSyncJob:App: Job : " + syncJobId + " not running. Scheduling it..");
-            scheduleJob();
+            System.out.println("UMSyncJob:App: DISABLING SCHEDULING FOR NOW..TODO: FIX");
+            //scheduleJob();
             System.out.print("\n");
         }else{
             System.out.println("UMSyncJob:App: Job: " + syncJobId + " is already running. " +
