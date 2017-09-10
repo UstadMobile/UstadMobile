@@ -27,6 +27,7 @@ import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
 import com.ustadmobile.nanolrs.core.manager.UserManager;
 import com.ustadmobile.nanolrs.core.manager.XapiStatementManager;
 import com.ustadmobile.nanolrs.core.model.User;
+import com.ustadmobile.nanolrs.core.model.UserCustomFields;
 import com.ustadmobile.nanolrs.core.model.XapiAgent;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
@@ -60,6 +61,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
@@ -514,6 +517,77 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
                 loggedInUser.setLocalSequence(setThis);
                 userManager.persist(context, loggedInUser, false);
                 userCustomFieldsManager.createUserCustom(fields,loggedInUser, context);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return 1;
+            }
+        }
+
+        handleUserLoginAuthComplete(loggedInUser.getUsername(), loggedInUser.getPassword(), context);
+        return 0;
+    }
+
+    /**
+     * Update users custom fields or make new ones..
+     * @param map
+     * @param user
+     * @param dbContext
+     * @throws SQLException
+     */
+    public void updateUserCustom(Map<Integer, String> map, User user, Object dbContext)
+            throws SQLException {
+        UserCustomFieldsManager customFieldsManager =
+                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
+
+        Set<Map.Entry<Integer, String>> es = map.entrySet();
+        Iterator<Map.Entry<Integer, String>> it = es.iterator();
+
+        List<UserCustomFields> userFields = customFieldsManager.findByUser(user, dbContext);
+
+        while(it.hasNext()){
+            Map.Entry<Integer, String> e = it.next();
+            int key = e.getKey();
+            String value = e.getValue(); //new value
+            boolean fieldExists = false;
+            UserCustomFields uce = null;
+            for(UserCustomFields customField : userFields){
+                if(customField.getFieldName() == key){
+                    uce = customField;
+                    fieldExists = true;
+                    uce.setFieldValue(value);
+                    break;
+                }
+            }
+            if(fieldExists == false){
+                uce = (UserCustomFields)customFieldsManager.makeNew();
+                uce.setUuid(UUID.randomUUID().toString());
+                if(user!=null) {
+                    uce.setUser(user);
+                }
+                uce.setFieldName(key);
+                uce.setFieldValue(value);
+            }
+
+            customFieldsManager.persist(dbContext, uce);
+        }
+    }
+    @Override
+    public int updateUser(String username, String password, Hashtable fields, Object context) {
+        UserManager userManager =
+                PersistenceManager.getInstance().getManager(UserManager.class);
+        UserCustomFieldsManager userCustomFieldsManager =
+                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
+
+        User loggedInUser = null;
+        loggedInUser = userManager.findByUsername(context, username);
+        if(loggedInUser != null){
+            //update the user
+            try {
+                loggedInUser.setNotes("User Updated via Account Settings Page");
+                userManager.persist(context, loggedInUser, true);
+                //userCustomFieldsManager.createUserCustom(fields,loggedInUser, context);
+                updateUserCustom(fields,loggedInUser, context);
+
             } catch (SQLException e) {
                 e.printStackTrace();
                 return 1;

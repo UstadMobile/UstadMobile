@@ -15,9 +15,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.RegistrationPresenter;
@@ -26,6 +28,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -42,13 +45,25 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
     private RegistrationPresenter mPresenter;
 
-    //private ArrayList<TextInputEditText> fieldList = new ArrayList<>();
+    private boolean editMode = false;
+
+    private String activeUsername = null;
+
     private ArrayList<AutoCompleteTextView> fieldList = new ArrayList();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        //Check if user is already logged in..
+        if(impl.getActiveUser(getContext()) != null){
+            editMode = true;
+            activeUsername = impl.getActiveUser(getContext());
+        }else{
+            editMode = false;
+        }
+
         final String minPassPrompt = impl.getString(MessageID.field_password_min, getContext());
         // Inflate the layout for this fragment
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
@@ -89,10 +104,40 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
             }});
 
+        if(editMode){
+            usernameFragment.setEnabled(false);
+            usernameFragment.setText(activeUsername);
+            usernameFragment.setHint(impl.getString(MessageID.cannot_update, getContext()) + " " +
+                    impl.getString(MessageID.username, getContext()));
+            passwordFragment.setEnabled(false);
+            passwordFragment.setText("PasswordCannotBeUpdated");
+            passwordFragment.setHint(impl.getString(MessageID.cannot_update, getContext()) + " " +
+                    impl.getString(MessageID.password, getContext()));
+            ((Button)mView.findViewById(R.id.fragment_register_dialog_register_button)).setText(
+                    impl.getString(MessageID.update, getContext())
+            );
+            ((TextView)mView.findViewById(R.id.fragment_register_dialog_title)).setText(
+                    impl.getString(MessageID.update, getContext())
+            );
+        }else{
+            usernameFragment.setHint(impl.getString(MessageID.username, getContext()));
+            passwordFragment.setHint(impl.getString(MessageID.password, getContext()));
+            ((Button)mView.findViewById(R.id.fragment_register_dialog_register_button)).setText(
+                    impl.getString(MessageID.register, getContext())
+            );
+            ((TextView)mView.findViewById(R.id.fragment_register_dialog_title)).setText(
+                    impl.getString(MessageID.register, getContext())
+            );
+        }
+
         fieldList.add(usernameFragment);
         fieldList.add(passwordFragment);
 
-        mPresenter = new RegistrationPresenter(getContext(), this);
+        try {
+            mPresenter = new RegistrationPresenter(getContext(), this);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         if(mResultListener != null)
             mPresenter.setResultListener(mResultListener);
 
@@ -163,7 +208,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment
     }
 
     @Override
-    public void addField(int fieldName, int fieldType, final String[] options) {
+    public void addField(int fieldName, int fieldType, final String[] options) throws SQLException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         LinearLayout fieldLayout = (LinearLayout)mView.findViewById(
@@ -286,7 +331,10 @@ public class RegistrationDialogFragment extends UstadDialogFragment
             default:
                 break;
         }
-
+        if (editMode) {
+            String value = mPresenter.getUserDetail(activeUsername, fieldName, getContext());
+            autoTextField.setText(value);
+        }
 
         textInputLayout.addView(autoTextField);
         fieldLayout.addView(textInputLayout, params);
@@ -329,7 +377,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
                 //register new user if validation all good
                 if(allgood) {
-                    mPresenter.handleClickRegister(username, password, fieldMap);
+                    mPresenter.handleClickRegister(username, password, fieldMap, editMode);
                 }
         }
     }

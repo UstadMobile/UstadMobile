@@ -26,6 +26,7 @@
 
 
             <LinearLayout
+                android:id="@+id/account_settings"
                 android:layout_width="match_parent"
                 android:layout_height="60dp">
                 <ImageView

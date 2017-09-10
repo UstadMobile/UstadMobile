@@ -99,8 +99,10 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
         }
 
 
+
         if(view==accountSection){
             //TODO: implement navigation to account settings
+            mController.handleClickAccount();
         }else if(view==dataUsageSection){
             mController.handleClickDataSettings();
         }else if(view==logoutSection){

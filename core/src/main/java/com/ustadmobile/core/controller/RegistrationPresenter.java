@@ -3,9 +3,15 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DialogResultListener;
+import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
+import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
+import com.ustadmobile.nanolrs.core.manager.UserManager;
+import com.ustadmobile.nanolrs.core.model.User;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
 import java.awt.TextField;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -97,12 +103,14 @@ public class RegistrationPresenter extends UstadBaseController {
     }
 
 
-    public RegistrationPresenter(Object context, RegistrationView view) {
+    public RegistrationPresenter(Object context) {
+        super(context);
+    }
+
+    public RegistrationPresenter(Object context, RegistrationView view) throws SQLException {
         super(context);
         setExtraFields();
         this.view = view;
-
-
 
         for (Map.Entry<Integer, Integer> entry : extraFieldsMap.entrySet()) {
             int name = entry.getKey();
@@ -114,6 +122,27 @@ public class RegistrationPresenter extends UstadBaseController {
             view.addField(name, type, options);
         }
     }
+
+    /**
+     * Get user detail
+     * @param username  The username of the active user or any other user
+     * @param field     The custom field field id/name
+     * @return          value
+     * @throws SQLException
+     */
+    public static String getUserDetail(String username, int field, Object dbContext) throws SQLException {
+        UserCustomFieldsManager customFieldsManager =
+                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
+        UserManager userManager =
+                PersistenceManager.getInstance().getManager(UserManager.class);
+        User user = userManager.findByUsername(dbContext, username);
+        String value = customFieldsManager.getUserField(user, field, dbContext);
+        if(value == null){
+            return "";
+        }
+        return value;
+
+    }
     public void setUIStrings() {
         //Doesn't do much
     }
@@ -121,12 +150,24 @@ public class RegistrationPresenter extends UstadBaseController {
     /**
      * Handle register link in Registration view
      */
-    public void handleClickRegister(String username, String password, Hashtable fields) {
+    public void handleClickRegister(String username, String password, Hashtable fields, boolean editMode) {
         Object context = getContext();
-        UstadMobileSystemImpl.getInstance().registerUser(username, password, fields, context);
+        if(editMode){
+            UstadMobileSystemImpl.getInstance().updateUser(username, password, fields, context);
+        }else {
+            UstadMobileSystemImpl.getInstance().registerUser(username, password, fields, context);
+        }
         if(resultListener != null){
             resultListener.onDialogResult(RESULT_REGISTRATION_SUCCESS, view, null);
         }
+
+        if(view != null && view instanceof DismissableDialog){
+            ((DismissableDialog)view).dismiss();
+        }
+    }
+
+    public void handleClickUpdate(String username, Hashtable fields){
+
     }
 
     public DialogResultListener getResultListener() {

@@ -102,6 +102,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"/>
         <activity android:name="com.ustadmobile.port.android.view.SettingsDataUsageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"/>
+
         <activity
             android:name="com.ustadmobile.port.android.view.UserSettingsActivity2"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"

@@ -1079,6 +1079,16 @@ public abstract class UstadMobileSystemImpl {
     public abstract int registerUser(String username, String password, Hashtable fields, Object context);
 
     /**
+     * Update users locally
+     * @param username
+     * @param password
+     * @param fields
+     * @param context
+     * @return
+     */
+    public abstract int updateUser(String username, String password, Hashtable fields, Object context);
+
+    /**
      * Authenticate locally
      * @param username
      * @param password
