@@ -52,6 +52,12 @@ public class App extends Application {
             //sup?
         }
 
+        /* just in case condition */
+        if(allUMSyncJobRequests.size() > 5){
+            System.out.println(" >>UMSyncJob:App: More than 5 job requests. Cancelling all.");
+            mJobManager.cancelAllForTag(UMSyncJob.TAG);
+        }
+
         if(mJobManager.getAllJobRequestsForTag(UMSyncJob.TAG).size() > 0){
             System.out.println(" UMSyncJob:App UMSyncJob Requests running. Monitor this: size: "
                     + allUMSyncJobRequests.size());
