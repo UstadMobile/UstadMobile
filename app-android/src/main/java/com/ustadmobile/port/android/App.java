@@ -37,15 +37,15 @@ public class App extends Application {
         Set<JobRequest> allJobRequests = mJobManager.getAllJobRequests();
         Set<JobRequest> allUMSyncJobRequests = mJobManager.getAllJobRequestsForTag(UMSyncJob.TAG);
 
-        System.out.println("UMSyncJob:App: Currently there are :"
+        System.out.println(" UMSyncJob:App: Currently there are :"
                 + allJobs.size() + " jobs running.");
-        System.out.println("UMSyncJob:App: Currently there are :"
+        System.out.println(" UMSyncJob:App: Currently there are :"
                 + allUMSyncJobs.size() +
                 " UMSyncJobs running.");
 
-        System.out.println("UMSyncJob:App: Currently there are: "
+        System.out.println(" UMSyncJob:App: Currently there are: "
                 + allJobRequests.size() + " job REQUESTS.");
-        System.out.println("UMSyncJob:App: Currently there are: "
+        System.out.println(" UMSyncJob:App: Currently there are: "
                 + allUMSyncJobRequests.size() + " UMSyncJob REQUESTS.");
 
         for(JobRequest thisJobRequest:allUMSyncJobRequests){
@@ -53,18 +53,19 @@ public class App extends Application {
         }
 
         if(mJobManager.getAllJobRequestsForTag(UMSyncJob.TAG).size() > 0){
-            System.out.println("UMSyncJob:App UMSyncJob Requests running. Monitor this: size: "
+            System.out.println(" UMSyncJob:App UMSyncJob Requests running. Monitor this: size: "
                     + allUMSyncJobRequests.size());
+            System.out.println(" >>UMSyncJob:App UMSyncJob Not running any more jobs..");
         }
-
+        else
         if(syncJobId > -1 && mJobManager.getJobRequest(syncJobId) == null
                 && mJobManager.getJob(syncJobId) == null){
-            System.out.println("UMSyncJob:App: Job : " + syncJobId + " not running. Scheduling it..");
-            System.out.println("UMSyncJob:App: DISABLING SCHEDULING FOR NOW..TODO: FIX");
-            //scheduleJob();
+            System.out.println(" >>UMSyncJob:App: Job : " + syncJobId + " not running. Scheduling it..");
+            //System.out.println("UMSyncJob:App: DISABLING SCHEDULING FOR NOW..TODO: FIX");
+            scheduleJob();
             System.out.print("\n");
         }else{
-            System.out.println("UMSyncJob:App: Job: " + syncJobId + " is already running. " +
+            System.out.println(" >>UMSyncJob:App: Job: " + syncJobId + " is already running. " +
                     "Not scheduling again.");
         }
     }

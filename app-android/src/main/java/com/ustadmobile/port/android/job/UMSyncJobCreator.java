@@ -47,29 +47,25 @@ public class UMSyncJobCreator implements JobCreator {
                 Set<JobRequest> allJobRequests = JobManager.instance().getAllJobRequests();
                 Set<JobRequest> allUMSyncJobRequests =
                         JobManager.instance().getAllJobRequestsForTag(UMSyncJob.TAG);
-                System.out.println("UMSyncJobCreator: Already running: " +
+                System.out.println(" UMSyncJobCreator: Already running: " +
                         allJobs.size() + " jobs");
-                System.out.println("UMSyncJobCreator: Already running: " +
+                System.out.println(" UMSyncJobCreator: Already running: " +
                         allUMSyncJobs.size() + " UMSyncJob jobs");
-                System.out.println("UMSyncJobCreator: Already running: " +
+                System.out.println(" UMSyncJobCreator: Already running: " +
                         allJobRequests.size() + " UMSyncJob REQUESTS");
-                System.out.println("UMSyncJobCreator: Already running: " +
+                System.out.println(" UMSyncJobCreator: Already running: " +
                         allUMSyncJobRequests.size() + " UMSyncJobREQUESTS");
 
                 //if(!haveJobsFinished(allUMSyncJobs) && allUMSyncJobRequests.size() < 2) {
                 if(!haveJobsFinished(allUMSyncJobs)) {
+                    System.out.println(" UMSyncJobCreator: All UMSyncJobs have finished. Not skipping.");
+                    //JobManager.instance().cancelAllForTag(UMSyncJob.TAG);
+                    //System.out.println(" UMSyncJobCreator: Cancelled all jobs.");
 
-                    /*
-                    System.out.println("UMSyncJobCreator: Cancelling finished jobs");
-                    JobManager.instance().cancelAllForTag(UMSyncJob.TAG);
-                    allUMSyncJobs = JobManager.instance().getAllJobsForTag(UMSyncJob.TAG);
-                    System.out.println("UMSyncJobCreator: Post cancellation running: " +
-                            allUMSyncJobs.size() + " UMSyncJob jobs");
-                    */
-                    System.out.println("UMSyncJobCreator: Starting new UMSyncJob..");
+                    System.out.println(" >>UMSyncJobCreator: Starting new UMSyncJob..");
                     return new UMSyncJob();
                 }else {
-                    System.out.println("UMSyncJobCreator: Skipping, " +
+                    System.out.println(" >>UMSyncJobCreator: Skipping, " +
                             "Sync job already running not finished");
                 }
             default:
