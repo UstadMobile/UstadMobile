@@ -571,6 +571,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             customFieldsManager.persist(dbContext, uce);
         }
     }
+
     @Override
     public int updateUser(String username, String password, Hashtable fields, Object context) {
         UserManager userManager =

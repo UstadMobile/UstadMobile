@@ -26,6 +26,7 @@ allprojects {
         maven {
             url "https://maven.google.com"
         }
+
     }
 }
 
@@ -37,7 +38,7 @@ version = "0.2.4.54"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 135
-    nanoLrsVersion = "0.2.223"
+    nanoLrsVersion = "0.2.250"
 
 }
 

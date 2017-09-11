@@ -403,6 +403,9 @@ public class LoginController extends UstadBaseController{
                     //encrypt and cache the authentication result
                     String authHashed = impl.hashAuth(getContext(), password);
                     impl.setAppPref(PREFKEY_AUTHCACHE_PREFIX + username, authHashed, getContext());
+
+                    impl.setActiveUser(username, getContext());
+                    impl.setActiveUserAuth(password, getContext());
                 }
 
                 if(result == 0 || result >= 500) {
