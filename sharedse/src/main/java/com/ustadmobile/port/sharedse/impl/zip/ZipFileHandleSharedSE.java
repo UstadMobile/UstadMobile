@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.ZipFileHandle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
@@ -22,12 +23,23 @@ public class ZipFileHandleSharedSE implements ZipFileHandle {
 
     @Override
     public InputStream openInputStream(String name) throws IOException {
-        return zipFile.getInputStream(zipFile.getEntry(name));
+        ZipEntry entry = zipFile.getEntry(name);
+        if(entry != null){
+            return zipFile.getInputStream(entry);
+        }else {
+            return null;
+        }
+
     }
 
     @Override
     public ZipEntryHandle getEntry(String name) throws IOException {
-        return new ZipEntryHandleSharedSE(zipFile.getEntry(name));
+        ZipEntry entry = zipFile.getEntry(name);
+        if(entry != null) {
+            return new ZipEntryHandleSharedSE(entry);
+        }else {
+            return null;
+        }
     }
 
     @Override

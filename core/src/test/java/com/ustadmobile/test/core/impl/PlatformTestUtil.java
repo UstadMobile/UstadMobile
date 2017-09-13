@@ -8,8 +8,11 @@ package com.ustadmobile.test.core.impl;
 
 public class PlatformTestUtil {
 
+
+    static TestContext testContext = new TestContext("maindevice");
+
     public static Object getTargetContext() {
-        return new Object();
+        return testContext;
     }
 
     public static Object getTestContext() {

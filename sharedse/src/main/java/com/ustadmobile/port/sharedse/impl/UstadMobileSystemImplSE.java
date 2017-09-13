@@ -235,6 +235,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     public UMStorageDir[] getStorageDirs(int mode, Object context) {
         List<UMStorageDir> dirList = new ArrayList<>();
         String systemBaseDir = getSystemBaseDir(context);
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
@@ -250,7 +251,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             }
         }
 
-        if((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE) {
+        if(impl.getActiveUser(context) != null
+                && ((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE)) {
             String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
             dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),

@@ -92,11 +92,14 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             currentNode = index;
             NetworkNode node = networkNodeList.get(currentNode);
 
-            //TODO : check if node is on same subnet
+            //TODO : check if node is on same subnet, for now just insist it was discovered using NSD
             if(networkManager.isWiFiEnabled() && isUseHttp()
                     && networkManager.getDeviceIPAddress() != null
+                    && node.getNsdServiceName() != null
                     && node.getDeviceIpAddress() != null) {
-                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index + " - http");
+                UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #"
+                        + index + " - http to " + node.getDeviceIpAddress() + ":" + node.getPort()
+                        + " (" + node.getNsdServiceName() + ")");
                 getEntryStatusHttp(node);
                 connectNextNode(index + 1);
             }else if(networkManager.isBluetoothEnabled() && isUseBluetooth()
@@ -163,15 +166,17 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
                     statusResults.add(isAvailable);
                 }
-
+                UstadMobileSystemImpl.l(UMLog.INFO, 376, mkLogPrefix()
+                        + " - successfully processed http response");
             }
         }catch(Exception e) {
             e.printStackTrace();
         }finally {
             UMIOUtils.closeOutputStream(httpOut);
             UMIOUtils.closeInputStream(httpIn);
-
         }
+
+        UstadMobileSystemImpl.l(UMLog.INFO, 382, mkLogPrefix() + " - done with node");
 
         if(statusResults != null)
             networkManager.handleEntriesStatusUpdate(node, entryIdList, statusResults);

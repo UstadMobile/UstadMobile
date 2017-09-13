@@ -1,4 +1,4 @@
-package com.ustadmobile.test.sharedse.impl;
+package com.ustadmobile.test.core.impl;
 
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UMStorageDir;

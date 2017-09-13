@@ -181,6 +181,10 @@
     <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
     <string name="catalog">Catalog</string>
     <string name="closed">Closed</string>
+
     <string name="update">Update</string>
     <string name="cannot_update">Cannot update</string>
+
+    <string name="error_unsupported_content_type">Error: Unsupported content type</string>
+
 </resources>

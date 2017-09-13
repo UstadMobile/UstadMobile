@@ -8,7 +8,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.SharedSeTestSuite;
 import com.ustadmobile.test.sharedse.network.TestEntryStatusTask;
-import com.ustadmobile.test.sharedse.impl.TestContext;
+import com.ustadmobile.test.core.impl.TestContext;
 import com.ustadmobile.test.sharedse.impl.UstadMobileSystemImplTest;
 import com.ustadmobile.test.sharedse.network.MockNetworkManager;
 import com.ustadmobile.test.sharedse.network.MockWifiNetwork;
