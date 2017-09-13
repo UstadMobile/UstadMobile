@@ -1,5 +1,7 @@
 package com.ustadmobile.test.core;
 
+import com.ustadmobile.test.core.catalog.contenttype.TestXapiPackageTypePlugin;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -10,7 +12,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
         TestHTTPCacheDir.class,
         TestImageLoader.class,
-        TestDirectoryScanner.class
+        TestDirectoryScanner.class,
+        TestXapiPackageTypePlugin.class
 })
 public abstract class CoreTestSuite {
 }

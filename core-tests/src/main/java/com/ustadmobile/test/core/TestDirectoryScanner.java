@@ -25,21 +25,7 @@ public class TestDirectoryScanner {
 
     @Before
     public void copyEntryFile() throws IOException {
-        InputStream entryIn = getClass().getResourceAsStream(
-                "/com/ustadmobile/test/core/thelittlechicks.epub");
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        Object context = PlatformTestUtil.getTargetContext();
-        UMStorageDir[] storageDirs = impl.getStorageDirs(CatalogController.SHARED_RESOURCE,
-                context);
-        String outDir = storageDirs[0].getDirURI();
-        if(!impl.dirExists(outDir)) {
-            impl.makeDirectoryRecursive(outDir);
-        }
-
-        String outPath = UMFileUtil.joinPaths(new String[]{outDir, "thelittlechicks.epub"});
-
-        OutputStream fileOut = UstadMobileSystemImpl.getInstance().openFileOutputStream(outPath, 0);
-        UMIOUtils.readFully(entryIn, fileOut, 8*1024);
+        UMTestUtil.copyResourceToStorageDir("/com/ustadmobile/test/core/thelittlechicks.epub");
     }
 
     @Test

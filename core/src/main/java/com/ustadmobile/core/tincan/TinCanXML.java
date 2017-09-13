@@ -37,7 +37,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * This class represents a tincan.xml file of a given container.
+ * This class represents a tincan.xml file of a given container. As specified here:
+ *  https://github.com/RusticiSoftware/launch/blob/master/lms_lrs.md
  * 
  * @author mike
  */

@@ -54,7 +54,7 @@ public class ZipFileHandleSharedSE implements ZipFileHandle {
 
     private class ZipFileHandleEntriesEnumeration implements Enumeration {
 
-        private Enumeration enumeration;
+        private Enumeration<? extends ZipEntry> enumeration;
 
         private ZipFileHandleEntriesEnumeration() {
             enumeration = ZipFileHandleSharedSE.this.zipFile.entries();
@@ -67,7 +67,7 @@ public class ZipFileHandleSharedSE implements ZipFileHandle {
 
         @Override
         public Object nextElement() {
-            return enumeration.nextElement();
+            return new ZipEntryHandleSharedSE(enumeration.nextElement());
         }
     }
 }
