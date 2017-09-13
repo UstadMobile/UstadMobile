@@ -83,7 +83,6 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     public void onCreate() {
         manager = UstadMobileSystemImpl.getInstance().getNetworkManager();
-        manager.addNetworkManagerListener(this);
         if(this.args.containsKey(ARG_ENTRY_OPDS_STR)) {
             try {
                 entryFeed = new UstadJSOPDSFeed();
@@ -139,6 +138,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 if(fileResponse != null) {
                     catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_AVAILABLE);
                 }
+                manager.addNetworkManagerListener(this);
                 startMonitoringLocalAvailability();
                 /* $endif$ */
 
