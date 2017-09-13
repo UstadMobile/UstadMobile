@@ -485,8 +485,33 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         return languages;
     }
 
+    /**
+     * Aggregates the given UstadJSOPDSFeed objects into this feed.
+     *
+     * @param feeds Feeds to aggregate. This can include null elements. If an element is null,
+     *              it will be skipped
+     * @param order
+     *
+     * @return this
+     */
+    public UstadJSOPDSFeed aggregate(UstadJSOPDSFeed[] feeds, int order) {
+        int i, j, feedSize;
 
+        UstadJSOPDSEntry entry;
+        for(i = 0; i < feeds.length; i++) {
+            if(feeds[i] == null)
+                continue;
 
+            feedSize = feeds[i].size();
+            for(j = 0; j < feedSize; j++) {
+                entry = new UstadJSOPDSEntry(this, feeds[i].getEntry(j));
+                //TODO: resolve links relative to the base of this feed
+                addEntry(entry);
+            }
+        }
+
+        return this;
+    }
 
 
 
