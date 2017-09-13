@@ -24,13 +24,13 @@ public class DirectoryScanner {
 
     /**
      * Flag for use with scanFiles: indicates that the feed acquisition links should be set using
-     * with file URLs
+     * with file uris
      */
     public static final int LINK_HREF_MODE_FILE = 0;
 
     /**
-     * Flag for use with scanFiles: indicates that the feed acquisition links should be set using
-     * ids e.g. baseHref/containerId
+     * Flag for use with setLinkHrefMode: indicates that the feed acquisition links should be set
+     * using ids e.g. baseHref/containerId
      */
     public static final int LINK_HREF_MODE_ID = 1;
 
@@ -58,12 +58,12 @@ public class DirectoryScanner {
             Class[] supportedContentTypes = impl.getSupportedContentTypePlugins();
 
 
-            ContentTypePlugin[] supportedTypePlugins = new ContentTypePlugin[supportedContentTypes.length];
-            for(int i = 0; i < supportedTypePlugins.length; i++) {
-                supportedTypePlugins[i] = (ContentTypePlugin)supportedContentTypes[i].newInstance();
-            }
-
+            ContentTypePlugin[] supportedTypePlugins = ContentTypeManager.getSupportedContentTypePlugins();
             String[] dirContents = impl.listDirectory(directoryUri);
+            if(dirContents == null) {
+                //This directory does not exist - return null
+                return null;
+            }
 
             String fileExt;
             int j, k;
@@ -123,16 +123,60 @@ public class DirectoryScanner {
             }
 
         }catch(IOException e) {
-
-        }catch(InstantiationException i) {
-
-        }catch(IllegalAccessException a) {
-
+            UstadMobileSystemImpl.l(UMLog.ERROR, 673, directoryUri, e);
         }
 
 
         return result;
     }
 
+    /**
+     * When generating the output OPDS the acquisition link can be either the file path (default)
+     * or it can be a set prefixed path followed by the ID (e.g. for use with the Http catalog
+     * server where entries are retrieved using /catalog/entry/entry-id
+     *
+     * @see #LINK_HREF_MODE_FILE
+     * @see #LINK_HREF_MODE_ID
+     *
+     * @return the current link href mode
+     */
+    public int getLinkHrefMode() {
+        return linkHrefMode;
+    }
 
+    /**
+     * When generating the output OPDS the acquisition link can be either the file path (default)
+     * or it can be a set prefixed path followed by the ID (e.g. for use with the Http catalog
+     * server where entries are retrieved using /catalog/entry/entry-id
+     *
+     * @see #LINK_HREF_MODE_FILE
+     * @see #LINK_HREF_MODE_ID
+     *
+     * @param linkHrefMode the mode to use for any future calls to scanDirectory
+     */
+    public void setLinkHrefMode(int linkHrefMode) {
+        this.linkHrefMode = linkHrefMode;
+    }
+
+    /**
+     * If the link mode is set to LINK_HREF_MODE_ID then this is the prefix that will be given before
+     * the id e.g if it is set to /catalog/entry/ and a given entry has the id 12345 the resulting
+     * acquisition link would be /catalog/entry/12345
+     *
+     * @return The prefix if using LINK_HREF_MODE_ID
+     */
+    public String getHrefModeBaseHref() {
+        return hrefModeBaseHref;
+    }
+
+    /**
+     * If the link mode is set to LINK_HREF_MODE_ID then this is the prefix that will be given before
+     * the id e.g if it is set to /catalog/entry/ and a given entry has the id 12345 the resulting
+     * acquisition link would be /catalog/entry/12345
+     *
+     * @param hrefModeBaseHref the prefix to use if using LINK_HREF_MODE_ID
+     */
+    public void setHrefModeBaseHref(String hrefModeBaseHref) {
+        this.hrefModeBaseHref = hrefModeBaseHref;
+    }
 }

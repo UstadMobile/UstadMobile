@@ -1,7 +1,9 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.catalog.ContentTypeManager;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
@@ -214,13 +216,27 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
     public void handleOpenEntry(UstadJSOPDSEntry entry) {
         CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
                 CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         if (entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
             Hashtable openArgs = new Hashtable();
             openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
             openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
             openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
-            UstadMobileSystemImpl.getInstance().go(ContainerView.VIEW_NAME, openArgs, getContext());
+
+            String viewName = ContentTypeManager.getViewNameForContentType(entryInfo.mimeType);
+
+            if(viewName != null) {
+                UstadMobileSystemImpl.getInstance().go(viewName, openArgs, getContext());
+            }else {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 672, entryInfo.mimeType);
+                impl.getAppView(getContext()).showNotification(impl.getString(0, getContext()),
+                        AppView.LENGTH_LONG);
+            }
+        }else {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 673, entryInfo != null ? entryInfo.toString() : null);
+            impl.getAppView(getContext()).showNotification(impl.getString(
+                    MessageID.error_opening_file, getContext()), AppView.LENGTH_LONG);
         }
     }
 

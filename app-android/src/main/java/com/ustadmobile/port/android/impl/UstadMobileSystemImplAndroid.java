@@ -55,6 +55,7 @@ import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -832,4 +833,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
     }
 
+    @Override
+    public Class[] getSupportedContentTypePlugins() {
+        return new Class[]{EPUBTypePlugin.class};
+    }
 }

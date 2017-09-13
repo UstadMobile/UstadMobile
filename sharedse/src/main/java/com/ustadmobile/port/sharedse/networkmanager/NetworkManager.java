@@ -306,13 +306,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         try {
             /*
-             * Do not log here: when running sharedse mock tests, this gets called in the
+             * Do not use .l logging method here: when running sharedse mock tests, this gets called in the
              * UstadMobileSystemImpl constructor. Calling the system log here thus results in a
              * stack overflow.
              */
             httpd = new EmbeddedHTTPD(0, mContext);
             NanoLrsHttpd.mountXapiEndpointsOnServer(httpd, mContext, "/xapi/");
             httpd.start();
+            System.out.println("Started main http server on port: " + httpd.getListeningPort());
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.CRITICAL, 1, "Failed to start http server");
             throw new RuntimeException("Failed to start http server", e);
