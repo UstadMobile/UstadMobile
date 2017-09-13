@@ -125,7 +125,7 @@ public class MockNetworkManager extends NetworkManager {
             synchronized (wifiLockObj) {
                 if (MockNetworkManager.this.connectedWifiNetwork != null) {
                     MockNetworkManager.this.connectedWifiNetwork.sendWirelessServiceBroadcast(
-                        CoreBuildConfig.WIFI_P2P_INSTANCE_NAME, MockNetworkManager.this.getDeviceIPAddress(),
+                        mockDeviceName, MockNetworkManager.this.getDeviceIPAddress(),
                         MockNetworkManager.this.getHttpListeningPort());
                 }
             }
@@ -214,7 +214,7 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void updateSupernodeServices() {
-        boolean shouldHaveLocalP2PService = isSuperNodeEnabled();
+        boolean shouldHaveLocalP2PService = true;
         if(shouldHaveLocalP2PService && wifiDirectBroadcastTimer == null) {
             HashMap<String, String> txtRecords = new HashMap<>();
             txtRecords.put(NetworkManager.SD_TXT_KEY_BT_MAC, mockBluetoothAddr);
@@ -232,8 +232,7 @@ public class MockNetworkManager extends NetworkManager {
 
     @Override
     public void updateClientServices() {
-        boolean clientEnabled = !isSuperNodeEnabled();
-        boolean shouldRunP2PDiscovery = clientEnabled;
+        boolean shouldRunP2PDiscovery = true;
 
         if(shouldRunP2PDiscovery && !isWifiDirectDiscoveryEnabled()) {
             setWifiDirectDiscoveryEnabled(true);
@@ -241,7 +240,7 @@ public class MockNetworkManager extends NetworkManager {
             setWifiDirectDiscoveryEnabled(false);
         }
 
-        boolean shouldRunNsd = clientEnabled;
+        boolean shouldRunNsd = true;
         if(shouldRunNsd && !isNetworkServiecDiscoveryEnabled()) {
             setNetworkServiecDiscoveryEnabled(true);
         }else if(!shouldRunNsd && isNetworkServiecDiscoveryEnabled()) {
