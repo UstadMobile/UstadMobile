@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.ComponentName;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.MenuItem;
@@ -40,6 +41,10 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xapi_package);
         mWebView = findViewById(R.id.activity_xapi_package_webview);
+        if(Build.VERSION.SDK_INT >= 17) {
+            mWebView.getSettings().setMediaPlaybackRequiresUserGesture(false);
+        }
+
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setDomStorageEnabled(true);
         mWebView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);

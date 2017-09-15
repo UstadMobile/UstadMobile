@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
 import com.ustadmobile.core.impl.ZipFileHandle;
@@ -25,6 +26,9 @@ import java.util.Hashtable;
  *
  * Pass ContainerController.ARG_CONTAINERURI when creating to provide the location of the xAPI
  * zip to open
+ *
+ * Uses the Rustici launch method to find the URL to launch:
+ *  https://github.com/RusticiSoftware/launch/blob/master/lms_lrs.md
  *
  */
 public class XapiPackagePresenter extends UstadBaseController implements Runnable{
@@ -86,11 +90,10 @@ public class XapiPackagePresenter extends UstadBaseController implements Runnabl
                 }
             }
         }catch(IOException e) {
-
+            UstadMobileSystemImpl.l(UMLog.ERROR, 675, launchUrl, e);
         }catch(XmlPullParserException x) {
-
+            UstadMobileSystemImpl.l(UMLog.ERROR, 676, launchUrl, x);
         }
-
     }
 
     /**
