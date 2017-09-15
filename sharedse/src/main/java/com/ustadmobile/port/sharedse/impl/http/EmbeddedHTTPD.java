@@ -69,6 +69,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
     @SuppressWarnings("rawtypes")
     private static HashMap<String, String> theMimeTypes = new HashMap<>();
 
+    private Hashtable<String, ZipFile> mountedZips = new Hashtable<>();
+
     static
     {
         theMimeTypes.put("htm", "text/html");
@@ -160,9 +162,22 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
             ZipFile zipFile = new ZipFile(zipPath);
             addRoute(PREFIX_MOUNT + mountPath + "/" + MountedZipHandler.URI_ROUTE_POSTFIX,
                     MountedZipHandler.class, zipFile, filters);
-            return PREFIX_MOUNT + URLEncoder.encode(mountPath, "UTF-8");
+            String fullPath = toFullZipMountPath(mountPath);
+            mountedZips.put(fullPath, zipFile);
+            return toFullZipMountPath(mountPath);
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 90, zipPath, e);
+        }
+
+        return null;
+    }
+
+    private String toFullZipMountPath(String mountPath) {
+        try {
+            return PREFIX_MOUNT + URLEncoder.encode(mountPath, "UTF-8");
+        }catch(UnsupportedEncodingException e){
+            //Should enver happen
+            UstadMobileSystemImpl.l(UMLog.ERROR, 0, null, e);
         }
 
         return null;
@@ -176,12 +191,25 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
     public void unmountZip(String mountPath) {
         String encodedPath = mountPath.substring(PREFIX_MOUNT.length());
         try {
-            String route = PREFIX_MOUNT + URLDecoder.decode(encodedPath, "UTF-8") + "/" + MountedZipHandler.URI_ROUTE_POSTFIX;
+            String route = PREFIX_MOUNT + URLDecoder.decode(encodedPath, "UTF-8") + "/"
+                    + MountedZipHandler.URI_ROUTE_POSTFIX;
             removeRoute(route);
+            mountedZips.remove(toFullZipMountPath(mountPath));
         }catch(UnsupportedEncodingException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 20, mountPath, e);
         }
+    }
 
+    /**
+     * Convenience method to make the ZipFile object accessible if a presenter needs it after
+     * mounting it on http. This will avoid having to read the file again.
+     *
+     * @param mountPath The path as returned by mountZip
+     *
+     * @return ZipFile object for the zip that was mounted on that path, null if it's not mounted.
+     */
+    public ZipFile getMountedZip(String mountPath){
+        return mountedZips.get(mountPath);
     }
 
     /**

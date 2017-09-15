@@ -11,6 +11,7 @@ import com.ustadmobile.core.tincan.Activity;
 import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.view.XapiPackageView;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -38,7 +39,7 @@ public class XapiPackageTypePlugin extends ContentTypePlugin{
 
     @Override
     public String getViewName() {
-        return null;
+        return XapiPackageView.VIEW_NAME;
     }
 
     @Override

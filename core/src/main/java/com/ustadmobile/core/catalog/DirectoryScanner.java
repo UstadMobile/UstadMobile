@@ -106,7 +106,8 @@ public class DirectoryScanner {
                                 thisEntryInfo = new CatalogEntryInfo();
                                 thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
                                 thisEntryInfo.fileURI = fileUri;
-                                thisEntryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
+                                thisEntryInfo.mimeType = entry.getFirstAcquisitionLink(null)
+                                        [UstadJSOPDSItem.ATTR_MIMETYPE];
                                 thisEntryInfo.srcURLs = new String[] { dirContents[i] };
                                 CatalogController.setEntryInfo(entry.id, thisEntryInfo,
                                         resourceMode, context);

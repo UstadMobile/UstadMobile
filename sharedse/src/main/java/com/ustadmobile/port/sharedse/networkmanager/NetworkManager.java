@@ -41,6 +41,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 import java.util.regex.Pattern;
+import java.util.zip.ZipFile;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -1471,6 +1472,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public void unmountZipFromHttp(String mountName) {
         httpd.unmountZip(mountName);
+    }
+
+    /**
+     * Method to access the ZipFile object once it's been mounted. This can be helpful for some
+     * presenters and avoid reading the same file twice
+     */
+    public ZipFile getHttpMountedZip(String mountPath){
+        return httpd.getMountedZip(mountPath);
     }
 
     /**

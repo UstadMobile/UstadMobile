@@ -20,6 +20,9 @@ public class ZipFileHandleSharedSE implements ZipFileHandle {
         zipFile = new ZipFile(name);
     }
 
+    public ZipFileHandleSharedSE(ZipFile zipFile){
+        this.zipFile = zipFile;
+    }
 
     @Override
     public InputStream openInputStream(String name) throws IOException {

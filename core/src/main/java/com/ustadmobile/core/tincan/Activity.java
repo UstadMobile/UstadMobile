@@ -108,6 +108,10 @@ public class Activity {
         return activityDef;
         
     }
+
+    public String getLaunchUrl() {
+        return launchURL;
+    }
     
     
 }

@@ -79,6 +79,11 @@
             android:name="com.ustadmobile.port.android.view.ContainerActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="" />
+
+        <activity android:name="com.ustadmobile.port.android.view.XapiPackageActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:label=""/>
+
         <activity
             android:name="com.ustadmobile.port.android.view.UserSettingsActivity"
             android:label="@string/settings"

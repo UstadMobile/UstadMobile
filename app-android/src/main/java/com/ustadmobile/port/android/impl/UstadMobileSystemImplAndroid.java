@@ -56,6 +56,7 @@ import android.widget.Toast;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
+import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.generated.locale.MessageID;
@@ -73,6 +74,7 @@ import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.UserSettingsView2;
 import com.ustadmobile.core.view.WelcomeView;
+import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
@@ -85,6 +87,7 @@ import com.ustadmobile.port.android.view.SendCourseDialogFragment;
 import com.ustadmobile.port.android.view.UserSettingsActivity2;
 import com.ustadmobile.port.android.view.UstadBaseActivity;
 import com.ustadmobile.port.android.view.WelcomeDialogFragment;
+import com.ustadmobile.port.android.view.XapiPackageActivity;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.BasePointView;
@@ -184,6 +187,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(RegistrationView.VIEW_NAME, RegistrationDialogFragment.class);
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
+        viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
     }
 
 
@@ -836,6 +840,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public Class[] getSupportedContentTypePlugins() {
-        return new Class[]{EPUBTypePlugin.class};
+        return new Class[]{
+                EPUBTypePlugin.class,
+                XapiPackageTypePlugin.class
+        };
     }
 }
