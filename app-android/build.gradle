@@ -186,7 +186,6 @@ android {
         targetSdkVersion 26
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.version
-        multiDexEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
     }
