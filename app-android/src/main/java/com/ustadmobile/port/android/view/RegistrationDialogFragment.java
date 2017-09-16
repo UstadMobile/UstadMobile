@@ -208,7 +208,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment
     }
 
     @Override
-    public void addField(int fieldName, int fieldType, final String[] options) throws SQLException {
+    public void addField(int fieldName, final int fieldType, final String[] options) throws SQLException {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         LinearLayout fieldLayout = (LinearLayout)mView.findViewById(
@@ -255,8 +255,12 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
                     @Override
                     public boolean onTouch(View paramView, MotionEvent paramMotionEvent) {
-                        if (paramMotionEvent.getAction() == MotionEvent.ACTION_UP)
+                        if (paramMotionEvent.getAction() == MotionEvent.ACTION_UP) {
+                            if(autoTextField.getError() != null){
+                                autoTextField.setError(null);
+                            }
                             return showOptions(paramView, paramMotionEvent, options, autoTextField);
+                        }
                         return false;
                     }
 
@@ -355,6 +359,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment
                         R.id.fragment_register_dialog_password_text)).getText().toString();
 
                 for(AutoCompleteTextView field: fieldList){
+                    field.setError(null); //Reset error every time
                     if(field.getText().toString().trim().equals("")){
 
                         field.setError(impl.getString(MessageID.field_required_prompt, getContext()));
