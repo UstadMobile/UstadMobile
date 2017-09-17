@@ -153,5 +153,28 @@
     <string name="field_faculty" value="985">د پوهنځي نوم</string>
 
 
+    <string name='login_successful'>بریالی ننوتل</string>
+    <string name='registration_successful'>بریالۍ نوم لیکنه</string>
+    <string name='share_offline_dialog_message'>کولای شئ دا اپلکېشن په آنلاین توګه شریک کړئ. هغه آله چې تاسو یې غواړئ د هغې په واسطه یې شریک کړئ:\n  تنظیمات پرانیسئ &lt; د بلوتوث تنظیمات\n ډاډ ترلاسه کړئ چې آله د لیدو وړ ده.\n </string>
+    <string name='send_in_zip_file'>د زېپ په فایل کې ولېږئ</string>
+    <string name='device_name'>د وزلې نوم</string>
+    <string name='accept'>منل</string>
+    <string name='decline'>رد کول</string>
+    <string name='app_name'>د بریالیتوب مهارتونه</string>
+    <string name='downloaded'>دانلوډ شو</string>
+    <string name='new_password'>نوی تېرنويى</string>
+    <string name='phone'>ټېلفون</string>
+    <string name='tablet'>تبلټ</string>
+    <string name='waiting_for_sender'>د استونکي په انتظار</string>
+    <string name='preparing'>چمتو کول</string>
+    <string name='send_course_instructions'>په بلې آله کې، اپلکېشن پرانیسئ، د مینو پورته ښي اړخه څخه د ترلاسه کول وټاکئ.\n  د لاندې لیسټ څخه بله آله انتخاب کړئ:</string>
+    <string name='cancel_invite'>د بلني لغوه </string>
+    <string name='inviting'>د بلنې په حال کې</string>
+    <string name='connecting'>د اړیکې په حال کې</string>
+    <string name='connected_but_host_not_sharing'>اړیکه/اتصال رامنځ ته شو، خو هغه بله وسله چې له دې اپلکېشن څخه استفاده کوي هېڅ شی نه شریکوي.</string>
+    <string name='field_required_prompt'>دا برخه لازمه ده </string>
+
+
+
 
 </resources>

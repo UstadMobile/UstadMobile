@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name="app_name">Ustad Mobile</string>
     <string name='dir'>ltr</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
@@ -186,5 +186,9 @@
     <string name="cannot_update">Cannot update</string>
 
     <string name="error_unsupported_content_type">Error: Unsupported content type</string>
+
+    <string name="accept">Accept</string>
+    <string name="decline">Decline</string>
+    <string name="send_in_zip_file">Send in zip file</string>
 
 </resources>

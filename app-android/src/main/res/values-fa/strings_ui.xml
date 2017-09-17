@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name='app_name'>مهارت‌های کامیابی</string>
     <string name='dir'>rtl</string>
     <string name='login'>وارد شدن</string>
     <string name='error'>خطا</string>
@@ -148,6 +148,26 @@
     <string name='failed'> ناموفق</string>
     <string name='ok_got_it'>سمه ده، پوه شوم</string>
     <string name="dont_show_this_next_time">این را بار بعدی نشان ندهید</string>
+
+    <string name='login_successful'>دخول موفق</string>
+    <string name='registration_successful'>ثبت‌نام موفق</string>
+    <string name='share_offline_dialog_message'>می‌تواند این اپلکیشن را به‌صورت آنلاین شریک سازید. در دستگاه که شما می‌خواهید توسط آن شریک سازید:\n  تنظیمات را بازکنید &lt; تنظیمات بلوتوث\n مطمئن شوید که دستگاه قابل‌رؤیت است.\n </string>
+    <string name='send_in_zip_file'>در فایل زیپ بفرستید</string>
+    <string name='device_name'>نام دستگاه</string>
+    <string name='accept'>پذیرفتن</string>
+    <string name='decline'>رد کردن</string>
+    <string name='downloaded'>دانلود شد</string>
+    <string name='new_password'>رمز عبور جدید</string>
+    <string name='phone'>تیلفون</string>
+    <string name='tablet'>تبلت</string>
+    <string name='waiting_for_sender'>منتظر فرستنده</string>
+    <string name='preparing'>آماده سازی</string>
+    <string name='send_course_instructions'>در دستگاه دیگر، اپلکیشن را بازه کنید، از بالای سمت راست مینو دریافت یا انتخاب کنید.\n دستگاه دیگر را از فهرست زیر انتخاب کنید: </string>
+    <string name='cancel_invite'>لغو دعوت</string>
+    <string name='inviting'>در حال دعوت </string>
+    <string name='connecting'>در حال تماس</string>
+    <string name='connected_but_host_not_sharing'>رابطه/اتصال ایجاد شد، اما دستگاه دیگر که از این اپلکیشن استفاده می‌کند هیچ‌چیزی را شریک نمیکند.  </string>
+    <string name='field_required_prompt'>این بخش الزمی است </string>
 
 
 

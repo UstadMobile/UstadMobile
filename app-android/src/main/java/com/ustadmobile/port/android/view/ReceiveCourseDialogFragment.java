@@ -38,8 +38,8 @@ public class ReceiveCourseDialogFragment extends UstadDialogFragment implements 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle(R.string.receive);
         builder.setView(rootView);
-        builder.setPositiveButton("Accept", this);
-        builder.setNegativeButton("Decline", this);
+        builder.setPositiveButton(R.string.accept, this);
+        builder.setNegativeButton(R.string.decline, this);
         alertDialog = builder.create();
         mPresenter = new ReceiveCoursePresenter(getContext(), this);
         return alertDialog;
