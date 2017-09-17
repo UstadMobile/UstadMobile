@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string name='app_name'>د بریالیتوب مهارتونه</string>s
     <string name='login'> ننوتون</string>
     <string name='error'> تېروتنه</string>
     <string name='err_registering_new_user'>تیروتنه د نوی کارونکی په ثبت</string>
@@ -160,7 +160,7 @@
     <string name='device_name'>د وزلې نوم</string>
     <string name='accept'>منل</string>
     <string name='decline'>رد کول</string>
-    <string name='app_name'>د بریالیتوب مهارتونه</string>
+
     <string name='downloaded'>دانلوډ شو</string>
     <string name='new_password'>نوی تېرنويى</string>
     <string name='phone'>ټېلفون</string>
