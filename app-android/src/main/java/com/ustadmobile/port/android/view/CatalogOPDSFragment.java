@@ -479,7 +479,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        idToCardMap.get(entryId).setThumbnail(imgBitmap);
+                        OPDSEntryCard card = idToCardMap.get(entryId);
+                        if(card != null)
+                            card.setThumbnail(imgBitmap);
                     }
                 });
             }
