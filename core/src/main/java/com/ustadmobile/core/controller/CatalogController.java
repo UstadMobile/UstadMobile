@@ -1817,8 +1817,6 @@ public class CatalogController extends BaseCatalogController implements AppViewC
             }
 
         }
-
-        startMonitoringLocalAvailability();
     }
 
     protected void startMonitoringLocalAvailability() {

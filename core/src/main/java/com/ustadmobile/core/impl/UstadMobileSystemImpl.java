@@ -383,7 +383,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public synchronized void handleSave() {
         if(httpCacheDir != null) {
-            httpCacheDir.saveIndex();
+            httpCacheDir.saveIndexAsync();
         }
     }
 

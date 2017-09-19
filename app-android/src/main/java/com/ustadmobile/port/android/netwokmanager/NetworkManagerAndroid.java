@@ -744,6 +744,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
         networkService.unregisterReceiver(mWifiBroadcastReceiver);
         networkService.getApplication().unregisterActivityLifecycleCallbacks(this);
+
+        UstadMobileSystemImpl.getInstance().getHTTPCacheDir(getContext()).saveIndexAsync();
         super.onDestroy();
     }
 

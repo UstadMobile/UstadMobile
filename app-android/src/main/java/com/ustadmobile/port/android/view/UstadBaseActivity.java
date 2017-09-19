@@ -245,6 +245,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public void onStop() {
         isStarted = false;
         super.onStop();
+        UstadMobileSystemImpl.getInstance().handleSave();
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityStop(this);
     }
 

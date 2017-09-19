@@ -96,6 +96,8 @@ public class HTTPCacheDir {
     private int maxEntries;
 
     public static final String CACHE_PRIME_INDEX_RES = "cache/";
+
+    private Thread asyncSaveThread = null;
     
     /**
      * Starts a new HTTP cache directory in the directory given
@@ -353,6 +355,19 @@ public class HTTPCacheDir {
         
         return savedOK;
     }
+
+    public void saveIndexAsync(){
+        if(asyncSaveThread == null) {
+            asyncSaveThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    saveIndex();
+                    asyncSaveThread = null;
+                }
+            });
+            asyncSaveThread.start();
+        }
+    }
     
     
     private JSONArray getEntryByFilename(String filename) {
@@ -417,7 +432,9 @@ public class HTTPCacheDir {
         String dataURL = null;
         boolean noCache = false;
         boolean mustRevalidate = false;
-        
+
+        UstadMobileSystemImpl.l(UMLog.INFO, 383, "Cache GET " + url);
+
         if(url.startsWith("data:")) {
             dataURL = url;
             url = convertIfDataURL(url);
@@ -467,12 +484,18 @@ public class HTTPCacheDir {
                 if (timeNow < entryExpires && !mustRevalidate) {
                     //we can serve it direct from the cache - no validation needed
                     isValid = true;
+                    UstadMobileSystemImpl.l(UMLog.INFO, 385, "Cache HIT (no validation)" + url);
                     impl.l(UMLog.DEBUG, 606, url);
                 } else if(dataURL == null){
                     //needs to be validated
-                    
                     result = impl.makeRequest(url, headers, null, "HEAD");
                     isValid = validateCacheEntry(entry, result);
+                    if(isValid) {
+                        UstadMobileSystemImpl.l(UMLog.INFO, 385, "Cache HIT (validated)" + url);
+                        entry.put(IDX_EXPIRES, calculateExpiryTime(result.getResponseHeaders(),
+                                System.currentTimeMillis() + DEFAULT_EXPIRES));
+                    }
+
                     impl.l(UMLog.DEBUG, 607, url + ':' + isValid);
                 }
                 
@@ -490,6 +513,7 @@ public class HTTPCacheDir {
         try {
             if(dataURL == null) {
                 result = impl.makeRequest(url, headers, null);
+                UstadMobileSystemImpl.l(UMLog.INFO, 386, "Cache MISS " + url);
             }else {
                 result = new HTTPResult(dataURL);
             }
@@ -678,9 +702,11 @@ public class HTTPCacheDir {
      * 
      * 
      * @param headers Hashtable with ALL headers in lower case
+     * @param defaultVal Expiry value to use in case headers do not contain max-age or expires
+     *
      * @return 
      */
-    public static long calculateExpiryTime(Hashtable headers) {        
+    public static long calculateExpiryTime(Hashtable headers, long defaultVal) {
         if(headers.containsKey("cache-control")) {
             Hashtable ccParams = UMFileUtil.parseParams(
                 (String)headers.get("cache-control"), ',');
@@ -694,7 +720,11 @@ public class HTTPCacheDir {
             return parseHTTPDate((String)headers.get("expires"));
         }
         
-        return -1;
+        return defaultVal;
+    }
+
+    public static long calculateExpiryTime(Hashtable headers) {
+        return calculateExpiryTime(headers, -1);
     }
     
     /**
@@ -860,12 +890,8 @@ public class HTTPCacheDir {
 
 
         long currentTime = System.currentTimeMillis();
-        long expiresTime = calculateExpiryTime(result.getResponseHeaders());
-
-
-        if(expiresTime == -1) {
-            expiresTime = currentTime + DEFAULT_EXPIRES;
-        }
+        long expiresTime = calculateExpiryTime(result.getResponseHeaders(),
+                currentTime + DEFAULT_EXPIRES);
 
         try {
             JSONArray cacheEntry = new JSONArray();
