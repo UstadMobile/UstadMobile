@@ -75,6 +75,8 @@ public interface CatalogEntryView extends UstadView {
 
     void removeSeeAlsoItem(String[] itemLink);
 
+    void setSeeAlsoVisible(boolean visible);
+
     void clearSeeAlsoItems();
 
 }

@@ -166,6 +166,9 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         catalogEntryView.addSeeAlsoItem((String[])relatedLinks.elementAt(i),
                                 thumbnailUrl);
                     }
+
+                    if(relatedLinks.size() == 0)
+                        catalogEntryView.setSeeAlsoVisible(false);
                 }
 
                 Vector coverImages = entry.getLinks(UstadJSOPDSItem.LINK_COVER_IMAGE, null);

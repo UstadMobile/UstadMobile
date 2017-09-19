@@ -341,6 +341,11 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
+    public void setSeeAlsoVisible(boolean visible) {
+        findViewById(R.id.activity_catalog_entry_see_also_cardview).setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
     public void clearSeeAlsoItems() {
         seeAlsoItems.clear();
         seeAlsoViewAdapter.notifyDataSetChanged();

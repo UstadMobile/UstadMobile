@@ -78,6 +78,7 @@
         <activity
             android:name="com.ustadmobile.port.android.view.ContainerActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:screenOrientation="portrait"
             android:label="" />
 
         <activity android:name="com.ustadmobile.port.android.view.XapiPackageActivity"

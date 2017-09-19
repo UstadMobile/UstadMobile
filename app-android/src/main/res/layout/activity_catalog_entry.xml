@@ -244,6 +244,7 @@
             </android.support.v7.widget.CardView>
 
             <android.support.v7.widget.CardView
+                android:id="@+id/activity_catalog_entry_see_also_cardview"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 app:cardElevation="2dp"
                 android:layout_marginStart="@dimen/dimen_12dp"
