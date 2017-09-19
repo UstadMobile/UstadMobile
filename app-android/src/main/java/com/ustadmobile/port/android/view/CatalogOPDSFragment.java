@@ -94,6 +94,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private Map<String, OPDSEntryCard> idToCardMap;
 
+    private Map<String, String> idToThumbnailUrlMap;
+
     private Map<String, Integer> idToStatusMap = new Hashtable<>();
 
     private Map<String, Boolean> idToProgressVisibleMap = new Hashtable<>();
@@ -164,7 +166,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         mSelectedEntries = new UstadJSOPDSEntry[0];
         setHasOptionsMenu(true);
 
-        idToCardMap = new WeakHashMap<String, OPDSEntryCard>();
+        idToCardMap = new WeakHashMap<>();
+        idToThumbnailUrlMap = new HashMap<>();
 
         mFetchFlags = getArguments().getInt(CatalogController.KEY_FLAGS,
                 CatalogController.CACHE_ENABLED);
@@ -470,22 +473,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void setEntrythumbnail(final String entryId, String iconUrl) {
-        ImageLoader.getInstance().loadImage(iconUrl, new ImageLoader.ImageLoadTarget() {
-            @Override
-            public void setImageFromFile(String filePath) {
-                String fileUri = UMFileUtil.stripPrefixIfPresent("file://", filePath);
-                final Bitmap imgBitmap = BitmapFactory.decodeFile(fileUri);
-                //TODO: Check this as it occassionally causes a null pointer exception on set Thumbnail
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        OPDSEntryCard card = idToCardMap.get(entryId);
-                        if(card != null)
-                            card.setThumbnail(imgBitmap);
-                    }
-                });
-            }
-        }, mCatalogController);
+        idToThumbnailUrlMap.put(entryId, iconUrl);
+        OPDSEntryCard card = idToCardMap.get(entryId);
+        if(card != null)
+            card.setThumbnailUrl(iconUrl, mCatalogController, this);
     }
 
     @Override
@@ -745,6 +736,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                         iterator.remove();
                     }
                 }
+            }
+
+            if(idToThumbnailUrlMap.containsKey(entryId)) {
+                holder.mEntryCard.setThumbnailUrl(idToThumbnailUrlMap.get(entryId),
+                        mCatalogController, CatalogOPDSFragment.this);
             }
 
             idToCardMap.put(feed.entries[position].id, holder.mEntryCard);

@@ -26,7 +26,6 @@
         >
 
         <ImageView
-            android:src="@drawable/ic_book_black_48dp"
             android:layout_width="@dimen/dimen_70dp"
             android:layout_height="@dimen/dimen_70dp"
             android:layout_marginEnd="@dimen/dimen_4dp"

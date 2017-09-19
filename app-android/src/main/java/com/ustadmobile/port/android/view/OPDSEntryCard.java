@@ -51,10 +51,14 @@ import com.txusballesteros.widgets.FitChart;
 import com.txusballesteros.widgets.FitChartValue;
 import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.ImageLoader;
+import com.ustadmobile.core.view.UstadView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -187,6 +191,23 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     public void setThumbnail(Bitmap bitmap) {
         ((ImageView)findViewById(R.id.opds_item_thumbnail)).setImageBitmap(bitmap);
     }
+
+    public void setThumbnailUrl(final String url, final UstadBaseController controller, final UstadView view) {
+        ImageLoader.getInstance().loadImage(url, new ImageLoader.ImageLoadTarget() {
+            @Override
+            public void setImageFromFile(String filePath) {
+                String fileUri = UMFileUtil.stripPrefixIfPresent("file://", filePath);
+                final Bitmap imgBitmap = BitmapFactory.decodeFile(fileUri);
+                view.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setThumbnail(imgBitmap);
+                    }
+                });
+            }
+        }, controller);
+    }
+
 
     public void setProgress(CourseProgress progress) {
         LearnerProgressView progressViewHolder = (LearnerProgressView)findViewById(R.id.opds_item_learner_progress_holder);
