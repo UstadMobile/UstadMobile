@@ -144,7 +144,8 @@ task grantTestPermissionsLocalconfigDebug(type: Exec) {
 
 afterEvaluate {
     android.applicationVariants.all { variant ->
-        variant.javaCompiler.dependsOn(copyXmlLocaleFilesFromCore)
+        variant.javaCompiler.dependsOn(copyMainXmlLocaleFilesFromCore)
+        variant.javaCompiler.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
         variant.javaCompiler.dependsOn(copyCachePrimeMain)
@@ -243,13 +244,26 @@ task checkBuildConfig {
 }
 assemble.dependsOn(checkBuildConfig)
 
-task copyXmlLocaleFilesFromCore(type: Copy) {
-    inputs.files('../core/locale/main/values/strings_ui.xml')
+task copyMainXmlLocaleFilesFromCore(type: Copy) {
+    inputs.files(fileTree(dir: rootProject.file("core/locale")).matching { include '**/*.xml' })
+
     from ("../core/locale/main")
     exclude "**/*.properties"
     into "src/main/res"
 }
-assemble.dependsOn(copyXmlLocaleFilesFromCore)
+assemble.dependsOn(copyMainXmlLocaleFilesFromCore)
+
+task copyLocalconfigXmlLocaleFilesFromCore(type: Copy) {
+    inputs.files(fileTree(dir: rootProject.file("core/locale")).matching { include '**/*.xml' })
+
+    from ("../core/locale/localconfig")
+    exclude "**/*.properties"
+    into "src/localconfig/res"
+}
+assemble.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
+
+
+
 
 task copyCachePrimeMain(type: Copy) {
     outputs.upToDateWhen { false }
