@@ -20,6 +20,7 @@
         <uri>/user/6</uri>
     </author>
 
+    <!-- Module 1 : CV Writing -->
     <entry>
         <title>CV Writing</title>
         <dc:language>en</dc:language>
@@ -30,6 +31,9 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml" title="Cover Letter Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml" title="Job Search Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml" title="Job Interview Skills" />
 
         <link rel="http://opds-spec.org/acquisition"
             href="1-cvwriting-en.epub"
@@ -40,8 +44,8 @@
             href="cvwriting-thumb.png"/>
 
         <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
-	    type="image/png"
-            href="cvwriting-cover.png"/>
+	    type="image/jpg"
+            href="1-cvwriting-cover.jpg"/>
 
         <id>202b10fe-b028-4b84-9b84-852aa123456a</id>
         <updated>2015-02-09T18:58:12Z</updated>
@@ -62,6 +66,10 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml" title="نوشتن نامۀ درخواستی"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml" title="مهارت‌های جستجوی وظیفه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml" title="مهارت‌های مصاحبۀ کاری" />
+
         <link rel="http://opds-spec.org/acquisition"
             href="1-cvwriting-fa.epub"
             type="application/epub+zip"/>
@@ -71,8 +79,8 @@
             href="cvwriting-thumb.png"/>
 
         <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
-	    type="image/png"
-            href="cvwriting-cover.png"/>
+	    type="image/jpg"
+            href="1-cvwriting-cover.jpg"/>
 
         <id>202b10fe-b028-4b84-9b84-852aa123456b</id>
         <updated>2015-02-09T18:58:12Z</updated>
@@ -93,17 +101,21 @@
         <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
             hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml"/>
 
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml" title="د غوښتنلیک لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml" title="د دندې لټولو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml" title="د کاري مرکې مهارتونه" />
+
         <link rel="http://opds-spec.org/acquisition"
             href="1-cvwriting-ps.epub"
             type="application/epub+zip"/>
 
         <link rel="http://opds-spec.org/image/thumbnail"
 	    type="image/png"
-            href="cvwriting-thumb.png"/>
+            href="1-cvwriting-thumb.png"/>
 
         <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
-	    type="image/png"
-            href="cvwriting-cover.png"/>
+	    type="image/jpg"
+            href="1-cvwriting-cover.jpg"/>
 
         <id>202b10fe-b028-4b84-9b84-852aa123456c</id>
         <updated>2015-02-09T18:58:12Z</updated>
@@ -114,5 +126,902 @@
         <content type="text">زده کړئ چې څنګه مسلکي سي وي ولیکئ</content>
     </entry>
 
+    <!-- End module 1 -->
+
+    <!-- Module 2 : Cover Letter -->
+    <entry>
+        <title>Cover Letter Writing</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml" title="CV Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml" title="Job Search Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml" title="Job Interview Skills" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="2-coverletter-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="2-coverletter-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="2-coverletter-cover.jpg"/>
+
+        <id>eb0476a2-b8b1-43e3-bb85-f0e51e143afe</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how to write a professional cover letter</content>
+    </entry>
+
+    <entry>
+        <title>نوشتن نامۀ درخواستی</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml" title="نوشتن خلص سوانح"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml" title="مهارت‌های جستجوی وظیفه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml" title="مهارت‌های مصاحبۀ کاری" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="2-coverletter-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="2-coverletter-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="2-coverletter-cover.jpg"/>
+
+        <id>023970e2-2d4b-4fd5-9bbd-de373bb2aad6</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیماموزید که چگونه یک کورلتیر مسلکی نوشته کنید</content>
+    </entry>
+
+    <entry>
+        <title>د غوښتنلیک لیکل</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml" title="د سي وي لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml" title="د دندې لټولو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml" title="د کاري مرکې مهارتونه" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="2-coverletter-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="2-coverletter-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="2-coverletter-cover.jpg"/>
+
+        <id>6f747783-9ec3-4195-a3c7-3c417efaf8ea</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">زده کړئ چې یوه مسلکي غوښتنلیک څنګه ولیکئ</content>
+    </entry>
+
+    <!-- End Module 2 -->
+
+    <!-- Module 3: Job Search and Networking -->
+    <entry>
+        <title>Job Search Skills</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml" title="CV Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml" title="Cover Letter Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml" title="Job Interview Skills" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="3-jobsearch-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="3-jobsearch-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="3-jobsearch-cover.jpg"/>
+
+        <id>114f6e63-80f2-4d10-9a70-efa113eb9f65</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how to find and apply for a job</content>
+    </entry>
+
+
+    <entry>
+        <title>مهارت‌های جستجوی وظیفه</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml" title="نوشتن خلص سوانح"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml" title="نوشتن نامۀ درخواستی"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml" title="مهارت‌های مصاحبۀ کاری" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="3-jobsearch-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="3-jobsearch-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="3-jobsearch-cover.jpg"/>
+
+        <id>6c27c4c0-6fc7-4c89-b8f8-54cd270666e9</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیاموزید که چگونه وظیفه دریابید و به برایش درخواست دهید</content>
+    </entry>
+
+    <entry>
+        <title>د دندې لټولو مهارتونه</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml" title="د سي وي لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml" title="د غوښتنلیک لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml" title="د کاري مرکې مهارتونه" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="3-jobsearch-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="3-jobsearch-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="3-jobsearch-cover.jpg"/>
+
+        <id>16f526b1-90e4-4e3d-a0e9-05e73bba9953</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیاموزید که چگونه وظیفه دریابید و به برایش درخواست دهید</content>
+    </entry>
+    <!-- End Module 3 -->
+    
+    <!-- Module 4: Interview -->
+    <entry>
+        <title>Job Interview Skills</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/202b10fe-b028-4b84-9b84-852aa123456a.xml" title="CV Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/eb0476a2-b8b1-43e3-bb85-f0e51e143afe.xml" title="Cover Letter Writing"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/114f6e63-80f2-4d10-9a70-efa113eb9f65.xml" title="Job Search Skills"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="4-interview-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="4-interview-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="4-interview-cover.jpg"/>
+
+        <id>3ce0e992-050c-4fbf-90c9-4dcb2b82bc64</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how to succeed in a job interview</content>
+    </entry>
+
+
+    <entry>
+        <title>مهارت‌های مصاحبۀ کاری</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/202b10fe-b028-4b84-9b84-852aa123456b.xml" title="نوشتن خلص سوانح"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/023970e2-2d4b-4fd5-9bbd-de373bb2aad6.xml" title="نوشتن نامۀ درخواستی"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="fa" href="/opds/6c27c4c0-6fc7-4c89-b8f8-54cd270666e9.xml" title="مهارت‌های جستجوی وظیفه"/>
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="4-interview-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="4-interview-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="4-interview-cover.jpg"/>
+
+        <id>e95ec3d7-d56b-4541-8d45-4684dfdf64a6</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیاموزید که چگونه در مصاحبۀ کاری خوب بدرخشید</content>
+    </entry>
+
+    <entry>
+        <title>د کاري مرکې مهارتونه</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/3ce0e992-050c-4fbf-90c9-4dcb2b82bc64.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e95ec3d7-d56b-4541-8d45-4684dfdf64a6.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/31e04e55-e29d-422f-9e99-c3f2fd1f6f4a.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/202b10fe-b028-4b84-9b84-852aa123456c.xml" title="د سي وي لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/6f747783-9ec3-4195-a3c7-3c417efaf8ea.xml" title="د غوښتنلیک لیکل"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="ps" href="/opds/16f526b1-90e4-4e3d-a0e9-05e73bba9953.xml" title="د دندې لټولو مهارتونه"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="4-interview-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="4-interview-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="4-interview-cover.jpg"/>
+
+        <id>31e04e55-e29d-422f-9e99-c3f2fd1f6f4a</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">زده کړئ چې څنګه په کاري مرکې کې ښه ورځلېږئ</content>
+    </entry>
+
+    <!-- Module 5: Communications -->
+    <entry>
+        <title>Communication Skills</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/66635af1-323c-4e29-aa2d-a5386653a285.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/fb89af83-d092-4d2b-8ca8-9ec3810e0ddd.xml"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="5-communication-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="5-communication-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="5-communication-cover.jpg"/>
+
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/6226481e-47ae-4d03-acf2-010c53ce1ab1.xml" title="Workplace Values and Ethics"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7ef939f2-f749-41d1-9365-2d0af6a82cd9.xml" title="Time Management" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7efd121a-127a-4d62-81c8-017033ad0f64.xml" title="Report Writing" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3e005d9e-aeaa-4909-bbb0-2ab92620c9e7.xml" title="Entrepreneurship" />
+        
+
+
+        <id>66635af1-323c-4e29-aa2d-a5386653a285</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how to communicate in a professional setting
+</content>
+    </entry>
+
+
+    <entry>
+        <title>مهارت‌های ارتباطات</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/66635af1-323c-4e29-aa2d-a5386653a285.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/fb89af83-d092-4d2b-8ca8-9ec3810e0ddd.xml"/>
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="5-communication-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="5-communication-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="5-communication-cover.jpg"/>
+
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e91c86d9-52f9-4406-920e-d905dde35867.xml" title="ارزش‌ها و اخلاقیات محل کار"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7.xml" title="مدریت زمان" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/bdd6c00b-a8f4-42c2-bd59-aab2b09b4855.xml" title="نوشتن گزارش" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e55a877d-deeb-4eb3-b5a5-2966f954d063.xml" title="تشبث" />
+
+
+        <id>1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیاموزید که چگونه در یک محیط مسلکی ارتباطات برقرار کنید</content>
+    </entry>
+
+    <entry>
+        <title>د اړیکو مهارتونه</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/66635af1-323c-4e29-aa2d-a5386653a285.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/fb89af83-d092-4d2b-8ca8-9ec3810e0ddd.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/544efc64-a39d-4945-a3b7-6a322982082d.xml" title="د کارځای ارزښتونه او اخلاقیات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/4c869131-02c4-4b5e-ad3a-d2287fec356c.xml" title="وخت مدریت" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/9ea8a88a-5c87-48b4-b985-ddaa8d2296e7.xml" title="د راپور لیکل" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/d01cce1c-e26e-4162-8670-0b9c7002a197.xml" title="تشبث" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="5-communication-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="5-communication-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="5-communication-cover.jpg"/>
+
+        
+
+
+        <id>fb89af83-d092-4d2b-8ca8-9ec3810e0ddd</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">زده کړئ چې په یوه مسلکي چاپېریال کې څنګه اړیکې ټینګې کړئ</content>
+    </entry>
+
+    <!-- 6 Business Ethics -->
+
+    <entry>
+        <title>Workplace Values and Ethics</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/6226481e-47ae-4d03-acf2-010c53ce1ab1.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e91c86d9-52f9-4406-920e-d905dde35867.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/544efc64-a39d-4945-a3b7-6a322982082d.xml"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="6-ethics-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="6-ethics-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="6-ethics-cover.jpg"/>
+
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/66635af1-323c-4e29-aa2d-a5386653a285.xml" title="Communication Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7ef939f2-f749-41d1-9365-2d0af6a82cd9.xml" title="Time Management" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7efd121a-127a-4d62-81c8-017033ad0f64.xml" title="Report Writing" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3e005d9e-aeaa-4909-bbb0-2ab92620c9e7.xml" title="Entrepreneurship" />
+
+        <id>6226481e-47ae-4d03-acf2-010c53ce1ab1</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how workplace values and ethics can help your career</content>
+    </entry>
+
+
+    <entry>
+        <title>ارزش‌ها و اخلاقیات محل کار</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/6226481e-47ae-4d03-acf2-010c53ce1ab1.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e91c86d9-52f9-4406-920e-d905dde35867.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/544efc64-a39d-4945-a3b7-6a322982082d.xml"/>
+
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97.xml" title="مهارت‌های ارتباطات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7.xml" title="مدریت زمان" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/bdd6c00b-a8f4-42c2-bd59-aab2b09b4855.xml" title="نوشتن گزارش" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e55a877d-deeb-4eb3-b5a5-2966f954d063.xml" title="تشبث" />
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="6-ethics-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="6-ethics-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="6-ethics-cover.jpg"/>
+
+        <id>e91c86d9-52f9-4406-920e-d905dde35867</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیاموزید که ارزش‌ها و اخلاقیات محل کار چگونه با مسلک شما کمک کرده میتواند</content>
+    </entry>
+
+    <entry>
+        <title>د کارځای ارزښتونه او اخلاقیات</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/6226481e-47ae-4d03-acf2-010c53ce1ab1.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e91c86d9-52f9-4406-920e-d905dde35867.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/544efc64-a39d-4945-a3b7-6a322982082d.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/89af83-d092-4d2b-8ca8-9ec3810e0ddd.xml" title="د اړیکو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/4c869131-02c4-4b5e-ad3a-d2287fec356c.xml" title="وخت مدریت" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/9ea8a88a-5c87-48b4-b985-ddaa8d2296e7.xml" title="د راپور لیکل" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/d01cce1c-e26e-4162-8670-0b9c7002a197.xml" title="تشبث" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="6-ethics-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="6-ethics-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="6-ethics-cover.jpg"/>
+
+        <id>544efc64-a39d-4945-a3b7-6a322982082d</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">زده کړئ چې د کارځای ارزښتونه او اخلاقیات د تاسو له مسلک څنګه مرسته کولای شي</content>
+    </entry>
+
+
+    <!-- 7 Time Management -->
+
+    <entry>
+        <title>Time Management</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/7ef939f2-f749-41d1-9365-2d0af6a82cd9.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/4c869131-02c4-4b5e-ad3a-d2287fec356c.xml"/>
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="7-timemanagement-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="7-timemanagement-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="7-timemanagement-cover.jpg"/>
+   
+         <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/66635af1-323c-4e29-aa2d-a5386653a285.xml" title="Communication Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/6226481e-47ae-4d03-acf2-010c53ce1ab1.xml" title="Workplace Values and Ethics"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7efd121a-127a-4d62-81c8-017033ad0f64.xml" title="Report Writing" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3e005d9e-aeaa-4909-bbb0-2ab92620c9e7.xml" title="Entrepreneurship" />
+
+        <id>7ef939f2-f749-41d1-9365-2d0af6a82cd9</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how to organize your work and meet deadlines</content>
+    </entry>
+
+
+    <entry>
+        <title>مدریت زمان</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/7ef939f2-f749-41d1-9365-2d0af6a82cd9.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/4c869131-02c4-4b5e-ad3a-d2287fec356c.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97.xml" title="مهارت‌های ارتباطات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e91c86d9-52f9-4406-920e-d905dde35867.xml" title="ارزش‌ها و اخلاقیات محل کار"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/bdd6c00b-a8f4-42c2-bd59-aab2b09b4855.xml" title="نوشتن گزارش" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e55a877d-deeb-4eb3-b5a5-2966f954d063.xml" title="تشبث" />
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="7-timemanagement-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="7-timemanagement-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="7-timemanagement-cover.jpg"/>
+
+        <id>613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیاموزید که چگونه کار خود را تنظیم کنید و پابند ضرب العجل باشید</content>
+    </entry>
+
+    <entry>
+        <title>د وخت مدریت</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/7ef939f2-f749-41d1-9365-2d0af6a82cd9.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/4c869131-02c4-4b5e-ad3a-d2287fec356c.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/89af83-d092-4d2b-8ca8-9ec3810e0ddd.xml" title="د اړیکو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/544efc64-a39d-4945-a3b7-6a322982082d.xml" title="د کارځای ارزښتونه او اخلاقیات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/9ea8a88a-5c87-48b4-b985-ddaa8d2296e7.xml" title="د راپور لیکل" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/d01cce1c-e26e-4162-8670-0b9c7002a197.xml" title="تشبث" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="7-timemanagement-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="7-timemanagement-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="7-timemanagement-cover.jpg"/>
+
+        <id>4c869131-02c4-4b5e-ad3a-d2287fec356c</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">زده کړئ چې خپل کار څنګه سمبال کړئ او کارونه په ټاکلي وخت ترسره کړئ</content>
+    </entry>
+
+    <!-- 8 Report Writing-->
+
+    <entry>
+        <title>Report Writing</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/7efd121a-127a-4d62-81c8-017033ad0f64.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/bdd6c00b-a8f4-42c2-bd59-aab2b09b4855.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/9ea8a88a-5c87-48b4-b985-ddaa8d2296e7.xml"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="8-reportwriting-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="8-reportwriting-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="8-reportwriting-cover.jpg"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/66635af1-323c-4e29-aa2d-a5386653a285.xml" title="Communication Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/6226481e-47ae-4d03-acf2-010c53ce1ab1.xml" title="Workplace Values and Ethics"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7ef939f2-f749-41d1-9365-2d0af6a82cd9.xml" title="Time Management" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/3e005d9e-aeaa-4909-bbb0-2ab92620c9e7.xml" title="Entrepreneurship" />
+
+        <id>7efd121a-127a-4d62-81c8-017033ad0f64</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how to write a professional report</content>
+    </entry>
+
+
+    <entry>
+        <title>نوشتن گزارش</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/7efd121a-127a-4d62-81c8-017033ad0f64.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/bdd6c00b-a8f4-42c2-bd59-aab2b09b4855.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/9ea8a88a-5c87-48b4-b985-ddaa8d2296e7.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97.xml" title="مهارت‌های ارتباطات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e91c86d9-52f9-4406-920e-d905dde35867.xml" title="ارزش‌ها و اخلاقیات محل کار"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7.xml" title="مدریت زمان" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e55a877d-deeb-4eb3-b5a5-2966f954d063.xml" title="تشبث" />
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="8-reportwriting-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="8-reportwriting-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="8-reportwriting-cover.jpg"/>
+
+        <id>bdd6c00b-a8f4-42c2-bd59-aab2b09b4855</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیماموزید که چگونه یک گزارش مسلکی بنوسید</content>
+    </entry>
+
+    <entry>
+        <title>د راپور لیکل</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/7efd121a-127a-4d62-81c8-017033ad0f64.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/bdd6c00b-a8f4-42c2-bd59-aab2b09b4855.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/9ea8a88a-5c87-48b4-b985-ddaa8d2296e7.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/89af83-d092-4d2b-8ca8-9ec3810e0ddd.xml" title="د اړیکو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/544efc64-a39d-4945-a3b7-6a322982082d.xml" title="د کارځای ارزښتونه او اخلاقیات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/4c869131-02c4-4b5e-ad3a-d2287fec356c.xml" title="وخت مدریت" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/d01cce1c-e26e-4162-8670-0b9c7002a197.xml" title="تشبث" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="8-reportwriting-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="8-reportwriting-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="8-reportwriting-cover.jpg"/>
+
+        <id>9ea8a88a-5c87-48b4-b985-ddaa8d2296e7</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">زده کړئ چې یو مسلکي راپور څنګه ولیکئ</content>
+    </entry>
+
+    <!-- 9 - entrepreneurship -->
+
+    <entry>
+        <title>Entrepreneurship</title>
+        <dc:language>en</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/3e005d9e-aeaa-4909-bbb0-2ab92620c9e7.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e55a877d-deeb-4eb3-b5a5-2966f954d063.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/d01cce1c-e26e-4162-8670-0b9c7002a197.xml"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="9-entrepreneurship-en.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="9-entrepreneurship-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="9-entrepreneurship-cover.jpg"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/66635af1-323c-4e29-aa2d-a5386653a285.xml" title="Communication Skills"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/6226481e-47ae-4d03-acf2-010c53ce1ab1.xml" title="Workplace Values and Ethics"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7ef939f2-f749-41d1-9365-2d0af6a82cd9.xml" title="Time Management" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/7efd121a-127a-4d62-81c8-017033ad0f64.xml" title="Report Writing" />
+
+        <id>3e005d9e-aeaa-4909-bbb0-2ab92620c9e7</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Learn how to start, run and grow your own business</content>
+    </entry>
+
+
+    <entry>
+        <title>تشبث</title>
+        <dc:language>fa</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/3e005d9e-aeaa-4909-bbb0-2ab92620c9e7.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e55a877d-deeb-4eb3-b5a5-2966f954d063.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/d01cce1c-e26e-4162-8670-0b9c7002a197.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97.xml" title="مهارت‌های ارتباطات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/e91c86d9-52f9-4406-920e-d905dde35867.xml" title="ارزش‌ها و اخلاقیات محل کار"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7.xml" title="مدریت زمان" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/bdd6c00b-a8f4-42c2-bd59-aab2b09b4855.xml" title="نوشتن گزارش" />
+
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="9-entrepreneurship-fa.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="9-entrepreneurship-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="9-entrepreneurship-cover.jpg"/>
+
+        <id>e55a877d-deeb-4eb3-b5a5-2966f954d063</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">بیاموزید که چگونه کسب و کار خود را آغاز و مدریت کنید و گسترش دهید</content>
+    </entry>
+
+    <entry>
+        <title>تشبث</title>
+        <dc:language>ps</dc:language>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="en" href="/opds/3e005d9e-aeaa-4909-bbb0-2ab92620c9e7.xml"/>              
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="fa" href="/opds/e55a877d-deeb-4eb3-b5a5-2966f954d063.xml"/>
+        <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog"
+            hreflang="ps" href="/opds/d01cce1c-e26e-4162-8670-0b9c7002a197.xml"/>
+
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/89af83-d092-4d2b-8ca8-9ec3810e0ddd.xml" title="د اړیکو مهارتونه"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/544efc64-a39d-4945-a3b7-6a322982082d.xml" title="د کارځای ارزښتونه او اخلاقیات"/>
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/4c869131-02c4-4b5e-ad3a-d2287fec356c.xml" title="وخت مدریت" />
+        <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" hreflang="en" href="/opds/9ea8a88a-5c87-48b4-b985-ddaa8d2296e7.xml" title="د راپور لیکل" />
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="9-entrepreneurship-ps.epub"
+            type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/image/thumbnail"
+	    type="image/png"
+            href="9-entrepreneurship-thumb.png"/>
+
+        <link rel="http://www.ustadmobile.com/ns/opds/cover-image"
+	    type="image/jpg"
+            href="9-entrepreneurship-cover.jpg"/>
+
+        <id>d01cce1c-e26e-4162-8670-0b9c7002a197</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">زده کړئ چې څپل کاروبار څنګه پيل او مدریت کړئ اوورته پراختیا ورکړئ</content>
+    </entry>
 
 </feed>
