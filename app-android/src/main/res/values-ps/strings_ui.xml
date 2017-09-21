@@ -151,6 +151,7 @@
     <string name="field_gender" value="983">جنسیت</string>
     <string name="field_phonenumber" value="984">د ټیلیفون شمیره</string>
     <string name="field_faculty" value="985">د پوهنځي نوم</string>
+    <string name="field_academic_year" value="991">د فراغت کال</string>
 
 
     <string name='login_successful'>بریالی ننوتل</string>

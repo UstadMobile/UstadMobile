@@ -168,7 +168,7 @@
     <string name="field_tazkira_id" value="988">Tazkira Number</string>
     <string name="field_relationship" value="989">Relationship</string>
     <string name="field_department" value="990">Department</string>
-    <string name="field_academic_year" value="991">Academic Year</string>
+    <string name="field_academic_year" value="991">Year of graduation</string>
     <string name="field_gpa" value="992">GPA in %</string>
     <string name="field_would_work" value="993">Would you like to work?</string>
     <string name="field_would_work_elaborate" value="994">Why do you want or dont want to work?</string>
