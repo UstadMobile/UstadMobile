@@ -47,21 +47,31 @@ public class RegistrationPresenter extends UstadBaseController {
     private DialogResultListener resultListener;
 
     public Map<Integer, Integer> extraFieldsMap;
-    public Map<Integer, String[]> extraFieldsOptions;
+    public Map<Integer, int[]> extraFieldsOptions;
 
-    //TODO: Remove. Instead get it from properties
-    String[] universities = {"Kabul University", "Kabul Polytechnic University",
-            "Kabul Education University", "Other", "I don't know"};
-    String[] gender = {"Female", "Male"};
-    String[] faculty = {};
-    String[] relationship={"Single", "Married"};
-    String[] academic_year={};
-    String[] english_proficiency = {"Fluent", "Good", "Fair", "Poor"};
-    String[] yes_no_choices = {"Yes", "No"};
-    String[] job_type = {"Short-term", "Long-term", "Part-time", "Full-time"};
+    UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+    int[] faculty, relationship, english_proficiency, yes_no_choices, job_type, gender, universities;
+
 
     //TODO: Remove. Instead get it from properties
     public void setExtraFields(){
+
+        universities = new int[]{MessageID.options_uni_kabul_uni,
+                MessageID.options_uni_kabul_polytechnic_uni,
+                MessageID.options_uni_kabul_education_uni,
+                MessageID.options_uni_other, MessageID.options_uni_i_dont_know};
+        gender = new int[]{MessageID.options_gender_female, MessageID.options_gender_male};
+        faculty = new int[]{};
+        relationship = new int[]{MessageID.options_relationship_single,
+                MessageID.options_relationship_married};
+        english_proficiency = new int[]{MessageID.options_english_fluent,
+                MessageID.options_english_good, MessageID.options_english_fair,
+                MessageID.options_english_poor};
+        yes_no_choices = new int[]{MessageID.options_yes, MessageID.options_no};
+        job_type = new int[]{MessageID.options_job_short, MessageID.options_job_long,
+                MessageID.options_job_part, MessageID.options_job_full};
+
         extraFieldsMap = new HashMap<>();
         extraFieldsMap.put(MessageID.field_university, TYPE_AUTOCOMPETE_TEXT_VIEW);
         extraFieldsMap.put(MessageID.field_fullname, TYPE_CLASS_TEXT);
@@ -115,11 +125,18 @@ public class RegistrationPresenter extends UstadBaseController {
         for (Map.Entry<Integer, Integer> entry : extraFieldsMap.entrySet()) {
             int name = entry.getKey();
             int type = entry.getValue();
-            String[] options = null;
+            int[] options = null;
+            String[] stringOptions = null;
             if(extraFieldsOptions.containsKey(name)) {
                 options = extraFieldsOptions.get(name);
             }
-            view.addField(name, type, options);
+            if(options != null) {
+                stringOptions = new String[options.length];
+                for (int i = 0; i < stringOptions.length; i++) {
+                    stringOptions[i] = impl.getString(options[i], context);
+                }
+            }
+            view.addField(name, type, stringOptions);
         }
     }
 
