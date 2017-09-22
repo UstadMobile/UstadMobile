@@ -190,5 +190,6 @@
     <string name="accept">Accept</string>
     <string name="decline">Decline</string>
     <string name="send_in_zip_file">Send in zip file</string>
+    <string name="kilobytes_per_second_abbreviated">KB/s</string>
 
 </resources>

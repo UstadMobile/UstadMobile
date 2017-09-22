@@ -191,6 +191,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 currentEntryStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
                 currentEntryStatus.setTotalSize(httpDownload.getTotalSize());
                 currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_RUNNING);
+                currentEntryStatus.setCurrentSpeed(httpDownload.getCurrentDownloadSpeed());
 
                 networkManager.fireAcquisitionProgressUpdate(
                         getFeed().entries[currentEntryIdIndex].id, AcquisitionTask.this);
@@ -219,6 +220,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         long totalSize;
 
         int status;
+
+        long currentSpeed;
+
         public Status() {
 
         }
@@ -271,6 +275,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
          */
         protected synchronized void setStatus(int status) {
             this.status = status;
+        }
+
+        public long getCurrentSpeed() {
+            return currentSpeed;
+        }
+
+        protected void setCurrentSpeed(long currentSpeed) {
+            this.currentSpeed = currentSpeed;
         }
     }
 

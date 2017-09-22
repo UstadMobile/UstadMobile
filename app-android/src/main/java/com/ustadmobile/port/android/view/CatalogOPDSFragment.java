@@ -519,12 +519,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void updateDownloadEntryProgress(final String entryId, final int loaded, final int total) {
+    public void updateDownloadEntryProgress(final String entryId, final float progress, final String statusText) {
         super.runOnUiThread(new Runnable() {
             public void run() {
-                int progressPercent = Math.round(((float)loaded/(float)total) * OPDSEntryCard.PROGRESS_ENTRY_MAX);
-                if(idToCardMap.containsKey(entryId)) {
-                    idToCardMap.get(entryId).setDownloadProgressBarProgress(progressPercent);
+                OPDSEntryCard card = idToCardMap.get(entryId);
+                if(card != null) {
+                    card.setDownloadProgressBarProgress(progress);
+                    card.setDownloadProgressStatusText(statusText);
                 }
             }
         });

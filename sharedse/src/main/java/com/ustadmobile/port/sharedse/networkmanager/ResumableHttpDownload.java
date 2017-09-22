@@ -11,7 +11,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
+import java.util.Vector;
 
 /**
  * <h1>ResumableHttpDownload</h1>
@@ -76,6 +80,16 @@ public class ResumableHttpDownload {
     private static final int HTTP_CONNECT_TIMEOUT = 10000;
 
     private boolean keepAliveEnabled = true;
+
+    //map of time (ms) to totalBytesDownloaded at that time to allow calculation of moving average of download speed
+    private TreeMap<Long, Long> downloadProgressHistory = new TreeMap<>();
+
+    private volatile long progressHistoryLastRecorded;
+
+    private int progressHistoryInterval = 1000;
+
+    private int progressHistoryStackSize = 5;
+
 
     public ResumableHttpDownload(String httpSrc, String destinationFile){
         this.httpSrc = httpSrc;
@@ -200,16 +214,34 @@ public class ResumableHttpDownload {
             fileOut = new BufferedOutputStream(new FileOutputStream(dlPartFile, appendToPartFileOutput));
             synchronized (this) {
                 downloadedSoFar = appendToPartFileOutput ? dlPartFileSize : 0L;
+                progressHistoryLastRecorded = System.currentTimeMillis();
+            }
+
+            synchronized (downloadProgressHistory){
+                downloadProgressHistory.put(progressHistoryLastRecorded, downloadedSoFar);
             }
 
             byte[] buf = new byte[bufferSize];
             int bytesRead;
             httpIn = con.getInputStream();
 
+            long currentTime;
             while(!isStopped() && (bytesRead = httpIn.read(buf)) != -1) {
                 fileOut.write(buf, 0, bytesRead);
+                currentTime = System.currentTimeMillis();
                 synchronized (this) {
                     downloadedSoFar += bytesRead;
+                }
+
+                synchronized (downloadProgressHistory){
+                    if((System.currentTimeMillis() - progressHistoryLastRecorded)
+                            > progressHistoryInterval) {
+                        downloadProgressHistory.put(currentTime, downloadedSoFar);
+                        progressHistoryLastRecorded = currentTime;
+
+                        if(downloadProgressHistory.size() > progressHistoryStackSize)
+                            downloadProgressHistory.remove(downloadProgressHistory.firstKey());
+                    }
                 }
             }
             fileOut.flush();
@@ -254,6 +286,73 @@ public class ResumableHttpDownload {
      */
     public long getDownloadedSoFar() {
         return downloadedSoFar;
+    }
+
+    /**
+     * Calculate the download speed in bytes per second.
+     *
+     * @return The current download speed in btyes per second
+     */
+    public long getCurrentDownloadSpeed() {
+        Map.Entry<Long, Long> firstEntry;
+        Map.Entry<Long, Long> lastEntry;
+
+        synchronized (downloadProgressHistory) {
+            if(downloadProgressHistory.size() < 2)
+                return 0;
+
+            firstEntry = downloadProgressHistory.firstEntry();
+            lastEntry = downloadProgressHistory.lastEntry();
+        }
+
+        //divide delta in byte download by delta time (ms), multiply by 1000 to get speed in bytes per second
+        return  ((lastEntry.getValue() - firstEntry.getValue())
+                    / (lastEntry.getKey() - firstEntry.getKey())) * 1000;
+    }
+
+
+    /**
+     * The minimum amount of time (in ms) after which the progress of a download will be checked and
+     * recorded, for use calculating the speed. This is checked during download after filling the
+     * buffer. 1000ms by default.
+     *
+     * @return Interval period for measurement of download progress (in ms)
+     */
+    public int getProgressHistoryInterval() {
+        return progressHistoryInterval;
+    }
+
+    /**
+     * Setter for progressHistoryInterval
+     *
+     * @see #getProgressHistoryInterval()
+     *
+     * @param progressHistoryInterval Interval period for measurement of download progress (in ms)
+     */
+    public void setProgressHistoryInterval(int progressHistoryInterval) {
+        this.progressHistoryInterval = progressHistoryInterval;
+    }
+
+    /**
+     * Calculate the download speed for presentation to the user we use a moving average. This
+     * is a First In First Out stack. Essentially the download speed returns the average download
+     * speed over (stackSize x historyInterval) ms.
+     *
+     * @return The stack size for the download progress history tracking. Default 5
+     */
+    public int getProgressHistoryStackSize() {
+        return progressHistoryStackSize;
+    }
+
+    /**
+     * Setter for progressHistoryStackSize
+     *
+     * @see #getProgressHistoryStackSize()
+     *
+     * @param progressHistoryStackSize The stack size for the download progress history tracking.
+     */
+    public void setProgressHistoryStackSize(int progressHistoryStackSize) {
+        this.progressHistoryStackSize = progressHistoryStackSize;
     }
 
     /**

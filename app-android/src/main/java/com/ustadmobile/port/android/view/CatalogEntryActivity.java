@@ -66,6 +66,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private HashMap<View, Integer> seeAlsoViewToIndexMap = new HashMap<>();
 
+    private DownloadProgressView mDownloadProgressView;
+
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_OPEN, R.id.activity_catalog_entry_open_button);
@@ -155,6 +157,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         iconLoadTarget = new ImageViewLoadTarget(this,
                 (ImageView)findViewById(R.id.activity_catalog_entry_icon_img));
 
+        mDownloadProgressView = findViewById(R.id.activity_catalog_entry_download_progress);
+
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mPresenter = new CatalogEntryPresenter(this, this, args);
         mPresenter.onCreate();
@@ -239,24 +243,15 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setProgress(float progress) {
-        final ProgressBar progressBar = (ProgressBar)findViewById(R.id.activity_catalog_entry_progress_bar);
-        if(progress == -1) {
-            progressBar.setIndeterminate(true);
-        }else {
-            progressBar.setIndeterminate(false);
-            final int progressSize = Math.round(progress * 100);
-            progressBar.setProgress(progressSize);
-        }
-
+        mDownloadProgressView.setProgress(progress);
     }
 
     @Override
     public void setProgressStatusText(final String progressStatusText) {
-        final TextView statusView = (TextView)findViewById(R.id.activity_catalog_entry_progress_status_text);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                statusView.setText(progressStatusText);
+                mDownloadProgressView.setStatusText(progressStatusText);
             }
         });
     }
@@ -284,8 +279,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setProgressVisible(boolean visible) {
-        findViewById(R.id.activity_catalog_entry_download_status_layout).setVisibility(
-                visible? View.VISIBLE : View.GONE);
+        mDownloadProgressView.setVisibility(visible? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -342,7 +336,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setSeeAlsoVisible(boolean visible) {
-        findViewById(R.id.activity_catalog_entry_see_also_cardview).setVisibility(visible ? View.VISIBLE : View.GONE);
+        findViewById(R.id.activity_catalog_entry_see_also_cardview).setVisibility(visible
+                ? View.VISIBLE : View.GONE);
     }
 
     @Override

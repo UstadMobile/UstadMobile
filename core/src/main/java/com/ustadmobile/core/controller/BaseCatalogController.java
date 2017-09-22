@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -14,7 +14,6 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
-import com.ustadmobile.core.view.ContainerView;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -328,6 +327,26 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
         info.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
         CatalogController.setEntryInfo(entryID, info, entryAcquireResMode, getContext());
+    }
+
+    /**
+     * Make a message to dislpay to the user on the status of the download
+     *
+     * @param status The acquisitiontaskstatus object
+     *
+     * @return Formatted string to show user e.g. Downloading: XXXX KB/s
+     */
+    protected String formatDownloadStatusText(AcquisitionTaskStatus status) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        switch(status.getStatus()) {
+            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                int kbpsSpeed = Math.round((float)status.getCurrentSpeed() / 1000f);
+                return impl.getString(MessageID.downloading, getContext()) + ":"
+                        + impl.formatInteger(kbpsSpeed) + " "
+                        + impl.getString(MessageID.kilobytes_per_second_abbreviated, getContext());
+            default:
+                return "";
+        }
     }
 
 

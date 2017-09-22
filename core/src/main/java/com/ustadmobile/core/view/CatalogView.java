@@ -126,10 +126,10 @@ public interface CatalogView extends UstadView{
      * Update the progress bar showing the progress on a given download entry
      * 
      * @param entryId The entry id to be updated
-     * @param loaded the amount loaded 
-     * @param total total amount to load (or -1 if not yet known)
+     * @param progress The progress as a float between 0 and 1
+     * @param statusText The status text to display to the user
      */
-    public void updateDownloadEntryProgress(String entryId, int loaded, int total);
+    void updateDownloadEntryProgress(String entryId, float progress, String statusText);
 
     /**
      * Show the user's progress on this course (displayed to the right of the entry as a donut

@@ -55,6 +55,7 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -659,4 +660,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         }
     }
 
+    @Override
+    public String formatInteger(int integer) {
+        return NumberFormat.getIntegerInstance().format(integer);
+    }
 }

@@ -26,4 +26,11 @@ public interface AcquisitionTaskStatus {
      * @return the status of the acquisition as per UstadMobileSystemImpl.DLSTATUS_ flags
      */
     int getStatus();
+
+    /**
+     * Gets the current download speed, kept as a moving average, in bytes per second
+     *
+     * @return Current download speed in bytes per second
+     */
+    long getCurrentSpeed();
 }

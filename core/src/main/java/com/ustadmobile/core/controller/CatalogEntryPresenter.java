@@ -417,10 +417,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         catalogEntryView.setProgress(-1);
                     }else {
                         float completed = (float) status.getDownloadedSoFar() / (float) status.getTotalSize();
-                        String statusText = impl.getString(MessageID.downloading, getContext())
-                                + ": " + Math.round(completed * 100) + "%";
                         catalogEntryView.setProgress(completed);
-                        catalogEntryView.setProgressStatusText(statusText);
+                        catalogEntryView.setProgressStatusText(formatDownloadStatusText(status));
                     }
                 }
             });

@@ -1112,6 +1112,16 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract Class[] getSupportedContentTypePlugins();
 
+    /**
+     * Format the given integer to use , seperators as per the locale in use
+     *
+     * @param integer
+     *
+     * @return
+     */
+    public abstract String formatInteger(int integer);
+
+
 }
 
 

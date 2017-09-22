@@ -68,19 +68,17 @@
             android:layout_toStartOf="@+id/opds_item_learner_progress_holder"
             android:layout_toLeftOf="@+id/opds_item_learner_progress_holder"/>
 
-        <ProgressBar
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="wrap_content"
+        <com.ustadmobile.port.android.view.DownloadProgressView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/opds_item_progressbar"
+            android:id="@+id/opds_item_download_progress_view"
             android:layout_below="@+id/opds_item_detail_text"
             android:layout_toRightOf="@+id/opds_item_thumbnail"
             android:layout_toEndOf="@+id/opds_item_thumbnail"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:max="100"
-            android:progress="0"
-            android:visibility="invisible" />
+            android:visibility="invisible">
+        </com.ustadmobile.port.android.view.DownloadProgressView>
 
         <com.ustadmobile.port.android.view.LearnerProgressView
             android:id="@+id/opds_item_learner_progress_holder"

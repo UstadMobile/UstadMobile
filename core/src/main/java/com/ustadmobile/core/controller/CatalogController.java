@@ -2154,7 +2154,8 @@ public class CatalogController extends BaseCatalogController implements AppViewC
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
         UstadJSOPDSEntry entry=  model.opdsFeed.getEntryById(entryId);
         if(entry != null && view != null) {
-            view.updateDownloadEntryProgress(entryId, (int)status.getDownloadedSoFar(), (int)status.getTotalSize());
+            float progress = (float)((double)status.getDownloadedSoFar() / (double)status.getTotalSize());
+            view.updateDownloadEntryProgress(entryId, progress, formatDownloadStatusText(status));
         }
 
     }
