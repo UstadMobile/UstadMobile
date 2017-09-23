@@ -1,2 +1,2 @@
-include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests'
+include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests', ':sharedse-utils'
 include ':app-j2me'

@@ -37,11 +37,8 @@ import com.ustadmobile.core.util.UMUtil;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Vector;
 
-import org.kxml2.io.KXmlSerializer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -460,11 +457,12 @@ public abstract class UstadJSOPDSItem {
         serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_SUMMARY], summary);
 
 
-        serializeStringToTag(xs, UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_CONTENT], content);
         if(content != null) {
-            if(getContentType().equals(CONTENT_TYPE_TEXT)) {
-                xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_CONTENT])
-                        .attribute(null, ATTR_NAMES[ATTR_TYPE], getContentType());
+            if(getContentType() == null || getContentType().equals(CONTENT_TYPE_TEXT)) {
+                xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_CONTENT]);
+                if(getContentType() != null)
+                    xs.attribute(null, ATTR_NAMES[ATTR_TYPE], getContentType());
+
                 xs.text(content);
                 xs.endTag(NS_ATOM, ATTR_NAMES[ATTR_CONTENT]);
             }else {
@@ -590,14 +588,10 @@ public abstract class UstadJSOPDSItem {
                     contentType = xpp.getAttributeValue(null, ATTR_NAMES[ATTR_TYPE]);
                     if(contentType != null && contentType.equals(CONTENT_TYPE_XHTML)) {
                         this.content = UMUtil.passXmlThroughToString(xpp, ATTR_NAMES[ATTR_CONTENT]);
-                        //int openContentTagStart = content.indexOf("<content");
-                        //int openContentTagEnd = content.indexOf('>', openContentTagStart+1);
-                        //int closeContentTagStart = content.lastIndexOf("</content");
-                        //this.content = this.content.substring(openContentTagEnd+1, closeContentTagStart);
                     }else if(xpp.next() == XmlPullParser.TEXT){
                         this.content = xpp.getText();
                     }
-                }else if(name.equals("dc:publisher") && xpp.next() == XmlPullParser.TEXT){ // Fix this
+                }else if(name.equals("dc:publisher") && xpp.next() == XmlPullParser.TEXT){
                     this.publisher = xpp.getText();
                 }else if(name.equals("dcterms:publisher") && xpp.next() == XmlPullParser.TEXT){
                     this.publisher = xpp.getText();
@@ -631,9 +625,6 @@ public abstract class UstadJSOPDSItem {
                 }
             }else if(evtType == XmlPullParser.END_TAG) {
                 if(xpp.getName().equals("entry")) {
-                    if(this.summary == null && content != null) {
-                        this.summary = content;
-                    }
                     return;
                 }
             }
@@ -718,6 +709,19 @@ public abstract class UstadJSOPDSItem {
     public String getContentType() {
         return contentType != null ? contentType: CONTENT_TYPE_TEXT;
     }
+
+    /**
+     * Return a summary for this item. If the summary node is set, that will be returned. Otherwise
+     * the content text will be returned.
+     *
+     * TODO: Maybe auto shorten content, when summary is not present
+     *
+     * @return Summary for this item as outlined
+     */
+    public String getSummary(){
+        return summary != null ? summary : content;
+    }
+
 
     public int getBgColor() {
         return parseColorString(bgColor);

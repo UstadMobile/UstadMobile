@@ -257,8 +257,9 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
-    public void setSize(long downloadSize) {
-
+    public void setSize(String entrySize) {
+        TextView entrySizeTextView = findViewById(R.id.activity_catalog_entry_size_text);
+        entrySizeTextView.setText(entrySize != null ? entrySize : "");
     }
 
     @Override

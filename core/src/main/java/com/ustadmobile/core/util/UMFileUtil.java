@@ -497,27 +497,7 @@ public class UMFileUtil {
             return false;
         }
     }
-    
-    /**
-     * Return a String formatted to show the file size in a user friendly format
-     * 
-     * If < 1024 (kb) : size 'bytes'
-     * if 1024 < size < 1024^2 : size/1024 kB
-     * if 1024^ < size < 1023^3 : size/1024^2 MB
-     * 
-     * @param size Size of the file in bytes
-     * 
-     * @return Formatted string as above
-     */
-    public static String formatFileSize(int size) {
-        if(size < 1024) {
-            return size + " bytes";
-        }else if(size < 1048576) {
-            return (size/1024) + " kB";
-        }else {
-            return (size/1048576) + " MB";
-        }
-    }
+
     
     /**
      * Returns the parent filename of a given string uri 
@@ -627,6 +607,46 @@ public class UMFileUtil {
     public static String stripMimeParams(String mimeType) {
         int i = mimeType.indexOf(';');
         return i != -1 ? mimeType.substring(0, i).trim() : mimeType;
+    }
+
+
+    private static final long UNIT_GB = (long)Math.pow(1024, 3);
+
+    private static final long UNIT_MB = (long)Math.pow(1024, 2);
+
+    private static final long UNIT_KB = 1024;
+
+    /**
+     * Return a String formatted to show the file size in a user friendly format
+     *
+     * If < 1024 (kb) : size 'bytes'
+     * if 1024 < size < 1024^2 : size/1024 kB
+     * if 1024^ < size < 1023^3 : size/1024^2 MB
+     *
+     * @param fileSize Size of the file in bytes
+     *
+     * @return Formatted string as above
+     */
+    public static String formatFileSize(long fileSize) {
+        String unit;
+        long factor;
+        if(fileSize > UNIT_GB){
+            factor = UNIT_GB;
+            unit = "GB";
+        }else if(fileSize > UNIT_MB){
+            factor = UNIT_MB;
+            unit = "MB";
+        }else if (fileSize > UNIT_KB){
+            factor = UNIT_KB;
+            unit = "kB";
+        }else {
+            factor = 1;
+            unit = "bytes";
+        }
+
+        double unitSize = (double)fileSize / (double)factor;
+        unitSize = Math.round(unitSize * 100) / 100d;
+        return unitSize + " " + unit;
     }
     
     

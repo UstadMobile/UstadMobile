@@ -50,7 +50,12 @@ public interface CatalogEntryView extends UstadView {
 
     void setLocallyAvailableStatus(int status);
 
-    void setSize(long downloadSize);
+    /**
+     * Set the size of this entry as it should be displayed to the user e.g. XX.YY MB
+     *
+     * @param entrySize
+     */
+    void setSize(String entrySize);
 
     void setDescription(String description, String contentType);
 

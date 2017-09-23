@@ -83,6 +83,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     public void onCreate() {
         manager = UstadMobileSystemImpl.getInstance().getNetworkManager();
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         if(this.args.containsKey(ARG_ENTRY_OPDS_STR)) {
             try {
                 entryFeed = new UstadJSOPDSFeed();
@@ -93,6 +94,15 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
                         CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
                 catalogEntryView.setDescription(entry.content, entry.getContentType());
+                String[] firstAcquisitionLink = entry.getFirstAcquisitionLink(null);
+                if(firstAcquisitionLink != null
+                        && firstAcquisitionLink[UstadJSOPDSItem.ATTR_LENGTH] != null) {
+                    catalogEntryView.setSize(impl.getString(MessageID.size, getContext())
+                            + ": "
+                            + UMFileUtil.formatFileSize(
+                                Long.valueOf(firstAcquisitionLink[UstadJSOPDSItem.ATTR_LENGTH])));
+                }
+
                 entryTranslationIds = entry.getAlternativeTranslationEntryIds();
 
                 boolean isAcquired = entryInfo != null
@@ -158,9 +168,10 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         if(relatedEntryMatch != null && relatedEntryMatch.size() > 0) {
                             entryLink = (UstadJSOPDSEntry)relatedEntryMatch.elementAt(0);
                             thumbnailLink = entryLink.getThumbnailLink(true);
-                            thumbnailUrl = UMFileUtil.resolveLink(
-                                    entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
-                                    thumbnailLink[UstadJSOPDSItem.ATTR_HREF]);
+                            if(thumbnailLink != null)
+                                thumbnailUrl = UMFileUtil.resolveLink(
+                                        entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
+                                        thumbnailLink[UstadJSOPDSItem.ATTR_HREF]);
                         }
 
                         catalogEntryView.addSeeAlsoItem((String[])relatedLinks.elementAt(i),

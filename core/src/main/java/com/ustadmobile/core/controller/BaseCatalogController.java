@@ -245,8 +245,14 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
      */
     public void handleOpenEntryView(UstadJSOPDSEntry entry) {
         Hashtable catalogEntryArgs = new Hashtable();
-        UstadJSOPDSFeed entryFeed = entry.getEntryFeed();
-        String[] entryAbsoluteLink = entryFeed.getAbsoluteSelfLink();
+        UstadJSOPDSFeed parentFeed = entry.parentFeed;
+        String[] entryAbsoluteLink = entry.parentFeed.getAbsoluteSelfLink();
+        if(entryAbsoluteLink == null && entry.parentFeed.href != null) {
+            parentFeed.addLink(UstadJSOPDSFeed.LINK_REL_SELF_ABSOLUTE,
+                    parentFeed.isAcquisitionFeed() ? UstadJSOPDSFeed.TYPE_ACQUISITIONFEED
+                    : UstadJSOPDSFeed.TYPE_NAVIGATIONFEED, parentFeed.href);
+        }
+
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
                 entry.parentFeed.serializeToString());
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,

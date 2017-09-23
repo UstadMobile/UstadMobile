@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/core-tests" />
             <option value="$PROJECT_DIR$/sharedse" />
             <option value="$PROJECT_DIR$/sharedse-tests" />
+            <option value="$PROJECT_DIR$/sharedse-utils" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
