@@ -68,10 +68,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.LOLLIPOP){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
         setContentView(R.layout.activity_base_point);
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         Hashtable savedInstanceHt = UMAndroidUtil.bundleToHashtable(savedInstanceState);
