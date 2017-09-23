@@ -171,9 +171,11 @@ public class JmDnsHelperAndroid implements ServiceListener, INsdHelperAndroid{
     public synchronized void registerNSDService() {
         broadcastEnabled = true;
         if(jmDns != null && !broadcastActive) {
-            String networkServiceName = BluetoothAdapter.getDefaultAdapter() != null
+            BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+            String networkServiceName =
+                    (btAdapter != null && btAdapter.getName() != null)
                     ? BluetoothAdapter.getDefaultAdapter().getName()
-                    : CoreBuildConfig.NETWORK_SERVICE_TYPE + (int)(Math.random() * 5000);
+                            : CoreBuildConfig.NETWORK_SERVICE_TYPE + (int)(Math.random() * 5000);
             localServiceInfo = ServiceInfo.create(
                     CoreBuildConfig.NETWORK_SERVICE_TYPE + SERVICE_TYPE_SUFFIX, networkServiceName,
                     networkManager.getHttpListeningPort(), "path=/");
