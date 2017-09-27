@@ -50,6 +50,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -68,12 +69,14 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.tincan.Activity;
 import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -132,6 +135,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
     private boolean isRequesting=false;
+
+    private String[] alternativeTranslationLanguages;
+
+    private ArrayList<MenuItem> alternativeTranslationLanguageMenuItems;
 
 
     /**
@@ -313,8 +320,27 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         shareItem.setIcon(R.drawable.ic_share_white_24dp);
         shareItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
-        super.onCreateOptionsMenu(menu, inflater);
+        if(alternativeTranslationLanguages != null) {
+            SubMenu languagesSubmenu = menu.addSubMenu(Menu.NONE, 700, 3, "");
+            languagesSubmenu.getItem().setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            languagesSubmenu.getItem().setTitle(R.string.catalog_language);
+            alternativeTranslationLanguageMenuItems = new ArrayList<>(alternativeTranslationLanguages.length);
 
+            MenuItem langItem;
+            for(int i = 0; i < alternativeTranslationLanguages.length; i++) {
+                langItem = languagesSubmenu.add(alternativeTranslationLanguages[i]);
+                alternativeTranslationLanguageMenuItems.add(langItem);
+            }
+        }
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void setAlternativeTranslationLinks(String[] translationLinks) {
+        this.alternativeTranslationLanguages = translationLinks;
+        if(getActivity() != null)
+            getActivity().invalidateOptionsMenu();
     }
 
     @Override
@@ -356,6 +382,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 return true;
 
         }
+
+        if(alternativeTranslationLanguageMenuItems.contains(item)){
+            mCatalogController.handleClickAlternativeTranslationLink(
+                    alternativeTranslationLanguageMenuItems.indexOf(item));
+            return true;
+        }
+
 
         return super.onOptionsItemSelected(item);
     }

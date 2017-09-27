@@ -367,6 +367,8 @@ public class CatalogController extends BaseCatalogController implements AppViewC
 
     private Vector shareLanguageChoices;
 
+    private String[] alternateTranslationLanguages;
+
 
     public CatalogController(Object context) {
         super(context);
@@ -495,6 +497,30 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         if(model != null && model.opdsFeed != null && model.opdsFeed.isAcquisitionFeed()) {
             cView.setDeleteOptionAvailable(true);
         }
+
+        if(model != null && model.opdsFeed != null) {
+            Vector translations = model.opdsFeed.getAvailableLanguages();
+            alternateTranslationLanguages = new String[translations.size()];
+            translations.toArray(alternateTranslationLanguages);
+
+            String[] langNames = new String[translations.size()];
+            String langCode;
+            for(int i = 0; i < langNames.length; i++) {
+                langCode = (String)translations.elementAt(i);
+                if(UstadMobileConstants.LANGUAGE_NAMES.containsKey(langCode))
+                    langNames[i] =  (String)UstadMobileConstants.LANGUAGE_NAMES.get(langCode);
+                else
+                    langNames[i] = langCode;
+            }
+
+            cView.setAlternativeTranslationLinks(langNames);
+        }
+
+
+//      TODO: set available translations
+
+
+//        cView.setAlternativeTranslationLinks();
 
         setStandardAppMenuOptions();
     }
@@ -861,6 +887,11 @@ public class CatalogController extends BaseCatalogController implements AppViewC
         }
 
         handleClickDownload(getModel().opdsFeed, displayedEntries);
+    }
+
+    public void handleClickAlternativeTranslationLink(int langIndex) {
+        String langCodeSelected = alternateTranslationLanguages[langIndex];
+        //TODO: Implement follow link
     }
     
     /**

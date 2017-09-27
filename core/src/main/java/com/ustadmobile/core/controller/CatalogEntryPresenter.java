@@ -1,6 +1,9 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.catalog.ContentTypeManager;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
@@ -18,7 +21,6 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
 
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -71,6 +73,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     protected AvailabilityMonitorRequest availabilityMonitorRequest;
 
+    private long downloadTaskId;
+
     public CatalogEntryPresenter(Object context) {
         super(context);
     }
@@ -105,18 +109,24 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
                 entryTranslationIds = entry.getAlternativeTranslationEntryIds();
 
+                //set the available translated versions that can be found
+                Vector alternativeTranslationLinks = entry.getAlternativeTranslationLinks();
+
+                String[] translatedLanguages = new String[alternativeTranslationLinks.size()];
+                String[] translatedLink;
+                for(int i = 0; i < translatedLanguages.length; i++) {
+                    translatedLink = (String[])alternativeTranslationLinks.elementAt(i);
+                    translatedLanguages[i] = translatedLink[UstadJSOPDSItem.ATTR_HREFLANG];
+                    if(UstadMobileConstants.LANGUAGE_NAMES.containsKey(translatedLanguages[i]))
+                        translatedLanguages[i] = UstadMobileConstants.LANGUAGE_NAMES
+                                .get(translatedLanguages[i]).toString();
+                }
+
+                catalogEntryView.setAlternativeTranslationLinks(translatedLanguages);
+
                 boolean isAcquired = entryInfo != null
                         ? entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED
                         : false;
-
-                CatalogEntryInfo translatedEntryInfo;
-                for(int i = 0; i < entryTranslationIds.length && !isAcquired; i++) {
-                    translatedEntryInfo = CatalogController.getEntryInfo(entryTranslationIds[i],
-                            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
-                            context);
-                    isAcquired = translatedEntryInfo != null
-                            && translatedEntryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED;
-                }
 
                 updateButtonsByStatus(isAcquired ? CatalogController.STATUS_ACQUIRED :
                         CatalogController.STATUS_NOT_ACQUIRED);
@@ -127,17 +137,9 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         &&  networkManager.getTaskById(entryInfo.downloadID,
                             NetworkManagerCore.QUEUE_ENTRY_ACQUISITION) != null;
 
-                for(int i = 0; i < entryTranslationIds.length && !isDownloadInProgress; i++) {
-                    translatedEntryInfo = CatalogController.getEntryInfo(entryTranslationIds[i],
-                            CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
-                            context);
-                    isDownloadInProgress = translatedEntryInfo != null
-                            && networkManager.getTaskById(translatedEntryInfo.downloadID,
-                                NetworkManagerCore.QUEUE_ENTRY_ACQUISITION) != null;
-                }
-
                 if(isDownloadInProgress) {
                     catalogEntryView.setProgressVisible(true);
+                    downloadTaskId = entryInfo.downloadID;
                 }
 
 
@@ -273,12 +275,39 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 break;
 
             case CatalogEntryView.BUTTON_MODIFY:
-                handleClickModify();
+                handleClickRemove();
                 break;
             case CatalogEntryView.BUTTON_OPEN:
-                handleClickOpenEntry(entry);
+                handleOpenEntry(entry);
                 break;
 
+        }
+    }
+
+    public void handleOpenEntry(UstadJSOPDSEntry entry) {
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
+                CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        if (entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
+            Hashtable openArgs = new Hashtable();
+            openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
+            openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
+            openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
+
+            String viewName = ContentTypeManager.getViewNameForContentType(entryInfo.mimeType);
+
+            if(viewName != null) {
+                UstadMobileSystemImpl.getInstance().go(viewName, openArgs, getContext());
+            }else {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 672, entryInfo.mimeType);
+                impl.getAppView(getContext()).showNotification(impl.getString(0, getContext()),
+                        AppView.LENGTH_LONG);
+            }
+        }else {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 673, entryInfo != null ? entryInfo.toString() : null);
+            impl.getAppView(getContext()).showNotification(impl.getString(
+                    MessageID.error_opening_file, getContext()), AppView.LENGTH_LONG);
         }
     }
 
@@ -309,32 +338,15 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
 
-    protected void handleClickModify() {
-        modifyAcquiredEntries = getTranslatedAlternativesLangVectors(entry,
-                CatalogController.STATUS_ACQUIRED);
+    protected void handleClickRemove() {
+        handleClickRemove(new UstadJSOPDSEntry[]{entry});
+    }
 
-        modifyUnacquiredEntries = getTranslatedAlternativesLangVectors(entry,
-                CatalogController.STATUS_NOT_ACQUIRED);
-
-        Vector modifyCommandsAvailableVector = new Vector();
-        if(modifyAcquiredEntries[0].size() > 0)
-            modifyCommandsAvailableVector.addElement(new Integer(MessageID.delete));
-
-        if(modifyUnacquiredEntries[0].size() > 0)
-            modifyCommandsAvailableVector.addElement(new Integer(MessageID.download_in_another_language));
-
-        modifyCommandsAvailable = new Integer[modifyCommandsAvailableVector.size()];
-        modifyCommandsAvailableVector.copyInto(modifyCommandsAvailable);
-
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] modifyOptionsToShow = new String[modifyCommandsAvailable.length];
-        for(int i = 0; i < modifyOptionsToShow.length; i++) {
-            modifyOptionsToShow[i] = impl.getString(modifyCommandsAvailable[i].intValue(),
-                    getContext());
+    public void handleClickAlternativeTranslationLink(int index) {
+        UstadJSOPDSEntry entry = entryFeed.getEntryById(entryTranslationIds[index]);
+        if(entry != null) {
+            handleOpenEntryView(entry);
         }
-
-        impl.getAppView(getContext()).showChoiceDialog(impl.getString(MessageID.modify, getContext()),
-                modifyOptionsToShow, CMD_MODIFY_ENTRY, this);
     }
 
     public void handleClickSeeAlsoItem(String[] link) {
@@ -346,42 +358,22 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
         }
     }
 
+    public void handleClickStopDownload() {
+        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
+                CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+        if(entryInfo != null
+                && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUISITION_IN_PROGRESS
+                && entryInfo.downloadID > 0) {
+            NetworkTask task = UstadMobileSystemImpl.getInstance().getNetworkManager().getTaskById(
+                    entryInfo.downloadID, NetworkManagerCore.QUEUE_ENTRY_ACQUISITION);
+            if(task != null)
+                task.stop(NetworkTask.STATUS_STOPPED);
+        }
+    }
+
     
     public void appViewChoiceSelected(int commandId, int choice) {
         switch(commandId) {
-            case CMD_MODIFY_ENTRY:
-                int cmdChosen = modifyCommandsAvailable[choice].intValue();
-
-                switch(cmdChosen) {
-                    case MessageID.download_in_another_language:
-                        Vector selectedEntries = new Vector();
-                        selectedEntries.addElement(entry);
-                        String[] languageChoices = new String[modifyUnacquiredEntries[0].size()];
-                        for(int i = 0; i < languageChoices.length; i++) {
-                            languageChoices[i] = ((UstadJSOPDSEntry)
-                                    modifyUnacquiredEntries[1].elementAt(i)).getLanguage();
-                        }
-                        handleClickDownload(entryFeed, selectedEntries, languageChoices, true);
-                        break;
-
-                    case MessageID.delete:
-                        if(modifyAcquiredEntries[1].size() == 1) {
-                            handleClickRemove(new UstadJSOPDSEntry[]{
-                                    (UstadJSOPDSEntry) modifyAcquiredEntries[1].elementAt(0)});
-                        }else {
-                            String[] languagesToRemove = new String[modifyAcquiredEntries[0].size()];
-                            modifyAcquiredEntries[0].copyInto(languagesToRemove);
-                            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                            impl.getAppView(getContext()).showChoiceDialog(
-                                    impl.getString(MessageID.delete, getContext()), languagesToRemove,
-                                    CMD_REMOVE_PRESENTER_ENTRY,this);
-                        }
-
-                        break;
-                }
-
-                break;
-
             case CMD_SHARE_ENTRY:
                 UstadJSOPDSEntry entryToShare = (UstadJSOPDSEntry)sharedAcquiredEntries[1].elementAt(choice);
                 handleShareSelectedEntry(entryToShare.id);
@@ -403,13 +395,9 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     
     protected void onEntriesRemoved() {
-        //check if any version is still acquired
-        Hashtable acquiredVersions = getTranslatedAlternatives(entry, CatalogController.STATUS_ACQUIRED);
-        if(acquiredVersions.size() == 0) {
-            catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, true);
-            catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY, false);
-            catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, false);
-        }
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, true);
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY, false);
+        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, false);
     }
 
     
@@ -419,8 +407,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     
     public void acquisitionProgressUpdate(String entryId, final AcquisitionTaskStatus status) {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        if(entry != null && (entryId.equals(entry.id) || UMUtil.getIndexInArray(entryId, entryTranslationIds) != -1)) {
+        if(entry != null && entryId.equals(entry.id)) {
             catalogEntryView.runOnUiThread(new Runnable() {
                 
                 public void run() {
@@ -438,7 +425,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     
     public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-        if(entryId.equals(entry.id) || UMUtil.getIndexInArray(entryId, entryTranslationIds) != -1) {
+        if(entryId.equals(entry.id)) {
             switch(status.getStatus()) {
                 case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
                     catalogEntryView.runOnUiThread(new Runnable() {
@@ -446,6 +433,14 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         public void run() {
                             catalogEntryView.setProgressVisible(false);
                             updateButtonsByStatus(CatalogController.STATUS_ACQUIRED);
+                        }
+                    });
+                    break;
+
+                case NetworkTask.STATUS_STOPPED:
+                    catalogEntryView.runOnUiThread(new Runnable() {
+                        public void run() {
+                            catalogEntryView.setProgressVisible(false);
                         }
                     });
                     break;

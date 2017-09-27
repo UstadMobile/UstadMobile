@@ -169,6 +169,7 @@
     <string name='connecting'>در حال تماس</string>
     <string name='connected_but_host_not_sharing'>رابطه/اتصال ایجاد شد، اما دستگاه دیگر که از این اپلکیشن استفاده می‌کند هیچ‌چیزی را شریک نمیکند.  </string>
     <string name='field_required_prompt'>این بخش الزمی است </string>
+    <string name="also_available_in">همدارنګه د لاسترسي وړ دی</string>
 
 
 

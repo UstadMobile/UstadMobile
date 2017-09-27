@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -12,13 +13,19 @@ import com.toughra.ustadmobile.R;
 /**
  * Created by mike on 9/22/17.
  */
-public class DownloadProgressView extends LinearLayout {
+public class DownloadProgressView extends LinearLayout implements View.OnClickListener{
 
     private ProgressBar progressBar;
 
     private TextView downloadPercentageTextView;
 
     private TextView downloadStatusTextView;
+
+    private OnStopDownloadListener downloadStopListener;
+
+    interface OnStopDownloadListener {
+        void onClickStopDownload(DownloadProgressView view);
+    }
 
     public DownloadProgressView(Context context) {
         super(context);
@@ -40,6 +47,7 @@ public class DownloadProgressView extends LinearLayout {
         progressBar = findViewById(R.id.view_download_progress_progressbar);
         downloadPercentageTextView = findViewById(R.id.view_download_progress_status_percentage_text);
         downloadStatusTextView = findViewById(R.id.view_download_progress_status_text);
+        findViewById(R.id.view_download_progress_stop_button).setOnClickListener(this);
     }
 
     public float getProgress() {
@@ -60,4 +68,13 @@ public class DownloadProgressView extends LinearLayout {
         return downloadStatusTextView.getText().toString();
     }
 
+    @Override
+    public void onClick(View view) {
+        if(downloadStopListener != null)
+            downloadStopListener.onClickStopDownload(this);
+    }
+
+    public void setOnStopDownloadListener(OnStopDownloadListener listener) {
+        this.downloadStopListener = listener;
+    }
 }

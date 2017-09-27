@@ -38,7 +38,7 @@
                 android:background="@color/background_light"
                 android:padding="@dimen/dimen_16dp"
                 android:gravity="center"
-                android:lines="2"
+                android:lines="3"
                 android:id="@+id/text_top_quote"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />

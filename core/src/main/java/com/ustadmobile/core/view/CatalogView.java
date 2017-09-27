@@ -197,6 +197,15 @@ public interface CatalogView extends UstadView{
 
     public void setAddOptionAvailable(boolean addOptionAvailable);
 
+    /**
+     * Set alternative (translated) versions of this catalog, as per the rel='alternate' hreflang='other-lang'
+     * links. The view should then call CatalogController.handleClickAlternativeTranslationLink
+     * with the index of the language selected
+     *
+     * @param translationLinks String array of other languages.
+     */
+    void setAlternativeTranslationLinks(String[] translationLinks);
+
 
 
 }

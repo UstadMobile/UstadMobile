@@ -289,22 +289,28 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         for(int i = 0; i < numEntries; i++) {
             UstadJSOPDSEntry selectedEntry = (UstadJSOPDSEntry)selectedEntries.elementAt(i);
 
-            Vector entryTranslationLinks = getEntryById(selectedEntry.id).getAlternativeTranslationLinks();
-            Vector translatedEntriesVector = new Vector();
-            String[] entryTranslationLink;
+            UstadJSOPDSEntry[] entriesToSelectFrom;
+            if(preferredLanguages != null) {
+                Vector entryTranslationLinks = getEntryById(selectedEntry.id).getAlternativeTranslationLinks();
+                Vector translatedEntriesVector = new Vector();
+                String[] entryTranslationLink;
 
-            for(int j = 0; j < entryTranslationLinks.size(); j++) {
-                entryTranslationLink = (String[])entryTranslationLinks.elementAt(j);
-                UstadJSOPDSEntry translatedEntry = findEntryForAlternateTranslation(
-                        entryTranslationLink[UstadJSOPDSEntry.ATTR_HREF]);
-                if(translatedEntry != null)
-                    translatedEntriesVector.addElement(translatedEntry);
+                for(int j = 0; j < entryTranslationLinks.size(); j++) {
+                    entryTranslationLink = (String[])entryTranslationLinks.elementAt(j);
+                    UstadJSOPDSEntry translatedEntry = findEntryForAlternateTranslation(
+                            entryTranslationLink[UstadJSOPDSEntry.ATTR_HREF]);
+                    if(translatedEntry != null)
+                        translatedEntriesVector.addElement(translatedEntry);
+                }
+
+                entriesToSelectFrom = new UstadJSOPDSEntry[
+                        translatedEntriesVector.size() + 1];
+                translatedEntriesVector.copyInto(entriesToSelectFrom);
+                entriesToSelectFrom[entriesToSelectFrom.length-1] = selectedEntry;
+            }else {
+                entriesToSelectFrom = new UstadJSOPDSEntry[]{selectedEntry};
             }
 
-            UstadJSOPDSEntry[] entriesToSelectFrom = new UstadJSOPDSEntry[
-                    translatedEntriesVector.size() + 1];
-            translatedEntriesVector.copyInto(entriesToSelectFrom);
-            entriesToSelectFrom[entriesToSelectFrom.length-1] = selectedEntry;
 
             UMUtil.bubbleSort(entriesToSelectFrom, new UMUtil.Comparer() {
                 public int compare(Object o1, Object o2) {
@@ -333,15 +339,18 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
 
                     int mimeDiff = (mimeDiff1 - mimeDiff2) * mimeWeight;
 
-                    int langDiff1 = UMUtil.indexInArray(preferredLanguages, entry1.getLanguage());
-                    if(langDiff1 == -1)
-                        langDiff1 = preferredLanguages.length+1;
+                    int langDiff = 0;
+                    if(preferredLanguages != null) {
+                        int langDiff1 = UMUtil.indexInArray(preferredLanguages, entry1.getLanguage());
+                        if(langDiff1 == -1)
+                            langDiff1 = preferredLanguages.length+1;
 
-                    int langDiff2 = UMUtil.indexInArray(preferredLanguages, entry2.getLanguage());
-                    if(langDiff2 == -1)
-                        langDiff2 = preferredLanguages.length+1;
+                        int langDiff2 = UMUtil.indexInArray(preferredLanguages, entry2.getLanguage());
+                        if(langDiff2 == -1)
+                            langDiff2 = preferredLanguages.length+1;
 
-                    int langDiff = (langDiff1 - langDiff2) * langWeight;
+                        langDiff = (langDiff1 - langDiff2) * langWeight;
+                    }
 
                     return langDiff + mimeDiff;
                 }

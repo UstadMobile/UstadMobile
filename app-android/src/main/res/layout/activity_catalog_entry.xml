@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<android.support.design.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:auto="http://schemas.android.com/tools"
     android:background="@color/background_light">
 
     <android.support.design.widget.AppBarLayout
@@ -87,10 +87,10 @@
                     android:layout_height="wrap_content"
                     android:foreground="?attr/selectableItemBackground"/>
                 <Button
-                    android:id="@+id/activity_catalog_entry_remove_modify_button"
+                    android:id="@+id/activity_catalog_entry_remove_button"
                     android:background="@color/catalog_entry_remove_modify_button_background"
                     android:textColor="@color/catalog_entry_remove_modify_button_text"
-                    android:text="@string/modify"
+                    android:text="@string/delete"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -116,6 +116,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/white"
+                android:id="@+id/activity_catalog_entry_maininfo_cardview"
                 >
 
 
@@ -199,6 +200,18 @@
                         android:id="@+id/activity_catalog_entry_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
+
+
+
+                    <com.google.android.flexbox.FlexboxLayout
+                        android:id="@+id/activity_catalog_entry_also_available_in"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:flexWrap="wrap">
+
+
+                    </com.google.android.flexbox.FlexboxLayout>
+
 
                 </LinearLayout>
 

@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
-import android.content.Context;
-import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -9,6 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,7 +18,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -28,10 +27,8 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.ImageLoader;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -41,10 +38,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Vector;
 
-public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener {
+public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener, DownloadProgressView.OnStopDownloadListener{
 
     private CatalogEntryPresenter mPresenter;
 
@@ -71,9 +67,13 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_OPEN, R.id.activity_catalog_entry_open_button);
-        BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_MODIFY, R.id.activity_catalog_entry_remove_modify_button);
+        BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_MODIFY, R.id.activity_catalog_entry_remove_button);
     }
 
+
+    private static final int ALTERNATIVE_TRANSLATION_BASE_VIEW_ID = 2000;
+
+    private ArrayList<View> alternativeTranlsationViews;
 
     private class SeeAlsoViewHolder extends RecyclerView.ViewHolder {
 
@@ -111,8 +111,9 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         public void onBindViewHolder(SeeAlsoViewHolder holder, int position) {
             String[] links = CatalogEntryActivity.this.seeAlsoItems.get(position);
             holder.titleView.setText(links[UstadJSOPDSItem.ATTR_TITLE]);
-            ImageLoader.getInstance().loadImage(seeAlsoIcons.elementAt(position),
-                    holder.imageLoadTarget, mPresenter);
+            if(seeAlsoIcons.elementAt(position) != null)
+                ImageLoader.getInstance().loadImage(seeAlsoIcons.elementAt(position),
+                        holder.imageLoadTarget, mPresenter);
             holder.currentIndex = position;
             seeAlsoViewToIndexMap.put(holder.itemView, position);
         }
@@ -158,6 +159,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
                 (ImageView)findViewById(R.id.activity_catalog_entry_icon_img));
 
         mDownloadProgressView = findViewById(R.id.activity_catalog_entry_download_progress);
+        mDownloadProgressView.setOnStopDownloadListener(this);
 
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mPresenter = new CatalogEntryPresenter(this, this, args);
@@ -212,7 +214,14 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         }else if(seeAlsoViewToIndexMap.containsKey(v)){
             int seeAlsoPos = seeAlsoViewToIndexMap.get(v);
             mPresenter.handleClickSeeAlsoItem(seeAlsoItems.get(seeAlsoPos));
+        }else if(alternativeTranlsationViews.contains(v)) {
+            mPresenter.handleClickAlternativeTranslationLink(alternativeTranlsationViews.indexOf(v));
         }
+    }
+
+    @Override
+    public void onClickStopDownload(DownloadProgressView view) {
+        mPresenter.handleClickStopDownload();
     }
 
     @Override
@@ -339,6 +348,44 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     public void setSeeAlsoVisible(boolean visible) {
         findViewById(R.id.activity_catalog_entry_see_also_cardview).setVisibility(visible
                 ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void setAlternativeTranslationLinks(String[] languages) {
+        ViewGroup flowLayout = findViewById(R.id.activity_catalog_entry_also_available_in);
+        flowLayout.removeAllViews();
+
+        int paddingTop = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 6,
+                getResources().getDisplayMetrics()));
+        int padding2 = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 2,
+                getResources().getDisplayMetrics()));
+
+
+        TextView languageTv;
+        TextView alsoAvailableView = new TextView(this);
+        alsoAvailableView.setText(R.string.also_available_in);
+        alsoAvailableView.setPadding(0, paddingTop, padding2, padding2);
+        flowLayout.addView(alsoAvailableView);
+
+        alternativeTranlsationViews = new ArrayList<>();
+
+
+        for(int i = 0; i < languages.length; i++) {
+            languageTv = new TextView(this);
+            languageTv.setText(languages[i]);
+            languageTv.setTypeface(null, Typeface.BOLD);
+            languageTv.setTextColor(ContextCompat.getColor(this, R.color.primary));
+            languageTv.setPadding(padding2, paddingTop, padding2, padding2);
+
+            TypedValue outValue = new TypedValue();
+            getTheme().resolveAttribute(R.attr.selectableItemBackground, outValue, true);
+            languageTv.setBackgroundResource(outValue.resourceId);
+            languageTv.setClickable(true);
+            languageTv.setOnClickListener(this);
+            alternativeTranlsationViews.add(languageTv);
+
+            flowLayout.addView(languageTv);
+        }
     }
 
     @Override

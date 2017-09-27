@@ -84,4 +84,17 @@ public interface CatalogEntryView extends UstadView {
 
     void clearSeeAlsoItems();
 
+    /**
+     * Sets the list of other languages that this content can be viewed in, as per the atom
+     * rel='alternate' hreflang='other-lang-code' option. If the user selected the alternative
+     * (translated) version of this resource, the view should call
+     * handleClickAlternativeTranslationLink and give the index of the item selected
+     *
+     * @see com.ustadmobile.core.controller.CatalogEntryPresenter#handleClickAlternativeTranslationLink(int)
+     *
+     * @param languages Array of languages that this entry is available in, as they will be displayed
+     *                  to the user e.g. "English" not "en"
+     */
+    void setAlternativeTranslationLinks(String[] languages);
+
 }
