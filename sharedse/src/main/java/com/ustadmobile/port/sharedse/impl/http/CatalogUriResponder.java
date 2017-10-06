@@ -58,10 +58,6 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         try {
             Object context = getContext(uriResource);
             if(normalizedUri.endsWith("acquire.opds")) {
-//                UstadJSOPDSFeed deviceFeed = OpdsEndpoint.makeDeviceFeed(
-//                    impl.getStorageDirs(CatalogController.SHARED_RESOURCE, context),
-//                    CatalogController.SHARED_RESOURCE, "/catalog/entry/", CatalogController.LINK_HREF_MODE_ID,
-//                    context);
                 UstadJSOPDSFeed deviceFeed = (UstadJSOPDSFeed)OpdsEndpoint.getInstance().loadItem(
                         OpdsEndpoint.OPDS_PROTO_DEVICE, null, context, null);
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();

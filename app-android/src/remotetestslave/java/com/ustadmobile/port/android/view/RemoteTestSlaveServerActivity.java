@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.OpdsEndpoint;
+import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
@@ -54,9 +56,8 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
 
     protected void scanFeed() {
         try {
-            CatalogController.makeDeviceFeed(
-                    UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogController.SHARED_RESOURCE, this),
-                    CatalogController.SHARED_RESOURCE, this);
+            UstadJSOPDSFeed deviceFeed = (UstadJSOPDSFeed) OpdsEndpoint.getInstance().loadItem(
+                    OpdsEndpoint.OPDS_PROTO_DEVICE, null, this, null);
             Toast.makeText(this, "Device feed scanned.", Toast.LENGTH_LONG).show();
         }catch(IOException e) {
 

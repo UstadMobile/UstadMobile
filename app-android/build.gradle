@@ -338,6 +338,13 @@ task generateCoreStringToAndroidResMap {
             oldMessageIdFile.delete()
         }
 
+        String[] outDirNames = new String[3]
+        outDirNames[MAIN] = "vanilla"
+        outDirNames[LOCALCONFIG] = "localconfig"
+        outDirNames[2] = "remotetestslave"
+
+
+
         for(int i = 0; i < dirNames.length; i++) {
             File outDir = project.file("src/" + dirNames[i] + "/java/com/ustadmobile/port/android/generated")
             if(!outDir.isDirectory()) {
@@ -347,6 +354,16 @@ task generateCoreStringToAndroidResMap {
             File outFile = new File(outDir, "MessageIDMap.java")
             outFile.setText(genSrcHeader + genSrcBody[i] + genSrcFooter, "UTF-8")
         }
+
+        //put the vanilla MessageIDMap in remotetestslave
+        File remoteTestSlaveOutDir = project.file("src/remotetestslave/java/com/ustadmobile/port/android/generated")
+        if(!remoteTestSlaveOutDir.exists()) {
+            remoteTestSlaveOutDir.mkdirs()
+        }
+        File remoteTestSlaveOutFile = new File(remoteTestSlaveOutDir, "MessageIDMap.java")
+        remoteTestSlaveOutFile.setText(genSrcHeader + genSrcBody[MAIN] + genSrcFooter, "UTF-8")
+
+
     }
 }
 assemble.dependsOn(generateCoreStringToAndroidResMap)
