@@ -120,8 +120,9 @@ public class DirectoryScanner {
 
                                 CatalogPresenter.setEntryInfo(entry.id, thisEntryInfo,
                                         resourceMode, context);
-                                impl.getNetworkManager().handleEntryStatusChangeDiscovered(entry.id,
-                                        thisEntryInfo.acquisitionStatus);
+                                if(impl.getNetworkManager() != null)
+                                    impl.getNetworkManager().handleEntryStatusChangeDiscovered(entry.id,
+                                            thisEntryInfo.acquisitionStatus);
                             }
 
                             if(thisEntryInfo.acquisitionStatus != STATUS_ACQUIRED) {

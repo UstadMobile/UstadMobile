@@ -19,19 +19,20 @@ import java.util.Vector;
 public class TestUstadJSOPDSFeed {
 
 
-    private UstadJSOPDSFeed loadAcquireMultiFeed() throws Exception {
-        InputStream opdsIn = getClass().getResourceAsStream("/com/ustadmobile/test/core/acquire-multi.opds");
-        UstadJSOPDSFeed feed = new UstadJSOPDSFeed();
+    private UstadJSOPDSFeed loadAcquireMultiFeed(String srcHref) throws Exception {
+        String resSrc = "/com/ustadmobile/test/core/acquire-multi.opds";
+        InputStream opdsIn = getClass().getResourceAsStream(resSrc);
+        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(srcHref);
         XmlPullParser parser = new KXmlParser();
         parser.setInput(opdsIn, "UTF-8");
-        feed.loadFromXpp(parser);
+        feed.loadFromXpp(parser, null);
         return feed;
 
     }
 
     @Test
     public void testFindLinkLanguages() throws Exception{
-        UstadJSOPDSFeed feed = loadAcquireMultiFeed();
+        UstadJSOPDSFeed feed = loadAcquireMultiFeed("http://www.ustadmobile.com/files/test/acquire-multi.opds");
 
         UstadJSOPDSEntry entry3 = feed.getEntry(2);
         Vector languageList = entry3.getHrefLanguagesFromLinks(entry3.getAcquisitionLinks(), null);
@@ -85,14 +86,13 @@ public class TestUstadJSOPDSFeed {
 
     @Test
     public void testSerialize() throws Exception{
-        UstadJSOPDSFeed feed = loadAcquireMultiFeed();
-        feed.href = "http://www.ustadmobile.com/files/test/acquire-multi.opds";
+        UstadJSOPDSFeed feed = loadAcquireMultiFeed("http://www.ustadmobile.com/files/test/acquire-multi.opds");
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         feed.serialize(bout);
 
         UstadJSOPDSFeed deserializedFeed = new UstadJSOPDSFeed();
         deserializedFeed.loadFromString(new String(bout.toByteArray(), "UTF-8"));
-        Assert.assertEquals("Serializer set absolute self href", feed.href,
+        Assert.assertEquals("Serializer set absolute self href", feed.getHref(),
                 deserializedFeed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF]);
         Assert.assertEquals("Feed loaded with correct id", feed.id, deserializedFeed.id);
         for(int i = 0; i < feed.size(); i++) {

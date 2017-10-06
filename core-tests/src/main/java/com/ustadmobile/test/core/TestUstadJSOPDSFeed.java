@@ -4,6 +4,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -126,7 +127,8 @@ public class TestUstadJSOPDSFeed {
                 "file.opds"});
         UstadJSOPDSFeed feed = new UstadJSOPDSFeed();
         final boolean[] onDoneCalled = new boolean[]{false};
-        feed.loadFromUrlAsync(opdsUrl, null, new UstadJSOPDSItem.OpdsItemLoadCallback() {
+        feed.loadFromUrlAsync(opdsUrl, null, PlatformTestUtil.getTargetContext(),
+                new UstadJSOPDSItem.OpdsItemLoadCallback() {
             @Override
             public void onEntryLoaded(int position, UstadJSOPDSEntry entry) {
 
@@ -165,7 +167,8 @@ public class TestUstadJSOPDSFeed {
                 "doesnotexist.opds"});
         UstadJSOPDSFeed feed = new UstadJSOPDSFeed();
         final Throwable[] onErrorThrowable = new Throwable[1];
-        feed.loadFromUrlAsync(opdsUrl, null, new UstadJSOPDSItem.OpdsItemLoadCallback() {
+        feed.loadFromUrlAsync(opdsUrl, null, PlatformTestUtil.getTargetContext(),
+                new UstadJSOPDSItem.OpdsItemLoadCallback() {
             @Override
             public void onEntryLoaded(int position, UstadJSOPDSEntry entry) {
 
