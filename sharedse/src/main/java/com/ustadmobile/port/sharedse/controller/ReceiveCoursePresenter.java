@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
@@ -136,7 +136,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
     public void handleClickAccept() {
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogController.SHARED_RESOURCE, getContext())[0].getDirURI();
+                CatalogPresenter.SHARED_RESOURCE, getContext())[0].getDirURI();
         sharedFeed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
                 "application/dir", destinationDir);
         networkManager.requestAcquisition(sharedFeed, true, true);

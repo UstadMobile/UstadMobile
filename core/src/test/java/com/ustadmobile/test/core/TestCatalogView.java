@@ -39,10 +39,13 @@ $endif$ */
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
-import com.ustadmobile.test.core.buildconfig.TestConstants;
+
 import com.ustadmobile.core.util.TestUtils;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
+
+import junit.framework.TestCase;
+
+/* $endif$ */
 
 
 /**

@@ -64,7 +64,7 @@ public class CatalogEntryInfo {
         sb.append(':');
         sb.append(URLTextUtil.urlEncodeUTF8(fileURI)).append(':');
         sb.append(mimeType);
-        if(acquisitionStatus == CatalogController.STATUS_ACQUISITION_IN_PROGRESS) {
+        if(acquisitionStatus == CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS) {
             sb.append(':').append(String.valueOf(downloadID)).append(':').append(
                     downloadTotalSize);
         }

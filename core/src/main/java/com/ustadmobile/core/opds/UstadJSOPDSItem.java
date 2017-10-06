@@ -30,18 +30,23 @@
  */
 package com.ustadmobile.core.opds;
 
+import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Vector;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * Abstract class that represents an OPDS Item - this can be a feed itself or an entry within a feed.
@@ -51,7 +56,7 @@ import org.xmlpull.v1.XmlSerializer;
  *
  * @author varuna
  */
-public abstract class UstadJSOPDSItem {
+public abstract class UstadJSOPDSItem implements Runnable {
     
     public String title;
     
@@ -139,6 +144,11 @@ public abstract class UstadJSOPDSItem {
     public String bgColor;
     
     public String textColor;
+
+    /**
+     * The url from which this item was loaded, if applicable.
+     */
+    protected transient String href;
     
     /**
     * Atom/XML feed mime type constant
@@ -231,6 +241,22 @@ public abstract class UstadJSOPDSItem {
     public static String LINK_COVER_IMAGE = "http://www.ustadmobile.com/ns/opds/cover-image";
 
 
+    public interface OpdsItemLoadCallback {
+
+        void onEntryLoaded(int position, UstadJSOPDSEntry entry);
+
+        void onDone();
+
+        void onError(Throwable cause);
+    }
+
+    private String asyncLoadUrl;
+
+    private OpdsItemLoadCallback asyncLoadCallback;
+
+    private Hashtable asyncHttpheaders;
+
+    private Object asyncContext;
 
     public UstadJSOPDSItem() {
         this.linkVector = new Vector();
@@ -555,21 +581,25 @@ public abstract class UstadJSOPDSItem {
      * @throws XmlPullParserException If there's an XML parsing exception
      * @throws IOException If there's an underlying IO exception
      */
-    public void loadFromXpp(XmlPullParser xpp, UstadJSOPDSFeed parentFeed) throws XmlPullParserException, IOException{
+    public void loadFromXpp(XmlPullParser xpp, UstadJSOPDSFeed parentFeed, OpdsItemLoadCallback callback) throws XmlPullParserException, IOException{
         int evtType;
         String name;
         String[] linkAttrs;
-        int i;
-        boolean isFeed = this instanceof UstadJSOPDSFeed;
-        Vector entriesFound = isFeed? new Vector() : null;
+        int i, entryPos = 0, entryCount = 0;
+        UstadJSOPDSFeed thisFeed = this instanceof UstadJSOPDSFeed ? (UstadJSOPDSFeed)this: null;
 
         while((evtType = xpp.next()) != XmlPullParser.END_DOCUMENT) {
             if(evtType == XmlPullParser.START_TAG) {
                 name = xpp.getName();
-                if(isFeed && name.equals(ATTR_NAMES[ATTR_ENTRY])) {
+                if(thisFeed != null && name.equals(ATTR_NAMES[ATTR_ENTRY])) {
                     UstadJSOPDSEntry newEntry = new UstadJSOPDSEntry(parentFeed);
-                    newEntry.loadFromXpp(xpp, parentFeed);
-                    entriesFound.addElement(newEntry);
+                    newEntry.loadFromXpp(xpp, parentFeed, callback);
+                    thisFeed.addEntry(entryCount, newEntry);
+                    entryCount++;
+
+                    if(callback != null) {
+                        callback.onEntryLoaded(entryCount, newEntry);
+                    }
                 }else if(name.equals(ATTR_NAMES[ATTR_TITLE]) && xpp.next() == XmlPullParser.TEXT) {
                     this.title = xpp.getText();
                 }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
@@ -630,11 +660,13 @@ public abstract class UstadJSOPDSItem {
             }
         }
 
-        if(isFeed) {
-            UstadJSOPDSFeed feed = (UstadJSOPDSFeed)this;
-            feed.entries = new UstadJSOPDSEntry[entriesFound.size()];
-            entriesFound.copyInto(feed.entries);
-        }
+        //Trim any other entries in case of refresh - we may have fewer entries
+
+//        if(isFeed) {
+//            UstadJSOPDSFeed feed = (UstadJSOPDSFeed)this;
+//            feed.entries = new UstadJSOPDSEntry[entriesFound.size()];
+//            entriesFound.copyInto(feed.entries);
+//        }
     }
 
     /**
@@ -644,8 +676,8 @@ public abstract class UstadJSOPDSItem {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    public void loadFromXpp(XmlPullParser xpp) throws XmlPullParserException, IOException{
-        loadFromXpp(xpp, null);
+    public void loadFromXpp(XmlPullParser xpp, OpdsItemLoadCallback callback) throws XmlPullParserException, IOException{
+        loadFromXpp(xpp, null, callback);
     }
 
 
@@ -660,7 +692,57 @@ public abstract class UstadJSOPDSItem {
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
         parser.setInput(bin, "UTF-8");
-        loadFromXpp(parser);
+        loadFromXpp(parser, null);
+    }
+
+    /**
+     * Load this OPDS item from the given URL asynchronously.
+     *
+     * @param url
+     * @param httpHeaders
+     * @param callback
+     */
+    public void loadFromUrlAsync(String url, Hashtable httpHeaders, Object context, OpdsItemLoadCallback callback) {
+        this.asyncLoadCallback = callback;
+        this.asyncLoadUrl = url;
+        this.asyncHttpheaders = httpHeaders;
+        this.asyncContext = context;
+        this.href = url;
+        new Thread(this).start();
+    }
+
+    public void run() {
+        InputStream in = null;
+        XmlPullParser xpp = null;
+        Throwable err = null;
+
+        try {
+            if(!asyncLoadUrl.startsWith(OpdsEndpoint.OPDS_PROTOCOL)) {
+                HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(asyncLoadUrl,
+                        asyncHttpheaders, null);
+                if(result.getStatus() >= 300)
+                    throw new IOException("Http status: " + result.getStatus());
+
+                in = new ByteArrayInputStream(result.getResponse());
+                xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
+                UstadJSOPDSFeed parentFeed = this instanceof UstadJSOPDSFeed ? (UstadJSOPDSFeed) this : null;
+                loadFromXpp(xpp, parentFeed, asyncLoadCallback);
+            }else {
+                OpdsEndpoint.getInstance().loadItem(asyncLoadUrl, this, asyncContext, asyncLoadCallback);
+            }
+        }catch(IOException e) {
+            err = e;
+        }catch(XmlPullParserException x) {
+            err = x;
+        }finally {
+            UMIOUtils.closeInputStream(in);
+        }
+
+        if(err == null) {
+            asyncLoadCallback.onDone();
+        }else {
+            asyncLoadCallback.onError(err);
+        }
     }
 
     /**
@@ -731,7 +813,38 @@ public abstract class UstadJSOPDSItem {
         return parseColorString(textColor);
     }
 
+    /**
+     * Get the href that this item was loaded from, if applicable. Applies to feeds and items loaded
+     * from http using async http load, and those where it was manually set. Does not apply to entries
+     * that were not loaded over http but are part of a feed.
+     *
+     * @return The url this item was loaded from, if applicable, as above.
+     */
+    public String getHref() {
+        return href;
+    }
 
 
+
+    public static int indexOfEntryInArray(String entryId, UstadJSOPDSItem[] items) {
+        for (int i = 0;i < items.length; i++){
+            if (items[i] != null && items[i].id.equals(entryId)){
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /* $if umplatform != 2  $ */
+    public static int indexOfEntryInList(String entryId, List<? extends UstadJSOPDSItem> list) {
+        for(int i = 0; i < list.size(); i++) {
+            if(list.get(i) != null && entryId.equals(list.get(i).id))
+                return i;
+        }
+
+        return -1;
+    }
+    /* $endif$ */
 
 }

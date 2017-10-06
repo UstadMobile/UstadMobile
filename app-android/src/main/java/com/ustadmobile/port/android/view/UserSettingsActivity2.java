@@ -13,14 +13,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.UserSettingsController2;
 import com.ustadmobile.core.view.UserSettingsView2;
-import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
-import com.ustadmobile.nanolrs.core.manager.UserManager;
-import com.ustadmobile.nanolrs.core.model.User;
-import com.ustadmobile.nanolrs.core.model.UserCustomFields;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-
-import java.util.List;
 
 public class UserSettingsActivity2 extends UstadBaseActivity implements UserSettingsView2,View.OnClickListener{
     private UserSettingsController2 mController;

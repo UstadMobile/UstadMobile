@@ -38,19 +38,23 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.model.AttendanceClass;
-import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
-import com.ustadmobile.port.sharedse.model.AttendanceRowModel;
-import com.ustadmobile.port.sharedse.omr.AttendanceSheetImage;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
-import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
 import com.ustadmobile.nanolrs.core.manager.XapiForwardingStatementManager;
 import com.ustadmobile.nanolrs.core.model.XapiForwardingStatement;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.port.sharedse.model.AttendanceClass;
+import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
+import com.ustadmobile.port.sharedse.model.AttendanceRowModel;
+import com.ustadmobile.port.sharedse.omr.AttendanceSheetImage;
+import com.ustadmobile.port.sharedse.view.AttendanceView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -62,7 +66,6 @@ import jp.sourceforge.qrcode.util.DebugCanvas;
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 

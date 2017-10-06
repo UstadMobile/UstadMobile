@@ -4,13 +4,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
 
-import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.core.view.UstadView;
-
-import java.io.IOException;
 
 /**
  * Created by mike on 8/4/17.

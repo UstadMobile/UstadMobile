@@ -39,26 +39,17 @@ $endif$ */
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
+
 import com.ustadmobile.core.util.TestUtils;
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.controller.ContainerController;
-import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.UstadController;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.ocf.UstadOCF;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opf.UstadJSOPF;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UMStorageDir;
+
+import junit.framework.TestCase;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import org.xmlpull.v1.XmlPullParserException;
+
+/* $endif$ */
 
 
 /**

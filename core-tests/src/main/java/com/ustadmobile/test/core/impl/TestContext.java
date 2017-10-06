@@ -1,12 +1,5 @@
 package com.ustadmobile.test.core.impl;
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.impl.UMStorageDir;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-
-import java.io.File;
 import java.util.Properties;
 
 /**

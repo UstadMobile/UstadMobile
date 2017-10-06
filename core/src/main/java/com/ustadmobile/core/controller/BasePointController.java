@@ -6,29 +6,23 @@
 package com.ustadmobile.core.controller;
 
 
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileConstants;
-import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.core.view.WelcomeView;
+
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.view.WelcomeView;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 /**
@@ -120,38 +114,33 @@ public class BasePointController extends UstadBaseController implements DialogRe
         String iPrefix;
         for(int i = 0; i < BasePointController.NUM_CATALOG_TABS; i++) {
             iPrefix = i+BasePointController.OPDS_ARGS_PREFIX;
-            args.put(iPrefix + CatalogController.KEY_URL, basePointURLs[i]);
+            args.put(iPrefix + CatalogPresenter.ARG_URL, basePointURLs[i]);
             if(impl.getActiveUser(context) != null) {
-                args.put(iPrefix + CatalogController.KEY_HTTPUSER,
-                        impl.getActiveUser(context));
+                args.put(iPrefix + CatalogPresenter.ARG_HTTPUSER, impl.getActiveUser(context));
             }
 
             if(impl.getActiveUserAuth(context) != null) {
-                args.put(iPrefix + CatalogController.KEY_HTTPPPASS,
-                        impl.getActiveUserAuth(context));
+                args.put(iPrefix + CatalogPresenter.ARG_HTTPPPASS, impl.getActiveUserAuth(context));
             }
 
-            args.put(iPrefix + CatalogController.KEY_FLAGS, 
-                new Integer(CatalogController.CACHE_ENABLED));
-            args.put(iPrefix + CatalogController.KEY_RESMOD, 
-                new Integer(CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE));
+            args.put(iPrefix + CatalogPresenter.ARG_RESMOD, new Integer(CatalogPresenter.ALL_RESOURCES));
 
-            if(CoreBuildConfig.BASEPOINT_FILTER_BY_UI_LANG) {
-                args.put(iPrefix + CatalogController.ARG_FILTER_BY_UI_LANG, "true");
-            }
+//            if(CoreBuildConfig.BASEPOINT_FILTER_BY_UI_LANG) {
+//                args.put(iPrefix + CatalogController.ARG_FILTER_BY_UI_LANG, "true");
+//            }
 
             //by default show the browse button on the first tab only
             if(i == 0 && CoreBuildConfig.BASEPOINT_BROWSEBUTTON_ENABLED) {
-                args.put(iPrefix + CatalogController.KEY_BROWSE_BUTTON_URL,
+                args.put(iPrefix + CatalogPresenter.ARG_BOTTOM_BUTTON_URL,
                         CoreBuildConfig.BASEPOINT_BROWSEBUTTON_URL);
             }
         }
         
-        Integer downloadedEntriesFlags = new Integer(
-            CatalogController.CACHE_ENABLED | CatalogController.SORT_DESC | 
-            CatalogController.SORT_BY_LASTACCESSED);
-        args.put(INDEX_DOWNLOADEDENTRIES+BasePointController.OPDS_ARGS_PREFIX +
-            CatalogController.KEY_FLAGS, downloadedEntriesFlags);
+//        Integer downloadedEntriesFlags = new Integer(
+//            CatalogController.CACHE_ENABLED | CatalogController.SORT_DESC |
+//            CatalogController.SORT_BY_LASTACCESSED);
+//        args.put(INDEX_DOWNLOADEDENTRIES+BasePointController.OPDS_ARGS_PREFIX +
+//            CatalogController.KEY_FLAGS, downloadedEntriesFlags);
         
         return args;
     }

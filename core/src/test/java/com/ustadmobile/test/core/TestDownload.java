@@ -31,20 +31,14 @@
 package com.ustadmobile.test.core;
 
 
-import com.ustadmobile.core.util.TestUtils;
-import com.ustadmobile.core.impl.UMDownloadCompleteEvent;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
-import java.io.IOException;
-import java.util.Hashtable;
+import com.ustadmobile.core.util.TestUtils;
+
+import junit.framework.TestCase;
 
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
 /* $endif$ */
 
 /* $if umplatform == 1 $

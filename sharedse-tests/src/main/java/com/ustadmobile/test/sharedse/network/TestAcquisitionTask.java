@@ -1,7 +1,8 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -29,8 +30,10 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -87,9 +90,9 @@ public class TestAcquisitionTask {
         final Object acquireLock = new Object();
 
         //make sure we don't have any of the entries in question already
-        CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
+        CatalogPresenter.removeEntry(ENTRY_ID_PRESENT, CatalogPresenter.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
-        CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
+        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
 
         final long[] testTaskId = new long[1];
@@ -171,17 +174,17 @@ public class TestAcquisitionTask {
                     remoteNode.getAcquisitionHistory().size() > numAcquisitions);
         }
 
-        CatalogEntryInfo localEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        CatalogEntryInfo localEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_PRESENT,
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
         Assert.assertEquals("File was downloaded successfully from node on same network",
-                CatalogController.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
+                CatalogPresenter.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
         Assert.assertTrue("File downloaded via local network is present",
                 new File(localEntryInfo.fileURI).exists());
 
-        CatalogEntryInfo cloudEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_NOT_PRESENT,
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        CatalogEntryInfo cloudEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_NOT_PRESENT,
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
         Assert.assertEquals("File was downloaded successfully from cloud",
-                CatalogController.STATUS_ACQUIRED, cloudEntryInfo.acquisitionStatus);
+                CatalogPresenter.STATUS_ACQUIRED, cloudEntryInfo.acquisitionStatus);
         Assert.assertTrue("File downloaded via cloud is present",
                 new File(cloudEntryInfo.fileURI).exists());
 
@@ -197,11 +200,14 @@ public class TestAcquisitionTask {
         //Create a feed manually
         String catalogUrl = UMFileUtil.joinPaths(new String[]{
                 httpRoot, "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds"});
-        UstadJSOPDSFeed feed = CatalogController.getCatalogByURL(catalogUrl,
-                CatalogController.SHARED_RESOURCE, null, null, 0, PlatformTestUtil.getTargetContext());
+        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(catalogUrl);
+        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(catalogUrl, null, null);
+        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(
+                new ByteArrayInputStream(result.getResponse()));
+        feed.loadFromXpp(xpp, null);
 
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         feed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
                 FEED_LINK_MIME, destinationDir);
         feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
@@ -303,9 +309,9 @@ public class TestAcquisitionTask {
     public void testAcquisitionStop() throws Exception {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
-        CatalogController.removeEntry(ENTRY_ID_PRESENT, CatalogController.SHARED_RESOURCE,
+        CatalogPresenter.removeEntry(ENTRY_ID_PRESENT, CatalogPresenter.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
-        CatalogController.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogController.SHARED_RESOURCE,
+        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
 
         Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
@@ -329,13 +335,13 @@ public class TestAcquisitionTask {
 
         Assert.assertEquals("Task status is stopped", NetworkTask.STATUS_STOPPED, task.getStatus());
         Assert.assertTrue("Task is stopped", task.isStopped());
-        CatalogEntryInfo presentEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_PRESENT,
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-        Assert.assertEquals("Entry 1 not acquired", CatalogController.STATUS_NOT_ACQUIRED,
+        CatalogEntryInfo presentEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_PRESENT,
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        Assert.assertEquals("Entry 1 not acquired", CatalogPresenter.STATUS_NOT_ACQUIRED,
                 presentEntryInfo.acquisitionStatus);
-        CatalogEntryInfo notPresentEntryInfo = CatalogController.getEntryInfo(ENTRY_ID_NOT_PRESENT,
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-        Assert.assertEquals("Entry 2 not acquired", CatalogController.STATUS_NOT_ACQUIRED,
+        CatalogEntryInfo notPresentEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_NOT_PRESENT,
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+        Assert.assertEquals("Entry 2 not acquired", CatalogPresenter.STATUS_NOT_ACQUIRED,
                 notPresentEntryInfo.acquisitionStatus);
         Assert.assertTrue("Supernode mode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
 

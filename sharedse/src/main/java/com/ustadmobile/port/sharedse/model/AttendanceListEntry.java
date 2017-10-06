@@ -1,7 +1,6 @@
 package com.ustadmobile.port.sharedse.model;
 
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.port.sharedse.controller.AttendanceController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.ListableEntity;
 import com.ustadmobile.core.util.UMUtil;
@@ -10,6 +9,7 @@ import com.ustadmobile.nanolrs.core.manager.XapiForwardingStatementManager;
 import com.ustadmobile.nanolrs.core.model.XapiForwardingStatement;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
+import com.ustadmobile.port.sharedse.controller.AttendanceController;
 
 import java.util.Calendar;
 import java.util.Iterator;

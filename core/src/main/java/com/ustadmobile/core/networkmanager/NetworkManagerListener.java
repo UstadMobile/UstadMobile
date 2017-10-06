@@ -1,7 +1,5 @@
 package com.ustadmobile.core.networkmanager;
 
-import java.util.List;
-
 /**
  * <h1>NetworkManagerListener</h1>
  *

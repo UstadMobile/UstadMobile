@@ -6,9 +6,9 @@
 package com.ustadmobile.port.sharedse.model;
 
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.port.sharedse.controller.AttendanceController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.ListableEntity;
+import com.ustadmobile.port.sharedse.controller.AttendanceController;
 
 /**
  * Represents a class of students for which we take attendance

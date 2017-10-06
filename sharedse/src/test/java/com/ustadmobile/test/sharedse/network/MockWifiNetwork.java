@@ -2,7 +2,6 @@ package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
-import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;

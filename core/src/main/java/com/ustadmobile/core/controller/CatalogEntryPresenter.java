@@ -9,8 +9,10 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
+import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
+import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -20,22 +22,19 @@ import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
 
-
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 /* $if umplatform != 2 $ */
-import java.util.List;
-import com.ustadmobile.core.networkmanager.NetworkNode;
-import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 /* $endif */
 
 /**
  * Created by mike on 4/17/17.
  */
 
-public class CatalogEntryPresenter extends BaseCatalogController implements AcquisitionListener, NetworkManagerListener{
+public class CatalogEntryPresenter extends BaseCatalogPresenter implements AcquisitionListener, NetworkManagerListener{
 
     private CatalogEntryView catalogEntryView;
 
@@ -95,8 +94,8 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 entry = entryFeed.getEntryById(args.get(ARG_ENTRY_ID).toString());
                 catalogEntryView.setTitle(entry.title);
 
-                CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
-                        CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, context);
+                CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.id,
+                        CatalogPresenter.ALL_RESOURCES, context);
                 catalogEntryView.setDescription(entry.content, entry.getContentType());
                 String[] firstAcquisitionLink = entry.getFirstAcquisitionLink(null);
                 if(firstAcquisitionLink != null
@@ -125,11 +124,11 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                 catalogEntryView.setAlternativeTranslationLinks(translatedLanguages);
 
                 boolean isAcquired = entryInfo != null
-                        ? entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED
+                        ? entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED
                         : false;
 
-                updateButtonsByStatus(isAcquired ? CatalogController.STATUS_ACQUIRED :
-                        CatalogController.STATUS_NOT_ACQUIRED);
+                updateButtonsByStatus(isAcquired ? CatalogPresenter.STATUS_ACQUIRED :
+                        CatalogPresenter.STATUS_NOT_ACQUIRED);
 
 
                 NetworkManagerCore networkManager = UstadMobileSystemImpl.getInstance().getNetworkManager();
@@ -259,11 +258,11 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
      */
     protected void updateButtonsByStatus(int acquisitionStatus) {
         catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD,
-                acquisitionStatus != CatalogController.STATUS_ACQUIRED);
+                acquisitionStatus != CatalogPresenter.STATUS_ACQUIRED);
         catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN,
-                acquisitionStatus == CatalogController.STATUS_ACQUIRED);
+                acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED);
         catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY,
-                acquisitionStatus == CatalogController.STATUS_ACQUIRED);
+                acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED);
     }
 
     public void handleClickButton(int buttonId) {
@@ -285,11 +284,11 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
     public void handleOpenEntry(UstadJSOPDSEntry entry) {
-        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
-                CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.id,
+                CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE, getContext());
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        if (entryInfo != null && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED) {
+        if (entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
             Hashtable openArgs = new Hashtable();
             openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
             openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
@@ -313,7 +312,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
 
     public void handleClickShare() {
         sharedAcquiredEntries = getTranslatedAlternativesLangVectors(entry,
-                CatalogController.STATUS_ACQUIRED);
+                CatalogPresenter.STATUS_ACQUIRED);
         if(sharedAcquiredEntries[0].size() == 0) {
             UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
                     "Not downloaded (in this language)!", AppView.LENGTH_LONG);
@@ -359,10 +358,10 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
     }
 
     public void handleClickStopDownload() {
-        CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(entry.id,
-                CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE, getContext());
+        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.id,
+                CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE, getContext());
         if(entryInfo != null
-                && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUISITION_IN_PROGRESS
+                && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS
                 && entryInfo.downloadID > 0) {
             NetworkTask task = UstadMobileSystemImpl.getInstance().getNetworkManager().getTaskById(
                     entryInfo.downloadID, NetworkManagerCore.QUEUE_ENTRY_ACQUISITION);
@@ -432,7 +431,7 @@ public class CatalogEntryPresenter extends BaseCatalogController implements Acqu
                         
                         public void run() {
                             catalogEntryView.setProgressVisible(false);
-                            updateButtonsByStatus(CatalogController.STATUS_ACQUIRED);
+                            updateButtonsByStatus(CatalogPresenter.STATUS_ACQUIRED);
                         }
                     });
                     break;

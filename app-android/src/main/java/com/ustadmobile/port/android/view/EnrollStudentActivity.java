@@ -10,11 +10,11 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.port.sharedse.controller.EnrollStudentController;
 import com.ustadmobile.core.controller.LoginController;
-import com.ustadmobile.port.sharedse.view.EnrollStudentView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.controller.EnrollStudentController;
+import com.ustadmobile.port.sharedse.view.EnrollStudentView;
 
 import java.util.Hashtable;
 

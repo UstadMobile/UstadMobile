@@ -5,7 +5,6 @@ import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.LoadControllerThread;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadController;
-import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
 import com.ustadmobile.port.sharedse.view.PersonListView;

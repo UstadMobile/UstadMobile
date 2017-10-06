@@ -32,13 +32,12 @@ package com.ustadmobile.core.epubnav;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * This class represents an EPUB navigation document as indicated by the OPF

@@ -32,7 +32,7 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.tincan.TinCanResultListener;
@@ -43,6 +43,7 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.LoginView;
 
+import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -56,7 +57,6 @@ import java.util.Hashtable;
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 
@@ -257,7 +257,7 @@ public abstract class UstadMobileSystemImpl {
             loadActiveUserInfo(context);
             if(getActiveUser(context) != null) {
                 getHTTPCacheDir(context).setPrivateCacheDir(
-                    getCacheDir(CatalogController.USER_RESOURCE, context));
+                    getCacheDir(CatalogPresenter.USER_RESOURCE, context));
             }
             getHTTPCacheDir(context).primeCache(context);
 
@@ -272,7 +272,7 @@ public abstract class UstadMobileSystemImpl {
         String sharedContentDir = mainInstance.getSharedContentDir();
         sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
         String sharedCacheDir = mainInstance.getCacheDir(
-                CatalogController.SHARED_RESOURCE, context);
+                CatalogPresenter.SHARED_RESOURCE, context);
         boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
         StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
         initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
@@ -456,8 +456,8 @@ public abstract class UstadMobileSystemImpl {
      * cache contents / shared cache contents
      *
      * @param mode USER_RESOURCE or SHARED_RESOURCE
-     * @see CatalogController#USER_RESOURCE
-     * @see CatalogController#SHARED_RESOURCE
+     * @see CatalogPresenter#USER_RESOURCE
+     * @see CatalogPresenter#SHARED_RESOURCE
      * @return String filepath to the cache dir for that mode
      */
     public abstract String getCacheDir(int mode, Object context);
@@ -705,7 +705,7 @@ public abstract class UstadMobileSystemImpl {
         //Make sure there is a valid directory for this user
         getLogger().l(UMLog.INFO, 306, username);
         if(username != null) {
-            String userCachePath = getCacheDir(CatalogController.USER_RESOURCE,
+            String userCachePath = getCacheDir(CatalogPresenter.USER_RESOURCE,
                     context);
             String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
             getHTTPCacheDir(context).setPrivateCacheDir(userCachePath);
@@ -976,8 +976,8 @@ public abstract class UstadMobileSystemImpl {
      */
     public HTTPCacheDir getHTTPCacheDir(Object context) {
         if(httpCacheDir == null) {
-            httpCacheDir = new HTTPCacheDir(getCacheDir(CatalogController.SHARED_RESOURCE, context),
-                    getCacheDir(CatalogController.USER_RESOURCE, context));
+            httpCacheDir = new HTTPCacheDir(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context),
+                    getCacheDir(CatalogPresenter.USER_RESOURCE, context));
         }
 
         return httpCacheDir;

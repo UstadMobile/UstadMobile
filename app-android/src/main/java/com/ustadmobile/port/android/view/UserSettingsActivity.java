@@ -5,9 +5,8 @@ import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
-import com.ustadmobile.core.controller.UserSettingsController;
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.model.UserSettingItem;
 import com.ustadmobile.core.view.UserSettingsView;
 

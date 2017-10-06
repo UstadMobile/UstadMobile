@@ -1,6 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipEntryHandle;
@@ -57,7 +57,7 @@ public class XapiPackageTypePlugin extends ContentTypePlugin{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         String containerFilename = UMFileUtil.getFilename(fileUri);
-        String cacheFeedID = CatalogController.sanitizeIDForFilename(fileUri);
+        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileUri);
         UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileUri, containerFilename,
                 cacheFeedID);
 

@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -23,12 +22,12 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.port.sharedse.omr.AttendanceSheetImage;
-import com.ustadmobile.port.sharedse.omr.OMRImageSource;
-import com.ustadmobile.port.sharedse.omr.OMRRecognizer;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
 import com.ustadmobile.port.android.impl.qr.RotatedNV21OMRImageSource;
+import com.ustadmobile.port.sharedse.omr.AttendanceSheetImage;
+import com.ustadmobile.port.sharedse.omr.OMRImageSource;
+import com.ustadmobile.port.sharedse.omr.OMRRecognizer;
 
 import java.io.File;
 import java.io.FileOutputStream;

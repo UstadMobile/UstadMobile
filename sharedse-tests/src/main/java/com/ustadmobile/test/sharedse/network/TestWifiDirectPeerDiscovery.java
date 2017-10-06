@@ -1,19 +1,14 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.controller.CatalogController;
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
-import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
 import com.ustadmobile.port.sharedse.networkmanager.WifiP2pListener;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -21,13 +16,9 @@ import com.ustadmobile.test.sharedse.TestUtilsSE;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 
 /**
@@ -129,7 +120,7 @@ public class TestWifiDirectPeerDiscovery {
 
         //now acquire that feed - make this a feed that will work for acquisition
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         feed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
                 "application/dir", destinationDir);
 

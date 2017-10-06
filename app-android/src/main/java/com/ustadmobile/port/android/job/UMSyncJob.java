@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 
 import com.evernote.android.job.Job;
-import com.evernote.android.job.JobRequest;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.nanolrs.core.manager.NodeManager;
 import com.ustadmobile.nanolrs.core.manager.UserManager;
@@ -16,7 +15,6 @@ import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This is using evernote's andoid-job to run, umsync process in the background.

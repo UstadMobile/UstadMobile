@@ -1,6 +1,5 @@
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.impl.ZipEntryHandle;
 import com.ustadmobile.core.impl.ZipFileHandle;
 
 /**

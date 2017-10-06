@@ -1,19 +1,19 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
 import com.ustadmobile.core.networkmanager.EntryCheckResponse;
+import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
 import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUUID;
@@ -21,6 +21,7 @@ import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -1357,6 +1358,20 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     /**
+     * This method is to be called when other components (e.g. directory scanner etc) discover
+     * new content, or catalog discover content that was previously thought to have been acquired
+     * is no longer around (e.g. the user manually deleted or moved files)
+     *
+     * @param entryId Entry id for which status has been discovered
+     */
+    public void handleEntryStatusChangeDiscovered(String entryId, int acquisitionStatus) {
+        AcquisitionTask.Status status = new AcquisitionTask.Status();
+        status.setStatus(acquisitionStatus);
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 645, "handleEntryStatusChangeDiscovered: " + entryId +
+                " : " + status.getStatus());
+    }
+
+    /**
      * Find the acquisition task for the given entry id
      *
      * @param entryId Entry ID to find
@@ -1596,10 +1611,10 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         UstadJSOPDSEntry entry;
         CatalogEntryInfo entryInfo;
         for(int i = 0; i < entryIds.length; i++) {
-            entryInfo = CatalogController.getEntryInfo(entryIds[i], CatalogController.SHARED_RESOURCE,
+            entryInfo = CatalogPresenter.getEntryInfo(entryIds[i], CatalogPresenter.SHARED_RESOURCE,
                     getContext());
 
-            if(entryInfo == null || entryInfo.acquisitionStatus != CatalogController.STATUS_ACQUIRED)
+            if(entryInfo == null || entryInfo.acquisitionStatus != CatalogPresenter.STATUS_ACQUIRED)
                 continue;//cannot be shared if it has not been acquired.
 
             entry = new UstadJSOPDSEntry(feed, "Shared: " + entryInfo.fileURI, entryIds[i],

@@ -3,13 +3,13 @@ package com.ustadmobile.port.android.view;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
+import android.widget.Button;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.sharedse.controller.ClassManagementController;
 import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
 import com.ustadmobile.port.sharedse.view.ClassManagementView;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
-import android.widget.Button;
 
 public class ClassManagementActivity extends UstadBaseActivity implements ClassManagementView,
         View.OnClickListener {

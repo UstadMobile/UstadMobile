@@ -3,8 +3,6 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.WelcomeView;
 
-import java.util.Hashtable;
-
 /**
  * Created by mike on 7/17/17.
  */

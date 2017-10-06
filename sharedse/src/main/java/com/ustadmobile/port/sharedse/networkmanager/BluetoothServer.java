@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.BufferedReader;
@@ -122,9 +122,9 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
             CatalogEntryInfo info;
             String response = CMD_ENTRY_STATUS_FEEDBACK+" ";
             for(int i = 0; i < entryIds.length; i++) {
-                info = CatalogController.getEntryInfo(URLDecoder.decode(entryIds[i], "UTF-8"),
-                        CatalogController.SHARED_RESOURCE, networkManager.getContext());
-                results[i] = info != null && info.acquisitionStatus == CatalogController.STATUS_ACQUIRED;
+                info = CatalogPresenter.getEntryInfo(URLDecoder.decode(entryIds[i], "UTF-8"),
+                        CatalogPresenter.SHARED_RESOURCE, networkManager.getContext());
+                results[i] = info != null && info.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED;
                 response += results[i] ? '1' : '0';
                 if(i < entryIds.length - 1)
                     response += CMD_SEPARATOR;

@@ -8,16 +8,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.UstadController;
-import com.ustadmobile.port.sharedse.model.AttendanceClass;
-import com.ustadmobile.port.sharedse.view.ClassListView;
-import com.ustadmobile.port.sharedse.controller.ClassListController;
 import android.widget.AdapterView;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.ControllerReadyListener;
+import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.controller.ClassListController;
+import com.ustadmobile.port.sharedse.model.AttendanceClass;
+import com.ustadmobile.port.sharedse.view.ClassListView;
 
 import java.util.ArrayList;
 import java.util.List;

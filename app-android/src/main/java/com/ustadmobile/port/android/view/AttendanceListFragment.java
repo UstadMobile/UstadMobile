@@ -9,12 +9,12 @@ import android.view.ViewGroup;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.port.sharedse.controller.AttendanceListController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.model.ListableEntity;
-import com.ustadmobile.port.sharedse.view.AttendanceListView;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.controller.AttendanceListController;
+import com.ustadmobile.port.sharedse.view.AttendanceListView;
 
 import java.util.List;
 

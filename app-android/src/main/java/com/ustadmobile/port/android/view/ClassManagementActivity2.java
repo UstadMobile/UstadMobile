@@ -1,18 +1,18 @@
 package com.ustadmobile.port.android.view;
 
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.port.sharedse.controller.ClassManagementController2;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.view.ClassManagementView2;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.sharedse.controller.ClassManagementController2;
+import com.ustadmobile.port.sharedse.view.ClassManagementView2;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;

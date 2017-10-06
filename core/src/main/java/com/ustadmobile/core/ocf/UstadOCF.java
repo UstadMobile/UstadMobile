@@ -32,9 +32,10 @@
 package com.ustadmobile.core.ocf;
 
 import org.xmlpull.v1.XmlPullParser;
-import java.util.*;
 import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
+import java.util.Vector;
 
 
 /**

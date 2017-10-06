@@ -1,7 +1,7 @@
 package com.ustadmobile.test.port.sharedse;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -39,7 +39,7 @@ public class TestCatalogUriResponder {
         OutputStream entryOut = null;
         IOException ioe = null;
 
-        File sharedStorageDir = new File(impl.getStorageDirs(CatalogController.SHARED_RESOURCE,
+        File sharedStorageDir = new File(impl.getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
                 context)[0].getDirURI());
         if(!sharedStorageDir.exists())
             sharedStorageDir.mkdirs();
@@ -60,15 +60,15 @@ public class TestCatalogUriResponder {
         }
         CatalogEntryInfo entryInfo = new CatalogEntryInfo();
         entryInfo.fileURI = entryTmpFile.getAbsolutePath();
-        entryInfo.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
+        entryInfo.acquisitionStatus = CatalogPresenter.STATUS_ACQUIRED;
         entryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
-        CatalogController.setEntryInfo(TestEntryStatusTask.ENTRY_ID, entryInfo,
-                CatalogController.SHARED_RESOURCE, context);
+        CatalogPresenter.setEntryInfo(TestEntryStatusTask.ENTRY_ID, entryInfo,
+                CatalogPresenter.SHARED_RESOURCE, context);
     }
 
     @After
     public void removeEntry() {
-        CatalogController.removeEntry(TestEntryStatusTask.ENTRY_ID, CatalogController.SHARED_RESOURCE,
+        CatalogPresenter.removeEntry(TestEntryStatusTask.ENTRY_ID, CatalogPresenter.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
     }
 

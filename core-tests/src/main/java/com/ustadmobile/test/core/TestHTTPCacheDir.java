@@ -35,24 +35,23 @@ package com.ustadmobile.test.core;
  $else$ */
     /* $endif$ */
 
-    import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.UMFileUtil;
-    import com.ustadmobile.test.core.impl.ClassResourcesResponder;
-    import com.ustadmobile.test.core.impl.PlatformTestUtil;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 
-    import org.json.JSONArray;
-    import org.junit.AfterClass;
-    import org.junit.Assert;
-    import org.junit.BeforeClass;
-    import org.junit.Test;
+import org.json.JSONArray;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-    import java.io.IOException;
-    import java.util.Hashtable;
+import java.io.IOException;
+import java.util.Hashtable;
 
-    import fi.iki.elonen.router.RouterNanoHTTPD;
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 
 /**
@@ -79,7 +78,7 @@ public class TestHTTPCacheDir  {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         //context is not needed when we are asking for the shaerd cache dir
-        String cacheDirName = impl.getCacheDir(CatalogController.SHARED_RESOURCE,
+        String cacheDirName = impl.getCacheDir(CatalogPresenter.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
         HTTPCacheDir cacheDir = new HTTPCacheDir(cacheDirName, null);
         String httpRoot = ResourcesHttpdTestServer.getHttpRoot();
@@ -159,7 +158,7 @@ public class TestHTTPCacheDir  {
          * Test caching of private responses
          */
         cacheDir.saveIndex();
-        String privateCacheDir = impl.getCacheDir(CatalogController.USER_RESOURCE,
+        String privateCacheDir = impl.getCacheDir(CatalogPresenter.USER_RESOURCE,
                 PlatformTestUtil.getTargetContext());
         cacheDir.setPrivateCacheDir(privateCacheDir);
         String httpUrlPrivate = UMFileUtil.joinPaths(new String[]{httpRoot, "smallcheck.jpg?private=true"});

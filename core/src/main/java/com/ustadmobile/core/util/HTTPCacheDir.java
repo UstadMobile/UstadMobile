@@ -5,26 +5,30 @@
  */
 package com.ustadmobile.core.util;
 
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
-import java.util.Hashtable;
-import java.util.TimeZone;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.TimeZone;
 import java.util.Vector;
+
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
-    import java.util.Iterator;
 
 /* $endif$ */
 
@@ -846,7 +850,7 @@ public class HTTPCacheDir {
         }
         
         if(filename == null) {
-            filename = CatalogController.sanitizeIDForFilename(url);
+            filename = CatalogPresenter.sanitizeIDForFilename(url);
         }
         
         String contentType = result.getHeaderValue("content-type");

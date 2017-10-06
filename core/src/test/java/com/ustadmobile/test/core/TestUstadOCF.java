@@ -39,19 +39,23 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
 
-import com.ustadmobile.core.util.TestUtils;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMFileUtil;
-import java.io.IOException;
 import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
-import java.io.ByteArrayInputStream;
-import java.util.Hashtable;
+import com.ustadmobile.core.util.TestUtils;
+import com.ustadmobile.core.util.UMFileUtil;
+
+import junit.framework.TestCase;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Hashtable;
+
+/* $endif$ */
 
 
 /**

@@ -39,22 +39,24 @@ import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.HTTPCacheDir;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.LoginView;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.UstadView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Hashtable;
 
-
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 

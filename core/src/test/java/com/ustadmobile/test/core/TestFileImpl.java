@@ -35,12 +35,15 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMFileUtil;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.io.OutputStream;
+
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
 /* $endif$ */
 
 /* $if umplatform == 1 $

@@ -1,19 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 
-import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.BasePointController;
-import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.BasePointMenuItem;
-import com.ustadmobile.core.view.BasePointView;
-import com.ustadmobile.core.view.DialogResultListener;
-import com.ustadmobile.core.view.DismissableDialog;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
-
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,9 +16,19 @@ import android.support.v7.app.AlertDialog;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
+
+import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.BasePointMenuItem;
+import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.view.DialogResultListener;
+import com.ustadmobile.core.view.DismissableDialog;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
@@ -217,11 +215,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         menu.add(Menu.NONE, BasePointController.CMD_SHARE_APP, 0, R.string.share_application);
         menu.add(Menu.NONE, BasePointController.CMD_RECEIVE_ENTRY, 1, R.string.receive);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void refreshCatalog(int column) {
-        ((CatalogOPDSFragment) mPagerAdapter.getItem(column)).loadCatalog();
     }
 
     @Override

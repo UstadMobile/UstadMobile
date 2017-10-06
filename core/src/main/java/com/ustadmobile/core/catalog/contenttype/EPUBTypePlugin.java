@@ -1,6 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
@@ -48,7 +48,7 @@ public class EPUBTypePlugin extends ContentTypePlugin{
         impl.l(UMLog.VERBOSE, 437, fileUri);
 
         String containerFilename = UMFileUtil.getFilename(fileUri);
-        String cacheFeedID = CatalogController.sanitizeIDForFilename(fileUri);
+        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileUri);
         UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileUri, containerFilename,
                 cacheFeedID);
 

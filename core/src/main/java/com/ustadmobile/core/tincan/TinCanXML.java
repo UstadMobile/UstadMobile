@@ -30,11 +30,11 @@
  */
 package com.ustadmobile.core.tincan;
 
-import java.io.IOException;
-import java.util.Hashtable;
-import java.util.Vector;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.util.Hashtable;
 
 /**
  * This class represents a tincan.xml file of a given container. As specified here:

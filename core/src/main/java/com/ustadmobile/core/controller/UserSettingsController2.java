@@ -5,7 +5,6 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMUtil;
-import com.ustadmobile.core.view.AccountSettingsView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.RegistrationView;

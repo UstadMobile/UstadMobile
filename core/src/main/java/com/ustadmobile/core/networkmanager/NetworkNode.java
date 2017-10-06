@@ -2,12 +2,12 @@ package com.ustadmobile.core.networkmanager;
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import java.util.Calendar;
-
-/* $if umplatform != 2 $ */
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+
+/* $if umplatform != 2 $ */
 /* $else$
 import java.util.Vector;
 $endif$ */

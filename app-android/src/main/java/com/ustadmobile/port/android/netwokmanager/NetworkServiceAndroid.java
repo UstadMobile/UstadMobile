@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.netwokmanager;
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -20,7 +19,6 @@ import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import java.sql.SQLException;
-import java.util.List;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
 import listener.ActiveUserListener;

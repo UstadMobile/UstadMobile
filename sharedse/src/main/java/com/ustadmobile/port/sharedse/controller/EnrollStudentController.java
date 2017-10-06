@@ -8,13 +8,13 @@ import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.port.sharedse.model.AttendanceClass;
 import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
 import com.ustadmobile.port.sharedse.view.ClassManagementView;
 import com.ustadmobile.port.sharedse.view.EnrollStudentView;
-import com.ustadmobile.core.view.UstadView;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;

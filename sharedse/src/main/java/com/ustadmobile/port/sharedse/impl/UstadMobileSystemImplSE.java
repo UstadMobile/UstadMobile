@@ -5,7 +5,7 @@
  */
 package com.ustadmobile.port.sharedse.impl;
 
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.TinCanQueueListener;
@@ -13,14 +13,12 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
-
-import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
-import com.ustadmobile.core.util.UMUUID;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.nanolrs.core.manager.ChangeSeqManager;
 import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
@@ -32,7 +30,7 @@ import com.ustadmobile.nanolrs.core.model.XapiAgent;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
-import com.ustadmobile.port.sharedse.impl.zip.*;
+import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import org.json.JSONObject;
@@ -224,7 +222,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     @Override
     public String getCacheDir(int mode, Object context) {
         String systemBaseDir = getSystemBaseDir(context);
-        if(mode == CatalogController.SHARED_RESOURCE) {
+        if(mode == CatalogPresenter.SHARED_RESOURCE) {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, UstadMobileConstants.CACHEDIR});
         }else {
             return UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-" + getActiveUser(context),
@@ -238,7 +236,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         String systemBaseDir = getSystemBaseDir(context);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        if((mode & CatalogController.SHARED_RESOURCE) == CatalogController.SHARED_RESOURCE) {
+        if((mode & CatalogPresenter.SHARED_RESOURCE) == CatalogPresenter.SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
                     false, true, false));
 
@@ -253,7 +251,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         }
 
         if(impl.getActiveUser(context) != null
-                && ((mode & CatalogController.USER_RESOURCE) == CatalogController.USER_RESOURCE)) {
+                && ((mode & CatalogPresenter.USER_RESOURCE) == CatalogPresenter.USER_RESOURCE)) {
             String userBase = UMFileUtil.joinPaths(new String[]{systemBaseDir, "user-"
                     + getActiveUser(context)});
             dirList.add(new UMStorageDir(userBase, getString(MessageID.device, context),

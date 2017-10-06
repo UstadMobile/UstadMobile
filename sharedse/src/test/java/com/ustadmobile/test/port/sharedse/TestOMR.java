@@ -30,10 +30,9 @@
  */
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.omr.OMRRecognizer;
+import com.ustadmobile.core.util.TestUtils;
 
 import java.io.IOException;
 

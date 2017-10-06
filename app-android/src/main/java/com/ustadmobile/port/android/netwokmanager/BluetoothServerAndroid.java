@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.netwokmanager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
-import android.content.Intent;
 import android.util.Log;
 
 import com.ustadmobile.core.impl.UMLog;

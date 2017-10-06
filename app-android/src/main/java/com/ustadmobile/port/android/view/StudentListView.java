@@ -1,12 +1,12 @@
 package com.ustadmobile.port.android.view;
 
+import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
-import android.content.Context;
 
 /**
  * Created by varuna on 21/02/16.

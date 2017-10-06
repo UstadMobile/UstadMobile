@@ -5,8 +5,8 @@
  */
 package com.ustadmobile.port.sharedse.view;
 
-import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.port.sharedse.model.AttendanceClassStudent;
 
 /**
  *

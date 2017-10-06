@@ -102,8 +102,8 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
         int speedLimit = session.getParameters().containsKey("speedLimit") ?
                 Integer.parseInt(session.getParameters().get("speedLimit").get(0)): 0;
 
-        ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(resPath),
-            loadedTime);
+        URL resourceUrl = getClass().getResource(resPath);
+        ResourceFileSource fileSource = new ResourceFileSource(resourceUrl, loadedTime);
 
         NanoHTTPD.Response response = newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, fileSource, null);
 

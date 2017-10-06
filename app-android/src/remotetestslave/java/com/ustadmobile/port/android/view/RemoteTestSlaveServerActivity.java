@@ -13,9 +13,7 @@ import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.test.core.buildconfig.TestConstants;

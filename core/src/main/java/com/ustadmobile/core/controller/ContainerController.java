@@ -61,42 +61,43 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opf.UstadJSOPF;
-import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMUtil;
-import com.ustadmobile.core.view.ContainerView;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.tincan.Registration;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.tincan.TinCanXML;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.UstadView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Vector;
 
-
-
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
-    import org.json.*;
 /* $endif$ */
 
 
@@ -236,7 +237,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
         impl.l(UMLog.VERBOSE, 437, fileURI);
         
         String containerFilename = UMFileUtil.getFilename(fileURI);
-        String cacheFeedID = CatalogController.sanitizeIDForFilename(fileURI);
+        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileURI);
         UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileURI, containerFilename, 
             cacheFeedID);
         

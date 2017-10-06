@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.impl;
 
 import android.util.Log;
+
 import com.ustadmobile.core.impl.UMLog;
 
 /**

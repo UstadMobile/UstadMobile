@@ -29,18 +29,21 @@
 
  */
 package com.ustadmobile.core.opds;
+
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.Vector;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Represents an OPDS Feed containing entries.
@@ -49,12 +52,7 @@ import org.xmlpull.v1.XmlSerializer;
  */
 public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
-    public UstadJSOPDSEntry[] entries;
-
-    /**
-     * The absolute URL of this catalog (HTTP or Filesystem based)
-     */
-    public String href;
+    public UstadJSOPDSEntry[] entries = new UstadJSOPDSEntry[0];
 
     /**
      * Cached reference to the OPDS self link
@@ -64,6 +62,10 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     public UstadJSOPDSFeed() {
         href = null;
+    }
+
+    public UstadJSOPDSFeed(String srcHref) {
+        this.href = srcHref;
     }
     
     /**
@@ -97,7 +99,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
 
         XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser();
         xpp.setInput(in, encoding);
-        loadFromXpp(xpp);
+        loadFromXpp(xpp, null);
     }
 
 
@@ -109,8 +111,8 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * @throws XmlPullParserException
      * @throws IOException
      */
-    public void loadFromXpp(XmlPullParser xpp) throws XmlPullParserException, IOException{
-        loadFromXpp(xpp, this);
+    public void loadFromXpp(XmlPullParser xpp, OpdsItemLoadCallback callback) throws XmlPullParserException, IOException{
+        loadFromXpp(xpp, this, callback);
     }
 
 
@@ -121,12 +123,30 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * @param entry  The entry to be added
      */
     public void addEntry(UstadJSOPDSEntry entry) {
-        UstadJSOPDSEntry[] newEntries = new UstadJSOPDSEntry[entries.length + 1];
-        System.arraycopy(this.entries, 0, newEntries, 0, this.entries.length);
-        newEntries[entries.length] = entry;
+        int newEntryIndex = entries != null ? entries.length : 0;
+        UstadJSOPDSEntry[] newEntries = new UstadJSOPDSEntry[newEntryIndex + 1];
+        if(entries != null)
+            System.arraycopy(this.entries, 0, newEntries, 0, this.entries.length);
+
+        newEntries[newEntryIndex] = entry;
         this.entries = newEntries;
     }
-    
+
+    /**
+     * Add an entry to the list
+     *
+     * @param position
+     * @param entry
+     */
+    public void addEntry(int position, UstadJSOPDSEntry entry) {
+        UstadJSOPDSEntry[] newEntries = new UstadJSOPDSEntry[size() + 1];
+        System.arraycopy(this.entries, 0, newEntries, 0, position);
+        newEntries[position] = entry;
+        System.arraycopy(this.entries, position, newEntries, position + 1,
+                entries.length - position);
+        this.entries = newEntries;
+    }
+
     /**
      * Sort entries use a given comparer
      * 
@@ -138,15 +158,19 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
     
     public UstadJSOPDSEntry getEntryById (String id) {
-        UstadJSOPDSEntry entry;
-        for (int i = 0;i < this.entries.length; i++){
-            if (this.entries[i].id.equals(id)){
-                entry = this.entries[i];
-                return entry;
-            }
-        }
-        
-        return null;
+        int index = UstadJSOPDSItem.indexOfEntryInArray(id, entries);
+        return index != -1 ? entries[index] : null;
+    }
+
+    /**
+     * Get the index of an entry if it is contained in this OPDS feed.
+     *
+     * @param entryId Entry ID to look for
+     *
+     * @return the index in this feed if found, -1 otherwise
+     */
+    public int indexOfEntryId(String entryId) {
+        return UstadJSOPDSItem.indexOfEntryInArray(entryId, entries);
     }
 
 
@@ -259,7 +283,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * @return Number of entries in this feed
      */
     public int size() {
-        return entries.length;
+        return entries != null ? entries.length : 0;
     }
 
 
@@ -272,6 +296,8 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     public UstadJSOPDSEntry getEntry(int index) {
         return entries[index];
     }
+
+
 
     /**
      * Given acquisition preferences : select the links to actually download
@@ -389,6 +415,20 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         }
 
         return languageList;
+    }
+
+    /**
+     * Return a Vector of all entries in this feed.
+     *
+     * @return Vector with all entries in this feed
+     */
+    public Vector getAllEntries() {
+        Vector result = new Vector(entries.length);
+        for(int i = 0; i < entries.length; i++) {
+            result.addElement(entries[i]);
+        }
+
+        return result;
     }
 
     public Vector getEntriesByLinkParams(String linkRel, String mimeType, String href, boolean relByPrefix, boolean mimeTypeByPrefix, boolean hrefByPrefix, int limit) {

@@ -32,29 +32,25 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Build;
+import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioGroup;
-import android.widget.Spinner;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 
-import java.util.Hashtable;
 import java.util.WeakHashMap;
 
 public class LoginActivity extends UstadBaseActivity implements LoginView, View.OnClickListener, CheckBox.OnCheckedChangeListener {

@@ -33,11 +33,13 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
 
-    import com.ustadmobile.core.controller.CatalogController;
-    import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
+
+import junit.framework.TestCase;
+
+/* $endif$ */
 
 /**
  *
@@ -47,7 +49,7 @@ public abstract class TestCatalogEntryInfo extends TestCase {
     
     public void testCatalogEntryInfo() {
         CatalogEntryInfo testInfo = new CatalogEntryInfo();
-        testInfo.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
+        testInfo.acquisitionStatus = CatalogPresenter.STATUS_ACQUIRED;
         testInfo.srcURLs = new String[]{"http://www.server1.com/file.epub",
             "http://www.server2.com/file.epub"};
         testInfo.fileURI = "/some/file/path/file.epub";

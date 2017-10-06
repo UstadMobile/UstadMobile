@@ -1,7 +1,7 @@
 package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.catalog.DirectoryScanner;
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -32,12 +32,12 @@ public class TestDirectoryScanner {
     public void testDirectoryScanner() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Assert.assertTrue(true);
-        UMStorageDir[] storageDirs = impl.getStorageDirs(CatalogController.SHARED_RESOURCE,
+        UMStorageDir[] storageDirs = impl.getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
                 PlatformTestUtil.getTargetContext());
         String dirPath = storageDirs[0].getDirURI();
         DirectoryScanner scanner = new DirectoryScanner();
         UstadJSOPDSFeed directoryFeed = scanner.scanDirectory(dirPath, null, "test", "test-id",
-                CatalogController.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+                CatalogPresenter.SHARED_RESOURCE, null, null, PlatformTestUtil.getTargetContext());
         Assert.assertNotNull(directoryFeed);
 
 

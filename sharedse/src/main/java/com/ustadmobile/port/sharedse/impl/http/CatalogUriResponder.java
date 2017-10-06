@@ -1,8 +1,9 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.OpdsEndpoint;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
@@ -13,7 +14,6 @@ import org.json.JSONObject;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,10 +58,12 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         try {
             Object context = getContext(uriResource);
             if(normalizedUri.endsWith("acquire.opds")) {
-                UstadJSOPDSFeed deviceFeed = CatalogController.makeDeviceFeed(
-                    impl.getStorageDirs(CatalogController.SHARED_RESOURCE, context),
-                    CatalogController.SHARED_RESOURCE, "/catalog/entry/", CatalogController.LINK_HREF_MODE_ID,
-                    context);
+//                UstadJSOPDSFeed deviceFeed = OpdsEndpoint.makeDeviceFeed(
+//                    impl.getStorageDirs(CatalogController.SHARED_RESOURCE, context),
+//                    CatalogController.SHARED_RESOURCE, "/catalog/entry/", CatalogController.LINK_HREF_MODE_ID,
+//                    context);
+                UstadJSOPDSFeed deviceFeed = (UstadJSOPDSFeed)OpdsEndpoint.getInstance().loadItem(
+                        OpdsEndpoint.OPDS_PROTO_DEVICE, null, context, null);
                 ByteArrayOutputStream bout = new ByteArrayOutputStream();
                 deviceFeed.serialize(bout);
                 bout.flush();
@@ -117,7 +119,7 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
                 EmbeddedHTTPD.class);
 
 
-        CatalogEntryInfo info = CatalogController.getEntryInfo(uuid, CatalogController.SHARED_RESOURCE,
+        CatalogEntryInfo info = CatalogPresenter.getEntryInfo(uuid, CatalogPresenter.SHARED_RESOURCE,
                 getContext(uriResource));
         if(info == null) {
             //this container does not exist here anymore
@@ -181,12 +183,12 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         JSONObject entryObj;
         for(int i = 0; i < requestEntryIds.length(); i++) {
             entryId = requestEntryIds.getString(i);
-            entryInfo = CatalogController.getEntryInfo(entryId,
-                    CatalogController.SHARED_RESOURCE, context);
+            entryInfo = CatalogPresenter.getEntryInfo(entryId,
+                    CatalogPresenter.SHARED_RESOURCE, context);
             entryObj = new JSONObject();
             responseEntries.put(entryId, entryObj);
             available = entryInfo != null
-                    && entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUIRED;
+                    && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED;
             entryObj.put(EntryStatusTask.ENTRY_RESPONSE_KEY_AVAILABLE, available);
         }
 

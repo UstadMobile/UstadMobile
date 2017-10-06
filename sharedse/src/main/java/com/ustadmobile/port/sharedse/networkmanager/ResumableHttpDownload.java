@@ -11,11 +11,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
-import java.util.Vector;
 
 /**
  * <h1>ResumableHttpDownload</h1>

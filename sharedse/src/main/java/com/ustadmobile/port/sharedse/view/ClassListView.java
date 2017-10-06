@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.view;
 
-import com.ustadmobile.port.sharedse.model.AttendanceClass;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.port.sharedse.model.AttendanceClass;
 
 /**
  * Created by varuna on 20/02/16.

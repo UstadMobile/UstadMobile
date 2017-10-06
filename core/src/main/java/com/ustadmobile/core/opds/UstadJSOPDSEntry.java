@@ -31,7 +31,6 @@
 package com.ustadmobile.core.opds;
 
 import com.ustadmobile.core.opf.UstadJSOPF;
-import com.ustadmobile.core.util.UMUtil;
 
 import org.xmlpull.v1.XmlSerializer;
 
@@ -310,4 +309,13 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         return alternativeEntryIds;
     }
 
+    @Override
+    public String getHref() {
+        if(this.href != null)
+            return href;
+        else if(this.parentFeed != null)
+            return this.parentFeed.getHref();
+        else
+            return null;
+    }
 }

@@ -1,6 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype;
 
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 
 /**

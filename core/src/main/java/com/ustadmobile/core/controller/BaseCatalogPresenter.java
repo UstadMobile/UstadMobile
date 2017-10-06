@@ -1,9 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.catalog.ContentTypeManager;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -11,7 +9,6 @@ import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMUtil;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
 
@@ -23,7 +20,7 @@ import java.util.Vector;
  * Created by mike on 4/20/17.
  */
 
-public abstract class BaseCatalogController extends UstadBaseController implements AppViewChoiceListener  {
+public abstract class BaseCatalogPresenter extends UstadBaseController implements AppViewChoiceListener  {
 
 
     public static final int CMD_REMOVE_ENTRIES = 53;
@@ -48,11 +45,11 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
     }
 
 
-    public BaseCatalogController(Object context, boolean statusEventListeningEnabled) {
+    public BaseCatalogPresenter(Object context, boolean statusEventListeningEnabled) {
         super(context, statusEventListeningEnabled);
     }
 
-    public BaseCatalogController(Object context) {
+    public BaseCatalogPresenter(Object context) {
         super(context);
     }
 
@@ -137,12 +134,11 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
         while(candidateLangs.hasMoreElements()) {
             candidateLang = (String)candidateLangs.nextElement();
             candidateEntry = (UstadJSOPDSEntry)candidateEntries.get(candidateLang);
-            info = CatalogController.getEntryInfo(candidateEntry.id,
-                    CatalogController.SHARED_RESOURCE | CatalogController.USER_RESOURCE,
-                    getContext());
+            info = CatalogPresenter.getEntryInfo(candidateEntry.id,
+                    CatalogPresenter.ALL_RESOURCES, getContext());
             if(info != null && info.acquisitionStatus == acquisitionStatus) {
                 matchingEntries.put(candidateLang, candidateEntry);
-            }else if(info == null && acquisitionStatus == CatalogController.STATUS_NOT_ACQUIRED) {
+            }else if(info == null && acquisitionStatus == CatalogPresenter.STATUS_NOT_ACQUIRED) {
                 matchingEntries.put(candidateLang, candidateEntry);
             }
         }
@@ -186,10 +182,10 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
         Hashtable catalogEntryArgs = new Hashtable();
         UstadJSOPDSFeed parentFeed = entry.parentFeed;
         String[] entryAbsoluteLink = entry.parentFeed.getAbsoluteSelfLink();
-        if(entryAbsoluteLink == null && entry.parentFeed.href != null) {
+        if(entryAbsoluteLink == null && entry.parentFeed.getHref() != null) {
             parentFeed.addLink(UstadJSOPDSFeed.LINK_REL_SELF_ABSOLUTE,
                     parentFeed.isAcquisitionFeed() ? UstadJSOPDSFeed.TYPE_ACQUISITIONFEED
-                    : UstadJSOPDSFeed.TYPE_NAVIGATIONFEED, parentFeed.href);
+                    : UstadJSOPDSFeed.TYPE_NAVIGATIONFEED, parentFeed.getHref());
         }
 
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
@@ -205,9 +201,8 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
         switch(commandId) {
             case CMD_REMOVE_ENTRIES:
                 for(int i = 0; i < removeEntriesSelected.length; i++) {
-                    CatalogController.removeEntry(removeEntriesSelected[i].id,
-                            CatalogController.USER_RESOURCE | CatalogController.SHARED_RESOURCE,
-                            getContext());
+                    CatalogPresenter.removeEntry(removeEntriesSelected[i].id,
+                            CatalogPresenter.ALL_RESOURCES, getContext());
                 }
                 onEntriesRemoved();
                 break;
@@ -229,7 +224,7 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
 
     protected String getAcquisitionStorageDir() {
-        return UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogController.SHARED_RESOURCE,
+        return UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
                 context)[0].getDirURI();
     }
 
@@ -246,12 +241,12 @@ public abstract class BaseCatalogController extends UstadBaseController implemen
 
     protected void registerItemAcquisitionCompleted(String entryID) {
         //first lookup as a user storage only download: if it's not - see if it is a shared space download
-        int entryAcquireResMode = CatalogController.SHARED_RESOURCE;
-        CatalogEntryInfo info = CatalogController.getEntryInfo(entryID, CatalogController.SHARED_RESOURCE,
+        int entryAcquireResMode = CatalogPresenter.SHARED_RESOURCE;
+        CatalogEntryInfo info = CatalogPresenter.getEntryInfo(entryID, CatalogPresenter.SHARED_RESOURCE,
                 getContext());
 
-        info.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
-        CatalogController.setEntryInfo(entryID, info, entryAcquireResMode, getContext());
+        info.acquisitionStatus = CatalogPresenter.STATUS_ACQUIRED;
+        CatalogPresenter.setEntryInfo(entryID, info, entryAcquireResMode, getContext());
     }
 
     /**

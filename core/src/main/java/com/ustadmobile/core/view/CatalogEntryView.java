@@ -1,7 +1,6 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.model.CourseProgress;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 /**
  * Created by mike on 4/17/17.

@@ -30,17 +30,17 @@
  */
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.test.core.buildconfig.TestConstants;
-import com.ustadmobile.core.util.TestUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
 
+import junit.framework.TestCase;
+
+import org.json.JSONObject;
 
 /* $if umplatform == 2  $
     import com.ustadmobile.test.port.j2me.TestCase;
     import org.json.me.*;
  $else$ */
-    import junit.framework.TestCase;
-    import org.json.*;
 /* $endif$ */
 
 

@@ -39,7 +39,7 @@ public class OpdsUpdater {
         try {
             fin = new FileInputStream(args[ARG_OPDS_FILE_INDEX]);
             parser.setInput(fin, "UTF-8");
-            feed.loadFromXpp(parser);
+            feed.loadFromXpp(parser, null);
             fin.close();
 
             System.out.println("Loaded feed");

@@ -30,10 +30,8 @@
  */
 package com.ustadmobile.core.view;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 
 /**
  *
@@ -48,22 +46,7 @@ public interface CatalogView extends UstadView{
     public int CMD_DOWNLOADENTRY = 2;
 
     public static final String VIEW_NAME = "Catalog";
-    
-    /**
-     * Set the controller linked to this view: the feed is referenced
-     * via controller.
-     * @param controller 
-     */
-    public void setController(CatalogController controller);
-    
-    /**
-     * Get the controller linked to this view: the feed is reference via the
-     * controller
-     * 
-     * @return Controller connected with this view
-     */
-    public CatalogController getController();
-    
+
     /**
      * Show a confirm/cancel dialog to the user (e.g. delete item? download item?)
      * 
@@ -206,6 +189,39 @@ public interface CatalogView extends UstadView{
      */
     void setAlternativeTranslationLinks(String[] translationLinks);
 
+    /**
+     * Add an entry to the catalog display list
+     *
+     * @param entry
+     */
+    void addEntry(UstadJSOPDSEntry entry);
+
+    /**
+     * Add an entry to the catalog display list at the specified index
+     *
+     * @param position
+     * @param entry
+     */
+    void addEntry(int position, UstadJSOPDSEntry entry);
+
+    void setEntryAt(int position, UstadJSOPDSEntry entry);
+
+    /**
+     * Remove an entry from the catalog display list
+     *
+     * @param entry
+     */
+    void removeEntry(UstadJSOPDSEntry entry);
+
+    /**
+     * Get the index of a given entry id
+     *
+     * @param entryId
+     * @return
+     */
+    int indexOfEntry(String entryId);
+
+    void setRefreshing(boolean isRefreshing);
 
 
 }

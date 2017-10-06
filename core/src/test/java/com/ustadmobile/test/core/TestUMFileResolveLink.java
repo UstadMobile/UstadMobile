@@ -33,9 +33,12 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
+
 import com.ustadmobile.core.util.UMFileUtil;
+
+import junit.framework.TestCase;
+
+/* $endif$ */
 
 /**
  *

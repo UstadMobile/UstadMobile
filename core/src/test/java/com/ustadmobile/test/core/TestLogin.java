@@ -33,13 +33,16 @@ package com.ustadmobile.test.core;
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
-/* $endif$ */
 
-import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.util.TestUtils;
+import com.ustadmobile.test.core.buildconfig.TestConstants;
+
+import junit.framework.TestCase;
+
 import java.io.IOException;
+
+/* $endif$ */
 
 /** 
 *

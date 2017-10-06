@@ -13,7 +13,8 @@ import org.junit.runners.Suite;
         TestHTTPCacheDir.class,
         TestImageLoader.class,
         TestDirectoryScanner.class,
-        TestXapiPackageTypePlugin.class
+        TestXapiPackageTypePlugin.class,
+        TestUstadJSOPDSFeed.class
 })
 public abstract class CoreTestSuite {
 }

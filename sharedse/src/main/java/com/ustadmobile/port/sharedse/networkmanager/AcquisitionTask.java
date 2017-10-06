@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
@@ -304,24 +304,24 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         String[] entryAcquireLink;
         Status entryStatus;
         for(int i = 0; i < feed.entries.length; i++) {
-            CatalogEntryInfo info = CatalogController.getEntryInfo(feed.entries[i].id,
-                    CatalogController.SHARED_RESOURCE,networkManager.getContext());
+            CatalogEntryInfo info = CatalogPresenter.getEntryInfo(feed.entries[i].id,
+                    CatalogPresenter.SHARED_RESOURCE,networkManager.getContext());
 
             if(info == null) {
                 info = new CatalogEntryInfo();
-                info.acquisitionStatus = CatalogController.STATUS_NOT_ACQUIRED;
+                info.acquisitionStatus = CatalogPresenter.STATUS_NOT_ACQUIRED;
             }
 
-            if(info.acquisitionStatus == CatalogController.STATUS_NOT_ACQUIRED) {
+            if(info.acquisitionStatus == CatalogPresenter.STATUS_NOT_ACQUIRED) {
                 entryAcquireLink = feed.entries[i].getFirstAcquisitionLink(null);
-                info.acquisitionStatus = CatalogController.STATUS_ACQUISITION_IN_PROGRESS;
+                info.acquisitionStatus = CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS;
                 info.mimeType = entryAcquireLink[UstadJSOPDSEntry.LINK_MIMETYPE];
                 info.srcURLs = new String[]{UMFileUtil.resolveLink(
                     feed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF],
                     entryAcquireLink[UstadJSOPDSEntry.LINK_HREF])};
             }
 
-            CatalogController.setEntryInfo(feed.entries[i].id, info, CatalogController.SHARED_RESOURCE,
+            CatalogPresenter.setEntryInfo(feed.entries[i].id, info, CatalogPresenter.SHARED_RESOURCE,
                 networkManager.getContext());
             entryStatus = new Status();
             entryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_PENDING);
@@ -345,12 +345,12 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
         CatalogEntryInfo info;
         for(int i = 0; i < feed.size(); i++) {
-            info = CatalogController.getEntryInfo(
-                    feed.getEntry(i).id, CatalogController.SHARED_RESOURCE,
+            info = CatalogPresenter.getEntryInfo(
+                    feed.getEntry(i).id, CatalogPresenter.SHARED_RESOURCE,
                     networkManager.getContext());
             info.downloadID = getTaskId();
-            CatalogController.setEntryInfo(feed.getEntry(i).id, info,
-                    CatalogController.SHARED_RESOURCE, networkManager.getContext());
+            CatalogPresenter.setEntryInfo(feed.getEntry(i).id, info,
+                    CatalogPresenter.SHARED_RESOURCE, networkManager.getContext());
         }
         setStatus(STATUS_RUNNING);
         networkManager.networkTaskStatusChanged(this);
@@ -369,14 +369,14 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
         //mark entries not completed as not acquired instead of in progress
         for(int i = currentEntryIdIndex; i < feed.entries.length; i++) {
-            CatalogEntryInfo entryInfo = CatalogController.getEntryInfo(feed.entries[i].id,
-                    CatalogController.SHARED_RESOURCE, networkManager.getContext());
-            if(entryInfo.acquisitionStatus == CatalogController.STATUS_ACQUISITION_IN_PROGRESS) {
+            CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(feed.entries[i].id,
+                    CatalogPresenter.SHARED_RESOURCE, networkManager.getContext());
+            if(entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS) {
                 UstadMobileSystemImpl.l(UMLog.INFO, 700, getLogPrefix() + ": marking entry not acquired: #"
                         + i + ": " + feed.entries[i].id);
-                entryInfo.acquisitionStatus = CatalogController.STATUS_NOT_ACQUIRED;
-                CatalogController.setEntryInfo(feed.entries[i].id, entryInfo,
-                    CatalogController.SHARED_RESOURCE, networkManager.getContext());
+                entryInfo.acquisitionStatus = CatalogPresenter.STATUS_NOT_ACQUIRED;
+                CatalogPresenter.setEntryInfo(feed.entries[i].id, entryInfo,
+                        CatalogPresenter.SHARED_RESOURCE, networkManager.getContext());
             }
         }
 
@@ -594,16 +594,15 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
 
                 if(downloadCompleted){
-                    //TODO : Needs to set the entry status with CatalogController
-                    CatalogEntryInfo info = CatalogController.getEntryInfo(
-                        feed.entries[currentEntryIdIndex].id, CatalogController.SHARED_RESOURCE,
+                    CatalogEntryInfo info = CatalogPresenter.getEntryInfo(
+                        feed.entries[currentEntryIdIndex].id, CatalogPresenter.SHARED_RESOURCE,
                         networkManager.getContext());
-                    info.acquisitionStatus = CatalogController.STATUS_ACQUIRED;
+                    info.acquisitionStatus = CatalogPresenter.STATUS_ACQUIRED;
                     info.fileURI = fileDestination.getAbsolutePath();
                     info.mimeType = feed.entries[currentEntryIdIndex].getFirstAcquisitionLink(
                             null)[UstadJSOPDSEntry.LINK_MIMETYPE];
-                    CatalogController.setEntryInfo(feed.entries[currentEntryIdIndex].id, info,
-                            CatalogController.SHARED_RESOURCE, networkManager.getContext());
+                    CatalogPresenter.setEntryInfo(feed.entries[currentEntryIdIndex].id, info,
+                            CatalogPresenter.SHARED_RESOURCE, networkManager.getContext());
                     UstadMobileSystemImpl.l(UMLog.INFO, 331, getLogPrefix() + ": item " + currentEntryIdIndex +
                             " id " + feed.entries[currentEntryIdIndex].id + " : Download successful ");
                     currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);

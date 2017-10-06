@@ -6,15 +6,15 @@ import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.port.sharedse.model.AttendanceListEntry;
 import com.ustadmobile.core.model.ListableEntity;
-import com.ustadmobile.port.sharedse.view.AttendanceListView;
-import com.ustadmobile.port.sharedse.view.AttendanceView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEvent;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
+import com.ustadmobile.port.sharedse.model.AttendanceListEntry;
+import com.ustadmobile.port.sharedse.view.AttendanceListView;
+import com.ustadmobile.port.sharedse.view.AttendanceView;
 
 import java.util.Hashtable;
 import java.util.Iterator;

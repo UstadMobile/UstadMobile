@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 package com.ustadmobile.port.sharedse.view;
-import com.ustadmobile.port.sharedse.controller.EnrollStudentController;
+
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.port.sharedse.controller.EnrollStudentController;
 
 /**
  *

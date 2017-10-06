@@ -34,18 +34,15 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.CatalogController;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.model.CourseProgress;
@@ -135,7 +132,6 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
      */
     public void setDownloadProgressBarProgress(float loaded) {
         mDownloadProgressView.setProgress(loaded);
-//        ((ProgressBar)findViewById(R.id.opds_item_download_progress_view)).setProgress(loaded);
     }
 
     public void setDownloadProgressStatusText(String statusText) {
@@ -157,22 +153,22 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
         ImageView statusIconView = (ImageView)findViewById(R.id.opds_item_status_icon);
         TextView statusText = (TextView)findViewById(R.id.opds_item_status_text);
         switch(overlay) {
-            case CatalogController.STATUS_ACQUIRED:
+            case CatalogPresenter.STATUS_ACQUIRED:
                 findViewById(R.id.opds_item_download_progress_view).setVisibility(View.GONE);
                 findViewById(R.id.opds_item_status_layout).setVisibility(View.VISIBLE);
                 statusIconView.setImageDrawable(ContextCompat.getDrawable(getContext(),
                         R.drawable.ic_done_black_16dp));
                 statusText.setText(R.string.downloaded);
                 break;
-            case CatalogController.STATUS_AVAILABLE_LOCALLY:
+            case CatalogPresenter.STATUS_AVAILABLE_LOCALLY:
                 findViewById(R.id.opds_item_download_progress_view).setVisibility(View.GONE);
                 findViewById(R.id.opds_item_status_layout).setVisibility(View.VISIBLE);
                 statusIconView.setImageDrawable(ContextCompat.getDrawable(getContext(),
                         R.drawable.ic_nearby_black_24px));
                 statusText.setText(R.string.file_available_locally);
                 break;
-            case CatalogController.STATUS_ACQUISITION_IN_PROGRESS:
-            case CatalogController.STATUS_NOT_ACQUIRED:
+            case CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS:
+            case CatalogPresenter.STATUS_NOT_ACQUIRED:
                 findViewById(R.id.opds_item_status_layout).setVisibility(View.GONE);
                 break;
 

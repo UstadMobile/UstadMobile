@@ -31,10 +31,12 @@
 package com.ustadmobile.test.core;
 
 import com.ustadmobile.core.util.UMUtil;
+
+import junit.framework.TestCase;
+
 /* $if umplatform == 2  $
     import j2meunit.framework.TestCase;
  $else$ */
-    import junit.framework.TestCase;
 /* $endif$ */
 
 

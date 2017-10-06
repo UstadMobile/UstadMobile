@@ -7,6 +7,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMUtil;
+
 import java.util.Hashtable;
 
 /**
@@ -22,11 +23,13 @@ public class CatalogLastAccessTimeComparer implements UMUtil.Comparer{
     final private Object context;
     
     final private boolean descOrder;
+
+    public static final int SORT_DESC = 8;
     
     public CatalogLastAccessTimeComparer(int flags, Object context) {
         lastAccessTimes = new Hashtable();
         this.context = context;
-        descOrder = (flags & CatalogController.SORT_DESC) == CatalogController.SORT_DESC;
+        descOrder = (flags & SORT_DESC) == SORT_DESC;
     }
 
     private final long getLastAccessTime(String id) {

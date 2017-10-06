@@ -24,7 +24,6 @@ import com.ustadmobile.core.controller.WelcomeController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.LocaleUtil;
 import com.ustadmobile.core.view.WelcomeView;
 import com.ustadmobile.port.android.impl.UMLogAndroid;
 

@@ -33,15 +33,9 @@ package com.toughra.ustadmobile;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Environment;
 
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
-import com.ustadmobile.core.opf.UstadJSOPFItem;
-
-import java.io.File;
-import java.io.IOException;
 
 public class UstadMobileActivity extends Activity
 {

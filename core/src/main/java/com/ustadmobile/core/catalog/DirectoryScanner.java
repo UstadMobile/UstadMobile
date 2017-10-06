@@ -1,8 +1,8 @@
 package com.ustadmobile.core.catalog;
 
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
-import com.ustadmobile.core.controller.CatalogController;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
+import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -14,7 +14,7 @@ import com.ustadmobile.core.util.UMUtil;
 import java.io.IOException;
 import java.util.Vector;
 
-import static com.ustadmobile.core.controller.CatalogController.STATUS_ACQUIRED;
+import static com.ustadmobile.core.controller.CatalogPresenter.STATUS_ACQUIRED;
 
 /**
  * Created by mike on 9/9/17.
@@ -46,17 +46,22 @@ public class DirectoryScanner {
      *
      * @param directoryUri
      * @param cacheDirUri
+     * @param feed A feed to add discovered entries to. Can be null, in which case a new feed object
+     *             will be created.
+     *
      * @return
      */
     public UstadJSOPDSFeed scanDirectory(String directoryUri, String cacheDirUri, String title,
-                                         String feedId, int resourceMode, Object context){
+                                         String feedId, int resourceMode,
+                                         UstadJSOPDSItem.OpdsItemLoadCallback callback,
+                                         UstadJSOPDSFeed feed, Object context){
         String baseHref = linkHrefMode == LINK_HREF_MODE_ID ? hrefModeBaseHref : directoryUri;
-        UstadJSOPDSFeed result = new UstadJSOPDSFeed(UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHref),
-            title, feedId);
+        if(feed == null)
+            feed  = new UstadJSOPDSFeed(UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHref),
+                title, feedId);
+
         try {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            Class[] supportedContentTypes = impl.getSupportedContentTypePlugins();
-
 
             ContentTypePlugin[] supportedTypePlugins = ContentTypeManager.getSupportedContentTypePlugins();
             String[] dirContents = impl.listDirectory(directoryUri);
@@ -85,7 +90,7 @@ public class DirectoryScanner {
                             continue;//see if another plugin can handle it
 
                         for(k = 0; k < fileFeed.entries.length; k++) {
-                            entry =new UstadJSOPDSEntry(result, fileFeed.entries[k]);
+                            entry =new UstadJSOPDSEntry(feed, fileFeed.entries[k]);
 
                             //If this is a catalog being made to serve over HTTP : replace acquisition HREF with a base path followed by the ID
                             if(linkHrefMode == LINK_HREF_MODE_ID) {
@@ -97,9 +102,11 @@ public class DirectoryScanner {
                                 }
                             }
 
-                            result.addEntry(entry);
+                            feed.addEntry(entry);
+                            if(callback != null)
+                                callback.onEntryLoaded(feed.size(), entry);
 
-                            CatalogEntryInfo thisEntryInfo = CatalogController.getEntryInfo(
+                            CatalogEntryInfo thisEntryInfo = CatalogPresenter.getEntryInfo(
                                     entry.id, resourceMode, context);
                             if(thisEntryInfo == null) {
                                 impl.l(UMLog.VERBOSE, 409, dirContents[i]);
@@ -109,13 +116,17 @@ public class DirectoryScanner {
                                 thisEntryInfo.mimeType = entry.getFirstAcquisitionLink(null)
                                         [UstadJSOPDSItem.ATTR_MIMETYPE];
                                 thisEntryInfo.srcURLs = new String[] { dirContents[i] };
-                                CatalogController.setEntryInfo(entry.id, thisEntryInfo,
+
+
+                                CatalogPresenter.setEntryInfo(entry.id, thisEntryInfo,
                                         resourceMode, context);
+                                impl.getNetworkManager().handleEntryStatusChangeDiscovered(entry.id,
+                                        thisEntryInfo.acquisitionStatus);
                             }
 
                             if(thisEntryInfo.acquisitionStatus != STATUS_ACQUIRED) {
                                 thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
-                                CatalogController.setEntryInfo(entry.id, thisEntryInfo,
+                                CatalogPresenter.setEntryInfo(entry.id, thisEntryInfo,
                                         resourceMode, context);
                             }
                         }
@@ -128,7 +139,7 @@ public class DirectoryScanner {
         }
 
 
-        return result;
+        return feed;
     }
 
     /**
