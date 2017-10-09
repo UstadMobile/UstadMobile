@@ -22,7 +22,7 @@
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:expandedTitleMarginStart="48dp"
             app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Headline"
-            android:id="@+id/coordinationLayout"
+            android:id="@+id/activity_catalog_entry_collapsing_toolbar"
             app:expandedTitleMarginEnd="64dp"
             >
 

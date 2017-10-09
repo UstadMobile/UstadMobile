@@ -204,14 +204,12 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      *
      * @throws IOException
      */
-    public void serialize(XmlSerializer xs) throws IOException {
+    public void serialize(XmlSerializer xs, boolean addAbsoluteSelfHref) throws IOException {
         serializeStartDoc(xs);
         xs.startTag(NS_ATOM, "feed");
 
         //set the href where this came from if not already added as a link
-        Vector absoluteSelfLink = getLinks(LINK_REL_SELF_ABSOLUTE, null);
-        if(absoluteSelfLink.isEmpty()) {
-            //Todo: this should be the feeds mime type
+        if(addAbsoluteSelfHref && href != null) {
             addLink(LINK_REL_SELF_ABSOLUTE, "application/xml", href);
         }
 
@@ -232,14 +230,16 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * an exception when writing
      * 
      * @param out
+     * @param addAbsoluteSelfLink
+     *
      * @throws IOException 
      */
-    public void serialize(OutputStream out) throws IOException {
+    public void serialize(OutputStream out, boolean addAbsoluteSelfLink) throws IOException {
         IOException ioe = null;
         XmlSerializer serializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
         try {
             serializer.setOutput(out, "UTF-8");
-            serialize(serializer);
+            serialize(serializer, addAbsoluteSelfLink);
             out.flush();
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 170, title, e);
@@ -248,7 +248,15 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
             UMIOUtils.closeOutputStream(out);
             UMIOUtils.throwIfNotNullIO(ioe);
         }
-        
+    }
+
+    /**
+     *
+     * @param out
+     * @throws IOException
+     */
+    public void serialize(OutputStream out) throws IOException{
+        serialize(out, false);
     }
 
     /**
@@ -323,7 +331,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
 
                 for(int j = 0; j < entryTranslationLinks.size(); j++) {
                     entryTranslationLink = (String[])entryTranslationLinks.elementAt(j);
-                    UstadJSOPDSEntry translatedEntry = findEntryForAlternateTranslation(
+                    UstadJSOPDSEntry translatedEntry = findEntryByAlternateHref(
                             entryTranslationLink[UstadJSOPDSEntry.ATTR_HREF]);
                     if(translatedEntry != null)
                         translatedEntriesVector.addElement(translatedEntry);
@@ -465,7 +473,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
 
 
 
-    public UstadJSOPDSEntry findEntryForAlternateTranslation(String alternateHref) {
+    public UstadJSOPDSEntry findEntryByAlternateHref(String alternateHref) {
         String entryLang;
         String[] currentAlternateLinks;
         for(int i = 0; i < size(); i++) {

@@ -413,7 +413,11 @@ public class UMFileUtil {
     
     
     /**
-     * Parse type with params header fields (Content-Disposition; Content-Type etc)
+     * Parse type with params header fields (Content-Disposition; Content-Type etc). E.g. given
+     *  application/atom+xml;type=entry;profile=opds-catalog
+     *
+     *  It will return an object with the mime type "application/atom+xml" and a hashtable of parameters
+     *  with type=entry and profile=opds-catalog .
      * 
      * TODO: Support params with *paramname and encoding e.g. http://tools.ietf.org/html/rfc6266 section 5 example 2
      * 

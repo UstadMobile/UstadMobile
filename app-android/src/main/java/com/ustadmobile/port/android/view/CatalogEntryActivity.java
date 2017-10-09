@@ -141,10 +141,10 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             findViewById(BUTTON_ID_MAP.get(buttonIds.nextElement())).setOnClickListener(this);
         }
 
-        //mCollapsingToolbar = (CollapsingToolbarLayout)findViewById(R.id.activity_catalog_entry_collapsing_toolbar);
+        mCollapsingToolbar = findViewById(R.id.activity_catalog_entry_collapsing_toolbar);
 
 
-        seeAlsoRecyclerView = (RecyclerView)findViewById(R.id.activity_catalog_entry_see_also_recycler_view);
+        seeAlsoRecyclerView = findViewById(R.id.activity_catalog_entry_see_also_recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         seeAlsoRecyclerView.setLayoutManager(linearLayoutManager);
@@ -164,16 +164,6 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mPresenter = new CatalogEntryPresenter(this, this, args);
         mPresenter.onCreate();
-
-        try{
-            UstadJSOPDSFeed feed=new UstadJSOPDSFeed();
-            feed.loadFromString(args.get(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR).toString());
-        } catch (XmlPullParserException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override
@@ -284,7 +274,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     @Override
     public void setTitle(String title) {
         super.setTitle(title);
-        //mCollapsingToolbar.setTitle(title);
+        mCollapsingToolbar.setTitle(title);
     }
 
     @Override

@@ -253,10 +253,27 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
      * @param xs XmlSerializer to use
      * @throws IOException
      */
-    public void serialize(XmlSerializer xs) throws IOException{
+    public void serialize(XmlSerializer xs, boolean addAbsoluteSelfHref) throws IOException{
         serializeStartDoc(xs);
-        serializeEntryTag(xs);
+        serializeEntryTag(xs, addAbsoluteSelfHref);
         xs.endDocument();
+    }
+
+    /**
+     * Serialize this entry as a tag the given XmlSerializer. This will *NOT* start and end the document.
+     * It is used both by the serialize method and UstadJSOPDSFeed,
+     *
+     * @param xs XmlSerialize to serialize to
+     * @param addAbsoluteSelfLink if true, and href is not null, add an absolute self link
+     * @throws IOException
+     */
+    protected void serializeEntryTag(XmlSerializer xs, boolean addAbsoluteSelfLink) throws IOException{
+        xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
+        if(addAbsoluteSelfLink && href != null) {
+            addLink(LINK_REL_SELF_ABSOLUTE, "application/xml", href);
+        }
+        serializeAttrs(xs);
+        xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
     }
 
     /**
@@ -267,9 +284,7 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
      * @throws IOException
      */
     protected void serializeEntryTag(XmlSerializer xs) throws IOException{
-        xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
-        serializeAttrs(xs);
-        xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_ENTRY]);
+        serializeEntryTag(xs, false);
     }
 
     /**
@@ -298,7 +313,7 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         UstadJSOPDSEntry translatedEntry;
         for(int i = 0; i < translationLinks.size(); i++) {
             currentLink = (String[])translationLinks.elementAt(i);
-            translatedEntry  =parentFeed.findEntryForAlternateTranslation(
+            translatedEntry = parentFeed.findEntryByAlternateHref(
                     currentLink[ATTR_HREF]);
             if(translatedEntry != null)
                 translatedIds.addElement(translatedEntry.id);

@@ -8,6 +8,7 @@ import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
@@ -37,6 +38,16 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
     protected Vector acquisitionEntriesSelected;
 
     protected UstadJSOPDSEntry[] removeEntriesSelected;
+
+    public static final String ARG_URL = "url";
+
+    public static final String ARG_HTTPUSER = "httpu";
+
+    public static final String ARG_HTTPPPASS = "httpp";
+
+    public static final String ARG_RESMOD = "resmod";
+
+    public static final String ARG_BOTTOM_BUTTON_URL = "browesbtnu";
 
     public interface AcquisitionChoicesCompletedCallback {
 
@@ -189,9 +200,21 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
         }
 
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
-                entry.parentFeed.serializeToString());
+                entry.parentFeed.serializeToString(true));
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,
                 entry.id);
+        UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, catalogEntryArgs,
+                getContext());
+    }
+
+    /**
+     * Follow a link to a catalog entry. Use a URL that should point to an OPDS entry .
+     *
+     * @param entryUrl
+     */
+    public void handleOpenEntryView(String entryUrl) {
+        Hashtable catalogEntryArgs = new Hashtable();
+        catalogEntryArgs.put(ARG_URL, entryUrl);
         UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, catalogEntryArgs,
                 getContext());
     }
@@ -267,6 +290,33 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
             default:
                 return "";
         }
+    }
+
+    /**
+     * Utility method to find the language names for available alternative language versions
+     *
+     * @param languageLinks
+     * @return
+     */
+    protected String[] getNamesForLangaugeCodes(Vector languageLinks) {
+        String[] retVal = new String[languageLinks.size()];
+        Object currentVal;
+        String[] links;
+        String langCode;
+        for(int i = 0; i < languageLinks.size(); i++) {
+            currentVal = languageLinks.elementAt(i);
+            if(currentVal instanceof String[]) {
+                links = (String[])currentVal;
+                langCode = links[UstadJSOPDSItem.ATTR_HREFLANG];
+
+            }else {
+                langCode = (String)currentVal;
+            }
+            retVal[i] = UstadMobileConstants.LANGUAGE_NAMES.containsKey(langCode) ?
+                    (String)UstadMobileConstants.LANGUAGE_NAMES.get(langCode) : langCode;
+        }
+
+        return retVal;
     }
 
 

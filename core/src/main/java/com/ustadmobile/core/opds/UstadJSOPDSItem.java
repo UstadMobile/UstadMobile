@@ -54,6 +54,10 @@ import java.util.Vector;
  * Items can be serialized to Xml using the XmlSerializer class and the serialize method
  * Items can be loaded from Xml using the XmlPullParser and the method loadFromXpp
  *
+ * The href property represents where the item was loaded from. When an item is serialized it using
+ * the serialize method it is possible to instruct the serializer to add an absolute self link, so
+ * that the original href can be determined when the feed is deserialized and used to resolve links.
+ *
  * @author varuna
  */
 public abstract class UstadJSOPDSItem implements Runnable {
@@ -243,11 +247,11 @@ public abstract class UstadJSOPDSItem implements Runnable {
 
     public interface OpdsItemLoadCallback {
 
-        void onEntryLoaded(int position, UstadJSOPDSEntry entry);
+        void onEntryLoaded(UstadJSOPDSItem item, int position, UstadJSOPDSEntry entryLoaded);
 
-        void onDone();
+        void onDone(UstadJSOPDSItem item);
 
-        void onError(Throwable cause);
+        void onError(UstadJSOPDSItem item, Throwable cause);
     }
 
     private String asyncLoadUrl;
@@ -261,6 +265,19 @@ public abstract class UstadJSOPDSItem implements Runnable {
     public UstadJSOPDSItem() {
         this.linkVector = new Vector();
     }
+
+//    @Override
+//    public boolean equals(Object o) {
+//        if(o == this) {
+//            return true;
+//        }else if(o != null && o instanceof UstadJSOPDSItem) {
+//            UstadJSOPDSItem otherItem = (UstadJSOPDSItem)o;
+//            if(otherItem.id != null && otherItem.id.equals(id)){
+//                //go through all properties
+//
+//            }
+//        }
+//    }
 
     /**
      * The language of this item as specified by the dublin core dc:language tag if present
@@ -466,9 +483,26 @@ public abstract class UstadJSOPDSItem implements Runnable {
      * spaces and then create a root item.
      *
      * @param xs XmlSerializer to use
+     * @param addAbsoluteSelfHref If true and the href property is not null, a link will be added to
+     *                            this item with a relationship as per the absolute self cnostant
+     *                            with the value of the href.
+     *
      * @throws IOException If an IOException is thrown by the underlying output stream
      */
-    public abstract void serialize(XmlSerializer xs) throws IOException;
+    public abstract void serialize(XmlSerializer xs, boolean addAbsoluteSelfHref) throws IOException;
+
+    /**
+     * Serialize this item to an XmlSerializer. This will create a new Xml Document, set the name
+     * spaces and then create a root item.
+     *
+     * This method will not add an absolute self link and is equivelent to calling serialize(xs, false)
+     *
+     * @param xs XmlSerializer to use
+     * @throws IOException If an IOException is thrown by the underlying output stream
+     */
+    public void serialize(XmlSerializer xs) throws IOException{
+        serialize(xs, false);
+    }
 
     /**
      * Serialize the attributes of this item. This will generate the idm title, summary tags etc.
@@ -556,12 +590,12 @@ public abstract class UstadJSOPDSItem implements Runnable {
      *
      * @return
      */
-    public String serializeToString()  {
+    public String serializeToString(boolean addAbsoluteSelfLink)  {
         try {
             XmlSerializer serializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             serializer.setOutput(bout, "UTF-8");
-            serialize(serializer);
+            serialize(serializer, addAbsoluteSelfLink);
             bout.flush();
             return new String(bout.toByteArray(), "UTF-8");
         }catch(IOException e) {
@@ -570,6 +604,10 @@ public abstract class UstadJSOPDSItem implements Runnable {
         }
 
         return null;
+    }
+
+    public String serializeToString() {
+        return serializeToString(false);
     }
 
     /**
@@ -598,7 +636,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
                     entryCount++;
 
                     if(callback != null) {
-                        callback.onEntryLoaded(entryCount, newEntry);
+                        callback.onEntryLoaded(this, entryCount, newEntry);
                     }
                 }else if(name.equals(ATTR_NAMES[ATTR_TITLE]) && xpp.next() == XmlPullParser.TEXT) {
                     this.title = xpp.getText();
@@ -609,7 +647,12 @@ public abstract class UstadJSOPDSItem implements Runnable {
                     for(i = 0; i < UstadJSOPDSItem.LINK_ATTRS_END; i++) {
                         linkAttrs[i] = xpp.getAttributeValue(null, ATTR_NAMES[i]);
                     }
-                    this.addLink(linkAttrs);
+
+                    if(!linkAttrs[ATTR_REL].equals(LINK_REL_SELF_ABSOLUTE)) {
+                        this.addLink(linkAttrs);
+                    }else {
+                        this.href = linkAttrs[ATTR_HREF];
+                    }
                 }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
                     this.updated = xpp.getText();
                 }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {
@@ -660,13 +703,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
             }
         }
 
-        //Trim any other entries in case of refresh - we may have fewer entries
-
-//        if(isFeed) {
-//            UstadJSOPDSFeed feed = (UstadJSOPDSFeed)this;
-//            feed.entries = new UstadJSOPDSEntry[entriesFound.size()];
-//            entriesFound.copyInto(feed.entries);
-//        }
+        //TODO: Trim any other entries in case of refresh - we may have fewer entries
     }
 
     /**
@@ -739,9 +776,9 @@ public abstract class UstadJSOPDSItem implements Runnable {
         }
 
         if(err == null) {
-            asyncLoadCallback.onDone();
+            asyncLoadCallback.onDone(this);
         }else {
-            asyncLoadCallback.onError(err);
+            asyncLoadCallback.onError(this, err);
         }
     }
 
@@ -817,6 +854,8 @@ public abstract class UstadJSOPDSItem implements Runnable {
      * Get the href that this item was loaded from, if applicable. Applies to feeds and items loaded
      * from http using async http load, and those where it was manually set. Does not apply to entries
      * that were not loaded over http but are part of a feed.
+     *
+     * This can be serialized with the feed when using the serialize method as the absolute self link.
      *
      * @return The url this item was loaded from, if applicable, as above.
      */

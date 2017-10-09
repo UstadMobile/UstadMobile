@@ -104,7 +104,7 @@ public class DirectoryScanner {
 
                             feed.addEntry(entry);
                             if(callback != null)
-                                callback.onEntryLoaded(feed.size(), entry);
+                                callback.onEntryLoaded(feed, feed.size(), entry);
 
                             CatalogEntryInfo thisEntryInfo = CatalogPresenter.getEntryInfo(
                                     entry.id, resourceMode, context);

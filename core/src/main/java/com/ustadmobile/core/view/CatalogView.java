@@ -186,8 +186,11 @@ public interface CatalogView extends UstadView{
      * with the index of the language selected
      *
      * @param translationLinks String array of other languages.
+     * @param disabledItem The index of an item which should be disabled. This would normally be the
+     *                     language the catalog is already in (if known). Providing a value < 0
+     *                     means none of the items are to be disabled.
      */
-    void setAlternativeTranslationLinks(String[] translationLinks);
+    void setAlternativeTranslationLinks(String[] translationLinks, int disabledItem);
 
     /**
      * Add an entry to the catalog display list

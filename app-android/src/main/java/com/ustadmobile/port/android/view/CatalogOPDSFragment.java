@@ -125,6 +125,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private String[] alternativeTranslationLanguages;
 
+    private int alterantiveTranslationLanguagesDisabledItemIndex = -1;
+
     private ArrayList<MenuItem> alternativeTranslationLanguageMenuItems;
 
     private CatalogPresenter mCatalogPresenter;
@@ -323,6 +325,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             MenuItem langItem;
             for(int i = 0; i < alternativeTranslationLanguages.length; i++) {
                 langItem = languagesSubmenu.add(alternativeTranslationLanguages[i]);
+                if(i == alterantiveTranslationLanguagesDisabledItemIndex)
+                    langItem.setEnabled(false);
+
                 alternativeTranslationLanguageMenuItems.add(langItem);
             }
         }
@@ -331,14 +336,21 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void setAlternativeTranslationLinks(String[] translationLinks) {
+    public void setAlternativeTranslationLinks(String[] translationLinks, int disabledItem) {
         this.alternativeTranslationLanguages = translationLinks;
+        alterantiveTranslationLanguagesDisabledItemIndex = disabledItem;
         if(getActivity() != null)
             getActivity().invalidateOptionsMenu();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if(alternativeTranslationLanguageMenuItems != null
+                && alternativeTranslationLanguageMenuItems.contains(item)) {
+            int selectedIndex = alternativeTranslationLanguageMenuItems.indexOf(item);
+            mCatalogPresenter.handleClickAlternativeLanguage(selectedIndex);
+        }
+
         switch(item.getItemId()) {
             case MENUCMDID_ADD:
 //                mCatalogController.handleClickAdd();

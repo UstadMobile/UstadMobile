@@ -105,12 +105,13 @@ public class TestUstadJSOPDSFeed {
     public void testSerialize() throws Exception{
         UstadJSOPDSFeed feed = loadAcquireMultiFeed("http://www.ustadmobile.com/files/test/acquire-multi.opds");
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        feed.serialize(bout);
+        feed.serialize(bout, true);
 
         UstadJSOPDSFeed deserializedFeed = new UstadJSOPDSFeed();
         deserializedFeed.loadFromString(new String(bout.toByteArray(), "UTF-8"));
-        Assert.assertEquals("Serializer set absolute self href", feed.getHref(),
-                deserializedFeed.getAbsoluteSelfLink()[UstadJSOPDSEntry.LINK_HREF]);
+        Assert.assertEquals("Serializer set absolute self href, then restored to href property",
+                "http://www.ustadmobile.com/files/test/acquire-multi.opds",
+                deserializedFeed.getHref());
         Assert.assertEquals("Feed loaded with correct id", feed.id, deserializedFeed.id);
         for(int i = 0; i < feed.size(); i++) {
             Assert.assertEquals("Feed entry " + i + " has same id ", feed.getEntry(i).id,
@@ -121,7 +122,7 @@ public class TestUstadJSOPDSFeed {
 
 
     @Test
-    public void testAsyncHttpLoad() {
+    public void testAsyncHttpLoadFeed() {
         final Object lock = new Object();
         String opdsUrl = UMFileUtil.joinPaths(new String[]{ResourcesHttpdTestServer.getHttpRoot(),
                 "file.opds"});
@@ -130,12 +131,12 @@ public class TestUstadJSOPDSFeed {
         feed.loadFromUrlAsync(opdsUrl, null, PlatformTestUtil.getTargetContext(),
                 new UstadJSOPDSItem.OpdsItemLoadCallback() {
             @Override
-            public void onEntryLoaded(int position, UstadJSOPDSEntry entry) {
+            public void onEntryLoaded(UstadJSOPDSItem item, int position, UstadJSOPDSEntry entry) {
 
             }
 
             @Override
-            public void onDone() {
+            public void onDone(UstadJSOPDSItem item) {
                 onDoneCalled[0] = true;
                 synchronized (lock) {
                     lock.notify();
@@ -143,7 +144,7 @@ public class TestUstadJSOPDSFeed {
             }
 
             @Override
-            public void onError(Throwable cause) {
+            public void onError(UstadJSOPDSItem item, Throwable cause) {
 
             }
         });
@@ -161,6 +162,47 @@ public class TestUstadJSOPDSFeed {
     }
 
     @Test
+    public void testAsyncHttpLoadEntry() {
+        final Object lock = new Object();
+        String opdsUrl = UMFileUtil.joinPaths(new String[]{ResourcesHttpdTestServer.getHttpRoot(),
+                "entry.opds"});
+        UstadJSOPDSEntry entry = new UstadJSOPDSEntry(null);
+        final boolean[] onDoneCalled = new boolean[]{false};
+
+        entry.loadFromUrlAsync(opdsUrl, null, PlatformTestUtil.getTargetContext(),
+                new UstadJSOPDSItem.OpdsItemLoadCallback() {
+            @Override
+            public void onEntryLoaded(UstadJSOPDSItem item, int position, UstadJSOPDSEntry entry) {
+
+            }
+
+            @Override
+            public void onDone(UstadJSOPDSItem item) {
+                onDoneCalled[0] = true;
+                synchronized (lock) {
+                    lock.notify();
+                }
+            }
+
+            @Override
+            public void onError(UstadJSOPDSItem item, Throwable cause) {
+
+            }
+        });
+
+        synchronized (lock) {
+            try { lock.wait(LOAD_TIMEOUT); }
+            catch(InterruptedException e) {}
+        }
+
+        Assert.assertEquals("Entry loaded id matches id in OPDS file",
+                "4f382c43-1e92-4fe9-bce0-e03b6c11336f", entry.id);
+        String[] acquisitionLinks = entry.getBestAcquisitionLink(new String[]{"application/epub+zip"});
+        Assert.assertEquals("Acquisition link matches expected", "small.epub",
+                acquisitionLinks[UstadJSOPDSItem.ATTR_HREF]);
+    }
+
+    @Test
     public void testAsyncHttpLoadOnError() {
         final Object lock = new Object();
         String opdsUrl = UMFileUtil.joinPaths(new String[]{ResourcesHttpdTestServer.getHttpRoot(),
@@ -170,17 +212,17 @@ public class TestUstadJSOPDSFeed {
         feed.loadFromUrlAsync(opdsUrl, null, PlatformTestUtil.getTargetContext(),
                 new UstadJSOPDSItem.OpdsItemLoadCallback() {
             @Override
-            public void onEntryLoaded(int position, UstadJSOPDSEntry entry) {
+            public void onEntryLoaded(UstadJSOPDSItem item, int position, UstadJSOPDSEntry entry) {
 
             }
 
             @Override
-            public void onDone() {
+            public void onDone(UstadJSOPDSItem item) {
 
             }
 
             @Override
-            public void onError(Throwable cause) {
+            public void onError(UstadJSOPDSItem item, Throwable cause) {
                 onErrorThrowable[0] = cause;
                 synchronized (lock) {
                     lock.notify();

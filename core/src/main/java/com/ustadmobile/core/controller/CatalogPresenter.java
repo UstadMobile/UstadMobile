@@ -32,16 +32,6 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
     private UstadJSOPDSFeed feed;
 
-    public static final String ARG_URL = "url";
-
-    public static final String ARG_HTTPUSER = "httpu";
-
-    public static final String ARG_HTTPPPASS = "httpp";
-
-    public static final String ARG_RESMOD = "resmod";
-
-    public static final String ARG_BOTTOM_BUTTON_URL = "browesbtnu";
-
     /**
      * Constant that can be used in the buildconfig to set the bottom button to be a download all
      * button instead of a link to any other catalog
@@ -82,6 +72,11 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     private String footerButtonUrl;
 
     private Hashtable args;
+
+    /**
+     * Alternative translations
+     */
+    private Vector alternativeTranslationLinks;
 
     public CatalogPresenter(Object context, CatalogView view) {
         super(context);
@@ -158,7 +153,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     }
 
     @Override
-    public void onEntryLoaded(final int position, final UstadJSOPDSEntry entry) {
+    public void onEntryLoaded(UstadJSOPDSItem item, final int position, final UstadJSOPDSEntry entry) {
         mView.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -192,17 +187,29 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     }
 
     @Override
-    public void onDone() {
+    public void onDone(UstadJSOPDSItem item) {
         mView.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 mView.setRefreshing(false);
+                alternativeTranslationLinks = feed.getAlternativeTranslationLinks();
+                if(alternativeTranslationLinks.size() > 0) {
+                    String feedLang = feed.getLanguage();
+                    int disabledItem = -1;
+                    if(feedLang != null) {
+                        alternativeTranslationLinks.insertElementAt(feedLang, 0);
+                        disabledItem = 0;
+                    }
+
+                    mView.setAlternativeTranslationLinks(getNamesForLangaugeCodes(
+                            alternativeTranslationLinks), disabledItem);
+                }
             }
         });
     }
 
     @Override
-    public void onError(Throwable cause) {
+    public void onError(UstadJSOPDSItem item, Throwable cause) {
 
     }
 
@@ -288,6 +295,13 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
         UstadMobileSystemImpl.getInstance().go(CatalogView.VIEW_NAME, args,
                 getContext());
+    }
+
+    public void handleClickAlternativeLanguage(int langIndex) {
+        String[] altLangLinks = (String[])alternativeTranslationLinks.elementAt(langIndex);
+        String alternativeUrl = UMFileUtil.resolveLink(feed.getHref(),
+                altLangLinks[UstadJSOPDSItem.ATTR_HREF]);
+        handleCatalogSelected(alternativeUrl);
     }
 
     public void handleClickFooterButton() {
