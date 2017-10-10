@@ -4,9 +4,9 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.BasePointView;
+
 
 public class CatalogActivity extends UstadBaseActivity  {
 
@@ -42,8 +42,7 @@ public class CatalogActivity extends UstadBaseActivity  {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-                        BasePointController.makeDefaultBasePointArgs(this), this);
+                UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION, this);
                 return true;
         }
 

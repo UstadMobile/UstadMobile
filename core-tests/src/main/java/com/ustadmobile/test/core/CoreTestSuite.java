@@ -14,7 +14,8 @@ import org.junit.runners.Suite;
         TestImageLoader.class,
         TestDirectoryScanner.class,
         TestXapiPackageTypePlugin.class,
-        TestUstadJSOPDSFeed.class
+        TestUstadJSOPDSFeed.class,
+        TestUMFileUtil.class
 })
 public abstract class CoreTestSuite {
 }

@@ -363,8 +363,7 @@ public class LoginController extends UstadBaseController{
             if (resultListener != null) {
                 resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog) view, null);
             } else {
-                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-                        BasePointController.makeDefaultBasePointArgs(context), context);
+                UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION, context);
             }
         }
         return result;
@@ -487,8 +486,8 @@ public class LoginController extends UstadBaseController{
                     if(resultListener != null) {
                         resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog)view, null);
                     }else {
-                        UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-                                BasePointController.makeDefaultBasePointArgs(context), context);
+                        UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION,
+                                context);
                     }
                 }
             }
@@ -519,8 +518,7 @@ public class LoginController extends UstadBaseController{
     private void handleUserLoginAuthComplete(final String username, final String password) {
         UstadMobileSystemImpl.getInstance().setActiveUser(username, context);
         UstadMobileSystemImpl.getInstance().setActiveUserAuth(password, context);
-        UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-            BasePointController.makeDefaultBasePointArgs(context), context);
+        UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION, context);
     }    
     
     /**

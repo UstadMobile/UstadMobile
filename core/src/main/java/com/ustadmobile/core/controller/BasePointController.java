@@ -9,6 +9,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
@@ -19,6 +20,7 @@ import com.ustadmobile.core.view.WelcomeView;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -73,76 +75,27 @@ public class BasePointController extends UstadBaseController implements DialogRe
 
     public static final int CMD_RECEIVE_ENTRY = 1006;
 
-    public BasePointController(Object context) {
+    public BasePointController(Object context, BasePointView view) {
         super(context);
+        this.basePointView = view;
     }
-    
-    public static BasePointController makeControllerForView(BasePointView view, Hashtable args, Hashtable savedState) {
-        BasePointController ctrl = new BasePointController(view.getContext());
+
+    public void onCreate(Hashtable args, Hashtable savedState) {
+        this.args = args;
+        basePointView.setClassListVisible(false);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        if(args == null)
-            args = new Hashtable();
-
-        Hashtable defaultArgs = makeDefaultBasePointArgs(view.getContext());
-        Enumeration defaultArgsE = defaultArgs.keys();
-        Object defaultKey;
-        while(defaultArgsE.hasMoreElements()){
-            defaultKey = defaultArgsE.nextElement();
-            if(!args.containsKey(defaultKey))
-                args.put(defaultKey, defaultArgs.get(defaultKey));
-        }
-
-        ctrl.args = args;
-        ctrl.setView(view);
-        view.setClassListVisible(ctrl.isUserTeacher());
-        view.setMenuItems(impl.getActiveUser(view.getContext()) != null ?
-            CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
 
         if(savedState != null && savedState.containsKey(ARG_WELCOME_SCREEN_DISPLAYED)){
-            ctrl.welcomeScreenDisplayed = savedState.get(ARG_WELCOME_SCREEN_DISPLAYED).toString().equals("true");
+            welcomeScreenDisplayed = savedState.get(ARG_WELCOME_SCREEN_DISPLAYED).toString().equals("true");
         }
 
-        return ctrl;
-    }
-    
-    public static Hashtable makeDefaultBasePointArgs(Object context) {
-        Hashtable args = new Hashtable();
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String[] basePointURLs = new String[] {CoreBuildConfig.BASEPOINT_CATALOG_URL};
-        
-        String iPrefix;
-        for(int i = 0; i < BasePointController.NUM_CATALOG_TABS; i++) {
-            iPrefix = i+BasePointController.OPDS_ARGS_PREFIX;
-            args.put(iPrefix + CatalogPresenter.ARG_URL, basePointURLs[i]);
-            if(impl.getActiveUser(context) != null) {
-                args.put(iPrefix + CatalogPresenter.ARG_HTTPUSER, impl.getActiveUser(context));
-            }
+        basePointView.setMenuItems(impl.getActiveUser(getContext()) != null ?
+                CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
 
-            if(impl.getActiveUserAuth(context) != null) {
-                args.put(iPrefix + CatalogPresenter.ARG_HTTPPPASS, impl.getActiveUserAuth(context));
-            }
-
-            args.put(iPrefix + CatalogPresenter.ARG_RESMOD, new Integer(CatalogPresenter.ALL_RESOURCES));
-
-//            if(CoreBuildConfig.BASEPOINT_FILTER_BY_UI_LANG) {
-//                args.put(iPrefix + CatalogController.ARG_FILTER_BY_UI_LANG, "true");
-//            }
-
-            //by default show the browse button on the first tab only
-            if(i == 0 && CoreBuildConfig.BASEPOINT_BROWSEBUTTON_ENABLED) {
-                args.put(iPrefix + CatalogPresenter.ARG_BOTTOM_BUTTON_URL,
-                        CoreBuildConfig.BASEPOINT_BROWSEBUTTON_URL);
-            }
+        Vector catalogTabs = UMFileUtil.splitCombinedViewArguments(args, "catalog", '-');
+        for(int i = 0; i < catalogTabs.size(); i++) {
+            basePointView.addTab((Hashtable)catalogTabs.elementAt(i));
         }
-        
-//        Integer downloadedEntriesFlags = new Integer(
-//            CatalogController.CACHE_ENABLED | CatalogController.SORT_DESC |
-//            CatalogController.SORT_BY_LASTACCESSED);
-//        args.put(INDEX_DOWNLOADEDENTRIES+BasePointController.OPDS_ARGS_PREFIX +
-//            CatalogController.KEY_FLAGS, downloadedEntriesFlags);
-        
-        return args;
     }
     
     /**

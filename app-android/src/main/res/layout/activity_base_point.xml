@@ -21,11 +21,12 @@
 
             <include android:id="@+id/um_toolbar" layout="@layout/toolbar"/>
 
-            <com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout
-                android:id="@+id/activity_basepoint_sliding_tab_layout"
-                android:layout_height="wrap_content"
+            <android.support.design.widget.TabLayout
                 android:layout_width="match_parent"
-                />
+                android:layout_height="wrap_content"
+                android:id="@+id/activity_basepoint_tablayout">
+
+            </android.support.design.widget.TabLayout>
 
         </android.support.design.widget.AppBarLayout>
 

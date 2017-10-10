@@ -162,7 +162,7 @@ task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTa
     clsName = "MessageID"
 
     Map<String, Integer> messageIds = new HashMap<>();
-    AtomicInteger messageIdGenerator = new AtomicInteger()
+    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
 
     rootProject.fileTree(dir : "core/locale/main/values", include: "*.xml").each() { File file ->
         def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))

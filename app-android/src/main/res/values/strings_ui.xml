@@ -11,7 +11,7 @@
     <string name='authenticating'>Authenticating</string>
     <string name='course_catalog_load_error'>Sorry: Error loading %s :</string>
     <string name="download">Download</string>
-    <string name="downloaded">Downloaded</string>
+    <string name="downloaded" value="81">Downloaded</string>
     <string name='download_q'>Download?</string>
     <string name='download_all_q'>Download all %s entries?</string>
     <string name='ok'>OK</string>
@@ -62,7 +62,7 @@
     <string name='email'>Email</string>
     <string name='regcode'>Signup Code</string>
     <string name='home'>Home</string>
-    <string name='my_libraries'>My Libraries</string>
+    <string name='my_libraries' value="80">My Libraries</string>
     <string name='add_library'>Add Library</string>
     <string name='select_library'>Select Library</string>
     <string name='add'>Add</string>

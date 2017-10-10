@@ -6,9 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -20,16 +22,18 @@ import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.BaseCatalogPresenter;
 import com.ustadmobile.core.controller.BasePointController;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.view.slidingtab.SlidingTabLayout;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.WeakHashMap;
 
@@ -62,12 +66,15 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     private AlertDialog shareAppDialog;
 
+    private ArrayList<Hashtable> tabArgumentsList;
+
+    private TabLayout mTabLayout;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base_point);
-        Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         Hashtable savedInstanceHt = UMAndroidUtil.bundleToHashtable(savedInstanceState);
         String recreateWelcomeVal = UstadMobileSystemImpl.getInstance().getAppPref(
                 "recreate-" + BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, this);
@@ -85,36 +92,32 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
             savedInstanceHt.put(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED, recreateWelcomeVal);
         }
 
-        //make OPDS fragments and set them here
-        mBasePointController = BasePointController.makeControllerForView(this, args, savedInstanceHt);
-        setBaseController(mBasePointController);
         setUMToolbar(R.id.um_toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        tabArgumentsList = new ArrayList<>();
         mPagerAdapter = new BasePointPagerAdapter(getSupportFragmentManager());
-        ViewPager viewPager = (ViewPager)findViewById(R.id.basepoint_pager);
+
+
+        ViewPager viewPager = findViewById(R.id.basepoint_pager);
         viewPager.setAdapter(mPagerAdapter);
-        SlidingTabLayout tabs = (SlidingTabLayout)findViewById(R.id.activity_basepoint_sliding_tab_layout);
-        tabs.setDistributeEvenly(false);
-        tabs.setViewPager(viewPager);
-        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
-            @Override
-            public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.primary_text);
-            }
-        });
 
-        if(!classListVisible) {
-            tabs.setVisibility(View.GONE);
-        }
+        mTabLayout= findViewById(R.id.activity_basepoint_tablayout);
+        mTabLayout.setupWithViewPager(viewPager);
+        mTabLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(this, R.color.primary_text));
+        mTabLayout.setTabTextColors(ContextCompat.getColor(this, R.color.secondary_text),
+                ContextCompat.getColor(this, R.color.primary_text));
 
-        mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
-        mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
+        mDrawerLayout = findViewById(R.id.activity_basepoint_drawlayout);
+        mDrawerNavigationView = findViewById(R.id.activity_basepoint_navigationview);
         mDrawerNavigationView.setNavigationItemSelectedListener(this);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open,
                 R.string.closed);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
-        setMenuItems(this.mNavigationDrawerItems);
+
+        mBasePointController = new BasePointController(this, this);
+        mBasePointController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
+                UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
     }
 
@@ -257,8 +260,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     public class BasePointPagerAdapter extends FragmentStatePagerAdapter {
 
-        private int[] tabTitles = new int[]{MessageID.my_resources, MessageID.classes};
-
         private WeakHashMap<Integer, Fragment> fragmentMap;
 
         public BasePointPagerAdapter(FragmentManager fm) {
@@ -271,19 +272,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         public Fragment getItem(int position) {
             Fragment fragment = fragmentMap.get(position);
             if(fragment == null) {
-                Bundle bundle = null;
-                switch(position) {
-                    case BasePointController.INDEX_DOWNLOADEDENTRIES:
-                        Hashtable posArgs =
-                                BasePointActivity.this.mBasePointController.getCatalogOPDSArguments(position);
-                        bundle = UMAndroidUtil.hashtableToBundle(posArgs);
-                        fragment = CatalogOPDSFragment.newInstance(bundle);
-                        break;
-                    case BasePointController.INDEX_CLASSES:
-                        bundle = new Bundle();
-                        fragment = ClassListFragment.newInstance(bundle);
-                        break;
-                }
+                fragment = CatalogOPDSFragment.newInstance(UMAndroidUtil.hashtableToBundle(
+                        tabArgumentsList.get(position)));
+
                 fragmentMap.put(position, fragment);
             }
 
@@ -292,13 +283,23 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
         @Override
         public int getCount() {
-            return BasePointActivity.this.classListVisible ? 2 : 1;
+            return tabArgumentsList.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return UstadMobileSystemImpl.getInstance().getString(tabTitles[position],
-                    BasePointActivity.this);
+            Object titleObj = tabArgumentsList.get(position).get(BaseCatalogPresenter.ARG_TITLE);
+            if(titleObj != null) {
+                try {
+                    int messageCode = Integer.parseInt((String)titleObj);
+                    return UstadMobileSystemImpl.getInstance().getString(messageCode,
+                            BasePointActivity.this);
+                }catch(NumberFormatException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 681, titleObj.toString(), e);
+                }
+            }
+
+            return "Tab " + position;
         }
 
 
@@ -342,5 +343,11 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     public void dismissShareAppDialog() {
         shareAppDialog.dismiss();
         shareAppDialog = null;
+    }
+
+    @Override
+    public void addTab(Hashtable tabArguments) {
+        tabArgumentsList.add(tabArguments);
+        mPagerAdapter.notifyDataSetChanged();
     }
 }

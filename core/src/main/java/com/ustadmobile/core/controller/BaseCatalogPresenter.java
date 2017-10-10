@@ -49,6 +49,8 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
 
     public static final String ARG_BOTTOM_BUTTON_URL = "browesbtnu";
 
+    public static final String ARG_TITLE = "t";
+
     public interface AcquisitionChoicesCompletedCallback {
 
         void onChoicesCompleted(UstadJSOPDSFeed preparedFeed);

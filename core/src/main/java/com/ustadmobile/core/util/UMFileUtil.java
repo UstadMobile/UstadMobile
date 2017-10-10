@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.util;
 
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.Enumeration;
@@ -652,6 +653,48 @@ public class UMFileUtil {
         unitSize = Math.round(unitSize * 100) / 100d;
         return unitSize + " " + unit;
     }
+
+    /**
+     *
+     * @param args
+     * @param prefix
+     * @return
+     */
+    public static Vector splitCombinedViewArguments(Hashtable args, String prefix, char argDelmininator) {
+        Vector result = new Vector();
+        Enumeration allArgsKeys = args.keys();
+
+        String currentKey, argName;
+        int index, indexStart, indexEnd;
+        Hashtable indexArgs;
+        while(allArgsKeys.hasMoreElements()) {
+            currentKey = (String)allArgsKeys.nextElement();
+            if(currentKey.startsWith(prefix)) {
+                indexStart = currentKey.indexOf(argDelmininator) + 1;
+                indexEnd = currentKey.indexOf(argDelmininator, indexStart + 1);
+                try {
+                    index = Integer.parseInt(currentKey.substring(indexStart, indexEnd));
+                    if(result.size() < index + 1)
+                        result.setSize(index + 1);
+
+                    argName = currentKey.substring(indexEnd + 1);
+                    if(result.elementAt(index) != null) {
+                        indexArgs = (Hashtable)result.elementAt(index);
+                    }else {
+                        indexArgs = new Hashtable();
+                        result.setElementAt(indexArgs, index);
+                    }
+
+                    indexArgs.put(argName, args.get(currentKey));
+                }catch(NumberFormatException e) {
+                    UstadMobileSystemImpl.l(UMLog.ERROR, 680, currentKey, e);
+                }
+            }
+        }
+
+        return result;
+    }
+
     
     
 }

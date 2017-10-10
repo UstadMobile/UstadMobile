@@ -18,13 +18,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.ustadmobile.core.controller.BasePointController;
+import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMUtil;
-import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
@@ -274,8 +273,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(BasePointView.VIEW_NAME,
-                        BasePointController.makeDefaultBasePointArgs(this), this);
+                UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION, this);
                 return true;
 
 

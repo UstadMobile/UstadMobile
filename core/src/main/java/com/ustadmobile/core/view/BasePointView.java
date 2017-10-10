@@ -31,6 +31,8 @@
 
 package com.ustadmobile.core.view;
 
+import java.util.Hashtable;
+
 /**
  * The base point view provides two tabs: the downloaded entries of that user
  * and a list of browsable feeds
@@ -65,5 +67,7 @@ public interface BasePointView extends UstadView{
     void setShareAppDialogProgressVisible(boolean visible);
 
     void dismissShareAppDialog();
+
+    void addTab(Hashtable tabArguments);
     
 }
