@@ -33,6 +33,8 @@ package com.ustadmobile.core.view;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
+import java.util.Vector;
+
 /**
  *
  * @author varuna
@@ -129,14 +131,14 @@ public interface CatalogView extends UstadView{
      * 
      * @return Array of entries selected by the user
      */
-    public UstadJSOPDSEntry[] getSelectedEntries();
+    Vector getSelectedEntries();
     
     /**
      * Set the entries that are to be marked as selected
      * 
      * @param entries Array of entries to be marked as selected
      */
-    public void setSelectedEntries(UstadJSOPDSEntry[] entries);
+    void setSelectedEntries(Vector entries);
 
     public void refresh();
 
@@ -194,6 +196,15 @@ public interface CatalogView extends UstadView{
      * @param entry
      */
     void removeEntry(UstadJSOPDSEntry entry);
+
+    void removeEntry(int index);
+
+    /**
+     * Return the number of entries in this view
+     *
+     * @return
+     */
+    int getNumEntries();
 
     /**
      * Get the index of a given entry id

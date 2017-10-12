@@ -147,6 +147,28 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
         this.entries = newEntries;
     }
 
+    public void setEntryAt(int position, UstadJSOPDSEntry entry) {
+        if(position > entries.length)
+            throw new IllegalArgumentException("position > entries.length");
+
+        if(position < entries.length)
+            this.entries[position] = entry;
+        else
+            addEntry(position, entry);
+    }
+
+
+    public void removeEntry(int position) {
+        UstadJSOPDSEntry[] newEntries = new UstadJSOPDSEntry[size() -1];
+        System.arraycopy(this.entries, 0, newEntries, 0, position);
+        if(position < entries.length -1) {
+            System.arraycopy(this.entries, position + 1, newEntries, position,
+                    entries.length - position -1);
+        }
+        this.entries = newEntries;
+    }
+
+
     /**
      * Sort entries use a given comparer
      * 

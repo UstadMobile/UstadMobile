@@ -215,6 +215,42 @@ public class OpdsEndpoint {
         fireFeedChanged(UMFileUtil.joinPaths(new String[]{OPDS_PROTO_PREFKEY_FEEDS, prefkey}));
     }
 
+    /**
+     * Remove a list of entries from the feed in the given preference key. Once complete, save the
+     * resulting feed back to it's preference key
+     *
+     * @param prefKey The preference key that the feed is stored in
+     * @param url The url through which the feed is accessed e.g. OPDS_PROTO_PREFKEY_FEEDS/prefKey
+     * @param entriesToRemove A vector where each element is either a String of the entry id to remove
+     *                        or an OpdsItem where the id is the id of the item to remove
+     * @param context System context object
+     */
+    public void removeEntriesFromPreferenceKeyFeed(String prefKey, String url, UstadJSOPDSFeed feed,
+                                                   Vector entriesToRemove, Object context) {
+        feed = getFeedFromPreferenceKey(prefKey, url, feed, null, context);
+        int entryIndex;
+        Object entryObj;
+        String idToRemove;
+        for(int i = 0; i < entriesToRemove.size(); i++) {
+            entryObj = entriesToRemove.elementAt(i);
+            if(entryObj instanceof String) {
+                idToRemove = (String)entryObj;
+            }else {
+                idToRemove = ((UstadJSOPDSItem)entryObj).id;
+            }
+
+            entryIndex = feed.indexOfEntryId(idToRemove);
+
+            if(entryIndex >= 0) {
+                feed.removeEntry(entryIndex);
+            }
+        }
+
+        saveFeedToPreferences(feed, prefKey, context);
+        fireFeedChanged(url);
+    }
+
+
 
     /**
      * Add an OPDS change listener. If a feed is modified using OpdsEndpoint methods, an event will

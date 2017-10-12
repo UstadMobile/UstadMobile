@@ -93,6 +93,8 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
     boolean opdsChangeListenerRegistered = false;
 
+    private Vector selectedEntries;
+
     public CatalogPresenter(Object context, CatalogView view) {
         super(context);
         this.mView = view;
@@ -104,6 +106,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
         this.args = args;
         opdsUri = (String)args.get(ARG_URL);
+        selectedEntries = new Vector();
 
         if(args.containsKey(ARG_RESMOD)){
             resourceMode = ((Integer)args.get(ARG_RESMOD)).intValue();
@@ -226,6 +229,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
         mView.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                while(mView.getNumEntries() > feed.size()) {
+                    mView.removeEntry(feed.size());
+                }
+
                 mView.setRefreshing(false);
                 alternativeTranslationLinks = feed.getAlternativeTranslationLinks();
                 if(alternativeTranslationLinks.size() > 0) {
@@ -242,6 +249,8 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
 
                 mView.setAddOptionAvailable(feedPrefKey != null);
+                if(feedPrefKey != null)
+                    mView.setDeleteOptionAvailable(true);
 
             }
         });
@@ -366,6 +375,17 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     public void handleClickDownloadAll() {
         handleClickDownload(feed, feed.getAllEntries());
     }
+
+    public void handleClickDelete() {
+        if(selectedEntries.size() > 0) {
+            if(feedPrefKey != null) {
+                //remove from the feed
+                OpdsEndpoint.getInstance().removeEntriesFromPreferenceKeyFeed(feedPrefKey, opdsUri,
+                        feed, selectedEntries, context);
+            }
+        }
+    }
+
 
     @Override
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
@@ -496,6 +516,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
         }
     }
 
+
     private static void actionRemoveEntry(String entryID, int resourceMode, Object context) {
         CatalogEntryInfo entry = getEntryInfo(entryID, resourceMode, context);
         if(entry != null && entry.acquisitionStatus == STATUS_ACQUIRED) {
@@ -504,6 +525,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
             impl.removeFile(entry.fileURI);
             setEntryInfo(entryID, null, resourceMode, context);
         }
+    }
+
+    public void handleSelectedEntriesChanged(Vector selectedEntries) {
+        this.selectedEntries = selectedEntries;
     }
 
 }

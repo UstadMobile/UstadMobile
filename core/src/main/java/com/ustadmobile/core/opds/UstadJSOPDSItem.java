@@ -629,7 +629,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
         int evtType;
         String name;
         String[] linkAttrs;
-        int i, entryPos = 0, entryCount = 0;
+        int i, entryCount = 0;
         UstadJSOPDSFeed thisFeed = this instanceof UstadJSOPDSFeed ? (UstadJSOPDSFeed)this: null;
 
         while((evtType = xpp.next()) != XmlPullParser.END_DOCUMENT) {
@@ -638,7 +638,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
                 if(thisFeed != null && name.equals(ATTR_NAMES[ATTR_ENTRY])) {
                     UstadJSOPDSEntry newEntry = new UstadJSOPDSEntry(parentFeed);
                     newEntry.loadFromXpp(xpp, parentFeed, callback);
-                    thisFeed.addEntry(entryCount, newEntry);
+                    thisFeed.setEntryAt(entryCount, newEntry);
                     entryCount++;
 
                     if(callback != null) {
@@ -886,6 +886,19 @@ public abstract class UstadJSOPDSItem implements Runnable {
             if (items[i] != null && items[i].id.equals(entryId)){
                 return i;
             }
+        }
+
+        return -1;
+    }
+
+    public static int indexOfItemInVector(String entryId, Vector items) {
+        UstadJSOPDSItem item;
+        for(int i = 0; i < items.size(); i++) {
+            if(items.elementAt(i) == null)
+                continue;
+            item = (UstadJSOPDSItem)items.elementAt(i);
+            if(item.id != null && entryId.equals(item.id))
+                return i;
         }
 
         return -1;

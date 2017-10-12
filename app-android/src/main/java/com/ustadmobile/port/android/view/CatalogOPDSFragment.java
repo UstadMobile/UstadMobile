@@ -71,6 +71,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.WeakHashMap;
 
 
@@ -93,7 +94,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private Map<String, Boolean> idToProgressVisibleMap = new Hashtable<>();
 
-    private UstadJSOPDSEntry[] mSelectedEntries;
+    private Vector<UstadJSOPDSEntry> mSelectedEntries;
 
     private boolean hasDisplayed = false;
 
@@ -160,7 +161,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
-        mSelectedEntries = new UstadJSOPDSEntry[0];
+        mSelectedEntries = new Vector<>();
         setHasOptionsMenu(true);
 
         idToCardMap = new WeakHashMap<>();
@@ -212,11 +213,20 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         mRecyclerAdapter.notifyDataSetChanged();
     }
 
+    public void removeEntry(int index) {
+        entryList.remove(index);
+        mRecyclerAdapter.notifyItemRemoved(index);
+    }
+
     @Override
     public int indexOfEntry(String entryId) {
         return UstadJSOPDSItem.indexOfEntryInList(entryId, entryList);
     }
 
+    @Override
+    public int getNumEntries() {
+        return entryList.size();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -259,7 +269,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(mDeleteOptionAvailable && mSelectedEntries.length > 0) {
+        if(mDeleteOptionAvailable && mSelectedEntries.size() > 0) {
             MenuItem item = menu.add(Menu.NONE, MENUCMDID_DELETE, 1, "");
             item.setIcon(R.drawable.ic_delete_white_24dp);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -332,11 +342,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
                 return true;
             case MENUCMDID_DELETE:
-                if(getSelectedEntries().length > 0) {
-//                    TODO: Handle click delete in presenter
-//                    mCatalogController.handleClickDeleteEntries(getSelectedEntries());
-                }
-
+                mCatalogPresenter.handleClickDelete();
                 return true;
 
             case MENUCMD_SHARE:
@@ -368,13 +374,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void onDestroy() {
         super.onDestroy();
-//        if (mCatalogController != null) {
-//            mCatalogController.handleViewDestroy();
-//            isRequesting=false;
-//        }
-
-//        if(mCatalogController != null)
-//            mCatalogController.onDestroy();
         mCatalogPresenter.onDestroy();
     }
 
@@ -382,25 +381,21 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         boolean nowSelected = !card.isSelected();
         card.setSelected(nowSelected);
 
-        //TODO: Fix this
-        UstadJSOPDSEntry[] currentSelection = getSelectedEntries();
-        int newArraySize = nowSelected ? currentSelection.length + 1 : currentSelection.length -1;
-        UstadJSOPDSEntry[] newSelection = new UstadJSOPDSEntry[newArraySize];
-
-        if(nowSelected) {
-            //just make the new selection one larger
-            System.arraycopy(currentSelection, 0, newSelection, 0, currentSelection.length);
-            newSelection[newSelection.length-1] = card.getEntry();
-        }else {
-            for(int i = 0, elCount = 0; i < currentSelection.length; i++) {
-                if(!currentSelection[i].id.equals(card.getEntry().id)) {
-                    newSelection[elCount] = currentSelection[i];
-                    elCount++;
-                }
+        if(nowSelected){
+            mSelectedEntries.addElement(card.getEntry());
+            if(mSelectedEntries.size() == 1 && getActivity() != null) {
+                getActivity().supportInvalidateOptionsMenu();
             }
+        }else {
+            int removeIndex = UstadJSOPDSItem.indexOfItemInVector(card.getEntry().id, mSelectedEntries);
+            if(removeIndex != -1)
+                mSelectedEntries.removeElementAt(removeIndex);
+
+            if(mSelectedEntries.size() == 0 && getActivity() != null)
+                getActivity().supportInvalidateOptionsMenu();
         }
 
-        setSelectedEntries(newSelection);
+        mCatalogPresenter.handleSelectedEntriesChanged(mSelectedEntries);
     }
 
 
@@ -409,7 +404,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public void onClick(View view) {
         if(view instanceof OPDSEntryCard) {
             OPDSEntryCard card = ((OPDSEntryCard)view);
-            if(getSelectedEntries().length > 0) {
+            if(mSelectedEntries.size() > 0) {
                 toggleEntrySelected(card);
             }else {
                 mCatalogPresenter.handleClickEntry(card.getEntry().id);
@@ -530,29 +525,20 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public UstadJSOPDSEntry[] getSelectedEntries() {
+    public Vector getSelectedEntries() {
         return mSelectedEntries;
     }
 
     @Override
-    public void setSelectedEntries(UstadJSOPDSEntry[] entries) {
-        if((entries.length == 0 && mSelectedEntries.length > 0) || (entries.length > 0 && mSelectedEntries.length ==0)) {
+    public void setSelectedEntries(Vector entries) {
+        if((entries.size() == 0 && mSelectedEntries.size() > 0) || (entries.size() > 0 && mSelectedEntries.size() ==0)) {
             getActivity().supportInvalidateOptionsMenu();
         }
 
         this.mSelectedEntries = entries;
 
-//        UstadJSOPDSFeed thisFeed = mCatalogController.getModel().opdsFeed;
         for(int i = 0; i < entryList.size(); i++) {
-            boolean isSelected = false;
-            for(int j = 0; j < entries.length; j++) {
-
-                if(entryList.get(i).id.equals(entries[j].id)) {
-                    isSelected = true;
-                    break;
-                }
-            }
-
+            boolean isSelected = UstadJSOPDSItem.indexOfItemInVector(entryList.get(i).id, entries) != -1;
             if(idToCardMap.containsKey(entryList.get(i).id)) {
                 idToCardMap.get(entryList.get(i).id).setSelected(isSelected);
             }
@@ -650,10 +636,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             }else {
                 holder.mEntryCard.setProgressBarVisible(false);
             }
-
-            //check the acquisition status
-//            int entryStatus = controller.getEntryAcquisitionStatus(feed.entries[position].id);
-//            holder.mEntryCard.setOPDSEntryOverlay(entryStatus);
 
             //Make sure if this entry is being recycled the idToCardMap won't get confused
             if(idToCardMap.containsValue(holder.mEntryCard)) {
