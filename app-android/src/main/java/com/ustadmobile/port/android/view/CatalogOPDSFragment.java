@@ -433,26 +433,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(message);
-        builder.setTitle(title);
-//        TODO: Handle the confirm dialog
-        builder.setPositiveButton(positiveChoice, new DialogInterface.OnClickListener(){
-            public void onClick(DialogInterface dialog, int id) {
-//                mCatalogController.handleConfirmDialogClick(true, commandId);
-            }
-        });
-        builder.setNegativeButton(negativeChoice, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-//                mCatalogController.handleConfirmDialogClick(false, commandId);
-            }
-        });
-        builder.create().show();
-    }
-
-
-    @Override
     public void setEntryStatus(final String entryId, final int status) {
         idToStatusMap.put(entryId, status);
         super.runOnUiThread(new Runnable() {

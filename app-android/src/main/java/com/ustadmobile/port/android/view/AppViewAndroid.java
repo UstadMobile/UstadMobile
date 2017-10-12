@@ -37,6 +37,8 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
+import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.UstadView;
@@ -54,6 +56,8 @@ public class AppViewAndroid implements AppView{
     private AlertDialog alertDialog;
 
     private AlertDialog choiceDialog;
+
+    private AlertDialog confirmDialog;
 
     private UstadView view;
 
@@ -119,7 +123,9 @@ public class AppViewAndroid implements AppView{
             protected void onPostExecute(Void aVoid) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setMessage(text).setTitle(title);
-                builder.setPositiveButton("OK", new AlertDialog.OnClickListener() {
+                String buttonText = UstadMobileSystemImpl.getInstance().getString(MessageID.ok,
+                        context);
+                builder.setPositiveButton(buttonText, new AlertDialog.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //do nothing
@@ -142,6 +148,62 @@ public class AppViewAndroid implements AppView{
                 }
             }
         });
+    }
+
+    /**
+     *
+     * @param title
+     * @param text
+     * @param positiveButtonText
+     * @param negativeButtonText
+     * @param cmdId
+     * @param listener
+     */
+    public void showConfirmDialog(final String title, final String text, final String positiveButtonText,
+                                  final String negativeButtonText, final int cmdId,
+                                  final AppViewChoiceListener listener) {
+        new AppViewAsyncTask() {
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage(text).setTitle(title);
+
+                DialogInterface.OnClickListener clickListener= new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int choice) {
+                        listener.appViewChoiceSelected(cmdId, choice == DialogInterface.BUTTON_POSITIVE ?
+                                CHOICE_POSITIVE : CHOICE_NEGATIVE);
+                        confirmDialog = null;
+                    }
+                };
+
+                builder.setPositiveButton(positiveButtonText, clickListener);
+                builder.setNegativeButton(negativeButtonText, clickListener);
+
+                confirmDialog = builder.create();
+                confirmDialog.show();
+            }
+        }.execute();
+    }
+
+    @Override
+    public void dismissConfirmDialog() {
+        if(confirmDialog != null) {
+            new AppViewAsyncTask() {
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    confirmDialog.dismiss();
+                }
+            }.execute();
+        }
+    }
+
+    @Override
+    public void showConfirmDialog(int title, int text, int positiveButtonText, int negativeButtonText, int cmdId, AppViewChoiceListener listener) {
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        showConfirmDialog(impl.getString(title, context), impl.getString(text, context),
+                impl.getString(positiveButtonText, context),
+                impl.getString(negativeButtonText, context), cmdId, listener);
     }
 
     @Override

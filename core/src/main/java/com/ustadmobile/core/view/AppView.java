@@ -50,6 +50,10 @@ public interface AppView {
      * http://developer.android.com/reference/android/widget/Toast.html#LENGTH_LONG
      */
     public static final int LENGTH_LONG = 1;
+
+    int CHOICE_POSITIVE = 1;
+
+    int CHOICE_NEGATIVE = 0;
     
     /**
      * Show progress going on (e.g. show spinner) with title
@@ -116,5 +120,39 @@ public interface AppView {
      * Hide the choice dialog if showing
      */
     public void dismissChoiceDialog();
+
+    /**
+     * Show a confirmation dialog. Use AppViewChoiceListener to listen for the result. The
+     * selection will be CHOICE_POSITIVE or CHOICE_NEGATIVE depending on the user selection
+     *
+     * @param title Title of the dialog window
+     * @param text Text for the dialog window
+     * @param positiveButtonText Text for the positive / confirmation button e.g. delete, add etc.
+     * @param negativeButtonText Text for the negative button e.g. cancel
+     * @param cmdId Command ID that will be passed to the listener
+     * @param listener Listener to receive event when the user makes a choice
+     */
+    void showConfirmDialog(final String title, final String text, String positiveButtonText,
+                                       String negativeButtonText, final int cmdId,
+                                       final AppViewChoiceListener listener);
+
+    /**
+     * Show a confirmation dialog. Use AppViewChoiceListener to listen for the result. The
+     * selection will be CHOICE_POSITIVE or CHOICE_NEGATIVE depending on the user selection
+     *
+     * @param title Title of the dialog window
+     * @param text Text for the dialog window
+     * @param positiveButtonText Text for the positive / confirmation button e.g. delete, add etc.
+     * @param negativeButtonText Text for the negative button e.g. cancel
+     * @param cmdId Command ID that will be passed to the listener
+     * @param listener Listener to receive event when the user makes a choice
+     */
+    void showConfirmDialog(int title, int text, int positiveButtonText, int negativeButtonText,
+                           int cmdId, AppViewChoiceListener listener);
+
+    /**
+     * Dismiss any active confirmation dialog
+     */
+    void dismissConfirmDialog();
 
 }

@@ -49,16 +49,7 @@ public interface CatalogView extends UstadView{
 
     public static final String VIEW_NAME = "Catalog";
 
-    /**
-     * Show a confirm/cancel dialog to the user (e.g. delete item? download item?)
-     * 
-     * @param title
-     * @param text 
-     * @param commandId The type of event (the view should then know what to trigger next)
-     */
-    public void showConfirmDialog(String title, String message, String positiveChoice, String negativeChoice, final int commandId);
-    
-    
+
     /**
      * Set the status of a given entry (e.g. acquired, not acquired, in progress) 
      * 

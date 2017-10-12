@@ -11,6 +11,8 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AddFeedDialogView;
+import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogView;
 
 import java.io.IOException;
@@ -379,9 +381,20 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     public void handleClickDelete() {
         if(selectedEntries.size() > 0) {
             if(feedPrefKey != null) {
-                //remove from the feed
-                OpdsEndpoint.getInstance().removeEntriesFromPreferenceKeyFeed(feedPrefKey, opdsUri,
-                        feed, selectedEntries, context);
+                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showConfirmDialog(
+                        MessageID.delete, MessageID.delete_q, MessageID.ok, MessageID.cancel, 0,
+                        new AppViewChoiceListener() {
+                            @Override
+                            public void appViewChoiceSelected(int commandId, int choice) {
+                                if(choice == AppView.CHOICE_POSITIVE) {
+                                    OpdsEndpoint.getInstance().removeEntriesFromPreferenceKeyFeed(
+                                            feedPrefKey, opdsUri, feed, selectedEntries, context);
+                                    selectedEntries.removeAllElements();
+                                    mView.setSelectedEntries(selectedEntries);
+                                }
+                            }
+                        }
+                );
             }
         }
     }
