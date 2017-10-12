@@ -63,6 +63,9 @@ public class UMAndroidUtil {
     }
 
     public static Bundle hashtableToBundle(Hashtable table) {
+        if(table == null)
+            return null;
+
         Bundle bundle = new Bundle();
 
         Iterator iterator = table.keySet().iterator();

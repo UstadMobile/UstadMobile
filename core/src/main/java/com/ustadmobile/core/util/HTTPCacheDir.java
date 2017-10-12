@@ -99,7 +99,7 @@ public class HTTPCacheDir {
     
     private int maxEntries;
 
-    public static final String CACHE_PRIME_INDEX_RES = "cache/";
+    public static final String CACHE_PRIME_INDEX_RES = "com/ustadmobile/core/cache/";
 
     private Thread asyncSaveThread = null;
     

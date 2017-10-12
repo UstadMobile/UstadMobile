@@ -222,8 +222,8 @@ app-android/src/main/java/com/ustadmobile/port/android/generated/*
 app-android/src/vanilla/java/com/ustadmobile/port/android/generated/*
 app-android/src/remotetestslave/java/com/ustadmobile/port/android/generated/*
 
-#Copied cache prime files
-app-android/src/main/assets/cache
+#Copied core resources
+app-android/src/main/assets/com/ustadmobile/core
 
 #Local buildconfig files
 buildconfig.local.properties

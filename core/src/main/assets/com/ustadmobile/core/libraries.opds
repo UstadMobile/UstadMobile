@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+    <title>Feeds</title>
+    <id>com.ustadmobile.presetfeeds</id>
+    
+    <entry>
+       <title>Project Gutenberg</title>
+       <id>com.ustadmobile.presetfeeds.gutenberg</id>
+       <link href="http://m.gutenberg.org/ebooks/?format=opds"
+           type="application/atom+xml;profile=opds-catalog;kind=navigation"
+           rel="subsection"/>
+    </entry>
+
+    <entry>
+       <title>Atoll Digital Library</title>
+       <id>com.ustadmobile.presetfeeds.atoll</id>
+       <link href="http://atoll-digital-library.org/opds/"
+           type="application/atom+xml;profile=opds-catalog;kind=navigation"
+           rel="subsection"/>
+    </entry>
+
+</feed>

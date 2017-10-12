@@ -138,27 +138,6 @@ public interface CatalogView extends UstadView{
      */
     public void setSelectedEntries(UstadJSOPDSEntry[] entries);
 
-    /**
-     * Show the dialog for adding a new feed
-     */
-    public void showAddFeedDialog();
-
-    public void setAddFeedDialogURL(String url);
-
-    public String getAddFeedDialogURL();
-
-    public String getAddFeedDialogTitle();
-
-    public void setAddFeedDialogTitle(String title);
-
-    /**
-     * Sets whether or not the URL and Title text fields are visible - they should be shown only
-     * when the user has selected Custom OPDS from the presets drop down
-     *
-     * @param visible
-     */
-    public void setAddFeedDialogTextFieldsVisible(boolean visible);
-
     public void refresh();
 
     /**

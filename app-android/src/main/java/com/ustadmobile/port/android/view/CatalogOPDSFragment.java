@@ -80,7 +80,8 @@ import java.util.WeakHashMap;
  * Use newInstance to create a new Fragment and use the FragmentManager in the normal way
  *
  */
-public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener, View.OnLongClickListener, CatalogView, ControllerReadyListener, SwipeRefreshLayout.OnRefreshListener, DialogInterface.OnClickListener, AdapterView.OnItemSelectedListener{
+public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnClickListener,
+        View.OnLongClickListener, CatalogView, SwipeRefreshLayout.OnRefreshListener{
 
     private View rootContainer;
 
@@ -92,8 +93,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private Map<String, Boolean> idToProgressVisibleMap = new Hashtable<>();
 
-//    protected CatalogController mCatalogController;
-
     private UstadJSOPDSEntry[] mSelectedEntries;
 
     private boolean hasDisplayed = false;
@@ -102,8 +101,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     //Trackers whether or not there is a loading operation (e.g. refresh) going on
     private boolean isLoading = false;
-
-    protected Dialog addFeedDialog;
 
     private boolean mDeleteOptionAvailable;
 
@@ -221,50 +218,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
 
-
-
-    @Override
-    public void controllerReady(final UstadController controller, int flags) {
-//        final SwipeRefreshLayout refreshLayout = mSwipeRefreshLayout;
-//        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-//        isLoading = false;
-//        mCatalogController = (CatalogController)controller;
-//        setBaseController(mCatalogController);
-//
-//        mRecyclerAdapter = new OPDSRecyclerAdapter(mCatalogController);
-//
-//        //in case user left activity when loading was going on
-//        if(getActivity() != null) {
-//            super.runOnUiThread(new Runnable() {
-//                public void run() {
-//                    refreshLayout.setRefreshing(false);
-//
-//                }
-//            });
-//        }
-//
-//        super.runOnUiThread(new Runnable() {
-//            public void run() {
-//                if (controller == null) {
-//                    String errMsg = LocaleUtil.formatMessage(impl.getString(MessageID.course_catalog_load_error, getContext()),
-//                            "Catalog controller");
-//                    impl.getAppView(getActivity()).showAlertDialog(
-//                            impl.getString(MessageID.error, getContext()), errMsg);
-//                } else {
-//                    if(getActivity() != null) {
-//                        getActivity().setTitle(mCatalogController.getModel().opdsFeed.title);
-//                        getActivity().supportInvalidateOptionsMenu();
-//                    }
-//
-//                    mCatalogController.setUIStrings();
-//                    setSelectedEntries(new UstadJSOPDSEntry[0]);
-//                    mRecyclerView.setAdapter(mRecyclerAdapter);
-//                    mCatalogController.loadThumbnails();
-//                }
-//            }
-//        });
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -353,7 +306,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         switch(item.getItemId()) {
             case MENUCMDID_ADD:
-//                mCatalogController.handleClickAdd();
+                mCatalogPresenter.handleClickAdd();
                 return true;
             case R.id.action_opds_acquire:
 //                TODO: Handle this in the presenter not the view
@@ -469,8 +422,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 mCatalogPresenter.handleClickFooterButton();
                 break;
             case R.id.fragment_catalog_addbutton:
-//                TODO: Handle click add
-//                mCatalogController.handleClickAdd();
+                mCatalogPresenter.handleClickAdd();
                 break;
         }
     }
@@ -619,13 +571,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void onRefresh() {
         mCatalogPresenter.handleRefresh();
-//        if(!isLoading) {
-//            Hashtable args = UMAndroidUtil.bundleToHashtable(getArguments());
-//            int flagArg = args.containsKey(CatalogController.KEY_FLAGS) ? (Integer)args.get(CatalogController.KEY_FLAGS) : 0;
-//            flagArg = flagArg | CatalogController.CACHE_DISABLED;
-//            args.put(CatalogController.KEY_FLAGS, flagArg);
-//            loadCatalog(args);
-//        }
     }
 
     @Override
@@ -662,75 +607,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                         addOptionAvailable ? View.VISIBLE : View.GONE);
             }
         });
-
-        //getActivity().invalidateOptionsMenu();
     }
-
-
-    @Override
-    public void showAddFeedDialog() {
-        AddFeedDialogFragment dialogFragment = new AddFeedDialogFragment();
-        dialogFragment.show(getActivity().getSupportFragmentManager(), "AddFeedDialog");
-    }
-
-    @Override
-    public void setAddFeedDialogURL(String url) {
-        ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_url)).setText(url);
-    }
-
-    @Override
-    public String getAddFeedDialogURL() {
-        return ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_url)).getText().toString();
-    }
-
-    @Override
-    public String getAddFeedDialogTitle() {
-        return ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).getText().toString();
-    }
-
-    @Override
-    public void setAddFeedDialogTitle(String title) {
-        ((EditText)addFeedDialog.findViewById(R.id.basepoint_addfeed_title)).setText(title);
-    }
-
-    @Override
-    public void setAddFeedDialogTextFieldsVisible(boolean visible) {
-        int visibility = visible ? View.VISIBLE : View.GONE;
-        addFeedDialog.findViewById(R.id.basepoint_addfeed_title).setVisibility(visibility);
-        addFeedDialog.findViewById(R.id.basepoint_addfeed_url).setVisibility(visibility);
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int index, long id) {
-//        TODO: handle when a preset feed is selected
-//        mCatalogController.handleFeedPresetSelected(index);
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-        //do nothing
-    }
-
-    /**
-     * Handle when the user has clicked a button on the dialog: to either add the feed or
-     * to cancel
-     *
-     * @param dialogInterface
-     * @param id
-     */
-    //@Override
-    public void onClick(DialogInterface dialogInterface, int id) {
-//        TODO: Handle when the user selects a preset OPDS item to add to their list
-        if(id == DialogInterface.BUTTON_POSITIVE) {
-//            mCatalogController.handleAddFeed(getAddFeedDialogURL(), getAddFeedDialogTitle());
-        }else if(id == DialogInterface.BUTTON_NEGATIVE) {
-            //cancel it
-
-        }
-        dialogInterface.dismiss();
-        addFeedDialog = null;
-    }
-
 
     public class OPDSRecyclerAdapter extends RecyclerView.Adapter<OPDSRecyclerAdapter.ViewHolder> {
 
@@ -804,51 +681,5 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             return entryList.size();
         }
     }
-
-
-    public static class AddFeedDialogFragment extends DialogFragment {
-
-        private Dialog dialog;
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            //builder.setTitle(impl.getString(MessageIDConstants.add_library));
-            builder.setTitle(R.string.add_library);
-            View dialogView =inflater.inflate(R.layout.dialog_basepoint_addfeed, null);
-            builder.setView(dialogView);
-            Fragment frag = getActivity().getSupportFragmentManager().findFragmentByTag(CatalogActivity.FRAGMENT_CATALOG_TAG);
-            if(frag != null && frag instanceof CatalogOPDSFragment) {
-//                TODO: Make the Add Feed Dialog
-//                CatalogOPDSFragment catFrag = (CatalogOPDSFragment)frag;
-//                builder.setNegativeButton(R.string.cancel, catFrag);
-//                builder.setPositiveButton(R.string.add, catFrag);
-//                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_title)).setHint(
-//                        R.string.library_title);
-//                ((EditText)dialogView.findViewById(R.id.basepoint_addfeed_url)).setHint(
-//                        R.string.library_url);
-//                //TODO: Fix me
-//                String[] presetTitles = catFrag.mCatalogController.getFeedList(
-//                        CatalogController.OPDS_FEEDS_INDEX_TITLE);
-//                ArrayAdapter<String> adapter= new ArrayAdapter<>(getContext(),
-//                        R.layout.item_basepoint_dialog_spinneritem, presetTitles);
-//                Spinner presetsSpinner = ((Spinner)dialogView.findViewById(
-//                        R.id.basepoint_addfeed_src_spinner));
-//                presetsSpinner.setAdapter(adapter);
-//                dialog = builder.create();
-//                catFrag.addFeedDialog = dialog;
-//                presetsSpinner.setOnItemSelectedListener(catFrag);
-            }else {
-                throw new IllegalArgumentException("");
-            }
-
-            return dialog;
-        }
-
-
-    }
-
 
 }

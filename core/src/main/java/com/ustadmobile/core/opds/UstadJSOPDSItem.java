@@ -202,6 +202,12 @@ public abstract class UstadJSOPDSItem implements Runnable {
      */
     public static final String LINK_REL_RELATED = "related";
 
+
+    /**
+     * The subsection link as per the Atom spec
+     */
+    public static final String LINK_REL_SUBSECTION = "subsection";
+
     /**
     * Type to be used for a catalog link of an acquisition feed as per OPDS spec
     * 
@@ -725,12 +731,18 @@ public abstract class UstadJSOPDSItem implements Runnable {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    public void loadFromString(String str) throws XmlPullParserException, IOException{
+    public void loadFromString(String str, OpdsItemLoadCallback callback) throws XmlPullParserException, IOException{
         XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
         ByteArrayInputStream bin = new ByteArrayInputStream(str.getBytes("UTF-8"));
         parser.setInput(bin, "UTF-8");
-        loadFromXpp(parser, null);
+        loadFromXpp(parser, callback);
     }
+
+    public void loadFromString(String str) throws XmlPullParserException, IOException{
+        loadFromString(str, null);
+    }
+
+
 
     /**
      * Load this OPDS item from the given URL asynchronously.
@@ -773,6 +785,10 @@ public abstract class UstadJSOPDSItem implements Runnable {
             err = x;
         }finally {
             UMIOUtils.closeInputStream(in);
+        }
+
+        if(!hasRequiredElements(false)){
+            err = new IllegalArgumentException("Not a valid OPDS item: missing title and/or id");
         }
 
         if(err == null) {
@@ -874,6 +890,24 @@ public abstract class UstadJSOPDSItem implements Runnable {
 
         return -1;
     }
+
+    /**
+     * Check if this item has the elements that are required of an OPDS entry or feed. As per the
+     * spec this is id, title and updated. In reality we can work with just the title and the id.
+     *
+     * @param strict If true, require the title, id and update timestamp to be present to return true
+     *
+     * @return True if this item has the required elements as outlined above
+     */
+    public boolean hasRequiredElements(boolean strict) {
+        boolean hasTitleAndId = title != null && id != null;
+        if(!strict) {
+            return hasTitleAndId;
+        }else {
+            return hasTitleAndId && this.updated != null;
+        }
+    }
+
 
     /* $if umplatform != 2  $ */
     public static int indexOfEntryInList(String entryId, List<? extends UstadJSOPDSItem> list) {

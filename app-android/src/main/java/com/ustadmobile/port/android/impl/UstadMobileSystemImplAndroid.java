@@ -66,6 +66,7 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogEntryView;
@@ -86,6 +87,7 @@ import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
+import com.ustadmobile.port.android.view.AddFeedDialogFragment;
 import com.ustadmobile.port.android.view.AppViewAndroid;
 import com.ustadmobile.port.android.view.AttendanceActivity;
 import com.ustadmobile.port.android.view.BasePointActivity;
@@ -184,6 +186,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(SendCourseView.VIEW_NAME, SendCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
+        viewNameToAndroidImplMap.put(AddFeedDialogView.VIEW_NAME, AddFeedDialogFragment.class);
     }
 
 
@@ -440,6 +443,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void go(String viewName, Hashtable args, Object context) {
         Class androidImplClass = viewNameToAndroidImplMap.get(viewName);
         Context ctx = (Context)context;
+        Bundle argsBundle = UMAndroidUtil.hashtableToBundle(args);
 
         if(androidImplClass == null) {
             Log.wtf(UMLogAndroid.LOGTAG, "No activity for " + viewName + " found");
@@ -453,7 +457,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             try {
                 DialogFragment dialog = (DialogFragment)androidImplClass.newInstance();
                 if(args != null)
-                    dialog.setArguments(UMAndroidUtil.hashtableToBundle(args));
+                    dialog.setArguments(argsBundle);
                 AppCompatActivity activity = (AppCompatActivity)context;
                 dialog.show(activity.getSupportFragmentManager(),TAG_DIALOG_FRAGMENT);
             }catch(InstantiationException e) {
@@ -470,7 +474,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }else {
             Intent startIntent = new Intent(ctx, androidImplClass);
             if(args != null)
-                startIntent.putExtras(UMAndroidUtil.hashtableToBundle(args));
+                startIntent.putExtras(argsBundle);
 
             ctx.startActivity(startIntent);
         }
@@ -568,6 +572,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      */
     @Override
     public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
+        if(resURI.charAt(0) == '/')
+            resURI = resURI.substring(1);
+
         return ((Context)context).getAssets().open(resURI);
     }
 

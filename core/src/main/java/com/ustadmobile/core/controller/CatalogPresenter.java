@@ -10,6 +10,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.CatalogView;
 
 import java.io.IOException;
@@ -26,7 +27,8 @@ import java.util.Vector;
  * Created by mike on 9/30/17.
  */
 
-public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPDSItem.OpdsItemLoadCallback, AcquisitionListener {
+public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPDSItem.OpdsItemLoadCallback,
+        AcquisitionListener, OpdsEndpoint.OpdsChangeListener  {
 
     private CatalogView mView;
 
@@ -78,6 +80,19 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
      */
     private Vector alternativeTranslationLinks;
 
+    /**
+     * If the feed originates from a preference key (e.g. the user feed list), this will be the
+     * preference key
+     */
+    private String feedPrefKey;
+
+    /**
+     * The uri where the OPDS for this catalog was loaded from
+     */
+    private String opdsUri;
+
+    boolean opdsChangeListenerRegistered = false;
+
     public CatalogPresenter(Object context, CatalogView view) {
         super(context);
         this.mView = view;
@@ -88,6 +103,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         this.args = args;
+        opdsUri = (String)args.get(ARG_URL);
 
         if(args.containsKey(ARG_RESMOD)){
             resourceMode = ((Integer)args.get(ARG_RESMOD)).intValue();
@@ -117,6 +133,13 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 //        feed.loadFromUrlAsync(opdsUrl, feedLoadHeaders, this);
     }
 
+    public void onDestroy() {
+        if(opdsChangeListenerRegistered) {
+            OpdsEndpoint.getInstance().removeOpdsChangeListener(this);
+        }
+    }
+
+
     public void initEntryStatusCheck(final boolean httpCacheMustRevalidate) {
         Thread initEntryCheckThread = new Thread(new Runnable() {
             @Override
@@ -140,8 +163,8 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
                 }
 
 
-                String opdsUrl = (String)args.get(ARG_URL);
-                feed.loadFromUrlAsync(opdsUrl, feedLoadHeaders, getContext(), CatalogPresenter.this);
+
+                feed.loadFromUrlAsync(opdsUri, feedLoadHeaders, getContext(), CatalogPresenter.this);
 
             }
         });
@@ -187,7 +210,19 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     }
 
     @Override
-    public void onDone(UstadJSOPDSItem item) {
+    public void onDone(final UstadJSOPDSItem item) {
+        String[] prefKeyLink = item.getFirstLink(OpdsEndpoint.USTAD_PREFKEY_FEED_LINK_REL,
+                null);
+        if(prefKeyLink != null)
+            this.feedPrefKey = prefKeyLink[UstadJSOPDSItem.ATTR_HREF];
+        else
+            this.feedPrefKey = null;
+
+        if(!opdsChangeListenerRegistered) {
+            OpdsEndpoint.getInstance().addOpdsChangeListener(this);
+            opdsChangeListenerRegistered = true;
+        }
+
         mView.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -204,6 +239,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
                     mView.setAlternativeTranslationLinks(getNamesForLangaugeCodes(
                             alternativeTranslationLinks), disabledItem);
                 }
+
+
+                mView.setAddOptionAvailable(feedPrefKey != null);
+
             }
         });
     }
@@ -283,6 +322,12 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
         }
     }
 
+    public void handleClickAdd() {
+        Hashtable args = new Hashtable();
+        args.put(AddFeedDialogPresenter.ARG_PREFKEY, feedPrefKey);
+        UstadMobileSystemImpl.getInstance().go(AddFeedDialogView.VIEW_NAME, args, getContext());
+    }
+
     protected void handleCatalogSelected(String url) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         Hashtable args = new Hashtable();
@@ -348,6 +393,18 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     public void handleRefresh() {
         mView.setRefreshing(true);
         initEntryStatusCheck(true);
+    }
+
+    @Override
+    public void feedChanged(String feedUri) {
+        if(feedUri.equals(opdsUri)) {
+            mView.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    handleRefresh();
+                }
+            });
+        }
     }
 
     /**

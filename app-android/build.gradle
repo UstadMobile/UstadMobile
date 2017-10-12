@@ -149,6 +149,7 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
         variant.javaCompiler.dependsOn(copyCachePrimeMain)
+        variant.javaCompiler.dependsOn(copyCoreAssetsLocalconfig)
     }
 }
 
@@ -262,19 +263,32 @@ task copyLocalconfigXmlLocaleFilesFromCore(type: Copy) {
 }
 assemble.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
 
-
-
-
 task copyCachePrimeMain(type: Copy) {
     outputs.upToDateWhen { false }
-    inputs.files(fileTree(dir: rootProject.file("core/src/main/assets/cache")).matching { include '**' })
+    doFirst {
+
+    }
+
+    inputs.files(fileTree(dir: rootProject.file("core/src/main/assets/com/ustadmobile/core")).matching { include '**' })
     eachFile { println it.file }
-    from ("../core/src/main/assets/cache")
+    from ("../core/src/main/assets/com/ustadmobile/core")
     include "**"
-    into "src/main/assets/cache"
+    into "src/main/assets/com/ustadmobile/core"
 }
 assemble.dependsOn(copyCachePrimeMain)
 
+task copyCoreAssetsLocalconfig(type: Copy) {
+    outputs.upToDateWhen { false }
+
+
+    inputs.files(fileTree(dir: rootProject.file("core/src/localconfig/assets/com/ustadmobile/core")).matching { include '**' })
+    eachFile { println it.file }
+    from ("../core/src/localconfig/assets/com/ustadmobile/core")
+    include "**"
+    into "src/localconfig/assets/com/ustadmobile/core"
+}
+
+assemble.dependsOn(copyCoreAssetsLocalconfig)
 
 task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/*/*.xml")
