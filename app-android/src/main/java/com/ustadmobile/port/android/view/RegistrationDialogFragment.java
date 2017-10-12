@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
+import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -13,10 +14,12 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -207,11 +210,16 @@ public class RegistrationDialogFragment extends UstadDialogFragment
         }
     }
 
-    @Override
-    public void addField(int fieldName, final int fieldType, final String[] options) throws SQLException {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+    public void hideNonUserFields(){
 
-        LinearLayout fieldLayout = (LinearLayout)mView.findViewById(
+    }
+
+    @Override
+    public void addField(int fieldName, final int fieldType, final String[] options)
+            throws SQLException {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        final LinearLayout fieldLayout = (LinearLayout)mView.findViewById(
                 R.id.fragment_register_dialog_field_layout);
 
         TextInputLayout textInputLayout = new TextInputLayout(getContext());
@@ -290,6 +298,56 @@ public class RegistrationDialogFragment extends UstadDialogFragment
                         }
                     }
                 });
+
+                autoTextField.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View arg1, int pos,
+                                            long id) {
+                        System.out.println("Selected: " + arg1);
+                        String selected = parent.getItemAtPosition((int)id).toString();
+                        if(selected.equals(impl.getString(MessageID.options_uni_none, getContext()))){
+                            LinearLayout layout = (LinearLayout) mView.findViewById(
+                                    R.id.fragment_register_dialog_field_layout);
+                            final int childCount = layout.getChildCount();
+                            for (int i = 0; i < childCount; i++) {
+                                View v = layout.getChildAt(i);
+                                TextInputLayout t = (TextInputLayout)v;
+                                View a = ((TextInputLayout) v).getChildAt(0);
+                                int vid = ((FrameLayout) a).getChildAt(0).getId();
+
+                                if (vid > 0 && !mPresenter.userFields.contains(vid)
+                                        && vid != R.id.fragment_register_dialog_username_text
+                                        && vid != R.id.fragment_register_dialog_password_text
+                                        ){
+                                    v.setVisibility(View.GONE);
+                                    for (int j=0; j<fieldList.size(); j++){
+                                        AutoCompleteTextView thisField = fieldList.get(j);
+                                        if(thisField.getId() == vid){
+                                            thisField.setVisibility(View.GONE);
+                                            fieldList.set(j, thisField);
+                                        }
+                                    }
+
+                                }else{
+                                    v.setVisibility(View.VISIBLE);
+                                }
+
+                            }
+                        }else{
+                            //Show all
+                            LinearLayout layout = (LinearLayout) mView.findViewById(
+                                    R.id.fragment_register_dialog_field_layout);
+                            final int childCount = layout.getChildCount();
+                            for (int i = 0; i < childCount; i++) {
+                                View v = layout.getChildAt(i);
+                                v.setVisibility(View.VISIBLE);
+                            }
+
+                        }
+
+                    }
+                });
                 break;
             case RegistrationPresenter.TYPE_SPINNER:
                 ArrayAdapter<String> adapterS =
@@ -361,7 +419,9 @@ public class RegistrationDialogFragment extends UstadDialogFragment
                 for(AutoCompleteTextView field: fieldList){
                     field.setError(null); //Reset error every time
                     if(field.getText().toString().trim().equals("")){
-
+                        if(field.getVisibility() == View.GONE){
+                            continue;
+                        }
                         field.setError(impl.getString(MessageID.field_required_prompt, getContext()));
                         allgood = false;
                     }

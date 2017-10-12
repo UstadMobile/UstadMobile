@@ -249,3 +249,6 @@ testres/p2p/*
 
 #Generated model
 ustadmobile-ormlite/src/main/java/com/ustadmobile/port/ormlite/persistence/generated/model/*
+
+#Assets
+app-android/src/main/assets/cache

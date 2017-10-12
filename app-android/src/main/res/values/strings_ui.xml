@@ -186,6 +186,18 @@
     <string name="options_uni_kabul_education_uni" value="1004">Kabul Education University</string>
     <string name="options_uni_other" value="1005">Other</string>
     <string name="options_uni_i_dont_know" value="1006">I don\'t know</string>
+    <string name="options_uni_none" value="1020">None</string>
+    <string name="options_uni_kabul_medical_science" value="1021">Kabul University of Medical Science</string>
+    <string name="options_uni_shaheed_rabani" value="1022">Shaheed Rabbani Education University</string>
+    <string name="options_uni_jawzjan" value="1023">Jawzjan University</string>
+    <string name="options_uni_herat" value="1024">Herat University</string>
+    <string name="options_uni_balkh" value="1025">Balkh University</string>
+    <string name="options_uni_nagahar" value="1026">Nangahar University</string>
+    <string name="options_uni_khost" value="1027">Sheikh Zayed University (Khost)</string>
+    <string name="options_uni_kandahar" value="1028">Kandahar University</string>
+    <string name="options_uni_kunduz" value="1029">Kunduz University</string>
+
+
 
     <string name="options_gender_female" value="1007">Female</string>
     <string name="options_gender_male" value="1008">Male</string>
