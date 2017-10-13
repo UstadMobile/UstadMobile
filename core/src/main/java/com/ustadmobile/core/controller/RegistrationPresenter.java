@@ -11,8 +11,11 @@ import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -51,14 +54,25 @@ public class RegistrationPresenter extends UstadBaseController {
 
     int[] faculty, relationship, english_proficiency, yes_no_choices, job_type, gender, universities;
 
+    public static List userFields;
 
     //TODO: Remove. Instead get it from properties
     public void setExtraFields(){
 
-        universities = new int[]{MessageID.options_uni_kabul_uni,
+        universities = new int[]{
+                MessageID.options_uni_none,
+                MessageID.options_uni_kabul_medical_science,
                 MessageID.options_uni_kabul_polytechnic_uni,
-                MessageID.options_uni_kabul_education_uni,
-                MessageID.options_uni_other, MessageID.options_uni_i_dont_know};
+                MessageID.options_uni_shaheed_rabani,
+                MessageID.options_uni_jawzjan,
+                MessageID.options_uni_herat,
+                MessageID.options_uni_balkh,
+                MessageID.options_uni_nagahar,
+                MessageID.options_uni_khost,
+                MessageID.options_uni_kandahar,
+                MessageID.options_uni_kunduz,
+                MessageID.options_uni_i_dont_know
+        };
         gender = new int[]{MessageID.options_gender_female, MessageID.options_gender_male};
         faculty = new int[]{};
         relationship = new int[]{MessageID.options_relationship_single,
@@ -70,14 +84,25 @@ public class RegistrationPresenter extends UstadBaseController {
         job_type = new int[]{MessageID.options_job_short, MessageID.options_job_long,
                 MessageID.options_job_part, MessageID.options_job_full};
 
-        extraFieldsMap = new HashMap<>();
-        extraFieldsMap.put(MessageID.field_university, TYPE_AUTOCOMPETE_TEXT_VIEW);
+        userFields = new ArrayList();
+
+        userFields.add(MessageID.field_fullname);
+        userFields.add(MessageID.field_gender);
+        userFields.add(MessageID.field_email);
+        userFields.add(MessageID.field_phonenumber);
+        userFields.add(MessageID.field_university);
+        userFields.add(MessageID.field_address);
+
+
+        extraFieldsMap = new LinkedHashMap<>();
         extraFieldsMap.put(MessageID.field_fullname, TYPE_CLASS_TEXT);
         extraFieldsMap.put(MessageID.field_gender, TYPE_AUTOCOMPETE_TEXT_VIEW);
         extraFieldsMap.put(MessageID.field_email, TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
         extraFieldsMap.put(MessageID.field_phonenumber, TYPE_CLASS_PHONE);
-        extraFieldsMap.put(MessageID.field_faculty, TYPE_CLASS_TEXT);
 
+        extraFieldsMap.put(MessageID.field_university, TYPE_AUTOCOMPETE_TEXT_VIEW);
+
+        extraFieldsMap.put(MessageID.field_faculty, TYPE_CLASS_TEXT);
         extraFieldsMap.put(MessageID.field_father_name, TYPE_CLASS_TEXT);
         extraFieldsMap.put(MessageID.field_address, TYPE_CLASS_TEXT);
         extraFieldsMap.put(MessageID.field_tazkira_id, TYPE_CLASS_TEXT);
