@@ -1,2 +1,3 @@
-include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests', ':sharedse-utils'
+include ':app-android', ':core', ':sharedse', ':core-tests', ':sharedse-tests', ':sharedse-utils', ':app-android-launcher'
 include ':app-j2me'
+

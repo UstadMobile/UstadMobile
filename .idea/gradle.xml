@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app-android" />
+            <option value="$PROJECT_DIR$/app-android-launcher" />
             <option value="$PROJECT_DIR$/app-j2me" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-tests" />

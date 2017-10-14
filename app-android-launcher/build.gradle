@@ -1,0 +1,85 @@
+apply plugin: 'com.android.application'
+apply plugin: "jacoco"
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.default.properties")))
+if (project.file("../app-android/buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.local.properties")))
+}
+
+//See:
+// https://developer.android.com/studio/projects/android-library.html
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
+
+    defaultConfig {
+        applicationId "com.toughra.ustadmobile.launcher"
+        minSdkVersion 16
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    productFlavors {
+        /*
+         * The localconfig flavor is created based on the buildconfig.local.properties settings
+         */
+        localconfig {
+            applicationId project.ext.buildConfigProperties['android.applicationId']
+            testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
+            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
+            manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName']]
+        }
+
+        /*
+         * The vanilla config flavor is here for convenience : it's the same as having no
+         * buildconfig.local.properties and relying on what's in buildconfig.default.properties
+         *
+         * It's just here to make life easier so you can switch flavors in Android studio without
+         * having to remove the local config files themselves
+         */
+        vanilla {
+            applicationId "com.toughra.ustadmobile"
+            testApplicationId "com.toughra.ustadmobile.appandroid.test"
+            versionCode rootProject.ext.ustadVersionCode
+            manifestPlaceholders = ["appName": "Ustad Mobile"]
+        }
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
+
+        release {
+            testCoverageEnabled = true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+configurations {
+    localconfigDebugCompile {}
+    localconfigReleaseCompile {}
+}
+
+
+dependencies {
+    compile project(':core')
+    compile project(':sharedse')
+
+    localconfigDebugCompile project(path: ':app-android', configuration: "localconfigDebug")
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:26.0.1'
+    testCompile 'junit:junit:4.12'
+}
