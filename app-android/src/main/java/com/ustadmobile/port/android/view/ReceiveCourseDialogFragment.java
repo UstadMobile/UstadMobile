@@ -76,10 +76,8 @@ public class ReceiveCourseDialogFragment extends UstadDialogFragment implements 
 
     @Override
     public void onClick(View view) {
-        switch(view.getId()) {
-            case R.id.fragment_receive_dialog_connected_but_not_sharing_button:
-                mPresenter.handleClickDisconnect();
-                break;
+        if(view.getId() == R.id.fragment_receive_dialog_connected_but_not_sharing_button) {
+            mPresenter.handleClickDisconnect();
         }
     }
 

@@ -408,42 +408,41 @@ public class RegistrationDialogFragment extends UstadDialogFragment
     @Override
     public void onClick(View v) {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        switch(v.getId()){
-            case R.id.fragment_register_dialog_register_button:
-                boolean allgood = true;
-                String username = ((AutoCompleteTextView)mView.findViewById(
-                        R.id.fragment_register_dialog_username_text)).getText().toString();
-                String password = ((AutoCompleteTextView) mView.findViewById(
-                        R.id.fragment_register_dialog_password_text)).getText().toString();
+        if(v.getId() == R.id.fragment_register_dialog_register_button) {
+            boolean allgood = true;
+            String username = ((AutoCompleteTextView)mView.findViewById(
+                    R.id.fragment_register_dialog_username_text)).getText().toString();
+            String password = ((AutoCompleteTextView) mView.findViewById(
+                    R.id.fragment_register_dialog_password_text)).getText().toString();
 
-                for(AutoCompleteTextView field: fieldList){
-                    field.setError(null); //Reset error every time
-                    if(field.getText().toString().trim().equals("")){
-                        if(field.getVisibility() == View.GONE){
-                            continue;
-                        }
-                        field.setError(impl.getString(MessageID.field_required_prompt, getContext()));
-                        allgood = false;
+            for(AutoCompleteTextView field: fieldList){
+                field.setError(null); //Reset error every time
+                if(field.getText().toString().trim().equals("")){
+                    if(field.getVisibility() == View.GONE){
+                        continue;
                     }
-                    if(field.getError() != null){
-                        allgood = false;
-                    }
+                    field.setError(impl.getString(MessageID.field_required_prompt, getContext()));
+                    allgood = false;
                 }
-
-                Hashtable fieldMap = new Hashtable();
-                Set<Integer> extraFieldsSet = mPresenter.extraFieldsMap.keySet();
-                Integer[] allFields =
-                        extraFieldsSet.toArray(new Integer[extraFieldsSet.size()]);
-
-                for(int field:allFields){
-                    String value = ((EditText)mView.findViewById(field)).getText().toString();
-                    fieldMap.put(field, value);
+                if(field.getError() != null){
+                    allgood = false;
                 }
+            }
 
-                //register new user if validation all good
-                if(allgood) {
-                    mPresenter.handleClickRegister(username, password, fieldMap, editMode);
-                }
+            Hashtable fieldMap = new Hashtable();
+            Set<Integer> extraFieldsSet = mPresenter.extraFieldsMap.keySet();
+            Integer[] allFields =
+                    extraFieldsSet.toArray(new Integer[extraFieldsSet.size()]);
+
+            for(int field:allFields){
+                String value = ((EditText)mView.findViewById(field)).getText().toString();
+                fieldMap.put(field, value);
+            }
+
+            //register new user if validation all good
+            if(allgood) {
+                mPresenter.handleClickRegister(username, password, fieldMap, editMode);
+            }
         }
     }
 

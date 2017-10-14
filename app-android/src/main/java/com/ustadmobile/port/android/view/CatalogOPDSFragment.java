@@ -308,17 +308,17 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
         if(alternativeTranslationLanguageMenuItems != null
                 && alternativeTranslationLanguageMenuItems.contains(item)) {
             int selectedIndex = alternativeTranslationLanguageMenuItems.indexOf(item);
             mCatalogPresenter.handleClickAlternativeLanguage(selectedIndex);
         }
 
-        switch(item.getItemId()) {
-            case MENUCMDID_ADD:
-                mCatalogPresenter.handleClickAdd();
-                return true;
-            case R.id.action_opds_acquire:
+        if(itemId == MENUCMDID_ADD) {
+            mCatalogPresenter.handleClickAdd();
+            return true;
+        }else if(itemId == R.id.action_opds_acquire) {
 //                TODO: Handle this in the presenter not the view
 //                if(getSelectedEntries().length > 0) {
 ////                    UstadJSOPDSFeed feed = mCatalogController.getModel().opdsFeed;
@@ -340,16 +340,16 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 //                    mCatalogController.handleClickDownloadAll();
 //                }
 
-                return true;
-            case MENUCMDID_DELETE:
-                mCatalogPresenter.handleClickDelete();
-                return true;
-
-            case MENUCMD_SHARE:
-//                mCatalogController.handleClickShare();
-                return true;
-
+            return true;
+        }else if(itemId == MENUCMDID_DELETE) {
+            mCatalogPresenter.handleClickDelete();
+            return true;
+        }else if(itemId == MENUCMD_SHARE) {
+            //mCatalogController.handleClickShare()
+            return true;
         }
+
+
 
         if(alternativeTranslationLanguageMenuItems.contains(item)){
             //TODO: handle click alternative translation
@@ -412,13 +412,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             return;
         }
 
-        switch(view.getId()) {
-            case R.id.fragment_catalog_footer_button:
-                mCatalogPresenter.handleClickFooterButton();
-                break;
-            case R.id.fragment_catalog_addbutton:
-                mCatalogPresenter.handleClickAdd();
-                break;
+        if(view.getId() == R.id.fragment_catalog_footer_button) {
+            mCatalogPresenter.handleClickFooterButton();
+        }else if(view.getId() == R.id.fragment_catalog_addbutton) {
+            mCatalogPresenter.handleClickAdd();
         }
     }
 

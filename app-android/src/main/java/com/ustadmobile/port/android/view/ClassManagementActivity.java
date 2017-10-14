@@ -72,13 +72,10 @@ public class ClassManagementActivity extends UstadBaseActivity implements ClassM
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.class_management_attendance_button:
-                mController.handleClickAttendanceButton();
-                break;
-            case R.id.class_management_new_student_fab:
-                mController.handleShowEnrollForm();
-                break;
+        if(v.getId() == R.id.class_management_attendance_button) {
+            mController.handleClickAttendanceButton();
+        }else if(v.getId() == R.id.class_management_new_student_fab){
+            mController.handleShowEnrollForm();
         }
     }
 }

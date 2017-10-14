@@ -101,17 +101,11 @@ public class AttendanceConfirmFragment extends Fragment implements View.OnClickL
 
     @Override
     public void onClick(View view) {
-
-        switch (view.getId()) {
-            case R.id.attendance_confirm_button:
-                ((AttendanceActivity)getActivity()).mController.handleClickSubmitResults();
-                break;
-            case R.id.attendance_tryagain_button:
-                //Go back to camera view
-                ((AttendanceActivity)getActivity()).mController.handleGoBack();
-                break;
+        if(view.getId() == R.id.attendance_confirm_button) {
+            ((AttendanceActivity)getActivity()).mController.handleClickSubmitResults();
+        }else if(view.getId() == R.id.attendance_tryagain_button){
+            ((AttendanceActivity)getActivity()).mController.handleGoBack();
         }
-
     }
 
     class AttendanceArrayAdapter<T> extends ArrayAdapter {

@@ -144,14 +144,12 @@ public class WelcomeDialogFragment extends UstadDialogFragment implements Adapte
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.welcome_dialog_got_it_button:
-                UstadMobileSystemImpl.getInstance().setAppPref(
-                        WelcomeController.PREF_KEY_WELCOME_DONT_SHOW_TRANSIENT,
-                        null, getContext());
-                mController.setHideWelcomeNextTime(mDontShowAgainCheckbox.isChecked());
-                mController.handleClickOK();
-                break;
+        if(v.getId() == R.id.welcome_dialog_got_it_button) {
+            UstadMobileSystemImpl.getInstance().setAppPref(
+                    WelcomeController.PREF_KEY_WELCOME_DONT_SHOW_TRANSIENT,
+                    null, getContext());
+            mController.setHideWelcomeNextTime(mDontShowAgainCheckbox.isChecked());
+            mController.handleClickOK();
         }
     }
 

@@ -75,33 +75,25 @@ public class LoginDialogFragment extends UstadDialogFragment implements LoginVie
     @Override
     public void onClick(View view) {
         int viewId = view.getId();
-        switch(viewId) {
-            case R.id.fragment_login_dialog_login_button:
-            case R.id.fragment_login_dialog_register_button:
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-                    view.setElevation(8);
-                }
-                break;
+        if((viewId == R.id.fragment_login_dialog_login_button
+                || viewId == R.id.fragment_login_dialog_register_button)
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            view.setElevation(8);
         }
 
+        if(viewId == R.id.fragment_login_dialog_login_button) {
+            String username = ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).getText().toString();
+            String password = ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).getText().toString();
 
-        switch(viewId){
-            case R.id.fragment_login_dialog_login_button:
-                String username = ((EditText)mView.findViewById(R.id.fragment_login_dialog_username_text)).getText().toString();
-                String password = ((EditText)mView.findViewById(R.id.fragment_login_dialog_password)).getText().toString();
-
-                //Login against local database
-                boolean locallyPresent =
-                        mLoginController.handleLoginLocally(username, password, getContext());
-                if(!locallyPresent) {
-                    //Login against main server:
-                    mLoginController.handleClickLogin(username, password, mXapiServer);
-                }
-                break;
-
-            case R.id.fragment_login_dialog_register_button:
-                mLoginController.handleClickRegister();
-                break;
+            //Login against local database
+            boolean locallyPresent =
+                    mLoginController.handleLoginLocally(username, password, getContext());
+            if(!locallyPresent) {
+                //Login against main server:
+                mLoginController.handleClickLogin(username, password, mXapiServer);
+            }
+        }else if(viewId == R.id.fragment_login_dialog_register_button) {
+            mLoginController.handleClickRegister();
         }
     }
 

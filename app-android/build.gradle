@@ -6,7 +6,7 @@ if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
 }
 
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: "jacoco"
 
 buildscript {
@@ -143,7 +143,7 @@ task grantTestPermissionsLocalconfigDebug(type: Exec) {
 }
 
 afterEvaluate {
-    android.applicationVariants.all { variant ->
+    android.libraryVariants.all { variant ->
         variant.javaCompiler.dependsOn(copyMainXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
@@ -152,7 +152,7 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(copyCoreAssetsLocalconfig)
     }
 }
-
+//TODO: Fix this for building as library
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {
         startTestSlaveServer.dependsOn task
@@ -166,6 +166,8 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
+
+    publishNonDefault true
 
     signingConfigs {
         release {
@@ -197,7 +199,7 @@ android {
          * The localconfig flavor is created based on the buildconfig.local.properties settings
          */
         localconfig {
-            applicationId project.ext.buildConfigProperties['android.applicationId']
+//            applicationId project.ext.buildConfigProperties['android.applicationId']
             testApplicationId = project.ext.buildConfigProperties['android.applicationId']+ ".test"
             versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
             manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName']]
@@ -211,14 +213,14 @@ android {
          * having to remove the local config files themselves
          */
         vanilla {
-            applicationId "com.toughra.ustadmobile"
+//            applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.test"
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile"]
         }
 
         remotetestslave {
-            applicationId "com.ustadmobile.testslave"
+//            applicationId "com.ustadmobile.testslave"
             testApplicationId "com.toughra.testslave.test"
             manifestPlaceholders = ["appName": "UM Test Server"]
         }

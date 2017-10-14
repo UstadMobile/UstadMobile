@@ -516,13 +516,12 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             return true;
         }
 
-        switch(item.getItemId()) {
-            case ContainerController.CMD_RESUME_SESSION:
-                mContainerController.handleClickResumableRegistrationMenuItem();
-                return true;
-            case R.id.action_leavecontainer:
-                finish();
-                return true;
+        if(item.getItemId() == ContainerController.CMD_RESUME_SESSION) {
+            mContainerController.handleClickResumableRegistrationMenuItem();
+            return true;
+        }else if(item.getItemId() == R.id.action_leavecontainer) {
+            finish();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

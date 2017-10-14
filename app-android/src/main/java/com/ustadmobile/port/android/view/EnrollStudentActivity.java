@@ -179,28 +179,25 @@ public class EnrollStudentActivity extends UstadBaseActivity implements EnrollSt
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.enroll_registerbutton:
-                System.out.println("So you want to add this?");
-                Hashtable userVals = new Hashtable();
+        if(v.getId() == R.id.enroll_registerbutton) {
+            System.out.println("So you want to add this?");
+            Hashtable userVals = new Hashtable();
 
-                userVals.put(LoginController.REGISTER_PHONENUM,
-                        ((EditText) findViewById(R.id.enroll_registerphonenum)).getText().toString());
-                userVals.put(LoginController.REGISTER_NAME,
-                        ((EditText)findViewById(R.id.enroll_registername)).getText().toString());
-                int genderSelectedId = ((RadioGroup)findViewById(R.id.enroll_registergenderradiogroup)).getCheckedRadioButtonId();
-                userVals.put(LoginController.REGISTER_GENDER,
-                        genderSelectedId == R.id.enroll_register_radio_female ? "f" : "m");
-                userVals.put(LoginController.REGISTER_USERNAME, getEditTextVal(R.id.enroll_registerusername));
-                userVals.put(LoginController.REGISTER_PASSWORD, getEditTextVal(R.id.enroll_registerpassword));
-                userVals.put(LoginController.REGISTER_EMAIL, getEditTextVal(R.id.enroll_registeremail));
-                try {
-                    mEnrollStudentController.handleClickEnroll(userVals);
-                }catch(Exception e){
-                    System.out.println("Exception in enrolling: " + e.toString());
-                }
-                break;
-
+            userVals.put(LoginController.REGISTER_PHONENUM,
+                    ((EditText) findViewById(R.id.enroll_registerphonenum)).getText().toString());
+            userVals.put(LoginController.REGISTER_NAME,
+                    ((EditText)findViewById(R.id.enroll_registername)).getText().toString());
+            int genderSelectedId = ((RadioGroup)findViewById(R.id.enroll_registergenderradiogroup)).getCheckedRadioButtonId();
+            userVals.put(LoginController.REGISTER_GENDER,
+                    genderSelectedId == R.id.enroll_register_radio_female ? "f" : "m");
+            userVals.put(LoginController.REGISTER_USERNAME, getEditTextVal(R.id.enroll_registerusername));
+            userVals.put(LoginController.REGISTER_PASSWORD, getEditTextVal(R.id.enroll_registerpassword));
+            userVals.put(LoginController.REGISTER_EMAIL, getEditTextVal(R.id.enroll_registeremail));
+            try {
+                mEnrollStudentController.handleClickEnroll(userVals);
+            }catch(Exception e){
+                System.out.println("Exception in enrolling: " + e.toString());
+            }
         }
     }
 }
