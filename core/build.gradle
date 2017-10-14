@@ -17,6 +17,7 @@ buildscript {
 
 apply plugin: "java"
 apply plugin: "jacoco"
+apply plugin: "maven-publish"
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
@@ -24,6 +25,11 @@ targetCompatibility = "1.7"
 jar {
     //Exclude factory classes that are intended to be replaced by platform specific implementations
     exclude("com/ustadmobile/core/impl/*Factory.class")
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+
 }
 
 repositories {
@@ -204,3 +210,25 @@ task copyTestResources(type: Copy) {
 }
 processTestResources.dependsOn copyTestResources
 
+
+publishing {
+    publications {
+        nanolrscore(MavenPublication) {
+            groupId 'com.ustadmobile.app'
+            artifactId 'core'
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
