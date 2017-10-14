@@ -141,10 +141,10 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
             findViewById(BUTTON_ID_MAP.get(buttonIds.nextElement())).setOnClickListener(this);
         }
 
-        mCollapsingToolbar = findViewById(R.id.activity_catalog_entry_collapsing_toolbar);
+        mCollapsingToolbar = (CollapsingToolbarLayout)findViewById(R.id.activity_catalog_entry_collapsing_toolbar);
 
 
-        seeAlsoRecyclerView = findViewById(R.id.activity_catalog_entry_see_also_recycler_view);
+        seeAlsoRecyclerView = (RecyclerView)findViewById(R.id.activity_catalog_entry_see_also_recycler_view);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         seeAlsoRecyclerView.setLayoutManager(linearLayoutManager);
@@ -158,7 +158,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         iconLoadTarget = new ImageViewLoadTarget(this,
                 (ImageView)findViewById(R.id.activity_catalog_entry_icon_img));
 
-        mDownloadProgressView = findViewById(R.id.activity_catalog_entry_download_progress);
+        mDownloadProgressView = (DownloadProgressView)findViewById(R.id.activity_catalog_entry_download_progress);
         mDownloadProgressView.setOnStopDownloadListener(this);
 
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
@@ -257,7 +257,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setSize(String entrySize) {
-        TextView entrySizeTextView = findViewById(R.id.activity_catalog_entry_size_text);
+        TextView entrySizeTextView = (TextView)findViewById(R.id.activity_catalog_entry_size_text);
         entrySizeTextView.setText(entrySize != null ? entrySize : "");
     }
 
@@ -341,7 +341,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setAlternativeTranslationLinks(String[] languages) {
-        ViewGroup flowLayout = findViewById(R.id.activity_catalog_entry_also_available_in);
+        ViewGroup flowLayout = (ViewGroup)findViewById(R.id.activity_catalog_entry_also_available_in);
         flowLayout.removeAllViews();
 
         int paddingTop = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 6,

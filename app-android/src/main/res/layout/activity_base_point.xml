@@ -50,6 +50,5 @@
         app:headerLayout="@layout/item_basepoint_header_view"
         app:itemIconTint="@color/basepoint_navigation_drawer_tint"
         android:background="@android:color/white"
-
         />
 </android.support.v4.widget.DrawerLayout>

@@ -99,17 +99,17 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mPagerAdapter = new BasePointPagerAdapter(getSupportFragmentManager());
 
 
-        ViewPager viewPager = findViewById(R.id.basepoint_pager);
+        ViewPager viewPager = (ViewPager)findViewById(R.id.basepoint_pager);
         viewPager.setAdapter(mPagerAdapter);
 
-        mTabLayout= findViewById(R.id.activity_basepoint_tablayout);
+        mTabLayout= (TabLayout)findViewById(R.id.activity_basepoint_tablayout);
         mTabLayout.setupWithViewPager(viewPager);
         mTabLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(this, R.color.primary_text));
         mTabLayout.setTabTextColors(ContextCompat.getColor(this, R.color.secondary_text),
                 ContextCompat.getColor(this, R.color.primary_text));
 
-        mDrawerLayout = findViewById(R.id.activity_basepoint_drawlayout);
-        mDrawerNavigationView = findViewById(R.id.activity_basepoint_navigationview);
+        mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
+        mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
         mDrawerNavigationView.setNavigationItemSelectedListener(this);
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open,
                 R.string.closed);
@@ -325,7 +325,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     @Override
     public void onClick(View view) {
-        CheckBox zipCheckbox = shareAppDialog.findViewById(
+        CheckBox zipCheckbox = (CheckBox)shareAppDialog.findViewById(
                 R.id.fragment_share_app_zip_checkbox);
         mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
     }

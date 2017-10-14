@@ -40,7 +40,7 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_xapi_package);
-        mWebView = findViewById(R.id.activity_xapi_package_webview);
+        mWebView = (WebView)findViewById(R.id.activity_xapi_package_webview);
         if(Build.VERSION.SDK_INT >= 17) {
             mWebView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         }
