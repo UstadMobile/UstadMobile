@@ -348,6 +348,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     @Override
     public void addTab(Hashtable tabArguments) {
         tabArgumentsList.add(tabArguments);
+        if(tabArgumentsList.size() > 1){
+            mTabLayout.setVisibility(View.VISIBLE);
+        }
         mPagerAdapter.notifyDataSetChanged();
     }
 }

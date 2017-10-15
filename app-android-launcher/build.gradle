@@ -67,6 +67,8 @@ android {
 configurations {
     localconfigDebugCompile {}
     localconfigReleaseCompile {}
+    vanillaDebugCompile {}
+    vanillaReleaseCompile {}
 }
 
 configurations.all {
@@ -84,6 +86,10 @@ dependencies {
     compile project(':sharedse')
 
     localconfigDebugCompile project(path: ':app-android', configuration: "localconfigDebug")
+    localconfigReleaseCompile project(path: ':app-android', configuration: "localconfigRelease")
+
+    vanillaDebugCompile project(path: ':app-android', configuration: 'vanillaDebug')
+    vanillaReleaseCompile project(path: ':app-android', configuration: "vanillaRelease")
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
