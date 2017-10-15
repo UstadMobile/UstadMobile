@@ -7,10 +7,13 @@ import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -129,9 +132,14 @@ public class OpdsEndpoint {
 
     /**
      * Loads an OPDS feed from a preference key. OPDS feeds (e.g. the list of the user's library
-     * feeds) are stored as strings to the preferences. The internal OPDS url scheme is
-     * as opds://com.ustadmobile.app.prefkey/preference_key where preference_key is the name of the
+     * feeds) can be serialized to strings and stored to a preference key. The internal OPDS url scheme
+     * is as opds://com.ustadmobile.app.prefkey/preference_key where preference_key is the name of the
      * preference key itself.
+     *
+     * Defaults: place a .opds file in the assets using the following naming convention for it to
+     * become the default feed for a given preference key:
+     *
+     * com/ustadmobile/core/feed-defaults/prefkyename.opds
      *
      * @see #OPDS_PROTO_PREFKEY_FEEDS
      *
@@ -170,6 +178,20 @@ public class OpdsEndpoint {
             }
         }else {
             //it's a new feed - just add the prefkey link so the view knows it can add
+            InputStream assetIn = null;
+            try {
+                assetIn = impl.openResourceInputStream(
+                        "/com/ustadmobile/core/feed-defaults/" + prefKey + ".opds", context);
+                XmlPullParser xpp = impl.newPullParser(assetIn);
+                destFeed.loadFromXpp(xpp, callback);
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 684, opdsFeedStr, e);
+            }catch(XmlPullParserException x) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 685, opdsFeedStr, x);
+            }finally {
+                UMIOUtils.closeInputStream(assetIn);
+            }
+
             destFeed.addLink(USTAD_PREFKEY_FEED_LINK_REL, UstadJSOPDSItem.TYPE_NAVIGATIONFEED, prefKey);
             if(callback != null)
                 callback.onDone(destFeed);
