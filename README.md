@@ -25,7 +25,17 @@ Code lives mostly in gradle projects as follows:
 
 To build debug / release versions for any given platform please see the README in the directory for that platform.
 
-## Build configuration management
+## Configuration management
+
+There are two parts to the configuration:
+
+* Build configuration : buildconfig properties that are merged and turned into static constants,
+  and can also be used to control the gradle build process itself.
+
+* App config : a .properties file that is contained in the assets. This can be overriden when the
+  app is used as a library. By default com/ustadmobile/core/appconfig.properties will be used. This
+  can be overriden by setting the com.ustadmobile.core.appconfig manifest property (e.g. meta-data
+  in AndroidManifest.xml or using properties in the jad file on J2ME).
 
 The codebase is designed to make it easy to generate builds with custom content sets, branding, etc. These configuration sets are gitignored and saved to their own separate repository. 
 
@@ -35,6 +45,7 @@ The build configuration system uses .properties files in each module:
 
 Most core options (e.g. app name, base content catalog, etc) are in the core module (e.g. in [core/buildconfig.default.properties](core/buildconfig.default.properties)). Options specific to a given platform (e.g. the android application id) 
   are in the module for that platform (e.g. app-android/buildconfig.local.properties).
+
   
 To commit the build config to it's own git repository (push):
  ```

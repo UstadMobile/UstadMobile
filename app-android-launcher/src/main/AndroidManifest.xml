@@ -7,6 +7,12 @@
         android:theme="@style/Theme.UstadTheme"
         android:supportsRtl="true">
 
+        <!--
+         The path to the asset containing the app runtime configuration.
+        -->
+        <meta-data android:name="com.ustadmobile.core.appconfig"
+            android:value="/com/ustadmobile/core/appconfig.properties"/>
+
         <activity
             android:name="com.ustadmobile.port.android.view.SplashScreenActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"

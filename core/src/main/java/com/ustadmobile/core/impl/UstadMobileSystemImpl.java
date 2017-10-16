@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
+import java.util.Properties;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -199,6 +200,8 @@ public abstract class UstadMobileSystemImpl {
      * The return value from getLocale when the user has said to use the system's locale
      */
     public static final String LOCALE_USE_SYSTEM = "";
+
+    private Properties appConfig;
 
     /**
      * Get an instance of the system implementation - relies on the platform
@@ -1120,6 +1123,103 @@ public abstract class UstadMobileSystemImpl {
      * @return
      */
     public abstract String formatInteger(int integer);
+
+    /**
+     * Wrapper to retrieve preference keys from the system Manifest.
+     *
+     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
+     * On J2ME: uses the jad file
+     *
+     * @param key The key to lookup
+     * @param context System context object
+     *
+     * @return The value of the manifest preference key if found, null otherwise
+     */
+    public abstract String getManifestPreference(String key, Object context);
+
+    /**
+     * Wrapper to retrieve preference keys from the system Manifest.
+     *
+     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
+     * On J2ME: uses the jad file
+     *
+     * @param key The key to lookup
+     * @param defaultVal The default value to return if the key is not found
+     * @param context System context object
+     *
+     * @return The value of the manifest preference key if found, otherwise the default value
+     */
+    public String getManifestPreference(String key, String defaultVal, Object context) {
+        String val = getManifestPreference(key, context);
+        if(val != null) {
+            return val;
+        }else {
+            return defaultVal;
+        }
+    }
+
+
+    /**
+     * Lookup a value from the app runtime configuration. These come from a properties file loaded
+     * from the assets folder, the path of which is set by the manifest preference
+     * com.sutadmobile.core.appconfig .
+     *
+     * @param key The config key to lookup
+     * @param defaultVal The default value to return if the key is not found
+     * @param context Systme context object
+     *
+     * @return The value of the key if found, if not, the default value provided
+     */
+    public String getAppConfigString(String key, String defaultVal, Object context) {
+        if(appConfig == null) {
+            String appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
+                    "/com/ustadmobile/core/appconfig.properties", context);
+            appConfig = new Properties();
+            InputStream prefIn = null;
+
+            try {
+                prefIn = openResourceInputStream(appPrefResource, context);
+                appConfig.load(prefIn);
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 685, appPrefResource, e);
+            }finally {
+                UMIOUtils.closeInputStream(prefIn);
+            }
+        }
+
+        return appConfig.getProperty(key, defaultVal);
+    }
+
+    /**
+     * Get a boolean from the app configuration. App config is stored as a string, so this is
+     * converted to a boolean using Boolean.parseBoolean
+     *
+     * @param key The preference key to lookup
+     * @param defaultVal The default value to return if the key is not found
+     * @param context System context object
+     * @return The boolean value of the given preference key if found, otherwise the default value
+     */
+    public boolean getAppConfigBoolean(String key, boolean defaultVal, Object context) {
+        String strVal = getAppConfigString(key, null, context);
+        if(strVal == null)
+            return defaultVal;
+        else
+            return Boolean.parseBoolean(strVal);
+    }
+
+    /**
+     * Get a boolean from the app configuration. App config is stored as a string, so this is
+     * converted to a boolean using Boolean.parseBoolean
+     *
+     * @param key The preference key to lookup
+     * @param context System context object
+     * @return The boolean value of the given preference key if found, otherwise false
+     */
+    public boolean getAppConfigBoolean(String key, Object context) {
+        return getAppConfigBoolean(key, false, context);
+    }
+
+
 
 
 }

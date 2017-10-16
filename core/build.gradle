@@ -138,8 +138,6 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     buildConfigField "String", "BASE_NAME", project.ext.buildConfigProperties["baseName"]
     buildConfigField "long", "BUILD_TIME_MILLIS", String.valueOf(buildTimeMillis) + "L"
     buildConfigField "boolean", "OPDS_ITEM_ENABLE_BACKGROUNDS", project.ext.buildConfigProperties["appOpdsBackgroundsEnable"]
-    buildConfigField "String", "BASEPOINT_CATALOG_URL", project.ext.buildConfigProperties["appBasepointCatalogUrl"]
-    buildConfigField "String", "BASEPOINT_BROWSEBUTTON_URL", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"]
     buildConfigField "boolean", "BASEPOINT_BROWSEBUTTON_ENABLED", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"].equals("") ? "false" : "true"
     buildConfigField "boolean", "BASEPOINT_FILTER_BY_UI_LANG", project.ext.buildConfigProperties["appBasepointFilterByUiLang"]
     buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]

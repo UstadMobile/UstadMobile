@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -847,5 +848,22 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 EPUBTypePlugin.class,
                 XapiPackageTypePlugin.class
         };
+    }
+
+    @Override
+    public String getManifestPreference(String key, Object context) {
+        try {
+            Context ctx = (Context)context;
+            ApplicationInfo ai2 = ctx.getPackageManager().getApplicationInfo(ctx.getPackageName(),
+                    PackageManager.GET_META_DATA);
+            Bundle metaData = ai2.metaData;
+            if(metaData != null) {
+                return metaData.getString(key);
+            }
+        }catch(PackageManager.NameNotFoundException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, UMLog.ERROR, key, e);
+        }
+
+        return null;
     }
 }

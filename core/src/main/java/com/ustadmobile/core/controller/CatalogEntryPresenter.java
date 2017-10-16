@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.catalog.ContentTypeManager;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -435,6 +436,14 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         if (entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
+            //see if the user needs to login
+            if(impl.getActiveUser(context) == null
+                && impl.getAppConfigBoolean(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN, context)){
+
+                impl.getAppView(context).showNotification("Please login first", AppView.LENGTH_LONG);
+                return;
+            }
+
             Hashtable openArgs = new Hashtable();
             openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
             openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
