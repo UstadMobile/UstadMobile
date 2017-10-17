@@ -1,6 +1,7 @@
 package com.ustadmobile.test.core;
 
 import com.ustadmobile.test.core.catalog.contenttype.TestXapiPackageTypePlugin;
+import com.ustadmobile.test.core.impl.TestUstadJSOPF;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -15,7 +16,8 @@ import org.junit.runners.Suite;
         TestDirectoryScanner.class,
         TestXapiPackageTypePlugin.class,
         TestUstadJSOPDSFeed.class,
-        TestUMFileUtil.class
+        TestUMFileUtil.class,
+        TestUstadJSOPF.class
 })
 public abstract class CoreTestSuite {
 }

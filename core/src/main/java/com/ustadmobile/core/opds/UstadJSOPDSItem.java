@@ -596,11 +596,12 @@ public abstract class UstadJSOPDSItem implements Runnable {
      *
      * @return
      */
-    public String serializeToString(boolean addAbsoluteSelfLink)  {
+    public String serializeToString(boolean addAbsoluteSelfLink, boolean indent)  {
         try {
             XmlSerializer serializer = UstadMobileSystemImpl.getInstance().newXMLSerializer();
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             serializer.setOutput(bout, "UTF-8");
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             serialize(serializer, addAbsoluteSelfLink);
             bout.flush();
             return new String(bout.toByteArray(), "UTF-8");
@@ -612,8 +613,12 @@ public abstract class UstadJSOPDSItem implements Runnable {
         return null;
     }
 
+    public String serializeToString(boolean addAbsoluteSelfLink){
+        return serializeToString(addAbsoluteSelfLink, false);
+    }
+
     public String serializeToString() {
-        return serializeToString(false);
+        return serializeToString(false, false);
     }
 
     /**

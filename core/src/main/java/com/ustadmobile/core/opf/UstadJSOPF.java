@@ -53,6 +53,8 @@ public class UstadJSOPF {
     public static String DEFAULT_MIMETYPE = "application/octet-stream";
     
     public UstadJSOPFItem[] spine;
+
+    private Vector coverImages;
     
     /**
      * The item from the OPF that contains "nav" in it's properties.  As per the 
@@ -197,6 +199,10 @@ public class UstadJSOPF {
                         if(properties != null && properties.indexOf("nav") != -1) {
                             result.navItem = item2;
                         }
+                        if(properties != null && properties.indexOf("cover-image") != -1) {
+                            result.addCoverImage(item2);
+                        }
+
 
                         allItems.put(id, item2);
 
@@ -320,4 +326,33 @@ public class UstadJSOPF {
         
         return -1;
     }
+
+    /**
+     * Add a cover image item.
+     *
+     * @param coverImage UstadJSOPFItem representing the cover image (including href and mime type)
+     */
+    public void addCoverImage(UstadJSOPFItem coverImage) {
+        if(coverImages == null)
+            coverImages = new Vector();
+
+        coverImages.addElement(coverImage);
+    }
+
+    /**
+     * Get the cover image for this publication.
+     *
+     * @param mimeType Preferred mime type (unimplemented)
+     *
+     * @return UstadJSOPFItem representing the cover image
+     */
+    public UstadJSOPFItem getCoverImage(String mimeType) {
+        //TODO: implement mime type preference here
+
+        if(coverImages == null || coverImages.size() == 0)
+            return null;
+
+        return (UstadJSOPFItem)coverImages.elementAt(0);
+    }
+
 }
