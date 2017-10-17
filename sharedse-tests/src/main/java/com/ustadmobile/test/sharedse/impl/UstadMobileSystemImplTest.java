@@ -244,4 +244,10 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     public Class[] getSupportedContentTypePlugins() {
         return new Class[] {EPUBTypePlugin.class};
     }
+
+    @Override
+    public String getManifestPreference(String key, Object context) {
+        //TODO: Implement this
+        return null;
+    }
 }

@@ -61,6 +61,7 @@ task copyLocalConfigToRepoDir(type: Copy) {
 
         include "app-android/src/localconfig/**"
         include "app-j2me/res-local/**"
+        include "core/src/localconfig/**"
     }
 
     into project.hasProperty("configDst") ? configDst : "../UstadMobile-config-" + project.ext.buildConfigProperties["localConfigId"]

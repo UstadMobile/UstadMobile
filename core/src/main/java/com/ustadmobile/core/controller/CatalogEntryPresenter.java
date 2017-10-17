@@ -21,6 +21,9 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
+import com.ustadmobile.core.view.DialogResultListener;
+import com.ustadmobile.core.view.DismissableDialog;
+import com.ustadmobile.core.view.LoginView;
 
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -35,7 +38,7 @@ import java.util.Vector;
  */
 
 public class CatalogEntryPresenter extends BaseCatalogPresenter implements AcquisitionListener,
-        NetworkManagerListener, UstadJSOPDSItem.OpdsItemLoadCallback{
+        NetworkManagerListener, UstadJSOPDSItem.OpdsItemLoadCallback, DialogResultListener{
 
     private CatalogEntryView catalogEntryView;
 
@@ -66,6 +69,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     private long downloadTaskId;
 
     private RelatedItemLoader seeAlsoLoader = new RelatedItemLoader();
+
+    private boolean openAfterLoginOrRegister = false;
 
 
     /**
@@ -439,8 +444,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
             //see if the user needs to login
             if(impl.getActiveUser(context) == null
                 && impl.getAppConfigBoolean(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN, context)){
-
-                impl.getAppView(context).showNotification("Please login first", AppView.LENGTH_LONG);
+                openAfterLoginOrRegister = true;
+                impl.go(LoginView.VIEW_NAME, context);
                 return;
             }
 
@@ -672,5 +677,17 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     
     public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
 
+    }
+
+    @Override
+    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
+        dialog.dismiss();
+
+        if((commandId == LoginController.RESULT_LOGIN_SUCCESSFUL
+            || commandId == RegistrationPresenter.RESULT_REGISTRATION_SUCCESS)
+            && openAfterLoginOrRegister) {
+            openAfterLoginOrRegister = false;
+            handleOpenEntry(entry);
+        }
     }
 }

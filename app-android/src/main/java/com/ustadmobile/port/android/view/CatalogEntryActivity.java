@@ -28,6 +28,8 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogEntryView;
+import com.ustadmobile.core.view.DialogResultListener;
+import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
@@ -40,7 +42,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
 
-public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView, View.OnClickListener, DownloadProgressView.OnStopDownloadListener{
+public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEntryView,
+        View.OnClickListener, DownloadProgressView.OnStopDownloadListener,
+        DialogResultListener {
 
     private CatalogEntryPresenter mPresenter;
 
@@ -401,5 +405,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         mPresenter.onDestroy();
     }
 
-
+    @Override
+    public void onDialogResult(int commandId, DismissableDialog dialog, Hashtable args) {
+        mPresenter.onDialogResult(commandId, dialog, args);
+    }
 }
