@@ -46,23 +46,20 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
     private UMSyncService umSyncService;
 
-
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
-//    public static final int SERVICE_REBROADCASTING_TIMER=30000;
+    //public static final int SERVICE_REBROADCASTING_TIMER=30000;
 
     public static final int SERVICE_REBROADCASTING_TIMER=120000;
 
-
-    public NetworkServiceAndroid(){
-
-    }
+    public NetworkServiceAndroid(){}
 
     @Override
     public void onCreate() {
         super.onCreate();
-        networkManagerAndroid = (NetworkManagerAndroid) UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
+        networkManagerAndroid = (NetworkManagerAndroid)
+                UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
@@ -70,8 +67,9 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
         //Sync:
         Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
-        String loggedInUserString =
-                UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
+        //String loggedInUserString =
+        //        UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
+        //TODO: Remove when new sync success.
         UstadMobileSystemImplSE.getInstanceSE().addActiveUserListener(this);
         bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
     }
@@ -90,8 +88,11 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
         //Sync:
         UstadMobileSystemImplSE.getInstanceSE().removeActiveUserListener(this);
-        String loggedInUserString =
-                UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
+
+        //TODO: We don't really need this. Remove.
+        //TODODone. Commented.
+        //String loggedInUserString =
+        //        UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
         unbindService(umSyncServiceConnection);
 
         super.onDestroy();
@@ -172,10 +173,6 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             umSyncService = ((UMSyncService.UMSyncBinder) iBinder).getService();
 
             loggedInUsername = UstadMobileSystemImpl.getInstance().getActiveUser(context);
-            //List<User> users = userManager.findByUsername(context, loggedInUsername);
-            //if(users!=null&&!users.isEmpty()){
-            //    loggedInUser = users.get(0);
-            //}else{)
 
             if(loggedInUsername != null && !loggedInUsername.isEmpty()) {
                 loggedInUser = userManager.findByUsername(context, loggedInUsername);
@@ -183,6 +180,7 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
             if(loggedInUser ==null){
                 //loggedInUser = null;
+                //TODO: Remove on success of new way.
                 System.out.println("No user logged in. Setting null (will not proceed)");
             }
 
@@ -193,25 +191,39 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             }
             umSyncService.setLoggedInUser(loggedInUser);
             umSyncService.setEndNode(endNode);
-        }
 
+            //TODO: Test this new way:
+            String loggedInUserCred = UstadMobileSystemImpl.getInstance().getActiveUserAuth(context);
+            umSyncService.setPassword(loggedInUserCred);
+
+            System.out.println("onServiceConnected ok.");
+        }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             //sup?
-            int x   =0;
+            int x = 0;
         }
+
     };
 
     @Override
+    public void credChanged(String cred, Object context){
+        umSyncService.setPassword(cred);
+        System.out.println("NetworkServiceandroid: Updated Active Cred..");
+    }
+
+    @Override
     public void userChanged(String username, Object context) {
+
+        if(context == null){
+            context = getApplicationContext();
+        }
+
         UserManager userManager =
                 PersistenceManager.getInstance().getManager(UserManager.class);
         User loggedInUser = null;
-        //List<User> users = userManager.findByUsername(context, username);
-        //if(users!=null&&!users.isEmpty()){
-        //    loggedInUser = users.get(0);
-        //}else{
+
         loggedInUser = userManager.findByUsername(context, username);
         if(loggedInUser == null){
             //loggedInUser = null;
@@ -219,6 +231,15 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
         }
 
         umSyncService.setLoggedInUser(loggedInUser);
+
+        //TODO: test new way.
+        String loggedInUserCred = UstadMobileSystemImpl.getInstance().getActiveUserAuth(context);
+        //umSyncService.setPassword(loggedInUserCred);
+        //The above didn't work since loggedInUserCred would be null always.
+        if(loggedInUserCred == null){
+            System.out.println("NetworkServiceandroid: Active Auth is null. Changing it..");
+        }
+        System.out.println("user changed.");
 
     }
 

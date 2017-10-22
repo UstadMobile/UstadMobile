@@ -245,6 +245,7 @@ public class LoginController extends UstadBaseController{
         //delete the active user
         UstadMobileSystemImpl.getInstance().setActiveUser(null, context);
         UstadMobileSystemImpl.getInstance().setActiveUserAuth(null, context);
+
         UstadMobileSystemImpl.getInstance().go(destAfterLogout, context);
     }
 

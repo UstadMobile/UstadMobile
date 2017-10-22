@@ -46,6 +46,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -495,6 +496,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         //to log in..
 
         User loggedInUser = null;
+        String cred = password;
         //List<User> users = userManager.findByUsername(context, username);
         //if(users!= null && !users.isEmpty()){
         //    loggedInUser = users.get(0);
@@ -505,7 +507,22 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
                 loggedInUser = (User)userManager.makeNew();
                 loggedInUser.setUsername(username);
                 loggedInUser.setUuid(UUID.randomUUID().toString());
+
+                //TODO: Test this new way
+                if(password != null && !password.isEmpty()){
+                    try {
+                        //hash it.
+                        password = userManager.hashPassword(password);
+                    } catch (NoSuchAlgorithmException e) {
+                        System.out.println("Cannot hash password.: " + e);
+                        e.printStackTrace();
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 loggedInUser.setPassword(password);
+
                 loggedInUser.setNotes("User Created via Registration Page");
                 loggedInUser.setDateCreated(System.currentTimeMillis());
                 loggedInUser.setMasterSequence(-1); //This is needed to check is new user or not.
@@ -524,7 +541,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             }
         }
 
-        handleUserLoginAuthComplete(loggedInUser.getUsername(), loggedInUser.getPassword(), context);
+        //handleUserLoginAuthComplete(loggedInUser.getUsername(), loggedInUser.getPassword(), context);
+        //Specifying the clear text password not the hashed persited one.
+        handleUserLoginAuthComplete(loggedInUser.getUsername(), cred, context);
         return 0;
     }
 
@@ -605,8 +624,15 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
      * and what happens after they are newly registered etc.
      */
     private void handleUserLoginAuthComplete(final String username, final String password, Object dbContext) {
+        //Updates user to pref. and userobject to Service.
         setActiveUser(username, dbContext);
+
+        //Updates password cred to pref.
         setActiveUserAuth(password, dbContext);
+
+        //Updating password to Service as well.
+        fireActiveUserCredChangedEvent(password, dbContext);
+
         String authHashed = hashAuth(dbContext, password);
         setAppPref("um-authcache-" + username, authHashed, dbContext);
 
@@ -615,7 +641,9 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     @Override
     public boolean handleLoginLocally(String username, String password, Object dbContext) {
         UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
-        boolean result = userManager.authenticate(dbContext, username, password);
+        //boolean result = userManager.authenticate(dbContext, username, password);
+        //Authenticating and hashing it.
+        boolean result = userManager.authenticate(dbContext, username, password, true);
         if(result){
             handleUserLoginAuthComplete(username, password, dbContext);
         }
@@ -634,6 +662,20 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
                 user.setUuid(UUID.randomUUID().toString());
             }
             user.setUsername(username);
+
+            //TODO: Test this.
+            if(password != null && !password.isEmpty()){
+                try {
+                    //hash it.
+                    password = userManager.hashPassword(password);
+                } catch (NoSuchAlgorithmException e) {
+                    System.out.println("Cannot hash password.: " + e);
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+
             user.setPassword(password);
             userManager.persist(dbContext, user);
             return true;
@@ -655,6 +697,13 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
         for(int i = 0; i < activeUserListener.size(); i++) {
             ((ActiveUserListener)activeUserListener
                     .elementAt(i)).userChanged(username, context);
+        }
+    }
+
+    protected void fireActiveUserCredChangedEvent(String cred, Object context) {
+        for(int i = 0; i < activeUserListener.size(); i++) {
+            ((ActiveUserListener)activeUserListener
+                    .elementAt(i)).credChanged(cred, context);
         }
     }
 

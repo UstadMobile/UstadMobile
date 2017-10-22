@@ -6,4 +6,5 @@ package listener;
 
 public interface ActiveUserListener {
     public void userChanged(String username, Object context);
+    public void credChanged(String cred, Object context);
 }

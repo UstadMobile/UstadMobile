@@ -16,6 +16,8 @@ import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid.KEY_CURRENTAUTH;
+
 /**
  * This is using evernote's andoid-job to run, umsync process in the background.
  * Created by varuna on 8/24/2017.
@@ -83,10 +85,14 @@ public class UMSyncJob extends Job {
             e.printStackTrace();
         }
 
+        String loggedInUserCred = appPrefs.getString(KEY_CURRENTAUTH, null);
+
         try {
             if(loggedInUser != null && endNode != null) {
                 System.out.println("  UMSyncJob: Logged in user and end node is NOT null. Syncing..");
-                UMSyncEndpoint.startSync(loggedInUser, endNode, getContext());
+                //TODO: Test it.
+                UMSyncEndpoint.startSync(loggedInUser, loggedInUserCred, endNode, getContext());
+                //UMSyncEndpoint.startSync(loggedInUser, endNode, getContext());
             }else{
                 System.out.println("  !UMSyncJob: Logged in user and end node is null, skipping..!");
             }

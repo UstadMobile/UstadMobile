@@ -6,11 +6,11 @@
       <module fileurl="file://$PROJECT_DIR$/app-android/app-android.iml" filepath="$PROJECT_DIR$/app-android/app-android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" filepath="$PROJECT_DIR$/app-android-launcher/app-android-launcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/app-j2me/app-j2me.iml" filepath="$PROJECT_DIR$/app-j2me/app-j2me.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app-javase/app-javase.iml" filepath="$PROJECT_DIR$/app-javase/app-javase.iml" />
       <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/core-tests/core-tests.iml" filepath="$PROJECT_DIR$/core-tests/core-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse/sharedse.iml" filepath="$PROJECT_DIR$/sharedse/sharedse.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" filepath="$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sharedse-utils/sharedse-utils.iml" filepath="$PROJECT_DIR$/sharedse-utils/sharedse-utils.iml" />
     </modules>
   </component>
 </project>
