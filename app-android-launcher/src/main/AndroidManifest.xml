@@ -2,7 +2,7 @@
     package="com.toughra.ustadmobile.launcher">
 
     <application android:allowBackup="true" android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="@string/app_name"
         android:name="com.ustadmobile.port.android.App"
         android:theme="@style/Theme.UstadTheme"
         android:supportsRtl="true">
