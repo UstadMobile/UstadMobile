@@ -28,7 +28,7 @@ import java.util.Enumeration;
  *
  */
 
-public class XapiPackageTypePlugin extends ContentTypePlugin{
+public class XapiPackageTypePlugin extends ZippedContentTypePlugin{
 
     private static final String[] MIME_TYPES = new String[] {"application/zip"};
 
@@ -53,7 +53,7 @@ public class XapiPackageTypePlugin extends ContentTypePlugin{
     }
 
     @Override
-    public UstadJSOPDSFeed getEntry(String fileUri, String cacheEntryFileUri) {
+    public EntryResult getEntry(String fileUri, String cacheEntryFileUri) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         String containerFilename = UMFileUtil.getFilename(fileUri);
@@ -109,6 +109,6 @@ public class XapiPackageTypePlugin extends ContentTypePlugin{
         }
 
 
-        return tincanEntry != null ? result : null;
+        return tincanEntry != null ? new ZippedEntryResult(result, fileUri, null, null) : null;
     }
 }

@@ -11,6 +11,12 @@ dependencies {
     compile "net.sf.kxml:kxml2:2.3.0"
 }
 
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 

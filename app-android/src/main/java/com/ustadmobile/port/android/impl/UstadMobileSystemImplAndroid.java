@@ -219,12 +219,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private HashMap<TinCanQueueListener, XapiStatementsForwardingListener> queueStatusListeners;
 
     /**
-     * Some mime types that the Android OS does not know about but we do...
-     * Mapped: Mime type -> extension
-     */
-    private HashMap<String, String> knownMimeToExtensionMap;
-
-    /**
      * Base ServiceConnection class used to bind any given context to shared services: notably
      * the HTTP service and the upcoming p2p service.
      */
@@ -293,8 +287,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         appViews = new WeakHashMap<>();
         downloadCompleteReceivers = new HashMap<>();
         queueStatusListeners = new HashMap<>();
-        knownMimeToExtensionMap = new HashMap<>();
-        knownMimeToExtensionMap.put("application/epub+zip", "epub");
         networkManagerAndroid = new NetworkManagerAndroid();
         networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
     }
@@ -754,17 +746,22 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     public String getMimeTypeFromExtension(String extension) {
-        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        if(mimeType != null) {
+            return mimeType;
+        }else {
+            return super.getMimeTypeFromExtension(extension);
+        }
     }
 
     @Override
     public String getExtensionFromMimeType(String mimeType) {
         String extension =MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-        if(extension == null) {
-            extension = knownMimeToExtensionMap.get(mimeType);
+        if(extension != null) {
+            return extension;
+        }else {
+            return super.getExtensionFromMimeType(mimeType);
         }
-
-        return extension;
     }
 
     @Override

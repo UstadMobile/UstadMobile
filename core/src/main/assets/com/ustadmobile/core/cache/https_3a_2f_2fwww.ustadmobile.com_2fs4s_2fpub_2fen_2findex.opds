@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>Mobile Soft Skills Training</title>
+  <id>com.ustadmobile.msst.en</id>
+  <dc:language>en</dc:language>
+  <link rel="alternate" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="../fa/index.opds" hreflang="fa" />
+  <link rel="alternate" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="../ps/index.opds" hreflang="ps" />
+  <entry>
+    <title>CV Writing</title>
+    <id>202b10fe-b028-4b84-9b84-852aa123456a</id>
+    <content type="text">Learn how to write a professional CV</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/1-cvwriting-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/1-cvwriting-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-en.epub.entry.opds" title="Cover Letter Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-en.epub.entry.opds" title="Job Search Skills" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-en.epub.entry.opds" title="Job Interview Skills" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/1-cvwriting-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/1-cvwriting-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="1-cvwriting-en.epub" length="20082762" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Cover Letter Writing</title>
+    <id>eb0476a2-b8b1-43e3-bb85-f0e51e143afe</id>
+    <content type="text">Learn how to write a professional cover letter</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/2-coverletter-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/2-coverletter-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-en.epub.entry.opds" title="CV Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-en.epub.entry.opds" title="Job Search Skills" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-en.epub.entry.opds" title="Job Interview Skills" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/2-coverletter-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/2-coverletter-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="2-coverletter-en.epub" length="13583027" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Job Search Skills</title>
+    <id>114f6e63-80f2-4d10-9a70-efa113eb9f65</id>
+    <content type="text">Learn how to find and apply for a job</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/3-jobsearch-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/3-jobsearch-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-en.epub.entry.opds" title="CV Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-en.epub.entry.opds" title="Cover Letter Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-en.epub.entry.opds" title="Job Interview Skills" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/3-jobsearch-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/3-jobsearch-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="3-jobsearch-en.epub" length="23694255" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Job Interview Skills</title>
+    <id>3ce0e992-050c-4fbf-90c9-4dcb2b82bc64</id>
+    <content type="text">Learn how to succeed in a job interview</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/4-interview-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/4-interview-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-en.epub.entry.opds" title="CV Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-en.epub.entry.opds" title="Cover Letter Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-en.epub.entry.opds" title="Job Search Skills" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/4-interview-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/4-interview-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="4-interview-en.epub" length="17022204" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Communication Skills</title>
+    <id>66635af1-323c-4e29-aa2d-a5386653a285</id>
+    <content type="text">Learn how to communicate in a professional setting</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/5-communication-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/5-communication-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-en.epub.entry.opds" title="Office Ethics" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-en.epub.entry.opds" title="Time Management" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-en.epub.entry.opds" title="Report Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-en.epub.entry.opds" title="Entrepreneurship" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/5-communication-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/5-communication-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="5-communication-en.epub" length="14012695" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Office Ethics</title>
+    <id>6226481e-47ae-4d03-acf2-010c53ce1ab1</id>
+    <content type="text">Learn how workplace values and ethics can help your career</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/6-ethics-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/6-ethics-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-en.epub.entry.opds" title="Communication Skills" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-en.epub.entry.opds" title="Time Management" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-en.epub.entry.opds" title="Report Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-en.epub.entry.opds" title="Entrepreneurship" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/6-ethics-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/6-ethics-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="6-ethics-en.epub" length="25132103" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Time Management</title>
+    <id>7ef939f2-f749-41d1-9365-2d0af6a82cd9</id>
+    <content type="text">Learn how to organize your work and meet deadlines</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/7-timemanagement-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/7-timemanagement-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-en.epub.entry.opds" title="Communication Skills" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-en.epub.entry.opds" title="Office Ethics" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-en.epub.entry.opds" title="Report Writing" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-en.epub.entry.opds" title="Entrepreneurship" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/7-timemanagement-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/7-timemanagement-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="7-timemanagement-en.epub" length="30329723" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Report Writing</title>
+    <id>7efd121a-127a-4d62-81c8-017033ad0f64</id>
+    <content type="text">Learn how to write a professional report</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/8-reportwriting-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/8-reportwriting-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-en.epub.entry.opds" title="Communication Skills" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-en.epub.entry.opds" title="Office Ethics" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-en.epub.entry.opds" title="Time Management" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-en.epub.entry.opds" title="Entrepreneurship" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/8-reportwriting-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/8-reportwriting-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="8-reportwriting-en.epub" length="16760973" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-en.epub.entry.opds" hreflang="en" />
+  </entry>
+  <entry>
+    <title>Entrepreneurship</title>
+    <id>3e005d9e-aeaa-4909-bbb0-2ab92620c9e7</id>
+    <content type="text">Learn how to start, run and grow your own business</content>
+    <dc:language>en</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/9-entrepreneurship-fa.epub.entry.opds" hreflang="fa" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/9-entrepreneurship-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-en.epub.entry.opds" title="Communication Skills" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-en.epub.entry.opds" title="Office Ethics" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-en.epub.entry.opds" title="Time Management" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-en.epub.entry.opds" title="Report Writing" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/9-entrepreneurship-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/9-entrepreneurship-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="9-entrepreneurship-en.epub" length="15012121" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-en.epub.entry.opds" hreflang="en" />
+  </entry>
+</feed>

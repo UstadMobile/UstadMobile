@@ -9,12 +9,19 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Vector;
 
 import static com.ustadmobile.core.controller.CatalogPresenter.STATUS_ACQUIRED;
+import static com.ustadmobile.core.controller.CatalogPresenter.sanitizeIDForFilename;
 
 /**
  * Created by mike on 9/9/17.
@@ -72,22 +79,55 @@ public class DirectoryScanner {
 
             String fileExt;
             int j, k;
+            ContentTypePlugin.EntryResult entryResult;
             UstadJSOPDSFeed fileFeed;
+            UstadJSOPDSFeed linkFeed;
+            InputStream linkFeedIn = null;
+
             UstadJSOPDSEntry entry;
             Vector acquisitionLinks;
             String fileUri;
+            String linkFeedUri;
+            String cacheEntryUri;
+            InputStream thumbnailData = null;
+            OutputStream thumbnailOut = null;
+
             for(int i = 0; i < dirContents.length; i++) {
                 fileExt = UMFileUtil.getExtension(dirContents[i]);
                 fileUri = UMFileUtil.joinPaths(new String[]{directoryUri, dirContents[i]});
+
+
                 if(fileExt == null)
                     continue;
 
+                cacheEntryUri = UMFileUtil.removeExtension(dirContents[i]) + ".opds";
 
                 for(j = 0; j < supportedTypePlugins.length; j++) {
                     if(UMUtil.getIndexInArray(fileExt, supportedTypePlugins[j].getFileExtensions()) != -1) {
-                        fileFeed = supportedTypePlugins[j].getEntry(fileUri, cacheDirUri);
-                        if(fileFeed == null || fileFeed.size() < 1)
+                        entryResult = supportedTypePlugins[j].getEntry(fileUri, cacheDirUri);
+
+                        if(entryResult == null || entryResult.getFeed().size() < 1)
                             continue;//see if another plugin can handle it
+
+                        fileFeed = entryResult.getFeed();
+
+                        linkFeedUri = UMFileUtil.joinPaths(new String[]{directoryUri, dirContents[i]
+                                + ".links.opds"});
+                        linkFeed = null;
+
+                        if(impl.fileExists(linkFeedUri)) {
+                            linkFeed = new UstadJSOPDSFeed();
+                            try {
+                                linkFeedIn = impl.openFileInputStream(linkFeedUri);
+                                linkFeed.loadFromXpp(impl.newPullParser(linkFeedIn), null);
+                            }catch(XmlPullParserException x) {
+                                UstadMobileSystemImpl.l(UMLog.ERROR, 688, linkFeedUri, x);
+                            }catch(IOException e) {
+                                UstadMobileSystemImpl.l(UMLog.ERROR, 688, linkFeedUri, e);
+                            }finally {
+                                UMIOUtils.closeInputStream(linkFeedIn);
+                            }
+                        }
 
                         for(k = 0; k < fileFeed.entries.length; k++) {
                             entry =new UstadJSOPDSEntry(feed, fileFeed.entries[k]);
@@ -99,6 +139,37 @@ public class DirectoryScanner {
                                     String[] links = (String[])acquisitionLinks.elementAt(0);
                                     links[UstadJSOPDSItem.ATTR_HREF] = UMFileUtil.joinPaths(new String[]{
                                             hrefModeBaseHref, entry.id});
+                                }
+                            }
+
+                            if(entryResult.getThumbnailMimeType() != null) {
+                                try {
+                                    thumbnailData = entryResult.getThumbnail();
+                                    if(thumbnailData == null)
+                                        throw new FileNotFoundException();
+
+                                    String extension = UstadMobileSystemImpl.getInstance()
+                                            .getExtensionFromMimeType(entryResult.getThumbnailMimeType());
+                                    String thumbnailFilename = entry.id + "-thumb." + extension;
+                                    thumbnailOut = impl.openFileOutputStream(UMFileUtil.joinPaths(
+                                            new String[]{cacheDirUri, thumbnailFilename}), 0);
+                                    UMIOUtils.readFully(thumbnailData, thumbnailOut, 8 * 1024);
+                                    entry.addLink(UstadJSOPDSItem.LINK_REL_THUMBNAIL,
+                                            entryResult.getThumbnailMimeType(), thumbnailFilename);
+                                }catch(IOException e) {
+                                    UstadMobileSystemImpl.l(UMLog.ERROR, 688, null, e);
+                                }finally {
+                                    UMIOUtils.closeInputStream(thumbnailData);
+                                    UMIOUtils.closeOutputStream(thumbnailOut);
+                                    thumbnailData = null;
+                                    thumbnailOut = null;
+                                }
+                            }
+
+                            if(linkFeed != null && linkFeed.getEntryById(entry.id) != null) {
+                                Vector allLinks = linkFeed.getEntryById(entry.id).getLinks();
+                                for(int l = 0; l < allLinks.size(); l++) {
+                                    entry.addLink((String[])allLinks.elementAt(l));
                                 }
                             }
 

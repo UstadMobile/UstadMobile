@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>د کاري مرکې مهارتونه</title>
+  <id>31e04e55-e29d-422f-9e99-c3f2fd1f6f4a</id>
+  <content type="text">زده کړئ چې څنګه په کاري مرکې کې ښه ورځلېږئ</content>
+  <dc:language>ps</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/4-interview-en.epub.entry.opds" hreflang="en" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/4-interview-fa.epub.entry.opds" hreflang="fa" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-ps.epub.entry.opds" title="د سي وي لیکل" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-ps.epub.entry.opds" title="د غوښتنلیک لیکل" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-ps.epub.entry.opds" title="د دندې لټولو مهارتونه" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/4-interview-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/4-interview-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="4-interview-ps.epub" length="19005952" />
+</entry>

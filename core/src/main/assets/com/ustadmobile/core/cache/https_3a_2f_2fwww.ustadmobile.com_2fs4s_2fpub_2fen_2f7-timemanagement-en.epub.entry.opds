@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>Time Management</title>
+  <id>7ef939f2-f749-41d1-9365-2d0af6a82cd9</id>
+  <content type="text">Learn how to organize your work and meet deadlines</content>
+  <dc:language>en</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/7-timemanagement-fa.epub.entry.opds" hreflang="fa" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/7-timemanagement-ps.epub.entry.opds" hreflang="ps" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-en.epub.entry.opds" title="Communication Skills" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-en.epub.entry.opds" title="Office Ethics" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-en.epub.entry.opds" title="Report Writing" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-en.epub.entry.opds" title="Entrepreneurship" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/7-timemanagement-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/7-timemanagement-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="7-timemanagement-en.epub" length="30329723" />
+</entry>

@@ -108,6 +108,9 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
         this.args = args;
         opdsUri = (String)args.get(ARG_URL);
+        if(opdsUri.indexOf("$USERLANG$") != -1)
+            opdsUri = opdsUri.replace("$USERLANG$", impl.getDisplayedLocale(getContext()).substring(0, 2));
+
         selectedEntries = new Vector();
 
         if(args.containsKey(ARG_RESMOD)){

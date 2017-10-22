@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>د سي وي لیکل</title>
+  <id>202b10fe-b028-4b84-9b84-852aa123456c</id>
+  <content type="text">زده کړئ چې څنګه مسلکي سي وي ولیکئ</content>
+  <dc:language>ps</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/1-cvwriting-en.epub.entry.opds" hreflang="en" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/1-cvwriting-fa.epub.entry.opds" hreflang="fa" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-ps.epub.entry.opds" title="د غوښتنلیک لیکل" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-ps.epub.entry.opds" title="د دندې لټولو مهارتونه" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-ps.epub.entry.opds" title="د کاري مرکې مهارتونه" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/1-cvwriting-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/1-cvwriting-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="1-cvwriting-ps.epub" length="19333981" />
+</entry>

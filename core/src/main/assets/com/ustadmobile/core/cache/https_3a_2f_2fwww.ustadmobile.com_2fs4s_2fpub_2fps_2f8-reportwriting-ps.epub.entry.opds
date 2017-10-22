@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>د راپور لیکل</title>
+  <id>9ea8a88a-5c87-48b4-b985-ddaa8d2296e7</id>
+  <content type="text">زده کړئ چې یو مسلکي راپور څنګه ولیکئ</content>
+  <dc:language>ps</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/8-reportwriting-en.epub.entry.opds" hreflang="en" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/8-reportwriting-fa.epub.entry.opds" hreflang="fa" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-ps.epub.entry.opds" title="د اړیکو مهارتونه" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-ps.epub.entry.opds" title="د کارځای ارزښتونه او اخلاقیات" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-ps.epub.entry.opds" title="د وخت مدریت" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-ps.epub.entry.opds" title="تشبث" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/8-reportwriting-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/8-reportwriting-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="8-reportwriting-ps.epub" length="18348624" />
+</entry>

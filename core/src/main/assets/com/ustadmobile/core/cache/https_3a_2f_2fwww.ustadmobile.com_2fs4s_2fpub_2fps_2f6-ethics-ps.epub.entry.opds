@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>د کارځای ارزښتونه او اخلاقیات</title>
+  <id>544efc64-a39d-4945-a3b7-6a322982082d</id>
+  <content type="text">زده کړئ چې د کارځای ارزښتونه او اخلاقیات د تاسو له مسلک څنګه مرسته کولای شي</content>
+  <dc:language>ps</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/6-ethics-en.epub.entry.opds" hreflang="en" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/6-ethics-fa.epub.entry.opds" hreflang="fa" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-ps.epub.entry.opds" title="د اړیکو مهارتونه" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-ps.epub.entry.opds" title="د وخت مدریت" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-ps.epub.entry.opds" title="د راپور لیکل" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-ps.epub.entry.opds" title="تشبث" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/6-ethics-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/6-ethics-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="6-ethics-ps.epub" length="27129283" />
+</entry>

@@ -1,13 +1,33 @@
 package com.ustadmobile.core.catalog.contenttype;
 
+import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
- * Base class representing a supported file type e.g. epub, h5p, etc.
+ * A ContentTypePlugin provides support to use a specific file type (e.g. EPUB, Xapi Package, etc) on
+ * Ustad Mobile. Specifically a plugin is responsible to:
+ *
+ *  a. Read a file type and return information about it including a unique id and a title.
+ *  b. Provide the view name that will be used to view that item.
  *
  * Created by mike on 9/9/17.
  */
 public abstract class ContentTypePlugin {
+
+    /**
+     *
+     */
+    public interface EntryResult {
+
+        UstadJSOPDSFeed getFeed();
+
+        InputStream getThumbnail() throws IOException;
+
+        String getThumbnailMimeType();
+    }
 
     /**
      * Return a String that will match the VIEW_NAME for the view that should be opened for this
@@ -32,6 +52,6 @@ public abstract class ContentTypePlugin {
      * @param fileUri
      * @return
      */
-    public abstract UstadJSOPDSFeed getEntry(String fileUri, String cacheEntryFileUri);
+    public abstract EntryResult getEntry(String fileUri, String cacheEntryFileUri);
 
 }

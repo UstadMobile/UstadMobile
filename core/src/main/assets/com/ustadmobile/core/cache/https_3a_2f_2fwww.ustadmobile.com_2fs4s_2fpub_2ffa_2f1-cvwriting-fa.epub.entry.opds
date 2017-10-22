@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>نوشتن خلص سوانح</title>
+  <id>202b10fe-b028-4b84-9b84-852aa123456b</id>
+  <content type="text">بیاموزید که خلص سوانح مسلکی را چگونه بنوسید</content>
+  <dc:language>fa</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/1-cvwriting-en.epub.entry.opds" hreflang="en" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/1-cvwriting-ps.epub.entry.opds" hreflang="ps" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-fa.epub.entry.opds" title="نوشتن نامۀ درخواستی" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-fa.epub.entry.opds" title="مهارت‌های جستجوی وظیفه" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-fa.epub.entry.opds" title="مهارت‌های مصاحبۀ کاری" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/1-cvwriting-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/1-cvwriting-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="1-cvwriting-fa.epub" length="19393834" />
+</entry>

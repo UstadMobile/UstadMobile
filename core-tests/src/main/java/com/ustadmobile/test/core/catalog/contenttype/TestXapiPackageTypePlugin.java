@@ -1,5 +1,6 @@
 package com.ustadmobile.test.core.catalog.contenttype;
 
+import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -33,7 +34,7 @@ public class TestXapiPackageTypePlugin {
     @Test
     public void testXapiPackageTypePlugin() {
         XapiPackageTypePlugin plugin = new XapiPackageTypePlugin();
-        UstadJSOPDSFeed feed = plugin.getEntry(xapiFilePath, null);
+        UstadJSOPDSFeed feed = plugin.getEntry(xapiFilePath, null).getFeed();
         Assert.assertNotNull("Feed is not null", feed);
         UstadJSOPDSEntry entry=  feed.getEntryById("http://id.tincanapi.com/activity/tincan-prototypes/tetris");
         Assert.assertNotNull("Feed has entry matching id", entry);

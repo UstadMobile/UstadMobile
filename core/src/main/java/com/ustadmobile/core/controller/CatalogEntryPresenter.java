@@ -343,8 +343,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         String[] thumbnailLink = item.opdsItem.getThumbnailLink(true);
         final String[] thumbnailUrl = new String[1];
         if(thumbnailLink != null) {
-            thumbnailUrl[0] = UMFileUtil.resolveLink(
-                    entryFeed.getAbsoluteSelfLink()[UstadJSOPDSItem.ATTR_HREF],
+            thumbnailUrl[0] = UMFileUtil.resolveLink(entry.getHref(),
                     thumbnailLink[UstadJSOPDSItem.ATTR_HREF]);
         }
 

@@ -542,6 +542,24 @@ public class UMFileUtil {
             return null;
         }
     }
+
+    /**
+     * Remove the extension from a filename. The input filename is expected to be only a filename,
+     * e.g. without the path or url query strings. This can be obtained using getFilename if needed.
+     *
+     * @param filename Input filename without path or query string components e.g. file.txt
+     *
+     * @return filename without the extension, e.g. file
+     */
+    public static String removeExtension(String filename) {
+        int lastDot = filename.lastIndexOf('.');
+
+        if(lastDot != -1 && lastDot != filename.length() -1) {
+            return filename.substring(0, lastDot);
+        }else {
+            return filename;
+        }
+    }
     
     /**
      * Ensure a given path has a given prefix (e.g. file:///) - if it doesn't

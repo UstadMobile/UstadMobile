@@ -436,6 +436,7 @@ public class HTTPCacheDir {
         String dataURL = null;
         boolean noCache = false;
         boolean mustRevalidate = false;
+        InputStream resultBufIn = null;
 
         UstadMobileSystemImpl.l(UMLog.INFO, 383, "Cache GET " + url);
 
@@ -484,12 +485,14 @@ public class HTTPCacheDir {
             try {
                 long timeNow = System.currentTimeMillis();
                 long entryExpires = entry.getLong(IDX_EXPIRES);
+                Hashtable responseHeaders = null;
 
                 if (timeNow < entryExpires && !mustRevalidate) {
                     //we can serve it direct from the cache - no validation needed
                     isValid = true;
                     UstadMobileSystemImpl.l(UMLog.INFO, 385, "Cache HIT (no validation)" + url);
                     impl.l(UMLog.DEBUG, 606, url);
+                    responseHeaders = new Hashtable();
                 } else if(dataURL == null){
                     //needs to be validated
                     result = impl.makeRequest(url, headers, null, "HEAD");
@@ -498,15 +501,27 @@ public class HTTPCacheDir {
                         UstadMobileSystemImpl.l(UMLog.INFO, 385, "Cache HIT (validated)" + url);
                         entry.put(IDX_EXPIRES, calculateExpiryTime(result.getResponseHeaders(),
                                 System.currentTimeMillis() + DEFAULT_EXPIRES));
+                        responseHeaders = result.getResponseHeaders();
                     }
+
 
                     impl.l(UMLog.DEBUG, 607, url + ':' + isValid);
                 }
                 
                 if(isValid) {
                     entry.put(IDX_LASTACCESSED, timeNow);
-                    return UMFileUtil.joinPaths(new String[]{ dirName[cacheNum],
-                        entry.optString(IDX_FILENAME)});
+                    String fileUri = UMFileUtil.joinPaths(new String[]{ dirName[cacheNum],
+                            entry.optString(IDX_FILENAME)});
+
+                    if(resultBuf != null) {
+                        resultBufIn = impl.openFileInputStream(fileUri);
+                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                        UMIOUtils.readFully(resultBufIn, bout, 8 * 1024);
+
+                        resultBuf[0] = new HTTPResult(bout.toByteArray(), 200, responseHeaders);
+                    }
+
+                    return fileUri;
                 }
             } catch (Exception e) {
                 impl.l(UMLog.ERROR, 130, url, e);
@@ -859,10 +874,12 @@ public class HTTPCacheDir {
         if(sepIndex != -1) {
             contentType = contentType.substring(0, sepIndex).trim();
         }
-        
-        String extension = '.' + impl.getExtensionFromMimeType(contentType);
-        if(filename  == null && (extension != null && !filename.endsWith(extension))) {
-            filename += extension;
+
+        if(contentType != null) {
+            String extension = '.' + impl.getExtensionFromMimeType(contentType);
+            if(filename  == null && (extension != null && !filename.endsWith(extension))) {
+                filename += extension;
+            }
         }
 
 

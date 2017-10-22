@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>Job Search Skills</title>
+  <id>114f6e63-80f2-4d10-9a70-efa113eb9f65</id>
+  <content type="text">Learn how to find and apply for a job</content>
+  <dc:language>en</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/3-jobsearch-fa.epub.entry.opds" hreflang="fa" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/3-jobsearch-ps.epub.entry.opds" hreflang="ps" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-en.epub.entry.opds" title="CV Writing" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-en.epub.entry.opds" title="Cover Letter Writing" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-en.epub.entry.opds" title="Job Interview Skills" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/3-jobsearch-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/3-jobsearch-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="3-jobsearch-en.epub" length="23694255" />
+</entry>

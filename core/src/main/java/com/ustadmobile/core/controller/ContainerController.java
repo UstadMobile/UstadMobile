@@ -284,7 +284,7 @@ public class ContainerController extends UstadBaseController implements AsyncLoa
                 epubEntry =new UstadJSOPDSEntry(result,opf, 
                     UstadJSOPDSItem.TYPE_EPUBCONTAINER, absFileURI);
                 if(thumbMimeType != null) {//Thumb Mime type only set when we have a file
-                    epubEntry.addLink(UstadJSOPDSEntry.LINK_THUMBNAIL, 
+                    epubEntry.addLink(UstadJSOPDSEntry.LINK_REL_THUMBNAIL,
                         thumbMimeType, thumbURI);
                 }
                 

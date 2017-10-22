@@ -65,6 +65,10 @@ public class UstadJSOPF {
     public String title;
     
     public String id;
+
+    public String description;
+
+    private Vector links;
     
     /**
      * Flag value to indicate we should parse the metadata (e.g. title, identifier, description)
@@ -112,6 +116,69 @@ public class UstadJSOPF {
     public static final String getExtension(String filename) {
         int dotPos = filename.lastIndexOf('.');
         return dotPos != -1 ? filename.substring(dotPos + 1) : null;
+    }
+
+    public static class LinkElement {
+
+        static final String ATTR_REL = "rel";
+
+        static final String ATTR_HREF = "href";
+
+        static final String ATTR_MEDIA_TYPE = "media-type";
+
+        static final String ATTR_ID = "id";
+
+        static final String ATTR_REFINES = "refines";
+
+        private String rel;
+
+        private String mediaType;
+
+        private String href;
+
+        private String id;
+
+        private String refines;
+
+        public String getRel() {
+            return rel;
+        }
+
+        public void setRel(String rel) {
+            this.rel = rel;
+        }
+
+        public String getMediaType() {
+            return mediaType;
+        }
+
+        public void setMediaType(String mediaType) {
+            this.mediaType = mediaType;
+        }
+
+        public String getHref() {
+            return href;
+        }
+
+        public void setHref(String href) {
+            this.href = href;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getRefines() {
+            return refines;
+        }
+
+        public void setRefines(String refines) {
+            this.refines = refines;
+        }
     }
     
     public UstadJSOPF() {
@@ -249,6 +316,19 @@ public class UstadJSOPF {
                             if(idAttr != null && idAttr.equals(uniqueIdentifier)) {
                                 result.id = xpp.nextText();
                             }
+                        }else if(xpp.getName().equals("dc:description")) {
+                            result.description = xpp.nextText();
+                        }else if(xpp.getName().equals("link")) {
+                            LinkElement linkEl = new LinkElement();
+                            linkEl.href = xpp.getAttributeValue(null, LinkElement.ATTR_HREF);
+                            linkEl.id = xpp.getAttributeValue(null, LinkElement.ATTR_ID);
+                            linkEl.mediaType = xpp.getAttributeValue(null, LinkElement.ATTR_MEDIA_TYPE);
+                            linkEl.rel = xpp.getAttributeValue(null, LinkElement.ATTR_REL);
+                            linkEl.refines = xpp.getAttributeValue(null, LinkElement.ATTR_REFINES);
+                            if(result.links == null)
+                                result.links = new Vector();
+
+                            result.links.addElement(linkEl);
                         }
                     }
                 }else if(evtType == XmlPullParser.END_TAG) {
@@ -353,6 +433,10 @@ public class UstadJSOPF {
             return null;
 
         return (UstadJSOPFItem)coverImages.elementAt(0);
+    }
+
+    public Vector getLinks() {
+        return links;
     }
 
 }

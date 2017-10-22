@@ -226,6 +226,14 @@ public abstract class UstadJSOPDSItem implements Runnable {
           "application/atom+xml;profile=opds-catalog;kind=navigation";
 
     /**
+     * Type to be used to represent an OPDS entry as per the opds spec
+     *
+     * @type String
+     */
+    public static final String TYPE_ENTRY_OPDS =
+            "application/atom+xml;type=entry;profile=opds-catalog";
+
+    /**
     * The type of link used for an epub file itself
     * 
     * @type String
@@ -242,7 +250,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
     * OPDS constnat for the thumbnail
     * @type String
     */
-    public static String LINK_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
+    public static String LINK_REL_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
 
     /**
      * Ustad Mobile's own cover image
@@ -465,7 +473,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
      * @return String][ array of link items as per getLinks or null if not found on this item
      */
     public String[] getThumbnailLink(boolean imgFallback) {
-        Vector results = getLinks(LINK_THUMBNAIL, null);
+        Vector results = getLinks(LINK_REL_THUMBNAIL, null);
         if(results.size() > 0) {
             return ((String[])results.elementAt(0));
         }
@@ -772,12 +780,13 @@ public abstract class UstadJSOPDSItem implements Runnable {
 
         try {
             if(!asyncLoadUrl.startsWith(OpdsEndpoint.OPDS_PROTOCOL)) {
-                HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(asyncLoadUrl,
-                        asyncHttpheaders, null);
-                if(result.getStatus() >= 300)
-                    throw new IOException("Http status: " + result.getStatus());
+                HTTPResult[] resultBuf = new HTTPResult[1];
+                UstadMobileSystemImpl.getInstance().getHTTPCacheDir(asyncContext).get(asyncLoadUrl,
+                        null, asyncHttpheaders, resultBuf);
+                if(resultBuf[0].getStatus() >= 300)
+                    throw new IOException("Http status: " + resultBuf[0].getStatus());
 
-                in = new ByteArrayInputStream(result.getResponse());
+                in = new ByteArrayInputStream(resultBuf[0].getResponse());
                 xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
                 UstadJSOPDSFeed parentFeed = this instanceof UstadJSOPDSFeed ? (UstadJSOPDSFeed) this : null;
                 loadFromXpp(xpp, parentFeed, asyncLoadCallback);
@@ -848,6 +857,18 @@ public abstract class UstadJSOPDSItem implements Runnable {
 
     public String getContentType() {
         return contentType != null ? contentType: CONTENT_TYPE_TEXT;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     /**

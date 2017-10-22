@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>آموزش مهارتهای شغلی از طریق مبایل</title>
+  <id>com.ustadmobile.msst.fa</id>
+  <dc:language>fa</dc:language>
+  <link rel="alternate" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="../en/index.opds" hreflang="en" />
+  <link rel="alternate" type="application/atom+xml;profile=opds-catalog;kind=acquisition" href="../ps/index.opds" hreflang="ps" />
+  <entry>
+    <title>نوشتن خلص سوانح</title>
+    <id>202b10fe-b028-4b84-9b84-852aa123456b</id>
+    <content type="text">بیاموزید که خلص سوانح مسلکی را چگونه بنوسید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/1-cvwriting-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/1-cvwriting-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-fa.epub.entry.opds" title="نوشتن نامۀ درخواستی" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-fa.epub.entry.opds" title="مهارت‌های جستجوی وظیفه" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-fa.epub.entry.opds" title="مهارت‌های مصاحبۀ کاری" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/1-cvwriting-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/1-cvwriting-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="1-cvwriting-fa.epub" length="19393834" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>نوشتن نامۀ درخواستی</title>
+    <id>023970e2-2d4b-4fd5-9bbd-de373bb2aad6</id>
+    <content type="text">بیماموزید که چگونه یک کورلتیر مسلکی نوشته کنید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/2-coverletter-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/2-coverletter-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-fa.epub.entry.opds" title="نوشتن خلص سوانح" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-fa.epub.entry.opds" title="مهارت‌های جستجوی وظیفه" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-fa.epub.entry.opds" title="مهارت‌های مصاحبۀ کاری" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/2-coverletter-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/2-coverletter-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="2-coverletter-fa.epub" length="15131712" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>مهارت‌های جستجوی وظیفه</title>
+    <id>6c27c4c0-6fc7-4c89-b8f8-54cd270666e9</id>
+    <content type="text">بیاموزید که چگونه وظیفه دریابید و به برایش درخواست دهید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/3-jobsearch-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/3-jobsearch-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-fa.epub.entry.opds" title="نوشتن خلص سوانح" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-fa.epub.entry.opds" title="نوشتن نامۀ درخواستی" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-fa.epub.entry.opds" title="مهارت‌های مصاحبۀ کاری" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/3-jobsearch-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/3-jobsearch-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="3-jobsearch-fa.epub" length="30693976" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>مهارت‌های مصاحبۀ کاری</title>
+    <id>e95ec3d7-d56b-4541-8d45-4684dfdf64a6</id>
+    <content type="text">بیاموزید که چگونه در مصاحبۀ کاری خوب بدرخشید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/4-interview-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/4-interview-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-fa.epub.entry.opds" title="نوشتن خلص سوانح" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="2-coverletter-fa.epub.entry.opds" title="نوشتن نامۀ درخواستی" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-fa.epub.entry.opds" title="مهارت‌های جستجوی وظیفه" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/4-interview-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/4-interview-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="4-interview-fa.epub" length="18479942" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>مهارت‌های ارتباطات</title>
+    <id>1bd1e17b-9f45-49ea-a53e-6c0dcfba3b97</id>
+    <content type="text">بیاموزید که چگونه در یک محیط مسلکی ارتباطات برقرار کنید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/5-communication-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/5-communication-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-fa.epub.entry.opds" title="ارزش‌ها و اخلاقیات محل کار" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-fa.epub.entry.opds" title="مدریت زمان" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-fa.epub.entry.opds" title="نوشتن گزارش" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-fa.epub.entry.opds" title="تشبث" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/5-communication-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/5-communication-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="5-communication-fa.epub" length="16025162" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>ارزش‌ها و اخلاقیات محل کار</title>
+    <id>e91c86d9-52f9-4406-920e-d905dde35867</id>
+    <content type="text">بیاموزید که ارزش‌ها و اخلاقیات محل کار چگونه با مسلک شما کمک کرده میتواند</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/6-ethics-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/6-ethics-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-fa.epub.entry.opds" title="مهارت‌های ارتباطات" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-fa.epub.entry.opds" title="مدریت زمان" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-fa.epub.entry.opds" title="نوشتن گزارش" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-fa.epub.entry.opds" title="تشبث" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/6-ethics-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/6-ethics-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="6-ethics-fa.epub" length="27592108" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>مدریت زمان</title>
+    <id>613ea4d7-ef4d-4823-83cf-2a1e3aa66dd7</id>
+    <content type="text">بیاموزید که چگونه کار خود را تنظیم کنید و پابند ضرب العجل باشید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/7-timemanagement-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/7-timemanagement-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-fa.epub.entry.opds" title="مهارت‌های ارتباطات" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-fa.epub.entry.opds" title="ارزش‌ها و اخلاقیات محل کار" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-fa.epub.entry.opds" title="نوشتن گزارش" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-fa.epub.entry.opds" title="تشبث" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/7-timemanagement-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/7-timemanagement-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="7-timemanagement-fa.epub" length="32231246" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>نوشتن گزارش</title>
+    <id>bdd6c00b-a8f4-42c2-bd59-aab2b09b4855</id>
+    <content type="text">بیماموزید که چگونه یک گزارش مسلکی بنوسید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/8-reportwriting-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/8-reportwriting-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-fa.epub.entry.opds" title="مهارت‌های ارتباطات" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-fa.epub.entry.opds" title="ارزش‌ها و اخلاقیات محل کار" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-fa.epub.entry.opds" title="مدریت زمان" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-fa.epub.entry.opds" title="تشبث" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/8-reportwriting-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/8-reportwriting-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="8-reportwriting-fa.epub" length="18391067" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+  <entry>
+    <title>تشبث</title>
+    <id>e55a877d-deeb-4eb3-b5a5-2966f954d063</id>
+    <content type="text">بیاموزید که چگونه کسب و کار خود را آغاز و مدریت کنید و گسترش دهید</content>
+    <dc:language>fa</dc:language>
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../en/9-entrepreneurship-en.epub.entry.opds" hreflang="en" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/9-entrepreneurship-ps.epub.entry.opds" hreflang="ps" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="5-communication-fa.epub.entry.opds" title="مهارت‌های ارتباطات" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="6-ethics-fa.epub.entry.opds" title="ارزش‌ها و اخلاقیات محل کار" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="7-timemanagement-fa.epub.entry.opds" title="مدریت زمان" />
+    <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="8-reportwriting-fa.epub.entry.opds" title="نوشتن گزارش" />
+    <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/9-entrepreneurship-cover.jpg" />
+    <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/9-entrepreneurship-thumb.png" />
+    <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="9-entrepreneurship-fa.epub" length="20629026" />
+    <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="9-entrepreneurship-fa.epub.entry.opds" hreflang="fa" />
+  </entry>
+</feed>

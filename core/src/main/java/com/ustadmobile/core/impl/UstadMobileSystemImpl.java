@@ -40,6 +40,7 @@ import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.LoginView;
 
@@ -202,6 +203,20 @@ public abstract class UstadMobileSystemImpl {
     public static final String LOCALE_USE_SYSTEM = "";
 
     private Properties appConfig;
+
+    protected static Hashtable MIME_TYPES = new Hashtable();
+
+    protected static Hashtable MIME_TYPES_REVERSE = new Hashtable();
+
+    static {
+        MIME_TYPES.put("image/jpg", "jpg");
+        MIME_TYPES.put("image/png", "png");
+        MIME_TYPES.put("image/gif", "gif");
+        MIME_TYPES.put("image/svg", "svg");
+        MIME_TYPES.put("application/epub+zip", "epub");
+
+        MIME_TYPES_REVERSE = UMUtil.flipHashtable(MIME_TYPES);
+    }
 
     /**
      * Get an instance of the system implementation - relies on the platform
@@ -993,7 +1008,12 @@ public abstract class UstadMobileSystemImpl {
      *
      * @return The mime type if none; or null if it's not known
      */
-    public abstract String getMimeTypeFromExtension(String extension);
+    public String getMimeTypeFromExtension(String extension) {
+        if(MIME_TYPES_REVERSE.containsKey(extension))
+            return (String)MIME_TYPES_REVERSE.get(extension);
+
+        return null;
+    }
 
     /**
      * Return the extension of the given mime type
@@ -1002,7 +1022,13 @@ public abstract class UstadMobileSystemImpl {
      *
      * @return File extension for the mime type without the leading .
      */
-    public abstract String getExtensionFromMimeType(String mimeType);
+    public String getExtensionFromMimeType(String mimeType) {
+        if(MIME_TYPES.containsKey(mimeType)) {
+            return (String)MIME_TYPES.get(mimeType);
+        }
+
+        return null;
+    }
 
 
     /**

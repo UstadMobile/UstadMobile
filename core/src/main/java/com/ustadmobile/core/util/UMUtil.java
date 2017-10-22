@@ -456,7 +456,24 @@ public class UMUtil {
         }
     }
 
+    /**
+     * Generate a new hashtable which is 'flipped' - e.g. where the keys of the input hashtable become
+     * the values in the output hashtable, and vice versa.
+     *
+     * @return Flip hashtable
+     */
+    public static Hashtable flipHashtable(Hashtable table) {
+        Hashtable out = new Hashtable();
+        Object key;
 
+        Enumeration keys = table.keys();
+        while(keys.hasMoreElements()) {
+            key = keys.nextElement();
+            out.put(table.get(key), key);
+        }
+
+        return table;
+    }
 
     
 }

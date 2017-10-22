@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
+<entry xmlns="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/terms/" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <title>Cover Letter Writing</title>
+  <id>eb0476a2-b8b1-43e3-bb85-f0e51e143afe</id>
+  <content type="text">Learn how to write a professional cover letter</content>
+  <dc:language>en</dc:language>
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../fa/2-coverletter-fa.epub.entry.opds" hreflang="fa" />
+  <link rel="alternate" type="application/atom+xml;type=entry;profile=opds-catalog" href="../ps/2-coverletter-ps.epub.entry.opds" hreflang="ps" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="1-cvwriting-en.epub.entry.opds" title="CV Writing" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="3-jobsearch-en.epub.entry.opds" title="Job Search Skills" />
+  <link rel="related" type="application/atom+xml;type=entry;profile=opds-catalog" href="4-interview-en.epub.entry.opds" title="Job Interview Skills" />
+  <link rel="http://www.ustadmobile.com/ns/opds/cover-image" type="image/jpg" href="../opds-img/2-coverletter-cover.jpg" />
+  <link rel="http://opds-spec.org/image/thumbnail" type="image/png" href="../opds-img/2-coverletter-thumb.png" />
+  <link rel="http://opds-spec.org/acquisition" type="application/epub+zip" href="2-coverletter-en.epub" length="13583027" />
+</entry>

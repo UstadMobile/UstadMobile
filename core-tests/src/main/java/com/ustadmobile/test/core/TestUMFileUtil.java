@@ -31,6 +31,15 @@ public class TestUMFileUtil {
     }
 
     @Test
+    public void testRemoveExtension() {
+        Assert.assertEquals("Can remove extension", UMFileUtil.removeExtension("filename.txt"),
+                "filename");
+        Assert.assertEquals("If file has no extension, same value is returned",
+                UMFileUtil.removeExtension("filename"), "filename");
+    }
+
+
+    @Test
     public void testSplitCombinedViewArguments() {
         Hashtable combinedArgs = new Hashtable();
         String catalogUrl0 = "http://www.ustadmobile.com/files/s4s/index.testnewcat.opds";

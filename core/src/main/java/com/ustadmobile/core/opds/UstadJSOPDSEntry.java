@@ -111,6 +111,10 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         this.linkVector = new Vector();
         this.title = opf.title;
         this.id = opf.id;
+        if(opf.description != null) {
+            this.content = opf.description;
+            this.contentType = CONTENT_TYPE_TEXT;
+        }
         
         this.addLink(UstadJSOPDSEntry.LINK_ACQUIRE, mimeType, containerHREF);
     }
@@ -216,7 +220,7 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
     
     public Vector getThumbnails(){
         Vector tentries = new Vector();
-        tentries = this.getLinks(LINK_THUMBNAIL, null);
+        tentries = this.getLinks(LINK_REL_THUMBNAIL, null);
         if (tentries.size() > 0){
             return tentries;
         }
@@ -237,7 +241,7 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
         }
         
         Vector tentries = new Vector();
-        tentries = this.getLinks(LINK_THUMBNAIL, null);
+        tentries = this.getLinks(LINK_REL_THUMBNAIL, null);
         if (tentries.size() > 0){
             return tentries;
         }
