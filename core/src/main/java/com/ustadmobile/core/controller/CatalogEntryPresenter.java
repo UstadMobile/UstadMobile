@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
@@ -71,6 +72,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     private RelatedItemLoader seeAlsoLoader = new RelatedItemLoader();
 
     private boolean openAfterLoginOrRegister = false;
+
+    private boolean entryLoaded = false;
 
 
     /**
@@ -226,6 +229,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     }
 
     public void handleEntryReady() {
+        entryLoaded = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         catalogEntryView.setTitle(entry.title);
 
@@ -331,6 +335,20 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
                     ((String[]) thumbnails.elementAt(0))[UstadJSOPDSItem.ATTR_HREF]);
             catalogEntryView.setIcon(thumbnailUrl);
         }
+
+        updateLearnerProgress();
+    }
+
+    protected void updateLearnerProgress() {
+        CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(
+                new String[]{entry.id}, getContext());
+        if(progress == null || progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
+            catalogEntryView.setLearnerProgressVisible(false);
+        }else {
+            catalogEntryView.setLearnerProgressVisible(true);
+            catalogEntryView.setLearnerProgress(progress);
+        }
+
     }
 
 
@@ -357,21 +375,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
 
     public void onStart() {
-//        String[] progressIds = new String[entryTranslationIds.length + 1];
-//        for(int i = 0; i < entryTranslationIds.length; i++) {
-//            progressIds[i] = entryTranslationIds[i];
-//        }
-//        progressIds[entryTranslationIds.length] = entry.id;
-
-        //TODO: fix this
-//        CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(
-//                new String[]{entry.id}, getContext());
-//        if(progress == null || progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
-//            catalogEntryView.setLearnerProgressVisible(false);
-//        }else {
-//            catalogEntryView.setLearnerProgressVisible(true);
-//            catalogEntryView.setLearnerProgress(progress);
-//        }
+        if(entryLoaded)
+            updateLearnerProgress();
     }
 
     public void onStop() {

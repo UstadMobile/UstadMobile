@@ -227,7 +227,9 @@ buildconfig.local.properties
 
 #local variant source files
 app-android/src/localconfig
+app-android-launcher/src/localconfig
 core/src/localconfig
+
 
 #language localconfig section
 core/locale/localconfig
