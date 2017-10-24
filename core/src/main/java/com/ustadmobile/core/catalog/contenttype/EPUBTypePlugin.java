@@ -110,6 +110,10 @@ public class EPUBTypePlugin extends ZippedContentTypePlugin {
         }
 
 
-        return new ZippedEntryResult(result, fileUri, thumbnailPathInZip, thumbnailMimeType);
+        if(result != null) {
+            return new ZippedEntryResult(result, fileUri, thumbnailPathInZip, thumbnailMimeType);
+        }else {
+            return null;
+        }
     }
 }
