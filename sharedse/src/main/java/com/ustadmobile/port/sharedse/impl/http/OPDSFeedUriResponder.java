@@ -30,7 +30,7 @@ public class OPDSFeedUriResponder implements RouterNanoHTTPD.UriResponder {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         NanoHTTPD.Response response = null;
         try {
-            returnFeed.serialize(bout);
+            returnFeed.serialize(bout, true);
             byte[] byteArr = bout.toByteArray();
             ByteArrayInputStream bin = new ByteArrayInputStream(byteArr);
             ResponseMonitoredInputStream rin = new ResponseMonitoredInputStream(bin, response);
