@@ -25,7 +25,6 @@ import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.DialogResultListener;
@@ -33,9 +32,6 @@ import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -67,6 +63,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     private HashMap<View, Integer> seeAlsoViewToIndexMap = new HashMap<>();
 
     private DownloadProgressView mDownloadProgressView;
+
+    private boolean shareButtonVisible = false;
 
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
@@ -186,6 +184,10 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.catalog_entry_presenter, menu);
+        if(!shareButtonVisible) {
+            menu.removeItem(R.id.menu_catalog_entry_presenter_share);
+        }
+
         return true;
     }
 
@@ -226,6 +228,12 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
                findViewById(BUTTON_ID_MAP.get(buttonId)).setVisibility(display ? View.VISIBLE : View.GONE);
            }
        });
+    }
+
+    @Override
+    public void setShareButtonVisible(boolean shareButtonVisible) {
+        this.shareButtonVisible = shareButtonVisible;
+        invalidateOptionsMenu();
     }
 
     @Override

@@ -419,6 +419,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
                 acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED);
         catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY,
                 acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED);
+        catalogEntryView.setShareButtonVisible(acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED);
     }
 
     public void handleClickButton(int buttonId) {
@@ -475,31 +476,11 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     }
 
     public void handleClickShare() {
-        sharedAcquiredEntries = getTranslatedAlternativesLangVectors(entry,
-                CatalogPresenter.STATUS_ACQUIRED);
-        if(sharedAcquiredEntries[0].size() == 0) {
-            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
-                    "Not downloaded (in this language)!", AppView.LENGTH_LONG);
-        }else if(sharedAcquiredEntries[0].size() == 1) {
-            UstadJSOPDSEntry entry = (UstadJSOPDSEntry)sharedAcquiredEntries[1].elementAt(0);
-            handleShareSelectedEntry(entry.id);
-        }else {
-            String[] languagesToShare = new String[sharedAcquiredEntries[0].size()];
-            sharedAcquiredEntries[0].copyInto(languagesToShare);
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            impl.getAppView(getContext()).showChoiceDialog(
-                    impl.getString(MessageID.share, getContext()), languagesToShare,
-                    CMD_SHARE_ENTRY,this);
-        }
-    }
-
-    protected void handleShareSelectedEntry(String entryId) {
         Hashtable args = new Hashtable();
         args.put("title", entry.title);
-        args.put("entries", new String[]{entryId});
+        args.put("entries", new String[]{entry.id});
         UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
     }
-
 
     protected void handleClickRemove() {
         handleClickRemove(new UstadJSOPDSEntry[]{entry});
@@ -550,11 +531,6 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     
     public void appViewChoiceSelected(int commandId, int choice) {
         switch(commandId) {
-            case CMD_SHARE_ENTRY:
-                UstadJSOPDSEntry entryToShare = (UstadJSOPDSEntry)sharedAcquiredEntries[1].elementAt(choice);
-                handleShareSelectedEntry(entryToShare.id);
-                break;
-
             case CMD_REMOVE_PRESENTER_ENTRY:
 //                UstadJSOPDSEntry entryToDelete = (UstadJSOPDSEntry)modifyAcquiredEntries[1].elementAt(choice);
 //                handleClickRemove(new UstadJSOPDSEntry[]{entryToDelete});
@@ -571,9 +547,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     
     protected void onEntriesRemoved() {
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_DOWNLOAD, true);
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_MODIFY, false);
-        catalogEntryView.setButtonDisplayed(CatalogEntryView.BUTTON_OPEN, false);
+        updateButtonsByStatus(CatalogPresenter.STATUS_NOT_ACQUIRED);
     }
 
     

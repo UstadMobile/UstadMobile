@@ -96,4 +96,13 @@ public interface CatalogEntryView extends UstadView {
      */
     void setAlternativeTranslationLinks(String[] languages);
 
+    /**
+     * Sets whether or not the offline share button is visible. This should be hidden by default. It
+     * is shown only when the entry itself has been downloaded.
+     *
+     * @param shareButtonVisible true for the button to be visible, false otherwise
+     */
+    void setShareButtonVisible(boolean shareButtonVisible);
+
+
 }

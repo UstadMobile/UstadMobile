@@ -47,7 +47,7 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
 
     public static final String ARG_RESMOD = "resmod";
 
-    public static final String ARG_BOTTOM_BUTTON_URL = "browesbtnu";
+    public static final String ARG_BOTTOM_BUTTON_URL = "b-btn-url";
 
     public static final String ARG_TITLE = "t";
 
