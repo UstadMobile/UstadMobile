@@ -402,6 +402,35 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
         }
     }
 
+    /**
+     * To be called by the view when the user clicks the share button the catalog. Used to send
+     * acquired entries using wifi direct sharing.
+     */
+    public void handleClickShare() {
+        //share all those in catalog that have been acquired
+        Vector acquiredEntryIds = new Vector();
+        CatalogEntryInfo entryInfo;
+        for(int i = 0; i < feed.size(); i++) {
+            entryInfo = getEntryInfo(feed.getEntry(i).id, CatalogPresenter.ALL_RESOURCES,
+                    getContext());
+            if(entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
+                acquiredEntryIds.addElement(feed.getEntry(i).id);
+            }
+        }
+
+        if(acquiredEntryIds.size() == 0) {
+            //nothing downloaded...
+            return;
+        }
+
+        String[] idsToShare = new String[acquiredEntryIds.size()];
+        acquiredEntryIds.copyInto(idsToShare);
+        Hashtable shareArgs = new Hashtable();
+        shareArgs.put("entries", idsToShare);
+        shareArgs.put("title", feed.title);
+        UstadMobileSystemImpl.getInstance().go("SendCourse", shareArgs, getContext());
+    }
+
 
     @Override
     public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {

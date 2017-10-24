@@ -318,34 +318,11 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         if(itemId == MENUCMDID_ADD) {
             mCatalogPresenter.handleClickAdd();
             return true;
-        }else if(itemId == R.id.action_opds_acquire) {
-//                TODO: Handle this in the presenter not the view
-//                if(getSelectedEntries().length > 0) {
-////                    UstadJSOPDSFeed feed = mCatalogController.getModel().opdsFeed;
-//                    UstadJSOPDSFeed feed = mCatalogController.getModel().opdsFeed;
-//                    UstadJSOPDSFeed acquisitionFeed = new UstadJSOPDSFeed(feed.href, feed.title,
-//                            feed.id+"-acquire");
-//                    UstadJSOPDSEntry[] selectedEntries = getSelectedEntries();
-//                    for(int i = 0; i  <selectedEntries.length; i++) {
-//                        acquisitionFeed.addEntry(new UstadJSOPDSEntry(acquisitionFeed, selectedEntries[i]));
-//                    }
-//
-//                    Vector selectEntriesVector = new Vector();
-//                    for(int i = 0; i < selectedEntries.length; i++) {
-//                        selectEntriesVector.addElement(selectedEntries[i]);
-//                    }
-//
-//                    mCatalogController.handleClickDownload(acquisitionFeed, selectEntriesVector);
-//                }else {
-//                    mCatalogController.handleClickDownloadAll();
-//                }
-
-            return true;
         }else if(itemId == MENUCMDID_DELETE) {
             mCatalogPresenter.handleClickDelete();
             return true;
         }else if(itemId == MENUCMD_SHARE) {
-            //mCatalogController.handleClickShare()
+            mCatalogPresenter.handleClickShare();
             return true;
         }
 

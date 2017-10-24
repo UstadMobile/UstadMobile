@@ -783,8 +783,9 @@ public abstract class UstadJSOPDSItem implements Runnable {
                 HTTPResult[] resultBuf = new HTTPResult[1];
                 UstadMobileSystemImpl.getInstance().getHTTPCacheDir(asyncContext).get(asyncLoadUrl,
                         null, asyncHttpheaders, resultBuf);
-                if(resultBuf[0].getStatus() >= 300)
-                    throw new IOException("Http status: " + resultBuf[0].getStatus());
+                if(resultBuf[0] == null || resultBuf[0].getStatus() >= 300)
+                    throw new IOException("Http status: " +
+                            (resultBuf[0] != null ? resultBuf[0].getStatus() : "-1"));
 
                 in = new ByteArrayInputStream(resultBuf[0].getResponse());
                 xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
