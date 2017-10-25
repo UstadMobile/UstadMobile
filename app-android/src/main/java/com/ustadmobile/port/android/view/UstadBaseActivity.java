@@ -261,7 +261,6 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
         super.onDestroy();
         unbindService(mLrsServiceConnection);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocaleChangeBroadcastReceiver);
-        PersistenceManagerAndroid.getInstanceAndroid().releaseHelperForContext(this);
         UstadMobileSystemImplAndroid.getInstanceAndroid().handleActivityDestroy(this);
     }
 

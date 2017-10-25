@@ -25,6 +25,10 @@ android {
 
     }
 
+    dexOptions {
+        jumboMode = true
+    }
+
     productFlavors {
         /*
          * The localconfig flavor is created based on the buildconfig.local.properties settings

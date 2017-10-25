@@ -550,8 +550,17 @@ public class HTTPCacheDir {
         
         //Looks like we are offline... use anything we have unless no-cache / must-revalidate are set
         if(entry != null && !noCache && !mustRevalidate) {
-            return UMFileUtil.joinPaths(new String[]{ dirName[cacheNum], entry.optString(
-                IDX_FILENAME)});
+            String fileUri = UMFileUtil.joinPaths(new String[]{ dirName[cacheNum], entry.optString(
+                    IDX_FILENAME)});
+            if(resultBuf != null) {
+                resultBufIn = impl.openFileInputStream(fileUri);
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                UMIOUtils.readFully(resultBufIn, bout, 8 * 1024);
+
+                resultBuf[0] = new HTTPResult(bout.toByteArray(), 200, new Hashtable());
+            }
+
+            return fileUri;
         }else {
             return null;
         }

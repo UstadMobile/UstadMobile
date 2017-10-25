@@ -26,7 +26,6 @@ allprojects {
         maven {
             url "https://maven.google.com"
         }
-
     }
 }
 
@@ -38,7 +37,7 @@ version = "0.2.4.65"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 143
-    nanoLrsVersion = "0.2.252"
+    nanoLrsVersion = "0.2.403"
 }
 
 ext.buildConfigProperties = new Properties()
