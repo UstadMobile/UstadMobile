@@ -10,6 +10,15 @@ if (project.file("../app-android/buildconfig.local.properties").exists()) {
 //See:
 // https://developer.android.com/studio/projects/android-library.html
 
+//As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
+def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
+def keystoreProperties = new Properties()
+
+if (keyStorePropertiesExists) {
+    keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
+}
+
+
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.1"
@@ -23,6 +32,15 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keyStorePropertiesExists ? keystoreProperties['keyAlias'] : "default"
+            keyPassword keyStorePropertiesExists ? keystoreProperties['keyPassword'] : "default"
+            storeFile keyStorePropertiesExists ? file(keystoreProperties['storeFile']) : new File("keystore.ks")
+            storePassword keyStorePropertiesExists ? keystoreProperties['storePassword'] : "default"
+        }
     }
 
     dexOptions {
@@ -61,9 +79,11 @@ android {
         }
 
         release {
-            testCoverageEnabled = true
+            testCoverageEnabled = false
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }
