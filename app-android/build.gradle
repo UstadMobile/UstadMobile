@@ -169,6 +169,10 @@ tasks.whenTaskAdded { task ->
 
 android {
 
+    dexOptions {
+        jumboMode = true
+    }
+
     publishNonDefault true
 
     signingConfigs {

@@ -36,7 +36,7 @@ task clean(type: Delete) {
 version = "0.2.4.66"
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 144
+    ustadVersionCode = 146
     nanoLrsVersion = "0.2.403"
 }
 
