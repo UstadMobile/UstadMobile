@@ -150,8 +150,6 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
-        variant.javaCompiler.dependsOn(copyCachePrimeMain)
-        variant.javaCompiler.dependsOn(copyCoreAssetsLocalconfig)
     }
 }
 //TODO: Fix this for building as library
@@ -171,6 +169,11 @@ android {
 
     dexOptions {
         jumboMode = true
+    }
+
+    sourceSets {
+        main.assets.srcDirs += "../core/src/main/assets/"
+        localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
     }
 
     publishNonDefault true
@@ -205,7 +208,6 @@ android {
          * The localconfig flavor is created based on the buildconfig.local.properties settings
          */
         localconfig {
-//            applicationId project.ext.buildConfigProperties['android.applicationId']
             testApplicationId = project.ext.buildConfigProperties['android.applicationId']+ ".test"
             versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
             manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName']]
@@ -219,14 +221,12 @@ android {
          * having to remove the local config files themselves
          */
         vanilla {
-//            applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.test"
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile"]
         }
 
         remotetestslave {
-//            applicationId "com.ustadmobile.testslave"
             testApplicationId "com.toughra.testslave.test"
             manifestPlaceholders = ["appName": "UM Test Server"]
         }
@@ -271,32 +271,6 @@ task copyLocalconfigXmlLocaleFilesFromCore(type: Copy) {
 }
 assemble.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
 
-task copyCachePrimeMain(type: Copy) {
-    outputs.upToDateWhen { false }
-    doFirst {
-
-    }
-
-    inputs.files(fileTree(dir: rootProject.file("core/src/main/assets/com/ustadmobile/core")).matching { include '**' })
-    eachFile { println it.file }
-    from ("../core/src/main/assets/com/ustadmobile/core")
-    include "**"
-    into "src/main/assets/com/ustadmobile/core"
-}
-assemble.dependsOn(copyCachePrimeMain)
-
-task copyCoreAssetsLocalconfig(type: Copy) {
-    outputs.upToDateWhen { false }
-
-
-    inputs.files(fileTree(dir: rootProject.file("core/src/localconfig/assets/com/ustadmobile/core")).matching { include '**' })
-    eachFile { println it.file }
-    from ("../core/src/localconfig/assets/com/ustadmobile/core")
-    include "**"
-    into "src/localconfig/assets/com/ustadmobile/core"
-}
-
-assemble.dependsOn(copyCoreAssetsLocalconfig)
 
 task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/*/*.xml")
