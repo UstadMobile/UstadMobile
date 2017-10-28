@@ -23,10 +23,6 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.1"
 
-    dexOptions {
-        jumboMode = true
-    }
-
     defaultConfig {
         applicationId "com.toughra.ustadmobile.launcher"
         minSdkVersion 16

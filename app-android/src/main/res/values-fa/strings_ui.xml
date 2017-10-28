@@ -126,6 +126,66 @@
     <string name="field_faculty" value="985">نام پوهنحی</string>
     <string name="field_academic_year" value="991">سال فراغت</string>
 
+    <string name="field_father_name" value="986">ولد</string>
+    <string name="field_address" value="987">آدرس</string>
+    <string name="field_tazkira_id" value="988">شمارۀ تذکره</string>
+    <string name="field_relationship" value="989">ارتباط</string>
+    <string name="field_department" value="990">دیپارتمنت</string>
+    <string name="field_gpa" value="992">فیصدی نمرات</string>
+    <string name="field_would_work" value="993">آیاعلاقه به وظیفه دارید؟ اگر بلی واضح سازید:</string>
+    <string name="field_would_work_elaborate" value="994">Why do you want or dont want to work?</string>
+    <string name="field_have_work_experience" value="995">تجربۀ کاری دارید؟ اگر بلی واضح سازید:</string>
+    <string name="field_type_job" value="996">چه نوع وظیفه یی را دوست دارید؟ یکی و یا بیشتر از گزینه ها را انتخاب کنید. </string>
+    <string name="field_english_proficiency" value="997">زبان انگلیسی را در چه حدی میدانید؟ یکی از گزینه ها را انتخاب کنید.</string>
+    <string name="field_computer_application" value="998">توانایی استفاده از کدام برنامه های کمپیوتر را دارید؟</string>
+    <string name="field_post_graduate" value="999">پلان تان برای بعد از فراغت تان چیست؟ </string>
+    <string name="field_comments" value="1000">اگر کدام نظر و یا سوال دارید</string>
+    <string name="field_work_experience_elaborate" value="1001">Elaborate on work experience:</string>
+
+    <!-- Registration options-->
+    <string name="options_uni_kabul_uni" value="1002">Kabul University</string>
+    <string name="options_uni_kabul_polytechnic_uni" value="1003">Kabul Polytechnic University</string>
+    <string name="options_uni_kabul_education_uni" value="1004">Kabul Education University</string>
+    <string name="options_uni_other" value="1005">Other</string>
+    <string name="options_uni_i_dont_know" value="1006">I don\'t know</string>
+    <string name="options_uni_none" value="1020">None</string>
+    <string name="options_uni_kabul_medical_science" value="1021">Kabul University of Medical Science</string>
+    <string name="options_uni_shaheed_rabani" value="1022">Shaheed Rabbani Education University</string>
+    <string name="options_uni_jawzjan" value="1023">Jawzjan University</string>
+    <string name="options_uni_herat" value="1024">Herat University</string>
+    <string name="options_uni_balkh" value="1025">Balkh University</string>
+    <string name="options_uni_nagahar" value="1026">Nangahar University</string>
+    <string name="options_uni_khost" value="1027">Sheikh Zayed University (Khost)</string>
+    <string name="options_uni_kandahar" value="1028">Kandahar University</string>
+    <string name="options_uni_kunduz" value="1029">Kunduz University</string>
+
+
+
+    <string name="options_gender_female" value="1007">Female</string>
+    <string name="options_gender_male" value="1008">Male</string>
+
+    <string name="options_relationship_single" value="1009">Single</string>
+    <string name="options_relationship_married" value="1010">Married</string>
+
+    <string name="options_english_fluent" value="1011">Fluent</string>
+    <string name="options_english_good" value="1012">Good</string>
+    <string name="options_english_fair" value="1013">Fair</string>
+    <string name="options_english_poor" value="1014">Poor</string>
+
+    <string name="options_yes" value="1015">Yes</string>
+    <string name="options_no" value="1016">No</string>
+
+    <string name="options_job_short" value="1017">Short-term</string>
+    <string name="options_job_long" value="1018">Long-term</string>
+    <string name="options_job_part" value="1019">Part-time</string>
+    <string name="options_job_full" value="1020">Full-time</string>
+
+    <!-- Registration dialog feedback -->
+    <string name="field_password_min">Minimum 5 characters</string>
+
+    <!-- Update student details action button -->
+    <string name="update">Update</string>
+
     <string name='data_usage_label'>مجموع مصرف داده تلفن همراه</string>
     <string name='app_interface_language'>زبان اپلکیشن</string>
     <string name='enable_supernode'>سوپرنود را فعال سازید</string>

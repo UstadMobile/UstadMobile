@@ -30,6 +30,11 @@ repositories {
 
 }
 
+configurations.all {
+    exclude group: "net.sf.kxml", module: "kxml2"
+    exclude group: "org.json", module: "json"
+}
+
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(project.file("buildconfig.default.properties")))
 if (project.file("buildconfig.local.properties").exists()) {
@@ -166,11 +171,6 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
-
-    dexOptions {
-        jumboMode = true
-    }
-
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
@@ -368,6 +368,7 @@ assemble.dependsOn(generateCoreStringToAndroidResMap)
 dependencies {
     compile project(':core')
     compile project(':sharedse')
+
     androidTestCompile project(":core-tests")
     /*
         compile fileTree(dir: 'libs', include: ['*.jar'])
