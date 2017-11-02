@@ -5,10 +5,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
-import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
-import com.ustadmobile.nanolrs.core.manager.UserManager;
-import com.ustadmobile.nanolrs.core.model.User;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -170,16 +166,13 @@ public class RegistrationPresenter extends UstadBaseController {
      * @return          value
      * @throws SQLException
      */
-    public static String getUserDetail(String username, int field, Object dbContext) throws SQLException {
-        UserCustomFieldsManager customFieldsManager =
-                PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
-        UserManager userManager =
-                PersistenceManager.getInstance().getManager(UserManager.class);
-        User user = userManager.findByUsername(dbContext, username);
-        String value = customFieldsManager.getUserField(user, field, dbContext);
+    public static String getUserDetail(String username, int field, Object dbContext){
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        String value = impl.getUserDetail(username, field, dbContext);
         if(value == null){
             return "";
         }
+
         return value;
 
     }

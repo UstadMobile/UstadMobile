@@ -1245,7 +1245,7 @@ public abstract class UstadMobileSystemImpl {
         return getAppConfigBoolean(key, false, context);
     }
 
-
+    public abstract String getUserDetail(String username, int field, Object dbContext);
 
 
 }
