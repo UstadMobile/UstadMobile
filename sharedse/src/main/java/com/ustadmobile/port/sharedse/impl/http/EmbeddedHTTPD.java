@@ -144,7 +144,8 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
      * @param mountPath The path to use after /mount .
      * @param zipPath The local filesystem path to the zip file (e.g. /path/to/file.epub)
      */
-    public String mountZip(String zipPath, String mountPath, HashMap<String, List<MountedZipHandler.MountedZipFilter>> filters) {
+    public String mountZip(String zipPath, String mountPath, boolean epubHtmlFilterEnabled,
+                           String epubScriptPath) {
         if(mountPath == null) {
             mountPath= UMFileUtil.getFilename(zipPath) + '-' +
                     new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
@@ -153,7 +154,7 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
         try {
             ZipFile zipFile = new ZipFile(zipPath);
             addRoute(PREFIX_MOUNT + mountPath + "/" + MountedZipHandler.URI_ROUTE_POSTFIX,
-                    MountedZipHandler.class, zipFile, filters);
+                    MountedZipHandler.class, zipFile, epubHtmlFilterEnabled, epubScriptPath);
             String fullPath = toFullZipMountPath(mountPath);
             mountedZips.put(fullPath, zipFile);
             return toFullZipMountPath(mountPath);

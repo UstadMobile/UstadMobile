@@ -123,7 +123,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         InputStream is = null;
         try {
             AssetManager asMgr = getApplicationContext().getAssets();
-            is = asMgr.open("onpageshow.js");
+            is = asMgr.open("http/onpageshow.js");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             UMIOUtils.readFully(is, bout, 1024);
             onpageSelectedJS = "javascript:" + new String(bout.toByteArray(), "UTF-8");
@@ -208,8 +208,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
 
     public void initContent() {
+        String scriptPath = UMFileUtil.joinPaths(new String[] {
+                mNetworkService.getNetworkManager().getHttpAndroidAssetsUrl(), "epub-paginate.js"});
         mMountedPath = mNetworkService.getNetworkManager().mountZipOnHttp(
-                ContainerActivity.this.mContainerURI, null);
+                ContainerActivity.this.mContainerURI, null, true, scriptPath);
         mBaseURL = UMFileUtil.joinPaths(new String[]{
                 mNetworkService.getNetworkManager().getLocalHttpUrl(), mMountedPath});
         mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);

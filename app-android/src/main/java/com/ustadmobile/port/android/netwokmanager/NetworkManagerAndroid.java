@@ -171,7 +171,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     /**
      * Assets are served over http that are used to interact with the content (e.g. to inject a
-     * javascript into the content that handles autoplay).
+     * javascript into the content that handles autoplay). Includes the a preceding '/'
      */
     private String httpAndroidAssetsPath;
 
@@ -299,7 +299,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         networkService.registerReceiver(mWifiBroadcastReceiver, intentFilter);
 
         httpAndroidAssetsPath = "/assets-" + new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + '/';
-        httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, this);
+        httpd.addRoute(httpAndroidAssetsPath +"(.)+",  AndroidAssetsHandler.class, context);
         timeoutCheckHandler = new Handler();
         httpd.addResponseListener(this);
 
@@ -1072,7 +1072,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
      */
     public String getHttpAndroidAssetsUrl() {
         return UMFileUtil.joinPaths(new String[]{"http://127.0.0.1:" + httpd.getListeningPort()
-            + "/" + httpAndroidAssetsPath});
+            + httpAndroidAssetsPath});
     }
 
     @Override

@@ -91,7 +91,7 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
 
     @Override
     public String mountZip(String zipUri) {
-        mMountedPath = networkManagerAndroid.mountZipOnHttp(zipUri, null);
+        mMountedPath = networkManagerAndroid.mountZipOnHttp(zipUri, null, false, null);
         String zipUrl = UMFileUtil.joinPaths(new String[]{
                 networkManagerAndroid.getLocalHttpUrl(), mMountedPath});
 

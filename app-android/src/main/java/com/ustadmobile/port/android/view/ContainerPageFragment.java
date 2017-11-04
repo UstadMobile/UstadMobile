@@ -68,7 +68,7 @@ public class ContainerPageFragment extends Fragment {
 
     private int pageSpineIndex;
 
-    public static final String PAUSE_ALL_MEDIA_SCRIPT_ASSET_NAME = "ustadmobile-pause-all.js";
+    public static final String PAUSE_ALL_MEDIA_SCRIPT_ASSET_NAME = "http/ustadmobile-pause-all.js";
 
 
     /**

@@ -1460,7 +1460,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @return The mountname that was used - the ocntent will then be accessible on getZipMountURL()/return value
      */
-    public String mountZipOnHttp(String zipPath, String mountName) {
+    public String mountZipOnHttp(String zipPath, String mountName, boolean epubFilterEnabled,
+                                 String epubScriptToAdd) {
         UstadMobileSystemImpl.l(UMLog.INFO, 371, "Mount zip " + zipPath + " on service "
                 + this + "httpd server = " + httpd + " listening port = " + httpd.getListeningPort());
 
@@ -1477,7 +1478,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             filterMap.put("xhtml", xhtmlFilterList);
         }
 
-        mountName = httpd.mountZip(zipPath, mountName, filterMap);
+        mountName = httpd.mountZip(zipPath, mountName, epubFilterEnabled, epubScriptToAdd);
         return mountName;
     }
 

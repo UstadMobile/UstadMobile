@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.HTTPCacheDir;
+import com.ustadmobile.core.util.UMFileUtil;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -96,12 +97,18 @@ public class ImageLoader implements ControllerLifecycleListener {
 
         public void run() {
             try {
-                HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
-                        controller.getContext());
-                String filePath = cacheDir.get(url);
-                Vector activeTasks = removeTaskForController(controller, this);
-                if(filePath != null && activeTasks != null) {
-                    target.setImageFromFile(filePath);
+                //TODO: add image loader tests for handling file paths
+                if(url.startsWith("file:/") || url.startsWith("/")) {
+                    url = UMFileUtil.stripPrefixIfPresent("file:///", url);
+                    target.setImageFromFile(url);
+                }else {
+                    HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
+                            controller.getContext());
+                    String filePath = cacheDir.get(url);
+                    Vector activeTasks = removeTaskForController(controller, this);
+                    if(filePath != null && activeTasks != null) {
+                        target.setImageFromFile(filePath);
+                    }
                 }
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 658, url, e);

@@ -1,0 +1,11 @@
+body {
+    column-width: 600px;
+    -webkit-column-width: 600px;
+    height: 100%;
+    width: auto;
+}
+
+img {
+    max-width: 100%;
+    max-height: 95%;
+}

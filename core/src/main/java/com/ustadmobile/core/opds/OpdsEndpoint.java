@@ -218,8 +218,8 @@ public class OpdsEndpoint {
             dirMode = dirs[i].isUserSpecific()
                     ? CatalogPresenter.USER_RESOURCE
                     : CatalogPresenter.SHARED_RESOURCE;
-            scanner.scanDirectory(dirs[i].getDirURI(), null, "scandir", "scandir",
-                    dirMode, callback, deviceFeed, context);
+            scanner.scanDirectory(dirs[i].getDirURI(), impl.getCacheDir(dirMode, context), "scandir",
+                    "scandir", dirMode, callback, deviceFeed, context);
         }
 
         return deviceFeed;
