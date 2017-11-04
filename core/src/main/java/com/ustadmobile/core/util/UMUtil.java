@@ -63,6 +63,11 @@ public class UMUtil {
     public static final int PORT_ALLOC_SECURITY_ERR = -2;
     
     public static final int PORT_ALLOC_OTHER_ERR = 3;
+
+    /**
+     * A list of elements that must have their own end tag
+     */
+    public static final String[] SEPARATE_END_TAG_REQUIRED_ELEMENTS = new String[] {"script", "style"};
     
     /**
      * Gets the index of a particular item in an array
@@ -380,11 +385,92 @@ public class UMUtil {
         return indexInArray(haystack, needle, 0, haystack.length);
     }
 
-    public static void passXmlThrough(XmlPullParser xpp, XmlSerializer xs, String endTagName) throws XmlPullParserException, IOException {
+    /**
+     * Pass XML through from an XmlPullParser to an XmlSerializer.
+     *
+     * @param parser XmlPullParser XML is coming from
+     * @param serializer XmlSerializer XML is being written to
+     * @param seperateEndTagRequiredElements An array of elements where separate closing tags are
+     *                                       required e.g. script, style etc. using &lt;/script&gt; instead
+     *                                       of &lt;script ... /&gt;
+     *
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public static void passXmlThrough(XmlPullParser parser, XmlSerializer serializer,
+                                      String[] seperateEndTagRequiredElements)
+            throws XmlPullParserException, IOException{
+        PassXmlThroughFilter filter = null;
+        passXmlThrough(parser, serializer, seperateEndTagRequiredElements, filter);
+    }
+
+    /**
+     * Pass XML through from an XmlPullParser to an XmlSerializer.
+     *
+     * @param parser XmlPullParser XML is coming from
+     * @param serializer XmlSerializer XML is being written to
+     *
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public static void passXmlThrough(XmlPullParser parser, XmlSerializer serializer)
+            throws XmlPullParserException, IOException{
+        PassXmlThroughFilter filter = null;
+        passXmlThrough(parser, serializer, null, filter);
+    }
+
+    /**
+     * Pass XML through from an XmlPullParser to an XmlSerializer.
+     *
+     * @param xpp XmlPullParser XML is coming from
+     * @param xs XmlSerializer XML is being written to
+     * @param separateHtmlEndTagRequiredElements if true then use the default list of html elements
+     *                                           that require a separate ending tag e.g. use
+     *                                           &lt;/script&gt; instead of &lt;script ... /&gt;
+     *
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public static void passXmlThrough(XmlPullParser xpp, XmlSerializer xs,
+                                      boolean separateHtmlEndTagRequiredElements,
+                                      PassXmlThroughFilter filter)
+            throws XmlPullParserException, IOException{
+        passXmlThrough(xpp, xs,
+                separateHtmlEndTagRequiredElements ? SEPARATE_END_TAG_REQUIRED_ELEMENTS : null, filter);
+    }
+
+    /**
+     *
+     * @param xpp XmlPullParser XML is coming from
+     * @param xs XmlSerializer XML is being written to
+     * @param seperateEndTagRequiredElements An array of elements where separate closing tags are
+     *                                       required e.g. script, style etc. using &lt;/script&gt; instead
+     *                                       of &lt;script ... /&gt;
+     * @param filter XmlPassThroughFilter that can be used to add to output or interrupt processing
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public static void passXmlThrough(XmlPullParser xpp, XmlSerializer xs,
+                                      String[] seperateEndTagRequiredElements,
+                                      PassXmlThroughFilter filter)
+            throws XmlPullParserException, IOException {
+
         int evtType = xpp.getEventType();
+        int lastEvent = -1;
         String tagName;
         while(evtType != XmlPullParser.END_DOCUMENT) {
+            if(filter != null && !filter.beforePassthrough(evtType, xpp, xs))
+                return;
+
             switch(evtType) {
+                case XmlPullParser.START_DOCUMENT:
+                    xs.startDocument("utf-8", false);
+                    break;
+
+                case XmlPullParser.DOCDECL:
+                    xs.docdecl(xpp.getText());
+                    break;
+
                 case XmlPullParser.START_TAG:
                     xs.startTag(xpp.getNamespace(), xpp.getName());
                     for(int i = 0; i < xpp.getAttributeCount(); i++) {
@@ -397,24 +483,105 @@ public class UMUtil {
                     break;
                 case XmlPullParser.END_TAG:
                     tagName = xpp.getName();
-                    if(endTagName != null && endTagName.equals(tagName))
-                        return;
+
+                    if(lastEvent == XmlPullParser.START_TAG
+                            && seperateEndTagRequiredElements != null
+                            && UMUtil.indexInArray(seperateEndTagRequiredElements, tagName) != -1) {
+                        xs.text(" ");
+                    }
 
                     xs.endTag(xpp.getNamespace(), tagName);
 
 
                     break;
             }
+            if(filter != null && !filter.afterPassthrough(evtType, xpp, xs))
+                return;
+
+            lastEvent = evtType;
             evtType = xpp.next();
         }
+
+        xs.endDocument();
     }
+
+    /**
+     *
+     * @param xpp XmlPullParser XML is coming from
+     * @param xs XmlSerializer XML is being written to
+     * @param seperateEndTagRequiredElements An array of elements where separate closing tags are
+     *                                       required e.g. script, style etc. using &lt;/script&gt; instead
+     *                                       of &lt;script ... /&gt;
+     * @param endTagName If the given endTagName is encountered processing will stop. The endTag
+     *                   for this tag will not be sent to the serializer.
+     * @throws XmlPullParserException
+     * @throws IOException
+     */
+    public static void passXmlThrough(XmlPullParser xpp, XmlSerializer xs,
+                                      String[] seperateEndTagRequiredElements,
+                                      final String endTagName) throws XmlPullParserException, IOException {
+        passXmlThrough(xpp, xs,seperateEndTagRequiredElements, new PassXmlThroughFilter() {
+            @Override
+            public boolean beforePassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer)
+                    throws IOException, XmlPullParserException {
+                if(evtType == XmlPullParser.END_TAG && parser.getName() != null
+                        && parser.getName().equals(endTagName))
+                    return false;
+                else
+                    return true;
+            }
+
+            @Override
+            public boolean afterPassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer)
+                    throws IOException, XmlPullParserException {
+                return true;
+            }
+        });
+    }
+
+    /**
+     * Implement this interface to control some of the passXmlThrough methods .  This can be used
+     * to add extra output to be serialized or to stop processing.
+     */
+    public interface PassXmlThroughFilter {
+
+        /**
+         * Called before the given event is passed through to the XmlSerializer.
+         *
+         * @param evtType The event type from the parser
+         * @param parser The XmlPullParser being used
+         * @param serializer The XmlSerializer being used
+         *
+         * @return true to continue processing, false to end processing
+         * @throws IOException
+         * @throws XmlPullParserException
+         */
+        boolean beforePassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer)
+                throws IOException, XmlPullParserException;
+
+        /**
+         * Called after the given event was passed through to the XmlSerializer.
+         *
+         * @param evtType The event type from the parser
+         * @param parser The XmlPullParser being used
+         * @param serializer The XmlSerializer being used
+         *
+         * @return true to continue processing, false to end processing
+         * @throws IOException
+         * @throws XmlPullParserException
+         */
+        boolean afterPassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer)
+                throws IOException, XmlPullParserException;
+
+    }
+
 
     public static String passXmlThroughToString(XmlPullParser xpp, String endTagName) throws XmlPullParserException, IOException{
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         XmlSerializer xs = UstadMobileSystemImpl.getInstance().newXMLSerializer();
         xs.setOutput(bout, "UTF-8");
         xs.startDocument("UTF-8", Boolean.FALSE);
-        passXmlThrough(xpp, xs, endTagName);
+        passXmlThrough(xpp, xs, null, endTagName);
         xs.endDocument();
         bout.flush();
         String retVal = new String(bout.toByteArray());
