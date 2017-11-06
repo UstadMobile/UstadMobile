@@ -134,6 +134,13 @@ public class HTTPCacheDir {
         try {
             in = impl.openResourceInputStream(UMFileUtil.joinPaths(new String[]{CACHE_PRIME_INDEX_RES,
                 INDEX_FILENAME}), context);
+
+            if(in == null) {
+                ///there is no prime cache prepared
+                return;
+            }
+
+
             UMIOUtils.readFully(in, bout, 1024);
             in.close();
             in = null;
