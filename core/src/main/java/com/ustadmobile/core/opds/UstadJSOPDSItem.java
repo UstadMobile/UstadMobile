@@ -543,7 +543,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
                 try {
                     XmlPullParser parser = UstadMobileSystemImpl.getInstance().newPullParser();
                     parser.setInput(new ByteArrayInputStream(content.getBytes("UTF-8")), "UTF-8");
-                    UMUtil.passXmlThrough(parser, xs);//TODO: check depth at which tag ends
+                    UMUtil.passXmlThrough(parser, xs);
                 }catch(XmlPullParserException e) {
                     e.printStackTrace();
                 }

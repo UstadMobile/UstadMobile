@@ -440,6 +440,8 @@ public class UMUtil {
     }
 
     /**
+     * Pass XML through from an XmlPullParser to an XmlSerializer. This will not call startDocument
+     * or endDocument - that must be called separately. This allows different documents to be merged.
      *
      * @param xpp XmlPullParser XML is coming from
      * @param xs XmlSerializer XML is being written to
@@ -463,14 +465,6 @@ public class UMUtil {
                 return;
 
             switch(evtType) {
-                case XmlPullParser.START_DOCUMENT:
-                    xs.startDocument("utf-8", false);
-                    break;
-
-                case XmlPullParser.DOCDECL:
-                    xs.docdecl(xpp.getText());
-                    break;
-
                 case XmlPullParser.START_TAG:
                     xs.startTag(xpp.getNamespace(), xpp.getName());
                     for(int i = 0; i < xpp.getAttributeCount(); i++) {
@@ -501,8 +495,6 @@ public class UMUtil {
             lastEvent = evtType;
             evtType = xpp.next();
         }
-
-        xs.endDocument();
     }
 
     /**
