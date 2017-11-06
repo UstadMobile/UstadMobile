@@ -252,3 +252,6 @@ ustadmobile-ormlite/src/main/java/com/ustadmobile/port/ormlite/persistence/gener
 
 #Assets
 app-android/src/main/assets/cache
+
+#GWT (moved to gwtdev branch)
+app-gwt/*

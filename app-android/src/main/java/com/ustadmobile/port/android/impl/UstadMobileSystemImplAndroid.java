@@ -83,6 +83,10 @@ import com.ustadmobile.core.view.XapiPackageView;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingEndpoint;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsForwardingListener;
+import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
+import com.ustadmobile.nanolrs.core.manager.UserManager;
+import com.ustadmobile.nanolrs.core.model.User;
+import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
@@ -127,6 +131,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -862,5 +867,29 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
         return null;
+    }
+
+    @Override
+    public String getUserDetail(String username, int field, Object dbContext){
+
+        try {
+            UserCustomFieldsManager customFieldsManager =
+                    PersistenceManager.getInstance().getManager(UserCustomFieldsManager.class);
+            UserManager userManager =
+                    PersistenceManager.getInstance().getManager(UserManager.class);
+            User user = userManager.findByUsername(dbContext, username);
+            String value = customFieldsManager.getUserField(user, field, dbContext);
+            if (value == null) {
+                return "";
+            }
+            return value;
+        }catch(SQLException s){
+            s.printStackTrace();
+            System.out.println("Unable to get user detail: " + field +
+                " for user: " + username);
+            return "";
+        }
+
+
     }
 }

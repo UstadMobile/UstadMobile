@@ -250,4 +250,9 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
         //TODO: Implement this
         return null;
     }
+
+    @Override
+    public String getUserDetail(String username, int field, Object dbContext) {
+        return null;
+    }
 }
