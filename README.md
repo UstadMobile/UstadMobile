@@ -16,11 +16,12 @@ Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file f
 The platform consisits of a main cross platform 'core' and an implementation of the UI and platform specific ports in app-platformname .
 
 Code lives mostly in gradle projects as follows:
-* __core__ : Contains core models and logic
-* __core-tests__ : Contains testing code shared between implementations. Some tests of core functionality cannot run without an implementation: So the tests are placed in this separate module and then included as test dependencies for individual implementations (e.g. Android, J2ME, etc)
-* __sharedse__: Contains implementation for "full fat" non-micro implementations: e.g. Android, J2SE, iOS via J2ObjC
-* __app-android__: Contains Android implementation.
-* __app-j2me__: This is an ant project: Contains J2ME feature phone mplementation.
+* __core__ : Contains core models and logic.
+* __core-tests__ : Contains testing code shared between implementations. Some tests of core functionality cannot run without an implementation: So the tests are placed in this separate module and then included as test dependencies for individual implementations (e.g. Android, J2ME, etc).
+* __sharedse__: Contains implementation for "full fat" non-micro implementations: e.g. Android, J2SE, iOS via J2ObjC.
+* __app-android__: Contains Android implementation, forms the basis of the app in app-android-launcher but can also be used as a library in other apps.
+* __app-android-launcher__: Standalone app launcher that uses app-android.
+* __app-j2me__: This is an ant project: Contains J2ME feature phone implementation.
 * __app-ios__: The iOS port done using j2objc.
 
 To build debug / release versions for any given platform please see the README in the directory for that platform.
