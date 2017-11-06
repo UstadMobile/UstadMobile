@@ -169,4 +169,9 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     public String getManifestPreference(String key, Object context) {
         return null;
     }
+
+    @Override
+    public String getUserDetail(String username, int field, Object dbContext) {
+        return null;
+    }
 }
