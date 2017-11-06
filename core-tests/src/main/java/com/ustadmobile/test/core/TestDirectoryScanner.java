@@ -36,7 +36,9 @@ public class TestDirectoryScanner {
                 PlatformTestUtil.getTargetContext());
         String dirPath = storageDirs[0].getDirURI();
         DirectoryScanner scanner = new DirectoryScanner();
-        UstadJSOPDSFeed directoryFeed = scanner.scanDirectory(dirPath, null, "test", "test-id",
+        UstadJSOPDSFeed directoryFeed = scanner.scanDirectory(dirPath,
+                impl.getCacheDir(CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext()),
+                "test", "test-id",
                 CatalogPresenter.SHARED_RESOURCE, null, null, PlatformTestUtil.getTargetContext());
         Assert.assertNotNull(directoryFeed);
 
