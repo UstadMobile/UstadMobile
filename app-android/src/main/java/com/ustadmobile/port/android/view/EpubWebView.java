@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.support.annotation.Px;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
@@ -22,8 +23,6 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
 
     private GestureDetectorCompat mGestureDetector;
 
-    private boolean isFling = false;
-
     private boolean isScrolling = false;
 
     /**
@@ -36,6 +35,8 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
     private MotionEvent scrollEvt1;
 
     private MotionEvent scrollEvt2;
+
+    private float mDownY;
 
 
     public EpubWebView(Context context) {
@@ -76,6 +77,9 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if(mGestureDetector.onTouchEvent(event)) {
+            return true;
+        }
         mGestureDetector.onTouchEvent(event);
 
         boolean endOfScroll = false;
@@ -85,17 +89,27 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
             isScrolling = false;
         }
 
-        Log.i("EpubWebView", "isScrolling: " + isScrolling + " end of scroll: " + endOfScroll
-                + " isFling: " + isFling);
-
-        if(!isFling && endOfScroll) {
-            Log.i("EpubWebView", "End of scroll: no fling");
-            return handleFlick(scrollEvt1, scrollEvt2, 1, 0);
+        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+            mDownY = event.getY();
         }
 
-        if(isFling) {
-            isFling = false;
-            return true;
+        if(isScrolling) {
+            switch(event.getAction()) {
+                case MotionEvent.ACTION_MOVE:
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP :
+                    event.setLocation(event.getX(), mDownY);
+                    break;
+            }
+        }
+
+
+
+        Log.i("EpubWebView", "isScrolling: " + isScrolling + " end of scroll: " + endOfScroll);
+
+        if(endOfScroll) {
+            Log.i("EpubWebView", "End of scroll: no fling");
+            return handleFlick(scrollEvt1, scrollEvt2, 1, 0);
         }
 
         return super.onTouchEvent(event);
@@ -118,11 +132,10 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
     }
 
     @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
         isScrolling = true;
         scrollEvt1 = e1;
         scrollEvt2 = e2;
-
         return false;
     }
 
@@ -137,8 +150,6 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
     }
 
     private boolean handleFlick(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        isFling = true ;
-
         int swipeDeltaX = Math.round(Math.abs(e1.getX() - e2.getX()));
         int swipeThresholdPx =  (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 MIN_DISTANCE_FOR_FLING, getContext().getResources().getDisplayMetrics());
@@ -170,5 +181,4 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
         ViewCompat.postInvalidateOnAnimation(this);
         return true;
     }
-
 }
