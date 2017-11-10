@@ -435,7 +435,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                 impl.getString(MessageID.error, this), message);
         }
 
-        if(navDocument != null) {
+        if(navDocument != null && navDocument.getNavById("toc") != null) {
             //show TOC
             Vector navVector = navDocument.getNavById("toc").getChildrenRecursive(new Vector());
             drawerNavItems = new EPUBNavItem[navVector.size()];

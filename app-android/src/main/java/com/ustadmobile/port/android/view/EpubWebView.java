@@ -5,6 +5,8 @@ import android.content.Context;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.webkit.WebView;
@@ -21,6 +23,19 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
     private GestureDetectorCompat mGestureDetector;
 
     private boolean isFling = false;
+
+    private boolean isScrolling = false;
+
+    /**
+     * Taken from ViewPager
+     */
+    private static final int MIN_DISTANCE_FOR_FLING = 25; // dips
+
+    private static final int MAX_SETTLE_DURATION = 600; // ms
+
+    private MotionEvent scrollEvt1;
+
+    private MotionEvent scrollEvt2;
 
 
     public EpubWebView(Context context) {
@@ -47,6 +62,7 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
     private void initScrolling(Context context) {
         mScroller = new OverScroller(context);
         mGestureDetector = new GestureDetectorCompat(context, this);
+        setVerticalScrollBarEnabled(false);
     }
 
     @Override
@@ -61,14 +77,33 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         mGestureDetector.onTouchEvent(event);
-//        if(isFling)
-//            return true;
+
+        boolean endOfScroll = false;
+
+        if(isScrolling && event.getAction() == MotionEvent.ACTION_UP) {
+            endOfScroll = true;
+            isScrolling = false;
+        }
+
+        Log.i("EpubWebView", "isScrolling: " + isScrolling + " end of scroll: " + endOfScroll
+                + " isFling: " + isFling);
+
+        if(!isFling && endOfScroll) {
+            Log.i("EpubWebView", "End of scroll: no fling");
+            return handleFlick(scrollEvt1, scrollEvt2, 1, 0);
+        }
+
+        if(isFling) {
+            isFling = false;
+            return true;
+        }
 
         return super.onTouchEvent(event);
     }
 
     @Override
     public boolean onDown(MotionEvent motionEvent) {
+        mScroller.abortAnimation();
         return false;
     }
 
@@ -83,36 +118,57 @@ public class EpubWebView extends WebView implements GestureDetector.OnGestureLis
     }
 
     @Override
-    public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        isScrolling = true;
+        scrollEvt1 = e1;
+        scrollEvt2 = e2;
+
         return false;
     }
 
     @Override
     public void onLongPress(MotionEvent motionEvent) {
-        mScroller.forceFinished(true);
-
-        mScroller.startScroll(0, 0, 100, 0);
-//        mScroller.fling(0, 0, 10, 0, 0, computeHorizontalScrollExtent(), 0, computeVerticalScrollExtent());
-        ViewCompat.postInvalidateOnAnimation(this);
-
     }
 
     @Override
-    public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
-        /*
-        isFling = true;
-        int width = computeHorizontalScrollRange();
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        Log.i("EpubWebView", "onFling");
+        return handleFlick(e1, e2, velocityX, velocityY);
+    }
 
-        int vX = Math.round(v);
-        int vY = Math.round(v1);
+    private boolean handleFlick(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        isFling = true ;
 
+        int swipeDeltaX = Math.round(Math.abs(e1.getX() - e2.getX()));
+        int swipeThresholdPx =  (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                MIN_DISTANCE_FOR_FLING, getContext().getResources().getDisplayMetrics());
+        boolean isFlick = swipeDeltaX > swipeThresholdPx;
+        Log.i("EpubWebView", "handleFlick Delta X = " + swipeDeltaX + " threshold px = "
+                + swipeThresholdPx + " isFlick: " + isFlick);
+        int currentXPos = getScrollX();
+        int currentChunk = currentXPos  / getWidth();// better to use the position that it would have been at
+        int increment = 0;
+        if(isFlick) {
+            if(e1.getX() > e2.getX()) {
+                increment = 1;
+            }else {
+                increment = -1;
+            }
+        }
 
-        mScroller.forceFinished(true);
-        mScroller.fling(getScrollX(), getScrollY(), vX, vY, 0, 0, getWidth(), getHeight());
+        int xDestination = (currentChunk + increment) * getWidth();
+        int distanceX = xDestination - currentXPos;
 
+        //As per Android's own ViewPager.java see line 677
+        // https://android.googlesource.com/platform/frameworks/support/+/jb-dev/v4/java/android/support/v4/view/ViewPager.java
+        int duration = Math.min(
+                Math.round(Math.abs(1000 * Math.abs(distanceX / velocityX))) * 4,
+                MAX_SETTLE_DURATION);
+        Log.i("EpubWebView", ": scroll duration " + duration + ", distanceX = " + distanceX + ", velocity = " + velocityX);
+
+        mScroller.startScroll(getScrollX(), 0, distanceX, 0, duration);
         ViewCompat.postInvalidateOnAnimation(this);
         return true;
-        */
-        return true;
     }
+
 }

@@ -13,6 +13,10 @@ var isOldAndroid = androidVersion ? parseFloat(androidVersion) < 4.4 : false;
 var bodyHeight = (isOldAndroid ? window.outerHeight : window.innerHeight) - (parseInt(bodyStyle.marginTop) + parseInt(bodyStyle.marginBottom));
 var bodyWidth = window.innerWidth - (parseInt(bodyStyle.marginLeft) + parseInt(bodyStyle.marginRight));
 
+console.log("Body width = " + window.innerWidth);
+//var bodyWidth = window.innerWidth - (parseInt(bodyStyle.marginLeft) + parseInt(bodyStyle.marginRight)
+//    + parseInt(bodyStyle.paddingLeft) + parseInt(bodyStyle.paddingRight));
+
 /*
  If Android less than 4.4, we must use window.outerHeight (because it will cut out the soft keyboard space). Otherwise window.innerHeight is what we want to use.
  */
