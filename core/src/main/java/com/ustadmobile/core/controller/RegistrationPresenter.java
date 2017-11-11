@@ -57,6 +57,7 @@ public class RegistrationPresenter extends UstadBaseController {
 
         universities = new int[]{
                 MessageID.options_uni_none,
+                MessageID.options_uni_kabul_uni,
                 MessageID.options_uni_kabul_medical_science,
                 MessageID.options_uni_kabul_polytechnic_uni,
                 MessageID.options_uni_shaheed_rabani,
