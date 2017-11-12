@@ -1458,7 +1458,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param zipPath Path to the zip that should be mounted (mandatory)
      * @param mountName Directory name that this should be mounted as e.g. something.epub-timestamp. Can be null
      *
-     * @return The mountname that was used - the ocntent will then be accessible on getZipMountURL()/return value
+     * @return The mountname that was used - the content will then be accessible on getZipMountURL()/return value
      */
     public String mountZipOnHttp(String zipPath, String mountName, boolean epubFilterEnabled,
                                  String epubScriptToAdd) {

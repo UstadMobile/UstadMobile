@@ -8,6 +8,6 @@ body {
 }
 
 img, video, audio {
-    max-width: 95% !important;
-    max-height: 95% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
 }
