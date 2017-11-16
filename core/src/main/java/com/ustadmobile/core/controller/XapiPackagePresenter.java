@@ -105,13 +105,16 @@ public class XapiPackagePresenter extends UstadBaseController implements Runnabl
     public String getXAPIQuery() {
         String username = UstadMobileSystemImpl.getInstance().getActiveUser(getContext());
         String password = UstadMobileSystemImpl.getInstance().getActiveUserAuth(getContext());
-        String xapiEndpoint = UMFileUtil.resolveLink(mountedPath, "/xapi");
+        String xapiEndpoint = UMFileUtil.resolveLink(mountedPath, "/xapi/");
+        String activityArgs = tinCanXml != null && tinCanXml.getLaunchActivity() != null ?
+                "&activity_id=" + URLTextUtil.urlEncodeUTF8(tinCanXml.getLaunchActivity().getId()) : "";
 
         return "?actor=" +
                 URLTextUtil.urlEncodeUTF8(UMTinCanUtil.makeActorFromActiveUser(getContext()).toString()) +
                 "&auth=" + URLTextUtil.urlEncodeUTF8(LoginController.encodeBasicAuth(username, password)) +
                 "&endpoint=" + URLTextUtil.urlEncodeUTF8(xapiEndpoint) +
-                "&registration=" + registrationUUID;
+                "&registration=" + registrationUUID +
+                activityArgs;
     }
 
     @Override
