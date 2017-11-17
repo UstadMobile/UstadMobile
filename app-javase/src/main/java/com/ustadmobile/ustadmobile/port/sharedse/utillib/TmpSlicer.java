@@ -97,7 +97,8 @@ public class TmpSlicer {
                 try {
                     opfIn = new FileInputStream(opfFile);
                     XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(opfIn);
-                    UstadJSOPF opfObj = UstadJSOPF.loadFromOPF(xpp);
+                    UstadJSOPF opfObj = new UstadJSOPF();
+                    opfObj.loadFromOPF(xpp);
                     System.out.println("loaded: " + opfObj.title);
 
                     UstadJSOPDSEntry linkEntry = new UstadJSOPDSEntry(feeds[j]);
@@ -144,7 +145,8 @@ public class TmpSlicer {
                                 "/EPUB/package.opf");
                         FileInputStream fin = new FileInputStream(seeAlsoOpfFile);
                         XmlPullParser seeAlsoXpp = UstadMobileSystemImpl.getInstance().newPullParser(fin);
-                        UstadJSOPF seeAlsoOpf = UstadJSOPF.loadFromOPF(seeAlsoXpp);
+                        UstadJSOPF seeAlsoOpf = new UstadJSOPF();
+                        seeAlsoOpf.loadFromOPF(seeAlsoXpp);
                         seeAlsoLinks[UstadJSOPDSItem.ATTR_TITLE] = seeAlsoOpf.title;
                         linkEntry.addLink(seeAlsoLinks);
                     }

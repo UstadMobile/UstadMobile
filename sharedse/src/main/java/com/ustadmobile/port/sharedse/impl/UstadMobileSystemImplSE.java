@@ -14,6 +14,9 @@ import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
+import com.ustadmobile.core.impl.http.UmHttpCall;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -30,6 +33,8 @@ import com.ustadmobile.nanolrs.core.model.XapiAgent;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
+import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
+import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
 import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
@@ -67,6 +72,11 @@ import java.util.UUID;
 import java.util.Vector;
 
 import listener.ActiveUserListener;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  *
@@ -79,6 +89,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     protected XapiAgent xapiAgent;
 
     Vector activeUserListener = new Vector();
+
+    private final OkHttpClient client = new OkHttpClient();
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -710,5 +722,25 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     @Override
     public String formatInteger(int integer) {
         return NumberFormat.getIntegerInstance().format(integer);
+    }
+
+    @Override
+    public UmHttpCall makeRequestAsync(UmHttpRequest request, final UmHttpResponseCallback callback) {
+        Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
+        Call call = client.newCall(httpRequest.build());
+        final UmHttpCall umCall = new UmHttpCallSe(call);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                callback.onFailure(umCall, null);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                callback.onComplete(umCall, new UmHttpResponseSe(response));
+            }
+        });
+
+        return umCall;
     }
 }

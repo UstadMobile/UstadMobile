@@ -34,6 +34,7 @@ dependencies {
     compile 'org.nanohttpd:nanohttpd:2.3.1'
     compile 'org.nanohttpd:nanohttpd-nanolets:2.3.1';
     compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
+    compile 'com.squareup.okhttp3:okhttp:3.9.0'
     project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
     compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
     compile "com.ustadmobile.nanolrs:nanolrs-http:$nanoLrsVersion"

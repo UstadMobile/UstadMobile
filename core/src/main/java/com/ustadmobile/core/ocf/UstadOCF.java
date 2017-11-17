@@ -49,6 +49,10 @@ public class UstadOCF {
     public UstadOCF(UstadOCFRootFile[] rootFiles) {
         this.rootFiles = rootFiles;
     }
+
+    public UstadOCF() {
+
+    }
     
     public UstadOCFRootFile[] rootFiles;
     
@@ -75,6 +79,27 @@ public class UstadOCF {
         
         UstadOCF retVal = new UstadOCF(rootFiles);
         return retVal;
+    }
+
+
+    public void loadFromParser(XmlPullParser xpp) throws XmlPullParserException, IOException{
+        int evtType = 0;
+
+        Vector rootsFound = new Vector();
+        do {
+            evtType = xpp.next();
+            if(evtType == XmlPullParser.START_TAG) {
+                if(ROOTFILETAG.equals(xpp.getName())) {
+                    String fullPath = xpp.getAttributeValue(null, "full-path");
+                    String mediaType = xpp.getAttributeValue(null, "media-type");
+                    rootsFound.addElement(new UstadOCFRootFile(fullPath,
+                            mediaType));
+                }
+            }
+        }while(evtType != XmlPullParser.END_DOCUMENT);
+
+        rootFiles = new UstadOCFRootFile[rootsFound.size()];
+        rootsFound.copyInto(rootFiles);
     }
 }
 

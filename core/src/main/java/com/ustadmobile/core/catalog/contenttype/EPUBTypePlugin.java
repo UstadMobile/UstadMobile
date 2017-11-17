@@ -78,7 +78,8 @@ public class EPUBTypePlugin extends ZippedContentTypePlugin {
 
                 for(j = 0; j < ocf.rootFiles.length; j++) {
                     zIs = zipHandle.openInputStream(ocf.rootFiles[j].fullPath);
-                    opf = UstadJSOPF.loadFromOPF(impl.newPullParser(zIs),
+                    opf = new UstadJSOPF();
+                    opf.loadFromOPF(impl.newPullParser(zIs),
                             UstadJSOPF.PARSE_METADATA | UstadJSOPF.PARSE_MANIFEST);
                     UMIOUtils.closeInputStream(zIs);
                     zIs = null;

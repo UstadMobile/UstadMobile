@@ -186,17 +186,14 @@ public class UstadJSOPF {
     }
     
     
-    public static UstadJSOPF loadFromOPF(XmlPullParser xpp) throws XmlPullParserException, IOException {
-        return loadFromOPF(xpp, PARSE_METADATA | PARSE_MANIFEST);
+    public void loadFromOPF(XmlPullParser xpp) throws XmlPullParserException, IOException {
+        loadFromOPF(xpp, PARSE_METADATA | PARSE_MANIFEST);
     }
     
     /*
      * xpp: Parser of the OPF
      */
-    public static UstadJSOPF loadFromOPF(XmlPullParser xpp, int parseFlags) throws XmlPullParserException, IOException {
-        UstadJSOPF result = new UstadJSOPF();
-        
-        
+    public void loadFromOPF(XmlPullParser xpp, int parseFlags) throws XmlPullParserException, IOException {
         boolean parseMetadata = (parseFlags & PARSE_METADATA) == PARSE_METADATA;
         boolean parseManifest = (parseFlags & PARSE_MANIFEST) == PARSE_MANIFEST;
         
@@ -212,7 +209,7 @@ public class UstadJSOPF {
         boolean isLinear = true;
         String isLinearStrVal = null;
         Hashtable allItems = new Hashtable();
-        Vector spineItems = new Vector();        
+        Vector spineItems = new Vector();
 
         
         /*
@@ -234,13 +231,15 @@ public class UstadJSOPF {
             idref=null;
             isLinear = true;
             isLinearStrVal = null;
+            String tagName;
             
                         
             
             //If we are parsing the manifest
             if(parseManifest) {
                 if(evtType == XmlPullParser.START_TAG){
-                    if(xpp.getName() != null && xpp.getName().equals("item")){
+                    tagName = xpp.getName();
+                    if(tagName != null && tagName.equals("item")){
 
                         filename=xpp.getAttributeValue(null, "href");
                         itemMime=xpp.getAttributeValue(null, "media-type");
@@ -255,7 +254,7 @@ public class UstadJSOPF {
 
                         if(extension == null || defMimeType == null ||
                                 !itemMime.equals(defMimeType)){
-                            result.mimeExceptions.put(filename, itemMime);
+                            mimeExceptions.put(filename, itemMime);
                         }
                         UstadJSOPFItem item2 = new UstadJSOPFItem();
                         item2.href = filename;
@@ -264,10 +263,10 @@ public class UstadJSOPF {
                         item2.id = id;
                         
                         if(properties != null && properties.indexOf("nav") != -1) {
-                            result.navItem = item2;
+                            navItem = item2;
                         }
                         if(properties != null && properties.indexOf("cover-image") != -1) {
-                            result.addCoverImage(item2);
+                            addCoverImage(item2);
                         }
 
 
@@ -293,8 +292,8 @@ public class UstadJSOPF {
                     }
                 }else if(evtType == XmlPullParser.END_TAG){
                     if(xpp.getName().equals("spine")){
-                        result.spine = new UstadJSOPFItem[spineItems.size()];
-                        spineItems.copyInto(result.spine);
+                        spine = new UstadJSOPFItem[spineItems.size()];
+                        spineItems.copyInto(spine);
                     }
                 }
             }
@@ -310,14 +309,14 @@ public class UstadJSOPF {
                     
                     if(inMetadata) {
                         if(xpp.getName().equals("dc:title")) {
-                            result.title = xpp.nextText();
+                            title = xpp.nextText();
                         }else if(xpp.getName().equals("dc:identifier")) {
                             String idAttr = xpp.getAttributeValue(null, "id");
                             if(idAttr != null && idAttr.equals(uniqueIdentifier)) {
-                                result.id = xpp.nextText();
+                                this.id = xpp.nextText();
                             }
                         }else if(xpp.getName().equals("dc:description")) {
-                            result.description = xpp.nextText();
+                            description = xpp.nextText();
                         }else if(xpp.getName().equals("link")) {
                             LinkElement linkEl = new LinkElement();
                             linkEl.href = xpp.getAttributeValue(null, LinkElement.ATTR_HREF);
@@ -325,10 +324,10 @@ public class UstadJSOPF {
                             linkEl.mediaType = xpp.getAttributeValue(null, LinkElement.ATTR_MEDIA_TYPE);
                             linkEl.rel = xpp.getAttributeValue(null, LinkElement.ATTR_REL);
                             linkEl.refines = xpp.getAttributeValue(null, LinkElement.ATTR_REFINES);
-                            if(result.links == null)
-                                result.links = new Vector();
+                            if(links == null)
+                                links = new Vector();
 
-                            result.links.addElement(linkEl);
+                            links.addElement(linkEl);
                         }
                     }
                 }else if(evtType == XmlPullParser.END_TAG) {
@@ -342,8 +341,6 @@ public class UstadJSOPF {
             evtType = xpp.next();
             
         }while(evtType != XmlPullParser.END_DOCUMENT);
-        
-        return result;
     }
     
     public String getMimeType(String filename) {

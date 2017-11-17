@@ -33,6 +33,9 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.impl.http.UmHttpCall;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.tincan.TinCanResultListener;
@@ -852,6 +855,28 @@ public abstract class UstadMobileSystemImpl {
             setAppPref(key, value, context);
         }
     }
+
+    /**
+     * Make an asynchronous http request
+     *
+     * @param request request to make
+     * @param responseListener response listener to receive response when ready
+     */
+    public abstract UmHttpCall makeRequestAsync(UmHttpRequest request,
+                                                UmHttpResponseCallback responseListener);
+
+
+    /**
+     * Mount a container (e.g. epub, xapi package, etc) so it can be accessed using makeRequest. This
+     * normally means making the contents of a zip file accessible over http , e.g.
+     * mount /path/file.zip will provide a base url, e.g. http://127.0.0.1:65000/file.zip and contents
+     * can be accessed (e.g. http://127.0.0.1:65000/file.zip/some/file.xhtml )
+     *
+     * @param request The request to make
+     * @param id The id used provided when the callback is called
+     * @param callback Callback to call when the mount is completed or failed
+     */
+    public abstract void mountContainer(ContainerMountRequest request, int id, UmCallback callback);
 
 
     /**

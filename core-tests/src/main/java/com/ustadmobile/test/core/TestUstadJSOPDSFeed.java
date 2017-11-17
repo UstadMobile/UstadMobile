@@ -235,7 +235,7 @@ public class TestUstadJSOPDSFeed {
             catch(InterruptedException e) {}
         }
 
-        Assert.assertNotNull("Loading a url that does not exist results in call to onError",
+        Assert.assertNotNull("Loading a url that does not exist results in call to onFailure",
                 onErrorThrowable[0]);
     }
 

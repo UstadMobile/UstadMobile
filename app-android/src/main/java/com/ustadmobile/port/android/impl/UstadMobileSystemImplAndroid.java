@@ -41,6 +41,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -59,11 +60,14 @@ import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UserSettingsController;
+import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.TinCanResultListener;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.core.view.AboutView;
@@ -279,6 +283,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             return iBinder;
         }
     }
+
 
     protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
@@ -891,5 +896,27 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
 
+    }
+
+    @Override
+    public void mountContainer(final ContainerMountRequest request, final int id,
+                               final UmCallback callback) {
+
+        final String scriptPath = UMFileUtil.joinPaths(new String[] {
+                networkManagerAndroid.getHttpAndroidAssetsUrl(), "epub-paginate.js"});
+        new AsyncTask<Void, Void, String>() {
+            @Override
+            protected String doInBackground(Void... voids) {
+                String mountedPath = networkManagerAndroid.mountZipOnHttp(request.getContainerUri(),
+                        null, request.isEpubMode(), scriptPath);
+                return UMFileUtil.joinPaths(new String[]{networkManagerAndroid.getLocalHttpUrl(),
+                    mountedPath});
+            }
+
+            @Override
+            protected void onPostExecute(String mountedPath) {
+                callback.onSuccess(id, mountedPath);
+            }
+        }.execute();
     }
 }

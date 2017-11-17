@@ -54,7 +54,8 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener, ControllerReadyListener, ContainerView, AppViewChoiceListener, TinCanResultListener, ListView.OnItemClickListener {
+public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener,
+        ContainerView, AppViewChoiceListener, TinCanResultListener, ListView.OnItemClickListener {
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -109,7 +110,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
 
     private Vector<Runnable> runWhenContentMounted = new Vector<>();
-
 
 
     @Override
@@ -184,6 +184,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
         mDrawerList = (ListView)findViewById(R.id.container_tocdrawer);
         mDrawerList.setOnItemClickListener(this);
+
+        mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
     }
 
     @Override
@@ -193,7 +195,9 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             mNetworkService = ((NetworkServiceAndroid.LocalServiceBinder)iBinder).getService();
             onpageSelectedJS = onpageSelectedJS.replace("__ASSETSURL__",
                 mNetworkService.getNetworkManager().getHttpAndroidAssetsUrl());
-            ContainerActivity.this.initContent();
+            mContainerController = new ContainerController(this, this);
+            mContainerController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
+                    null);
         }
     }
 
@@ -206,27 +210,8 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         super.onServiceDisconnected(name);
     }
 
-
-    public void initContent() {
-        String scriptPath = UMFileUtil.joinPaths(new String[] {
-                mNetworkService.getNetworkManager().getHttpAndroidAssetsUrl(), "epub-paginate.js"});
-        mMountedPath = mNetworkService.getNetworkManager().mountZipOnHttp(
-                ContainerActivity.this.mContainerURI, null, true, scriptPath);
-        mBaseURL = UMFileUtil.joinPaths(new String[]{
-                mNetworkService.getNetworkManager().getLocalHttpUrl(), mMountedPath});
-        mArgs.put(ContainerController.ARG_OPENPATH, mBaseURL);
-        UstadMobileSystemImpl.l(UMLog.INFO, 365, mContainerURI + "on " + mBaseURL + " type "
-                + mMimeType);
-
-        ContainerController.makeControllerForView(this, mArgs, this);
-    }
-
     public String getBaseURL() {
         return mBaseURL;
-    }
-
-    public String getOpfBasePath() {
-        return mContainerController.getOPFBasePath(mContainerController.getActiveOPF());
     }
 
     public String getXapiQuery() {
@@ -248,62 +233,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         }
     }
 
-    @Override
-    public void controllerReady(final UstadController controller, int flags) {
-        final Context ctx = this;
-        String navDocHREF = null;
-        try {
-            /*
-            Load the navigation document here - this event handler is on the thread that loaded
-            the controller itself - thus off the UI thread.  The controller itself won't load this
-            as the J2ME version only loads the navigation when the user goes to the TOC page
-            */
-            ContainerController containerCtrl =(ContainerController)controller;
-            navDocHREF = containerCtrl.resolveHREFS(containerCtrl.getActiveOPF(),
-                    new String[]{containerCtrl.getActiveOPF().navItem.href}, null)[0];
-            HTTPResult navDocResult= UstadMobileSystemImpl.getInstance().makeRequest(navDocHREF,
-                    null, null);
-
-            navDocument = EPUBNavDocument.load(new ByteArrayInputStream(navDocResult.getResponse()));
-        }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 166, navDocHREF, e);
-        }
-
-
-        runOnUiThread(new Runnable() {
-            public void run() {
-                if (controller != null) {
-                    mContainerController = (ContainerController) controller;
-                    synchronized (runWhenContentMounted) {
-                        Iterator<Runnable> runnableIterator = runWhenContentMounted.iterator();
-                        Runnable runnable;
-                        while(runnableIterator.hasNext()) {
-                            runnable = runnableIterator.next();
-                            runnable.run();
-                            runnableIterator.remove();
-                        }
-                    }
-                    setupFromController((ContainerController) controller);
-                } else {
-                    UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                    impl.getAppView(ctx).showAlertDialog(
-                            impl.getString(MessageID.error, ContainerActivity.this),
-                            impl.getString(MessageID.could_not_open_file, ContainerActivity.this));
-                }
-            }
-        });
-    }
-
-
-
-    protected void setupFromController(ContainerController controller) {
-        //TODO: Deal with other content types here - but for right now we only have EPUB
-        setBaseController(controller);
-        mContainerController.setUIStrings();
-        if(mMimeType.startsWith("application/epub+zip")) {
-            showEPUB();
-        }
-    }
 
     @Override
     /**
@@ -324,8 +253,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
      */
     @Override
     public void appViewChoiceSelected(int commandId, int choice) {
-        mContainerController.setRegistrationUUID(resumableRegistrations[choice].uuid);
-        showEPUB();
+
     }
 
     /**
@@ -375,93 +303,13 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         mDrawerLayout.closeDrawers();
     }
 
-    public void showEPUB() {
-        String[] urlArray = null;
-        Exception exc = null;
-        try {
-            urlArray = mContainerController.getActiveOPF().getLinearSpineHREFs();
-            UstadMobileSystemImpl.getInstance().queueTinCanStatement(
-                mContainerController.makeLaunchedStatement(), getContext());
-        }catch(Exception e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 163, null, e);
-            exc = e;
-        }
-
-        if(urlArray != null) {
-            setContainerTitle(mContainerController.getActiveOPF().title);
-            mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
-            final int numPages = urlArray.length;
-            mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(),
-                    mContainerController.getOPFBasePath(mContainerController.getActiveOPF()),
-                    mContainerController.getActiveOPF().getLinearSpineHREFs(),
-                    mContainerController.getXAPIQuery());
-            mPager.setOffscreenPageLimit(1);
-            mPager.setAdapter(mPagerAdapter);
-            if(mSavedPosition != -1) {
-                mPager.setCurrentItem(mSavedPosition);
-            }
-
-
-
-            mPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
-                }
-
-                @Override
-                public void onPageSelected(int pos) {
-                    ContainerPageFragment frag = (ContainerPageFragment) mPagerAdapter.getItem(pos);
-                    frag.evaluateJavascript(onpageSelectedJS);
-                    frag.showPagePosition(pos+1, numPages);
-                    updateTOCSelection(frag.getPageHref());
-                    String pageTitle = frag.getPageTitle();
-                    if(pageTitle != null) {
-                        setTitle(frag.getPageTitle());
-                    }
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {
-
-                }
-            });
-
-        }else {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-            String message = "what a terrible failure: " + exc.toString();
-            exc.printStackTrace();
-            impl.getAppView(this).showAlertDialog(
-                impl.getString(MessageID.error, this), message);
-        }
-
-        if(navDocument != null && navDocument.getNavById("toc") != null) {
-            //show TOC
-            Vector navVector = navDocument.getNavById("toc").getChildrenRecursive(new Vector());
-            drawerNavItems = new EPUBNavItem[navVector.size()];
-            navVector.toArray(drawerNavItems);
-
-            mDrawerList.setAdapter(new ArrayAdapter<EPUBNavItem>(this, R.layout.item_containerview_toc,
-                    drawerNavItems));
-            mDrawerList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-            mDrawerList.setItemChecked(0, true);
-        }
-    }
-
     @Override
-    public boolean refreshURLs() {
-        boolean success = false;
-        try {
-            mPagerAdapter.updatePageProps(mContainerController.getOPFBasePath(
-                    mContainerController.getActiveOPF()),
-                    mContainerController.getActiveOPF().getLinearSpineHREFs(),
-                    mContainerController.getXAPIQuery(), true);
-            success = true;
-        }catch(Exception e) {
-            UstadMobileSystemImpl.getInstance().l(UMLog.ERROR, 197, null, e);
-        }
-
-        return success;
+    public void setSpineUrls(String basePath, String[] spineUrls, String query) {
+        mBaseURL = basePath;
+        mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(),
+                basePath, spineUrls, query);
+        mPager.setOffscreenPageLimit(1);
+        mPager.setAdapter(mPagerAdapter);
     }
 
     @Override
@@ -516,15 +364,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     public boolean onOptionsItemSelected(MenuItem item) {
         if(handleClickAppMenuItem(item, mContainerController)) {
             return true;
-        }
-
-        if(item.getItemId() == ContainerController.CMD_RESUME_SESSION) {
-            mContainerController.handleClickResumableRegistrationMenuItem();
-            return true;
-        }else if(item.getItemId() == R.id.action_leavecontainer) {
+        } else if(item.getItemId() == R.id.action_leavecontainer) {
             finish();
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -634,6 +478,11 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         public int getCount() {
             return hrefList.length;
         }
+    }
+
+
+    public String getBaseUrl() {
+        return mBaseURL;
     }
 
 }

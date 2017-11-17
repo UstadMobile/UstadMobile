@@ -248,7 +248,7 @@ public class ContainerPageFragment extends Fragment {
                     @Override
                     public void run() {
                         ContainerPageFragment.this.mQuery = activity.getXapiQuery();
-                        ContainerPageFragment.this.mBaseURI = activity.getOpfBasePath();
+                        ContainerPageFragment.this.mBaseURI = activity.getBaseURL();
                         loadURL();
                     }
                 });
