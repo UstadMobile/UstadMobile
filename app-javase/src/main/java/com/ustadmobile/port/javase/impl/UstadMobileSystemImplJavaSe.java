@@ -2,7 +2,9 @@ package com.ustadmobile.port.javase.impl;
 
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
+import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
@@ -173,5 +175,10 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public String getUserDetail(String username, int field, Object dbContext) {
         return null;
+    }
+
+    @Override
+    public void mountContainer(ContainerMountRequest request, int id, UmCallback callback) {
+
     }
 }
