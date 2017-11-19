@@ -17,7 +17,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
 
@@ -192,7 +192,7 @@ android {
     }
 
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion '26.0.2'
     defaultConfig {
 
         minSdkVersion 16
@@ -203,11 +203,14 @@ android {
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
     }
 
+    flavorDimensions "config"
+
     productFlavors {
         /*
          * The localconfig flavor is created based on the buildconfig.local.properties settings
          */
         localconfig {
+            dimension "config"
             testApplicationId = project.ext.buildConfigProperties['android.applicationId']+ ".test"
             versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
             manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName']]
@@ -221,12 +224,14 @@ android {
          * having to remove the local config files themselves
          */
         vanilla {
+            dimension "config"
             testApplicationId "com.toughra.ustadmobile.test"
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile"]
         }
 
         remotetestslave {
+            dimension "config"
             testApplicationId "com.toughra.testslave.test"
             manifestPlaceholders = ["appName": "UM Test Server"]
         }

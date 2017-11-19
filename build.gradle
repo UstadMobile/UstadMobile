@@ -5,7 +5,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -19,12 +19,9 @@ plugins {
 allprojects {
     repositories {
         jcenter()
+        google()
         maven {
             url "http://devserver2.ustadmobile.com/repo-mvn"
-        }
-
-        maven {
-            url "https://maven.google.com"
         }
     }
 }

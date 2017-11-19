@@ -21,7 +21,7 @@ if (keyStorePropertiesExists) {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion '26.0.2'
 
     lintOptions {
         abortOnError false
@@ -51,11 +51,14 @@ android {
         jumboMode = true
     }
 
+    flavorDimensions "config"
+
     productFlavors {
         /*
          * The localconfig flavor is created based on the buildconfig.local.properties settings
          */
         localconfig {
+            dimension "config"
             applicationId project.ext.buildConfigProperties['android.applicationId']
             testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
             versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
@@ -70,6 +73,7 @@ android {
          * having to remove the local config files themselves
          */
         vanilla {
+            dimension "config"
             applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
@@ -92,13 +96,6 @@ android {
     }
 }
 
-configurations {
-    localconfigDebugCompile {}
-    localconfigReleaseCompile {}
-    vanillaDebugCompile {}
-    vanillaReleaseCompile {}
-}
-
 configurations.all {
     resolutionStrategy {
         force 'com.android.support:appcompat-v7:26.0.1'
@@ -113,11 +110,7 @@ dependencies {
     compile project(':core')
     compile project(':sharedse')
 
-    localconfigDebugCompile project(path: ':app-android', configuration: "localconfigDebug")
-    localconfigReleaseCompile project(path: ':app-android', configuration: "localconfigRelease")
-
-    vanillaDebugCompile project(path: ':app-android', configuration: 'vanillaDebug')
-    vanillaReleaseCompile project(path: ':app-android', configuration: "vanillaRelease")
+    implementation project(":app-android")
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
