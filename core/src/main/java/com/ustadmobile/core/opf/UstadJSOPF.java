@@ -32,6 +32,7 @@ package com.ustadmobile.core.opf;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.UstadJSOPDSItem;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -69,6 +70,8 @@ public class UstadJSOPF {
     public String description;
 
     private Vector links;
+
+    private String creator;
     
     /**
      * Flag value to indicate we should parse the metadata (e.g. title, identifier, description)
@@ -261,7 +264,10 @@ public class UstadJSOPF {
                         item2.mimeType = itemMime;
                         item2.properties = properties;
                         item2.id = id;
-                        
+
+                        /*
+                         * As per the EPUB spec only one item should have this property
+                         */
                         if(properties != null && properties.indexOf("nav") != -1) {
                             navItem = item2;
                         }
@@ -328,6 +334,8 @@ public class UstadJSOPF {
                                 links = new Vector();
 
                             links.addElement(linkEl);
+                        }else if(xpp.getName().equals("dc:creator") && xpp.next() == XmlPullParser.TEXT) {
+                            creator = xpp.getText();
                         }
                     }
                 }else if(evtType == XmlPullParser.END_TAG) {
@@ -434,6 +442,26 @@ public class UstadJSOPF {
 
     public Vector getLinks() {
         return links;
+    }
+
+
+    /**
+     * Return the opf item that represents the navigation document. This is the OPF item that
+     * contains properties="nav". As per the spec, only one item is allowed to have this property.
+     *
+     * @return
+     */
+    public UstadJSOPFItem getNavItem() {
+        return navItem;
+    }
+
+    /**
+     * Get the creator as specified by the dublin core creator tag
+     *
+     * @return Creator as specified by the dc:creator tag
+     */
+    public String getCreator() {
+        return creator;
     }
 
 }

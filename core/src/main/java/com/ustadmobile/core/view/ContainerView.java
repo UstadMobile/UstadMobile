@@ -31,6 +31,8 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.controller.ContainerController;
+import com.ustadmobile.core.epubnav.EPUBNavDocument;
+import com.ustadmobile.core.epubnav.EPUBNavItem;
 
 /**
  *
@@ -47,5 +49,11 @@ public interface ContainerView extends UstadView {
     void setSpineUrls(String basePath, String[] spineUrls, String query);
 
     void setPageTitle(String pageTitle);
+
+    void setTableOfContents(EPUBNavItem tocNavItem);
+
+    void setCoverImage(String imageUrl);
+
+    void setAuthorName(String authorName);
     
 }

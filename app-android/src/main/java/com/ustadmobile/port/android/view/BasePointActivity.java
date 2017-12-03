@@ -169,7 +169,6 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 String iconName;
 
                 for(int i = 0; i < menuItems.length; i++) {
-//                    item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0, impl.getString(menuItems[i].getTitleStringId()));
                     item = drawerMenu.add(0, BASEPOINT_MENU_CMD_ID_OFFSET+ i, 0,
                         impl.getString(menuItems[i].getTitleStringId(), BasePointActivity.this));
                     iconName = menuItems[i].getIconName();

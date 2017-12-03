@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,49 +12,45 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.ContainerController;
-import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.epubnav.EPUBNavDocument;
 import com.ustadmobile.core.epubnav.EPUBNavItem;
-import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.tincan.Registration;
 import com.ustadmobile.core.tincan.TinCanResultListener;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.ImageLoader;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
 public class ContainerActivity extends UstadBaseActivity implements ContainerPageFragment.OnFragmentInteractionListener,
-        ContainerView, AppViewChoiceListener, TinCanResultListener, ListView.OnItemClickListener {
+        ContainerView, AppViewChoiceListener, TinCanResultListener, ListView.OnItemClickListener,
+        TocListView.OnItemClickListener{
 
 
     /** The ViewPager used to swipe between epub pages */
@@ -67,13 +62,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     private String onpageSelectedJS = "";
 
 
-    private String mContainerURI;
-
-    private String mMimeType;
-
     private NetworkServiceAndroid mNetworkService;
-
-    private boolean mBound = false;
 
     private ContainerController mContainerController;
 
@@ -91,25 +80,21 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     private Hashtable mArgs;
 
-    private Registration[] resumableRegistrations;
-
     private DrawerLayout mDrawerLayout;
 
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private ListView mDrawerList;
-
     private EPUBNavDocument navDocument;
 
-    private int drawerSelectedIndex = -1;
-
-    /**
-     * Navigation items in the order in which they appear in the drawer on the left
-     */
-    private EPUBNavItem[] drawerNavItems;
-
-
     private Vector<Runnable> runWhenContentMounted = new Vector<>();
+
+    private TocListView tocList;
+
+    private String[] spineUrls;
+
+    private ImageView coverImageView;
+
+    private ImageViewLoadTarget coverImageLoadTarget;
 
 
     @Override
@@ -134,8 +119,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             UMIOUtils.closeInputStream(is);
         }
 
-        mContainerURI = getIntent().getStringExtra(ContainerController.ARG_CONTAINERURI);
-        mMimeType = getIntent().getStringExtra(ContainerController.ARG_MIMETYPE);
         mArgs = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
 
         if(saved != null) {
@@ -153,26 +136,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
                 mDrawerLayout, toolbar, R.string.open, R.string.closed) {
 
             public void onDrawerOpened(View drawerView) {
-                drawerSelectedIndex = -1;
             }
 
             public void onDrawerClosed(View drawerView) {
-                if(drawerSelectedIndex != -1) {
-                    if(drawerNavItems != null) {
-                        final int fragPos = mPagerAdapter.getFragmentIndexByHREF(drawerNavItems[drawerSelectedIndex].href);
-                        if(fragPos != -1) {
-                            runOnUiThread(new Runnable() {
-                                public void run() {
-                                    mPager.setCurrentItem(fragPos, true);
-                                }
-                            });
-
-                            drawerSelectedIndex = -1;
-                        }
-                    }
-                }
             }
-
         };
 
         if(!CoreBuildConfig.EPUB_TOC_ENABLED) {
@@ -182,10 +149,10 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         mDrawerToggle.syncState();
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        mDrawerList = (ListView)findViewById(R.id.container_tocdrawer);
-        mDrawerList.setOnItemClickListener(this);
-
         mPager = (ViewPager) findViewById(R.id.container_epubrunner_pager);
+        tocList = (TocListView)findViewById(R.id.activity_container_epubpager_toclist);
+        coverImageView = (ImageView)findViewById(R.id.item_basepoint_cover_img);
+        coverImageLoadTarget = new ImageViewLoadTarget(this, coverImageView);
     }
 
     @Override
@@ -272,23 +239,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
     }
 
 
-
-    /**
-     * Update the selected item in the drawer
-     */
-    private void updateTOCSelection(String currentPageHREF) {
-        if(drawerNavItems != null) {
-            for(int i = 0; i < drawerNavItems.length; i++) {
-                int numVisible = mDrawerList.getLastVisiblePosition() - mDrawerList.getFirstVisiblePosition();
-                if(drawerNavItems[i].href != null && drawerNavItems[i].href.equals(currentPageHREF)) {
-                    mDrawerList.setItemChecked(i, true);
-                    mDrawerList.setSelection(Math.max(i-(numVisible/2), 0));//Put the selected item in the middle
-                    return;
-                }
-            }
-        }
-    }
-
     /**
      * Handle when the user has tapped an item from the table of contents on the drawer
      *
@@ -299,13 +249,13 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
      */
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        drawerSelectedIndex = i;
         mDrawerLayout.closeDrawers();
     }
 
     @Override
     public void setSpineUrls(String basePath, String[] spineUrls, String query) {
-        mBaseURL = basePath;
+        this.mBaseURL = basePath;
+        this.spineUrls = spineUrls;
         mPagerAdapter = new ContainerViewPagerAdapter(getSupportFragmentManager(),
                 basePath, spineUrls, query);
         mPager.setOffscreenPageLimit(1);
@@ -343,6 +293,7 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         if(mPager != null) {
             outState.putInt(OUTSTATE_CURRENTITEM, mPager.getCurrentItem());
         }
+
         if(mMountedPath != null) {
             outState.putString(OUTSTATE_MOUNTPOINT, mMountedPath);
         }
@@ -353,8 +304,6 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
             mNetworkService.getNetworkManager().unmountZipFromHttp(mMountedPath);
         }
 
-        mContainerURI = null;
-        mMimeType = null;
         mSavedPosition = -1;
 
         super.onDestroy();
@@ -385,14 +334,72 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
 
     @Override
     public void setContainerTitle(String title) {
-        ((Button)findViewById(R.id.container_tocdrawer_upbutton)).setText(title);
-        setTitle(title);
+        ((TextView)findViewById(R.id.item_basepoint_cover_title)).setText(title);
+    }
+
+    @Override
+    public void setCoverImage(String imageUrl) {
+        ImageLoader.getInstance().loadImage(imageUrl, coverImageLoadTarget, mContainerController);
     }
 
     @Override
     public Object getContext() {
         return this;
     }
+
+    @Override
+    public void setTableOfContents(EPUBNavItem tocNavItem) {
+        tocList.setAdapter(new ContainerTocListAdapter(tocNavItem));
+        tocList.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onClick(Object item, View view) {
+        EPUBNavItem navItem = (EPUBNavItem)item;
+        int hrefIndex = Arrays.asList(spineUrls).indexOf(navItem.href);
+        if(hrefIndex != -1) {
+            mPager.setCurrentItem(hrefIndex, true);
+            mDrawerLayout.closeDrawers();
+        }
+    }
+
+    private class ContainerTocListAdapter extends TocListView.TocListViewAdapter{
+
+        private EPUBNavItem rootItem;
+
+        private ContainerTocListAdapter(EPUBNavItem rootItem) {
+            this.rootItem = rootItem;
+        }
+
+        @Override
+        public Object getRoot() {
+            return rootItem;
+        }
+
+        @Override
+        public List getChildren(Object node) {
+            return ((EPUBNavItem)node).children;
+        }
+
+        @Override
+        public int getNumChildren(Object node) {
+            return ((EPUBNavItem)node).children != null ? ((EPUBNavItem)node).children.size() : 0;
+        }
+
+        @Override
+        public View getNodeView(Object node, View recycleView, int depth) {
+            if(recycleView == null) {
+                LayoutInflater inflater = LayoutInflater.from(ContainerActivity.this);
+                recycleView = inflater.inflate(R.layout.item_epubview_child, null);
+            }
+
+            TextView expandedTextView = recycleView.findViewById(R.id.expandedListItem);
+            expandedTextView.setText(node.toString());
+
+            return recycleView;
+        }
+    }
+
 
 
     /**
@@ -485,4 +492,9 @@ public class ContainerActivity extends UstadBaseActivity implements ContainerPag
         return mBaseURL;
     }
 
+    @Override
+    public void setAuthorName(String authorName) {
+        ((TextView)findViewById(R.id.activity_container_epubpager_auuthor_text))
+                .setText(authorName);
+    }
 }

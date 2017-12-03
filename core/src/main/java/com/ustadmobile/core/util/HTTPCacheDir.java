@@ -337,7 +337,7 @@ public class HTTPCacheDir {
             cal.set(Calendar.YEAR, checkYear(Integer.parseInt(
                 (String)tokens.elementAt(6))));
         }else {
-            throw new RuntimeException("Invalid date: " + httpDate);
+            return 0L;
         }
         
         return cal.getTime().getTime();
