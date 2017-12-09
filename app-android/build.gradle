@@ -10,26 +10,6 @@ apply plugin: 'com.android.library'
 apply plugin: "jacoco"
 apply plugin: 'maven-publish'
 
-
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.0.1'
-    }
-}
-
-repositories {
-    mavenCentral()
-
-    maven {
-        url "http://devserver2.ustadmobile.com/repo-mvn"
-    }
-
-}
-
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
