@@ -115,6 +115,11 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
             this.content = opf.description;
             this.contentType = CONTENT_TYPE_TEXT;
         }
+
+        if(opf.getCreator() != null) {
+            this.authors = new Vector();
+            this.authors.addElement(new UstadJSOPDSAuthor(opf.getCreator(), null));
+        }
         
         this.addLink(UstadJSOPDSEntry.LINK_ACQUIRE, mimeType, containerHREF);
     }

@@ -332,7 +332,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
             }
         }else {
             //Go to the entry view
-            handleOpenEntryView(entry);
+            handleOpenEntryView(entry, entry.parentFeed.title);
         }
     }
 

@@ -1,10 +1,15 @@
 package com.ustadmobile.port.android.view;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -18,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
@@ -66,6 +72,14 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private boolean shareButtonVisible = false;
 
+    private String entryTitle;
+
+    private String titlebarText;
+
+    private String entryAuthor;
+
+    private Bitmap thumbnailBitmap;
+
     static {
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_DOWNLOAD, R.id.activity_catalog_entry_download_button);
         BUTTON_ID_MAP.put(CatalogEntryView.BUTTON_OPEN, R.id.activity_catalog_entry_open_button);
@@ -76,6 +90,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     private static final int ALTERNATIVE_TRANSLATION_BASE_VIEW_ID = 2000;
 
     private ArrayList<View> alternativeTranlsationViews;
+
+    private int currentDisplayMode = -1;
 
     private class SeeAlsoViewHolder extends RecyclerView.ViewHolder {
 
@@ -126,16 +142,32 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         }
     }
 
+    private ImageLoader.ImageLoadTarget thumbnailLoadTarget = new ImageLoader.ImageLoadTarget() {
+        @Override
+        public void setImageFromFile(String filePath) {
+            thumbnailBitmap = BitmapFactory.decodeFile(filePath);
+            final int imageViewId = currentDisplayMode != DISPLAY_MODE_BANNER ?
+                    R.id.activity_catalog_entry_icon_img_normal
+                    : R.id.activity_catalog_entry_icon_img;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ((ImageView)findViewById(imageViewId)).setImageBitmap(thumbnailBitmap);
+                }
+            });
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.LOLLIPOP){
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION, WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
         setContentView(R.layout.activity_catalog_entry);
+        setDisplayMode(UstadMobileSystemImpl.getInstance().getAppConfigInt(
+                CatalogEntryPresenter.APP_CONFIG_DISPLAY_MODE, CatalogEntryView.DISPLAY_MODE_THUMBNAIL,
+                this));
         setUMToolbar(R.id.um_toolbar);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Enumeration<Integer> buttonIds = BUTTON_ID_MAP.keys();
@@ -166,6 +198,109 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         Hashtable args = UMAndroidUtil.bundleToHashtable(getIntent().getExtras());
         mPresenter = new CatalogEntryPresenter(this, this, args);
         mPresenter.onCreate();
+    }
+
+    @Override
+    public void setDisplayMode(int displayMode) {
+        AppBarLayout appBarLayout = (AppBarLayout)findViewById(
+                R.id.activity_catalog_entry_appbar_layout);
+        LinearLayout buttonLayout = (LinearLayout)findViewById(
+                R.id.activity_catalog_entry_button_layout);
+
+        if(currentDisplayMode != displayMode) {
+            appBarLayout.removeAllViews();
+
+            int showButtonDividers;
+            int buttonHeight;
+            int mainCardElevation;
+            boolean fitsSystemWindows;
+            CoordinatorLayout.LayoutParams coordinatorLayoutParams;
+            int standardHeaderVisibility;
+            int buttonBarPadding;
+            int entrySideIconVisibility;
+            int activityBackgroundColor;
+
+            if(displayMode == DISPLAY_MODE_THUMBNAIL) {
+                LayoutInflater.from(this).inflate(R.layout.item_catalog_entry_activity_header_normal,
+                        appBarLayout,true);
+                showButtonDividers = LinearLayout.SHOW_DIVIDER_MIDDLE;
+                buttonHeight = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 28,
+                        getResources().getDisplayMetrics()));
+                mainCardElevation = 0;
+                buttonBarPadding = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        12, getResources().getDisplayMetrics()));
+
+                coordinatorLayoutParams = new CoordinatorLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                fitsSystemWindows = false;
+                standardHeaderVisibility = View.VISIBLE;
+                entrySideIconVisibility = View.GONE;
+                activityBackgroundColor = R.color.catalog_entry_display_mode_normal_background;
+            }else {
+                showButtonDividers = LinearLayout.SHOW_DIVIDER_NONE;
+                buttonHeight = LinearLayout.LayoutParams.WRAP_CONTENT;
+                mainCardElevation = 4;
+                buttonBarPadding = 0;
+                LayoutInflater.from(this).inflate(R.layout.item_catalog_entry_activity_header_banner,
+                        appBarLayout, true);
+
+
+                coordinatorLayoutParams = new CoordinatorLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 180,
+                                getResources().getDisplayMetrics())));
+                fitsSystemWindows = true;
+                standardHeaderVisibility = View.GONE;
+                entrySideIconVisibility = View.VISIBLE;
+                activityBackgroundColor = R.color.catalog_entry_display_mode_banner_background;
+
+                if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.LOLLIPOP){
+                    getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                            WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+                    getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                            WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                }
+            }
+
+            findViewById(R.id.activity_catalog_entry_content_view).setBackgroundColor(
+                    ContextCompat.getColor(this, activityBackgroundColor));
+            findViewById(R.id.activity_catalog_entry_appbar_layout).setLayoutParams(coordinatorLayoutParams);
+            findViewById(R.id.activity_catalog_entry_appbar_layout).setFitsSystemWindows(fitsSystemWindows);
+            buttonLayout.setShowDividers(showButtonDividers);
+            buttonLayout.setPadding(buttonBarPadding, buttonLayout.getPaddingTop(), buttonBarPadding,
+                    buttonLayout.getPaddingBottom());
+
+            for(int i = BUTTON_DOWNLOAD; i <= BUTTON_OPEN; i++) {
+                int viewId = BUTTON_ID_MAP.get(i);
+                Button button = (Button)findViewById(viewId);
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams)button.getLayoutParams();
+                params.height = buttonHeight;
+                button.setLayoutParams(params);
+            }
+
+            this.currentDisplayMode = displayMode;
+            CardView mainCardView =(CardView)findViewById(R.id.activity_catalog_entry_maininfo_cardview);
+
+            mainCardView.setCardElevation(
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, mainCardElevation,
+                getResources().getDisplayMetrics()));
+
+            findViewById(R.id.activity_catalog_entry_standard_header)
+                    .setVisibility(standardHeaderVisibility);
+            findViewById(R.id.activity_catalog_entry_icon_img).setVisibility(entrySideIconVisibility);
+        }
+    }
+
+    /**
+     * Return the view ID that is currently to be used for showing the thumbnail image. This is based
+     * on the currently active display mode.
+     *
+     * @return
+     */
+    private int getThumbnailImageViewId() {
+        return currentDisplayMode != DISPLAY_MODE_BANNER ?
+                R.id.activity_catalog_entry_icon_img_normal
+                : R.id.activity_catalog_entry_icon_img;
     }
 
     @Override
@@ -238,12 +373,16 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setHeader(String headerUrl) {
-        ImageLoader.getInstance().loadImage(headerUrl, headerLoadTarget, mPresenter);
+        if(currentDisplayMode == DISPLAY_MODE_BANNER)
+            ImageLoader.getInstance().loadImage(headerUrl, headerLoadTarget, mPresenter);
     }
 
     @Override
-    public void setIcon(String iconFileUri) {
-        ImageLoader.getInstance().loadImage(iconFileUri, iconLoadTarget, mPresenter);
+    public void setThumbnail(String iconFileUri) {
+        if(iconFileUri != null)
+            ImageLoader.getInstance().loadImage(iconFileUri, thumbnailLoadTarget, mPresenter);
+        else
+            ((ImageView)findViewById(getThumbnailImageViewId())).setImageResource(R.drawable.cover);
     }
 
     @Override
@@ -284,9 +423,31 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
-    public void setTitle(String title) {
-        super.setTitle(title);
-        mCollapsingToolbar.setTitle(title);
+    public void setEntryTitle(String title) {
+        this.entryTitle = title;
+        switch(currentDisplayMode){
+            case DISPLAY_MODE_BANNER:
+                super.setTitle(title);
+                if(mCollapsingToolbar != null)
+                    mCollapsingToolbar.setTitle(title);
+                break;
+
+            case DISPLAY_MODE_THUMBNAIL:
+                ((TextView)findViewById(R.id.activity_catalog_entry_title_normal)).setText(title);
+                break;
+        }
+    }
+
+    @Override
+    public void setEntryAuthors(String authors) {
+        ((TextView)findViewById(R.id.activity_catalog_entry_author_name)).setText(authors);
+    }
+
+    @Override
+    public void setTitlebarText(String titlebarText) {
+        this.titlebarText = titlebarText;
+        if(currentDisplayMode == DISPLAY_MODE_THUMBNAIL)
+            super.setTitle(titlebarText);
     }
 
     @Override
@@ -355,6 +516,9 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     public void setAlternativeTranslationLinks(String[] languages) {
         ViewGroup flowLayout = (ViewGroup)findViewById(R.id.activity_catalog_entry_also_available_in);
         flowLayout.removeAllViews();
+
+        if(languages == null || languages.length == 0)
+            return;
 
         int paddingTop = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 6,
                 getResources().getDisplayMetrics()));

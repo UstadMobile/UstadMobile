@@ -37,5 +37,26 @@ package com.ustadmobile.core.opds;
 public class UstadJSOPDSAuthor {
     public String name;
     public String uri;
-    
+
+    public UstadJSOPDSAuthor(String name, String uri) {
+        this.name = name;
+        this.uri = uri;
+    }
+
+    public UstadJSOPDSAuthor() {
+
+    }
+
+    public String toString() {
+        return name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
 }

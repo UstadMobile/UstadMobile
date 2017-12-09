@@ -66,10 +66,13 @@ public class EPUBTypePlugin extends ZippedContentTypePlugin {
         String thumbnailPathInZip = null;
         String thumbnailMimeType = null;
 
+        long fileLength;
+
         int j;
 
         try {
             zipHandle = impl.openZip(fileUri);
+            fileLength = impl.fileSize(fileUri);
             zIs = zipHandle.openInputStream(OCF_CONTAINER_PATH);
 
             if(zIs != null) {
@@ -86,6 +89,9 @@ public class EPUBTypePlugin extends ZippedContentTypePlugin {
 
                     epubEntry =new UstadJSOPDSEntry(result,opf,
                             UstadJSOPDSItem.TYPE_EPUBCONTAINER, absfileUri);
+                    String[] acquireLink = epubEntry.getLink(0);
+                    acquireLink[UstadJSOPDSEntry.ATTR_LENGTH] = String.valueOf(fileLength);
+                    epubEntry.setLinkAt(acquireLink, 0);
 
                     UstadJSOPFItem coverItem = opf.getCoverImage(null);
 

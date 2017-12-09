@@ -634,5 +634,46 @@ public class UMUtil {
         return table;
     }
 
+    /**
+     * Joins strings e.g. from an array generate a single string with "Bob", "Anand", "Kate" etc.
+     *
+     * @param objects Objects to join - using toString method
+     * @param joiner String to use between each object.
+     *
+     * @return A single string formed by each object's toString method, followed by the joiner, the
+     * next object, and so on.
+     */
+    public static String joinStrings(Object[] objects, String joiner) {
+        StringBuffer buffer = new StringBuffer();
+        for(int i = 0; i < objects.length; i++) {
+            buffer.append(objects.toString());
+
+            if(i < objects.length - 1)
+                buffer.append(joiner);
+        }
+
+        return buffer.toString();
+    }
+
+    /**
+     * Joins strings e.g. from an array generate a single string with "Bob", "Anand", "Kate" etc.
+     *
+     * @param objects Objects to join - using toString method
+     * @param joiner String to use between each object.
+     *
+     * @return A single string formed by each object's toString method, followed by the joiner, the
+     * next object, and so on.
+     */
+    public static String joinStrings(Vector objects, String joiner) {
+        StringBuffer buffer = new StringBuffer();
+        for(int i = 0; i < objects.size(); i++) {
+            buffer.append(objects.elementAt(i));
+
+            if(i < objects.size() - 1)
+                buffer.append(joiner);
+        }
+
+        return buffer.toString();
+    }
     
 }

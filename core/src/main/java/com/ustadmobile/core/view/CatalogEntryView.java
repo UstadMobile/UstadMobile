@@ -13,6 +13,20 @@ public interface CatalogEntryView extends UstadView {
     int MODE_ENTRY_DOWNLOADED = 1;
 
 
+    /**
+     * "Thumbnail" display mode - shows a thumbnail on the left and the title / author info on
+     * the right. As standard EPUBs and OPDS catalogs do not have a banner image, this is the default
+     * "normal" way to do things.
+     */
+    int DISPLAY_MODE_THUMBNAIL = 0;
+
+
+    /**
+     * Banner display mode - for those entries that have a banner image specified (not part of
+     * standard OPDS). This is used in Skills for Success OPDS.
+     */
+    int DISPLAY_MODE_BANNER = 1;
+
 
     int BUTTON_DOWNLOAD = 0;
 
@@ -43,7 +57,11 @@ public interface CatalogEntryView extends UstadView {
 
     void setHeader(String headerFileUri);
 
-    void setIcon(String iconFileUri);
+    /**
+     *
+     * @param iconFileUri
+     */
+    void setThumbnail(String iconFileUri);
 
     void setMode(int mode);
 
@@ -58,7 +76,17 @@ public interface CatalogEntryView extends UstadView {
 
     void setDescription(String description, String contentType);
 
-    void setTitle(String title);
+    void setEntryTitle(String title);
+
+    /**
+     * Set the authors to show on the entry.
+     *
+     * @param authors Authors to show e.g. Cathy Jones
+     */
+    void setEntryAuthors(String authors);
+
+
+    void setTitlebarText(String titlebarText);
 
     /**
      * Sets whether or not the progress section of the view (progress bar, status text etc) are
@@ -92,7 +120,8 @@ public interface CatalogEntryView extends UstadView {
      * @see com.ustadmobile.core.controller.CatalogEntryPresenter#handleClickAlternativeTranslationLink(int)
      *
      * @param languages Array of languages that this entry is available in, as they will be displayed
-     *                  to the user e.g. "English" not "en"
+     *                  to the user e.g. "English" not "en". If there are no such alternative translations
+     *                  pass null or a zero length array.
      */
     void setAlternativeTranslationLinks(String[] languages);
 
@@ -103,6 +132,14 @@ public interface CatalogEntryView extends UstadView {
      * @param shareButtonVisible true for the button to be visible, false otherwise
      */
     void setShareButtonVisible(boolean shareButtonVisible);
+
+    /**
+     * Set whether we are using the banner mode or 'normal' mode
+     *
+     * @param viewMode
+     */
+    void setDisplayMode(int viewMode);
+
 
 
 }

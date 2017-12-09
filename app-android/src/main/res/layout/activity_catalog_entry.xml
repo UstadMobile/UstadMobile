@@ -2,12 +2,15 @@
 
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_catalog_entry_content_view"
+    tools:context="com.ustadmobile.port.android.view.CatalogEntryActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_light">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/coordination"
+        android:id="@+id/activity_catalog_entry_appbar_layout"
         android:elevation="4dp"
         android:layout_width="match_parent"
         android:layout_height="180dp"
@@ -15,48 +18,8 @@
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         >
 
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:expandedTitleMarginStart="48dp"
-            app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Headline"
-            android:id="@+id/activity_catalog_entry_collapsing_toolbar"
-            app:expandedTitleMarginEnd="64dp"
-            >
+        <!-- The toolbar (normal or collapsing banner is added by CatalogEntryActivity.setDisplayMode -->
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_collapseMode="pin">
-
-                <ImageView
-                    android:id="@+id/activity_catalog_entry_header_img"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:fitsSystemWindows="true"
-                    />
-                
-                <View
-                    android:background="@drawable/fg_catalog_entry_view_gradient"
-                    android:layout_width="match_parent"
-                    android:layout_marginBottom="0dp"
-                    android:layout_gravity="bottom"
-                    android:layout_height="match_parent"/>
-            </FrameLayout>
-
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/um_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:layout_collapseMode="pin"
-                />
-
-        </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
@@ -67,15 +30,59 @@
         android:paddingBottom="@dimen/dimen_16dp"
         >
         <LinearLayout
+            android:background="#FFFFFF"
             android:descendantFocusability="blocksDescendants"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <RelativeLayout
+                android:id="@+id/activity_catalog_entry_standard_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="12dp"
+                android:paddingLeft="12dp"
+                android:paddingTop="12dp"
+                android:layout_marginBottom="12dp"
+                >
+
+                <ImageView
+                    android:id="@+id/activity_catalog_entry_icon_img_normal"
+                    android:layout_width="96dp"
+                    android:layout_height="144dp" />
+
+                <TextView
+                    android:paddingStart="12dp"
+                    android:paddingLeft="12dp"
+                    android:id="@+id/activity_catalog_entry_title_normal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                    android:text="Title Here"
+
+                    android:layout_toEndOf="@+id/activity_catalog_entry_icon_img_normal"
+                    android:layout_toRightOf="@+id/activity_catalog_entry_icon_img_normal"/>
+
+                <TextView
+                    android:paddingStart="12dp"
+                    android:paddingLeft="12dp"
+                    android:id="@+id/activity_catalog_entry_author_name"
+                    android:layout_below="@+id/activity_catalog_entry_title_normal"
+                    android:layout_toEndOf="@+id/activity_catalog_entry_icon_img_normal"
+                    android:layout_toRightOf="@+id/activity_catalog_entry_icon_img_normal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </RelativeLayout>
+
             <LinearLayout
+                android:id="@+id/activity_catalog_entry_button_layout"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:paddingLeft="12dp"
+                android:divider="@drawable/catalog_entry_divider"
+                android:paddingRight="12dp">
                 <Button
                     android:id="@+id/activity_catalog_entry_download_button"
                     android:background="@color/catalog_entry_download_button_background"
@@ -85,6 +92,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:foreground="?attr/selectableItemBackground"/>
+
+
                 <Button
                     android:id="@+id/activity_catalog_entry_remove_button"
                     android:background="@color/catalog_entry_remove_modify_button_background"
@@ -94,6 +103,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:foreground="?attr/selectableItemBackground"/>
+
+
                 <Button
                     android:id="@+id/activity_catalog_entry_open_button"
                     android:background="@color/catalog_entry_open_button_background"
@@ -111,7 +122,7 @@
                 android:layout_marginLeft="@dimen/dimen_12dp"
                 android:layout_marginEnd="@dimen/dimen_12dp"
                 android:layout_marginRight="@dimen/dimen_12dp"
-                app:cardElevation="@dimen/dimen_2dp"
+                app:cardElevation="0dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@android:color/white"
@@ -221,6 +232,7 @@
 
             <android.support.v7.widget.CardView
                 android:id="@+id/activity_catalog_entry_see_also_cardview"
+                android:visibility="gone"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 app:cardElevation="2dp"
                 android:layout_marginStart="@dimen/dimen_12dp"

@@ -189,9 +189,14 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
 
     /**
      * Open the given entry in the catalog entry view
-     * @param entry
+     *
+     * @param titlebarText Where the 'normal' thumbnail display mode is used for a catalog entry,
+     *                    this sets the title bar. This is normally the same as the OPDS catalog
+     *                     title it was navigated from. The title of the entry itself is displayed
+     *                     next to the thumbnail. Where a banner is used this parameter is ignored.
+     * @param entry The OPDS entry to navigate open.
      */
-    public void handleOpenEntryView(UstadJSOPDSEntry entry) {
+    public void handleOpenEntryView(UstadJSOPDSEntry entry, String titlebarText) {
         Hashtable catalogEntryArgs = new Hashtable();
         UstadJSOPDSFeed parentFeed = entry.parentFeed;
         String[] entryAbsoluteLink = entry.parentFeed.getAbsoluteSelfLink();
@@ -205,9 +210,23 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
                 entry.parentFeed.serializeToString(true));
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,
                 entry.id);
+        if(titlebarText != null)
+            catalogEntryArgs.put(CatalogEntryPresenter.ARG_TITLEBAR_TEXT, titlebarText);
+
         UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, catalogEntryArgs,
                 getContext());
     }
+
+    /**
+     * Open the given entry in the catalog entry view
+     *
+     * @param entry The OPDS entry to navigate open.
+     */
+     public void handleOpenEntryView(UstadJSOPDSEntry entry) {
+        handleOpenEntryView(entry, null);
+    }
+
+
 
     /**
      * Follow a link to a catalog entry. Use a URL that should point to an OPDS entry .

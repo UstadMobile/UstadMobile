@@ -49,6 +49,16 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     public static final String ARG_ENTRY_ID = "entry_id";
 
+    /**
+     * Where the dislpay mode is "normal" - e.g. DISPLAY_MODE_THUMBNAIL the title bar will collapse
+     * and show the title header. This should normally come from the OPDS feed from which this item
+     * was navigated to.
+     */
+    public static final String ARG_TITLEBAR_TEXT = "bar_title";
+
+    public static final String APP_CONFIG_DISPLAY_MODE = "catalog_entry_display_mode";
+
+
     private UstadJSOPDSEntry entry;
 
     private UstadJSOPDSFeed entryFeed;
@@ -74,6 +84,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     private boolean openAfterLoginOrRegister = false;
 
     private boolean entryLoaded = false;
+
+    private boolean seeAlsoVisible = false;
 
 
     /**
@@ -204,6 +216,10 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
             entry = new UstadJSOPDSEntry(null);
             entry.loadFromUrlAsync((String)args.get(ARG_URL), null, getContext(), this);
         }
+
+        if(this.args.containsKey(ARG_TITLEBAR_TEXT))
+            catalogEntryView.setTitlebarText((String)this.args.get(ARG_TITLEBAR_TEXT));
+
         UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
     }
 
@@ -231,7 +247,11 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     public void handleEntryReady() {
         entryLoaded = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        catalogEntryView.setTitle(entry.title);
+        catalogEntryView.setEntryTitle(entry.title);
+
+        if(entry.getNumAuthors() > 0) {
+            catalogEntryView.setEntryAuthors(UMUtil.joinStrings(entry.getAuthors(), ", "));
+        }
 
         CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.id,
                 CatalogPresenter.ALL_RESOURCES, context);
@@ -333,7 +353,9 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         if(thumbnails != null && thumbnails.size() > 0) {
             String thumbnailUrl = UMFileUtil.resolveLink(entry.getHref(),
                     ((String[]) thumbnails.elementAt(0))[UstadJSOPDSItem.ATTR_HREF]);
-            catalogEntryView.setIcon(thumbnailUrl);
+            catalogEntryView.setThumbnail(thumbnailUrl);
+        }else {
+            catalogEntryView.setThumbnail(null);
         }
 
         updateLearnerProgress();
@@ -368,6 +390,10 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         catalogEntryView.runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if(!seeAlsoVisible) {
+                    catalogEntryView.setSeeAlsoVisible(true);
+                    seeAlsoVisible = true;
+                }
                 catalogEntryView.addSeeAlsoItem(item.link, thumbnailUrl[0]);
             }
         });

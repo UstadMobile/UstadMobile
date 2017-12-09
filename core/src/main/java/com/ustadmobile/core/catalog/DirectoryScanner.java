@@ -150,13 +150,16 @@ public class DirectoryScanner {
 
                                     String extension = UstadMobileSystemImpl.getInstance()
                                             .getExtensionFromMimeType(entryResult.getThumbnailMimeType());
-                                    String thumbnailFilename = entry.id + "-thumb." + extension;
+                                    String thumbnailFilename = sanitizeIDForFilename(entry.id)
+                                            + "-thumb." + extension;
                                     String thumbnailAbsolutePath = UMFileUtil.joinPaths(
                                             new String[]{cacheDirUri, thumbnailFilename});
                                     thumbnailOut = impl.openFileOutputStream(thumbnailAbsolutePath, 0);
                                     UMIOUtils.readFully(thumbnailData, thumbnailOut, 8 * 1024);
                                     entry.addLink(UstadJSOPDSItem.LINK_REL_THUMBNAIL,
-                                            entryResult.getThumbnailMimeType(), thumbnailAbsolutePath);
+                                            entryResult.getThumbnailMimeType(),
+                                            UMFileUtil.joinPaths(new String[]{"file:///",
+                                                    thumbnailAbsolutePath}));
                                 }catch(IOException e) {
                                     UstadMobileSystemImpl.l(UMLog.ERROR, 688, null, e);
                                 }finally {

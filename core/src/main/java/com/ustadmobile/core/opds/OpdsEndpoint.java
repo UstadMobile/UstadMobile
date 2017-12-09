@@ -119,9 +119,10 @@ public class OpdsEndpoint {
             int linkMode = args.containsKey(ARG_LINK_HREF_MODE) ?
                     ((Integer)args.get(ARG_LINK_HREF_MODE)).intValue() : LINK_HREF_MODE_FILE;
 
-
             UMStorageDir[] dirs = impl.getStorageDirs(resourceMode, context);
-            return makeDeviceFeed(dirs, baseHref, linkMode, destFeed, context, callback);
+            UstadJSOPDSFeed feed = makeDeviceFeed(dirs, baseHref, linkMode, destFeed, context, callback);
+            feed.title = impl.getString(MessageID.downloaded, context);
+            return feed;
         }else if(opdsUri.startsWith(OPDS_PROTO_PREFKEY_FEEDS)) {
             return getFeedFromPreferenceKey(UMFileUtil.getFilename(opdsUri), opdsUri, destFeed, callback,
                     context);

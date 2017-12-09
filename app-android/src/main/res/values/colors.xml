@@ -33,6 +33,8 @@
     <item name="catalog_entry_open_button_background" type="color">@color/primary</item>
     <item name="catalog_entry_open_button_text" type="color">@color/primary_text</item>
 
+    <item name="catalog_entry_display_mode_normal_background" type="color">#FFFFFF</item>
+    <item name="catalog_entry_display_mode_banner_background" type="color">@color/background_light</item>
 
 
 

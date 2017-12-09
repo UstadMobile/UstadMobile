@@ -1270,6 +1270,19 @@ public abstract class UstadMobileSystemImpl {
         return getAppConfigBoolean(key, false, context);
     }
 
+    /**
+     * Get an integer from the app configuration.
+     *
+     * @param key The preference key to lookup
+     * @param defaultVal The default value if the preference key is not found
+     * @param context System context object
+     * @return The integer value of the value if found, otherwise the default value
+     */
+    public int getAppConfigInt(String key, int defaultVal, Object context) {
+        return Integer.parseInt(getAppConfigString(key, ""+defaultVal, context));
+    }
+
+
     public abstract String getUserDetail(String username, int field, Object dbContext);
 
 
