@@ -77,6 +77,10 @@ public class TestUMFileResolveLink extends TestCase{
             "http://server1.com/file.jpg",
             UMFileUtil.resolveLink("http://server1.com/some/other.html", 
                 "../file.jpg"));
+
+        assertEquals("Can handle base link with no folder", "images/thumb.png",
+                UMFileUtil.resolveLink("content.opf", "images/thumb.png"));
+
     }
 
     public void runTest(){

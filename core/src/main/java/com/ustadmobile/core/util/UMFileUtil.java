@@ -138,7 +138,16 @@ public class UMFileUtil {
         //remove the filename component if present in base path
         //if the base path ends with a /, remove that, because it will be joined to the path using a /
         charFoundIndex = base.lastIndexOf(FILE_SEP);
+
+        //Check if this is not a relative link but has no actual folder structure in the base. E.g.
+        // base = somefile.txt href=path/to/somewhere.text . As there is no folder structure there is
+        // nothing to resolve against
+        if(charFoundIndex == -1) {
+            return link;
+        }
+
         base = base.substring(0, charFoundIndex);
+
         
         
         String[] baseParts = splitString(base, FILE_SEP);
