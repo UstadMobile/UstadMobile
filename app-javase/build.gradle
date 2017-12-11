@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: "maven-publish"
 
 task runOrmLiteGeneration(type: JavaExec) {
     classpath sourceSets.main.runtimeClasspath
@@ -17,7 +18,31 @@ task fatJar(type: Jar) {
     with jar
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
+publishing {
+    publications {
+        nanolrscore(MavenPublication) {
+            groupId 'com.ustadmobile.app'
+            artifactId 'app-javase'
+            version rootProject.version
 
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
