@@ -225,14 +225,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getExtensionFromMimeType(String mimeType) {
-        if(mimeType.equals(UstadJSOPDSFeed.TYPE_EPUBCONTAINER))
-            return "epub";
-
-        return null;
-    }
-
-    @Override
     public void getResumableRegistrations(String activityId, Object context, TinCanResultListener listener) {
 
     }

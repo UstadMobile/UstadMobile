@@ -1,7 +1,12 @@
 <package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="pub-id">
         <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
 <dc:identifier id="pub-id">202b10fe-b028-4b84-9b84-852aa766607d</dc:identifier>
-<meta property="dcterms:modified">2015-12-26T18:32:12Z</meta><dc:title>The Little Chicks</dc:title></metadata>
+<meta property="dcterms:modified">2015-12-26T18:32:12Z</meta>
+<dc:title>The Little Chicks</dc:title>
+<dc:creator id="author1">Benita Rowe</dc:creator>
+<dc:creator id="author2">Mike Dawson</dc:creator>
+<dc:language>en-US</dc:language>
+</metadata>
 <manifest>
 <item id="nav" href="nav.xhtml" properties="nav" media-type="application/xhtml+xml"/>
 <item id="cover_img" href="cover.png" properties="cover-image" media-type="image/png"/>

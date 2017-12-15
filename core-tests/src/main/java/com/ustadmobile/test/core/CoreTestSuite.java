@@ -16,6 +16,7 @@ import org.junit.runners.Suite;
         TestDirectoryScanner.class,
         TestXapiPackageTypePlugin.class,
         TestUstadJSOPDSFeed.class,
+        TestUstadJSOPDSEntry.class,
         TestUMFileUtil.class,
         TestUstadJSOPF.class
 })

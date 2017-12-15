@@ -49,6 +49,15 @@ var _ustadMobileEpubPaginate = (function() {
     document.head.appendChild(styleEl);
     styleEl.sheet.insertRule("body > * { max-width: " + bodyWidth + "px }");
 
+    /*
+     Inline elements are technically on the baseline. Thus other elements leave the distance
+     between the baseline and the descender bottom (e.g. bottom of letter g) blank. Therefor
+     we must set the image vertical-align to bottom to avoid extra space creating a blank
+     column.
+    */
+    styleEl.sheet.insertRule("img { max-height: " + (bodyHeight - 0) + "px !important; vertical-align: bottom}");
+    console.log("set img max height = " + bodyHeight + "-0 vertical-align: bottom");
+    
 
     window.addEventListener("load", function() {
         console.log("epub-paginate: body width is now: " + document.body.innerWidth);
@@ -58,6 +67,49 @@ var _ustadMobileEpubPaginate = (function() {
     }, false);
 
 
+    /*
+     * For some reason using 'vh' units do not work with the WebView even though they work in the
+     * browser. We therefor need to convert those into raw values in pixels using Javscript.
+     * African Storybook Project uses vh for font-size to make the font increase with the height of
+     * the browser.
+     */
+    mod.calculateOutViewportUnits = function(sheet) {
+        console.log("calculating out viewports for element: " + sheet);
+        var ruleName;
+        var ruleValue;
+        var regex = /((\d+)((\.\d+)?))\s*(vh)/;
+        for(var i = 0; i < sheet.cssRules.length; i++) {
+           if(sheet.cssRules[i].type === 1) { //1 = CSSStyleRule
+               for(var j = 0; j < sheet.cssRules[i].style.length; j++) {
+                   ruleName = sheet.cssRules[i].style[j];
+                   ruleValue = sheet.cssRules[i].style[ruleName];
+
+                   if(ruleValue.indexOf("vh") !== -1) {
+                       var match = regex.exec(ruleValue);
+                       if(match) {
+                           var vhQty = parseFloat(match[1]);
+                           var pxQty = (vhQty / 100) * bodyHeight;
+                           var newVal = ruleValue.replace(regex, pxQty+"px");
+                           sheet.cssRules[i].style[ruleName] = ruleValue.replace(regex, pxQty+"px");
+                       }
+                   }
+               }
+           }
+        }
+    };
+
+    
+    mod.updateStylesheets = function() {
+        for(var i = 0; i < document.styleSheets.length; i++) {
+            mod.calculateOutViewportUnits(document.styleSheets[i]);
+        }
+    };
+
+    window.addEventListener("load", function() {
+        mod.updateStylesheets();
+    }, false);
+    
+    
     return mod;
 }());
 

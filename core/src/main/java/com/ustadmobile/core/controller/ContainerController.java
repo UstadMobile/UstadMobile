@@ -76,6 +76,7 @@ import com.ustadmobile.core.opf.UstadJSOPFItem;
 import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.UstadView;
@@ -219,7 +220,8 @@ public class ContainerController extends UstadBaseController {
                 final String xapiQuery = getXAPIQuery(UMFileUtil.resolveLink(mountedUrl, "/xapi/"));
                 final String containerTitle = opf.title;
                 final UstadJSOPFItem opfCoverImageItem = opf.getCoverImage(null);
-                final String authorName = opf.getCreator();
+                final String authorNames = opf.getNumCreators() > 0 ?
+                        UMUtil.joinStrings(opf.getCreators(), ", ") : null;
 
                 containerView.runOnUiThread(new Runnable() {
                     @Override
@@ -231,8 +233,8 @@ public class ContainerController extends UstadBaseController {
                                     opfCoverImageItem.href));
                         }
 
-                        if(authorName != null) {
-                            containerView.setAuthorName(authorName);
+                        if(authorNames != null) {
+                            containerView.setAuthorName(authorNames);
                         }
                     }
                 });

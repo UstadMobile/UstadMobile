@@ -211,7 +211,7 @@ public class OpdsEndpoint {
         }
 
         DirectoryScanner scanner = new DirectoryScanner();
-        scanner.setHrefModeBaseHref(baseHREF);
+        scanner.setAcquisitionLinkHrefPrefix(baseHREF);
         scanner.setLinkHrefMode(linkHrefMode);
 
         int dirMode;

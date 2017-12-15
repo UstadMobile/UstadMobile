@@ -213,6 +213,7 @@ public abstract class UstadMobileSystemImpl {
 
     static {
         MIME_TYPES.put("image/jpg", "jpg");
+        MIME_TYPES.put("image/jpeg", "jpg");
         MIME_TYPES.put("image/png", "png");
         MIME_TYPES.put("image/gif", "gif");
         MIME_TYPES.put("image/svg", "svg");
