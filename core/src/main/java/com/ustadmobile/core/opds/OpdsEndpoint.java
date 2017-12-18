@@ -223,6 +223,9 @@ public class OpdsEndpoint {
                     "scandir", dirMode, callback, deviceFeed, context);
         }
 
+        if(callback != null)
+            callback.onDone(deviceFeed);
+
         return deviceFeed;
     }
 

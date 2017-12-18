@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -24,7 +25,6 @@ import android.widget.CheckBox;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.BaseCatalogPresenter;
 import com.ustadmobile.core.controller.BasePointController;
-import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.BasePointMenuItem;
@@ -40,7 +40,8 @@ import java.util.WeakHashMap;
 
 public class BasePointActivity extends UstadBaseActivity implements BasePointView,
         NavigationView.OnNavigationItemSelectedListener, DialogResultListener,
-        View.OnClickListener {
+        View.OnClickListener, TabLayout.OnTabSelectedListener,
+        CatalogOPDSFragment.CatalogOPDSFragmentListener{
 
     protected BasePointController mBasePointController;
 
@@ -105,8 +106,9 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mTabLayout= (TabLayout)findViewById(R.id.activity_basepoint_tablayout);
         mTabLayout.setupWithViewPager(viewPager);
         mTabLayout.setSelectedTabIndicatorColor(ContextCompat.getColor(this, R.color.primary_text));
-        mTabLayout.setTabTextColors(ContextCompat.getColor(this, R.color.secondary_text),
+        mTabLayout.setTabTextColors(ContextCompat.getColor(this, R.color.primary_light),
                 ContextCompat.getColor(this, R.color.primary_text));
+        mTabLayout.addOnTabSelectedListener(this);
 
         mDrawerLayout = (DrawerLayout)findViewById(R.id.activity_basepoint_drawlayout);
         mDrawerNavigationView = (NavigationView)findViewById(R.id.activity_basepoint_navigationview);
@@ -114,6 +116,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open,
                 R.string.closed);
         mDrawerLayout.addDrawerListener(mDrawerToggle);
+
+        findViewById(R.id.activity_basepoint_fab).setOnClickListener(this);
 
         mBasePointController = new BasePointController(this, this);
         mBasePointController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()),
@@ -251,6 +255,53 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     }
 
     @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        Fragment selectedFragment = mPagerAdapter.getItem(tab.getPosition());
+
+        if(selectedFragment instanceof CatalogOPDSFragment) {
+            //set the filter options
+            filterOptionsUpdated((CatalogOPDSFragment)selectedFragment);
+            updateAddFabVisibility((CatalogOPDSFragment)selectedFragment);
+        }
+    }
+
+    @Override
+    public void filterOptionsUpdated(CatalogOPDSFragment catalogFragment) {
+        Fragment selectedFragment = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
+        Fragment fromFragment = catalogFragment;
+        boolean sameFrag = selectedFragment.equals(fromFragment);
+        if(catalogFragment.equals(mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition()))) {
+            //this is an update to the currently selected tab - show it.
+            ((OpdsFilterBar)findViewById(R.id.activity_basepoint_filterbar)).setFilterOptions(
+                    catalogFragment.getFilterOptions());
+        }
+    }
+
+    @Override
+    public void updateAddFabVisibility(CatalogOPDSFragment catalogFragment) {
+        Fragment currentFragment = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
+        if(catalogFragment.equals(currentFragment)) {
+            FloatingActionButton fab = (FloatingActionButton)findViewById(R.id.activity_basepoint_fab);
+            boolean showFab = catalogFragment.isAddOptionAvailable();
+            if(fab.isShown() && !showFab) {
+                fab.hide();
+            }else if(!fab.isShown() && showFab) {
+                fab.show();
+            }
+        }
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
     public void onDestroy() {
         mBasePointController.onDestroy();
         super.onDestroy();
@@ -324,9 +375,16 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     @Override
     public void onClick(View view) {
-        CheckBox zipCheckbox = (CheckBox)shareAppDialog.findViewById(
-                R.id.fragment_share_app_zip_checkbox);
-        mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
+        if(view.getId() == R.id.activity_basepoint_fab) {
+            Fragment currentFrag = mPagerAdapter.getItem(mTabLayout.getSelectedTabPosition());
+            if(currentFrag instanceof CatalogOPDSFragment) {
+                ((CatalogOPDSFragment)currentFrag).onClick(view);
+            }
+        }else {
+            CheckBox zipCheckbox = (CheckBox)shareAppDialog.findViewById(
+                    R.id.fragment_share_app_zip_checkbox);
+            mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
+        }
     }
 
     public void setShareAppDialogProgressVisible(boolean visible) {

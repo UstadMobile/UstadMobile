@@ -6,6 +6,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.OpdsEndpoint;
+import com.ustadmobile.core.opds.OpdsFilterOptionField;
+import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -239,6 +241,15 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
                 }
 
                 mView.setRefreshing(false);
+
+                OpdsFilterOptions filterOptions = new OpdsFilterOptions();
+                OpdsFilterOptionField langField = new OpdsFilterOptionField();
+                langField.setFilterName("Language");
+                langField.setFilterOptions(new String[]{"English", "Dari"});
+                filterOptions.addFilter(langField);
+                mView.setFilterOptions(filterOptions);
+
+
                 alternativeTranslationLinks = feed.getAlternativeTranslationLinks();
                 if(alternativeTranslationLinks.size() > 0) {
                     String feedLang = feed.getLanguage();
