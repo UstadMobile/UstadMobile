@@ -76,8 +76,8 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getAppSetupFile(Object context, boolean zip) {
-        return null;
+    public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
+
     }
     
     public String getCacheDir(int mode, Object context) {

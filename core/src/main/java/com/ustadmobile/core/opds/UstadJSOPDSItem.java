@@ -268,30 +268,18 @@ public abstract class UstadJSOPDSItem implements Runnable {
         void onError(UstadJSOPDSItem item, Throwable cause);
     }
 
-    private String asyncLoadUrl;
+    protected String asyncLoadUrl;
 
-    private OpdsItemLoadCallback asyncLoadCallback;
+    protected OpdsItemLoadCallback asyncLoadCallback;
 
-    private Hashtable asyncHttpheaders;
+    protected Hashtable asyncHttpheaders;
 
-    private Object asyncContext;
+    protected Object asyncContext;
 
     public UstadJSOPDSItem() {
         this.linkVector = new Vector();
     }
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if(o == this) {
-//            return true;
-//        }else if(o != null && o instanceof UstadJSOPDSItem) {
-//            UstadJSOPDSItem otherItem = (UstadJSOPDSItem)o;
-//            if(otherItem.id != null && otherItem.id.equals(id)){
-//                //go through all properties
-//
-//            }
-//        }
-//    }
 
     /**
      * The language of this item as specified by the dublin core dc:language tag if present
@@ -794,7 +782,7 @@ public abstract class UstadJSOPDSItem implements Runnable {
         this.asyncHttpheaders = httpHeaders;
         this.asyncContext = context;
         this.href = url;
-        new Thread(this).start();
+        new UstadJSOPDSItemAsyncHelper(this).start();
     }
 
     public void run() {

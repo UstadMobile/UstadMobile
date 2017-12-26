@@ -96,7 +96,8 @@ public class OpdsEndpoint {
      * @return
      * @throws IOException
      */
-    public UstadJSOPDSItem loadItem(String opdsUri, UstadJSOPDSItem item, Object context, UstadJSOPDSItem.OpdsItemLoadCallback callback) throws IOException {
+    public UstadJSOPDSItem loadItem(String opdsUri, UstadJSOPDSItem item, Object context,
+                                    UstadJSOPDSItem.OpdsItemLoadCallback callback) throws IOException {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UstadMobileSystemImpl.l(UMLog.DEBUG, 678, "OpdsEndpoint: load " + opdsUri);
         UstadJSOPDSFeed destFeed = item != null ? (UstadJSOPDSFeed)item : null;
@@ -129,6 +130,20 @@ public class OpdsEndpoint {
         }else {
             return null;
         }
+    }
+
+    public void loadItemAsync(final String opdsUri, final UstadJSOPDSItem item, final Object context,
+                              final UstadJSOPDSItem.OpdsItemLoadCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    loadItem(opdsUri, item, context, callback);
+                }catch(IOException e) {
+                    callback.onError(item, e);
+                }
+            }
+        }).start();
     }
 
     /**

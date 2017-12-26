@@ -13,6 +13,7 @@ import org.junit.runners.Suite;
 
 @Suite.SuiteClasses({
         TestResumableHttpDownload.class,
+        TestMountedZipHandler.class
 })
 
 public abstract class SharedSeTestSuite {

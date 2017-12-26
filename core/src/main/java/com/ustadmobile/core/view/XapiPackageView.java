@@ -1,5 +1,7 @@
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.controller.XapiPackagePresenter;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.ZipFileHandle;
 
 /**
@@ -8,13 +10,16 @@ import com.ustadmobile.core.impl.ZipFileHandle;
 
 public interface XapiPackageView extends UstadView{
 
-    static String VIEW_NAME = "XapiPackage";
+    String VIEW_NAME = "XapiPackage";
 
     void setTitle(String title);
 
     void loadUrl(String url);
 
-    String mountZip(String zipUri);
+    void mountZip(String zipUri, UmCallback callback);
 
     ZipFileHandle getMountedZipHandle();
+
+    XapiPackagePresenter getPresenter();
+
 }

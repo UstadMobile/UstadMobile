@@ -1107,12 +1107,14 @@ public abstract class UstadMobileSystemImpl {
     }
 
     /**
-     * Return absolute path of the application setup file.
+     * Return absolute path of the application setup file. Asynchronous.
+     *
      * @param context System context
-     * @param zip
+     * @param zip if true, the app setup file should be delivered within a zip.
+     * @param callback callback to call when complete or if any error occurs.
      * @return String: file absolute path
      */
-    public abstract String getAppSetupFile(Object context, boolean zip);
+    public abstract void getAppSetupFile(Object context, boolean zip, UmCallback callback);
 
 
     /**
