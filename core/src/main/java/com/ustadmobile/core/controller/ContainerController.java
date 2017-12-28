@@ -162,7 +162,7 @@ public class ContainerController extends UstadBaseController {
     private UmCallback mountedCallbackHandler = new UmCallback() {
 
         @Override
-        public void onSuccess(int requestId, Object result) {
+        public void onSuccess(Object result) {
             mountedUrl = (String) result;
             String containerUri = UMFileUtil.joinPaths(new String[]{mountedUrl, OCF_CONTAINER_PATH});
             containerXmlCall = UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(containerUri),
@@ -170,7 +170,7 @@ public class ContainerController extends UstadBaseController {
         }
 
         @Override
-        public void onFailure(int requestId, Object reason, Throwable exception) {
+        public void onFailure(Throwable exception) {
 
         }
     };

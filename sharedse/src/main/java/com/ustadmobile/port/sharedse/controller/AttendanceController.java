@@ -73,6 +73,7 @@ import jp.sourceforge.qrcode.util.DebugCanvas;
  *
  * @author mike
  */
+@Deprecated
 public class AttendanceController extends UstadBaseController {
 
     /**
@@ -289,32 +290,32 @@ public class AttendanceController extends UstadBaseController {
     public static AttendanceClassStudent[] loadClassStudentListFromNet(final String classID, final Object context) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
-        Thread getStudentListThread = new Thread() {
-
-            public void run() {
-                String username = impl.getActiveUser(context);
-                String password = impl.getActiveUserAuth(context);
-                String classURL = UMFileUtil.resolveLink(
-                    CoreBuildConfig.DEFAULT_XAPI_SERVER,
-                    UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
-                        + classID;
-
-                String studentListJSON = null;
-                try {
-                    studentListJSON = LoginController.getJSONArrayResult(
-                            username, password, classURL);
-                } catch (IOException ex) {
-                    System.out.println("Something wrong with getting "
-                            + "Student List: " + ex.toString());
-
-                }
-                if(studentListJSON != null) {
-                    impl.setUserPref("studentlist."+classID,
-                            studentListJSON, context);
-                }
-            }
-        };
-        getStudentListThread.start();
+//        Thread getStudentListThread = new Thread() {
+//
+//            public void run() {
+//                String username = impl.getActiveUser(context);
+//                String password = impl.getActiveUserAuth(context);
+//                String classURL = UMFileUtil.resolveLink(
+//                    CoreBuildConfig.DEFAULT_XAPI_SERVER,
+//                    UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
+//                        + classID;
+//
+//                String studentListJSON = null;
+//                try {
+//                    studentListJSON = LoginController.getJSONArrayResult(
+//                            username, password, classURL);
+//                } catch (IOException ex) {
+//                    System.out.println("Something wrong with getting "
+//                            + "Student List: " + ex.toString());
+//
+//                }
+//                if(studentListJSON != null) {
+//                    impl.setUserPref("studentlist."+classID,
+//                            studentListJSON, context);
+//                }
+//            }
+//        };
+//        getStudentListThread.start();
         
         
         return loadClassStudentListFromPrefs(classID, context);

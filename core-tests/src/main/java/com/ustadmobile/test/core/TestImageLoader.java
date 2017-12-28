@@ -3,7 +3,7 @@ package com.ustadmobile.test.core;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.ImageLoader;
+import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.junit.AfterClass;

@@ -44,11 +44,7 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
 
         private UmCallback callback;
 
-        private int requestId;
-
-        private MountZipAsyncTask(NetworkManagerAndroid networkManagerAndroid, UmCallback callback,
-                                  int requestId) {
-            this.requestId = requestId;
+        private MountZipAsyncTask(NetworkManagerAndroid networkManagerAndroid, UmCallback callback) {
             this.networkManagerAndroid = networkManagerAndroid;
             this.callback = callback;
         }
@@ -62,7 +58,7 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
 
         @Override
         protected void onPostExecute(String mountedPath) {
-            callback.onSuccess(requestId, mountedPath);
+            callback.onSuccess(mountedPath);
         }
     }
 
@@ -121,7 +117,7 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
 
     @Override
     public void mountZip(String zipUri, UmCallback callback) {
-        new MountZipAsyncTask(networkManagerAndroid, callback, 0).execute(zipUri);
+        new MountZipAsyncTask(networkManagerAndroid, callback).execute(zipUri);
     }
 
     @Override

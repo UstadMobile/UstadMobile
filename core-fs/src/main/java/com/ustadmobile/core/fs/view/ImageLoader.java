@@ -1,16 +1,19 @@
-package com.ustadmobile.core.view;
+package com.ustadmobile.core.fs.view;
 
 import com.ustadmobile.core.controller.ControllerLifecycleListener;
 import com.ustadmobile.core.controller.UstadBaseController;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.AbstractCacheResponse;
+import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.HTTPCacheDir;
-import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
+import com.ustadmobile.core.impl.http.UmHttpCall;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 /**
@@ -45,7 +48,7 @@ public class ImageLoader implements ControllerLifecycleListener {
      */
     private Hashtable tasksByController;
 
-    private abstract class ImageLoaderTask extends TimerTask {
+    private class ImageLoaderTask implements UmHttpResponseCallback{
 
         String url;
 
@@ -53,68 +56,68 @@ public class ImageLoader implements ControllerLifecycleListener {
 
         UstadBaseController controller;
 
+        private boolean cacheResponded;
+
+        private HttpCache cache;
+
+        private UmHttpCall currentCall;
+
+        private boolean cancelled = false;
+
         private ImageLoaderTask(String url, ImageLoadTarget target, UstadBaseController controller) {
             this.url = url;
             this.target = target;
             this.controller = controller;
+            cache = ((UstadMobileSystemImplFs)UstadMobileSystemImpl.getInstance()).getHttpCache(
+                    controller.getContext());
         }
 
-    }
+        private void load() {
+            synchronized (this) {
+                if(cancelled)
+                    return;
 
-    private class LoadCachedImageTask extends ImageLoaderTask {
-
-        private LoadCachedImageTask(String url, ImageLoadTarget target, UstadBaseController controller){
-            super(url, target, controller);
-        }
-
-        public void run() {
-            HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(controller.getContext());
-            String fileUri = cacheDir.getCacheFileURIByURL(url);
-            try {
-                if(fileUri != null && UstadMobileSystemImpl.getInstance().fileExists(fileUri)){
-                    target.setImageFromFile(fileUri);
-                }
-            }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 657, url, e);
-            }
-
-            Vector controllerTasks = removeTaskForController(controller, this);
-            if(controllerTasks == null)
-                return;//controller has been destroyed
-
-            LoadImageFromNetworkTask networkTask = new LoadImageFromNetworkTask(url, target, controller);
-            controllerTasks.addElement(networkTask);
-            networkLoadTimer.schedule(networkTask, 0);
-        }
-    }
-
-
-    private class LoadImageFromNetworkTask extends ImageLoaderTask {
-
-        public LoadImageFromNetworkTask(String url, ImageLoadTarget target, UstadBaseController controller) {
-            super(url, target, controller);
-        }
-
-        public void run() {
-            try {
-                //TODO: add image loader tests for handling file paths
-                if(url.startsWith("file:/") || url.startsWith("/")) {
-                    url = UMFileUtil.stripPrefixIfPresent("file:///", url);
-                    target.setImageFromFile(url);
-                }else {
-                    HTTPCacheDir cacheDir = UstadMobileSystemImpl.getInstance().getHTTPCacheDir(
-                            controller.getContext());
-                    String filePath = cacheDir.get(url);
-                    Vector activeTasks = removeTaskForController(controller, this);
-                    if(filePath != null && activeTasks != null) {
-                        target.setImageFromFile(filePath);
-                    }
-                }
-            }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 658, url, e);
+                currentCall = cache.get(new UmHttpRequest(url).setOnlyIfCached(true), this);
             }
         }
+
+        private void handleCacheResponded() {
+            cacheResponded = true;
+            synchronized (this) {
+                if(cancelled)
+                    return;
+
+                currentCall = cache.get(new UmHttpRequest(url), this);
+            }
+        }
+
+        @Override
+        public void onComplete(UmHttpCall call, UmHttpResponse response) {
+            if(!cacheResponded) {
+                handleCacheResponded();
+            }else {
+                //task is complete
+                removeTaskForController(controller, this);
+            }
+
+            //TODO: check if the image actually changed since the cached reply
+            target.setImageFromFile(((AbstractCacheResponse)response).getFilePath());
+        }
+
+        @Override
+        public void onFailure(UmHttpCall call, IOException exception) {
+            if(!cacheResponded) {
+                handleCacheResponded();
+            }
+        }
+
+        public synchronized void cancel() {
+            cancelled = true;
+            if(currentCall != null)
+                currentCall.cancel();
+        }
     }
+
 
     private static ImageLoader singleton = new ImageLoader();
 
@@ -158,9 +161,9 @@ public class ImageLoader implements ControllerLifecycleListener {
 
         controller.addLifecycleListener(this);
 
-        LoadCachedImageTask cachedImageTask = new LoadCachedImageTask(src, target, controller);
+        ImageLoaderTask cachedImageTask = new ImageLoaderTask(src, target, controller);
         controllerTasks.addElement(cachedImageTask);
-        cacheLoadTimer.schedule(cachedImageTask, 0);
+        cachedImageTask.load();
     }
 
     private Vector getTasksByController(UstadBaseController controller) {

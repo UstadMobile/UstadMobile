@@ -48,7 +48,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.ImageLoader;
+import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.HashMap;

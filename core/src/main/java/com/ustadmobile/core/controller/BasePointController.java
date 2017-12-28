@@ -229,14 +229,14 @@ public class BasePointController extends UstadBaseController implements DialogRe
         impl.getAppSetupFile(getContext(), zip, new UmCallback() {
 
             @Override
-            public void onSuccess(int requestId, Object result) {
+            public void onSuccess(Object result) {
                 impl.getNetworkManager().shareAppSetupFile((String)result,
                         impl.getString(MessageID.share, getContext()));
                 basePointView.dismissShareAppDialog();
             }
 
             @Override
-            public void onFailure(int requestId, Object reason, Throwable exception) {
+            public void onFailure(Throwable exception) {
 
             }
         });

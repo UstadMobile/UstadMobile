@@ -1,0 +1,29 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":core")
+    compile project(":sharedse")
+    compile project(":core-tests")
+
+    compile 'junit:junit:4.12'
+}
+
+jar {
+    exclude("com/ustadmobile/test/core/impl/PlatformTestUtil.class")
+}
+
+
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+/*
+ * When running in test mode we use getClass.getResource to load assets.
+ */
+task copyCoreResources(type: Copy) {
+    from "${projectDir}/../core/src/main/assets"
+    into "${buildDir}/classes/main/res"
+}
+
+processResources.dependsOn(copyCoreResources)

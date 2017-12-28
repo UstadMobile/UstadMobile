@@ -3,11 +3,17 @@ package com.ustadmobile.test.sharedse;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Collection of utility methods used for testing
@@ -50,10 +56,17 @@ public class TestUtilsSE {
     }
 
     private static boolean sendCommand(String url) {
-        HTTPResult result = null;
-        for(int i = 0; result == null && i < 4; i++) {
+        int status = -1;
+        for(int i = 0; status != 200 && i < 4; i++) {
+            InputStream in = null;
+            ByteArrayOutputStream bout = null;
+
             try {
-                result = UstadMobileSystemImpl.getInstance().makeRequest(url, null, null);
+                HttpURLConnection urlConnection = (HttpURLConnection)new URL(url).openConnection();
+                status = urlConnection.getResponseCode();
+                in = urlConnection.getInputStream();
+                bout = new ByteArrayOutputStream();
+                UMIOUtils.readFully(in, bout);
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 79, "Error sending command to "
                         + url + "(Attempt #" + (i+1) + ")");
@@ -62,7 +75,7 @@ public class TestUtilsSE {
             }
         }
 
-        boolean successful = result != null && result.getStatus() == 200;
+        boolean successful = status == 200;
         UstadMobileSystemImpl.l(UMLog.DEBUG, 659, "Send command to ./" + url + " successful ? " + successful);
         return successful;
     }

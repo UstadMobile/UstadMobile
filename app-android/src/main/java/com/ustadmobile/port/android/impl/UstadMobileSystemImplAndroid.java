@@ -346,7 +346,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
         @Override
         protected void onPostExecute(String filePath) {
-            doneCallback.onSuccess(0, filePath);
+            doneCallback.onSuccess(filePath);
         }
     }
 
@@ -943,7 +943,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
             @Override
             protected void onPostExecute(String mountedPath) {
-                callback.onSuccess(id, mountedPath);
+                callback.onSuccess(mountedPath);
             }
         }.execute();
     }

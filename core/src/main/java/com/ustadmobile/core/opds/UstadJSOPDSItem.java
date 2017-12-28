@@ -60,7 +60,7 @@ import java.util.Vector;
  *
  * @author varuna
  */
-public abstract class UstadJSOPDSItem implements Runnable {
+public abstract class UstadJSOPDSItem {
     
     public String title;
     
@@ -782,36 +782,20 @@ public abstract class UstadJSOPDSItem implements Runnable {
         this.asyncHttpheaders = httpHeaders;
         this.asyncContext = context;
         this.href = url;
-        new UstadJSOPDSItemAsyncHelper(this).start();
+        new UstadJSOPDSItemAsyncHelper(this).load();
     }
 
-    public void run() {
-        InputStream in = null;
+    public void loadFromInputStream(InputStream in) {
         XmlPullParser xpp = null;
         Throwable err = null;
-
         try {
-            if(!asyncLoadUrl.startsWith(OpdsEndpoint.OPDS_PROTOCOL)) {
-                HTTPResult[] resultBuf = new HTTPResult[1];
-                UstadMobileSystemImpl.getInstance().getHTTPCacheDir(asyncContext).get(asyncLoadUrl,
-                        null, asyncHttpheaders, resultBuf);
-                if(resultBuf[0] == null || resultBuf[0].getStatus() >= 300)
-                    throw new IOException("Http status: " +
-                            (resultBuf[0] != null ? resultBuf[0].getStatus() : "-1"));
-
-                in = new ByteArrayInputStream(resultBuf[0].getResponse());
-                xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
-                UstadJSOPDSFeed parentFeed = this instanceof UstadJSOPDSFeed ? (UstadJSOPDSFeed) this : null;
-                loadFromXpp(xpp, parentFeed, asyncLoadCallback);
-            }else {
-                OpdsEndpoint.getInstance().loadItem(asyncLoadUrl, this, asyncContext, asyncLoadCallback);
-            }
-        }catch(IOException e) {
-            err = e;
+            xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
+            UstadJSOPDSFeed parentFeed = this instanceof UstadJSOPDSFeed ? (UstadJSOPDSFeed) this : null;
+            loadFromXpp(xpp, parentFeed, asyncLoadCallback);
         }catch(XmlPullParserException x) {
             err = x;
-        }finally {
-            UMIOUtils.closeInputStream(in);
+        }catch(IOException e) {
+            err = e;
         }
 
         if(!hasRequiredElements(false)){

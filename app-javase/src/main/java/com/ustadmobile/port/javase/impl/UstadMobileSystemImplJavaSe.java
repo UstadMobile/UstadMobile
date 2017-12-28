@@ -158,8 +158,8 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getAppSetupFile(Object context, boolean zip) {
-        return null;
+    public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
+
     }
 
     @Override

@@ -553,6 +553,22 @@ public class UMFileUtil {
     }
 
     /**
+     * Split a filename into it's basename and extension.
+     *
+     * @param filename e.g. file.jpg
+     * @return A two component String array e.g. {"file", "jpg"}
+     */
+    public static String[] splitFilename(String filename) {
+        int dotIndex = filename.lastIndexOf('.');
+        if(dotIndex != -1)
+            return new String[]{filename.substring(0, dotIndex),
+                filename.substring(dotIndex+1)};
+        else
+            return new String[]{filename, null};
+    }
+
+
+    /**
      * Remove the extension from a filename. The input filename is expected to be only a filename,
      * e.g. without the path or url query strings. This can be obtained using getFilename if needed.
      *

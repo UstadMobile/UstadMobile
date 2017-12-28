@@ -35,7 +35,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
-import com.ustadmobile.core.view.ImageLoader;
+import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;

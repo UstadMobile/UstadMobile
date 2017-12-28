@@ -297,7 +297,6 @@ NetBeans.  See README for instructions on building from source.
 		<preserve class="com.ustadmobile.test.core.TestUMFileResolveLink"/>
 		<preserve class="com.ustadmobile.test.core.TestUMFileUtilFilename"/>
 		<preserve class="com.ustadmobile.test.core.TestUMFileUtilJoin"/>
-		<preserve class="com.ustadmobile.test.core.TestTestUtils"/>
 	        <preserve class="com.ustadmobile.test.core.TestCacheAndStorageDir"/>
 		<preserve class="com.ustadmobile.test.port.j2me.AllTestCases"/>
                 <preserve class="com.ustadmobile.test.port.j2me.CoreLoginTest"/>

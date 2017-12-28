@@ -59,7 +59,7 @@ public class XapiPackagePresenter extends UstadBaseController {
 
     private UmCallback zipMountedCallbackHandler = new UmCallback() {
         @Override
-        public void onSuccess(int requestId, Object result) {
+        public void onSuccess(Object result) {
             mountedPath = (String)result;
             UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(
                     UMFileUtil.joinPaths(new String[]{mountedPath, "tincan.xml"})),
@@ -67,7 +67,7 @@ public class XapiPackagePresenter extends UstadBaseController {
         }
 
         @Override
-        public void onFailure(int requestId, Object reason, Throwable exception) {
+        public void onFailure(Throwable exception) {
             //TODO: implement this.
         }
     };
@@ -128,7 +128,7 @@ public class XapiPackagePresenter extends UstadBaseController {
             });
             loadCompleted = true;
             if(loadListener != null)
-                loadListener.onSuccess(0, null);
+                loadListener.onSuccess(null);
         }catch(XmlPullParserException xe) {
 
         }catch(IOException e) {

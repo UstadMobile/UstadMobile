@@ -24,9 +24,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
 public class ClassResourcesResponder extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
 
-    public static Hashtable LAST_MODIFIED_TIMES = new Hashtable();
-
-    public static long loadedTime = Calendar.getInstance().getTimeInMillis();
+    public static final Hashtable<String, Long> LAST_MODIFIED_TIMES = new Hashtable<>();
 
 
     public static class ResourceFileSource implements FileResponder.IFileSource {
@@ -103,7 +101,13 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
                 Integer.parseInt(session.getParameters().get("speedLimit").get(0)): 0;
 
         URL resourceUrl = getClass().getResource(resPath);
-        ResourceFileSource fileSource = new ResourceFileSource(resourceUrl, loadedTime);
+        Long lastModTime = LAST_MODIFIED_TIMES.get(resPath);
+        if(lastModTime == null) {
+            lastModTime = System.currentTimeMillis();
+            LAST_MODIFIED_TIMES.put(resPath, lastModTime);
+        }
+
+        ResourceFileSource fileSource = new ResourceFileSource(resourceUrl, lastModTime);
 
         NanoHTTPD.Response response = newResponseFromFile(NanoHTTPD.Method.GET, uriResource, session, fileSource, null);
 
@@ -139,8 +143,15 @@ public class ClassResourcesResponder extends FileResponder implements RouterNano
     @Override
     public NanoHTTPD.Response other(String method, RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
         if(NanoHTTPD.Method.HEAD.toString().equals(method)) {
-            ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(getResourcePathFromRequest(uriResource, session)),
-                    loadedTime);
+            String resPath = getResourcePathFromRequest(uriResource, session);
+            Long lastModTime = LAST_MODIFIED_TIMES.get(resPath);
+            if(lastModTime == null) {
+                lastModTime = System.currentTimeMillis();
+                LAST_MODIFIED_TIMES.put(resPath, lastModTime);
+            }
+
+            ResourceFileSource fileSource = new ResourceFileSource(getClass().getResource(resPath),
+                    lastModTime);
 
             return newResponseFromFile(NanoHTTPD.Method.HEAD, uriResource, session, fileSource, null);
         }

@@ -135,72 +135,72 @@ public class EnrollStudentController extends UstadBaseController {
     }
     
     public void handleClickEnroll(final Hashtable userInfoParams) throws IOException{
-        System.out.println("Handling register button in the controller..");
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        
-        Thread enrollThread = new Thread() {
-            public void run() {
-                String classId = mClass.id; // is the class
-                String teacher_username = impl.getActiveUser(context);
-                String teacher_password = impl.getActiveUserAuth(context);
-
-                String teacher_enroll_student_url = null;
-                String umCloudServer = UstadMobileSystemImpl.getInstance().getAppPref(
-                            UstadMobileSystemImpl.PREFKEY_XAPISERVER,
-                            CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
-                teacher_enroll_student_url = umCloudServer + "/" + 
-                        TEACHER_ENROLL_STUDENT_ENDPOINT;
-
-                Hashtable headers = new Hashtable();
-                headers.put("UM-In-App-Registration-Version", "1.0.1");
-                //headers.put("X-Experience-API-Version", "1.0.1");
-                headers.put("Authorization", LoginController.encodeBasicAuth(
-                        teacher_username, teacher_password));
-                userInfoParams.put("class_id", classId);
-
-                HTTPResult registrationResult = null;
-                try {
-                    registrationResult = impl.makeRequest(
-                            teacher_enroll_student_url, headers, userInfoParams, "POST");
-                } catch (IOException ex) {
-                    System.out.println("EXCEPTION in making Request: " + ex.toString());
-                }
-                
-                String serverSays = null;
-                try {
-                    serverSays = new String(registrationResult.getResponse(), "UTF-8");
-                } catch (UnsupportedEncodingException ex) {
-                    System.out.println("EXCEPTION: " + ex.toString());
-                }
-                if(registrationResult.getStatus() != 200) {
-                    try {
-                        throw new IOException("Registration error: code "
-                                + registrationResult.getStatus());
-                    } catch (IOException ex) {
-                        System.out.println("EXCEPTION: " + ex.toString());
-                    }
-                }else{
-                    System.out.println("Added OK");
-                    
-                }
-
-                
-                    
-                impl.getAppView(context).dismissProgressDialog();
-                Hashtable args = new Hashtable();
-                args.put(ClassManagementController.KEY_CLASSID, 
-                        classId);
-                args.put(ClassManagementController.KEY_UPDATE_STUDENT_LIST, "true");
-                UstadMobileSystemImpl.getInstance().go(ClassManagementView.VIEW_NAME, args,
-                        context);
-                //return serverSays;
-                      
-            }
-        };
-        impl.getAppView(context).showProgressDialog(impl.getString(MessageID.processing, getContext()));
-        String serverSays;
-        //return serverSays;
-        enrollThread.start();
+//        System.out.println("Handling register button in the controller..");
+//        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//
+//        Thread enrollThread = new Thread() {
+//            public void run() {
+//                String classId = mClass.id; // is the class
+//                String teacher_username = impl.getActiveUser(context);
+//                String teacher_password = impl.getActiveUserAuth(context);
+//
+//                String teacher_enroll_student_url = null;
+//                String umCloudServer = UstadMobileSystemImpl.getInstance().getAppPref(
+//                            UstadMobileSystemImpl.PREFKEY_XAPISERVER,
+//                            CoreBuildConfig.DEFAULT_XAPI_SERVER, context);
+//                teacher_enroll_student_url = umCloudServer + "/" +
+//                        TEACHER_ENROLL_STUDENT_ENDPOINT;
+//
+//                Hashtable headers = new Hashtable();
+//                headers.put("UM-In-App-Registration-Version", "1.0.1");
+//                //headers.put("X-Experience-API-Version", "1.0.1");
+//                headers.put("Authorization", LoginController.encodeBasicAuth(
+//                        teacher_username, teacher_password));
+//                userInfoParams.put("class_id", classId);
+//
+//                HTTPResult registrationResult = null;
+//                try {
+//                    registrationResult = impl.makeRequest(
+//                            teacher_enroll_student_url, headers, userInfoParams, "POST");
+//                } catch (IOException ex) {
+//                    System.out.println("EXCEPTION in making Request: " + ex.toString());
+//                }
+//
+//                String serverSays = null;
+//                try {
+//                    serverSays = new String(registrationResult.getResponse(), "UTF-8");
+//                } catch (UnsupportedEncodingException ex) {
+//                    System.out.println("EXCEPTION: " + ex.toString());
+//                }
+//                if(registrationResult.getStatus() != 200) {
+//                    try {
+//                        throw new IOException("Registration error: code "
+//                                + registrationResult.getStatus());
+//                    } catch (IOException ex) {
+//                        System.out.println("EXCEPTION: " + ex.toString());
+//                    }
+//                }else{
+//                    System.out.println("Added OK");
+//
+//                }
+//
+//
+//
+//                impl.getAppView(context).dismissProgressDialog();
+//                Hashtable args = new Hashtable();
+//                args.put(ClassManagementController.KEY_CLASSID,
+//                        classId);
+//                args.put(ClassManagementController.KEY_UPDATE_STUDENT_LIST, "true");
+//                UstadMobileSystemImpl.getInstance().go(ClassManagementView.VIEW_NAME, args,
+//                        context);
+//                //return serverSays;
+//
+//            }
+//        };
+//        impl.getAppView(context).showProgressDialog(impl.getString(MessageID.processing, getContext()));
+//        String serverSays;
+//        //return serverSays;
+//        enrollThread.start();
     }
     
 }

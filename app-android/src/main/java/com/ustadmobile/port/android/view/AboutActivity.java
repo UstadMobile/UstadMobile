@@ -12,6 +12,7 @@ import com.ustadmobile.core.controller.AboutController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.view.AboutView;
+import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.Hashtable;
 
@@ -25,9 +26,8 @@ public class AboutActivity extends UstadBaseActivity implements AboutView, Contr
         setContentView(R.layout.activity_about);
         setUMToolbar(R.id.um_toolbar);
         setTitle(R.string.about);
-
-        AboutController.makeControllerForView(new Hashtable(),
-                this, this);
+        mAboutController = new AboutController(this, this);
+        mAboutController.onCreate(UMAndroidUtil.bundleToHashtable(getIntent().getExtras()), null);
     }
 
     @Override

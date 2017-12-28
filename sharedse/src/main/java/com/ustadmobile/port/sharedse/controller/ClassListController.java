@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.controller.AsyncLoadableController;
 import com.ustadmobile.core.controller.ControllerReadyListener;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.controller.UstadController;
@@ -20,7 +19,8 @@ import java.util.Hashtable;
 /**
  * Created by varuna on 20/02/16.
  */
-public class ClassListController extends UstadBaseController implements AsyncLoadableController, XapiStatementsForwardingListener{
+@Deprecated
+public class ClassListController extends UstadBaseController implements  XapiStatementsForwardingListener{
 
     private AttendanceClass[] attendanceClasses;
 
@@ -39,7 +39,6 @@ public class ClassListController extends UstadBaseController implements AsyncLoa
         }
     }
 
-    @Override
     public UstadController loadController(Hashtable args, Object context) throws Exception {
         ClassListController controller = new ClassListController(context);
         return controller;

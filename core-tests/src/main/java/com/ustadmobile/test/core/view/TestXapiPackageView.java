@@ -27,12 +27,12 @@ public abstract class TestXapiPackageView {
 
         final UmCallback loadCallback = new UmCallback() {
             @Override
-            public void onSuccess(int requestId, Object result) {
+            public void onSuccess(Object result) {
                 helper.runTests();
             }
 
             @Override
-            public void onFailure(int requestId, Object reason, Throwable exception) {
+            public void onFailure(Throwable exception) {
                 synchronized (lockObject) {
                     lockObject.notifyAll();
                 }

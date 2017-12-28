@@ -1,7 +1,6 @@
 package com.ustadmobile.port.sharedse.controller;
 
 import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.LoadControllerThread;
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
@@ -23,7 +22,7 @@ import java.util.List;
 /**
  * Created by mike on 20/11/16.
  */
-
+@Deprecated
 public class AttendanceListController extends EntityListController implements XapiStatementsForwardingListener{
 
     public static final int MAX_ATTENDANCE_ITEMS = 40;
@@ -37,18 +36,18 @@ public class AttendanceListController extends EntityListController implements Xa
 
     public static void makeControllerForView(AttendanceListView view, Hashtable args, ControllerReadyListener listener) {
         AttendanceListController controller = new AttendanceListController(view.getContext());
-        new LoadControllerThread(args, controller, listener, view).start();
+//        new LoadControllerThread(args, controller, listener, view).start();
     }
 
-    @Override
-    public UstadController loadController(Hashtable args, Object context) throws Exception {
-        String classId = args.get(ClassManagementController2.ARG_CLASSID).toString();
-
-        AttendanceListController controller = new AttendanceListController(context);
-        controller.setClassId(classId);
-        controller.loadAttendanceList();
-        return controller;
-    }
+//    @Override
+//    public UstadController loadController(Hashtable args, Object context) throws Exception {
+//        String classId = args.get(ClassManagementController2.ARG_CLASSID).toString();
+//
+//        AttendanceListController controller = new AttendanceListController(context);
+//        controller.setClassId(classId);
+//        controller.loadAttendanceList();
+//        return controller;
+//    }
 
     public void loadAttendanceList() {
         String attendanceActivityId = UstadMobileConstants.PREFIX_ATTENDANCE_URL + classId;

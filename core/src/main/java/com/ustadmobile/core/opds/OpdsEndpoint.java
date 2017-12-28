@@ -62,17 +62,22 @@ public class OpdsEndpoint {
     public static final int LINK_HREF_MODE_ID = 1;
 
 
-
-    public static OpdsEndpoint getInstance() {
-        return instance;
-    }
-
-
     private static final String PREF_KEY_FEED_LIST = "mylibrary_feeds";
 
     public static final String OPDS_USERFEED_ID_PREFIX = "com.ustadmobile.userfeed.";
 
     private Vector opdsChangeListeners = new Vector();
+
+    private OpdsEndpointAsyncHelper asyncHelper;
+
+    public static OpdsEndpoint getInstance() {
+        return instance;
+    }
+
+    public OpdsEndpoint() {
+        asyncHelper = new OpdsEndpointAsyncHelper(this);
+    }
+
 
     /**
      * Used to notify of when a feed is changed.
@@ -134,16 +139,7 @@ public class OpdsEndpoint {
 
     public void loadItemAsync(final String opdsUri, final UstadJSOPDSItem item, final Object context,
                               final UstadJSOPDSItem.OpdsItemLoadCallback callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    loadItem(opdsUri, item, context, callback);
-                }catch(IOException e) {
-                    callback.onError(item, e);
-                }
-            }
-        }).start();
+        asyncHelper.loadItemAsync(opdsUri, item, context, callback);
     }
 
     /**
@@ -209,9 +205,10 @@ public class OpdsEndpoint {
             }
 
             destFeed.addLink(USTAD_PREFKEY_FEED_LINK_REL, UstadJSOPDSItem.TYPE_NAVIGATIONFEED, prefKey);
-            if(callback != null)
-                callback.onDone(destFeed);
         }
+
+        if(callback != null)
+            callback.onDone(destFeed);
 
         return destFeed;
     }

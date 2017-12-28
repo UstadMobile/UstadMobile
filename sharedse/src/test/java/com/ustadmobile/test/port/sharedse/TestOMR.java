@@ -28,7 +28,7 @@
     GNU General Public License for more details.
 
  */
-package com.ustadmobile.test.core;
+package com.ustadmobile.test.port.sharedse;
 
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -67,10 +67,10 @@ public class TestOMR  {
     }
 
     protected void setUp() throws Exception {
-        String imgURL = TestUtils.getInstance().getHTTPRoot() + "omr-img1.jpg";
-        HTTPResult imgResult = UstadMobileSystemImpl.getInstance().makeRequest(
-            imgURL, null, null);
-        imgBytes = imgResult.getResponse();
+//        String imgURL = TestUtils.getInstance().getHTTPRoot() + "omr-img1.jpg";
+//        HTTPResult imgResult = UstadMobileSystemImpl.getInstance().makeRequest(
+//            imgURL, null, null);
+//        imgBytes = imgResult.getResponse();
     }
     
     public void testOMR() throws IOException{

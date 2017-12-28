@@ -169,7 +169,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
             @Override
             public void onError(UstadJSOPDSItem item, Throwable cause) {
-
+                loadFeed(httpCacheMustRevalidate);
             }
         };
 

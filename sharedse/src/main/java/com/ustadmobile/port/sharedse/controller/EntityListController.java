@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.controller;
 
-import com.ustadmobile.core.controller.AsyncLoadableController;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.model.ListableEntity;
 
@@ -11,7 +10,7 @@ import java.util.List;
  * Created by mike on 20/11/16.
  */
 
-public abstract class EntityListController extends UstadBaseController implements AsyncLoadableController {
+public abstract class EntityListController extends UstadBaseController  {
 
     protected List<ListableEntity> entityList;
 

@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.impl.http;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import okhttp3.Response;
 
@@ -29,7 +30,17 @@ public class UmHttpResponseSe extends UmHttpResponse {
     }
 
     @Override
+    public InputStream getResponseAsStream() throws IOException {
+        return response.body().byteStream();
+    }
+
+    @Override
     public boolean isSuccessful() {
         return response.isSuccessful();
+    }
+
+    @Override
+    public int getStatus() {
+        return response.code();
     }
 }
