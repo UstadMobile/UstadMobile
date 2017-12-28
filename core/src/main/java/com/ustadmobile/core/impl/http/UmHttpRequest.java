@@ -34,7 +34,10 @@ public class UmHttpRequest {
 
     public static final String HEADER_LAST_MODIFIED = "last-modified";
 
+    public static final String HEADER_CONTENT_ENCODING = "content-encoding";
+
     public static final String CACHE_CONTROL_MUST_REVALIDATE = "must-revalidate";
+
 
 
     /**
@@ -81,7 +84,7 @@ public class UmHttpRequest {
 
     public boolean mustRevalidate() {
         if(headers != null && headers.containsKey(HEADER_CACHE_CONTROL)) {
-            return ((String)headers.get(HEADER_CACHE_CONTROL)).indexOf("CACHE_CONTROL_MUST_REVALIDATE") != -1;
+            return ((String)headers.get(HEADER_CACHE_CONTROL)).indexOf(CACHE_CONTROL_MUST_REVALIDATE) != -1;
         }else {
             return false;
         }

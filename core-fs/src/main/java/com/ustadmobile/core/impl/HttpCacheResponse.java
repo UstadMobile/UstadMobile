@@ -2,28 +2,151 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMUtil;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 
 /**
+ * Represents an Http Cache Response. There are three modes of delivering a response:
+ *  1. If the data was already cached and the entry was fresh or validated by a 304 not modified:
+ *      Data is served directly from the file the cache entry was stored in.
+ *
+ *  2. If the request was performed asynchronously then the cache response object will save the data
+ *     to disk and retain the buffer (so it need not be read back from the disk). This is performed
+ *     by saveNetworkResponseToDiskAndBuffer .
+ *
+ *  3. If the request was performed synchronously then initPipe should be called to setup piped input
+ *     and output streams, and then pipeNetworkResponseToDisk should be called in a separate thread
+ *     (eg. using an ExecutorService). The executor service will ensure the data is promptly written
+ *     to disk regardless of whether or not the consumer which made the request processes it promptly.
+ *
+ *
  * Created by mike on 12/27/17.
  */
 
-public class HttpCacheResponse extends AbstractCacheResponse{
+public class HttpCacheResponse extends AbstractCacheResponse implements Runnable{
 
     private HttpCacheEntry entry;
 
+    private PipedInputStream bufferPipeIn;
+
+    private PipedOutputStream bufferedPipeOut;
+
+    private UmHttpResponse networkResponse;
+
+    boolean bodyReturned = false;
+
+    ResponseCompleteListener responseCompleteListener;
+
+    private UmHttpRequest request;
+
+    private int maxPipeBuffer = 2 * 1024 * 1024;
+
+    private byte[] byteBuf;
 
 
-    public HttpCacheResponse(HttpCacheEntry entry) {
+    interface ResponseCompleteListener {
+        void onResponseComplete(HttpCacheResponse response);
+    }
+
+    public HttpCacheResponse(HttpCacheEntry entry, UmHttpRequest request) {
         this.entry = entry;
+        this.request = request;
         setCacheResponse(MISS);
     }
+
+
+    protected void setNetworkResponse(UmHttpResponse response) {
+        this.networkResponse = response;
+    }
+
+    protected UmHttpResponse getNetworkResponse() {
+        return networkResponse;
+    }
+
+    public void run() {
+        pipeNetworkResponseToDisk();
+    }
+
+    protected void initPipe() {
+        String networkLengthHeader = networkResponse.getHeader(UmHttpRequest.HEADER_CONTENT_LENGTH);
+        String networkEncodingHeader = networkResponse.getHeader(UmHttpRequest.HEADER_CONTENT_ENCODING);
+
+        //if the content-length is provided and gzip encoding is not being used, then the maximum
+        //pipe size we need is content-length.
+        int pipeSize = maxPipeBuffer;
+        if(networkLengthHeader != null && (networkEncodingHeader == null || networkEncodingHeader.equals("identity"))) {
+            try {
+                pipeSize = Math.min(maxPipeBuffer, Integer.parseInt(networkLengthHeader));
+            }catch(NumberFormatException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 0, networkLengthHeader, e);
+            }
+        }
+
+        bufferPipeIn = new PipedInputStream(pipeSize);
+
+        try {
+            bufferedPipeOut= new PipedOutputStream(bufferPipeIn);
+        }catch(IOException e) {
+
+        }
+    }
+
+    protected void pipeNetworkResponseToDisk() {
+        InputStream networkIn = null;
+        FileOutputStream fout = null;
+        boolean responseCompleted = false;
+        try {
+            networkIn = networkResponse.getResponseAsStream();
+            fout = new FileOutputStream(entry.getFileUri());
+
+            byte[] buf = new byte[8*1024];
+            int bytesRead;
+            while((bytesRead = networkIn.read(buf)) != -1) {
+                bufferedPipeOut.write(buf,0, bytesRead);
+                fout.write(buf, 0, bytesRead);
+            }
+
+            fout.flush();
+            bufferedPipeOut.flush();
+            responseCompleted = true;
+        }catch(IOException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Exception piping cache response to disk", e);
+        }finally {
+            UMIOUtils.closeInputStream(networkIn);
+            UMIOUtils.closeOutputStream(fout);
+            UMIOUtils.closeOutputStream(bufferedPipeOut);
+        }
+
+        if(responseCompleted && responseCompleteListener != null)
+            responseCompleteListener.onResponseComplete(this);
+    }
+
+    protected void saveNetworkResponseToDiskAndBuffer() {
+        FileOutputStream fout = null;
+        boolean responseCompleted = false;
+        try {
+            byteBuf = networkResponse.getResponseBody();
+            fout = new FileOutputStream(entry.getFileUri());
+            fout.write(byteBuf);
+            fout.flush();
+            responseCompleted = true;
+        }catch(IOException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 0, "Exception writing / buffering response", e);
+        }finally {
+            UMIOUtils.closeOutputStream(fout);
+        }
+
+        if(responseCompleted && responseCompleteListener != null)
+            responseCompleteListener.onResponseComplete(this);
+    }
+
 
     @Override
     public String getHeader(String headerName) {
@@ -38,22 +161,43 @@ public class HttpCacheResponse extends AbstractCacheResponse{
             case UmHttpRequest.HEADER_ETAG:
                 return entry.geteTag();
             case UmHttpRequest.HEADER_EXPIRES:
-                return UMUtil.makeHTTPDate(entry.getExpiresTime());
+                return UMCalendarUtil.makeHTTPDate(entry.getExpiresTime());
 
             default:
                 return null;
         }
     }
 
+    private final void markBodyReturned(){
+        if(bodyReturned)
+            throw new IllegalStateException("HttpCacheResponse: Body already returned");
+
+        bodyReturned = true;
+    }
+
     @Override
     public byte[] getResponseBody() throws IOException {
-        return UMIOUtils.readStreamToByteArray(UstadMobileSystemImpl.getInstance().openFileInputStream(
-                entry.getFileUri()));
+        markBodyReturned();
+        if(networkResponse == null) {
+            return UMIOUtils.readStreamToByteArray(UstadMobileSystemImpl.getInstance().openFileInputStream(
+                    entry.getFileUri()));
+        }else if(byteBuf != null) {
+            return byteBuf;
+        }else {
+            return UMIOUtils.readStreamToByteArray(bufferPipeIn);
+        }
     }
 
     @Override
     public InputStream getResponseAsStream() throws IOException {
-        return UstadMobileSystemImpl.getInstance().openFileInputStream(entry.getFileUri());
+        markBodyReturned();
+        if(networkResponse == null) {
+            return UstadMobileSystemImpl.getInstance().openFileInputStream(entry.getFileUri());
+        }else if(byteBuf != null){
+            return new ByteArrayInputStream(byteBuf);
+        }else {
+            return bufferPipeIn;
+        }
     }
 
     @Override
@@ -74,5 +218,27 @@ public class HttpCacheResponse extends AbstractCacheResponse{
     @Override
     public String getFilePath() {
         return entry.getFileUri();
+    }
+
+    public void setOnResponseCompleteListener(ResponseCompleteListener responseCompleteListener) {
+        this.responseCompleteListener = responseCompleteListener;
+    }
+
+    public HttpCacheEntry getEntry() {
+        return entry;
+    }
+
+    public UmHttpRequest getRequest() {
+        return request;
+    }
+
+    @Override
+    public boolean isFresh(int timeToLive) {
+        return entry.isFresh(timeToLive);
+    }
+
+    @Override
+    public boolean isFresh() {
+        return entry.isFresh();
     }
 }

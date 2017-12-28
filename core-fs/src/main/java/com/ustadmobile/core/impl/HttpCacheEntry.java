@@ -2,9 +2,13 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMUtil;
 
 import org.json.JSONObject;
+
+import java.util.Hashtable;
 
 /**
  * Created by mike on 12/26/17.
@@ -42,7 +46,15 @@ public class HttpCacheEntry {
 
     static final String JSON_KEY_LAST_CHECKED = "lc";
 
+    static final String CACHE_CONTROL_KEY_MAX_AGE = "max-age";
+
     private long lastAccessed;
+
+    /**
+     * The default time for which a cache entry is considered fresh from the time it was last checked
+     * if the server does not provide this information using the cache-control or expires header.
+     */
+    public static final int DEFAULT_TIME_TO_LIVE = (60 * 60 * 1000);
 
 
     public HttpCacheEntry() {
@@ -106,7 +118,7 @@ public class HttpCacheEntry {
         String headerVal = response.getHeader(headerName);
         if(headerVal != null) {
             try {
-                return UMUtil.parseHTTPDate(headerVal);
+                return UMCalendarUtil.parseHTTPDate(headerVal);
             }catch(NumberFormatException e) {
                 return -1L;
             }
@@ -117,6 +129,64 @@ public class HttpCacheEntry {
 
     public long getExpiresTime() {
         return expiresTime;
+    }
+
+    /**
+     * Calculates when an entry will expire based on it's HTTP headers: specifically
+     * the expires header and cache-control header
+     *
+     * As per :  http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html section
+     * 14.9.3 the max-age if present will take precedence over the expires header
+     *
+     * @return -1 if the expiration time calculated from the headers provided if possible, -1 otherwise
+     */
+    public final long calculateEntryExpirationTime() {
+        if(cacheControl != null) {
+            Hashtable ccParams = UMFileUtil.parseParams(cacheControl, ',');
+            if(ccParams.containsKey(CACHE_CONTROL_KEY_MAX_AGE)) {
+                long maxage = Integer.parseInt((String)ccParams.get(CACHE_CONTROL_KEY_MAX_AGE));
+                return lastChecked + (maxage * 1000);
+            }
+        }
+
+        if(expiresTime >= 0) {
+            return expiresTime;
+        }
+
+        return -1;
+    }
+
+    /**
+     * Determine if the entry is considered fresh.
+     *
+     * @see #calculateEntryExpirationTime()
+     *
+     * @param timeToLive the time since when this entry was last checked for which the entry will be
+     *                   considered fresh if the cache-control headers and expires headers do not
+     *                   provide this information.
+     *
+     * @return true if the entry is considered fresh, false otherwise
+     */
+    public boolean isFresh(int timeToLive) {
+        long expiryTime = calculateEntryExpirationTime();
+        long timeNow = System.currentTimeMillis();
+        if(expiryTime != -1 && expiryTime > timeNow) {
+            return true;
+        }else {
+            return lastChecked + timeToLive > timeNow;
+        }
+    }
+
+    /**
+     * Determine if the entry is considered fresh. This simply calls isFresh with the
+     * DEFAULT_TIME_TO_LIVE as the timeToLive parameter.
+     *
+     * @see #isFresh(int)
+     *
+     * @return true if the entry is considered fresh, false otherwise
+     */
+    public boolean isFresh() {
+        return isFresh(DEFAULT_TIME_TO_LIVE);
     }
 
     public void setExpiresTime(long expiresTime) {

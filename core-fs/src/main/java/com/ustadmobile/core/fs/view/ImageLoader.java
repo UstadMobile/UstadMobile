@@ -4,6 +4,7 @@ import com.ustadmobile.core.controller.ControllerLifecycleListener;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.AbstractCacheResponse;
 import com.ustadmobile.core.impl.HttpCache;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
 import com.ustadmobile.core.impl.http.UmHttpCall;
@@ -13,8 +14,9 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 
 import java.io.IOException;
 import java.util.Hashtable;
-import java.util.Timer;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Ustad Mobile Image Loader. The Image Loader is cross platform and should work on any platform
@@ -39,16 +41,14 @@ import java.util.Vector;
  */
 public class ImageLoader implements ControllerLifecycleListener {
 
-    private Timer cacheLoadTimer;
-
-    private Timer networkLoadTimer;
-
     /**
      * Hashtable of controller -> Vector of tasks that are associated with that controller
      */
     private Hashtable tasksByController;
 
-    private class ImageLoaderTask implements UmHttpResponseCallback{
+    private ExecutorService executorService = Executors.newCachedThreadPool();
+
+    private class ImageLoaderTask implements UmHttpResponseCallback, Runnable{
 
         String url;
 
@@ -56,13 +56,17 @@ public class ImageLoader implements ControllerLifecycleListener {
 
         UstadBaseController controller;
 
-        private boolean cacheResponded;
+        private boolean cacheOnlyCheckComplete;
+
+        private boolean responseIsFresh = false;
 
         private HttpCache cache;
 
         private UmHttpCall currentCall;
 
         private boolean cancelled = false;
+
+        private volatile AbstractCacheResponse responseBuffer;
 
         private ImageLoaderTask(String url, ImageLoadTarget target, UstadBaseController controller) {
             this.url = url;
@@ -76,37 +80,54 @@ public class ImageLoader implements ControllerLifecycleListener {
             synchronized (this) {
                 if(cancelled)
                     return;
-
                 currentCall = cache.get(new UmHttpRequest(url).setOnlyIfCached(true), this);
             }
         }
 
-        private void handleCacheResponded() {
-            cacheResponded = true;
-            synchronized (this) {
-                if(cancelled)
-                    return;
+        private synchronized void handleCacheResponded() {
+            cacheOnlyCheckComplete = true;
+            if(cancelled)
+                return;
 
+            if(!responseIsFresh)
                 currentCall = cache.get(new UmHttpRequest(url), this);
-            }
         }
 
         @Override
         public void onComplete(UmHttpCall call, UmHttpResponse response) {
-            if(!cacheResponded) {
-                handleCacheResponded();
-            }else {
-                //task is complete
-                removeTaskForController(controller, this);
+            synchronized (this) {
+                this.responseBuffer = (AbstractCacheResponse)response;
+                responseIsFresh = responseBuffer.isFresh();
             }
 
-            //TODO: check if the image actually changed since the cached reply
-            target.setImageFromFile(((AbstractCacheResponse)response).getFilePath());
+            executorService.execute(this);
+        }
+
+        public void run() {
+            if(!responseBuffer.isNetworkResponseNotModified()) {
+                try {
+                    target.setImageFromBytes(responseBuffer.getResponseBody());
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }catch(IllegalStateException ie) {
+                    ie.printStackTrace();
+                }
+            }
+
+            responseBuffer = null;
+
+            if(cacheOnlyCheckComplete) {
+                //task is complete
+                removeTaskForController(controller, this);
+            }else {
+                handleCacheResponded();
+            }
         }
 
         @Override
         public void onFailure(UmHttpCall call, IOException exception) {
-            if(!cacheResponded) {
+            if(!cacheOnlyCheckComplete) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 0, this + " not cached");
                 handleCacheResponded();
             }
         }
@@ -126,17 +147,27 @@ public class ImageLoader implements ControllerLifecycleListener {
     }
 
     /**
-     *
+     * Represents a consumer that expects to display the image loaded.
      */
     public interface ImageLoadTarget {
 
-        void setImageFromFile(String filePath);
+
+        /**
+         * Called when image data is available. This may be called up to two times:
+         *  Firstly if a cached version of the image is available, called before the entry has been validated
+         *  Secondly if a network request yields an updated version of the image, or if no cached version
+         *  was available
+         *
+         *  This method will be called on an executorservice thread seperate to the UI. It is thus
+         *  suitable for performing decoding directly in the implementation of this method.
+         *
+         * @param bytes Image data as a byte buffer as it was returned from the network or cache
+         */
+        void setImageFromBytes(byte[] bytes);
 
     }
 
     public ImageLoader() {
-        cacheLoadTimer = new Timer();
-        networkLoadTimer = new Timer();
         tasksByController = new Hashtable();
     }
 

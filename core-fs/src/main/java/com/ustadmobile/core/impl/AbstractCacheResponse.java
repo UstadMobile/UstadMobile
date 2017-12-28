@@ -30,6 +30,8 @@ public abstract class AbstractCacheResponse extends UmHttpResponse{
      */
     public static final int HIT_VALIDATED = 2;
 
+    private boolean isNetworkResponseNotModified;
+
 
     protected void setCacheResponse(int cacheResponse) {
         this.cacheResponse = cacheResponse;
@@ -64,5 +66,29 @@ public abstract class AbstractCacheResponse extends UmHttpResponse{
      */
     public abstract String getFilePath();
 
+
+    protected void setNetworkResponseNotModified(boolean networkResponseNotModified) {
+        this.isNetworkResponseNotModified = networkResponseNotModified;
+    }
+
+    /**
+     * Indicates that this response is from the network, where the network server replied 304. Thus
+     * if something has already been displayed using a request set to onlyIfCached, that response is
+     * accurate is still valid and nothing needs to be changed/done.
+     *
+     * @return boolean indicating if this is a 304 response
+     */
+    public boolean isNetworkResponseNotModified() {
+        return isNetworkResponseNotModified;
+    }
+
+    /**
+     * Indicates if the cache entry is fresh. The entry
+     * @param timeToLive
+     * @return
+     */
+    public abstract boolean isFresh(int timeToLive);
+
+    public abstract boolean isFresh();
 
 }

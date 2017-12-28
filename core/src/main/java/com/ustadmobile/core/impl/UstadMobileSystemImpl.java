@@ -861,6 +861,10 @@ public abstract class UstadMobileSystemImpl {
      */
     protected abstract UmHttpResponse sendRequestSync(UmHttpRequest request) throws IOException;
 
+
+    public abstract UmHttpResponse makeRequestSync(UmHttpRequest request) throws IOException;
+
+
     /**
      * Mount a container (e.g. epub, xapi package, etc) so it can be accessed using makeRequest. This
      * normally means making the contents of a zip file accessible over http , e.g.

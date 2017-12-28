@@ -1,5 +1,8 @@
 package com.ustadmobile.core.opds;
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.util.UMIOUtils;
 
 import java.io.IOException;
@@ -33,9 +36,11 @@ class UstadJSOPDSItemAsyncHelper implements Runnable {
     public void run() {
         InputStream in = null;
         IOException ioe = null;
+        UmHttpResponse response;
         try {
-            HttpURLConnection urlConnection = (HttpURLConnection)new URL(item.asyncLoadUrl).openConnection();
-            in = urlConnection.getInputStream();
+            response = UstadMobileSystemImpl.getInstance().makeRequestSync(
+                    new UmHttpRequest(item.asyncLoadUrl));
+            in = response.getResponseAsStream();
             item.loadFromInputStream(in);
         }catch(IOException e) {
             ioe = e;

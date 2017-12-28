@@ -75,7 +75,6 @@ import java.util.UUID;
 import java.util.Vector;
 
 import listener.ActiveUserListener;
-import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -111,7 +110,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     public void init(Object context) {
         super.init(context);
 
-        httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
+        if(httpCache == null)
+            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
     }
 
     /**
@@ -686,6 +686,11 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         Request.Builder httpRequest = new Request.Builder().url(request.getUrl());
         Call call = client.newCall(httpRequest.build());
         return new UmHttpResponseSe(call.execute());
+    }
+
+    @Override
+    public UmHttpResponse makeRequestSync(UmHttpRequest request) throws IOException {
+        return httpCache.getSync(request);
     }
 
     @Override

@@ -59,4 +59,14 @@ public class FileProtocolCacheResponse extends AbstractCacheResponse {
     public String getFilePath() {
         return file.getAbsolutePath();
     }
+
+    @Override
+    public boolean isFresh(int timeToLive) {
+        return true;
+    }
+
+    @Override
+    public boolean isFresh() {
+        return true;
+    }
 }

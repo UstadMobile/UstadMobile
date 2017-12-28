@@ -145,9 +145,11 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     }
 
     public void onDestroy() {
+        super.onDestroy();
         if(opdsChangeListenerRegistered) {
             OpdsEndpoint.getInstance().removeOpdsChangeListener(this);
         }
+        UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 
 

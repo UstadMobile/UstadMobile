@@ -5,17 +5,16 @@ import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUUID;
-import com.ustadmobile.core.util.UMUtil;
 
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
@@ -25,9 +24,9 @@ import java.util.concurrent.Executors;
 /**
  * Created by mike on 12/26/17.
  *
- * The HttpCache provides transparent async http caching, as well as the ability to 'prime' the cache
- * by pre-loading it. It will be expanded to support saving cache entries in multiple directories so
- * that certain items can be 'subscribed' to and thus will not be eligible for deletion.
+ * The HttpCache provides transparent synchronous and async http caching, as well as the ability to
+ * 'prime' the cache by pre-loading it. It will be expanded to support saving cache entries in multiple
+ * directories so that certain items can be 'subscribed' to and thus will not be eligible for deletion.
  *
  * The HttpCache will store etag and last modified information, and (mostly) obey http cache-control
  * and related headers.
@@ -36,7 +35,7 @@ import java.util.concurrent.Executors;
  * protected and accessed by this class, but it won't be accessible to other classes that
  * shouldn't use it (e.g. presenters).
  */
-public class HttpCache {
+public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
 
     private String sharedDir;
 
@@ -66,42 +65,57 @@ public class HttpCache {
         //Handler that deals with the http request, if an outgoing request is actually sent
         private UmHttpResponseHandler httpResponseHandler;
 
-        protected Hashtable requestCacheControl;
-
         protected HttpCacheEntry entry;
+
+        private boolean async = true;
 
         private UmHttpCacheCall(UmHttpRequest request, UmHttpResponseCallback responseCallback) {
             this.request = request;
             this.responseCallback = responseCallback;
+
+            async = (responseCallback != null);
         }
 
-
-        @Override
-        public void run() {
+        public UmHttpResponse execute() throws IOException {
             final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+            AbstractCacheResponse cacheResponse = null;
 
             if(request.getUrl().startsWith(PROTOCOL_FILE)) {
                 File responseFile = new File(UMFileUtil.stripPrefixIfPresent("file://",
                         request.getUrl()));
-                responseCallback.onComplete(this, new FileProtocolCacheResponse(responseFile));
-                return;
+                cacheResponse = new FileProtocolCacheResponse(responseFile);
+                if(async) {
+                    responseCallback.onComplete(this, cacheResponse);
+                }
+
+                return cacheResponse;
             }
 
             HttpCacheEntry entry = getEntry(request.getUrl());
             if(entry != null) {
-                long expirationTime = calculateExpiryTime(entry.getCacheControl(), entry.getExpiresTime(),
-                        entry.getLastChecked() + defaultTimeToLive);
-                if(request.isOnlyIfCached() ||
-                        !(request.mustRevalidate() && expirationTime > System.currentTimeMillis())) {
-                    HttpCacheResponse cacheResponse = new HttpCacheResponse(entry);
+                int timeToLive = request.mustRevalidate() ? 0 : defaultTimeToLive;
+                if(entry.isFresh(timeToLive) || request.isOnlyIfCached()) {
+                    cacheResponse = new HttpCacheResponse(entry, request);
                     cacheResponse.setCacheResponse(HttpCacheResponse.HIT_DIRECT);
+                    UstadMobileSystemImpl.l(UMLog.INFO, 384, "Cache:HIT_DIRECT: "
+                            + request.getUrl());
                     //no validation required - directly return the cached response
-                    responseCallback.onComplete(this, cacheResponse);
-                    return;
+                    if(async) {
+                        responseCallback.onComplete(this, cacheResponse);
+                    }
+                    return cacheResponse;
+
                 }
             }else if(request.isOnlyIfCached() && entry == null) {
-                responseCallback.onFailure(this, new FileNotFoundException(request.getUrl()));
-                return;
+                IOException ioe =  new FileNotFoundException(request.getUrl());
+                if(async) {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 386,
+                            "Cache:onlyIfCached: Fail: not cached: " + request.getUrl());
+                    responseCallback.onFailure(this, ioe);
+                    return cacheResponse;
+                }else {
+                    throw ioe;
+                }
             }
 
             //make an http request for this cache entry
@@ -112,12 +126,29 @@ public class HttpCache {
                 }
                 if(entry.getLastModified() > 0) {
                     httpRequest.addHeader("if-modified-since",
-                            UMUtil.makeHTTPDate(entry.getLastModified()));
+                            UMCalendarUtil.makeHTTPDate(entry.getLastModified()));
                 }
             }
 
             httpResponseHandler = new UmHttpResponseHandler(this);
-            impl.sendRequestAsync(httpRequest, httpResponseHandler);
+            if(async) {
+                impl.sendRequestAsync(httpRequest, httpResponseHandler);
+            }else {
+                httpResponseHandler.response = impl.sendRequestSync(httpRequest);
+                return httpResponseHandler.execute();
+
+            }
+
+            return null;
+        }
+
+        @Override
+        public void run() {
+            try {
+                execute();
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 73, request.getUrl(), e);
+            }
         }
 
 
@@ -154,10 +185,20 @@ public class HttpCache {
 
         @Override
         public void run() {
-            HttpCacheResponse cacheResponse = cacheResponse(cacheCall.request, response);
-            cacheCall.responseCallback.onComplete(cacheCall, cacheResponse);
+            execute();
+        }
+
+        public AbstractCacheResponse execute() {
+            HttpCacheResponse cacheResponse = cacheResponse(cacheCall.request, response, !cacheCall.async);
+
+            if(cacheCall.async) {
+                cacheCall.responseCallback.onComplete(cacheCall, cacheResponse);
+            }
+
+            return cacheResponse;
         }
     }
+
 
 
 
@@ -201,6 +242,26 @@ public class HttpCache {
         return cacheCall;
     }
 
+    /**
+     * Performs an http request synchronously. Returns as soon as the the connection is established.
+     * The response will be simultaneously saved to the disk as it's read. If the response comes from
+     * the network, this is done using an executor to fork a thread that simultaneously writes to a
+     * fileoutputstream to cache the entry to disk and writes to a pipedoutputstream, which connects
+     * with a pipedinputstream providing the response to the consumer.
+     *
+     * The client is expected to read the entire response. Failing to do so could cause an issue as
+     * the pipedstream has a limited buffer size.
+     *
+     * @param request HttpRequest object for the request
+     *
+     * @return AbstractCacheResponse object representing the http response.
+     * @throws IOException If an IOException occurs
+     */
+    public UmHttpResponse getSync(UmHttpRequest request) throws IOException{
+        UmHttpCacheCall cacheCall = new UmHttpCacheCall(request, null);
+        return cacheCall.execute();
+    }
+
 
     private HttpCacheEntry getEntry(String url) {
         JSONObject entryObj = cacheDb.optJSONObject(url);
@@ -213,41 +274,50 @@ public class HttpCache {
         return entry;
     }
 
-    public HttpCacheResponse cacheResponse(UmHttpRequest request, UmHttpResponse response) {
+    public HttpCacheResponse cacheResponse(UmHttpRequest request, UmHttpResponse networkResponse,
+                                           boolean forkSaveToDisk) {
         HttpCacheEntry entry = getEntry(request.getUrl());
         if(entry == null) {
             entry = new HttpCacheEntry();
-            entry.setFileUri(generateCacheEntryFileName(request, response, sharedDir));
+            entry.setFileUri(generateCacheEntryFileName(request, networkResponse, sharedDir));
         }
 
-        HttpCacheResponse cacheResponse = new HttpCacheResponse(entry);
+        HttpCacheResponse cacheResponse = new HttpCacheResponse(entry, request);
+        cacheResponse.setNetworkResponse(networkResponse);
+        cacheResponse.getEntry().setLastChecked(System.currentTimeMillis());
+        cacheResponse.getEntry().updateFromResponse(networkResponse);
 
-        if(response.getStatus() != 304) {
-            cacheResponse.setCacheResponse(HttpCacheResponse.MISS);
-            FileOutputStream fout = null;
-            InputStream responseIn = null;
-            try {
-                fout = new FileOutputStream(entry.getFileUri());
-                responseIn = response.getResponseAsStream();
-                UMIOUtils.readFully(responseIn, fout);
-            }catch(IOException e){
-                UstadMobileSystemImpl.l(UMLog.ERROR, 66, null, e);
-            }finally {
-                UMIOUtils.closeInputStream(responseIn);
-                UMIOUtils.closeOutputStream(fout);
-            }
+        if(networkResponse.getStatus() == 304) {
+            updateCacheIndex(cacheResponse);
+            cacheResponse.setNetworkResponseNotModified(true);
+            UstadMobileSystemImpl.l(UMLog.INFO, 387, "Cache:HIT_VALIDATED:"+ request.getUrl());
         }else {
-            cacheResponse.setCacheResponse(HttpCacheResponse.HIT_VALIDATED);
+            cacheResponse.setOnResponseCompleteListener(this);
+            UstadMobileSystemImpl.l(UMLog.INFO, 385, "Cache:MISS - storing:"+ request.getUrl());
+            if(forkSaveToDisk) {
+                cacheResponse.initPipe();
+                executorService.execute(cacheResponse);
+            }else {
+                cacheResponse.saveNetworkResponseToDiskAndBuffer();
+            }
         }
-
-        long currentTime = System.currentTimeMillis();
-        entry.updateFromResponse(response);
-        entry.setLastAccessed(currentTime);
-        entry.setLastChecked(currentTime);
-
-        cacheDb.put(request.getUrl(), entry.toJson());
 
         return cacheResponse;
+    }
+
+    protected void updateCacheIndex(HttpCacheResponse response) {
+        if(response.getNetworkResponse().getStatus() == 304) {
+            response.setCacheResponse(HttpCacheResponse.HIT_VALIDATED);
+        }
+
+        response.getEntry().setLastAccessed(System.currentTimeMillis());
+
+        cacheDb.put(response.getRequest().getUrl(), response.getEntry().toJson());
+    }
+
+    @Override
+    public void onResponseComplete(HttpCacheResponse response) {
+        updateCacheIndex(response);
     }
 
     private String generateCacheEntryFileName(UmHttpRequest request, UmHttpResponse response,
@@ -281,37 +351,5 @@ public class HttpCache {
 
         return UMUUID.randomUUID().toString() + "." + filenameParts[1];
     }
-
-    /**
-     * Calculates when an entry will expire based on it's HTTP headers: specifically
-     * the expires header and cache-control header
-     *
-     * As per :  http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html section
-     * 14.9.3 the max-age if present will take precedence over the expires header
-     *
-     *
-     * @param cacheControlHeader Cache control header value
-     * @param expires value (in utime) of the expires header
-     *
-     * @param defaultVal Expiry value to use in case headers do not contain max-age or expires
-     *
-     * @return
-     */
-    public static long calculateExpiryTime(String cacheControlHeader, long expires, long defaultVal) {
-        if(cacheControlHeader != null) {
-            Hashtable ccParams = UMFileUtil.parseParams(cacheControlHeader, ',');
-            if(ccParams.containsKey("max-age")) {
-                long maxage = Integer.parseInt((String)ccParams.get("max-age"));
-                return System.currentTimeMillis() + (maxage * 1000);
-            }
-        }
-
-        if(expires >= 0) {
-            return expires;
-        }
-
-        return defaultVal;
-    }
-
 
 }

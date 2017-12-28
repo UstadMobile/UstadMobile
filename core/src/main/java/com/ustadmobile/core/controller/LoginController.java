@@ -41,6 +41,7 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.util.Base64Coder;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.DialogResultListener;
@@ -367,7 +368,7 @@ public class LoginController extends UstadBaseController{
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         view.setVersionLabel(impl.getVersion(context) + " - " +
-                UMUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
+                UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     impl.isHttpsSupported() ? CoreBuildConfig.DEFAULT_XAPI_SERVER : CoreBuildConfig.DEFAULT_XAPI_SERVER_NOSSL,
