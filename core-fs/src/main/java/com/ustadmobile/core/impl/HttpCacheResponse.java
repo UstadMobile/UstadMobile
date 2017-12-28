@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 
@@ -38,7 +39,7 @@ public class HttpCacheResponse extends AbstractCacheResponse{
             case UmHttpRequest.HEADER_ETAG:
                 return entry.geteTag();
             case UmHttpRequest.HEADER_EXPIRES:
-                return UMUtil.makeHTTPDate(entry.getExpiresTime());
+                return UMCalendarUtil.makeHTTPDate(entry.getExpiresTime());
 
             default:
                 return null;

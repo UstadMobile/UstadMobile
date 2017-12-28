@@ -14,14 +14,12 @@ import com.ustadmobile.core.util.UMUtil;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
 import static com.ustadmobile.core.controller.CatalogPresenter.STATUS_ACQUIRED;
-import static com.ustadmobile.core.controller.CatalogPresenter.sanitizeIDForFilename;
 
 /**
  * Created by mike on 9/9/17.
@@ -159,7 +157,7 @@ public class DirectoryScanner {
                                 try {
                                     thumbnailData = entryResult.getThumbnail();
                                     if(thumbnailData == null)
-                                        throw new FileNotFoundException();
+                                        throw new IOException("Thumbnail file not found");
 
                                     String extension = UstadMobileSystemImpl.getInstance()
                                             .getExtensionFromMimeType(entryResult.getThumbnailMimeType());

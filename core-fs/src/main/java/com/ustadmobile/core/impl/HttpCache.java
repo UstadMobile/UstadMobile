@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUUID;
@@ -112,7 +113,7 @@ public class HttpCache {
                 }
                 if(entry.getLastModified() > 0) {
                     httpRequest.addHeader("if-modified-since",
-                            UMUtil.makeHTTPDate(entry.getLastModified()));
+                            UMCalendarUtil.makeHTTPDate(entry.getLastModified()));
                 }
             }
 

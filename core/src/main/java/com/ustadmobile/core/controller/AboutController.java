@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AboutView;
@@ -38,13 +39,13 @@ public class AboutController extends UstadBaseController  {
         }
 
         aboutView.setVersionInfo(impl.getVersion(context) + " - " +
-                UMUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
+                UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
     }
 
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         aboutView.setVersionInfo(impl.getVersion(context) + " - " +
-                UMUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
+                UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
         aboutView.setAboutHTML(aboutHTMLStr);
     }
 

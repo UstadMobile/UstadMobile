@@ -2,6 +2,7 @@ package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMUtil;
 
 import org.json.JSONObject;
@@ -106,7 +107,7 @@ public class HttpCacheEntry {
         String headerVal = response.getHeader(headerName);
         if(headerVal != null) {
             try {
-                return UMUtil.parseHTTPDate(headerVal);
+                return UMCalendarUtil.parseHTTPDate(headerVal);
             }catch(NumberFormatException e) {
                 return -1L;
             }

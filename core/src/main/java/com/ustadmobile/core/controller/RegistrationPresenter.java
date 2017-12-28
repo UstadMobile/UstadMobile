@@ -6,7 +6,6 @@ import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.RegistrationView;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -137,7 +136,7 @@ public class RegistrationPresenter extends UstadBaseController {
         super(context);
     }
 
-    public RegistrationPresenter(Object context, RegistrationView view) throws SQLException {
+    public RegistrationPresenter(Object context, RegistrationView view)  {
         super(context);
         setExtraFields();
         this.view = view;
@@ -165,7 +164,6 @@ public class RegistrationPresenter extends UstadBaseController {
      * @param username  The username of the active user or any other user
      * @param field     The custom field field id/name
      * @return          value
-     * @throws SQLException
      */
     public static String getUserDetail(String username, int field, Object dbContext){
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
