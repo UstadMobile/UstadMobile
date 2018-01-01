@@ -72,6 +72,10 @@
             android:label="@string/settings"
             android:theme="@style/Theme.UstadTheme" />
         <activity
+            android:name="com.ustadmobile.port.android.view.SettingsDataSyncListActivity"
+            android:label="Sync History"
+            android:theme="@style/Theme.UstadTheme" />
+        <activity
             android:name="com.ustadmobile.port.android.view.BasePointActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
         <activity
@@ -99,17 +103,6 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
             android:label="@string/settings"
             android:theme="@style/Theme.UstadTheme" />
-
-        <!-- SyncJob receiver (May not be doing anything) -->
-        <!--
-        <receiver
-            android:name="com.ustadmobile.port.android.job.UMSyncJobCreator$AddReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.evernote.android.job.ADD_JOB_CREATOR"/>
-            </intent-filter>
-        </receiver>
-        -->
 
         <service
             android:name="com.evernote.android.job.gcm.PlatformGcmService"

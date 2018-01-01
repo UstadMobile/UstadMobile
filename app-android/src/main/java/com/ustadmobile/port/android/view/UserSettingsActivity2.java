@@ -124,4 +124,10 @@ public class UserSettingsActivity2 extends UstadBaseActivity implements UserSett
     public void setUserDisplayName(String name) {
         ((TextView)findViewById(R.id.user_profile_full_name)).setText(name);
     }
+
+    @Override
+    public void setLastSyncText(String lastSyncText){
+        ((TextView)findViewById(R.id.user_profile_last_sync)).setText(lastSyncText);
+    }
+
 }

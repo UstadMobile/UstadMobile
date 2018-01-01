@@ -27,8 +27,8 @@ public class TmpSlicer {
 
     public static final String[] LANGUAGES = new String[]{"en", "fa", "ps"};
 
-    public static final String[] TITLES = new String[]{"Mobile Soft Skills Training",
-            "آموزش مهارتهای شغلی از طریق مبایل", "د موبایل له لارې د کاری مهارتونو زده کړه"};
+
+    public static final String[] TITLES = new String[]{"Mobile Soft Skills Training","",""};
 
     public static final String[] MODULES = new String[]{
             "1-cvwriting", "2-coverletter", "3-jobsearch", "4-interview", "5-communication",

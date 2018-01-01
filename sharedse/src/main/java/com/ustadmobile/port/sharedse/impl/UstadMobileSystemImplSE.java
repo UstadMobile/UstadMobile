@@ -71,6 +71,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
+import listener.ActiveSyncListener;
 import listener.ActiveUserListener;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -89,6 +90,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
     protected XapiAgent xapiAgent;
 
     Vector activeUserListener = new Vector();
+    Vector activeSyncListener = new Vector();
+    //ActiveSyncListener activeSyncListener;
 
     private final OkHttpClient client = new OkHttpClient();
 
@@ -717,6 +720,26 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl {
             ((ActiveUserListener)activeUserListener
                     .elementAt(i)).credChanged(cred, context);
         }
+    }
+
+    //ActiveSyncListener:
+    //TODO: Check if gotta remove this.
+
+    public void addActiveSyncListener(ActiveSyncListener listener){
+        activeSyncListener.addElement(listener);
+    }
+
+    public void removeActiveSyncListener(ActiveSyncListener listener){
+        activeSyncListener.removeElement(listener);
+    }
+
+    public void fireSetSyncHappeningEvent(boolean happening, Object context){
+        for(int i = 0; i < activeSyncListener.size(); i++) {
+            ( (ActiveSyncListener)
+                    activeSyncListener.elementAt(i)
+            ).setSyncHappening(happening, context);
+        }
+
     }
 
     @Override

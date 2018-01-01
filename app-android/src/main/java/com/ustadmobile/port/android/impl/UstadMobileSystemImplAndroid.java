@@ -79,6 +79,7 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.RegistrationView;
+import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView;
 import com.ustadmobile.core.view.UserSettingsView2;
@@ -110,6 +111,7 @@ import com.ustadmobile.port.android.view.LoginDialogFragment;
 import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
 import com.ustadmobile.port.android.view.SendCourseDialogFragment;
+import com.ustadmobile.port.android.view.SettingsDataSyncListActivity;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity;
 import com.ustadmobile.port.android.view.UserSettingsActivity2;
@@ -181,6 +183,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(CatalogView.VIEW_NAME, CatalogActivity.class);
         viewNameToAndroidImplMap.put(UserSettingsView.VIEW_NAME, UserSettingsActivity.class);
         viewNameToAndroidImplMap.put(SettingsDataUsageView.VIEW_NAME, SettingsDataUsageActivity.class);
+        viewNameToAndroidImplMap.put(SettingsDataSyncListView.VIEW_NAME, SettingsDataSyncListActivity.class);
         //Account settings:
         //viewNameToAndroidImplMap.put(AccountSettingsView.VIEW_NAME, AccountSettingsActivity.class);
         viewNameToAndroidImplMap.put(BasePointView.VIEW_NAME, BasePointActivity.class);

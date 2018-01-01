@@ -14,4 +14,6 @@ public interface UserSettingsView2 extends  UstadView{
 
     void refreshLanguage();
 
+    void setLastSyncText(String lastSyncText);
+
 }
