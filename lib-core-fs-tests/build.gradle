@@ -1,0 +1,51 @@
+apply plugin: 'java-library'
+
+buildscript {
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    dependencies {
+        classpath 'gradle.plugin.de.fuerstenau:BuildConfigPlugin:1.1.7'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(":core")
+    compile project(":sharedse")
+    compile project(":core-tests")
+
+    compile 'junit:junit:4.12'
+}
+
+jar {
+    exclude("com/ustadmobile/test/core/impl/PlatformTestUtil.class")
+}
+
+
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+/*
+ * When running in test mode we use getClass.getResource to load assets.
+ */
+task copyCoreResources(type: Copy) {
+    from "${projectDir}/../core/src/main/assets"
+    into "${buildDir}/classes/main/res"
+}
+
+processResources.dependsOn(copyCoreResources)
+
+task generateCoreFsTestsBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTask) {
+    inputs.file("../buildconfig.default.properties")
+    inputs.file("../buildconfig.local.properties")
+    outputDir = new File("${projectDir}/src/main/java")
+    clsName = "TestConstantsCoreFs"
+    packageName = "com.ustadmobile.core.fs.buildconfig"
+    buildConfigField "String", "TEST_JDBC_URL", rootProject.ext.buildConfigProperties["test.jdbc.url"]
+    buildConfigField "String", "TEST_JDBC_URL_ENDPOINT", rootProject.ext.buildConfigProperties["test.jdbc.url.endpoint"]
+}
+compileJava.dependsOn(generateCoreFsTestsBuildConfig)

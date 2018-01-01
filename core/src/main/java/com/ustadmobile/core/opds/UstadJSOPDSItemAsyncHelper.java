@@ -39,7 +39,7 @@ class UstadJSOPDSItemAsyncHelper implements Runnable {
         UmHttpResponse response;
         try {
             response = UstadMobileSystemImpl.getInstance().makeRequestSync(
-                    new UmHttpRequest(item.asyncLoadUrl));
+                    new UmHttpRequest(item.asyncContext, item.asyncLoadUrl));
             in = response.getResponseAsStream();
             item.loadFromInputStream(in);
         }catch(IOException e) {

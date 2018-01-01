@@ -165,8 +165,8 @@ public class ContainerController extends UstadBaseController {
         public void onSuccess(Object result) {
             mountedUrl = (String) result;
             String containerUri = UMFileUtil.joinPaths(new String[]{mountedUrl, OCF_CONTAINER_PATH});
-            containerXmlCall = UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(containerUri),
-                    containerHttpCallbackHandler);
+            containerXmlCall = UstadMobileSystemImpl.getInstance().makeRequestAsync(
+                    new UmHttpRequest(getContext(), containerUri), containerHttpCallbackHandler);
         }
 
         @Override
@@ -189,8 +189,8 @@ public class ContainerController extends UstadBaseController {
                     //get and parse the first publication
                     String opfUrl = UMFileUtil.joinPaths(new String[]{mountedUrl,
                             ocf.rootFiles[0].fullPath});
-                    UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(opfUrl),
-                            opfHttpCallbackHandler);
+                    UstadMobileSystemImpl.getInstance().makeRequestAsync(
+                            new UmHttpRequest(getContext(), opfUrl), opfHttpCallbackHandler);
 
                 }catch(IOException e) {
                     e.printStackTrace();
@@ -245,8 +245,8 @@ public class ContainerController extends UstadBaseController {
                 String navXhtmlUrl = UMFileUtil.resolveLink(UMFileUtil.joinPaths(new String[]{
                         mountedUrl, ocf.rootFiles[0].fullPath}), opf.getNavItem().href);
 
-                UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(navXhtmlUrl),
-                        navCallbackHandler);
+                UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(
+                        getContext(), navXhtmlUrl), navCallbackHandler);
             }catch(IOException e) {
                 e.printStackTrace();
             }catch(XmlPullParserException x) {

@@ -62,6 +62,7 @@ public class XapiPackagePresenter extends UstadBaseController {
         public void onSuccess(Object result) {
             mountedPath = (String)result;
             UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(
+                    getContext(),
                     UMFileUtil.joinPaths(new String[]{mountedPath, "tincan.xml"})),
                     tincanXmlResponseCallback);
         }

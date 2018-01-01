@@ -1,0 +1,12 @@
+apply plugin: 'java-library'
+
+dependencies {
+    compile "com.j256.ormlite:ormlite-core:5.0"
+    compile project (":core")
+    compile project (":lib-core-fs")
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"

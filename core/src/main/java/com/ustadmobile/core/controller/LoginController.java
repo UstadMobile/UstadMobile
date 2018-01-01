@@ -203,8 +203,9 @@ public class LoginController extends UstadBaseController{
      * @throws IOException if something goes wrong with the lookup
      * @return two letter country code of the country based on user's IP address.
      */
-    public static void getCountryCode(String serverURL, final UmCallback callback) {
-        UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(serverURL), new UmHttpResponseCallback() {
+    public static void getCountryCode(Object context, String serverURL, final UmCallback callback) {
+        UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(context, serverURL),
+                new UmHttpResponseCallback() {
 
             public void onComplete(UmHttpCall call, UmHttpResponse response) {
                 if(response.isSuccessful()) {

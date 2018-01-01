@@ -8,6 +8,12 @@ task runOrmLiteGeneration(type: JavaExec) {
 dependencies {
     compile project(":core")
     compile project(":sharedse")
+    compile project(":lib-core-fs")
+    compile project(':lib-core-fs-jcommon')
+
+    compile "com.j256.ormlite:ormlite-core:5.0"
+    compile "com.j256.ormlite:ormlite-jdbc:5.0"
+
     compile "org.json:json:20160212"
     compile "net.sf.kxml:kxml2:2.3.0"
 }

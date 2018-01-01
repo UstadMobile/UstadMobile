@@ -149,7 +149,7 @@ public class LoginFragment extends Fragment {
 
     public void lookupCountry(final Spinner countrySpinner, final Activity activity) {
         final Context ctx = getActivity();
-        LoginController.getCountryCode(UstadMobileDefaults.DEFAULT_GEOIP_SERVER, new UmCallback() {
+        LoginController.getCountryCode(ctx, UstadMobileDefaults.DEFAULT_GEOIP_SERVER, new UmCallback() {
             @Override
             public void onSuccess(Object result) {
                 String countryCode = (String)result;
