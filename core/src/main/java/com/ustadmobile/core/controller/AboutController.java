@@ -1,13 +1,15 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.HTTPCacheDir;
+import com.ustadmobile.core.util.UMCalendarUtil;
+import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.UstadView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.Hashtable;
 
 
@@ -15,49 +17,41 @@ import java.util.Hashtable;
  * Created by mike on 12/27/16.
  */
 
-public class AboutController extends UstadBaseController implements AsyncLoadableController {
+public class AboutController extends UstadBaseController  {
 
     AboutView aboutView;
 
     private String aboutHTMLStr;
 
-    public AboutController(Object context){
+    public AboutController(Object context, AboutView view){
         super(context);
+        this.aboutView = view;
     }
 
-    public UstadController loadController(Hashtable args, Object context) throws Exception {
-        AboutController controller = new AboutController(context);
-        InputStream aboutIn = UstadMobileSystemImpl.getInstance().openResourceInputStream(
-            "com/ustadmobile/core/about.html", context);
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        byte[] buf = new byte[1024];
-        int bytesRead;
-        while((bytesRead = aboutIn.read(buf)) != -1) {
-            bout.write(buf, 0, bytesRead);
+    public void onCreate(Hashtable args, Hashtable savedState) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        try {
+            aboutHTMLStr = UMIOUtils.readStreamToString(impl.openResourceInputStream(
+                    "com/ustadmobile/core/about.html", context));
+            aboutView.setAboutHTML(aboutHTMLStr);
+        }catch(IOException e) {
+            UstadMobileSystemImpl.l(UMLog.ERROR, 0, null, e);
         }
 
-        aboutIn.close();
-        controller.aboutHTMLStr = new String(bout.toByteArray());
-
-        return controller;
+        aboutView.setVersionInfo(impl.getVersion(context) + " - " +
+                UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
     }
 
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         aboutView.setVersionInfo(impl.getVersion(context) + " - " +
-                HTTPCacheDir.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
+                UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
         aboutView.setAboutHTML(aboutHTMLStr);
-    }
-
-    public static void makeControllerForView(Hashtable args, ControllerReadyListener listener, UstadView view) {
-        AboutController loadCtrl = new AboutController(view.getContext());
-        new LoadControllerThread(args,loadCtrl, listener, view).start();
     }
 
     public void setView(UstadView view) {
         super.setView(view);
         aboutView = (AboutView)view;
-        setUIStrings();
     }
 
 

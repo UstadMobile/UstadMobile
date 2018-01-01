@@ -52,7 +52,14 @@ public class EpubHtmlFilterSerializer {
         xs.startDocument("UTF-8", false);
         UMUtil.passXmlThrough(xpp, xs, true, new UMUtil.PassXmlThroughFilter() {
             @Override
-            public boolean beforePassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer) {
+            public boolean beforePassthrough(int evtType, XmlPullParser parser, XmlSerializer serializer) throws IOException {
+                if(evtType == XmlPullParser.END_TAG && parser.getName().equals("head")) {
+                    serializer.startTag(parser.getNamespace(), "meta");
+                    serializer.attribute(parser.getNamespace(), "name", "viewport");
+                    serializer.attribute(parser.getNamespace(), "content",
+                            "height=device-height, initial-scale=1,user-scalable=no");
+                    serializer.endTag(parser.getNamespace(), "meta");
+                }
                 return true;
             }
 

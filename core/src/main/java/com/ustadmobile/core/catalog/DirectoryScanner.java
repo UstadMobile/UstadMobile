@@ -14,14 +14,12 @@ import com.ustadmobile.core.util.UMUtil;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Vector;
 
 import static com.ustadmobile.core.controller.CatalogPresenter.STATUS_ACQUIRED;
-import static com.ustadmobile.core.controller.CatalogPresenter.sanitizeIDForFilename;
 
 /**
  * Created by mike on 9/9/17.
@@ -30,39 +28,55 @@ import static com.ustadmobile.core.controller.CatalogPresenter.sanitizeIDForFile
 public class DirectoryScanner {
 
     /**
-     * Flag for use with scanFiles: indicates that the feed acquisition links should be set using
-     * with file uris
+     * Flag to indicate that links added (acquisition and thumbnail) should be absolute file URLs in
+     * the form of file:///path/to/file.ext
      */
-    public static final int LINK_HREF_MODE_FILE = 0;
+    public static final int LINK_HREF_MODE_ABSOLUTE = 0;
 
     /**
-     * Flag for use with setLinkHrefMode: indicates that the feed acquisition links should be set
-     * using ids e.g. baseHref/containerId
+     * Flag to indicate that links added (acquisition and thumbnail) should be relative file names
+     * e.g. file.ext
+     */
+    public static final int LINK_HREF_MODE_RELATIVE = 2;
+
+
+    /**
+     * Flag to indicate that links added (acquisition and thumbnail) should be added using the
+     * entry ID and not the actual filename
      */
     public static final int LINK_HREF_MODE_ID = 1;
 
     private int linkHrefMode;
 
-    private String hrefModeBaseHref;
+    private String acquisitionLinkHrefPrefix;
+
+    private int thumbnailHrefMode;
+
+    private String entryThumbnailLinkHrefPrefix;
 
     public DirectoryScanner() {
 
     }
 
     /**
+     * Scan the given directory for content of supported types and return an OPDS feed of content
+     * found.
      *
-     * @param directoryUri
-     * @param cacheDirUri
+     * @param directoryUri The directory to scan
+     * @param cacheDirUri The directory to use for thumbnails (possibly in future to cache extracted opds
      * @param feed A feed to add discovered entries to. Can be null, in which case a new feed object
      *             will be created.
+     * @param resourceMode When entries are scanned they will be added to the catalogentryinfo database.
+     *         This parameter will determine if they are deemed to be system wide shared resources
+     *         or user specific resources.
      *
-     * @return
+     * @return UstadJSOPDSFeed object with entries for each item found in the given directory.
      */
     public UstadJSOPDSFeed scanDirectory(String directoryUri, String cacheDirUri, String title,
                                          String feedId, int resourceMode,
                                          UstadJSOPDSItem.OpdsItemLoadCallback callback,
                                          UstadJSOPDSFeed feed, Object context){
-        String baseHref = linkHrefMode == LINK_HREF_MODE_ID ? hrefModeBaseHref : directoryUri;
+        String baseHref = linkHrefMode == LINK_HREF_MODE_ID ? acquisitionLinkHrefPrefix : directoryUri;
         if(feed == null)
             feed  = new UstadJSOPDSFeed(UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHref),
                 title, feedId);
@@ -78,6 +92,7 @@ public class DirectoryScanner {
             }
 
             String fileExt;
+            String containerLinkHref;
             int j, k;
             ContentTypePlugin.EntryResult entryResult;
             UstadJSOPDSFeed fileFeed;
@@ -85,7 +100,8 @@ public class DirectoryScanner {
             InputStream linkFeedIn = null;
 
             UstadJSOPDSEntry entry;
-            Vector acquisitionLinks;
+            String[] acquisitionLink;
+
             String fileUri;
             String linkFeedUri;
             String cacheEntryUri;
@@ -106,7 +122,7 @@ public class DirectoryScanner {
                     if(UMUtil.getIndexInArray(fileExt, supportedTypePlugins[j].getFileExtensions()) != -1) {
                         entryResult = supportedTypePlugins[j].getEntry(fileUri, cacheDirUri);
 
-                        if(entryResult == null || entryResult.getFeed().size() < 1)
+                        if(entryResult == null || entryResult.getFeed().size() == 0)
                             continue;//see if another plugin can handle it
 
                         fileFeed = entryResult.getFeed();
@@ -131,35 +147,35 @@ public class DirectoryScanner {
 
                         for(k = 0; k < fileFeed.entries.length; k++) {
                             entry =new UstadJSOPDSEntry(feed, fileFeed.entries[k]);
+                            containerLinkHref = generateLink(fileUri, acquisitionLinkHrefPrefix,
+                                    null, entry.id, linkHrefMode);
 
-                            //If this is a catalog being made to serve over HTTP : replace acquisition HREF with a base path followed by the ID
-                            if(linkHrefMode == LINK_HREF_MODE_ID) {
-                                acquisitionLinks = entry.getAcquisitionLinks();
-                                if(acquisitionLinks != null && acquisitionLinks.size() > 0) {
-                                    String[] links = (String[])acquisitionLinks.elementAt(0);
-                                    links[UstadJSOPDSItem.ATTR_HREF] = UMFileUtil.joinPaths(new String[]{
-                                            hrefModeBaseHref, entry.id});
-                                }
-                            }
+                            acquisitionLink = (String[])entry.getAcquisitionLinks().elementAt(0);
+                            acquisitionLink[UstadJSOPDSItem.ATTR_HREF] = containerLinkHref;
 
                             if(entryResult.getThumbnailMimeType() != null) {
                                 try {
                                     thumbnailData = entryResult.getThumbnail();
                                     if(thumbnailData == null)
-                                        throw new FileNotFoundException();
+                                        throw new IOException("Thumbnail file not found");
 
                                     String extension = UstadMobileSystemImpl.getInstance()
                                             .getExtensionFromMimeType(entryResult.getThumbnailMimeType());
-                                    String thumbnailFilename = sanitizeIDForFilename(entry.id)
-                                            + "-thumb." + extension;
+
+                                    String thumbnailFilename = UMFileUtil.removeExtension(
+                                            UMFileUtil.getFilename(fileUri))  + "-tmb." + extension;
                                     String thumbnailAbsolutePath = UMFileUtil.joinPaths(
                                             new String[]{cacheDirUri, thumbnailFilename});
                                     thumbnailOut = impl.openFileOutputStream(thumbnailAbsolutePath, 0);
                                     UMIOUtils.readFully(thumbnailData, thumbnailOut, 8 * 1024);
+
                                     entry.addLink(UstadJSOPDSItem.LINK_REL_THUMBNAIL,
                                             entryResult.getThumbnailMimeType(),
-                                            UMFileUtil.joinPaths(new String[]{"file:///",
-                                                    thumbnailAbsolutePath}));
+                                            generateLink(thumbnailAbsolutePath,
+                                                    entryThumbnailLinkHrefPrefix,
+                                                    null, entry.id,
+                                                    thumbnailHrefMode));
+
                                 }catch(IOException e) {
                                     UstadMobileSystemImpl.l(UMLog.ERROR, 688, null, e);
                                 }finally {
@@ -218,12 +234,38 @@ public class DirectoryScanner {
         return feed;
     }
 
+    private String generateLink(String absoluteFilePath, String idPrefix, String postfix, String entryId,
+                              int linkMode) {
+        String link;
+
+        switch(linkMode) {
+            case LINK_HREF_MODE_ID:
+                link = UMFileUtil.joinPaths(new String[]{
+                        idPrefix, entryId});
+                break;
+
+            case LINK_HREF_MODE_RELATIVE:
+                link = UMFileUtil.getFilename(absoluteFilePath);
+                break;
+
+            default:
+                link = "file://" + absoluteFilePath;
+                break;
+        }
+
+        if(postfix != null)
+            link += postfix;
+
+        return link;
+    }
+
     /**
-     * When generating the output OPDS the acquisition link can be either the file path (default)
-     * or it can be a set prefixed path followed by the ID (e.g. for use with the Http catalog
-     * server where entries are retrieved using /catalog/entry/entry-id
+     * When generating the output OPDS the acquisition link can be an absolute file path (default),
+     * a relative file path, or it can be a set prefixed path followed by the ID (e.g. for use with
+     * the HTTP catalog server where entries are retrieved using /catalog/entry/entry-id
      *
-     * @see #LINK_HREF_MODE_FILE
+     * @see #LINK_HREF_MODE_ABSOLUTE
+     * @see #LINK_HREF_MODE_RELATIVE
      * @see #LINK_HREF_MODE_ID
      *
      * @return the current link href mode
@@ -233,11 +275,13 @@ public class DirectoryScanner {
     }
 
     /**
-     * When generating the output OPDS the acquisition link can be either the file path (default)
-     * or it can be a set prefixed path followed by the ID (e.g. for use with the Http catalog
-     * server where entries are retrieved using /catalog/entry/entry-id
+     * When generating the output OPDS the acquisition link can be an absolute file path (default),
+     * a relative file path, or it can be a set prefixed path followed by the ID (e.g. for use with
+     * the HTTP catalog server where entries are retrieved using /catalog/entry/entry-id
      *
-     * @see #LINK_HREF_MODE_FILE
+     *
+     * @see #LINK_HREF_MODE_ABSOLUTE
+     * @see #LINK_HREF_MODE_RELATIVE
      * @see #LINK_HREF_MODE_ID
      *
      * @param linkHrefMode the mode to use for any future calls to scanDirectory
@@ -247,14 +291,49 @@ public class DirectoryScanner {
     }
 
     /**
-     * If the link mode is set to LINK_HREF_MODE_ID then this is the prefix that will be given before
-     * the id e.g if it is set to /catalog/entry/ and a given entry has the id 12345 the resulting
-     * acquisition link would be /catalog/entry/12345
+     * Same as linkHrefMode - but for the thumbnail link.
      *
-     * @return The prefix if using LINK_HREF_MODE_ID
+     * @see #LINK_HREF_MODE_ABSOLUTE
+     * @see #LINK_HREF_MODE_RELATIVE
+     * @see #LINK_HREF_MODE_ID
+     *
+     * @return the mode to use for generating thumbnail links
      */
-    public String getHrefModeBaseHref() {
-        return hrefModeBaseHref;
+    public int getThumbnailHrefMode() {
+        return thumbnailHrefMode;
+    }
+
+    /**
+     * Same as lnikHrefMode - but for the thumbnail link
+     *
+     * @see #LINK_HREF_MODE_ABSOLUTE
+     * @see #LINK_HREF_MODE_RELATIVE
+     * @see #LINK_HREF_MODE_ID
+     *
+     * @param thumbnailHrefMode the mode to use for generating thumbnail links
+     */
+    public void setThumbnailHrefMode(int thumbnailHrefMode) {
+        this.thumbnailHrefMode = thumbnailHrefMode;
+    }
+
+    /**
+     * If the link mode for thumbnails is set to LINK_HREF_MODE_ID this will be the prefix
+     * to be added. Same as get/set acquisitionLinkHrefPrefix but for the thumbnail link
+     *
+     * @return The prefix to be used for thumbnail links
+     */
+    public String getEntryThumbnailLinkHrefPrefix() {
+        return entryThumbnailLinkHrefPrefix;
+    }
+
+    /**
+     * If the link mode for thumbnails is set to LINK_HREF_MODE_ID this will be the prefix
+     * to be added. Same as get/set acquisitionLinkHrefPrefix but for the thumbnail link
+     *
+     * @param entryThumbnailLinkHrefPrefix The prefix to be used for thumbnail links
+     */
+    public void setEntryThumbnailLinkHrefPrefix(String entryThumbnailLinkHrefPrefix) {
+        this.entryThumbnailLinkHrefPrefix = entryThumbnailLinkHrefPrefix;
     }
 
     /**
@@ -262,9 +341,20 @@ public class DirectoryScanner {
      * the id e.g if it is set to /catalog/entry/ and a given entry has the id 12345 the resulting
      * acquisition link would be /catalog/entry/12345
      *
-     * @param hrefModeBaseHref the prefix to use if using LINK_HREF_MODE_ID
+     * @return The prefix if using LINK_HREF_MODE_ID
      */
-    public void setHrefModeBaseHref(String hrefModeBaseHref) {
-        this.hrefModeBaseHref = hrefModeBaseHref;
+    public String getAcquisitionLinkHrefPrefix() {
+        return acquisitionLinkHrefPrefix;
+    }
+
+    /**
+     * If the link mode is set to LINK_HREF_MODE_ID then this is the prefix that will be given before
+     * the id e.g if it is set to /catalog/entry/ and a given entry has the id 12345 the resulting
+     * acquisition link would be /catalog/entry/12345
+     *
+     * @param acquisitionLinkHrefPrefix the prefix to use if using LINK_HREF_MODE_ID
+     */
+    public void setAcquisitionLinkHrefPrefix(String acquisitionLinkHrefPrefix) {
+        this.acquisitionLinkHrefPrefix = acquisitionLinkHrefPrefix;
     }
 }

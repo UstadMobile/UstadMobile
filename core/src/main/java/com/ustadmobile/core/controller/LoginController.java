@@ -32,23 +32,24 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
-import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.impl.http.UmHttpCall;
+import com.ustadmobile.core.impl.http.UmHttpException;
+import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.util.Base64Coder;
-import com.ustadmobile.core.util.HTTPCacheDir;
+import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.BasePointView;
+import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.UstadView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -125,19 +126,32 @@ public class LoginController extends UstadBaseController{
      * @param username Username to authenticate as
      * @param password Password to authenticate with
      * @param url xAPI statements endpoint to authenticate against
+     * @param
+     *
      * @return HTTP OK 200 if OK, 403 for unauthorized
      * @throws IOException if something goes wrong talking to server
      */
-    public static int authenticate(String username, String password,
-                                   String url) throws IOException{
+    public static void authenticate(String username, String password,
+                                   String url, final UmCallback callback) {
         Hashtable headers = new Hashtable();
         headers.put("X-Experience-API-Version", "1.0.1");
         headers.put("Authorization", LoginController.encodeBasicAuth(username, password));
-        
-        HTTPResult authResult = UstadMobileSystemImpl.getInstance().makeRequest(
-                url, headers, null);
-        return authResult.getStatus();
 
+        UmHttpRequest request = new UmHttpRequest(url, headers);
+        UstadMobileSystemImpl.getInstance().makeRequestAsync(request, new UmHttpResponseCallback() {
+            @Override
+            public void onComplete(UmHttpCall call, UmHttpResponse response) {
+                if(response.isSuccessful())
+                    callback.onSuccess(Integer.valueOf(response.getStatus()));
+                else
+                    callback.onFailure(new UmHttpException(response));
+            }
+
+            @Override
+            public void onFailure(UmHttpCall call, IOException exception) {
+                callback.onFailure(new UmHttpException(exception));
+            }
+        });
     }
     
     /**
@@ -155,85 +169,7 @@ public class LoginController extends UstadBaseController{
         return ht;
     }
     
-    /**
-     * Get the role from the UMCloud server
-     * 
-     * @param username auth username to use with request
-     * @param password auth password to use with request
-     * @param url the API endpoint url
-     * @return
-     * @throws IOException 
-     */
-    public static final String getRole(String username, String password, String url) throws IOException {
-        String role = null;
-        
-        Hashtable headers = LoginController.makeAuthHeaders(username, password);
-        
-        HTTPResult roleResult = UstadMobileSystemImpl.getInstance().makeRequest(
-            url, headers, null);
-        if(roleResult.getStatus() == 200) {
-            try {
-                JSONObject obj = new JSONObject(new String(roleResult.getResponse(), 
-                    "UTF-8"));
-                role = obj.optString("role");
-            }catch(JSONException j) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 185, url, j);
-                throw new IOException(j.toString());
-            }
-        }
-        
-        return role;
-    }
-    
-    /**
-     * 
-     * @param username
-     * @param password
-     * @param url
-     * @return
-     * @throws IOException 
-     */
-    public static String getTeacherClassList(String username, String password, String url) throws IOException {
-        JSONObject result = null;
-        String classListStr = null;
-        
-        HTTPResult classListResult = UstadMobileSystemImpl.getInstance().makeRequest(url, 
-            makeAuthHeaders(username, password), null);
-        if(classListResult.getStatus() == 200) {
-            classListStr = new String(classListResult.getResponse(), "UTF-8");
-            try {
-                JSONArray classArray = new JSONArray(classListStr);
-            }catch(JSONException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 187, 
-                    url+ '/' +  classListStr, e);
-                classListStr = null;
-            }
-            
-        }
-        
-        return classListStr;
-    }
-    
-    public static String getJSONArrayResult(String username, String password, String url) throws IOException {
-        JSONArray arr;
-        String classListStr = null;
-        
-        HTTPResult classListResult  = UstadMobileSystemImpl.getInstance().makeRequest(url, 
-            makeAuthHeaders(username, password), null);
-        if(classListResult.getStatus() == 200) {
-            classListStr = new String(classListResult.getResponse(), "UTF-8");
-            try {
-                arr = new JSONArray(classListStr);
-            }catch(JSONException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 189, 
-                    url+ '/' +  classListStr, e);
-                classListStr = null;
-            }
-        }
-        
-        return classListStr;
-    }
-    
+
     /**
      * Removes the credentials of the current user from the system and goes to the next view
      * specified
@@ -258,40 +194,6 @@ public class LoginController extends UstadBaseController{
         handleLogout(context, LoginView.VIEW_NAME);
     }
 
-
-    /**
-     * Register a new user
-     * @param userInfoParams Hashtable with 
-     *  phonenumber Mandatory: must start with +countrycode
-     *  name  optional - simple string of username
-     *  gender "m" or "f"  - optional - can be blank
-     * 
-     * @param url HTTP endpoint from which to register the user
-     * @return Hashtable with 
-     */
-    public static String registerNewUser(Hashtable userInfoParams, String url) throws IOException{
-        Hashtable headers = new Hashtable();
-        headers.put("UM-In-App-Registration-Version", "1.0.1");
-        HTTPResult registrationResult = UstadMobileSystemImpl.getInstance().makeRequest(url, 
-            headers, userInfoParams, "POST");
-        if(registrationResult.getStatus() != 200) {
-            String serverResponse = new String(registrationResult.getResponse());
-            UstadMobileSystemImpl.l(UMLog.ERROR, 83, registrationResult.getStatus() + ';' +
-                    serverResponse);
-            String errorMessage = "General error: try again later";
-            if(registrationResult.getStatus() >= 400 && registrationResult.getStatus() < 500) {
-                //there may be useful info for the user - e.g. username taken etc
-                
-            }
-
-
-            throw new IOException("Registration error: code " 
-                    + registrationResult.getStatus());
-        }
-        
-        String serverSays = new String(registrationResult.getResponse(), "UTF-8");
-        return serverSays;
-    }
     
     /**
      * Attempt to get the country of the user by looking up their IP address.
@@ -301,19 +203,29 @@ public class LoginController extends UstadBaseController{
      * @throws IOException if something goes wrong with the lookup
      * @return two letter country code of the country based on user's IP address.
      */
-    public static String getCountryCode(String serverURL) throws IOException{
-        String retVal = null;
-        try {
-            HTTPResult httpResponse = UstadMobileSystemImpl.getInstance().makeRequest(
-                serverURL, new Hashtable(), new Hashtable(), "GET");
-            JSONObject jsonResp = new JSONObject(new String(httpResponse.getResponse(), 
-                "UTF-8"));
-            retVal = jsonResp.getString("country_code");
-        }catch(Exception e) {
-            throw new IOException(e.toString());
-        }
-        
-        return retVal;
+    public static void getCountryCode(Object context, String serverURL, final UmCallback callback) {
+        UstadMobileSystemImpl.getInstance().makeRequestAsync(new UmHttpRequest(context, serverURL),
+                new UmHttpResponseCallback() {
+
+            public void onComplete(UmHttpCall call, UmHttpResponse response) {
+                if(response.isSuccessful()) {
+                    try {
+                        JSONObject jsonResp = new JSONObject(new String(response.getResponseBody(),
+                                "UTF-8"));
+                        callback.onSuccess(jsonResp.getString("country_code"));
+                    }catch(IOException e) {
+                        callback.onFailure(e);
+                    }
+                }else {
+                    callback.onFailure(new IOException("get country request failed"));
+                }
+            }
+
+
+            public void onFailure(UmHttpCall call, IOException exception) {
+                callback.onFailure(exception);
+            }
+        });
     }
     
     public static int getCountryIndexByCode(String countryCode) {
@@ -371,6 +283,7 @@ public class LoginController extends UstadBaseController{
     }
     /**
      * Handles what happens when in the app the login button is clicked.
+     *
      * @param username
      * @param password
      * @param xAPIServer
@@ -380,138 +293,51 @@ public class LoginController extends UstadBaseController{
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
         updateXAPIServer(xAPIServer);
-        
-        Thread loginThread = new Thread() {
-            public void run() {
-                impl.getLogger().l(UMLog.DEBUG, 303, null);
-                String serverURL = UMFileUtil.joinPaths(new String[]{xAPIServer, 
-                    "statements?limit=1"});
 
-                int result = 0;
-                String role = null;
-                String teacherClassList = null;
-                IOException ioe = null;
-                boolean authPassed = false;
+        String serverURL = UMFileUtil.joinPaths(new String[]{xAPIServer,
+                "statements?limit=1"});
 
-                try {
-                    result = LoginController.authenticate(username, password,
-                            serverURL);
-                }catch(IOException e) {
-                    ioe = e;
+        LoginController.authenticate(username, password, serverURL, new UmCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                String authHashed = impl.hashAuth(getContext(), password);
+                impl.setAppPref(PREFKEY_AUTHCACHE_PREFIX + username, authHashed, getContext());
+
+                impl.setActiveUser(username, getContext());
+                impl.setActiveUserAuth(password, getContext());
+
+                //Added by Varuna:
+                //create a user locally:
+                impl.createUserLocally(username, password, null, getContext());
+
+                if(resultListener != null) {
+                    resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog)view, null);
+                }else {
+                    UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION,
+                            context);
                 }
+            }
 
-                if(result == 200) {
-                    authPassed = true;
-                    //encrypt and cache the authentication result
-                    String authHashed = impl.hashAuth(getContext(), password);
-                    impl.setAppPref(PREFKEY_AUTHCACHE_PREFIX + username, authHashed, getContext());
-
-                    impl.setActiveUser(username, getContext());
-                    impl.setActiveUserAuth(password, getContext());
-                }
-
-                if(result == 0 || result >= 500) {
-                    //check the cache
-                    String storedAuth = impl.getAppPref(PREFKEY_AUTHCACHE_PREFIX + username, getContext());
-                    String authHashed = impl.hashAuth(getContext(), password);
-                    if(storedAuth != null && authHashed != null && storedAuth.equals(authHashed)) {
-                        //authentication was stored and this matches what we know from before
-                        authPassed = true;
-                    }
-                }
-
-
-                if(result == 401 | result == 403) {
+            @Override
+            public void onFailure(Throwable exception) {
+                UmHttpException httpException = (UmHttpException)exception;
+                int status = httpException.getStatus();
+                if(status == 401 || status == 403) {
                     impl.getAppView(context).dismissProgressDialog();
                     impl.getAppView(context).showAlertDialog(
                             impl.getString(MessageID.error, getContext()),
                             impl.getString(MessageID.wrong_user_pass_combo, getContext()));
-                }else if(!authPassed) {
+                }else {
                     impl.getAppView(context).dismissProgressDialog();
                     UstadMobileSystemImpl.getInstance().getAppView(context).showAlertDialog(
                             impl.getString(MessageID.error, getContext()),
                             impl.getString(MessageID.login_network_error, getContext()));
-                }else {
-                    impl.setActiveUser(username, context);
-                    impl.setActiveUserAuth(password, context);
-
-                    //Added by Varuna:
-                    //create a user locally:
-                    impl.createUserLocally(username, password, null, getContext());
-
-                    impl.getAppView(context).setProgressDialogTitle("Checking user role");
-                    // try and find the role
-                    //TODO
-                    try {
-                        role = LoginController.getRole(username, password,
-                            UMFileUtil.resolveLink(
-                                xAPIServer, UstadMobileDefaults.DEFAULT_ROLE_ENDPOINT));
-
-                        if(role != null && role.equals(UstadMobileConstants.ROLE_TEACHER)) {
-                            impl.getAppView(context).setProgressDialogTitle("Loading teacher classes");
-                            teacherClassList = LoginController.getJSONArrayResult(
-                                    username, password,
-                                    UMFileUtil.resolveLink(xAPIServer,
-                                        UstadMobileDefaults.DEFAULT_CLASSLIST_ENDPOINT));
-                            if(teacherClassList != null) {
-                                impl.setUserPref("teacherclasslist",
-                                        teacherClassList, context);
-                            }
-                        }
-
-                        if(teacherClassList != null) {
-                            try {
-                                JSONArray classArr = new JSONArray(teacherClassList);
-                                for(int i = 0; i < classArr.length(); i++) {
-                                    JSONObject classObj = classArr.getJSONObject(i);
-                                    String classID = classObj.getString("id");
-                                    loadClassListToPrefs(classID, xAPIServer, context);
-                                }
-                            }catch(JSONException e) {
-                                //this should never happen - if it did... getTeacherClassList would have return null
-                            }
-                        }
-
-                    }catch(IOException e) {
-                        ioe = e;
-                    }
-
-
-                    if(role != null) {
-                        UstadMobileSystemImpl.getInstance().setUserPref("role", 
-                            role, context);
-                    }
-
-                    impl.getAppView(context).dismissProgressDialog();
-
-                    if(resultListener != null) {
-                        resultListener.onDialogResult(RESULT_LOGIN_SUCCESSFUL, (DismissableDialog)view, null);
-                    }else {
-                        UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION,
-                                context);
-                    }
                 }
             }
-        };
-        UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.DEBUG, 302, null);
-        impl.getAppView(context).showProgressDialog(
-                impl.getString(MessageID.authenticating, getContext()));
-        loginThread.start();
+        });
     }
 
-    public static void loadClassListToPrefs(String classId, String xapiServer, Object context) throws IOException{
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        String classURL = UMFileUtil.resolveLink(
-                xapiServer,
-                UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
-                + classId;
-        String studentListJSON = LoginController.getJSONArrayResult(impl.getActiveUser(context),
-                impl.getActiveUserAuth(context), classURL);
-        if(studentListJSON != null) {
-            impl.setUserPref("studentlist."+classId, studentListJSON, context);
-        }
-    }
-    
+
     /**
      * Utility merge of what happens after a user is logged in through username/password
      * and what happens after they are newly registered etc.
@@ -543,7 +369,7 @@ public class LoginController extends UstadBaseController{
     public void setUIStrings() {
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         view.setVersionLabel(impl.getVersion(context) + " - " +
-                HTTPCacheDir.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
+                UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));
         String xAPIURL = impl.getAppPref(
                     UstadMobileSystemImpl.PREFKEY_XAPISERVER,
                     impl.isHttpsSupported() ? CoreBuildConfig.DEFAULT_XAPI_SERVER : CoreBuildConfig.DEFAULT_XAPI_SERVER_NOSSL,

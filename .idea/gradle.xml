@@ -14,6 +14,9 @@
             <option value="$PROJECT_DIR$/app-javase" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core-tests" />
+            <option value="$PROJECT_DIR$/lib-core-fs" />
+            <option value="$PROJECT_DIR$/lib-core-fs-jcommon" />
+            <option value="$PROJECT_DIR$/lib-core-fs-tests" />
             <option value="$PROJECT_DIR$/sharedse" />
             <option value="$PROJECT_DIR$/sharedse-tests" />
           </set>

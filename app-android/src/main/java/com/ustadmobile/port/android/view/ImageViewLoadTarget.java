@@ -6,7 +6,7 @@ import android.widget.ImageView;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.view.ImageLoader;
+import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.core.view.UstadView;
 
 /**
@@ -28,8 +28,8 @@ public class ImageViewLoadTarget implements ImageLoader.ImageLoadTarget {
     }
 
     @Override
-    public void setImageFromFile(String filePath) {
-        final Bitmap bitmap = BitmapFactory.decodeFile(filePath);
+    public void setImageFromBytes(byte[] buf) {
+        final Bitmap bitmap = BitmapFactory.decodeByteArray(buf, 0, buf.length);
         if(bitmap != null) {
             ustadView.runOnUiThread(new Runnable() {
                 @Override
@@ -38,7 +38,7 @@ public class ImageViewLoadTarget implements ImageLoader.ImageLoadTarget {
                 }
             });
         }else {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 656, filePath);
+            UstadMobileSystemImpl.l(UMLog.ERROR, 656, "could not set image from bytes");
         }
     }
 }

@@ -31,6 +31,7 @@
 package com.ustadmobile.core.view;
 
 import com.ustadmobile.core.model.CourseProgress;
+import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 
 import java.util.Vector;
@@ -207,5 +208,6 @@ public interface CatalogView extends UstadView{
 
     void setRefreshing(boolean isRefreshing);
 
+    void setFilterOptions(OpdsFilterOptions filterOptions);
 
 }

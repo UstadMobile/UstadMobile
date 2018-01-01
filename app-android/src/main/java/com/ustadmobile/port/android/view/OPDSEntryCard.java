@@ -48,7 +48,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.view.ImageLoader;
+import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.core.view.UstadView;
 
 import java.util.HashMap;
@@ -187,9 +187,8 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     public void setThumbnailUrl(final String url, final UstadBaseController controller, final UstadView view) {
         ImageLoader.getInstance().loadImage(url, new ImageLoader.ImageLoadTarget() {
             @Override
-            public void setImageFromFile(String filePath) {
-                String fileUri = UMFileUtil.stripPrefixIfPresent("file://", filePath);
-                final Bitmap imgBitmap = BitmapFactory.decodeFile(fileUri);
+            public void setImageFromBytes(byte[] buf) {
+                final Bitmap imgBitmap = BitmapFactory.decodeByteArray(buf, 0, buf.length);
                 view.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

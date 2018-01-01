@@ -24,6 +24,7 @@ import java.util.Hashtable;
  *
  * @author varuna
  */
+@Deprecated
 public class ClassManagementController extends UstadBaseController {
 
     /**
@@ -100,36 +101,36 @@ public class ClassManagementController extends UstadBaseController {
             final ClassManagementView view) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         
-        Thread getStudentListThread = new Thread() {
-
-            public void run() {
-                String username = impl.getActiveUser(context);
-                String password = impl.getActiveUserAuth(context);
-                String classURL = UMFileUtil.resolveLink(
-                    CoreBuildConfig.DEFAULT_XAPI_SERVER,
-                    UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
-                        + classID;
-
-                String studentListJSON = null;
-                try {
-                    studentListJSON = LoginController.getJSONArrayResult(
-                            username, password, classURL);
-                } catch (IOException ex) {
-                    System.out.println("Something wrong with getting "
-                            + "Student List: " + ex.toString());
-
-                }
-                if(studentListJSON != null) {
-                    impl.setUserPref("studentlist."+classID,
-                            studentListJSON, context);
-                }
-                AttendanceClassStudent[] students = 
-                        AttendanceController.loadClassStudentListFromPrefs(classID, context);
-                view.updateStudentList(students);
-                
-            }
-        };
-        getStudentListThread.start();
+//        Thread getStudentListThread = new Thread() {
+//
+//            public void run() {
+//                String username = impl.getActiveUser(context);
+//                String password = impl.getActiveUserAuth(context);
+//                String classURL = UMFileUtil.resolveLink(
+//                    CoreBuildConfig.DEFAULT_XAPI_SERVER,
+//                    UstadMobileDefaults.DEFAULT_STUDENTLIST_ENDPOINT)
+//                        + classID;
+//
+//                String studentListJSON = null;
+//                try {
+//                    studentListJSON = LoginController.getJSONArrayResult(
+//                            username, password, classURL);
+//                } catch (IOException ex) {
+//                    System.out.println("Something wrong with getting "
+//                            + "Student List: " + ex.toString());
+//
+//                }
+//                if(studentListJSON != null) {
+//                    impl.setUserPref("studentlist."+classID,
+//                            studentListJSON, context);
+//                }
+//                AttendanceClassStudent[] students =
+//                        AttendanceController.loadClassStudentListFromPrefs(classID, context);
+//                view.updateStudentList(students);
+//
+//            }
+//        };
+//        getStudentListThread.start();
         
         
         //return AttendanceController.loadClassStudentListFromPrefs(classID, context);

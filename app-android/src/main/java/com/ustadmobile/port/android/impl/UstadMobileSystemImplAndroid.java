@@ -287,6 +287,72 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
     }
 
+    /**
+     * Simple async task to handle getting the setup file
+     * Param 0 = boolean - true to zip, false otherwise
+     */
+    private static class GetSetupFileAsyncTask extends AsyncTask<Boolean, Void, String> {
+
+        private Context context;
+
+        private UmCallback doneCallback;
+
+        private GetSetupFileAsyncTask(UmCallback doneCallback, Context context) {
+            this.context = context;
+            this.doneCallback = doneCallback;
+        }
+
+        @Override
+        protected String doInBackground(Boolean... booleans) {
+            File apkFile = new File(((Context)context).getApplicationInfo().sourceDir);
+            String baseName = CoreBuildConfig.BASE_NAME + "-" + CoreBuildConfig.VERSION;
+            FileInputStream apkFileIn = null;
+            Context ctx = (Context)context;
+            File outDir = new File(ctx.getFilesDir(), "shared");
+            if(!outDir.isDirectory())
+                outDir.mkdirs();
+
+            if(booleans[0]) {
+                ZipOutputStream zipOut = null;
+                File outZipFile = new File(outDir, baseName + ".zip");
+                try {
+                    zipOut = new ZipOutputStream(new FileOutputStream(outZipFile));
+                    zipOut.putNextEntry(new ZipEntry(baseName + ".apk"));
+                    apkFileIn = new FileInputStream(apkFile);
+                    UMIOUtils.readFully(apkFileIn, zipOut, 1024);
+                    zipOut.closeEntry();
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }finally {
+                    UMIOUtils.closeOutputStream(zipOut);
+                    UMIOUtils.closeInputStream(apkFileIn);
+                }
+
+                return outZipFile.getAbsolutePath();
+            }else {
+                FileOutputStream fout = null;
+                File outApkFile = new File(outDir, baseName + ".apk");
+                try {
+                    apkFileIn = new FileInputStream(apkFile);
+                    fout = new FileOutputStream(outApkFile);
+                    UMIOUtils.readFully(apkFileIn, fout, 1024);
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }finally {
+                    UMIOUtils.closeInputStream(apkFileIn);
+                    UMIOUtils.closeOutputStream(fout);
+                }
+
+                return outApkFile.getAbsolutePath();
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String filePath) {
+            doneCallback.onSuccess(filePath);
+        }
+    }
+
 
     protected HashMap<Context, ServiceConnection> networkServiceConnections = new HashMap<>();
 
@@ -808,48 +874,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getAppSetupFile(Object context, boolean zip) {
-        File apkFile = new File(((Context)context).getApplicationInfo().sourceDir);
-        String baseName = CoreBuildConfig.BASE_NAME + "-" + CoreBuildConfig.VERSION;
-        FileInputStream apkFileIn = null;
-        Context ctx = (Context)context;
-        File outDir = new File(ctx.getFilesDir(), "shared");
-        if(!outDir.isDirectory())
-            outDir.mkdirs();
-
-        if(zip) {
-            ZipOutputStream zipOut = null;
-            File outZipFile = new File(outDir, baseName + ".zip");
-            try {
-                zipOut = new ZipOutputStream(new FileOutputStream(outZipFile));
-                zipOut.putNextEntry(new ZipEntry(baseName + ".apk"));
-                apkFileIn = new FileInputStream(apkFile);
-                UMIOUtils.readFully(apkFileIn, zipOut, 1024);
-                zipOut.closeEntry();
-            }catch(IOException e) {
-                e.printStackTrace();
-            }finally {
-                UMIOUtils.closeOutputStream(zipOut);
-                UMIOUtils.closeInputStream(apkFileIn);
-            }
-
-            return outZipFile.getAbsolutePath();
-        }else {
-            FileOutputStream fout = null;
-            File outApkFile = new File(outDir, baseName + ".apk");
-            try {
-                apkFileIn = new FileInputStream(apkFile);
-                fout = new FileOutputStream(outApkFile);
-                UMIOUtils.readFully(apkFileIn, fout, 1024);
-            }catch(IOException e) {
-                e.printStackTrace();
-            }finally {
-                UMIOUtils.closeInputStream(apkFileIn);
-                UMIOUtils.closeOutputStream(fout);
-            }
-
-            return outApkFile.getAbsolutePath();
-        }
+    public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
+        GetSetupFileAsyncTask setupFileAsyncTask = new GetSetupFileAsyncTask(callback,
+                (Context)context);
+        setupFileAsyncTask.execute(zip);
     }
 
     @Override
@@ -918,7 +946,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
             @Override
             protected void onPostExecute(String mountedPath) {
-                callback.onSuccess(id, mountedPath);
+                callback.onSuccess(mountedPath);
             }
         }.execute();
     }

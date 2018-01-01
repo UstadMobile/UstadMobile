@@ -18,6 +18,7 @@ import android.widget.TextView;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.LoginController;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileDefaults;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -143,31 +144,29 @@ public class LoginFragment extends Fragment {
 
                 break;
         }
-
     }
 
 
     public void lookupCountry(final Spinner countrySpinner, final Activity activity) {
         final Context ctx = getActivity();
-        Thread countryLookupThread = new Thread() {
-            public void run() {
-                try {
-                    String countryCode =
-                            LoginController.getCountryCode(UstadMobileDefaults.DEFAULT_GEOIP_SERVER);
-                    final int countryIndex = LoginController.getCountryIndexByCode(countryCode);
-                    activity.runOnUiThread(new Runnable() {
-                        public void run() {
-                            countrySpinner.setSelection(countryIndex);
-                        }
-                    });
-                }catch(Exception e) {
-                    e.printStackTrace();
-                    UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
-                        "Sorry - Could not detect country", AppView.LENGTH_LONG);
-                }
+        LoginController.getCountryCode(ctx, UstadMobileDefaults.DEFAULT_GEOIP_SERVER, new UmCallback() {
+            @Override
+            public void onSuccess(Object result) {
+                String countryCode = (String)result;
+                final int countryIndex = LoginController.getCountryIndexByCode(countryCode);
+                activity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        countrySpinner.setSelection(countryIndex);
+                    }
+                });
             }
-        };
-        countryLookupThread.start();
+
+            @Override
+            public void onFailure(Throwable exception) {
+                UstadMobileSystemImpl.getInstance().getAppView(ctx).showNotification(
+                        "Sorry - Could not detect country", AppView.LENGTH_LONG);
+            }
+        });
     }
 
 }

@@ -116,12 +116,22 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
             this.contentType = CONTENT_TYPE_TEXT;
         }
 
-        if(opf.getCreator() != null) {
-            this.authors = new Vector();
-            this.authors.addElement(new UstadJSOPDSAuthor(opf.getCreator(), null));
+        int numAuthors = opf.getNumCreators();
+        if(numAuthors > 0) {
+            authors = new Vector();
+            for(int i = 0; i < opf.getNumCreators(); i++) {
+                authors.addElement(new UstadJSOPDSAuthor(opf.getCreator(i).getCreator(), null));
+            }
         }
-        
-        this.addLink(UstadJSOPDSEntry.LINK_ACQUIRE, mimeType, containerHREF);
+
+        //TODO: modeling language as a single string is wrong, as per the dublin core spec there can
+        // be one or more language elements.
+        if(opf.getLanguages().size() > 0) {
+            language = (String)opf.getLanguages().elementAt(0);
+        }
+
+        if(containerHREF != null)
+            this.addLink(UstadJSOPDSEntry.LINK_ACQUIRE, mimeType, containerHREF);
     }
     
     /**

@@ -52,6 +52,8 @@ public class UMIOUtils {
     public static final int HTTP_SIZE_NOT_GIVEN = -1;
     
     public static final int HTTP_SIZE_IO_EXCEPTION = -2;
+
+    public static final int DEFAULT_BUFFER_SIZE = 8 * 1024;
     
     /**
      * Close the given input stream if not null
@@ -123,6 +125,34 @@ public class UMIOUtils {
         }
         out.flush();
     }
+
+    public static final void readFully(InputStream in, OutputStream out) throws IOException{
+        readFully(in, out, DEFAULT_BUFFER_SIZE);
+    }
+
+    public static final String readStreamToString(InputStream in, int bufsize) throws IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        readFully(in, bout, bufsize);
+        in.close();
+
+        return new String(bout.toByteArray(), "UTF-8");
+    }
+
+    public static final String readStreamToString(InputStream in) throws IOException{
+        return readStreamToString(in, DEFAULT_BUFFER_SIZE);
+    }
+
+    public static final byte[] readStreamToByteArray(InputStream in, int bufsize) throws IOException{
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        readFully(in, bout, bufsize);
+        return bout.toByteArray();
+    }
+
+    public static final byte[] readStreamToByteArray(InputStream in) throws IOException {
+        return readStreamToByteArray(in, DEFAULT_BUFFER_SIZE);
+    }
+
+
 
     /**
      * Read from the given input stream and return a string

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.impl.http;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 
 /**
@@ -32,12 +33,27 @@ public abstract class UmHttpResponse {
     public abstract byte[] getResponseBody() throws IOException;
 
     /**
+     *
+     * @return
+     * @throws IOException
+     */
+    public abstract InputStream getResponseAsStream() throws IOException;
+
+
+    /**
      * Returns whether or not the respnose was successful, e.g. the response has a successful http
      * response code.
      *
      * @return true if the request was successful, false otherwise (e.g. 400+ status code)
      */
     public abstract boolean isSuccessful();
+
+    /**
+     * Returns the response status code
+     *
+     * @return
+     */
+    public abstract int getStatus();
 
 
 }

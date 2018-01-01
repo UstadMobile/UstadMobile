@@ -40,7 +40,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -401,31 +400,7 @@ public class UMTinCanUtil {
         return resultStmts;
     }
     
-    /**
-     * Parse the ISO 8601 combined date and time format string 
-     * 
-     * e.g. 
-     * 2016-04-18T17:08:07.563789+00:00
-     * 
-     */
-    public static Calendar parse8601Timestamp(String timestamp) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, Integer.parseInt(timestamp.substring(0, 4)));
-        cal.set(Calendar.MONTH, Integer.parseInt(timestamp.substring(5, 7)));
-        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(timestamp.substring(8, 10)));
-        
-        if(timestamp.length() < 12) {
-            return cal;
-        }
-        
-        //There is a time section
-        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(timestamp.substring(11, 13)));
-        cal.set(Calendar.MINUTE, Integer.parseInt(timestamp.substring(14, 16)));
-        cal.set(Calendar.SECOND, Integer.parseInt(timestamp.substring(17, 19)));
-        
-        return cal;
-    }
-    
+
     
     
 }

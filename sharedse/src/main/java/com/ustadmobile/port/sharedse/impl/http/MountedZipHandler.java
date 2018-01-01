@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.URLTextUtil;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -8,6 +9,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -114,10 +117,16 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
 
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
-        String pathInZip = RouterNanoHTTPD.normalizeUri(session.getUri()).substring(
+        String requestUri = RouterNanoHTTPD.normalizeUri(session.getUri());
+        String pathInZip = requestUri.substring(
                 uriResource.getUri().length() - URI_ROUTE_POSTFIX.length());
         ZipFile zipFile = uriResource.initParameter(0, ZipFile.class);
         ZipEntry entry = zipFile.getEntry(pathInZip);
+
+        if(session.getUri().endsWith("/")) {
+            return listDirectory(pathInZip, zipFile);
+        }
+
         IFileSource src = new ZipEntrySource(entry, zipFile);
         String extension = UMFileUtil.getExtension(pathInZip);
 
@@ -127,6 +136,62 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
 
         return newResponseFromFile(uriResource, session, src);
     }
+
+    public NanoHTTPD.Response listDirectory(String dirInZip, ZipFile zipfile) {
+        StringBuffer xhtmlBuffer = new StringBuffer();
+        xhtmlBuffer.append("<?xml version=\"1.0\" encoding=\"utf-8\">")
+                .append(" <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" ")
+                .append(" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"> \n")
+                .append("  <html xmlns=\"http://www.w3.org/1999/xhtml\"> \n")
+                .append("<body>");
+
+        if(!dirInZip.endsWith("/"))
+            dirInZip += "/";
+
+        Enumeration<? extends ZipEntry> entries = zipfile.entries();
+        List<String> filesInDir = new ArrayList<>();
+        List<String> subdirs = new ArrayList<>();
+
+        ZipEntry currentEntry;
+        String currentDirName;
+
+        String pathAfterDir;
+        int lastSepPos;
+        while(entries.hasMoreElements()) {
+            currentEntry = entries.nextElement();
+            if(currentEntry.getName().substring(0, dirInZip.length()).equals(dirInZip)) {
+                pathAfterDir = currentEntry.getName().substring(dirInZip.length());
+
+                lastSepPos = pathAfterDir.indexOf('/');
+                if(lastSepPos == -1) {
+                    //no further paths, this is a file
+                    filesInDir.add(pathAfterDir);
+                }else {
+                    pathAfterDir = pathAfterDir.substring(0, lastSepPos);
+                    if(!subdirs.contains(pathAfterDir))
+                        subdirs.add(pathAfterDir);
+                }
+
+            }
+        }
+
+        xhtmlBuffer.append("<h2>Subdirectories</h2>\n<ul>");
+        appendEntryLinksToBuffer(subdirs, xhtmlBuffer);
+        xhtmlBuffer.append("</ul><h2>Files</h2><ul>");
+        appendEntryLinksToBuffer(filesInDir, xhtmlBuffer);
+        xhtmlBuffer.append("</ul></body></html>");
+
+        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
+                "application/xhtml+xml", xhtmlBuffer.toString());
+    }
+
+    private void appendEntryLinksToBuffer(List<String> entries, StringBuffer buffer) {
+        for(String entry : entries) {
+            buffer.append("<li><a href=\"").append(URLTextUtil.urlEncodeUTF8(entry))
+                    .append("</a></li>\n");
+        }
+    }
+
 
     @Override
     public NanoHTTPD.Response put(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {

@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Created by mike on 20/11/16.
  */
-
+@Deprecated
 public class PersonListFragment extends EntityListFragment implements PersonListView, ControllerReadyListener, SwipeRefreshLayout.OnRefreshListener {
 
     private PersonListController mPersonListController;
@@ -27,8 +27,8 @@ public class PersonListFragment extends EntityListFragment implements PersonList
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PersonListController.makeControllerForView(this, UMAndroidUtil.bundleToHashtable(getArguments()),
-                this);
+//        PersonListController.makeControllerForView(this, UMAndroidUtil.bundleToHashtable(getArguments()),
+//                this);
     }
 
 

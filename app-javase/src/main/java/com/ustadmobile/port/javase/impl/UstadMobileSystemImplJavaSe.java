@@ -10,6 +10,7 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -23,6 +24,8 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
 
     private UMLogJavaSe logJavaSe;
 
+    private File systemDir;
+
     public UstadMobileSystemImplJavaSe() {
         logJavaSe = new UMLogJavaSe();
     }
@@ -34,7 +37,11 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
 
     @Override
     protected String getSystemBaseDir(Object context) {
-        return null;
+        if(systemDir == null) {
+            systemDir = makeTempDir("tmp-test-javase", "");
+        }
+
+        return systemDir.getAbsolutePath();
     }
 
     @Override
@@ -158,8 +165,8 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getAppSetupFile(Object context, boolean zip) {
-        return null;
+    public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
+
     }
 
     @Override
@@ -180,5 +187,21 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public void mountContainer(ContainerMountRequest request, int id, UmCallback callback) {
 
+    }
+
+    protected File makeTempDir(String prefix, String suffix) {
+        File tmpDir = null;
+        try {
+            tmpDir = File.createTempFile(prefix, suffix);
+            tmpDir.delete();
+            tmpDir.mkdir();
+            tmpDir.deleteOnExit();
+        }catch(IOException e) {
+            System.err.println("Exception with makeTempDir");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        return tmpDir;
     }
 }

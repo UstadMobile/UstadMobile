@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.ComponentName;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -13,6 +14,7 @@ import android.webkit.WebViewClient;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.XapiPackagePresenter;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.ZipFileHandle;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -35,6 +37,30 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
     private String mMountedPath;
 
     private WebView mWebView;
+
+    private static class MountZipAsyncTask extends AsyncTask<String, Void, String> {
+
+        private NetworkManagerAndroid networkManagerAndroid;
+
+        private UmCallback callback;
+
+        private MountZipAsyncTask(NetworkManagerAndroid networkManagerAndroid, UmCallback callback) {
+            this.networkManagerAndroid = networkManagerAndroid;
+            this.callback = callback;
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            String mountedUri = networkManagerAndroid.mountZipOnHttp(strings[0], null, false, null);
+            return UMFileUtil.joinPaths(new String[]{networkManagerAndroid.getLocalHttpUrl(),
+                    mountedUri});
+        }
+
+        @Override
+        protected void onPostExecute(String mountedPath) {
+            callback.onSuccess(mountedPath);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +116,13 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
     }
 
     @Override
-    public String mountZip(String zipUri) {
-        mMountedPath = networkManagerAndroid.mountZipOnHttp(zipUri, null, false, null);
-        String zipUrl = UMFileUtil.joinPaths(new String[]{
-                networkManagerAndroid.getLocalHttpUrl(), mMountedPath});
+    public void mountZip(String zipUri, UmCallback callback) {
+        new MountZipAsyncTask(networkManagerAndroid, callback).execute(zipUri);
+    }
 
-        return zipUrl;
+    @Override
+    public XapiPackagePresenter getPresenter() {
+        return mPresenter;
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.ustadmobile.core.networkmanager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -171,7 +170,7 @@ public class NetworkNode {
      * @return
      */
     public long getTimeSinceWifiDirectLastUpdated() {
-        return Calendar.getInstance().getTimeInMillis() - wifiDirectLastUpdated;
+        return System.currentTimeMillis() - wifiDirectLastUpdated;
     }
 
 
@@ -202,7 +201,7 @@ public class NetworkNode {
     }
 
     public long getTimeSinceNetworkServiceLastUpdated() {
-        return Calendar.getInstance().getTimeInMillis() - networkServiceLastUpdated;
+        return System.currentTimeMillis() - networkServiceLastUpdated;
     }
 
     /**

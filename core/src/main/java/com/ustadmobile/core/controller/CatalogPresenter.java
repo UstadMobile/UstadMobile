@@ -6,6 +6,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.opds.OpdsEndpoint;
+import com.ustadmobile.core.opds.OpdsFilterOptionField;
+import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -97,6 +99,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
     private Vector selectedEntries;
 
+
     public CatalogPresenter(Object context, CatalogView view) {
         super(context);
         this.mView = view;
@@ -142,45 +145,56 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
     }
 
     public void onDestroy() {
+        super.onDestroy();
         if(opdsChangeListenerRegistered) {
             OpdsEndpoint.getInstance().removeOpdsChangeListener(this);
         }
+        UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 
 
     public void initEntryStatusCheck(final boolean httpCacheMustRevalidate) {
-        Thread initEntryCheckThread = new Thread(new Runnable() {
+        String lastCheckedDir = UstadMobileSystemImpl.getInstance().getAppPref(PREFKEY_STORAGE_DIR_CHECKTIME,
+                getContext());
+        long timeNow = new Date().getTime();
+
+        UstadJSOPDSItem.OpdsItemLoadCallback feedCheckLoadedCallbackHandler = new UstadJSOPDSItem.OpdsItemLoadCallback() {
             @Override
-            public void run() {
-                String lastCheckedDir = UstadMobileSystemImpl.getInstance().getAppPref(PREFKEY_STORAGE_DIR_CHECKTIME,
-                        getContext());
-                long timeNow = new Date().getTime();
-                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-                if(lastCheckedDir == null || timeNow - Long.parseLong(lastCheckedDir) > 500) {
-                    try {
-                        UstadJSOPDSFeed deviceFeed = (UstadJSOPDSFeed) OpdsEndpoint.getInstance().loadItem(
-                                OpdsEndpoint.OPDS_PROTO_DEVICE, null, context, null);
-                    } catch (IOException e) {
-                        UstadMobileSystemImpl.l(UMLog.ERROR, 79, null, e);
-                    }
-                }
-
-                Hashtable feedLoadHeaders = new Hashtable();
-                if(httpCacheMustRevalidate) {
-                    feedLoadHeaders.put("cache-control", "must-revalidate");
-                }
-
-
-
-                feed.loadFromUrlAsync(opdsUri, feedLoadHeaders, getContext(), CatalogPresenter.this);
+            public void onEntryLoaded(UstadJSOPDSItem item, int position, UstadJSOPDSEntry entryLoaded) {
 
             }
-        });
-        initEntryCheckThread.start();
+
+            @Override
+            public void onDone(UstadJSOPDSItem item) {
+                loadFeed(httpCacheMustRevalidate);
+            }
+
+            @Override
+            public void onError(UstadJSOPDSItem item, Throwable cause) {
+                loadFeed(httpCacheMustRevalidate);
+            }
+        };
+
+        if(lastCheckedDir == null || timeNow - Long.parseLong(lastCheckedDir) > 500) {
+            OpdsEndpoint.getInstance().loadItemAsync(OpdsEndpoint.OPDS_PROTO_DEVICE, null, context,
+                    feedCheckLoadedCallbackHandler);
+        }else {
+            feedCheckLoadedCallbackHandler.onDone(null);
+        }
     }
 
     public void initEntryStatusCheck() {
         initEntryStatusCheck(false);
+    }
+
+    private void loadFeed(boolean httpCacheMustRevalidate) {
+        Hashtable feedLoadHeaders = new Hashtable();
+
+        if(httpCacheMustRevalidate) {
+            feedLoadHeaders.put("cache-control", "must-revalidate");
+        }
+
+        feed.loadFromUrlAsync(opdsUri, feedLoadHeaders, getContext(), CatalogPresenter.this);
     }
 
     @Override
@@ -239,6 +253,15 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
                 }
 
                 mView.setRefreshing(false);
+
+                OpdsFilterOptions filterOptions = new OpdsFilterOptions();
+                OpdsFilterOptionField langField = new OpdsFilterOptionField();
+                langField.setFilterName("Language");
+                langField.setFilterOptions(new String[]{"English", "Dari"});
+                filterOptions.addFilter(langField);
+                mView.setFilterOptions(filterOptions);
+
+
                 alternativeTranslationLinks = feed.getAlternativeTranslationLinks();
                 if(alternativeTranslationLinks.size() > 0) {
                     String feedLang = feed.getLanguage();

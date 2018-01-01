@@ -136,11 +136,9 @@ public class RegistrationDialogFragment extends UstadDialogFragment
         fieldList.add(usernameFragment);
         fieldList.add(passwordFragment);
 
-        try {
-            mPresenter = new RegistrationPresenter(getContext(), this);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
+        mPresenter = new RegistrationPresenter(getContext(), this);
+
         if(mResultListener != null)
             mPresenter.setResultListener(mResultListener);
 
@@ -216,7 +214,7 @@ public class RegistrationDialogFragment extends UstadDialogFragment
 
     @Override
     public void addField(int fieldName, final int fieldType, final String[] options)
-            throws SQLException {
+             {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         final LinearLayout fieldLayout = (LinearLayout)mView.findViewById(

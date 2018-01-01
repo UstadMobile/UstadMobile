@@ -8,6 +8,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AppView;
@@ -225,15 +226,20 @@ public class BasePointController extends UstadBaseController implements DialogRe
     public void handleClickConfirmShareApp(final boolean zip) {
         final UstadMobileSystemImpl impl =UstadMobileSystemImpl.getInstance();
         basePointView.setShareAppDialogProgressVisible(true);
-        new Thread(new Runnable() {
+        impl.getAppSetupFile(getContext(), zip, new UmCallback() {
+
             @Override
-            public void run() {
-                String appSetupFile = impl.getAppSetupFile(getContext(), zip);
-                impl.getNetworkManager().shareAppSetupFile(appSetupFile,
+            public void onSuccess(Object result) {
+                impl.getNetworkManager().shareAppSetupFile((String)result,
                         impl.getString(MessageID.share, getContext()));
                 basePointView.dismissShareAppDialog();
             }
-        }).start();
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
     }
 
 

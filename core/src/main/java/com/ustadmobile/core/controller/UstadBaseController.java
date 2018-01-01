@@ -240,24 +240,6 @@ public abstract class UstadBaseController implements UstadController {
         view.setAppMenuCommands(labels, STANDARD_APPEMNU_CMDS);
     }
 
-    /**
-     * Method which is responsible for initiating UstadMobile application setup sharing
-     * @param context System context
-     */
-//    public static void handleClickShareAppSetupFile(final Object context){
-//        final UstadMobileSystemImpl impl=UstadMobileSystemImpl.getInstance();
-//        impl.getAppView(context).showProgressDialog(impl.getString(MessageID.loading, context));
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                String appSetupFile = impl.getAppSetupFile(context);
-//                impl.getNetworkManager().shareAppSetupFile(appSetupFile,
-//                        impl.getString(MessageID.share_via, context));
-//                impl.getAppView(context).dismissProgressDialog();
-//            }
-//        }).start();
-//    }
-
     public void addLifecycleListener(ControllerLifecycleListener listener) {
         if(controllerLifecycleListeners == null)
             controllerLifecycleListeners = new Vector();

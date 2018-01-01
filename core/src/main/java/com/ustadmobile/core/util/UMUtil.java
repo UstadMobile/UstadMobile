@@ -30,11 +30,8 @@
  */
 package com.ustadmobile.core.util;
 
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
-import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -68,7 +65,10 @@ public class UMUtil {
      * A list of elements that must have their own end tag
      */
     public static final String[] SEPARATE_END_TAG_REQUIRED_ELEMENTS = new String[] {"script", "style"};
-    
+
+
+
+
     /**
      * Gets the index of a particular item in an array
      * 
@@ -238,46 +238,6 @@ public class UMUtil {
         }
         
         return vector;
-    }
-    
-    /**
-     * Request a new port on the DodgyHTTPD Test Server for logging /asset request
-     * 
-     * @param serverURL - Control Server URL eg http://server:8065/
-     * @param action - "newserver" for HTTP server or "newrawserver" for socket logger
-     * @param client client name if requesting newrawserver (otherwise null)
-     * @return the port that was opened or -1 for an error
-     */
-    public static int requestDodgyHTTPDPort(String serverURL, String action, String client) {
-        try {
-            String requestURL = serverURL;
-            if(requestURL.indexOf('?') == -1) {
-                requestURL += "?action=" + action;
-            }else {
-                requestURL += "&action=" + action;
-            }
-            
-            if(client != null) {
-                requestURL += "&client=" + client;
-            }
-            
-            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(
-                requestURL, new Hashtable(), new Hashtable(), "GET");
-            String serverSays = new String(result.getResponse(), "UTF-8");
-            JSONObject response = new JSONObject(serverSays);
-            int serverPort = response.getInt("port");
-            return serverPort;
-        }catch(Exception e) {
-            UstadMobileSystemImpl.getInstance().getLogger().l(UMLog.ERROR, 510, action + "," + serverURL, e);
-            e.printStackTrace();
-            if(e instanceof SecurityException) {
-                return PORT_ALLOC_SECURITY_ERR;
-            }else if(e instanceof IOException) {
-                return PORT_ALLOC_IO_ERR;
-            }else {
-                return PORT_ALLOC_OTHER_ERR;
-            }
-        }
     }
 
     /**
@@ -675,5 +635,10 @@ public class UMUtil {
 
         return buffer.toString();
     }
-    
+
+
+
+
+
+
 }

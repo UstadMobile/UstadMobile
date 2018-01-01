@@ -3,6 +3,7 @@ package com.ustadmobile.test.sharedse.network;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
@@ -15,7 +16,11 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  *
@@ -41,10 +46,15 @@ public class TestWifiDirectGroupConnection {
         UstadMobileSystemImpl.l(UMLog.INFO, 324, "TestWifiDirectGroupConnection: start");
         String createGroupUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd="
                 + RemoteTestServerHttpd.CMD_CREATEGROUP;
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(createGroupUrl, null, null);
-        Assert.assertEquals("Group created", 200, result.getStatus());
-        String resultStr = new String(result.getResponse());
-        JSONObject object = new JSONObject(resultStr);
+//        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(createGroupUrl, null, null);
+
+        HttpURLConnection urlConnection = (HttpURLConnection)new URL(createGroupUrl).openConnection();
+
+
+        Assert.assertEquals("Group created", 200, urlConnection.getResponseCode());
+
+        JSONObject object = new JSONObject(UMIOUtils.readStreamToString(urlConnection.getInputStream()));
+
         groupSsid = object.getString("ssid");
         groupPasphrase = object.getString("passphrase");
 

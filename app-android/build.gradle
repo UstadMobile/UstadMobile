@@ -353,6 +353,9 @@ assemble.dependsOn(generateCoreStringToAndroidResMap)
 dependencies {
     compile project(':core')
     compile project(':sharedse')
+    compile project(":lib-core-fs")
+    compile project(':lib-core-fs-jcommon')
+
 
     androidTestCompile project(":core-tests")
     /*

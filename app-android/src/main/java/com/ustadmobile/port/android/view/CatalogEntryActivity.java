@@ -35,7 +35,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
-import com.ustadmobile.core.view.ImageLoader;
+import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -144,8 +144,8 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     private ImageLoader.ImageLoadTarget thumbnailLoadTarget = new ImageLoader.ImageLoadTarget() {
         @Override
-        public void setImageFromFile(String filePath) {
-            thumbnailBitmap = BitmapFactory.decodeFile(filePath);
+        public void setImageFromBytes(byte[] buf) {
+            thumbnailBitmap = BitmapFactory.decodeByteArray(buf, 0, buf.length);
             final int imageViewId = currentDisplayMode != DISPLAY_MODE_BANNER ?
                     R.id.activity_catalog_entry_icon_img_normal
                     : R.id.activity_catalog_entry_icon_img;

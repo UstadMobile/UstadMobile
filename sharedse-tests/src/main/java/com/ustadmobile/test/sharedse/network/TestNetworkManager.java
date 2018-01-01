@@ -19,6 +19,8 @@ import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Calendar;
 
 /**
@@ -373,8 +375,8 @@ public class TestNetworkManager {
             //Create a wifi direct group before disabling wifi
             String createGroupUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd="
                     + RemoteTestServerHttpd.CMD_CREATEGROUP;
-            HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(createGroupUrl, null, null);
-            Assert.assertEquals("Group created", 200, result.getStatus());
+            HttpURLConnection urlConnection = (HttpURLConnection)new URL(createGroupUrl).openConnection();
+            Assert.assertEquals("Group created", 200, urlConnection.getResponseCode());
 
             Assert.assertTrue("Supernode wifi disabled for 20s", TestUtilsSE.disableRemoteWifi(20000));
             UstadMobileSystemImpl.l(UMLog.INFO, 340, "=== wifi disabled on server ===" );

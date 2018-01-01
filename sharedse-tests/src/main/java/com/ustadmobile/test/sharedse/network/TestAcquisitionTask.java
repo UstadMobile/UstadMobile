@@ -36,6 +36,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -201,10 +204,12 @@ public class TestAcquisitionTask {
         String catalogUrl = UMFileUtil.joinPaths(new String[]{
                 httpRoot, "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds"});
         UstadJSOPDSFeed feed = new UstadJSOPDSFeed(catalogUrl);
-        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(catalogUrl, null, null);
-        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(
-                new ByteArrayInputStream(result.getResponse()));
+        HttpURLConnection urlConnection = (HttpURLConnection)new URL(catalogUrl).openConnection();
+
+        InputStream in = urlConnection.getInputStream();
+        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
         feed.loadFromXpp(xpp, null);
+        in.close();
 
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();

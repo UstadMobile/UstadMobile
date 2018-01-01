@@ -62,17 +62,22 @@ public class OpdsEndpoint {
     public static final int LINK_HREF_MODE_ID = 1;
 
 
-
-    public static OpdsEndpoint getInstance() {
-        return instance;
-    }
-
-
     private static final String PREF_KEY_FEED_LIST = "mylibrary_feeds";
 
     public static final String OPDS_USERFEED_ID_PREFIX = "com.ustadmobile.userfeed.";
 
     private Vector opdsChangeListeners = new Vector();
+
+    private OpdsEndpointAsyncHelper asyncHelper;
+
+    public static OpdsEndpoint getInstance() {
+        return instance;
+    }
+
+    public OpdsEndpoint() {
+        asyncHelper = new OpdsEndpointAsyncHelper(this);
+    }
+
 
     /**
      * Used to notify of when a feed is changed.
@@ -96,7 +101,8 @@ public class OpdsEndpoint {
      * @return
      * @throws IOException
      */
-    public UstadJSOPDSItem loadItem(String opdsUri, UstadJSOPDSItem item, Object context, UstadJSOPDSItem.OpdsItemLoadCallback callback) throws IOException {
+    public UstadJSOPDSItem loadItem(String opdsUri, UstadJSOPDSItem item, Object context,
+                                    UstadJSOPDSItem.OpdsItemLoadCallback callback) throws IOException {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         UstadMobileSystemImpl.l(UMLog.DEBUG, 678, "OpdsEndpoint: load " + opdsUri);
         UstadJSOPDSFeed destFeed = item != null ? (UstadJSOPDSFeed)item : null;
@@ -129,6 +135,11 @@ public class OpdsEndpoint {
         }else {
             return null;
         }
+    }
+
+    public void loadItemAsync(final String opdsUri, final UstadJSOPDSItem item, final Object context,
+                              final UstadJSOPDSItem.OpdsItemLoadCallback callback) {
+        asyncHelper.loadItemAsync(opdsUri, item, context, callback);
     }
 
     /**
@@ -194,9 +205,10 @@ public class OpdsEndpoint {
             }
 
             destFeed.addLink(USTAD_PREFKEY_FEED_LINK_REL, UstadJSOPDSItem.TYPE_NAVIGATIONFEED, prefKey);
-            if(callback != null)
-                callback.onDone(destFeed);
         }
+
+        if(callback != null)
+            callback.onDone(destFeed);
 
         return destFeed;
     }
@@ -211,7 +223,7 @@ public class OpdsEndpoint {
         }
 
         DirectoryScanner scanner = new DirectoryScanner();
-        scanner.setHrefModeBaseHref(baseHREF);
+        scanner.setAcquisitionLinkHrefPrefix(baseHREF);
         scanner.setLinkHrefMode(linkHrefMode);
 
         int dirMode;
@@ -222,6 +234,9 @@ public class OpdsEndpoint {
             scanner.scanDirectory(dirs[i].getDirURI(), impl.getCacheDir(dirMode, context), "scandir",
                     "scandir", dirMode, callback, deviceFeed, context);
         }
+
+        if(callback != null)
+            callback.onDone(deviceFeed);
 
         return deviceFeed;
     }

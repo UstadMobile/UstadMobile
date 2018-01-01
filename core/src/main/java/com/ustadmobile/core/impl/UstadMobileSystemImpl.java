@@ -35,11 +35,11 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
+import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.tincan.TinCanResultListener;
-import com.ustadmobile.core.util.HTTPCacheDir;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -195,11 +195,6 @@ public abstract class UstadMobileSystemImpl {
     public static final int DLSTATUS_PAUSED = 4;
 
     /**
-     * The shared HTTPCacheDir
-     */
-    protected HTTPCacheDir httpCacheDir;
-
-    /**
      * The maximum number of sessions to show for the user to be able to resume
      * This is limited both for usability and performance.
      */
@@ -218,6 +213,7 @@ public abstract class UstadMobileSystemImpl {
 
     static {
         MIME_TYPES.put("image/jpg", "jpg");
+        MIME_TYPES.put("image/jpeg", "jpg");
         MIME_TYPES.put("image/png", "png");
         MIME_TYPES.put("image/gif", "gif");
         MIME_TYPES.put("image/svg", "svg");
@@ -278,31 +274,9 @@ public abstract class UstadMobileSystemImpl {
             return;
         }
 
-        try {
-            checkCacheDir(context);
-            loadActiveUserInfo(context);
-            if(getActiveUser(context) != null) {
-                getHTTPCacheDir(context).setPrivateCacheDir(
-                    getCacheDir(CatalogPresenter.USER_RESOURCE, context));
-            }
-            getHTTPCacheDir(context).primeCache(context);
+        loadActiveUserInfo(context);
 
-            initRan = true;
-        }catch(IOException e) {
-            mainInstance.getLogger().l(UMLog.CRITICAL, 5, null, e);
-        }
-    }
-
-    public void checkCacheDir(Object context) throws IOException{
-        boolean sharedDirOK = false;
-        String sharedContentDir = mainInstance.getSharedContentDir();
-        sharedDirOK = mainInstance.makeDirectory(sharedContentDir);
-        String sharedCacheDir = mainInstance.getCacheDir(
-                CatalogPresenter.SHARED_RESOURCE, context);
-        boolean sharedCacheDirOK = mainInstance.makeDirectory(sharedCacheDir);
-        StringBuffer initMsg = new StringBuffer(sharedContentDir).append(':').append(sharedDirOK);
-        initMsg.append(" cache -").append(sharedCacheDir).append(':').append(sharedCacheDirOK);
-        mainInstance.getLogger().l(UMLog.VERBOSE, 411, initMsg.toString());
+        initRan = true;
     }
 
     /**
@@ -408,9 +382,7 @@ public abstract class UstadMobileSystemImpl {
      * Save anything that should be written to disk
      */
     public synchronized void handleSave() {
-        if(httpCacheDir != null) {
-            httpCacheDir.saveIndexAsync();
-        }
+
     }
 
     /**
@@ -734,7 +706,6 @@ public abstract class UstadMobileSystemImpl {
             String userCachePath = getCacheDir(CatalogPresenter.USER_RESOURCE,
                     context);
             String userCacheParent = UMFileUtil.getParentFilename(userCachePath);
-            getHTTPCacheDir(context).setPrivateCacheDir(userCachePath);
             try {
                 boolean dirOK = makeDirectory(userCacheParent) && makeDirectory(userCachePath);
                 getLogger().l(UMLog.VERBOSE, 404, username + ":" + userCachePath
@@ -862,13 +833,41 @@ public abstract class UstadMobileSystemImpl {
     }
 
     /**
-     * Make an asynchronous http request
+     * Make an asynchronous http request. This can (on platforms with a filesystem) rely on the
+     * caching directory.
      *
      * @param request request to make
      * @param responseListener response listener to receive response when ready
      */
     public abstract UmHttpCall makeRequestAsync(UmHttpRequest request,
                                                 UmHttpResponseCallback responseListener);
+
+
+    /**
+     * Directly send an asynchronous http request. This must *NOT* rely on the httpcachedir, as it
+     * will be used by HttpCacheDir as the underlying implementation to retrieve data from the network.
+     *
+     * @param request
+     * @param responseListener
+     * @return
+     */
+    public abstract UmHttpCall sendRequestAsync(UmHttpRequest request,
+                                                   UmHttpResponseCallback responseListener);
+
+    /**
+     * Directly send a synchronous request. THIS IS NOT FOR NORMAL USAGE. It is intended only to be
+     * used by the cache so requests can be pumped through the system http library, if present on
+     * that implementation. As http libraries like okhttp
+     *
+     * It must *NOT* be used directly by presenters etc.
+     *
+     * @param request
+     * @return
+     */
+    protected abstract UmHttpResponse sendRequestSync(UmHttpRequest request) throws IOException;
+
+
+    public abstract UmHttpResponse makeRequestSync(UmHttpRequest request) throws IOException;
 
 
     /**
@@ -883,59 +882,6 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract void mountContainer(ContainerMountRequest request, int id, UmCallback callback);
 
-
-    /**
-     * Do a basic HTTP Request
-     *
-     * @param url URL to request e.g. http://www.somewhere.com/some/thing.php?param1=blah
-     * @param headers Hashtable of extra headers to add (can be null)
-     * @param postParameters Parameters to be put in HTTP Request (can be null)
-     *  only applicable when method = POST
-     * @param method e.g. GET, POST, PUT
-     * @throws IOException if something goes wrong with the request
-     * @return HTTPResult object containing the server response
-     */
-    public abstract HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters, String method, byte[] postBody) throws IOException;
-
-
-    /**
-     * Do an HTTP request using the default method (GET)
-     */
-    public HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters) throws IOException{
-        return makeRequest(url, headers, postParameters, HTTPResult.GET, null);
-    }
-
-    /**
-    * Do an HTTP request with no PostBody given
-    */
-    public HTTPResult makeRequest(String url, Hashtable headers, Hashtable postParameters, String method) throws IOException{
-        return makeRequest(url, headers, postParameters, method, null);
-    }
-
-    /**
-     * Reads a URL to String: this can be a file:/// url in which case the contents
-     * will be read from the filesystem or an HTTP url
-     *
-     * @param url file:/// url or http:// url
-     * @param headers headers to send when an HTTP request (ignored in case of file:///)
-     *
-     * @return HTTPResult with byte contents, status code if an HTTP request was made
-     * @throws IOException
-     */
-    public HTTPResult readURLToString(String url, Hashtable headers) throws IOException {
-        l(UMLog.DEBUG, 521, url);
-        String urlLower = url.toLowerCase();
-        if(urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
-            return makeRequest(url, headers, null, "GET");
-        }else if(urlLower.startsWith("file:///")) {
-            String contents = readFileAsText(url);
-            return new HTTPResult(contents.getBytes(), 200, null);
-        }else {
-            IOException e = new IOException("Unrecognized protocol: " + url);
-            l(UMLog.ERROR, 127, url, e);
-            throw e;
-        }
-    }
 
     /**
      * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
@@ -1018,20 +964,6 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getUMProfileName();
 
     /**
-     *
-     * @param context
-     * @return
-     */
-    public HTTPCacheDir getHTTPCacheDir(Object context) {
-        if(httpCacheDir == null) {
-            httpCacheDir = new HTTPCacheDir(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context),
-                    getCacheDir(CatalogPresenter.USER_RESOURCE, context));
-        }
-
-        return httpCacheDir;
-    }
-
-    /**
      * Return the mime type for the given extension
      *
      * @param extension the extension without the leading .
@@ -1111,12 +1043,14 @@ public abstract class UstadMobileSystemImpl {
     }
 
     /**
-     * Return absolute path of the application setup file.
+     * Return absolute path of the application setup file. Asynchronous.
+     *
      * @param context System context
-     * @param zip
+     * @param zip if true, the app setup file should be delivered within a zip.
+     * @param callback callback to call when complete or if any error occurs.
      * @return String: file absolute path
      */
-    public abstract String getAppSetupFile(Object context, boolean zip);
+    public abstract void getAppSetupFile(Object context, boolean zip, UmCallback callback);
 
 
     /**

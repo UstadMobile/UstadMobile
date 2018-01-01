@@ -76,8 +76,8 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getAppSetupFile(Object context, boolean zip) {
-        return null;
+    public void getAppSetupFile(Object context, boolean zip, UmCallback callback) {
+
     }
     
     public String getCacheDir(int mode, Object context) {
@@ -221,14 +221,6 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public String getMimeTypeFromExtension(String extension) {
-        return null;
-    }
-
-    @Override
-    public String getExtensionFromMimeType(String mimeType) {
-        if(mimeType.equals(UstadJSOPDSFeed.TYPE_EPUBCONTAINER))
-            return "epub";
-
         return null;
     }
 

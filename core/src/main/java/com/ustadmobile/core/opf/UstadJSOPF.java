@@ -71,7 +71,12 @@ public class UstadJSOPF {
 
     private Vector links;
 
-    private String creator;
+    private Vector creators;
+
+    //As per the OPF spec a dc:language tag is required
+    private Vector languages = new Vector();
+
+
     
     /**
      * Flag value to indicate we should parse the metadata (e.g. title, identifier, description)
@@ -235,6 +240,8 @@ public class UstadJSOPF {
             isLinear = true;
             isLinearStrVal = null;
             String tagName;
+            UstadJSOPFCreator creator;
+            String tagVal;
             
                         
             
@@ -334,8 +341,21 @@ public class UstadJSOPF {
                                 links = new Vector();
 
                             links.addElement(linkEl);
-                        }else if(xpp.getName().equals("dc:creator") && xpp.next() == XmlPullParser.TEXT) {
-                            creator = xpp.getText();
+                        }else if(xpp.getName().equals("dc:creator")) {
+                            creator = new UstadJSOPFCreator();
+                            creator.setId(xpp.getAttributeValue(null, LinkElement.ATTR_ID));
+                            if(xpp.next() == XmlPullParser.TEXT)
+                                creator.setCreator(xpp.getText());
+
+                            if(creators == null)
+                                creators = new Vector();
+
+                            creators.addElement(creator);
+                        }else if(xpp.getName().equals("dc:language")) {
+                            if(xpp.next() == XmlPullParser.TEXT) {
+                                tagVal = xpp.getText();
+                                languages.addElement(tagVal);
+                            }
                         }
                     }
                 }else if(evtType == XmlPullParser.END_TAG) {
@@ -455,13 +475,27 @@ public class UstadJSOPF {
         return navItem;
     }
 
-    /**
-     * Get the creator as specified by the dublin core creator tag
-     *
-     * @return Creator as specified by the dc:creator tag
-     */
-    public String getCreator() {
-        return creator;
+    public Vector getCreators() {
+        return creators;
     }
+
+    public UstadJSOPFCreator getCreator(int index) {
+        return (UstadJSOPFCreator)creators.elementAt(index);
+    }
+
+    public int getNumCreators() {
+        return creators != null ? creators.size() : 0;
+    }
+
+    /**
+     * Return a Vector of String objects containing the languages as per dc:language tags that were
+     * found on this OPF, in the order they appeared in the declaration.
+     *
+     * @return Vector of language codes as Strings.
+     */
+    public Vector getLanguages() {
+        return languages;
+    }
+
 
 }

@@ -39,6 +39,7 @@ dependencies {
     compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
     compile "com.ustadmobile.nanolrs:nanolrs-http:$nanoLrsVersion"
     compile project(":core")
+    compile project(':lib-core-fs')
     testCompile project(":sharedse-tests")
     testCompile project(":core-tests")
 }
