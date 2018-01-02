@@ -200,6 +200,44 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         }
     }
 
+    private class DeleteEntriesTask implements Runnable {
+
+        private String[] urlsToDelete;
+
+        private Object context;
+
+        private UmCallback callback;
+
+        private DeleteEntriesTask(Object context, String[] urlsToDelete, UmCallback callback) {
+            this.context = context;
+            this.urlsToDelete = urlsToDelete;
+            this.callback = callback;
+        }
+
+        @Override
+        public void run() {
+            final HttpCacheDbManager dbManager = HttpCacheDbManager.getInstance();
+            HttpCacheDbEntry entry;
+            File entryFile;
+
+            for(int i = 0; i < urlsToDelete.length; i++) {
+                entry = dbManager.getEntryByUrl(context, urlsToDelete[i]);
+                if(entry == null)
+                    continue;
+
+                entryFile= new File(entry.getFileUri());
+                if(entryFile.exists()) {
+                    entryFile.delete();
+                }
+
+                dbManager.delete(context, entry);
+            }
+
+            if(callback != null)
+                callback.onSuccess(null);
+        }
+    }
+
 
 
 
@@ -215,23 +253,11 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             if(!impl.fileExists(sharedDir)) {
                 impl.makeDirectoryRecursive(sharedDir);
             }
-
-            String sharedIndexPath = getSharedIndexPath();
-
-            if(impl.fileExists(sharedIndexPath)) {
-                ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                fileIndexIn = impl.openFileInputStream(sharedIndexPath);
-                UMIOUtils.readFully(fileIndexIn, bout);
-            }
         }catch(IOException e) {
             UstadMobileSystemImpl.l(UMLog.CRITICAL, 4, sharedDir, e);
         }finally {
             UMIOUtils.closeInputStream(fileIndexIn);
         }
-    }
-
-    protected String getSharedIndexPath() {
-        return UMFileUtil.joinPaths(new String[]{sharedDir, "cache_index.json"});
     }
 
     public UmHttpCall get(UmHttpRequest request, UmHttpResponseCallback callback) {
@@ -304,6 +330,14 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
         return cacheResponse;
     }
 
+    public void deleteEntries(Object context, String[] urls, UmCallback callback){
+        executorService.execute(new DeleteEntriesTask(context, urls, callback));
+    }
+
+    public void deleteEntriesSync(Object context, String[] urls) {
+        new DeleteEntriesTask(context, urls, null).run();
+    }
+
     protected void updateCacheIndex(HttpCacheResponse response) {
         if(response.getNetworkResponse().getStatus() == 304) {
             response.setCacheResponse(HttpCacheResponse.HIT_VALIDATED);
@@ -318,6 +352,8 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
     public void onResponseComplete(HttpCacheResponse response) {
         updateCacheIndex(response);
     }
+
+
 
     private String generateCacheEntryFileName(UmHttpRequest request, UmHttpResponse response,
                                               String dir) {

@@ -45,6 +45,15 @@ public abstract class HttpCacheDbManagerOrmLite extends HttpCacheDbManager {
         }
     }
 
+    @Override
+    public void delete(Object context, HttpCacheDbEntry entry) {
+        try {
+            getDao(context).delete((HttpCacheDbEntryEntity)entry);
+        }catch(SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * This method varies between Android and Jdbc implementations. The implementation class only needs
      * to implement this method

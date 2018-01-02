@@ -56,7 +56,7 @@ public class FileProtocolCacheResponse extends AbstractCacheResponse {
     }
 
     @Override
-    public String getFilePath() {
+    public String getFileUri() {
         return file.getAbsolutePath();
     }
 

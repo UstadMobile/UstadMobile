@@ -215,11 +215,6 @@ public class HttpCacheResponse extends AbstractCacheResponse implements Runnable
         return entry.getFileUri();
     }
 
-    @Override
-    public String getFilePath() {
-        return entry.getFileUri();
-    }
-
     public void setOnResponseCompleteListener(ResponseCompleteListener responseCompleteListener) {
         this.responseCompleteListener = responseCompleteListener;
     }

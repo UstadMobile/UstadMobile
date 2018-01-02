@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,5 +56,35 @@ public class UMTestUtil {
 
         return outPath;
     }
+
+    /**
+     * Test util to determine if the contents of two streams are equal
+     * @param expectedStream
+     * @param testStream
+     * @return
+     * @throws IOException
+     */
+    public static boolean areStreamsEqual(InputStream expectedStream, InputStream testStream) throws IOException {
+        if(!(expectedStream instanceof BufferedInputStream)) {
+            expectedStream = new BufferedInputStream(expectedStream);
+        }
+
+        if(!(testStream instanceof BufferedInputStream)) {
+            testStream = new BufferedInputStream(testStream);
+        }
+
+
+        int bExpected;
+        int bTest;
+        boolean streamsEqual = true;
+        do {
+            bExpected = expectedStream.read();
+            bTest = testStream.read();
+            streamsEqual = bTest == bExpected;
+        }while(streamsEqual && bExpected != -1);
+
+        return streamsEqual;
+    }
+
 
 }

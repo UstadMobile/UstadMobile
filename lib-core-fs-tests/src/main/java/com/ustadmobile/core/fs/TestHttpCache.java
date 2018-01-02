@@ -36,7 +36,11 @@ package com.ustadmobile.core.fs;
     /* $endif$ */
 
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.fs.db.HttpCacheDbEntry;
+import com.ustadmobile.core.fs.db.HttpCacheDbManager;
+import com.ustadmobile.core.impl.AbstractCacheResponse;
 import com.ustadmobile.core.impl.HttpCache;
+import com.ustadmobile.core.impl.HttpCacheEntry;
 import com.ustadmobile.core.impl.HttpCacheResponse;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpCall;
@@ -44,7 +48,9 @@ import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
+import com.ustadmobile.test.core.UMTestUtil;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 
@@ -53,7 +59,15 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -67,9 +81,15 @@ public class TestHttpCache {
 
     private static RouterNanoHTTPD resourcesHttpd;
 
+    private static HttpCache httpCache;
+
+    static final String TEST_PNG_ASSET_RESOURCE = "/phonepic-smaller.png";
+
     public class UmHttpResponseNotifyCallback implements UmHttpResponseCallback {
 
         private UmHttpResponse response;
+
+        private IOException exception;
 
         @Override
         public void onComplete(UmHttpCall call, UmHttpResponse response) {
@@ -82,6 +102,7 @@ public class TestHttpCache {
         @Override
         public void onFailure(UmHttpCall call, IOException exception) {
             synchronized (this) {
+                this.exception = exception;
                 notifyAll();
             }
         }
@@ -90,11 +111,36 @@ public class TestHttpCache {
             return response;
         }
 
+        public IOException getException() {
+            return exception;
+        }
+
+        public synchronized UmHttpResponse waitAndGetResponse(int timeout) {
+            waitForResponse(timeout);
+
+
+            return response;
+        }
+
         public void waitForResponse(int timeout) {
             synchronized (this) {
+                if(response != null || exception != null)
+                    return;
+
                 try { this.wait(timeout); }
                 catch(InterruptedException e) {}
             }
+        }
+
+        public IOException waitAndGetException(int timeout) {
+            waitForResponse(timeout);
+
+            return exception;
+        }
+
+        public synchronized void clear() {
+            this.exception = null;
+            this.response = null;
         }
     }
 
@@ -103,6 +149,14 @@ public class TestHttpCache {
     @BeforeClass
     public static void startHttpResourcesServer() throws IOException {
         ResourcesHttpdTestServer.startServer();
+
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+        //context is not needed when we are asking for the shaerd cache dir
+        String cacheDirName = impl.getCacheDir(CatalogPresenter.SHARED_RESOURCE,
+                PlatformTestUtil.getTargetContext());
+        httpCache = new HttpCache(cacheDirName);
+
     }
 
     @AfterClass
@@ -111,119 +165,236 @@ public class TestHttpCache {
     }
 
     @Test
-    public void testHTTPCacheDir() throws Exception {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+    public void testCacheAsync() throws Exception {
         Object context = PlatformTestUtil.getTargetContext();
-        
-        //context is not needed when we are asking for the shaerd cache dir
-        String cacheDirName = impl.getCacheDir(CatalogPresenter.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
-        HttpCache cacheDir = new HttpCache(cacheDirName);
         String httpRoot = ResourcesHttpdTestServer.getHttpRoot();
+        UmHttpResponseNotifyCallback notifyCallback = new UmHttpResponseNotifyCallback();
         
         String httpURL = UMFileUtil.joinPaths(new String[] {httpRoot, 
             "phonepic-smaller.png"});
 
-        UmHttpResponseNotifyCallback notifyCallback = new UmHttpResponseNotifyCallback();
-        cacheDir.get(new UmHttpRequest(context, httpURL), notifyCallback);
-        notifyCallback.waitForResponse(240000);
+
+        httpCache.get(new UmHttpRequest(context, httpURL), notifyCallback);
+        notifyCallback.waitAndGetResponse(240000);
         Assert.assertNotNull(notifyCallback.getResponse());
+        Assert.assertTrue("InputStream bytes are identical to original resource",
+                UMTestUtil.areStreamsEqual(getClass().getResourceAsStream(TEST_PNG_ASSET_RESOURCE),
+                        notifyCallback.getResponse().getResponseAsStream()));
+        Assert.assertEquals("Response code is 200", 200,
+                notifyCallback.getResponse().getStatus());
+
+        //asking for the body twice shoudl throw an exception
+        Exception illegalStateException = null;
+        try {
+            InputStream secondStream = notifyCallback.getResponse().getResponseAsStream();
+        }catch(IllegalStateException e) {
+            illegalStateException = e;
+        }
+        Assert.assertNotNull("Illegal state exception thrown when body is requested twice",
+                illegalStateException);
+
+
+        //try making a request and using get response as bytes
+        notifyCallback.clear();
+        httpCache.deleteEntriesSync(context, new String[]{httpURL});
+        httpCache.get(new UmHttpRequest(context, httpURL), notifyCallback);
+        notifyCallback.waitForResponse(240000);
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        InputStream resIn = getClass().getResourceAsStream(TEST_PNG_ASSET_RESOURCE);
+        UMIOUtils.readFully(resIn, bout);
+        byte[] responseBytes = notifyCallback.getResponse().getResponseBody();
+        bout.flush();
+        byte[] resourceBytes = bout.toByteArray();
+        Assert.assertTrue("byte array from response is same as original resource",
+                Arrays.equals(resourceBytes, responseBytes));
+
+        //repeat the request and get response as bytes - should come from the cache (file stream)
+        notifyCallback.clear();
+        httpCache.get(new UmHttpRequest(context, httpURL), notifyCallback);
+        notifyCallback.waitForResponse(240000);
+        Assert.assertTrue("Second request is cache hit",
+                ((AbstractCacheResponse)notifyCallback.getResponse()).isHit());
+        Assert.assertTrue("Response bytes from cache equal original resource bytes",
+                Arrays.equals(resourceBytes, notifyCallback.getResponse().getResponseBody()));
 
         //try it again and make sure it comes from the cache
-        cacheDir.get(new UmHttpRequest(context, httpURL), notifyCallback);
+        notifyCallback.clear();
+        httpCache.get(new UmHttpRequest(context, httpURL), notifyCallback);
         notifyCallback.waitForResponse(240000);
         Assert.assertTrue("Response object is instanceof UmHttpCacheResponse",
                 notifyCallback.getResponse() instanceof HttpCacheResponse);
         HttpCacheResponse cachedResponse = (HttpCacheResponse)notifyCallback.getResponse();
         Assert.assertTrue("Second request is a cache hit", cachedResponse.isHit());
+        Assert.assertTrue("InputStream bytes are identical to original resource from cache hit",
+                UMTestUtil.areStreamsEqual(getClass().getResourceAsStream(TEST_PNG_ASSET_RESOURCE),
+                        notifyCallback.getResponse().getResponseAsStream()));
+        Assert.assertTrue("File is cached on disk",
+                new File(cachedResponse.getFileUri()).exists());
 
+        //test 304 not modified validation
+        notifyCallback.clear();
+        httpCache.get(
+                new UmHttpRequest(context, httpURL).addHeader("cache-control", "must-revalidate"),
+                notifyCallback);
+        notifyCallback.waitForResponse(240000);
+        AbstractCacheResponse validatedResponse = (AbstractCacheResponse)notifyCallback.getResponse();
+        Assert.assertEquals("Response is a validated HIT", AbstractCacheResponse.HIT_VALIDATED,
+                validatedResponse.getCacheResponse());
+        Assert.assertTrue("Response is marked as isNetworkResponseNotModified",
+                validatedResponse.isNetworkResponseNotModified());
 
-//        //make sure that we can fetch a file
-//        String cachedFile = cacheDir.get(httpURL);
-//        Assert.assertTrue("Cached file downloaded", impl.fileExists(cachedFile));
-//        boolean savedOK = cacheDir.saveIndex();
-//        Assert.assertTrue("Cache dir can save OK", savedOK);
-//
-//        cacheDir = new HTTPCacheDir(cacheDirName, null);
-//        String fileURI = cacheDir.getCacheFileURIByURL(httpURL);
-//        Assert.assertNotNull("HTTP URL is known on creating new cache dir object",
-//            fileURI);
-//        Assert.assertTrue("Cached file URI exists", impl.fileExists(fileURI));
-//
-//        long date1 = HTTPCacheDir.parseHTTPDate("Sun, 06 Nov 1994 08:49:37 GMT");
-//        long date2 = HTTPCacheDir.parseHTTPDate("Sunday, 06-Nov-94 08:49:37 GMT");
-//        long date3 = HTTPCacheDir.parseHTTPDate("Sun Nov  6 08:49:37 1994 ");
-//
-//        //The time in milliseconds between teh date given and the date calculated
-//        // accurate to within one second
-//        Assert.assertTrue("Can parse date 1", Math.abs(784111777137L -date1) <= 1000);
-//        Assert.assertTrue("Can parse date 2", Math.abs(784111777137L -date2) <= 1000);
-//        Assert.assertTrue("Can parse date 3", Math.abs(784111777137L -date3) <= 1000);
-//
-//        Assert.assertEquals("Can format HTTP Date", "Sun, 06 Nov 1994 08:49:37 GMT",
-//            HTTPCacheDir.makeHTTPDate(784111777137L));
-//
-//
-//
-//        //Expiry time in one hour
-//        long currentTime = System.currentTimeMillis();
-//        long expireHeaderTime = currentTime + (1000*60*60);
-//        Hashtable expireHeaders = new Hashtable();
-//
-//        expireHeaders.put("expires", HTTPCacheDir.makeHTTPDate(expireHeaderTime));
-//        expireHeaders.put("cache-control", "max-age=7200");
-//        long calculatedExpiryTime = HTTPCacheDir.calculateExpiryTime(expireHeaders);
-//        long expectedExpiry = Math.abs(currentTime + (7200L*1000));
-//        //the cache-control should take precedence
-//        Assert.assertTrue("Can calculate expires time with both cache control and expires header",
-//            Math.abs(expectedExpiry - calculatedExpiryTime) < 1000);
-//
-//        expireHeaders.remove("cache-control");
-//        calculatedExpiryTime = HTTPCacheDir.calculateExpiryTime(expireHeaders);
-//        Assert.assertTrue("Can calculate expires time with just expires header",
-//            Math.abs(expireHeaderTime - calculatedExpiryTime) < 1000);
-//
-//        int numEntriesPreDelete = cacheDir.getNumEntries();
-//        boolean deletedEntry = cacheDir.deleteEntry(httpURL);
-//        Assert.assertTrue("Cache dir reports success deleting entry", deletedEntry);
-//        Assert.assertEquals("Cache dir now one entry smaller", numEntriesPreDelete-1,
-//            cacheDir.getNumEntries());
-//
-//        try { Thread.sleep(1000); }
-//        catch(InterruptedException e) {}
-//
-//        //access the entry
-//        cacheDir.get(httpURL);
-//        long timeSinceAccess = System.currentTimeMillis() -
-//            cacheDir.getEntry(httpURL).getLong(HTTPCacheDir.IDX_LASTACCESSED);
-//        Assert.assertTrue("Last accessed time is updated", timeSinceAccess < 300);
-//
-//        String httpURL2 = UMFileUtil.joinPaths(new String[] {httpRoot,
-//            "smallcheck.jpg"});
-//        cacheDir.get(httpURL2);
-//        boolean oldestRemoved = cacheDir.removeOldestEntry();
-//        Assert.assertTrue("Can remove oldest entry", oldestRemoved);
-//        Assert.assertNotNull("most recently accessed item still in cache",
-//            cacheDir.getCacheFileURIByURL(httpURL2));
-//
-//        /**
-//         * Test caching of private responses
-//         */
-//        cacheDir.saveIndex();
-//        String privateCacheDir = impl.getCacheDir(CatalogPresenter.USER_RESOURCE,
-//                PlatformTestUtil.getTargetContext());
-//        cacheDir.setPrivateCacheDir(privateCacheDir);
-//        String httpUrlPrivate = UMFileUtil.joinPaths(new String[]{httpRoot, "smallcheck.jpg?private=true"});
-//        String privateCacheFile = cacheDir.get(httpUrlPrivate);
-//        JSONArray cachePrivateEntry = cacheDir.getEntry(httpUrlPrivate);
-//        Assert.assertTrue("Entry with cache-control private marked as such",
-//                cachePrivateEntry.getBoolean(HTTPCacheDir.IDX_PRIVATE));
-//        Assert.assertTrue("Entry with cache-control private is in private directory",
-//                privateCacheFile.startsWith(privateCacheDir));
     }
 
-    protected void runTest() throws Throwable {
-        testHTTPCacheDir();
+    @Test
+    public void testCacheSync() throws IOException {
+        final Object context = PlatformTestUtil.getTargetContext();
+
+        String httpURL = UMFileUtil.joinPaths(new String[] {ResourcesHttpdTestServer.getHttpRoot(),
+                "phonepic-smaller.png"});
+        UmHttpRequest request = new UmHttpRequest(context, httpURL);
+
+        //make sure the entry is deleted before test runs
+        httpCache.deleteEntriesSync(context, new String[]{httpURL});
+
+        AbstractCacheResponse cacheResponse = (AbstractCacheResponse)httpCache.getSync(request);
+        Assert.assertTrue("Byte data from response is the same",
+                UMTestUtil.areStreamsEqual(getClass().getResourceAsStream(TEST_PNG_ASSET_RESOURCE),
+                cacheResponse.getResponseAsStream()));
+        Assert.assertTrue("Content-length is provided and > 0",
+                Integer.parseInt(cacheResponse.getHeader(UmHttpRequest.HEADER_CONTENT_LENGTH)) > 0);
     }
-    
+
+    /**
+     * The HttpCacheDir is also expected to respond to requests for normal files (via file:// urls)
+     * so that image components etc can simply make calls to the cache.
+     */
+    @Test
+    public void testCacheFileResponse() throws IOException {
+        Object context = PlatformTestUtil.getTargetContext();
+        UmHttpResponseNotifyCallback notifyCallback = new UmHttpResponseNotifyCallback();
+
+        //test that we can get a file from the disk using file:// requests
+        InputStream resourceIn = getClass().getResourceAsStream("/phonepic-smaller.png");
+        File testTmpFile = File.createTempFile("testhttpcache-test-file", ".png");
+        OutputStream testTmpFileOut = new FileOutputStream(testTmpFile);
+        UMIOUtils.readFully(resourceIn, testTmpFileOut);
+        resourceIn.close();
+        testTmpFileOut.close();
+
+        notifyCallback.clear();
+
+        httpCache.get(new UmHttpRequest(context, "file://" + testTmpFile.getAbsolutePath()), notifyCallback);
+        AbstractCacheResponse fileResponse = (AbstractCacheResponse)notifyCallback.waitAndGetResponse(240000);
+        Assert.assertEquals("File response is from same file as request", testTmpFile.getAbsolutePath(),
+                fileResponse.getFileUri());
+        Assert.assertEquals("File header content-type works from extension", "image/png",
+                fileResponse.getHeader((UmHttpRequest.HEADER_CONTENT_TYPE)));
+        Assert.assertEquals("File content-length if set according to file size",
+                String.valueOf(testTmpFile.length()), fileResponse.getHeader(UmHttpRequest.HEADER_CONTENT_LENGTH));
+        Assert.assertTrue("File response is always considered fresh", fileResponse.isFresh());
+        Assert.assertNull("Other file response headers are null",
+                fileResponse.getHeader(UmHttpRequest.HEADER_CACHE_CONTROL));
+        Assert.assertTrue("File response is successful", fileResponse.isSuccessful());
+        Assert.assertEquals("File response status code is 200", 200, fileResponse.getStatus());
+
+        FileInputStream testFileIn = new FileInputStream(testTmpFile);
+        Assert.assertTrue("Stream delivered from response is the same as the file itself",
+                UMTestUtil.areStreamsEqual(testFileIn, fileResponse.getResponseAsStream()));
+        testFileIn.close();
+
+        notifyCallback.clear();
+        httpCache.get(new UmHttpRequest(context, "file://" + testTmpFile.getAbsolutePath()), notifyCallback);
+        fileResponse = (AbstractCacheResponse)notifyCallback.waitAndGetResponse(240000);
+
+
+        testFileIn = new FileInputStream(testTmpFile);
+        Assert.assertTrue("Byte array delivered is the same as original file",
+                UMTestUtil.areStreamsEqual(testFileIn, new ByteArrayInputStream(fileResponse.getResponseBody())));
+    }
+
+
+    @Test
+    public void testOnlyIfCached() {
+        Object context = PlatformTestUtil.getTargetContext();
+        UmHttpResponseNotifyCallback notifyCallback = new UmHttpResponseNotifyCallback();
+        String httpURL = UMFileUtil.joinPaths(new String[] {ResourcesHttpdTestServer.getHttpRoot(),
+                "phonepic-smaller.png"});
+
+        httpCache.deleteEntriesSync(context, new String[]{httpURL});
+
+        httpCache.get(new UmHttpRequest(context, httpURL).setOnlyIfCached(true), notifyCallback);
+        notifyCallback.waitAndGetException(240000);
+
+        Assert.assertNull("Response to uncached entry, when using onlyIfCached, is null",
+                notifyCallback.getResponse());
+        Assert.assertNotNull("IOException occurred when requesting onlyIfCached entry that is not yet cached",
+                notifyCallback.getException());
+
+        notifyCallback.clear();
+        httpCache.get(new UmHttpRequest(context, httpURL), notifyCallback);
+        notifyCallback.waitForResponse(240000);
+
+        notifyCallback.clear();
+        httpCache.get(new UmHttpRequest(context, httpURL).setOnlyIfCached(true), notifyCallback);
+        notifyCallback.waitForResponse(240000);
+        Assert.assertTrue("Response to cached entry, when using onlyIfCached, is successful",
+                notifyCallback.getResponse().isSuccessful());
+    }
+
+    @Test
+    public void testFailedRequest() {
+        Object context = PlatformTestUtil.getTargetContext();
+        UmHttpResponseNotifyCallback notifyCallback = new UmHttpResponseNotifyCallback();
+        String httpUrl = UMFileUtil.joinPaths(new String[] {ResourcesHttpdTestServer.getHttpRoot(),
+                "does-not-exist.png"});
+        httpCache.get(new UmHttpRequest(context, httpUrl), notifyCallback);
+        notifyCallback.waitAndGetResponse(240000);
+
+        Assert.assertTrue("Calling an error page results in response, isSuccessful = false",
+                !notifyCallback.getResponse().isSuccessful());
+
+        notifyCallback.clear();
+
+        httpCache.get(new UmHttpRequest(context, "http://localhost:100/doesnotexist.html"), notifyCallback);
+        notifyCallback.waitAndGetException(240000);
+        Assert.assertNotNull("Connection refused results in a callback to onFailrue",
+                notifyCallback.getException());
+    }
+
+    @Test
+    public void testFreshness() {
+        final Object context = PlatformTestUtil.getTargetContext();
+
+        //Make up an entry that expires in 10 minutes, where it was last checked 9 minutes ago
+        HttpCacheDbEntry dbEntry = HttpCacheDbManager.getInstance().makeNewEntry(context);
+        dbEntry.setCacheControl("max-age=600");
+        dbEntry.setLastChecked(System.currentTimeMillis() - (9 * 60 * 1000));
+        HttpCacheEntry entry = new HttpCacheEntry(dbEntry);
+        Assert.assertTrue("Cache-control header maxage=10min, last checked 9mins ago, isFresh",
+                entry.isFresh(0));
+
+        dbEntry.setLastChecked(System.currentTimeMillis() - (11 * 60 * 1000));
+        Assert.assertTrue("Cache-control header maxage=10min, last checked 1mins ago, is stale",
+                !entry.isFresh(0));
+
+        //Test interpreting freshness using expires header
+        dbEntry.setCacheControl(null);
+        dbEntry.setExpiresTime(System.currentTimeMillis() + 1000);
+        Assert.assertTrue("Entry is considered fresh if without cache-control header, with expires header in future",
+                entry.isFresh());
+        dbEntry.setExpiresTime(System.currentTimeMillis() - 1000);
+        Assert.assertTrue("Entry is considered stale if without cache-control header, with expires header in past",
+                !entry.isFresh());
+
+        //test using time to live default
+        dbEntry.setExpiresTime(-1);
+        dbEntry.setLastChecked(System.currentTimeMillis());
+        Assert.assertTrue("Entry without headers is considered fresh by default with a time to live",
+                entry.isFresh(10000));
+        Assert.assertTrue("Entry without headers is considered stale if no time to live given",
+                !entry.isFresh(0));
+
+
+    }
+
 }
