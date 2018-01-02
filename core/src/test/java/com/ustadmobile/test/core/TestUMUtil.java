@@ -63,7 +63,7 @@ public class TestUMUtil extends TestCase{
         assertEquals("sorted item1", five, arr[1]);
         assertEquals("Sorted item2", seven, arr[2]);
     }
-    
+
     public void runTest(){
         testUMUtilSort();
     }

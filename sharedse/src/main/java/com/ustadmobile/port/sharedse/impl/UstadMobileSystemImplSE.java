@@ -664,7 +664,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                callback.onFailure(umCall, null);
+                callback.onFailure(umCall, e);
             }
 
             @Override

@@ -17,7 +17,8 @@ import org.junit.runners.Suite;
         TestUstadJSOPDSFeed.class,
         TestUstadJSOPDSEntry.class,
         TestUMFileUtil.class,
-        TestUstadJSOPF.class
+        TestUstadJSOPF.class,
+        TestUmCalendarUtil.class
 })
 public abstract class CoreTestSuite {
 }

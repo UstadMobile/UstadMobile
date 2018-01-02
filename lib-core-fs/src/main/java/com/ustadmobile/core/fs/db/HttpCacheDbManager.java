@@ -47,5 +47,12 @@ public abstract class HttpCacheDbManager  {
     public abstract void persist(Object context, HttpCacheDbEntry entry);
 
 
+    /**
+     * Delete an entry from the database
+     *
+     * @param context
+     * @param entry
+     */
+    public abstract void delete(Object context, HttpCacheDbEntry entry);
 
 }

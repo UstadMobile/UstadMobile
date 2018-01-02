@@ -117,8 +117,9 @@ public class HttpCacheEntry  {
     public boolean isFresh(int timeToLive) {
         long expiryTime = calculateEntryExpirationTime();
         long timeNow = System.currentTimeMillis();
-        if(expiryTime != -1 && expiryTime > timeNow) {
-            return true;
+
+        if(expiryTime != -1) {
+             return expiryTime > timeNow;
         }else {
             return dbProxy.getLastChecked() + timeToLive > timeNow;
         }

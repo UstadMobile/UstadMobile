@@ -22,7 +22,7 @@ public class HttpCacheDbEntryEntity implements HttpCacheDbEntry{
     private String fileUri;
 
     @DatabaseField
-    private long expiresTime;
+    private long expiresTime = -1;
 
     @DatabaseField
     private String contentType;

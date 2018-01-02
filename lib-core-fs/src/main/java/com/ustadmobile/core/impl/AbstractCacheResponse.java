@@ -64,7 +64,7 @@ public abstract class AbstractCacheResponse extends UmHttpResponse{
      *
      * @return File path to where this entry is stored on disk.
      */
-    public abstract String getFilePath();
+    public abstract String getFileUri();
 
 
     protected void setNetworkResponseNotModified(boolean networkResponseNotModified) {

@@ -591,7 +591,7 @@ public class UMUtil {
             out.put(table.get(key), key);
         }
 
-        return table;
+        return out;
     }
 
     /**
