@@ -66,6 +66,7 @@ import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -924,6 +925,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
 
+    }
+
+    @Override
+    public UmOpdsDbManager getOpdsDbManager() {
+        return null;
     }
 
     @Override

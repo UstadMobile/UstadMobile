@@ -3,7 +3,7 @@ package com.ustadmobile.port.javase.fs.db;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.ustadmobile.port.javase.impl.UmContextSe;
-import com.ustadmobile.port.jcommon.HttpCacheDbManagerOrmLite;
+import com.ustadmobile.port.jcommon.fs.db.HttpCacheDbManagerOrmLite;
 import com.ustadmobile.port.jcommon.fs.db.HttpCacheDbEntryEntity;
 
 import java.lang.ref.WeakReference;

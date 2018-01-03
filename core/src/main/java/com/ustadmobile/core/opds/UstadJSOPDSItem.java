@@ -62,9 +62,9 @@ import java.util.Vector;
  */
 public abstract class UstadJSOPDSItem {
     
-    public String title;
+    protected String title;
     
-    public String id;
+    protected String id;
     
     protected Vector linkVector;
 
@@ -136,18 +136,18 @@ public abstract class UstadJSOPDSItem {
     //    "href", "length", "title", "hreflang"};
     
         
-    public String updated;
+    protected String updated;
     
-    public String summary;
+    protected String summary;
 
-    public String content;
+    protected String content;
 
-    public Vector authors;    
-    public String publisher;
+    protected Vector authors;
+    protected String publisher;
     
-    public String bgColor;
+    protected String bgColor;
     
-    public String textColor;
+    protected String textColor;
 
     /**
      * The url from which this item was loaded, if applicable.
@@ -987,5 +987,23 @@ public abstract class UstadJSOPDSItem {
     public Vector getAuthors() {
         return authors;
     }
+
+    public String getItemId() {
+        return id;
+    }
+
+    public void setItemId(String id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
 
 }

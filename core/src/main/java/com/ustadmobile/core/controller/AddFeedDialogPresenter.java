@@ -59,7 +59,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
             presetNames[0] = "Select a feed";
             presetNames[1] = "Add by URL";
             for(int i = 0; i < presetFeeds.size(); i++) {
-                presetNames[i + 2] = presetFeeds.getEntry(i).title;
+                presetNames[i + 2] = presetFeeds.getEntry(i).getTitle();
             }
 
 
@@ -141,8 +141,8 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
                     UMFileUtil.joinPaths(new String[]{OpdsEndpoint.OPDS_PROTO_PREFKEY_FEEDS, prefkey}),
                     null, getContext(), null);
             UstadJSOPDSEntry feedEntry = new UstadJSOPDSEntry(userFeedList);
-            feedEntry.title = item.title;
-            feedEntry.id = item.id;
+            feedEntry.setTitle(item.getTitle());
+            feedEntry.setItemId(item.getItemId());
             feedEntry.addLink(link);
             String[] thumbnailLinks = item.getThumbnailLink(false);
             if(thumbnailLinks != null) {

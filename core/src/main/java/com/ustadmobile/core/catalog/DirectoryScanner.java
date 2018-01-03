@@ -145,10 +145,10 @@ public class DirectoryScanner {
                             }
                         }
 
-                        for(k = 0; k < fileFeed.entries.length; k++) {
-                            entry =new UstadJSOPDSEntry(feed, fileFeed.entries[k]);
+                        for(k = 0; k < fileFeed.size(); k++) {
+                            entry =new UstadJSOPDSEntry(feed, fileFeed.getEntry(k));
                             containerLinkHref = generateLink(fileUri, acquisitionLinkHrefPrefix,
-                                    null, entry.id, linkHrefMode);
+                                    null, entry.getItemId(), linkHrefMode);
 
                             acquisitionLink = (String[])entry.getAcquisitionLinks().elementAt(0);
                             acquisitionLink[UstadJSOPDSItem.ATTR_HREF] = containerLinkHref;
@@ -173,7 +173,7 @@ public class DirectoryScanner {
                                             entryResult.getThumbnailMimeType(),
                                             generateLink(thumbnailAbsolutePath,
                                                     entryThumbnailLinkHrefPrefix,
-                                                    null, entry.id,
+                                                    null, entry.getItemId(),
                                                     thumbnailHrefMode));
 
                                 }catch(IOException e) {
@@ -186,8 +186,8 @@ public class DirectoryScanner {
                                 }
                             }
 
-                            if(linkFeed != null && linkFeed.getEntryById(entry.id) != null) {
-                                Vector allLinks = linkFeed.getEntryById(entry.id).getLinks();
+                            if(linkFeed != null && linkFeed.getEntryById(entry.getItemId()) != null) {
+                                Vector allLinks = linkFeed.getEntryById(entry.getItemId()).getLinks();
                                 for(int l = 0; l < allLinks.size(); l++) {
                                     entry.addLink((String[])allLinks.elementAt(l));
                                 }
@@ -198,7 +198,7 @@ public class DirectoryScanner {
                                 callback.onEntryLoaded(feed, feed.size(), entry);
 
                             CatalogEntryInfo thisEntryInfo = CatalogPresenter.getEntryInfo(
-                                    entry.id, resourceMode, context);
+                                    entry.getItemId(), resourceMode, context);
                             if(thisEntryInfo == null) {
                                 impl.l(UMLog.VERBOSE, 409, dirContents[i]);
                                 thisEntryInfo = new CatalogEntryInfo();
@@ -209,16 +209,16 @@ public class DirectoryScanner {
                                 thisEntryInfo.srcURLs = new String[] { dirContents[i] };
 
 
-                                CatalogPresenter.setEntryInfo(entry.id, thisEntryInfo,
+                                CatalogPresenter.setEntryInfo(entry.getItemId(), thisEntryInfo,
                                         resourceMode, context);
                                 if(impl.getNetworkManager() != null)
-                                    impl.getNetworkManager().handleEntryStatusChangeDiscovered(entry.id,
+                                    impl.getNetworkManager().handleEntryStatusChangeDiscovered(entry.getItemId(),
                                             thisEntryInfo.acquisitionStatus);
                             }
 
                             if(thisEntryInfo.acquisitionStatus != STATUS_ACQUIRED) {
                                 thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
-                                CatalogPresenter.setEntryInfo(entry.id, thisEntryInfo,
+                                CatalogPresenter.setEntryInfo(entry.getItemId(), thisEntryInfo,
                                         resourceMode, context);
                             }
                         }

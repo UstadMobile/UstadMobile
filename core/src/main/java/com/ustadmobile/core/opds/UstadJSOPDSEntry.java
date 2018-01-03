@@ -43,7 +43,7 @@ import java.util.Vector;
  * @author varuna
  */
 public class UstadJSOPDSEntry extends UstadJSOPDSItem {
-    public UstadJSOPDSFeed parentFeed;
+    protected UstadJSOPDSFeed parentFeed;
     
     public static int LINK_REL = 0;
     public static int LINK_MIMETYPE = 1;
@@ -351,5 +351,13 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
             return this.parentFeed.getHref();
         else
             return null;
+    }
+
+    public UstadJSOPDSFeed getParentFeed() {
+        return parentFeed;
+    }
+
+    public void setParentFeed(UstadJSOPDSFeed parentFeed) {
+        this.parentFeed = parentFeed;
     }
 }

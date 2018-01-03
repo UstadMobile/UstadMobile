@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.fs.cachedb;
 import android.content.Context;
 
 import com.j256.ormlite.dao.Dao;
-import com.ustadmobile.port.jcommon.HttpCacheDbManagerOrmLite;
+import com.ustadmobile.port.jcommon.fs.db.HttpCacheDbManagerOrmLite;
 import com.ustadmobile.port.jcommon.fs.db.HttpCacheDbEntryEntity;
 
 import java.lang.ref.WeakReference;

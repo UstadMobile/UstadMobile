@@ -39,6 +39,7 @@ import com.ustadmobile.core.impl.http.UmHttpResponse;
 import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
+import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -1218,6 +1219,10 @@ public abstract class UstadMobileSystemImpl {
 
 
     public abstract String getUserDetail(String username, int field, Object dbContext);
+
+
+    public abstract UmOpdsDbManager getOpdsDbManager();
+
 
 
 }

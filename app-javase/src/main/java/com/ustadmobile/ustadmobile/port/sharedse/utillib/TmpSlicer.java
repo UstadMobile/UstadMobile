@@ -49,8 +49,8 @@ public class TmpSlicer {
         for(int i = 0; i < feeds.length; i++) {
             feeds[i] = new UstadJSOPDSFeed("http://www.ustadmobile.com/files/s4s/index."
                 + LANGUAGES[i] + ".opds");
-            feeds[i].id = "com.ustadmobile.msst." + LANGUAGES[i];
-            feeds[i].title = TITLES[i];
+            feeds[i].setItemId("com.ustadmobile.msst." + LANGUAGES[i]);
+            feeds[i].setTitle(TITLES[i]);
             feeds[i].setLanguage(LANGUAGES[i]);
 
             //now add links to other languages
@@ -102,8 +102,8 @@ public class TmpSlicer {
                     System.out.println("loaded: " + opfObj.title);
 
                     UstadJSOPDSEntry linkEntry = new UstadJSOPDSEntry(feeds[j]);
-                    linkEntry.id = opfObj.id;
-                    linkEntry.title = opfObj.title;
+                    linkEntry.setItemId(opfObj.id);
+                    linkEntry.setTitle(opfObj.title);
                     if(opfObj.description != null) {
                         linkEntry.setContent(opfObj.description);
                     }

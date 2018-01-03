@@ -119,7 +119,7 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
         candidateEntries.put(entry.getLanguage() != null ? entry.getLanguage() : "", entry);
         String[] translatedEntryIds = entry.getAlternativeTranslationEntryIds();
         for(int i = 0; i < translatedEntryIds.length; i++) {
-            UstadJSOPDSEntry translatedEntry = entry.parentFeed.getEntryById(translatedEntryIds[i]);
+            UstadJSOPDSEntry translatedEntry = entry.getParentFeed().getEntryById(translatedEntryIds[i]);
             if(translatedEntry != null && translatedEntry.getLanguage() != null)
                 candidateEntries.put(translatedEntry.getLanguage(), translatedEntry);
 
@@ -147,7 +147,7 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
         while(candidateLangs.hasMoreElements()) {
             candidateLang = (String)candidateLangs.nextElement();
             candidateEntry = (UstadJSOPDSEntry)candidateEntries.get(candidateLang);
-            info = CatalogPresenter.getEntryInfo(candidateEntry.id,
+            info = CatalogPresenter.getEntryInfo(candidateEntry.getItemId(),
                     CatalogPresenter.ALL_RESOURCES, getContext());
             if(info != null && info.acquisitionStatus == acquisitionStatus) {
                 matchingEntries.put(candidateLang, candidateEntry);
@@ -198,18 +198,18 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
      */
     public void handleOpenEntryView(UstadJSOPDSEntry entry, String titlebarText) {
         Hashtable catalogEntryArgs = new Hashtable();
-        UstadJSOPDSFeed parentFeed = entry.parentFeed;
-        String[] entryAbsoluteLink = entry.parentFeed.getAbsoluteSelfLink();
-        if(entryAbsoluteLink == null && entry.parentFeed.getHref() != null) {
+        UstadJSOPDSFeed parentFeed = entry.getParentFeed();
+        String[] entryAbsoluteLink = entry.getParentFeed().getAbsoluteSelfLink();
+        if(entryAbsoluteLink == null && entry.getParentFeed().getHref() != null) {
             parentFeed.addLink(UstadJSOPDSFeed.LINK_REL_SELF_ABSOLUTE,
                     parentFeed.isAcquisitionFeed() ? UstadJSOPDSFeed.TYPE_ACQUISITIONFEED
                     : UstadJSOPDSFeed.TYPE_NAVIGATIONFEED, parentFeed.getHref());
         }
 
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_OPDS_STR,
-                entry.parentFeed.serializeToString(true));
+                entry.getParentFeed().serializeToString(true));
         catalogEntryArgs.put(CatalogEntryPresenter.ARG_ENTRY_ID,
-                entry.id);
+                entry.getItemId());
         if(titlebarText != null)
             catalogEntryArgs.put(CatalogEntryPresenter.ARG_TITLEBAR_TEXT, titlebarText);
 
@@ -245,7 +245,7 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
         switch(commandId) {
             case CMD_REMOVE_ENTRIES:
                 for(int i = 0; i < removeEntriesSelected.length; i++) {
-                    CatalogPresenter.removeEntry(removeEntriesSelected[i].id,
+                    CatalogPresenter.removeEntry(removeEntriesSelected[i].getItemId(),
                             CatalogPresenter.ALL_RESOURCES, getContext());
                 }
                 onEntriesRemoved();

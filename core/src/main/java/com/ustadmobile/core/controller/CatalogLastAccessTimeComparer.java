@@ -44,8 +44,8 @@ public class CatalogLastAccessTimeComparer implements UMUtil.Comparer{
     }
     
     public int compare(Object o1, Object o2) {
-        long diff = getLastAccessTime(((UstadJSOPDSEntry)o1).id) -
-            getLastAccessTime(((UstadJSOPDSEntry)o2).id);
+        long diff = getLastAccessTime(((UstadJSOPDSEntry)o1).getItemId()) -
+            getLastAccessTime(((UstadJSOPDSEntry)o2).getItemId());
         
         if(descOrder) diff *= -1;
 

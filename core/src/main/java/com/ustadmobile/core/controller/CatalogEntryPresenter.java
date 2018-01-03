@@ -247,15 +247,15 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     public void handleEntryReady() {
         entryLoaded = true;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        catalogEntryView.setEntryTitle(entry.title);
+        catalogEntryView.setEntryTitle(entry.getTitle());
 
         if(entry.getNumAuthors() > 0) {
             catalogEntryView.setEntryAuthors(UMUtil.joinStrings(entry.getAuthors(), ", "));
         }
 
-        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.id,
+        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
                 CatalogPresenter.ALL_RESOURCES, context);
-        catalogEntryView.setDescription(entry.content, entry.getContentType());
+        catalogEntryView.setDescription(entry.getContent(), entry.getContentType());
         String[] firstAcquisitionLink = entry.getFirstAcquisitionLink(null);
         if(firstAcquisitionLink != null
                 && firstAcquisitionLink[UstadJSOPDSItem.ATTR_LENGTH] != null) {
@@ -302,7 +302,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         //TODO: as this is bound to the activity - this might not be ready - lifecycle implication needs handled
         NetworkManagerCore manager  = UstadMobileSystemImpl.getInstance().getNetworkManager();
         /* $if umplatform != 2  $ */
-        List<EntryCheckResponse> fileResponse = manager.getEntryResponsesWithLocalFile(entry.id);
+        List<EntryCheckResponse> fileResponse = manager.getEntryResponsesWithLocalFile(entry.getItemId());
         if(fileResponse != null) {
             catalogEntryView.setLocallyAvailableStatus(CatalogEntryView.LOCAL_STATUS_AVAILABLE);
         }
@@ -363,7 +363,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     protected void updateLearnerProgress() {
         CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(
-                new String[]{entry.id}, getContext());
+                new String[]{entry.getItemId()}, getContext());
         if(progress == null || progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
             catalogEntryView.setLearnerProgressVisible(false);
         }else {
@@ -417,7 +417,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     protected void startMonitoringLocalAvailability() {
         if(availabilityMonitorRequest == null) {
             HashSet<String> monitorIdSet = new HashSet<>();
-            monitorIdSet.add(entry.id);
+            monitorIdSet.add(entry.getItemId());
             availabilityMonitorRequest = new AvailabilityMonitorRequest(monitorIdSet);
             UstadMobileSystemImpl.getInstance().getNetworkManager().startMonitoringAvailability(
                     availabilityMonitorRequest, true);
@@ -467,7 +467,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     }
 
     public void handleOpenEntry(UstadJSOPDSEntry entry) {
-        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.id,
+        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
                 CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE, getContext());
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
@@ -503,8 +503,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     public void handleClickShare() {
         Hashtable args = new Hashtable();
-        args.put("title", entry.title);
-        args.put("entries", new String[]{entry.id});
+        args.put("title", entry.getTitle());
+        args.put("entries", new String[]{entry.getItemId()});
         UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
     }
 
@@ -542,7 +542,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     }
 
     public void handleClickStopDownload() {
-        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.id,
+        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
                 CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE, getContext());
         if(entryInfo != null
                 && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS
@@ -583,7 +583,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     
     public void acquisitionProgressUpdate(String entryId, final AcquisitionTaskStatus status) {
-        if(entry != null && entryId.equals(entry.id)) {
+        if(entry != null && entryId.equals(entry.getItemId())) {
             catalogEntryView.runOnUiThread(new Runnable() {
                 
                 public void run() {
@@ -601,7 +601,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     
     public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-        if(entryId.equals(entry.id)) {
+        if(entryId.equals(entry.getItemId())) {
             switch(status.getStatus()) {
                 case UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL:
                     catalogEntryView.runOnUiThread(new Runnable() {
@@ -632,8 +632,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     }
 
     public void fileStatusCheckInformationAvailable(String[] fileIds) {
-        if(UMUtil.getIndexInArray(entry.id, fileIds) != -1) {
-            final boolean available = manager.isEntryLocallyAvailable(entry.id);
+        if(UMUtil.getIndexInArray(entry.getItemId(), fileIds) != -1) {
+            final boolean available = manager.isEntryLocallyAvailable(entry.getItemId());
             updateViewLocallyAvailableStatus(available ?
                     CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
         }
@@ -644,7 +644,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         /* $if umplatform != 2  $ */
         if(task.getTaskId() == entryCheckTaskId && task.getStatus() == NetworkTask.STATUS_COMPLETE) {
             boolean available =
-                UstadMobileSystemImpl.getInstance().getNetworkManager().getEntryResponsesWithLocalFile(entry.id) != null;
+                UstadMobileSystemImpl.getInstance().getNetworkManager().getEntryResponsesWithLocalFile(entry.getItemId()) != null;
             updateViewLocallyAvailableStatus(available ?
                 CatalogEntryView.LOCAL_STATUS_AVAILABLE : CatalogEntryView.LOCAL_STATUS_NOT_AVAILABLE);
             startMonitoringLocalAvailability();

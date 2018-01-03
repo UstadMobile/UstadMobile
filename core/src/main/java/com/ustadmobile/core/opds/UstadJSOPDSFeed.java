@@ -52,7 +52,7 @@ import java.util.Vector;
  */
 public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
-    public UstadJSOPDSEntry[] entries = new UstadJSOPDSEntry[0];
+    private UstadJSOPDSEntry[] entries = new UstadJSOPDSEntry[0];
 
     /**
      * Cached reference to the OPDS self link
