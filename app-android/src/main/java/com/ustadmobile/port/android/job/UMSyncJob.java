@@ -12,6 +12,8 @@ import com.ustadmobile.nanolrs.core.model.Node;
 import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
+import com.ustadmobile.nanolrs.core.sync.UMSyncResult;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -91,8 +93,11 @@ public class UMSyncJob extends Job {
             if(loggedInUser != null && endNode != null) {
                 System.out.println("  UMSyncJob: Logged in user and end node is NOT null. Syncing..");
                 //TODO: Test it.
-                UMSyncEndpoint.startSync(loggedInUser, loggedInUserCred, endNode, getContext());
-                //UMSyncEndpoint.startSync(loggedInUser, endNode, getContext());
+                UstadMobileSystemImplSE.getInstanceSE().fireSetSyncHappeningEvent(true, getContext());
+                UMSyncResult result = UMSyncEndpoint.startSync(loggedInUser, loggedInUserCred, endNode, getContext());
+                if(result.getStatus() != -1){
+                    UstadMobileSystemImplSE.getInstanceSE().fireSetSyncHappeningEvent(false, getContext());
+                }
             }else{
                 System.out.println("  !UMSyncJob: Logged in user and end node is null, skipping..!");
             }

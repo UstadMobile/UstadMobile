@@ -255,3 +255,9 @@ app-android/src/main/assets/cache
 
 #GWT (moved to gwtdev branch)
 app-gwt/*
+
+#Eclipse gradle plugin files
+.project
+.classpath
+.settings
+

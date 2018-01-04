@@ -66,6 +66,17 @@
                    android:textSize="@dimen/text_body"
                    android:layout_width="match_parent"
                    android:layout_height="wrap_content" />
+
+               <TextView
+                   android:id="@+id/user_profile_last_sync"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:layout_alignBottom="@+id/user_profile_image"
+                   android:layout_alignLeft="@+id/user_profile_full_name"
+                   android:layout_alignStart="@+id/user_profile_full_name"
+                   android:text="Last Synced at 12/12/2017 8:40am"
+                   android:textSize="@dimen/text_body" />
+
                <FrameLayout
                    android:id="@+id/edit_user_profile_holder"
                    android:layout_alignParentRight="true"

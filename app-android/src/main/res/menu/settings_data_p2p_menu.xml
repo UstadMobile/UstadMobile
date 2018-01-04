@@ -2,8 +2,19 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/settings_data_usage_sync_now"
+        android:title="Sync now"
+        android:icon="@drawable/ic_sync_black_24dp"
+        app:showAsAction="always" />
+
     <item android:id="@+id/p2pDeviceList"
         android:title="List Super Nodes"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/syncList"
+        android:title="List Syncs"
         android:orderInCategory="100"
         app:showAsAction="never" />
 </menu>

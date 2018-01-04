@@ -21,6 +21,7 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import java.sql.SQLException;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
+import listener.ActiveSyncListener;
 import listener.ActiveUserListener;
 
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
@@ -38,7 +39,8 @@ import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.P
  * @author kileha3
  *
  */
-public class NetworkServiceAndroid extends Service implements ActiveUserListener{
+public class NetworkServiceAndroid extends Service
+        implements ActiveUserListener, ActiveSyncListener{
 
     private WifiDirectHandler wifiDirectHandler;
     private final IBinder mBinder = new LocalServiceBinder();
@@ -46,11 +48,11 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
     private UMSyncService umSyncService;
 
+    private boolean isSyncHappening = false;
+
     /**
      * Default time interval for Wi-Fi Direct service rebroadcasting.
      */
-    //public static final int SERVICE_REBROADCASTING_TIMER=30000;
-
     public static final int SERVICE_REBROADCASTING_TIMER=120000;
 
     public NetworkServiceAndroid(){}
@@ -62,14 +64,12 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
                 UstadMobileSystemImplAndroid.getInstanceAndroid().getNetworkManager();
         networkManagerAndroid.init(NetworkServiceAndroid.this);
 
+        //Bind WifiService
         Intent wifiServiceIntent = new Intent(this, WifiDirectHandler.class);
         bindService(wifiServiceIntent, wifiP2PServiceConnection, BIND_AUTO_CREATE);
 
-        //Sync:
+        //Sync: Bing SyncService TODO: Remove. Replaced by SyncJob
         Intent umSyncServiceIntent = new Intent(this, UMSyncService.class);
-        //String loggedInUserString =
-        //        UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
-        //TODO: Remove when new sync success.
         UstadMobileSystemImplSE.getInstanceSE().addActiveUserListener(this);
         bindService(umSyncServiceIntent, umSyncServiceConnection, BIND_AUTO_CREATE);
     }
@@ -82,17 +82,13 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             wifiDirectHandler.removeGroup();
             wifiDirectHandler.stopServiceDiscovery();
             wifiDirectHandler.removeService();
-            UstadMobileSystemImpl.getInstance().setAppPref("devices","",getApplicationContext());
+            UstadMobileSystemImpl.getInstance().setAppPref("devices",
+                    "",getApplicationContext());
         }
         unbindService(wifiP2PServiceConnection);
 
-        //Sync:
+        //Sync: Remove active User as sync is over and unbind service.
         UstadMobileSystemImplSE.getInstanceSE().removeActiveUserListener(this);
-
-        //TODO: We don't really need this. Remove.
-        //TODODone. Commented.
-        //String loggedInUserString =
-        //        UstadMobileSystemImpl.getInstance().getActiveUser(getApplicationContext());
         unbindService(umSyncServiceConnection);
 
         super.onDestroy();
@@ -139,7 +135,6 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
             networkManagerAndroid.setSuperNodeEnabled(NetworkServiceAndroid.this.getApplicationContext(),
                     isSuperNodeEnabled);
         }
-
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
@@ -207,6 +202,8 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
     };
 
+    //ActiveUserListener:
+
     @Override
     public void credChanged(String cred, Object context){
         umSyncService.setPassword(cred);
@@ -226,7 +223,6 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
         loggedInUser = userManager.findByUsername(context, username);
         if(loggedInUser == null){
-            //loggedInUser = null;
             System.out.println("No user logged in. Setting null (will not proceed)");
         }
 
@@ -243,6 +239,18 @@ public class NetworkServiceAndroid extends Service implements ActiveUserListener
 
     }
 
+    //ActiveSyncListener: TODO: remove . Not being used. Moved to the Activity
+
+    @Override
+    public boolean isSyncHappening(Object context) {
+        return this.isSyncHappening;
+    }
+
+    @Override
+    public void setSyncHappening(boolean happening, Object context) {
+        this.isSyncHappening = happening;
+
+    }
 
     /**
      * Class used for the client Binder.  Because we know this service always

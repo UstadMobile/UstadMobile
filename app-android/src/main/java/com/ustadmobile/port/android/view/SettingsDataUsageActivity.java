@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.view.menu.ActionMenuItemView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,9 +14,16 @@ import android.widget.TextView;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.SettingsDataUsageController;
+import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
+import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
-public class SettingsDataUsageActivity extends UstadBaseActivity implements SettingsDataUsageView, CompoundButton.OnCheckedChangeListener, View.OnClickListener {
+import listener.ActiveSyncListener;
+
+public class SettingsDataUsageActivity extends UstadBaseActivity implements
+        SettingsDataUsageView, CompoundButton.OnCheckedChangeListener, View.OnClickListener,
+        ActiveSyncListener {
 
     private SettingsDataUsageController mController;
 
@@ -22,7 +31,7 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
     private RadioButton setWifiOnly,setMobileData;
     private LinearLayout superNodeLayoutWrapper,wifiLayoutWrapper,mobileLayoutWrapper;
 
-
+    private boolean isSyncHappening = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +58,13 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         mobileLayoutWrapper.setOnClickListener(this);
         wifiLayoutWrapper.setOnClickListener(this);
         superNodeLayoutWrapper.setOnClickListener(this);
+
+        UstadMobileSystemImplSE.getInstanceSE().addActiveSyncListener(this);
     }
 
     @Override
     public void onDestroy() {
-
+        UstadMobileSystemImplSE.getInstanceSE().removeActiveSyncListener(this);
         super.onDestroy();
     }
 
@@ -114,7 +125,39 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         if(item.getItemId()==android.R.id.home){
             finish();
         }
+
+        //If Sync Now Menu Action Button Icon is pressed.
+        if(item.getItemId() == R.id.settings_data_usage_sync_now){
+            try {
+                disableSyncButton();
+                mController.triggerSync();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                //Update view that Sync could not be started.. TODO
+            }
+        }
+
+        if(item.getItemId() == R.id.syncList){
+            //go To new ListView
+            UstadMobileSystemImpl.getInstance().go(SettingsDataSyncListView.VIEW_NAME, null, this);
+        }
+
         return true;
+    }
+
+    public void disableSyncButton(){
+        ActionMenuItemView syncButton = (ActionMenuItemView) findViewById(R.id.settings_data_usage_sync_now);
+        syncButton.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_sync_grey_24dp));
+        syncButton.setEnabled(false);
+        syncButton.setClickable(false);
+    }
+
+    public void enableSyncButton(){
+        ActionMenuItemView syncButton = (ActionMenuItemView) findViewById(R.id.settings_data_usage_sync_now);
+        syncButton.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_sync_black_24dp));
+        syncButton.setEnabled(true);
+        syncButton.setClickable(true);
     }
 
     @Override
@@ -147,9 +190,28 @@ public class SettingsDataUsageActivity extends UstadBaseActivity implements Sett
         }
     }
 
+    @Override
+    public boolean isSyncHappening(Object context) {
+        return this.isSyncHappening;
+    }
+
+    @Override
+    public void setSyncHappening(boolean happening, Object context) {
+        this.isSyncHappening = happening;
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                //stuff that updates ui
+                if(isSyncHappening == false){
+                    enableSyncButton();
+                }else{
+                    disableSyncButton();
+                }
+            }
+        });
 
 
-
-
-
+    }
 }
