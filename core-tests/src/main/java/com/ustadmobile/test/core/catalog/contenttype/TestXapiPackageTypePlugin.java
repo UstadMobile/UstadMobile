@@ -41,7 +41,7 @@ public class TestXapiPackageTypePlugin {
         String[] entryLinks = entry.getFirstAcquisitionLink(null);
         Assert.assertEquals("Mime type is application/zip", "application/zip",
                 entryLinks[UstadJSOPDSItem.ATTR_MIMETYPE]);
-        Assert.assertEquals("Title is as expected", "Tin Can Tetris Example", entry.title);
+        Assert.assertEquals("Title is as expected", "Tin Can Tetris Example", entry.getTitle());
     }
 
     @After

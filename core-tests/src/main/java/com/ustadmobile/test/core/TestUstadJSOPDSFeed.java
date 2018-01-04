@@ -112,10 +112,11 @@ public class TestUstadJSOPDSFeed {
         Assert.assertEquals("Serializer set absolute self href, then restored to href property",
                 "http://www.ustadmobile.com/files/test/acquire-multi.opds",
                 deserializedFeed.getHref());
-        Assert.assertEquals("Feed loaded with correct id", feed.id, deserializedFeed.id);
+        Assert.assertEquals("Feed loaded with correct id", feed.getItemId(),
+                deserializedFeed.getItemId());
         for(int i = 0; i < feed.size(); i++) {
-            Assert.assertEquals("Feed entry " + i + " has same id ", feed.getEntry(i).id,
-                    deserializedFeed.getEntry(i).id);
+            Assert.assertEquals("Feed entry " + i + " has same id ", feed.getEntry(i).getItemId(),
+                    deserializedFeed.getEntry(i).getItemId());
         }
 
     }
@@ -155,7 +156,7 @@ public class TestUstadJSOPDSFeed {
         }
 
         Assert.assertEquals("Feed loaded correct id",
-                "http://umcloud1.ustadmobile.com/opds/courseid/6CM", feed.id);
+                "http://umcloud1.ustadmobile.com/opds/courseid/6CM", feed.getItemId());
         Assert.assertNotNull("Feed expected entry is present",
                 feed.getEntryById("4f382c43-1e92-4fe9-bce0-e03b6c11336f"));
         Assert.assertEquals("Feed has 1 entry", feed.size(), 1);
@@ -196,7 +197,7 @@ public class TestUstadJSOPDSFeed {
         }
 
         Assert.assertEquals("Entry loaded id matches id in OPDS file",
-                "4f382c43-1e92-4fe9-bce0-e03b6c11336f", entry.id);
+                "4f382c43-1e92-4fe9-bce0-e03b6c11336f", entry.getItemId());
         String[] acquisitionLinks = entry.getBestAcquisitionLink(new String[]{"application/epub+zip"});
         Assert.assertEquals("Acquisition link matches expected", "small.epub",
                 acquisitionLinks[UstadJSOPDSItem.ATTR_HREF]);

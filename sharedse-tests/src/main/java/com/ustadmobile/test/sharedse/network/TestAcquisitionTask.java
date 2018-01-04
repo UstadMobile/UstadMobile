@@ -413,7 +413,7 @@ public class TestAcquisitionTask {
         AcquisitionTask task = new AcquisitionTask(makeAcquisitionTestFeed(),
                 UstadMobileSystemImplSE.getInstanceSE().getNetworkManager());
         Assert.assertEquals("When WiFi direct and local network responses are available, local network response will be chosen",
-                sameNetworkResponse, task.selectEntryCheckResponse(acquisitionFeed.entries[0], responseList));
+                sameNetworkResponse, task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), responseList));
 
 
         /*
@@ -432,7 +432,7 @@ public class TestAcquisitionTask {
         nodeWithFailuresResponse.setFileAvailable(true);
         long failureTime = timeNow - 20000;//20 seconds ago
         AcquisitionTaskHistoryEntry failureEntry = new AcquisitionTaskHistoryEntry(
-            acquisitionFeed.entries[0].id, "http://127.0.0.2:8001/catalog/entry/foo",
+            acquisitionFeed.getEntry(0).getItemId(), "http://127.0.0.2:8001/catalog/entry/foo",
                 NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, failureTime,
                 failureTime, UstadMobileSystemImpl.DLSTATUS_FAILED);
         nodeWithFailures.addAcquisitionHistoryEntry(failureEntry);
@@ -440,7 +440,7 @@ public class TestAcquisitionTask {
         responseList.add(nodeWithFailuresResponse);
         responseList.add(nodeWithoutFailuresResponse);
         Assert.assertEquals("When downloading prefer a network node without recent failures",
-                nodeWithoutFailuresResponse, task.selectEntryCheckResponse(acquisitionFeed.entries[0],
+                nodeWithoutFailuresResponse, task.selectEntryCheckResponse(acquisitionFeed.getEntry(0),
                 responseList));
 
         /*
@@ -455,7 +455,7 @@ public class TestAcquisitionTask {
             nodesWithFailures[i].setNsdServiceName("node-with-failures-"+i);
             failureTime = timeNow - (((long)AcquisitionTask.FAILURE_MEMORY_TIME / 4)*i);
             AcquisitionTaskHistoryEntry nodeWithFailuresEntry = new AcquisitionTaskHistoryEntry(
-                acquisitionFeed.entries[0].id, "http://127.0.0." + i +":8000/catalog/foo",
+                acquisitionFeed.getEntry(0).getItemId(), "http://127.0.0." + i +":8000/catalog/foo",
                 NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, failureTime, failureTime,
                 UstadMobileSystemImpl.DLSTATUS_FAILED);
             nodesWithFailures[i].addAcquisitionHistoryEntry(nodeWithFailuresEntry);
@@ -465,7 +465,7 @@ public class TestAcquisitionTask {
         }
 
         Assert.assertEquals("When nodes have failed choose the node where the failure was least recent",
-                nodeWithFailuresResponses[3], task.selectEntryCheckResponse(acquisitionFeed.entries[0],
+                nodeWithFailuresResponses[3], task.selectEntryCheckResponse(acquisitionFeed.getEntry(0),
                 responseList));
 
         /**
@@ -483,7 +483,7 @@ public class TestAcquisitionTask {
 
             for(int j = 0; j < numFailures; j++) {
                 AcquisitionTaskHistoryEntry nodeWithMultipleFailuresEntry = new AcquisitionTaskHistoryEntry(
-                        acquisitionFeed.entries[0].id, "http://127.0.0.2:8000/catalog/foo",
+                        acquisitionFeed.getEntry(0).getItemId(), "http://127.0.0.2:8000/catalog/foo",
                         NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, failTime, failTime,
                         UstadMobileSystemImpl.DLSTATUS_FAILED);
                 nodesWithMultipleFailures[i].addAcquisitionHistoryEntry(nodeWithMultipleFailuresEntry);
@@ -492,7 +492,7 @@ public class TestAcquisitionTask {
         }
 
         Assert.assertNull("When too many failures have occurred result will be null",
-            task.selectEntryCheckResponse(acquisitionFeed.entries[0], responseList));
+            task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), responseList));
 
         /**
          * When there is only one acceptable entryResponse = return it
@@ -500,7 +500,7 @@ public class TestAcquisitionTask {
         responseList.clear();
         responseList.add(wifiDirectResponse);
         Assert.assertEquals("When there is one acceptable EntryResponse - it is returned",
-                wifiDirectResponse, task.selectEntryCheckResponse(acquisitionFeed.entries[0],
+                wifiDirectResponse, task.selectEntryCheckResponse(acquisitionFeed.getEntry(0),
                 responseList));
 
         /**
@@ -509,12 +509,12 @@ public class TestAcquisitionTask {
         responseList.clear();
         responseList.add(nodesWithMultipleFailuresResponse[0]);
         Assert.assertNull("When there is one unacceptable EntryResponse result is null",
-            task.selectEntryCheckResponse(acquisitionFeed.entries[0], responseList));
+            task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), responseList));
 
         Assert.assertNull("When responseList is empty select response returns null",
-            task.selectEntryCheckResponse(acquisitionFeed.entries[0], new ArrayList<EntryCheckResponse>()));
+            task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), new ArrayList<EntryCheckResponse>()));
 
         Assert.assertNull("When resposneList is null select response returns null",
-                task.selectEntryCheckResponse(acquisitionFeed.entries[0], null));
+                task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), null));
     }
 }

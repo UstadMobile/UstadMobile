@@ -690,11 +690,14 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
 
     @Override
     public UmHttpResponse makeRequestSync(UmHttpRequest request) throws IOException {
-        return httpCache.getSync(request);
+        return getHttpCache(request.getContext()).getSync(request);
     }
 
     @Override
     public HttpCache getHttpCache(Object context) {
+        if(httpCache == null)
+            httpCache = new HttpCache(getCacheDir(CatalogPresenter.SHARED_RESOURCE, context));
+
         return httpCache;
     }
 }
