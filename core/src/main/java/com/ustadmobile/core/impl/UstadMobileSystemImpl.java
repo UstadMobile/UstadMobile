@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -1242,6 +1243,14 @@ public abstract class UstadMobileSystemImpl {
         }
 
     }
+
+    public abstract LinkedHashMap<String, String> getSyncHistory(Object node, Object context);
+
+    public abstract LinkedHashMap<String, String> getMainNodeSyncHistory(Object context);
+
+    public abstract long getMainNodeLastSyncDate(Object context);
+
+    public abstract void triggerSync(Object context) throws Exception;
 }
 
 

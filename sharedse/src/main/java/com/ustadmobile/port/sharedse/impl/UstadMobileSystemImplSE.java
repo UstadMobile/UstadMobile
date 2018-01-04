@@ -23,19 +23,23 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.nanolrs.core.manager.ChangeSeqManager;
+import com.ustadmobile.nanolrs.core.manager.NodeManager;
+import com.ustadmobile.nanolrs.core.manager.NodeSyncStatusManager;
 import com.ustadmobile.nanolrs.core.manager.UserCustomFieldsManager;
 import com.ustadmobile.nanolrs.core.manager.UserManager;
 import com.ustadmobile.nanolrs.core.manager.XapiStatementManager;
+import com.ustadmobile.nanolrs.core.model.Node;
+import com.ustadmobile.nanolrs.core.model.NodeSyncStatus;
 import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.model.UserCustomFields;
 import com.ustadmobile.nanolrs.core.model.XapiAgent;
 import com.ustadmobile.nanolrs.core.model.XapiStatement;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
+import com.ustadmobile.nanolrs.core.sync.UMSyncResult;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpCallSe;
 import com.ustadmobile.port.sharedse.impl.http.UmHttpResponseSe;
 import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
@@ -47,7 +51,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,10 +58,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -67,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -99,6 +101,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     private HttpCache httpCache;
 
     private final OkHttpClient client = new OkHttpClient();
+
+    public static String DEFAULT_MAIN_SERVER_HOST_NAME = "umcloud1svlt";
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -719,5 +723,93 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     @Override
     public HttpCache getHttpCache(Object context) {
         return httpCache;
+    }
+
+    /**
+     * Get list of syncs
+     * @param context
+     * @return
+     */
+    @Override
+    public LinkedHashMap<String, String> getSyncHistory(Object nodeObj, Object context) {
+        NodeSyncStatusManager nodeSyncStatusManager =
+                PersistenceManager.getInstance().getManager(NodeSyncStatusManager.class);
+        LinkedHashMap syncHistoryMap = new LinkedHashMap<>();
+        Node node = (Node) nodeObj;
+        try {
+            List<NodeSyncStatus> allStatuses = nodeSyncStatusManager.getStatusesByNode(context, node);
+            Iterator<NodeSyncStatus> allStatusesIterator = allStatuses.iterator();
+            while(allStatusesIterator.hasNext()){
+                NodeSyncStatus thisNodeStatus = allStatusesIterator.next();
+                String thisNodeStatusResult = "SUCCESS";
+                if(!thisNodeStatus.getSyncResult().equals("200")){
+                    thisNodeStatusResult = "FAIL";
+                }
+                syncHistoryMap.put(thisNodeStatus.getSyncDate(), thisNodeStatusResult);
+            }
+            return syncHistoryMap;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public LinkedHashMap<String, String> getMainNodeSyncHistory(Object context) {
+        NodeManager nodeManager = PersistenceManager.getInstance().getManager(NodeManager.class);
+        Node mainNode = null;
+        try {
+            mainNode = nodeManager.getMainNode(DEFAULT_MAIN_SERVER_HOST_NAME, context);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return getSyncHistory(mainNode, context);
+    }
+
+    @Override
+    public long getMainNodeLastSyncDate(Object context) {
+        NodeSyncStatusManager nodeSyncStatusManager =
+                PersistenceManager.getInstance().getManager(NodeSyncStatusManager.class);
+        NodeManager nodeManager = PersistenceManager.getInstance().getManager(NodeManager.class);
+        Node mainNode = null;
+        NodeSyncStatus latestMainNodeSync = null;
+        try {
+            mainNode = nodeManager.getMainNode(
+                    DEFAULT_MAIN_SERVER_HOST_NAME, context);
+
+            latestMainNodeSync =
+                    nodeSyncStatusManager.getLatestSuccessfulStatusByNode(context, mainNode);
+            long lastSyncDate = latestMainNodeSync.getSyncDate();
+            return lastSyncDate;
+        }catch(SQLException se){
+            se.printStackTrace();
+            return 0;
+        }
+    }
+
+    @Override
+    public void triggerSync(final Object context) throws Exception {
+
+        UserManager userManager = PersistenceManager.getInstance().getManager(UserManager.class);
+        NodeManager nodeManager = PersistenceManager.getInstance().getManager(NodeManager.class);
+
+        String loggedInUsername = getActiveUser(context);
+        User loggedInUser = userManager.findByUsername(context, loggedInUsername);
+        String loggedInUserCred = getActiveUserAuth(context);
+        Node endNode = null;
+
+        try {
+            endNode = nodeManager.getMainNode(DEFAULT_MAIN_SERVER_HOST_NAME, context);
+            UMSyncResult result = UMSyncEndpoint.startSync(loggedInUser, loggedInUserCred,
+                    endNode, context);
+            if(result.getStatus() > -1){
+                UstadMobileSystemImpl.getInstance().fireSetSyncHappeningEvent(false, context);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            //Update view that something went wrong TODO
+        }
+
     }
 }
