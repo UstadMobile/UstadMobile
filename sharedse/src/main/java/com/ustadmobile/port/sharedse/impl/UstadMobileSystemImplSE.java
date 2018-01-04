@@ -63,8 +63,11 @@ import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.text.Format;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -811,5 +814,12 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
             //Update view that something went wrong TODO
         }
 
+    }
+
+    @Override
+    public String convertTimeToReadableTime(long time) {
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
+        return format.format(date);
     }
 }

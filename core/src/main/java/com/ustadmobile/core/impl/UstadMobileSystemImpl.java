@@ -1251,6 +1251,8 @@ public abstract class UstadMobileSystemImpl {
     public abstract long getMainNodeLastSyncDate(Object context);
 
     public abstract void triggerSync(Object context) throws Exception;
+
+    public abstract String convertTimeToReadableTime(long time);
 }
 
 
