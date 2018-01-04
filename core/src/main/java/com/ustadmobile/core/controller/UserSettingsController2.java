@@ -11,9 +11,6 @@ import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView2;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Hashtable;
 
 /**
@@ -39,20 +36,13 @@ public class UserSettingsController2 extends  UstadBaseController implements App
 
         long lastSyncDate = impl.getMainNodeLastSyncDate(context);
         if(lastSyncDate > 0){
-            String lastSyncDateString = convertTime(lastSyncDate);
+            String lastSyncDateString = impl.convertTimeToReadableTime(lastSyncDate);
             view.setLastSyncText("Last Sync: " + lastSyncDateString);
         }else{
             view.setLastSyncText("Unable to get Last sync.");
         }
 
     }
-
-    public String convertTime(long time){
-        Date date = new Date(time);
-        Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-        return format.format(date);
-    }
-
     public void handleClickAccount() {
         //UstadMobileSystemImpl.getInstance().go(AccountSettingsView.VIEW_NAME, getContext());
         UstadMobileSystemImpl.getInstance().go(RegistrationView.VIEW_NAME, getContext());
