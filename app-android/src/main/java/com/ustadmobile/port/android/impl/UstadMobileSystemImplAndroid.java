@@ -139,6 +139,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.sql.SQLException;
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -955,5 +958,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
                 callback.onSuccess(mountedPath);
             }
         }.execute();
+    }
+
+    @Override
+    public String convertTimeToReadableTime(long time) {
+        Date date = new Date(time);
+        Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
+        return format.format(date);
     }
 }

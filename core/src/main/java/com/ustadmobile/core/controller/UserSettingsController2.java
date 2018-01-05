@@ -10,17 +10,7 @@ import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView2;
-import com.ustadmobile.nanolrs.core.manager.NodeManager;
-import com.ustadmobile.nanolrs.core.manager.NodeSyncStatusManager;
-import com.ustadmobile.nanolrs.core.model.Node;
-import com.ustadmobile.nanolrs.core.model.NodeSyncStatus;
-import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
-import com.ustadmobile.nanolrs.core.sync.UMSyncEndpoint;
 
-import java.sql.SQLException;
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Hashtable;
 
 /**
@@ -43,36 +33,16 @@ public class UserSettingsController2 extends  UstadBaseController implements App
         localeOnCreate = impl.getDisplayedLocale(context);
         if(impl.getActiveUser(context) != null)
             view.setUserDisplayName(impl.getActiveUser(context));
-        //set last sync
-        NodeSyncStatusManager nodeSyncStatusManager =
-                PersistenceManager.getInstance().getManager(NodeSyncStatusManager.class);
-        NodeManager nodeManager = PersistenceManager.getInstance().getManager(NodeManager.class);
-        Node mainNode = null;
-        NodeSyncStatus latestMainNodeSync = null;
-        try {
-            mainNode = nodeManager.getMainNode(
-                            SettingsDataUsageController.DEFAULT_MAIN_SERVER_HOST_NAME,context);
-            latestMainNodeSync =
-                    nodeSyncStatusManager.getLatestStatusByNode(context, mainNode);
-            latestMainNodeSync =
-                    nodeSyncStatusManager.getLatestSuccessfulStatusByNode(context, mainNode);
-            long lastSyncDate = latestMainNodeSync.getSyncDate();
-            String lastSyncDateString = convertTime(lastSyncDate);
+
+        long lastSyncDate = impl.getMainNodeLastSyncDate(context);
+        if(lastSyncDate > 0){
+            String lastSyncDateString = impl.convertTimeToReadableTime(lastSyncDate);
             view.setLastSyncText("Last Sync: " + lastSyncDateString);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        }else{
             view.setLastSyncText("Unable to get Last sync.");
         }
 
-
     }
-
-    public String convertTime(long time){
-        Date date = new Date(time);
-        Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
-        return format.format(date);
-    }
-
     public void handleClickAccount() {
         //UstadMobileSystemImpl.getInstance().go(AccountSettingsView.VIEW_NAME, getContext());
         UstadMobileSystemImpl.getInstance().go(RegistrationView.VIEW_NAME, getContext());
