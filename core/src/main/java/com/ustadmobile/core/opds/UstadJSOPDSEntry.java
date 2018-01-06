@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.opds;
 
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.opf.UstadJSOPF;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -205,7 +206,7 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
      * @param mimeType Required mime type. Can be null to indicate any mime type
      * @return String[] array of link attributes or null if there is no matching acquisition link
      */
-    public String[] getFirstAcquisitionLink(String mimeType) {
+    public UmOpdsLink getFirstAcquisitionLink(String mimeType) {
         return this.getFirstLink(LINK_ACQUIRE, mimeType, true, false);
     }
 
@@ -218,8 +219,8 @@ public class UstadJSOPDSEntry extends UstadJSOPDSItem {
      *
      * @return
      */
-    public String[] getBestAcquisitionLink(final String[] preferredMimeTypes) {
-        String[] link;
+    public UmOpdsLink getBestAcquisitionLink(final String[] preferredMimeTypes) {
+        UmOpdsLink link;
         for(int i = 0; i < preferredMimeTypes.length; i++) {
             link = getFirstAcquisitionLink(preferredMimeTypes[i]);
             if(link != null)

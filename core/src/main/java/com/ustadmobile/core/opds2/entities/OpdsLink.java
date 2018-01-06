@@ -5,4 +5,22 @@ package com.ustadmobile.core.opds2.entities;
  */
 
 public class OpdsLink {
+
+    private String href;
+
+    private String rel;
+
+    private String mimeType;
+
+    private long length;
+
+    private String hrefLang;
+
+    private String title;
+
+    private int feedId;
+
+    private int entryId;
+
+
 }

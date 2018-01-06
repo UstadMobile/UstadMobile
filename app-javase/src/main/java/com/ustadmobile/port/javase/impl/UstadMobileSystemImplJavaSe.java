@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
+import com.ustadmobile.port.javase.opds.db.UmOpdsDbManagerJdbc;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
@@ -27,8 +28,11 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
 
     private File systemDir;
 
+    private UmOpdsDbManagerJdbc opdsDbManager;
+
     public UstadMobileSystemImplJavaSe() {
         logJavaSe = new UMLogJavaSe();
+        opdsDbManager =new UmOpdsDbManagerJdbc();
     }
 
     @Override
@@ -193,7 +197,7 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     @Override
     public UmOpdsDbManager getOpdsDbManager() {
         //TODO: implement me
-        return null;
+        return opdsDbManager;
     }
 
     protected File makeTempDir(String prefix, String suffix) {

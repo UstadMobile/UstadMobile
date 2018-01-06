@@ -27,7 +27,7 @@ public class HttpCacheDbManagerJdbc extends HttpCacheDbManagerOrmLite {
                 dao = DaoManager.createDao(contextSe.getCacheDbConnectionSource(), HttpCacheDbEntryEntity.class);
                 daoRef = new WeakReference<>(dao);
             }catch(SQLException e) {
-
+                e.printStackTrace();
             }
 
         }

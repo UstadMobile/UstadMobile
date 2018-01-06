@@ -2,6 +2,7 @@ package com.ustadmobile.ustadmobile.port.sharedse.utillib;
 
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 
 import org.kxml2.io.KXmlParser;
 import org.kxml2.io.KXmlSerializer;
@@ -43,11 +44,11 @@ public class OpdsUpdater {
             fin.close();
 
             System.out.println("Loaded feed");
-            String[] entryAcquisitionLinks;
+            UmOpdsLink entryAcquisitionLinks;
             for(int i = 0; i < feed.size(); i++) {
                 entryAcquisitionLinks = feed.getEntry(i).getFirstAcquisitionLink(null);
-                entryFile = new File(args[ARG_BASE_PATH], entryAcquisitionLinks[UstadJSOPDSItem.ATTR_HREF]);
-                entryAcquisitionLinks[UstadJSOPDSItem.ATTR_LENGTH] = String.valueOf(entryFile.length());
+                entryFile = new File(args[ARG_BASE_PATH], entryAcquisitionLinks.getHref());
+                entryAcquisitionLinks.setLength(entryFile.length());
             }
 
             fout = new FileOutputStream(args[ARG_OPDS_FILE_OUT]);

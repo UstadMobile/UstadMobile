@@ -205,7 +205,8 @@ public class DirectoryScanner {
                                 thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
                                 thisEntryInfo.fileURI = fileUri;
                                 thisEntryInfo.mimeType = entry.getFirstAcquisitionLink(null)
-                                        [UstadJSOPDSItem.ATTR_MIMETYPE];
+                                        .getMimeType();
+
                                 thisEntryInfo.srcURLs = new String[] { dirContents[i] };
 
 

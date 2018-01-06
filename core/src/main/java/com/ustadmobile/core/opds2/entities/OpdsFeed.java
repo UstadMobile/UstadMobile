@@ -5,4 +5,13 @@ package com.ustadmobile.core.opds2.entities;
  */
 
 public class OpdsFeed {
+
+    private int feedId;
+
+    private String title;
+
+    private String href;
+
+
+
 }

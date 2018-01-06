@@ -9,6 +9,7 @@ import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
@@ -199,7 +200,7 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
     public void handleOpenEntryView(UstadJSOPDSEntry entry, String titlebarText) {
         Hashtable catalogEntryArgs = new Hashtable();
         UstadJSOPDSFeed parentFeed = entry.getParentFeed();
-        String[] entryAbsoluteLink = entry.getParentFeed().getAbsoluteSelfLink();
+        UmOpdsLink entryAbsoluteLink = entry.getParentFeed().getAbsoluteSelfLink();
         if(entryAbsoluteLink == null && entry.getParentFeed().getHref() != null) {
             parentFeed.addLink(UstadJSOPDSFeed.LINK_REL_SELF_ABSOLUTE,
                     parentFeed.isAcquisitionFeed() ? UstadJSOPDSFeed.TYPE_ACQUISITIONFEED
