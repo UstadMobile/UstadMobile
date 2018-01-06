@@ -11,6 +11,7 @@ import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AppView;
@@ -233,10 +234,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
 
     @Override
     public void onDone(final UstadJSOPDSItem item) {
-        String[] prefKeyLink = item.getFirstLink(OpdsEndpoint.USTAD_PREFKEY_FEED_LINK_REL,
+        UmOpdsLink prefKeyLink = item.getFirstLink(OpdsEndpoint.USTAD_PREFKEY_FEED_LINK_REL,
                 null);
         if(prefKeyLink != null)
-            this.feedPrefKey = prefKeyLink[UstadJSOPDSItem.ATTR_HREF];
+            this.feedPrefKey = prefKeyLink.getHref();
         else
             this.feedPrefKey = null;
 

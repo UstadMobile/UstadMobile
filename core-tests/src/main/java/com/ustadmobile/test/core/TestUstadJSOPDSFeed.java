@@ -3,6 +3,7 @@ package com.ustadmobile.test.core;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
@@ -198,9 +199,9 @@ public class TestUstadJSOPDSFeed {
 
         Assert.assertEquals("Entry loaded id matches id in OPDS file",
                 "4f382c43-1e92-4fe9-bce0-e03b6c11336f", entry.getItemId());
-        String[] acquisitionLinks = entry.getBestAcquisitionLink(new String[]{"application/epub+zip"});
+        UmOpdsLink acquisitionLinks = entry.getBestAcquisitionLink(new String[]{"application/epub+zip"});
         Assert.assertEquals("Acquisition link matches expected", "small.epub",
-                acquisitionLinks[UstadJSOPDSItem.ATTR_HREF]);
+                acquisitionLinks.getHref());
     }
 
     @Test

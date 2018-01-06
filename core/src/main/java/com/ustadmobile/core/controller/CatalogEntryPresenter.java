@@ -18,6 +18,7 @@ import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
@@ -256,13 +257,12 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
                 CatalogPresenter.ALL_RESOURCES, context);
         catalogEntryView.setDescription(entry.getContent(), entry.getContentType());
-        String[] firstAcquisitionLink = entry.getFirstAcquisitionLink(null);
+        UmOpdsLink firstAcquisitionLink = entry.getFirstAcquisitionLink(null);
         if(firstAcquisitionLink != null
-                && firstAcquisitionLink[UstadJSOPDSItem.ATTR_LENGTH] != null) {
+                && firstAcquisitionLink.getLength() > 0) {
             catalogEntryView.setSize(impl.getString(MessageID.size, getContext())
                     + ": "
-                    + UMFileUtil.formatFileSize(
-                    Long.valueOf(firstAcquisitionLink[UstadJSOPDSItem.ATTR_LENGTH])));
+                    + UMFileUtil.formatFileSize(firstAcquisitionLink.getLength()));
         }
 
         //set the available translated versions that can be found

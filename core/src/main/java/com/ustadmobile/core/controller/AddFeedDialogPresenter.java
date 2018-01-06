@@ -6,6 +6,7 @@ import com.ustadmobile.core.opds.OpdsEndpoint;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AddFeedDialogView;
@@ -111,10 +112,10 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
     @Override
     public void onDone(UstadJSOPDSItem item) {
         if(item == loadingFeed) {
-            String[] link = new String[UstadJSOPDSItem.LINK_ATTRS_END];
-            link[UstadJSOPDSItem.ATTR_REL] = UstadJSOPDSItem.LINK_REL_SUBSECTION;
-            link[UstadJSOPDSItem.ATTR_MIMETYPE] = UstadJSOPDSItem.TYPE_NAVIGATIONFEED;
-            link[UstadJSOPDSItem.ATTR_HREF] = item.getHref();
+            UmOpdsLink link = (UmOpdsLink)UstadMobileSystemImpl.getInstance().getOpdsDbManager().makeNew(UmOpdsLink.class);
+            link.setRel(UstadJSOPDSItem.LINK_REL_SUBSECTION);
+            link.setMimeType(UstadJSOPDSItem.TYPE_NAVIGATIONFEED);
+            link.setHref(item.getHref());
             addFeed(item, link);
         }
     }
@@ -134,7 +135,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
         }
     }
 
-    public void addFeed(UstadJSOPDSItem item, String[] link) {
+    public void addFeed(UstadJSOPDSItem item, UmOpdsLink link) {
         final boolean[] completedOk = new boolean[1];
         try {
             UstadJSOPDSFeed userFeedList = (UstadJSOPDSFeed)OpdsEndpoint.getInstance().loadItem(

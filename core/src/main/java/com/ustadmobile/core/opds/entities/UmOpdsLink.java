@@ -6,6 +6,10 @@ package com.ustadmobile.core.opds.entities;
 
 public interface UmOpdsLink {
 
+    int getId();
+
+    void setId(int id);
+
     String getHref();
 
     void setHref(String href);

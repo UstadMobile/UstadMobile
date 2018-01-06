@@ -20,6 +20,18 @@ public class UmOpdsLinkEntity implements UmOpdsLink{
 
     private long length;
 
+    private int id;
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String getHref() {
         return href;

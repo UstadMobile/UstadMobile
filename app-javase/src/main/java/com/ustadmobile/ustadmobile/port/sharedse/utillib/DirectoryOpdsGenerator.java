@@ -40,8 +40,8 @@ public class DirectoryOpdsGenerator {
                 UstadJSOPDSEntry e1 = (UstadJSOPDSEntry)o1;
                 UstadJSOPDSEntry e2 = (UstadJSOPDSEntry)o2;
 
-                String e1AcquireLink = e1.getFirstAcquisitionLink(null)[UstadJSOPDSItem.ATTR_HREF];
-                String e2AcquireLink = e2.getFirstAcquisitionLink(null)[UstadJSOPDSItem.ATTR_HREF];
+                String e1AcquireLink = e1.getFirstAcquisitionLink(null).getHref();
+                String e2AcquireLink = e2.getFirstAcquisitionLink(null).getHref();
 
                 return e1AcquireLink.compareTo(e2AcquireLink);
             }
@@ -51,7 +51,7 @@ public class DirectoryOpdsGenerator {
         UstadJSOPDSEntry entry;
         for(int i = 0; i < feed.size(); i++) {
             entry = feed.getEntry(i);
-            String feedAcquireLink = entry.getFirstAcquisitionLink(null)[UstadJSOPDSItem.ATTR_HREF];
+            String feedAcquireLink = entry.getFirstAcquisitionLink(null).getHref();
             String baseName = UMFileUtil.getFilename(feedAcquireLink);
             String entryFilename = baseName + ".entry.opds";
             UstadJSOPDSEntry itemEntry = new UstadJSOPDSEntry(null, entry);
