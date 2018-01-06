@@ -352,7 +352,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         Vector thumbnails = entry.getThumbnails();
         if(thumbnails != null && thumbnails.size() > 0) {
             String thumbnailUrl = UMFileUtil.resolveLink(entry.getHref(),
-                    ((String[]) thumbnails.elementAt(0))[UstadJSOPDSItem.ATTR_HREF]);
+                    ((UmOpdsLink) thumbnails.elementAt(0)).getHref());
             catalogEntryView.setThumbnail(thumbnailUrl);
         }else {
             catalogEntryView.setThumbnail(null);
@@ -380,11 +380,11 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
      * @param item
      */
     protected void handleRelatedItemReady(final RelatedItem item) {
-        String[] thumbnailLink = item.opdsItem.getThumbnailLink(true);
+        UmOpdsLink thumbnailLink = item.opdsItem.getThumbnailLink(true);
         final String[] thumbnailUrl = new String[1];
         if(thumbnailLink != null) {
             thumbnailUrl[0] = UMFileUtil.resolveLink(entry.getHref(),
-                    thumbnailLink[UstadJSOPDSItem.ATTR_HREF]);
+                    thumbnailLink.getHref());
         }
 
         catalogEntryView.runOnUiThread(new Runnable() {

@@ -108,7 +108,11 @@ public class TestUstadJSOPDSFeed {
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
         feed.serialize(bout, true);
 
+        String serializedFeed = new String(bout.toByteArray(), "UTF-8");
+        System.out.println(serializedFeed);
+
         UstadJSOPDSFeed deserializedFeed = new UstadJSOPDSFeed();
+
         deserializedFeed.loadFromString(new String(bout.toByteArray(), "UTF-8"));
         Assert.assertEquals("Serializer set absolute self href, then restored to href property",
                 "http://www.ustadmobile.com/files/test/acquire-multi.opds",

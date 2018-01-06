@@ -145,12 +145,17 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
             feedEntry.setTitle(item.getTitle());
             feedEntry.setItemId(item.getItemId());
             feedEntry.addLink(link);
-            String[] thumbnailLinks = item.getThumbnailLink(false);
+            UmOpdsLink thumbnailLinks = item.getThumbnailLink(false);
             if(thumbnailLinks != null) {
-                String[] thumbnailLinksMod = new String[thumbnailLinks.length];
-                System.arraycopy(thumbnailLinks, 0, thumbnailLinksMod, 0, thumbnailLinksMod.length);
-                thumbnailLinksMod[UstadJSOPDSItem.ATTR_HREF] = UMFileUtil.resolveLink(item.getHref(),
-                        thumbnailLinksMod[UstadJSOPDSItem.ATTR_HREF]);
+                UmOpdsLink thumbnailLinksMod = (UmOpdsLink)UstadMobileSystemImpl.getInstance().getOpdsDbManager().makeNew(UmOpdsLink.class);
+//                String[] thumbnailLinksMod = new String[thumbnailLinks.length];
+//                System.arraycopy(thumbnailLinks, 0, thumbnailLinksMod, 0, thumbnailLinksMod.length);
+                thumbnailLinksMod.setHref(UMFileUtil.resolveLink(item.getHref(), thumbnailLinks.getHref()));
+//                thumbnailLinksMod[UstadJSOPDSItem.ATTR_HREF] = UMFileUtil.resolveLink(item.getHref(),
+//                        thumbnailLinksMod[UstadJSOPDSItem.ATTR_HREF]);
+                thumbnailLinksMod.setLength(thumbnailLinks.getLength());
+                thumbnailLinksMod.setMimeType(thumbnailLinks.getMimeType());
+                thumbnailLinksMod.setRel(thumbnailLinks.getRel());
                 feedEntry.addLink(thumbnailLinksMod);
             }
             userFeedList.addEntry(feedEntry);

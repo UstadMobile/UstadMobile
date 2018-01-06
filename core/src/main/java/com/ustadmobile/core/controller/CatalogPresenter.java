@@ -215,10 +215,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
                     mView.addEntry(currentIndex, entry);
                 }
 
-                String[] thumbnailLinks = entry.getThumbnailLink(false);
+                UmOpdsLink thumbnailLinks = entry.getThumbnailLink(false);
                 if(thumbnailLinks != null)
                     mView.setEntrythumbnail(entry.getItemId(), UMFileUtil.resolveLink(entry.getHref(),
-                            thumbnailLinks[UstadJSOPDSItem.ATTR_HREF]));
+                            thumbnailLinks.getHref()));
 
                 CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
                         CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE,
@@ -350,9 +350,9 @@ public class CatalogPresenter extends BaseCatalogPresenter implements UstadJSOPD
                     true, true);
 
             if(entryLinks.size() > 0) {
-                String[] firstLink = (String[])entryLinks.elementAt(0);
+                UmOpdsLink firstLink = (UmOpdsLink) entryLinks.elementAt(0);
                 handleCatalogSelected(UMFileUtil.resolveLink(entry.getParentFeed().getHref(),
-                        firstLink[UstadJSOPDSItem.ATTR_HREF]));
+                        firstLink.getHref()));
             }
         }else {
             //Go to the entry view

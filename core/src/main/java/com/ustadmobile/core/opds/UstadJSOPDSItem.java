@@ -307,7 +307,6 @@ public abstract class UstadJSOPDSItem {
         newLink.setRel(rel);
         newLink.setMimeType(mimeType);
         newLink.setHref(href);
-//        String[] newLink = new String[]{rel, mimeType, href, null, null, null};
         linkVector.addElement(newLink);
         return newLink;
     }
@@ -326,12 +325,12 @@ public abstract class UstadJSOPDSItem {
         linkVector.addElement(link);
     }
     
-    public String[] getLink(int index) {
-        return (String[])linkVector.elementAt(index);
+    public UmOpdsLink getLink(int index) {
+        return (UmOpdsLink) linkVector.elementAt(index);
     }
 
-    public void setLinkAt(String[] linkVals, int index) {
-        linkVector.setElementAt(linkVals, index);
+    public void setLinkAt(UmOpdsLink link, int index) {
+        linkVector.setElementAt(link, index);
     }
     
     /**
@@ -477,16 +476,16 @@ public abstract class UstadJSOPDSItem {
      * 
      * @return String][ array of link items as per getLinks or null if not found on this item
      */
-    public String[] getThumbnailLink(boolean imgFallback) {
+    public UmOpdsLink getThumbnailLink(boolean imgFallback) {
         Vector results = getLinks(LINK_REL_THUMBNAIL, null);
         if(results.size() > 0) {
-            return ((String[])results.elementAt(0));
+            return (UmOpdsLink) results.elementAt(0);
         }
         
         if(imgFallback) {
             results = getLinks(LINK_IMAGE, null);
             if(results.size() > 0) {
-                return ((String[])results.elementAt(0));
+                return (UmOpdsLink)results.elementAt(0);
             }
         }
         
@@ -583,17 +582,17 @@ public abstract class UstadJSOPDSItem {
             UmOpdsLink link = (UmOpdsLink)linkVector.elementAt(i);
             xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_LINK]);
             if(link.getRel() != null)
-                xs.attribute(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_REL], link.getRel());
+                xs.attribute(null, ATTR_NAMES[ATTR_REL], link.getRel());
             if(link.getHref() != null)
-                xs.attribute(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_HREF], link.getHref());
+                xs.attribute(null, ATTR_NAMES[ATTR_HREF], link.getHref());
             if(link.getMimeType() != null)
-                xs.attribute(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_MIMETYPE], link.getMimeType());
+                xs.attribute(null, ATTR_NAMES[ATTR_MIMETYPE], link.getMimeType());
             if(link.getHrefLang() != null)
-                xs.attribute(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_HREFLANG], link.getHrefLang());
+                xs.attribute(null, ATTR_NAMES[ATTR_HREFLANG], link.getHrefLang());
             if(link.getLength() >= 0)
-                xs.attribute(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_LENGTH], String.valueOf(link.getLength()));
+                xs.attribute(null, ATTR_NAMES[ATTR_LENGTH], String.valueOf(link.getLength()));
             if(link.getTitle() != null)
-                xs.attribute(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_TITLE], link.getTitle());
+                xs.attribute(null, ATTR_NAMES[ATTR_TITLE], link.getTitle());
 //            String[] thisLink = (String[])linkVector.elementAt(i);
 //            for(j = 0; j < thisLink.length; j++) {
 //                if(thisLink[j] != null) {
@@ -697,7 +696,6 @@ public abstract class UstadJSOPDSItem {
                 }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
                     this.id = xpp.getText();
                 }else if(name.equals("link")){
-//                    linkAttrs = new String[UstadJSOPDSItem.LINK_ATTRS_END];
                     link = (UmOpdsLink) dbManager.makeNew(UmOpdsLink.class);
                     link.setHref(xpp.getAttributeValue(null, ATTR_NAMES[ATTR_HREF]));
                     link.setRel(xpp.getAttributeValue(null, ATTR_NAMES[ATTR_REL]));
@@ -723,7 +721,13 @@ public abstract class UstadJSOPDSItem {
 //                    }else {
 //                        this.href = linkAttrs[ATTR_HREF];
 //                    }
-                    this.addLink(link);
+
+                    if(!LINK_REL_SELF_ABSOLUTE.equals(link.getRel())) {
+                        this.addLink(link);
+                    }else {
+                        this.href = link.getHref();
+                    }
+
                 }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
                     this.updated = xpp.getText();
                 }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {

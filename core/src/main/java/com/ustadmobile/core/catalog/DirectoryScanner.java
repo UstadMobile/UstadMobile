@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
@@ -100,7 +101,7 @@ public class DirectoryScanner {
             InputStream linkFeedIn = null;
 
             UstadJSOPDSEntry entry;
-            String[] acquisitionLink;
+            UmOpdsLink acquisitionLink;
 
             String fileUri;
             String linkFeedUri;
@@ -150,8 +151,9 @@ public class DirectoryScanner {
                             containerLinkHref = generateLink(fileUri, acquisitionLinkHrefPrefix,
                                     null, entry.getItemId(), linkHrefMode);
 
-                            acquisitionLink = (String[])entry.getAcquisitionLinks().elementAt(0);
-                            acquisitionLink[UstadJSOPDSItem.ATTR_HREF] = containerLinkHref;
+                            acquisitionLink = (UmOpdsLink)entry.getAcquisitionLinks().elementAt(0);
+                            acquisitionLink.setHref(containerLinkHref);
+//                            acquisitionLink[UstadJSOPDSItem.ATTR_HREF] = containerLinkHref;
 
                             if(entryResult.getThumbnailMimeType() != null) {
                                 try {

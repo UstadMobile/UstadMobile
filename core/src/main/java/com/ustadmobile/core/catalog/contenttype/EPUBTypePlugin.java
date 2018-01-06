@@ -8,6 +8,7 @@ import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.opf.UstadJSOPF;
 import com.ustadmobile.core.opf.UstadJSOPFItem;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -89,8 +90,8 @@ public class EPUBTypePlugin extends ZippedContentTypePlugin {
 
                     epubEntry =new UstadJSOPDSEntry(result,opf,
                             UstadJSOPDSItem.TYPE_EPUBCONTAINER, absfileUri);
-                    String[] acquireLink = epubEntry.getLink(0);
-                    acquireLink[UstadJSOPDSEntry.ATTR_LENGTH] = String.valueOf(fileLength);
+                    UmOpdsLink acquireLink = epubEntry.getLink(0);
+                    acquireLink.setLength(fileLength);
                     epubEntry.setLinkAt(acquireLink, 0);
 
                     UstadJSOPFItem coverItem = opf.getCoverImage(null);
