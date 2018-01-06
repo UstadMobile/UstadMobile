@@ -345,7 +345,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         Vector coverImages = entry.getLinks(UstadJSOPDSItem.LINK_COVER_IMAGE, null);
         if(coverImages != null && coverImages.size() > 0) {
             String coverImageUrl = UMFileUtil.resolveLink(entry.getHref(),
-                    ((String[])coverImages.elementAt(0))[UstadJSOPDSItem.ATTR_HREF]);
+                    ((UmOpdsLink)coverImages.elementAt(0)).getHref());
             catalogEntryView.setHeader(coverImageUrl);
         }
 
