@@ -59,17 +59,18 @@ public abstract class TestLogin extends TestCase{
     public void tearDown() {
     }
 
-    public void testLogin() throws IOException{
-        TestUtils utils = new TestUtils();
-        int loginOKResult = LoginController.authenticate(
-                utils.getTestProperty(TestUtils.PROP_TESTUSER), 
-                utils.getTestProperty(TestUtils.PROP_TESTAUTH),
-                TestConstants.LOGIN_URL);
-        assertEquals("Login OK returns 200", 200, loginOKResult);
-    }
+//    public void testLogin() throws IOException{
+//        TestUtils utils = new TestUtils();
+//        Object testLock = new Object();
+//        int loginOKResult = LoginController.authenticate(
+//                utils.getTestProperty(TestUtils.PROP_TESTUSER),
+//                utils.getTestProperty(TestUtils.PROP_TESTAUTH),
+//                TestConstants.LOGIN_URL);
+//        assertEquals("Login OK returns 200", 200, loginOKResult);
+//    }
     
     public void runTest() throws IOException{
-        testLogin();
+//        testLogin();
     }
     
 }

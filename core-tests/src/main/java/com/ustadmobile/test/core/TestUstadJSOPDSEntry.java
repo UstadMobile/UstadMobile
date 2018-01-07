@@ -18,6 +18,9 @@ import java.io.InputStream;
 
 public class TestUstadJSOPDSEntry {
 
+
+
+
     @Test
     public void testNewEntryFromOpf() throws XmlPullParserException, IOException {
         InputStream opfIn = getClass().getResourceAsStream("/com/ustadmobile/test/core/package.opf");
@@ -28,7 +31,7 @@ public class TestUstadJSOPDSEntry {
 
         UstadJSOPDSEntry entry = new UstadJSOPDSEntry(null, opf, "application/epub+zip", null);
         Assert.assertEquals("Entry has expected ID", "202b10fe-b028-4b84-9b84-852aa766607d",
-                entry.id);
+                entry.getItemId());
         Assert.assertEquals("Entry has 2 authors", 2, entry.getNumAuthors());
         Assert.assertEquals("Entry author 1 as expected", "Benita Rowe",
                 entry.getAuthor(0).getName());

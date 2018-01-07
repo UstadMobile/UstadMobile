@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
@@ -253,5 +254,10 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     @Override
     public void mountContainer(ContainerMountRequest request, int id, UmCallback callback) {
         //do nothing at the moment
+    }
+
+    @Override
+    public UmOpdsDbManager getOpdsDbManager() {
+        return null;
     }
 }

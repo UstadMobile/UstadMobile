@@ -92,7 +92,7 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     public void setOPDSEntry(UstadJSOPDSEntry entry) {
         this.entry = entry;
         String summary = entry.getSummary();
-        ((TextView)findViewById(R.id.opdsitem_title_text)).setText(entry.title);
+        ((TextView)findViewById(R.id.opdsitem_title_text)).setText(entry.getTitle());
         ((TextView)findViewById(R.id.opds_item_detail_text)).setText(summary != null ? summary : "");
         mDownloadProgressView = findViewById(R.id.opds_item_download_progress_view);
     }

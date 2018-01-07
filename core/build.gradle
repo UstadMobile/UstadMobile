@@ -47,6 +47,8 @@ dependencies {
     compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
     testCompile project(":core-tests")
     testCompile project(":sharedse")
+    testCompile project(":app-javase")
+    testCompile project(":lib-core-fs-tests")
     testCompile 'org.nanohttpd:nanohttpd:2.3.1'
     testCompile 'org.nanohttpd:nanohttpd-nanolets:2.3.1'
     testCompile project(":sharedse-tests")

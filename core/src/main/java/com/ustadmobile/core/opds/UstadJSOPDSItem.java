@@ -33,6 +33,8 @@ package com.ustadmobile.core.opds;
 import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.db.UmOpdsDbManager;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 
@@ -62,9 +64,9 @@ import java.util.Vector;
  */
 public abstract class UstadJSOPDSItem {
     
-    public String title;
+    protected String title;
     
-    public String id;
+    protected String id;
     
     protected Vector linkVector;
 
@@ -136,18 +138,18 @@ public abstract class UstadJSOPDSItem {
     //    "href", "length", "title", "hreflang"};
     
         
-    public String updated;
+    protected String updated;
     
-    public String summary;
+    protected String summary;
 
-    public String content;
+    protected String content;
 
-    public Vector authors;    
-    public String publisher;
+    protected Vector authors;
+    protected String publisher;
     
-    public String bgColor;
+    protected String bgColor;
     
-    public String textColor;
+    protected String textColor;
 
     /**
      * The url from which this item was loaded, if applicable.
@@ -299,8 +301,12 @@ public abstract class UstadJSOPDSItem {
         this.language = language;
     }
 
-    public String[] addLink(String rel, String mimeType, String href) {
-        String[] newLink = new String[]{rel, mimeType, href, null, null, null};
+    public UmOpdsLink addLink(String rel, String mimeType, String href) {
+        UmOpdsLink newLink = (UmOpdsLink)UstadMobileSystemImpl.getInstance().getOpdsDbManager()
+                .makeNew(UmOpdsLink.class);
+        newLink.setRel(rel);
+        newLink.setMimeType(mimeType);
+        newLink.setHref(href);
         linkVector.addElement(newLink);
         return newLink;
     }
@@ -310,16 +316,21 @@ public abstract class UstadJSOPDSItem {
      * 
      * @param linkVals Link values as per the LINK_* constants
      */
+    @Deprecated
     public void addLink(String[] linkVals) {
         linkVector.addElement(linkVals);
     }
+
+    public void addLink(UmOpdsLink link) {
+        linkVector.addElement(link);
+    }
     
-    public String[] getLink(int index) {
-        return (String[])linkVector.elementAt(index);
+    public UmOpdsLink getLink(int index) {
+        return (UmOpdsLink) linkVector.elementAt(index);
     }
 
-    public void setLinkAt(String[] linkVals, int index) {
-        linkVector.setElementAt(linkVals, index);
+    public void setLinkAt(UmOpdsLink link, int index) {
+        linkVector.setElementAt(link, index);
     }
     
     /**
@@ -364,28 +375,29 @@ public abstract class UstadJSOPDSItem {
             matchType = true;
             matchHref = true;
             
-            String[] thisLink = (String[])linkVector.elementAt(i);
-            if(linkRel != null && thisLink[ATTR_REL] != null) {
+//            String[] thisLink = (String[])linkVector.elementAt(i);
+            UmOpdsLink thisLink = (UmOpdsLink)linkVector.elementAt(i);
+            if(linkRel != null && thisLink.getRel() != null) {
                 matchRel = relByPrefix ? 
-                    thisLink[ATTR_REL].startsWith(linkRel) :
-                        thisLink[ATTR_REL].equals(linkRel);
-            }else if(linkRel != null && thisLink[ATTR_REL] == null) {
+                    thisLink.getRel().startsWith(linkRel) :
+                        thisLink.getRel().equals(linkRel);
+            }else if(linkRel != null && thisLink.getRel() == null) {
                 matchRel = false;
             }
             
-            if(mimeType != null && thisLink[ATTR_MIMETYPE] != null) {
+            if(mimeType != null && thisLink.getMimeType() != null) {
                 matchType = mimeTypeByPrefix ? 
-                        thisLink[ATTR_MIMETYPE].startsWith(mimeType) :
-                    thisLink[ATTR_MIMETYPE].equals(mimeType);
-            }else if(mimeType != null && thisLink[ATTR_MIMETYPE] == null) {
+                        thisLink.getMimeType().startsWith(mimeType) :
+                    thisLink.getMimeType().equals(mimeType);
+            }else if(mimeType != null && thisLink.getMimeType() == null) {
                 matchType = false;
             }
 
-            if(href != null && thisLink[ATTR_HREF] != null) {
+            if(href != null && thisLink.getHref() != null) {
                 matchHref = hrefByPrefix ?
-                        thisLink[ATTR_HREF].startsWith(href)
-                        : thisLink[ATTR_HREF].equals(href);
-            }else if(href != null && thisLink[ATTR_HREF] == null){
+                        thisLink.getHref().startsWith(href)
+                        : thisLink.getHref().equals(href);
+            }else if(href != null && thisLink.getHref() == null){
                 matchHref = false;
             }
             
@@ -439,20 +451,20 @@ public abstract class UstadJSOPDSItem {
      *
      * @return
      */
-    public String[] getFirstLink(String linkRel, String mimeType, String href, boolean relByPrefix, boolean mimeTypeByPrefix, boolean hrefByPrefix){
+    public UmOpdsLink getFirstLink(String linkRel, String mimeType, String href, boolean relByPrefix, boolean mimeTypeByPrefix, boolean hrefByPrefix){
         Vector result = getLinks(linkRel, mimeType, href, relByPrefix, mimeTypeByPrefix, hrefByPrefix, 1);
         if(result.size() == 0) {
             return null;
         }else {
-            return (String[])result.elementAt(0);
+            return (UmOpdsLink) result.elementAt(0);
         }
     }
 
-    public String[] getFirstLink(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix) {
+    public UmOpdsLink getFirstLink(String linkRel, String mimeType, boolean relByPrefix, boolean mimeTypeByPrefix) {
         return getFirstLink(linkRel, mimeType, null, relByPrefix, mimeTypeByPrefix, false);
     }
 
-    public String[] getFirstLink(String linkRel, String mimeType) {
+    public UmOpdsLink getFirstLink(String linkRel, String mimeType) {
         return getFirstLink(linkRel, mimeType, null, false, false, false);
     }
 
@@ -464,16 +476,16 @@ public abstract class UstadJSOPDSItem {
      * 
      * @return String][ array of link items as per getLinks or null if not found on this item
      */
-    public String[] getThumbnailLink(boolean imgFallback) {
+    public UmOpdsLink getThumbnailLink(boolean imgFallback) {
         Vector results = getLinks(LINK_REL_THUMBNAIL, null);
         if(results.size() > 0) {
-            return ((String[])results.elementAt(0));
+            return (UmOpdsLink) results.elementAt(0);
         }
         
         if(imgFallback) {
             results = getLinks(LINK_IMAGE, null);
             if(results.size() > 0) {
-                return ((String[])results.elementAt(0));
+                return (UmOpdsLink)results.elementAt(0);
             }
         }
         
@@ -567,22 +579,29 @@ public abstract class UstadJSOPDSItem {
 
         int i, j;
         for(i = 0; i < linkVector.size(); i++) {
-            String[] thisLink = (String[])linkVector.elementAt(i);
+            UmOpdsLink link = (UmOpdsLink)linkVector.elementAt(i);
             xs.startTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_LINK]);
-
-            for(j = 0; j < thisLink.length; j++) {
-                if(thisLink[j] != null) {
-                    xs.attribute(null, ATTR_NAMES[j], thisLink[j]);
-                }
-            }
+            if(link.getRel() != null)
+                xs.attribute(null, ATTR_NAMES[ATTR_REL], link.getRel());
+            if(link.getHref() != null)
+                xs.attribute(null, ATTR_NAMES[ATTR_HREF], link.getHref());
+            if(link.getMimeType() != null)
+                xs.attribute(null, ATTR_NAMES[ATTR_MIMETYPE], link.getMimeType());
+            if(link.getHrefLang() != null)
+                xs.attribute(null, ATTR_NAMES[ATTR_HREFLANG], link.getHrefLang());
+            if(link.getLength() >= 0)
+                xs.attribute(null, ATTR_NAMES[ATTR_LENGTH], String.valueOf(link.getLength()));
+            if(link.getTitle() != null)
+                xs.attribute(null, ATTR_NAMES[ATTR_TITLE], link.getTitle());
+//            String[] thisLink = (String[])linkVector.elementAt(i);
+//            for(j = 0; j < thisLink.length; j++) {
+//                if(thisLink[j] != null) {
+//                    xs.attribute(null, ATTR_NAMES[j], thisLink[j]);
+//                }
+//            }
             xs.endTag(UstadJSOPDSFeed.NS_ATOM, ATTR_NAMES[ATTR_LINK]);
         }
-
-
-
-
     }
-    
     
     /**
      * Shorthand to write a simple tag in the form of <ns:tagname>value</ns:tagname>
@@ -656,6 +675,9 @@ public abstract class UstadJSOPDSItem {
         String[] linkAttrs;
         int i, entryCount = 0;
         UstadJSOPDSFeed thisFeed = this instanceof UstadJSOPDSFeed ? (UstadJSOPDSFeed)this: null;
+        UmOpdsLink link;
+        final UmOpdsDbManager dbManager = UstadMobileSystemImpl.getInstance().getOpdsDbManager();
+        String linkLength;
 
         while((evtType = xpp.next()) != XmlPullParser.END_DOCUMENT) {
             if(evtType == XmlPullParser.START_TAG) {
@@ -674,16 +696,38 @@ public abstract class UstadJSOPDSItem {
                 }else if(name.equals("id") && xpp.next() == XmlPullParser.TEXT) {
                     this.id = xpp.getText();
                 }else if(name.equals("link")){
-                    linkAttrs = new String[UstadJSOPDSItem.LINK_ATTRS_END];
-                    for(i = 0; i < UstadJSOPDSItem.LINK_ATTRS_END; i++) {
-                        linkAttrs[i] = xpp.getAttributeValue(null, ATTR_NAMES[i]);
+                    link = (UmOpdsLink) dbManager.makeNew(UmOpdsLink.class);
+                    link.setHref(xpp.getAttributeValue(null, ATTR_NAMES[ATTR_HREF]));
+                    link.setRel(xpp.getAttributeValue(null, ATTR_NAMES[ATTR_REL]));
+                    link.setMimeType(xpp.getAttributeValue(null, ATTR_NAMES[ATTR_MIMETYPE]));
+                    link.setHrefLang(xpp.getAttributeValue(null, ATTR_NAMES[ATTR_HREFLANG]));
+                    linkLength = xpp.getAttributeValue(null, ATTR_NAMES[ATTR_LENGTH]);
+                    if(linkLength != null) {
+                        try {
+                            link.setLength(Long.parseLong(linkLength));
+                        }catch(NumberFormatException n) {
+                            n.printStackTrace();
+                        }
                     }
 
-                    if(!linkAttrs[ATTR_REL].equals(LINK_REL_SELF_ABSOLUTE)) {
-                        this.addLink(linkAttrs);
+                    link.setTitle(xpp.getAttributeValue(null, ATTR_NAMES[ATTR_TITLE]));
+
+//                    for(i = 0; i < UstadJSOPDSItem.LINK_ATTRS_END; i++) {
+//                        linkAttrs[i] = xpp.getAttributeValue(null, ATTR_NAMES[i]);
+//                    }
+//
+//                    if(!linkAttrs[ATTR_REL].equals(LINK_REL_SELF_ABSOLUTE)) {
+//                        this.addLink(linkAttrs);
+//                    }else {
+//                        this.href = linkAttrs[ATTR_HREF];
+//                    }
+
+                    if(!LINK_REL_SELF_ABSOLUTE.equals(link.getRel())) {
+                        this.addLink(link);
                     }else {
-                        this.href = linkAttrs[ATTR_HREF];
+                        this.href = link.getHref();
                     }
+
                 }else if(name.equals("updated") && xpp.next() == XmlPullParser.TEXT){
                     this.updated = xpp.getText();
                 }else if(name.equals(ATTR_NAMES[ATTR_SUMMARY]) && xpp.next() == XmlPullParser.TEXT) {
@@ -825,7 +869,8 @@ public abstract class UstadJSOPDSItem {
         int numLinks = links.size();
         String lang;
         for(int i = 0; i < numLinks; i++) {
-            lang = ((String[])links.elementAt(i))[ATTR_HREFLANG];
+            lang = ((UmOpdsLink)links.elementAt(i)).getHrefLang();
+
             if(lang == null)
                 lang = getLanguage();
 
@@ -987,5 +1032,23 @@ public abstract class UstadJSOPDSItem {
     public Vector getAuthors() {
         return authors;
     }
+
+    public String getItemId() {
+        return id;
+    }
+
+    public void setItemId(String id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+
 
 }

@@ -374,6 +374,7 @@ dependencies {
 
     androidTestCompile project(":core-tests")
     androidTestCompile project(":sharedse-tests")
+    androidTestCompile project(":lib-core-fs-tests")
 
     remotetestslaveCompile project(":core-tests")
     remotetestslaveCompile project(":sharedse-tests")

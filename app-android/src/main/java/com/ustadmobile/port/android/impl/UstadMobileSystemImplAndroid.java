@@ -66,6 +66,7 @@ import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -95,6 +96,7 @@ import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.android.generated.MessageIDMap;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
+import com.ustadmobile.port.android.opds.db.UmOpdsDbManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 import com.ustadmobile.port.android.view.AboutActivity;
 import com.ustadmobile.port.android.view.AddFeedDialogFragment;
@@ -232,6 +234,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      * Map of TinCanQueueListeners to the XapiQueueStatusListeners used by NanoLRS
      */
     private HashMap<TinCanQueueListener, XapiStatementsForwardingListener> queueStatusListeners;
+
+
+    private UmOpdsDbManagerAndroid opdsDbManager;
 
     /**
      * Base ServiceConnection class used to bind any given context to shared services: notably
@@ -371,6 +376,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         queueStatusListeners = new HashMap<>();
         networkManagerAndroid = new NetworkManagerAndroid();
         networkManagerAndroid.setServiceConnectionMap(networkServiceConnections);
+        opdsDbManager = new UmOpdsDbManagerAndroid();
     }
 
     /**
@@ -383,6 +389,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     @Override
     public void init(Object context) {
         super.init(context);
+
 
         if(context instanceof Activity) {
             ((Activity)context).runOnUiThread(new Runnable() {
@@ -930,6 +937,11 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
 
 
+    }
+
+    @Override
+    public UmOpdsDbManager getOpdsDbManager() {
+        return opdsDbManager;
     }
 
     @Override

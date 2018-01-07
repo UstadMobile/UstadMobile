@@ -32,6 +32,7 @@ package com.ustadmobile.core.opds;
 
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUtil;
 
@@ -52,12 +53,12 @@ import java.util.Vector;
  */
 public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     
-    public UstadJSOPDSEntry[] entries = new UstadJSOPDSEntry[0];
+    private UstadJSOPDSEntry[] entries = new UstadJSOPDSEntry[0];
 
     /**
      * Cached reference to the OPDS self link
      */
-    private String[] selfLink;
+    private UmOpdsLink selfLink;
 
     
     public UstadJSOPDSFeed() {
@@ -284,7 +285,7 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
     /**
      *
      */
-    public String[] getSelfLink() {
+    public UmOpdsLink getSelfLink() {
         if(selfLink == null) {
             selfLink = getFirstLink(LINK_REL_SELF, null);
         }
@@ -297,8 +298,8 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
      * Get an absolute link to where this catalog was loaded from
      * @return
      */
-    public String[] getAbsoluteSelfLink() {
-        String[] absoluteSelfLink = getFirstLink(LINK_REL_SELF_ABSOLUTE, null);
+    public UmOpdsLink getAbsoluteSelfLink() {
+        UmOpdsLink absoluteSelfLink = getFirstLink(LINK_REL_SELF_ABSOLUTE, null);
         if(absoluteSelfLink == null && href != null){
             absoluteSelfLink = addLink(LINK_REL_SELF_ABSOLUTE, TYPE_ACQUISITIONFEED, href);
         }
@@ -378,18 +379,18 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
 
                     //TODO: Handle when there is no acquisition link at all.
                     //getFirstAcquisitionLink is redundant, this is done by getBestAcquisitionLink anyway
-                    String[] link1 = link1Obj != null ? (String[])link1Obj : entry1.getFirstAcquisitionLink(null);
-                    String[] link2 = link2Obj != null ? (String[])link2Obj : entry2.getFirstAcquisitionLink(null);
+                    UmOpdsLink link1 = link1Obj != null ? (UmOpdsLink)link1Obj : entry1.getFirstAcquisitionLink(null);
+                    UmOpdsLink link2 = link2Obj != null ? (UmOpdsLink)link2Obj : entry2.getFirstAcquisitionLink(null);
 
 
 
                     int mimeDiff1 = UMUtil.indexInArray(preferredMimeTypes,
-                            link1[UstadJSOPDSEntry.LINK_MIMETYPE]);
+                            link1.getMimeType());
                     if(mimeDiff1 == -1)
                         mimeDiff1 = preferredMimeTypes.length+1;
 
                     int mimeDiff2 = UMUtil.indexInArray(preferredMimeTypes,
-                            link2[UstadJSOPDSEntry.LINK_MIMETYPE]);
+                            link2.getMimeType());
                     if(mimeDiff2 == -1)
                         mimeDiff2 = preferredMimeTypes.length+1;
 
@@ -497,15 +498,15 @@ public class UstadJSOPDSFeed extends UstadJSOPDSItem{
 
     public UstadJSOPDSEntry findEntryByAlternateHref(String alternateHref) {
         String entryLang;
-        String[] currentAlternateLinks;
+        UmOpdsLink currentAlternateLinks;
         for(int i = 0; i < size(); i++) {
             entryLang = getEntry(i).getLanguage();
             currentAlternateLinks = getEntry(i).getFirstLink(LINK_REL_ALTERNATE, null, alternateHref,
                     false, false, false);
 
             if(currentAlternateLinks != null
-                    && (currentAlternateLinks[ATTR_HREFLANG] == null
-                        ||UMUtil.isSameLanguage(currentAlternateLinks[ATTR_HREFLANG], entryLang))) {
+                    && (currentAlternateLinks.getHrefLang() == null
+                        ||UMUtil.isSameLanguage(currentAlternateLinks.getHrefLang(), entryLang))) {
                 return getEntry(i);
             }
         }

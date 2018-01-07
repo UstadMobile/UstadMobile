@@ -54,20 +54,20 @@ public abstract class TestLoginRegisterUser extends TestCase {
         
     }
     
-    public void testLoginRegister() throws IOException{
-        Hashtable registerParams = new Hashtable();
-        registerParams.put("phonenumber", "+9641234567");
-        registerParams.put("gender", "f");
-        registerParams.put("name", "Unit Testing");
-        
-        String serverSays = LoginController.registerNewUser(registerParams, 
-            TestConstants.REGISTER_URL);
-        assertNotNull("Can register user: server says " + serverSays, 
-            serverSays);
-    }
+//    public void testLoginRegister() throws IOException{
+//        Hashtable registerParams = new Hashtable();
+//        registerParams.put("phonenumber", "+9641234567");
+//        registerParams.put("gender", "f");
+//        registerParams.put("name", "Unit Testing");
+//
+//        String serverSays = LoginController.registerNewUser(registerParams,
+//            TestConstants.REGISTER_URL);
+//        assertNotNull("Can register user: server says " + serverSays,
+//            serverSays);
+//    }
   
     public void runTest() throws IOException{
-        this.testLoginRegister();
+//        this.testLoginRegister();
     }
     
 }

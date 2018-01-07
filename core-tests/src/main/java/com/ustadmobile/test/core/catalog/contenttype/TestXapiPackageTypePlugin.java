@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.test.core.UMTestUtil;
 
 import org.junit.After;
@@ -38,10 +39,10 @@ public class TestXapiPackageTypePlugin {
         Assert.assertNotNull("Feed is not null", feed);
         UstadJSOPDSEntry entry=  feed.getEntryById("http://id.tincanapi.com/activity/tincan-prototypes/tetris");
         Assert.assertNotNull("Feed has entry matching id", entry);
-        String[] entryLinks = entry.getFirstAcquisitionLink(null);
+        UmOpdsLink entryLinks = entry.getFirstAcquisitionLink(null);
         Assert.assertEquals("Mime type is application/zip", "application/zip",
-                entryLinks[UstadJSOPDSItem.ATTR_MIMETYPE]);
-        Assert.assertEquals("Title is as expected", "Tin Can Tetris Example", entry.title);
+                entryLinks.getMimeType());
+        Assert.assertEquals("Title is as expected", "Tin Can Tetris Example", entry.getTitle());
     }
 
     @After

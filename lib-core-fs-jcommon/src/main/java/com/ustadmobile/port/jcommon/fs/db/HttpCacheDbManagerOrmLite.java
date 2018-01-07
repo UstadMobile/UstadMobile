@@ -1,4 +1,4 @@
-package com.ustadmobile.port.jcommon;
+package com.ustadmobile.port.jcommon.fs.db;
 
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.QueryBuilder;

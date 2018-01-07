@@ -402,7 +402,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 getActivity().supportInvalidateOptionsMenu();
             }
         }else {
-            int removeIndex = UstadJSOPDSItem.indexOfItemInVector(card.getEntry().id, mSelectedEntries);
+            int removeIndex = UstadJSOPDSItem.indexOfItemInVector(card.getEntry().getItemId(), mSelectedEntries);
             if(removeIndex != -1)
                 mSelectedEntries.removeElementAt(removeIndex);
 
@@ -422,7 +422,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             if(mSelectedEntries.size() > 0) {
                 toggleEntrySelected(card);
             }else {
-                mCatalogPresenter.handleClickEntry(card.getEntry().id);
+                mCatalogPresenter.handleClickEntry(card.getEntry().getItemId());
             }
             return;
         }
@@ -542,9 +542,9 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         this.mSelectedEntries = entries;
 
         for(int i = 0; i < entryList.size(); i++) {
-            boolean isSelected = UstadJSOPDSItem.indexOfItemInVector(entryList.get(i).id, entries) != -1;
-            if(idToCardMap.containsKey(entryList.get(i).id)) {
-                idToCardMap.get(entryList.get(i).id).setSelected(isSelected);
+            boolean isSelected = UstadJSOPDSItem.indexOfItemInVector(entryList.get(i).getItemId(), entries) != -1;
+            if(idToCardMap.containsKey(entryList.get(i).getItemId())) {
+                idToCardMap.get(entryList.get(i).getItemId()).setSelected(isSelected);
             }
         }
 
@@ -631,7 +631,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             holder.mEntryCard.setOPDSEntry(entryList.get(position));
             holder.mEntryCard.setOnClickListener(CatalogOPDSFragment.this);
             holder.mEntryCard.setOnLongClickListener(CatalogOPDSFragment.this);
-            String entryId = entryList.get(position).id;
+            String entryId = entryList.get(position).getItemId();
             if(idToStatusMap.containsKey(entryId)){
                 holder.mEntryCard.setOPDSEntryOverlay(idToStatusMap.get(entryId));
             }else {
@@ -661,7 +661,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                         mCatalogPresenter, CatalogOPDSFragment.this);
             }
 
-            idToCardMap.put(entryList.get(position).id, holder.mEntryCard);
+            idToCardMap.put(entryList.get(position).getItemId(), holder.mEntryCard);
 
 
         }

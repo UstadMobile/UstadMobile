@@ -98,7 +98,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
             view.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    view.setSharedCourseName(sharedFeed.title);
+                    view.setSharedCourseName(sharedFeed.getTitle());
                     view.setMode(ReceiveCourseView.MODE_ACCEPT_DECLINE);
                 }
             });
