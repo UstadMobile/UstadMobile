@@ -1,7 +1,10 @@
 package com.ustadmobile.port.javase.impl;
 
+import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
+import com.ustadmobile.core.catalog.contenttype.ScormTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
+import com.ustadmobile.core.epubnav.EPUBNavItem;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
@@ -29,6 +32,9 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     private File systemDir;
 
     private UmOpdsDbManagerJdbc opdsDbManager;
+
+    public static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[] {
+            new EPUBTypePlugin(), new XapiPackageTypePlugin(), new ScormTypePlugin()};
 
     public UstadMobileSystemImplJavaSe() {
         logJavaSe = new UMLogJavaSe();
@@ -175,8 +181,8 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public Class[] getSupportedContentTypePlugins() {
-        return new Class[] {EPUBTypePlugin.class, XapiPackageTypePlugin.class};
+    public ContentTypePlugin[] getSupportedContentTypePlugins() {
+        return SUPPORTED_CONTENT_TYPES;
     }
 
     @Override

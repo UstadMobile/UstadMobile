@@ -66,8 +66,8 @@
         <activity
             android:name="com.ustadmobile.port.android.view.XapiPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
-            android:theme="@style/Theme.UstadTheme"
-            android:label="" />
+            android:label=""
+            android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.UserSettingsActivity"
             android:label="@string/settings"
@@ -108,6 +108,10 @@
         <service
             android:name="com.evernote.android.job.gcm.PlatformGcmService"
             tools:node="remove" />
+
+        <activity android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label=""></activity>
     </application>
 
 </manifest>

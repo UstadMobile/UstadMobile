@@ -56,7 +56,9 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
+import com.ustadmobile.core.catalog.contenttype.ScormTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UserSettingsController;
@@ -80,6 +82,7 @@ import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.RegistrationView;
+import com.ustadmobile.core.view.ScormPackageView;
 import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.core.view.UserSettingsView;
@@ -112,6 +115,7 @@ import com.ustadmobile.port.android.view.EnrollStudentActivity;
 import com.ustadmobile.port.android.view.LoginDialogFragment;
 import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
 import com.ustadmobile.port.android.view.RegistrationDialogFragment;
+import com.ustadmobile.port.android.view.ScormPackageActivity;
 import com.ustadmobile.port.android.view.SendCourseDialogFragment;
 import com.ustadmobile.port.android.view.SettingsDataSyncListActivity;
 import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
@@ -205,6 +209,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(ReceiveCourseView.VIEW_NAME, ReceiveCourseDialogFragment.class);
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
         viewNameToAndroidImplMap.put(AddFeedDialogView.VIEW_NAME, AddFeedDialogFragment.class);
+        viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
     }
 
 
@@ -237,6 +242,9 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
 
     private UmOpdsDbManagerAndroid opdsDbManager;
+
+    private static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[] {
+            new EPUBTypePlugin(), new ScormTypePlugin(), new XapiPackageTypePlugin()};
 
     /**
      * Base ServiceConnection class used to bind any given context to shared services: notably
@@ -891,11 +899,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public Class[] getSupportedContentTypePlugins() {
-        return new Class[]{
-                EPUBTypePlugin.class,
-                XapiPackageTypePlugin.class
-        };
+    public ContentTypePlugin[] getSupportedContentTypePlugins() {
+        return SUPPORTED_CONTENT_TYPES;
     }
 
     @Override
