@@ -1,15 +1,15 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.AboutView;
 import com.ustadmobile.core.view.UstadView;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Hashtable;
 
 
@@ -30,13 +30,24 @@ public class AboutController extends UstadBaseController  {
 
     public void onCreate(Hashtable args, Hashtable savedState) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        try {
-            aboutHTMLStr = UMIOUtils.readStreamToString(impl.openResourceInputStream(
-                    "com/ustadmobile/core/about.html", context));
-            aboutView.setAboutHTML(aboutHTMLStr);
-        }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 0, null, e);
-        }
+
+        impl.getAsset(context, "com/ustadmobile/core/about.html", new UmCallback<InputStream>() {
+            @Override
+            public void onSuccess(InputStream result) {
+                try {
+                    aboutHTMLStr = UMIOUtils.readStreamToString(result);
+                    aboutView.setAboutHTML(aboutHTMLStr);
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable exception) {
+
+            }
+        });
+
 
         aboutView.setVersionInfo(impl.getVersion(context) + " - " +
                 UMCalendarUtil.makeHTTPDate(CoreBuildConfig.BUILD_TIME_MILLIS));

@@ -56,10 +56,7 @@ import android.webkit.WebView;
 import android.widget.Toast;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
-import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
-import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
-import com.ustadmobile.core.catalog.contenttype.ScormTypePlugin;
-import com.ustadmobile.core.catalog.contenttype.XapiPackageTypePlugin;
+import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.impl.ContainerMountRequest;
@@ -101,37 +98,10 @@ import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.opds.db.UmOpdsDbManagerAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.android.view.AboutActivity;
-import com.ustadmobile.port.android.view.AddFeedDialogFragment;
-import com.ustadmobile.port.android.view.AppViewAndroid;
-import com.ustadmobile.port.android.view.AttendanceActivity;
-import com.ustadmobile.port.android.view.BasePointActivity;
-import com.ustadmobile.port.android.view.CatalogActivity;
-import com.ustadmobile.port.android.view.CatalogEntryActivity;
-import com.ustadmobile.port.android.view.ClassManagementActivity;
-import com.ustadmobile.port.android.view.ClassManagementActivity2;
-import com.ustadmobile.port.android.view.ContainerActivity;
-import com.ustadmobile.port.android.view.EnrollStudentActivity;
-import com.ustadmobile.port.android.view.LoginDialogFragment;
-import com.ustadmobile.port.android.view.ReceiveCourseDialogFragment;
-import com.ustadmobile.port.android.view.RegistrationDialogFragment;
-import com.ustadmobile.port.android.view.ScormPackageActivity;
-import com.ustadmobile.port.android.view.SendCourseDialogFragment;
-import com.ustadmobile.port.android.view.SettingsDataSyncListActivity;
-import com.ustadmobile.port.android.view.SettingsDataUsageActivity;
-import com.ustadmobile.port.android.view.UserSettingsActivity;
-import com.ustadmobile.port.android.view.UserSettingsActivity2;
-import com.ustadmobile.port.android.view.UstadBaseActivity;
-import com.ustadmobile.port.android.view.WelcomeDialogFragment;
-import com.ustadmobile.port.android.view.XapiPackageActivity;
+import com.ustadmobile.port.android.view.*;
+import com.ustadmobile.port.sharedse.view.*;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
-import com.ustadmobile.port.sharedse.view.AttendanceView;
-import com.ustadmobile.port.sharedse.view.ClassManagementView;
-import com.ustadmobile.port.sharedse.view.ClassManagementView2;
-import com.ustadmobile.port.sharedse.view.EnrollStudentView;
-import com.ustadmobile.port.sharedse.view.ReceiveCourseView;
-import com.ustadmobile.port.sharedse.view.SendCourseView;
 
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlSerializer;
@@ -153,6 +123,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.WeakHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -246,6 +218,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[] {
             new EPUBTypePlugin(), new ScormTypePlugin(), new XapiPackageTypePlugin()};
 
+    private ExecutorService bgExecutorService = Executors.newCachedThreadPool();
+
     /**
      * Base ServiceConnection class used to bind any given context to shared services: notably
      * the HTTP service and the upcoming p2p service.
@@ -303,19 +277,40 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         }
     }
 
+    private abstract static class UmCallbackAsyncTask<A, P, R> extends AsyncTask<A, P, R> {
+
+        protected UmCallback<R> umCallback;
+
+        protected Throwable error;
+
+        private UmCallbackAsyncTask(UmCallback<R> callback) {
+            this.umCallback = callback;
+        }
+
+
+
+        @Override
+        protected void onPostExecute(R r) {
+            if(error == null) {
+                umCallback.onSuccess(r);
+            }else {
+                umCallback.onFailure(error);
+            }
+        }
+    }
+
     /**
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise
      */
-    private static class GetSetupFileAsyncTask extends AsyncTask<Boolean, Void, String> {
+    private static class GetSetupFileAsyncTask extends UmCallbackAsyncTask<Boolean, Void, String> {
 
         private Context context;
 
-        private UmCallback doneCallback;
-
         private GetSetupFileAsyncTask(UmCallback doneCallback, Context context) {
+            super(doneCallback);
             this.context = context;
-            this.doneCallback = doneCallback;
+
         }
 
         @Override
@@ -361,11 +356,6 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
                 return outApkFile.getAbsolutePath();
             }
-        }
-
-        @Override
-        protected void onPostExecute(String filePath) {
-            doneCallback.onSuccess(filePath);
         }
     }
 
@@ -657,18 +647,33 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         */
     }
 
-    /**
-     * Use Android assets instead
-     */
     @Override
-    public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
-        if(resURI.charAt(0) == '/')
-            resURI = resURI.substring(1);
+    public void getAsset(final Object context, String path, final UmCallback<InputStream> callback) {
+        if(path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        final String assetPath = path;
 
-        return ((Context)context).getAssets().open(resURI);
+        bgExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    callback.onSuccess(((Context)context).getAssets().open(assetPath));
+                }catch(IOException e) {
+                    callback.onFailure(e);
+                }
+            }
+        });
     }
 
+    @Override
+    public InputStream getAssetSync(Object context, String path) throws IOException {
+        if(path.startsWith("/")) {
+            path = path.substring(1);
+        }
 
+        return ((Context)context).getAssets().open(path);
+    }
 
     @Override
     public int[] getFileDownloadStatus(String downloadID, Object context) {

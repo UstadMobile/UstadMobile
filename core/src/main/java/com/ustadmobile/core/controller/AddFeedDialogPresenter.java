@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.OpdsEndpoint;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -46,32 +47,43 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
 
 
     public void onCreate(Hashtable args, Hashtable savedState) {
-        InputStream in = null;
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         prefkey = (String)args.get(ARG_PREFKEY);
+        impl.getAsset(context, "/com/ustadmobile/core/libraries.opds", new UmCallback<InputStream>() {
+            @Override
+            public void onSuccess(InputStream in) {
+                try {
+                    presetFeeds = new UstadJSOPDSFeed();
+                    XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
+                    presetFeeds.loadFromXpp(xpp, null);
 
-        try {
-            in = impl.openResourceInputStream("/com/ustadmobile/core/libraries.opds", getContext());
-            presetFeeds = new UstadJSOPDSFeed();
-            XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
-            presetFeeds.loadFromXpp(xpp, null);
+                    final String[] presetNames = new String[presetFeeds.size() + 2];
+                    presetNames[0] = "Select a feed";
+                    presetNames[1] = "Add by URL";
+                    for(int i = 0; i < presetFeeds.size(); i++) {
+                        presetNames[i + 2] = presetFeeds.getEntry(i).getTitle();
+                    }
 
-            String[] presetNames = new String[presetFeeds.size() + 2];
-            presetNames[0] = "Select a feed";
-            presetNames[1] = "Add by URL";
-            for(int i = 0; i < presetFeeds.size(); i++) {
-                presetNames[i + 2] = presetFeeds.getEntry(i).getTitle();
+                    addFeedDialogView.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            addFeedDialogView.setDropdownPresets(presetNames);
+                        }
+                    });
+                }catch(IOException e) {
+                    e.printStackTrace();
+                }catch(XmlPullParserException x) {
+                    x.printStackTrace();
+                }finally {
+                    UMIOUtils.closeInputStream(in);
+                }
             }
 
-
-            addFeedDialogView.setDropdownPresets(presetNames);
-        }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 682, null, e);
-        }catch(XmlPullParserException x) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 682, null, x);
-        }finally {
-            UMIOUtils.closeInputStream(in);
-        }
+            @Override
+            public void onFailure(Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
     public void handlePresetSelected(int index) {
