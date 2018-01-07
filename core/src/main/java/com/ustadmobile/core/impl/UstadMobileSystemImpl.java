@@ -32,6 +32,7 @@
 package com.ustadmobile.core.impl;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.impl.http.UmHttpCall;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -1100,7 +1101,7 @@ public abstract class UstadMobileSystemImpl {
      *
      * @return Array of Class objects representing the ContentTypePlugin
      */
-    public abstract Class[] getSupportedContentTypePlugins();
+    public abstract ContentTypePlugin[] getSupportedContentTypePlugins();
 
     /**
      * Format the given integer to use , seperators as per the locale in use

@@ -233,4 +233,8 @@ public class ScormManifest {
     public Resource getResourceByIdentifier(String identifier) {
         return resourceMap.get(identifier);
     }
+
+    public Organization getDefaultOrganization() {
+        return getOrganizationByIdentifier(defaultOrganizationIdentifier);
+    }
 }

@@ -85,7 +85,7 @@ public class DirectoryScanner {
         try {
             UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-            ContentTypePlugin[] supportedTypePlugins = ContentTypeManager.getSupportedContentTypePlugins();
+            ContentTypePlugin[] supportedTypePlugins = UstadMobileSystemImpl.getInstance().getSupportedContentTypePlugins();
             String[] dirContents = impl.listDirectory(directoryUri);
             if(dirContents == null) {
                 //This directory does not exist - return null
