@@ -67,6 +67,9 @@ public class SettingsDataUsageController extends UstadBaseController{
 
     public void triggerSync() throws Exception {
 
+        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        impl.triggerSync(getContext());
+        /*
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -78,5 +81,6 @@ public class SettingsDataUsageController extends UstadBaseController{
                 }
             }
         }).start();
+        */
     }
 }
