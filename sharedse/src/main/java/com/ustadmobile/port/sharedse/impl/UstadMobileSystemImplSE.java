@@ -22,6 +22,7 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMTinCanUtil;
 import com.ustadmobile.nanolrs.core.endpoints.XapiAgentEndpoint;
 import com.ustadmobile.nanolrs.core.manager.ChangeSeqManager;
@@ -74,6 +75,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
@@ -105,6 +107,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
     private final OkHttpClient client = new OkHttpClient();
 
     public static String DEFAULT_MAIN_SERVER_HOST_NAME = "umcloud1svlt";
+
+    private Properties appConfig;
 
     /**
      * Convenience method to return a casted instance of UstadMobileSystemImplSharedSE
@@ -824,5 +828,28 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         Date date = new Date(time);
         Format format = new SimpleDateFormat("yyyy MM dd HH:mm:ss");
         return format.format(date);
+    }
+
+    public abstract InputStream getAssetSync(Object context, String path) throws IOException;
+
+    @Override
+    public String getAppConfigString(String key, String defaultVal, Object context) {
+        if(appConfig == null) {
+            String appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
+                    "/com/ustadmobile/core/appconfig.properties", context);
+            appConfig = new Properties();
+            InputStream prefIn = null;
+
+            try {
+                prefIn = getAssetSync(context, appPrefResource);
+                appConfig.load(prefIn);
+            }catch(IOException e) {
+                UstadMobileSystemImpl.l(UMLog.ERROR, 685, appPrefResource, e);
+            }finally {
+                UMIOUtils.closeInputStream(prefIn);
+            }
+        }
+
+        return appConfig.getProperty(key, defaultVal);
     }
 }

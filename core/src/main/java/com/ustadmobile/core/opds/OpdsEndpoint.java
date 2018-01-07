@@ -5,6 +5,7 @@ import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
@@ -163,8 +164,8 @@ public class OpdsEndpoint {
      *
      * @return UstadJSOPDSFeed populated from the string stored in the given preference key
      */
-    protected UstadJSOPDSFeed getFeedFromPreferenceKey(String prefKey, String url, UstadJSOPDSFeed destFeed,
-                                                       UstadJSOPDSItem.OpdsItemLoadCallback callback, Object context) {
+    protected UstadJSOPDSFeed getFeedFromPreferenceKey(final String prefKey, String url, UstadJSOPDSFeed destFeed,
+                                                       final UstadJSOPDSItem.OpdsItemLoadCallback callback, Object context) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         String activeUser = impl.getActiveUser(context);
         String opdsFeedStr;
@@ -183,32 +184,41 @@ public class OpdsEndpoint {
         if(opdsFeedStr != null) {
             try {
                 destFeed.loadFromString(opdsFeedStr, callback);
+                if(callback != null)
+                    callback.onDone(destFeed);
             }catch(IOException e) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 684, opdsFeedStr, e);
             }catch(XmlPullParserException x) {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 684, opdsFeedStr, x);
             }
         }else {
-            //it's a new feed - just add the prefkey link so the view knows it can add
-            InputStream assetIn = null;
-            try {
-                assetIn = impl.openResourceInputStream(
-                        "/com/ustadmobile/core/feed-defaults/" + prefKey + ".opds", context);
-                XmlPullParser xpp = impl.newPullParser(assetIn);
-                destFeed.loadFromXpp(xpp, callback);
-            }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 684, opdsFeedStr, e);
-            }catch(XmlPullParserException x) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 685, opdsFeedStr, x);
-            }finally {
-                UMIOUtils.closeInputStream(assetIn);
-            }
+            final UstadJSOPDSFeed assetLoadFeed = destFeed;
+            impl.getAsset(context, "/com/ustadmobile/core/feed-defaults/" + prefKey + ".opds",
+                    new UmCallback<InputStream>() {
+                @Override
+                public void onSuccess(InputStream result) {
+                    try {
+                        XmlPullParser xpp = impl.newPullParser(result);
+                        assetLoadFeed.loadFromXpp(xpp, callback);
+                        assetLoadFeed.addLink(USTAD_PREFKEY_FEED_LINK_REL,
+                                UstadJSOPDSItem.TYPE_NAVIGATIONFEED, prefKey);
+                        if(callback != null) {
+                            callback.onDone(assetLoadFeed);
+                        }
+                    }catch(XmlPullParserException| IOException e) {
+                        e.printStackTrace();
+                        if(callback != null)
+                            callback.onError(assetLoadFeed, e);
+                    }
+                }
 
-            destFeed.addLink(USTAD_PREFKEY_FEED_LINK_REL, UstadJSOPDSItem.TYPE_NAVIGATIONFEED, prefKey);
+                @Override
+                public void onFailure(Throwable exception) {
+                    if(callback != null)
+                        callback.onError(assetLoadFeed, exception);
+                }
+            });
         }
-
-        if(callback != null)
-            callback.onDone(destFeed);
 
         return destFeed;
     }

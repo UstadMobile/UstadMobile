@@ -203,7 +203,7 @@ public abstract class UstadMobileSystemImpl {
      */
     public static final String LOCALE_USE_SYSTEM = "";
 
-    private Properties appConfig;
+
 
     protected static Hashtable MIME_TYPES = new Hashtable();
 
@@ -566,17 +566,12 @@ public abstract class UstadMobileSystemImpl {
      */
     public abstract InputStream openFileInputStream(String fileURI) throws IOException, SecurityException;
 
-
     /**
-     * Get an input stream for an item in the resources - this should be the path
-     * without a leading slash for files that get copied from the res directory
-     * of the source.
+     * Get an asset (from files that are in core/src/flavorName/assets)
      *
-     * @param resURI the path to the resource; e.g. locale/en.properties
      */
-    public InputStream openResourceInputStream(String resURI, Object context) throws IOException {
-        return getClass().getResourceAsStream("/res/" + resURI);
-    }
+    public abstract void getAsset(Object context, String path, UmCallback<InputStream> callback);
+
 
     /**
      * Write the given string to the given file URI.  Create the file if it does
@@ -1158,25 +1153,7 @@ public abstract class UstadMobileSystemImpl {
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    public String getAppConfigString(String key, String defaultVal, Object context) {
-        if(appConfig == null) {
-            String appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    "/com/ustadmobile/core/appconfig.properties", context);
-            appConfig = new Properties();
-            InputStream prefIn = null;
-
-            try {
-                prefIn = openResourceInputStream(appPrefResource, context);
-                appConfig.load(prefIn);
-            }catch(IOException e) {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 685, appPrefResource, e);
-            }finally {
-                UMIOUtils.closeInputStream(prefIn);
-            }
-        }
-
-        return appConfig.getProperty(key, defaultVal);
-    }
+    public abstract String getAppConfigString(String key, String defaultVal, Object context);
 
     /**
      * Get a boolean from the app configuration. App config is stored as a string, so this is
