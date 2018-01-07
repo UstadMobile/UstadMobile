@@ -21,8 +21,8 @@ import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import java.sql.SQLException;
 
 import edu.rit.se.wifibuddy.WifiDirectHandler;
-import listener.ActiveSyncListener;
-import listener.ActiveUserListener;
+import com.ustadmobile.core.listener.ActiveSyncListener;
+import com.ustadmobile.core.listener.ActiveUserListener;
 
 import static com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid.PREF_KEY_SUPERNODE;
 
