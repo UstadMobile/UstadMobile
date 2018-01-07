@@ -63,8 +63,6 @@ import java.util.LinkedHashMap;
 import java.util.Properties;
 import java.util.Vector;
 
-import listener.ActiveSyncListener;
-
 /* $if umplatform == 2  $
     import org.json.me.*;
  $else$ */
@@ -82,9 +80,6 @@ import listener.ActiveSyncListener;
 public abstract class UstadMobileSystemImpl {
 
     protected static UstadMobileSystemImpl mainInstance;
-
-    //ActiveSyncListener in Core
-    Vector activeSyncListener = new Vector();
 
     /**
      * Default behaviour - any existing content is overwritten
@@ -1224,30 +1219,10 @@ public abstract class UstadMobileSystemImpl {
         return Integer.parseInt(getAppConfigString(key, ""+defaultVal, context));
     }
 
-
     public abstract String getUserDetail(String username, int field, Object dbContext);
 
-    //ActiveSyncListener: TODO: Remove or Remove SE. This isn't called. SE is called.
-
-    public void addActiveSyncListener(ActiveSyncListener listener){
-        activeSyncListener.addElement(listener);
-    }
-
-    public void removeActiveSyncListener(ActiveSyncListener listener){
-        activeSyncListener.removeElement(listener);
-    }
-
-    public void fireSetSyncHappeningEvent(boolean happening, Object context) {
-        for (int i = 0; i < activeSyncListener.size(); i++) {
-            ((ActiveSyncListener)
-                    activeSyncListener.elementAt(i)
-            ).setSyncHappening(happening, context);
-        }
-
-    }
-
     public abstract UmOpdsDbManager getOpdsDbManager();
-
+    
     public abstract LinkedHashMap<String, String> getSyncHistory(Object node, Object context);
 
     public abstract LinkedHashMap<String, String> getMainNodeSyncHistory(Object context);

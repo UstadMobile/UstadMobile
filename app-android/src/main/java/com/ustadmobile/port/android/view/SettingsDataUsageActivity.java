@@ -19,7 +19,7 @@ import com.ustadmobile.core.view.SettingsDataSyncListView;
 import com.ustadmobile.core.view.SettingsDataUsageView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 
-import listener.ActiveSyncListener;
+import com.ustadmobile.core.listener.ActiveSyncListener;
 
 public class SettingsDataUsageActivity extends UstadBaseActivity implements
         SettingsDataUsageView, CompoundButton.OnCheckedChangeListener, View.OnClickListener,

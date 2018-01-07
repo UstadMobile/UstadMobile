@@ -7,7 +7,6 @@ package com.ustadmobile.port.sharedse.impl;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.HttpCache;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMLog;
@@ -79,8 +78,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
-import listener.ActiveSyncListener;
-import listener.ActiveUserListener;
+import com.ustadmobile.core.listener.ActiveSyncListener;
+import com.ustadmobile.core.listener.ActiveUserListener;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -810,7 +809,8 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
             UMSyncResult result = UMSyncEndpoint.startSync(loggedInUser, loggedInUserCred,
                     endNode, context);
             if(result.getStatus() > -1){
-                UstadMobileSystemImpl.getInstance().fireSetSyncHappeningEvent(false, context);
+                //UstadMobileSystemImpl.getInstance().fireSetSyncHappeningEvent(false, context);
+                fireSetSyncHappeningEvent(false, context);
             }
         } catch (Exception e) {
             e.printStackTrace();
