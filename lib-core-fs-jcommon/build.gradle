@@ -23,7 +23,7 @@ publishing {
     publications {
         nanolrscore(MavenPublication) {
             groupId 'com.ustadmobile.app'
-            artifactId 'lib-core-fs'
+            artifactId 'lib-core-fs-jcommon'
             version rootProject.version
 
             from components.java
