@@ -1199,7 +1199,7 @@ public abstract class UstadMobileSystemImpl {
     public abstract String getUserDetail(String username, int field, Object dbContext);
 
     public abstract UmOpdsDbManager getOpdsDbManager();
-    
+
     public abstract LinkedHashMap<String, String> getSyncHistory(Object node, Object context);
 
     public abstract LinkedHashMap<String, String> getMainNodeSyncHistory(Object context);
