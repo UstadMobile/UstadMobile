@@ -24,3 +24,32 @@ jar {
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
 
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+
+publishing {
+    publications {
+        nanolrscore(MavenPublication) {
+            groupId 'com.ustadmobile.app'
+            artifactId 'lib-core-fs'
+            version rootProject.version
+
+            from components.java
+
+            artifact sourceJar {
+                classifier = 'sources'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            url rootProject.ext.buildConfigProperties['repo.dir']
+        }
+    }
+}
+
+
