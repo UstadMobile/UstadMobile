@@ -4,7 +4,7 @@ import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.RegistrationView;
@@ -82,7 +82,8 @@ public class UserSettingsController2 extends  UstadBaseController implements App
         UstadMobileSystemImpl.getInstance().setLocale(chosenLocale, getContext());
         UstadMobileSystemImpl.getInstance().getAppView(getContext()).dismissChoiceDialog();
 
-        if(UMUtil.hasDisplayedLocaleChanged(localeOnCreate, getContext())) {
+
+        if(UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, getContext())) {
             view.refreshLanguage();
         }
     }

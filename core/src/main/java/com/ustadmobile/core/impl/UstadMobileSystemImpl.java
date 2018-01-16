@@ -45,7 +45,7 @@ import com.ustadmobile.core.tincan.TinCanResultListener;
 import com.ustadmobile.core.util.MessagesHashtable;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.LoginView;
 
@@ -60,8 +60,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.Properties;
-import java.util.Vector;
 
 /* $if umplatform == 2  $
     import org.json.me.*;
@@ -1209,6 +1207,23 @@ public abstract class UstadMobileSystemImpl {
     public abstract void triggerSync(Object context) throws Exception;
 
     public abstract String convertTimeToReadableTime(long time);
+
+    /**
+     * Determine if the two given locales are the same as far as what the user will see.
+     *
+     * @param oldLocale
+     *
+     * @return
+     */
+    public boolean hasDisplayedLocaleChanged(String oldLocale, Object context) {
+        String currentlyDisplayedLocale = getDisplayedLocale(context);
+        if(currentlyDisplayedLocale != null && oldLocale != null
+                && oldLocale.substring(0, 2).equals(currentlyDisplayedLocale.substring(0,2))) {
+            return false;
+        }else {
+            return true;
+        }
+    }
 }
 
 

@@ -19,12 +19,14 @@ apply plugin: "java"
 apply plugin: "jacoco"
 apply plugin: "maven-publish"
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 jar {
     //Exclude factory classes that are intended to be replaced by platform specific implementations
     exclude("com/ustadmobile/core/impl/*Factory.class")
+    exclude("com/ustadmobile/core/db/impl/*Factory.class")
+    exclude("com/ustadmobile/core/db/entities/*.class")
 }
 
 task sourceJar(type: Jar) {
@@ -43,8 +45,11 @@ dependencies {
     compile "org.json:json:20160212";
     compile "net.sf.kxml:kxml2:2.3.0";
     compile 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
+    compile project(":lib-database")
+    compile project(":lib-util")
     project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
     compile "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
+    implementation project(":lib-util")
     testCompile project(":core-tests")
     testCompile project(":sharedse")
     testCompile project(":app-javase")

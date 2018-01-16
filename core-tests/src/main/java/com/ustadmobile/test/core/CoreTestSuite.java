@@ -1,5 +1,6 @@
 package com.ustadmobile.test.core;
 
+import com.ustadmobile.core.db.entities.TestOpdsFeed;
 import com.ustadmobile.test.core.catalog.contenttype.TestXapiPackageTypePlugin;
 import com.ustadmobile.test.core.impl.TestUstadJSOPF;
 import com.ustadmobile.test.core.scorm.TestScormManifest;
@@ -15,12 +16,13 @@ import org.junit.runners.Suite;
         TestImageLoader.class,
         TestDirectoryScanner.class,
         TestXapiPackageTypePlugin.class,
-        TestUstadJSOPDSFeed.class,
-        TestUstadJSOPDSEntry.class,
+//        TestUstadJSOPDSFeed.class,
+//        TestUstadJSOPDSEntry.class,
         TestUMFileUtil.class,
         TestUstadJSOPF.class,
         TestUmCalendarUtil.class,
-        TestScormManifest.class
+        TestScormManifest.class,
+        TestOpdsFeed.class
 })
 public abstract class CoreTestSuite {
 }

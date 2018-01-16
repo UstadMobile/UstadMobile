@@ -24,8 +24,8 @@ jar {
     exclude("com/ustadmobile/test/core/impl/PlatformTestUtil.class")
 }
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 ext.buildConfigProperties = new Properties()
 ext.buildConfigProperties.load(new FileInputStream(rootProject.file("buildconfig.default.properties")))

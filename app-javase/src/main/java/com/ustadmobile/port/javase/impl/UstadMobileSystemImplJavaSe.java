@@ -17,6 +17,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Hashtable;
@@ -220,5 +221,23 @@ public class UstadMobileSystemImplJavaSe extends UstadMobileSystemImplSE {
         }
 
         return tmpDir;
+    }
+
+    @Override
+    public void getAsset(Object context, String path, UmCallback<InputStream> callback) {
+        //TODO: convert this to using NIO
+        if(!path.startsWith("/"))
+            path = '/' + path;
+
+        try {
+            callback.onSuccess(getClass().getResourceAsStream(path));
+        }catch(Exception e) {
+            callback.onFailure(e);
+        }
+    }
+
+    @Override
+    public InputStream getAssetSync(Object context, String path) throws IOException {
+        return null;
     }
 }

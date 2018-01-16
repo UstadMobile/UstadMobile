@@ -61,7 +61,6 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.epubnav.EPUBNavDocument;
-import com.ustadmobile.core.epubnav.EPUBNavItem;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -76,7 +75,7 @@ import com.ustadmobile.core.opf.UstadJSOPFItem;
 import com.ustadmobile.core.tincan.TinCanXML;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMTinCanUtil;
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.util.URLTextUtil;
 import com.ustadmobile.core.view.ContainerView;
 import com.ustadmobile.core.view.UstadView;

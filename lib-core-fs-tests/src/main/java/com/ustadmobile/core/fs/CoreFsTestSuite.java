@@ -1,5 +1,7 @@
 package com.ustadmobile.core.fs;
 
+import com.ustadmobile.core.fs.db.TestOpdsRepository;
+
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -8,7 +10,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    TestHttpCache.class
+//    TestHttpCache.class
+        TestOpdsRepository.class
 })
 
 public class CoreFsTestSuite {

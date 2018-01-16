@@ -43,7 +43,6 @@ import com.ustadmobile.core.impl.http.UmHttpResponseCallback;
 import com.ustadmobile.core.util.Base64Coder;
 import com.ustadmobile.core.util.UMCalendarUtil;
 import com.ustadmobile.core.util.UMFileUtil;
-import com.ustadmobile.core.util.UMUtil;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.view.LoginView;

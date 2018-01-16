@@ -27,6 +27,11 @@ android {
         abortOnError false
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
         applicationId "com.toughra.ustadmobile.launcher"
         minSdkVersion 16
@@ -103,6 +108,11 @@ configurations.all {
         force 'com.android.support:design:27.0.2'
         force 'com.android.support:support-v4:27.0.2'
     }
+
+    exclude group: "net.sf.kxml", module: "kxml2"
+    exclude group: "org.json", module: "json"
+    exclude module: "lib-database"
+
 }
 
 

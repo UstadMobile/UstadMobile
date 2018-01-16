@@ -6,7 +6,7 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
 
 import java.util.Hashtable;
 

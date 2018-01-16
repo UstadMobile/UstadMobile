@@ -30,7 +30,7 @@
  */
 package com.ustadmobile.test.core;
 
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
 
 import junit.framework.TestCase;
 

@@ -30,13 +30,11 @@
  */
 package com.ustadmobile.core.opds;
 
-import com.ustadmobile.core.impl.HTTPResult;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.db.UmOpdsDbManager;
 import com.ustadmobile.core.opds.entities.UmOpdsLink;
-import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -735,7 +733,7 @@ public abstract class UstadJSOPDSItem {
                 }else if(name.equals("content")) {
                     contentType = xpp.getAttributeValue(null, ATTR_NAMES[ATTR_TYPE]);
                     if(contentType != null && contentType.equals(CONTENT_TYPE_XHTML)) {
-                        this.content = UMUtil.passXmlThroughToString(xpp, ATTR_NAMES[ATTR_CONTENT]);
+//                        this.content = UMUtil.passXmlThroughToString(xpp, ATTR_NAMES[ATTR_CONTENT]);
                     }else if(xpp.next() == XmlPullParser.TEXT){
                         this.content = xpp.getText();
                     }

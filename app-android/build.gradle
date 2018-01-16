@@ -13,6 +13,7 @@ apply plugin: 'maven-publish'
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
     exclude group: "org.json", module: "json"
+    exclude module: "lib-database"
 }
 
 ext.buildConfigProperties = new Properties()
@@ -156,6 +157,12 @@ android {
         localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+
     publishNonDefault true
 
     signingConfigs {
@@ -230,9 +237,9 @@ android {
             testCoverageEnabled = true
         }
     }
-
-
 }
+
+
 
 task checkBuildConfig {
     inputs.files("buildconfig.*.properties")
@@ -371,6 +378,9 @@ dependencies {
     // Room
     implementation "android.arch.persistence.room:runtime:1.0.0"
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
+
+    // Paging
+    implementation "android.arch.paging:runtime:1.0.0-alpha4-1"
 
 
 

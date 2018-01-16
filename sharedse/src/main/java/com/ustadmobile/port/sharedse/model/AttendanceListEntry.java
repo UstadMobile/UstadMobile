@@ -3,7 +3,7 @@ package com.ustadmobile.port.sharedse.model;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.ListableEntity;
-import com.ustadmobile.core.util.UMUtil;
+import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.nanolrs.core.endpoints.XapiStatementsEndpoint;
 import com.ustadmobile.nanolrs.core.manager.XapiForwardingStatementManager;
 import com.ustadmobile.nanolrs.core.model.XapiForwardingStatement;

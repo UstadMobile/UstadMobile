@@ -23,8 +23,7 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.util.UMUtil;
-import com.ustadmobile.nanolrs.android.persistence.PersistenceManagerAndroid;
+import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.nanolrs.android.service.XapiStatementForwardingService;
 import com.ustadmobile.port.android.impl.UstadMobileSystemImplAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
@@ -90,7 +89,7 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     protected void onResume() {
         super.onResume();
         if(localeChanged) {
-            if(UMUtil.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+            if(UstadMobileSystemImpl.getInstance().hasDisplayedLocaleChanged(localeOnCreate, this)) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {

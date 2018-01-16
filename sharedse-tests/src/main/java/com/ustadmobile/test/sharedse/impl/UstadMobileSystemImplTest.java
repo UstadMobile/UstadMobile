@@ -1,5 +1,6 @@
 package com.ustadmobile.test.sharedse.impl;
 
+import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin;
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.UMLog;
@@ -18,6 +19,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -236,8 +238,8 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public Class[] getSupportedContentTypePlugins() {
-        return new Class[] {EPUBTypePlugin.class};
+    public ContentTypePlugin[] getSupportedContentTypePlugins() {
+        return new ContentTypePlugin[]{new EPUBTypePlugin()};
     }
 
     @Override
@@ -258,6 +260,16 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
 
     @Override
     public UmOpdsDbManager getOpdsDbManager() {
+        return null;
+    }
+
+    @Override
+    public void getAsset(Object context, String path, UmCallback<InputStream> callback) {
+
+    }
+
+    @Override
+    public InputStream getAssetSync(Object context, String path) throws IOException {
         return null;
     }
 }

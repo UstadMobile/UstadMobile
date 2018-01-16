@@ -26,8 +26,8 @@ jar {
 
 
 
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 /*
  * When running in test mode we use getClass.getResource to load assets.
