@@ -3,7 +3,9 @@ package com.ustadmobile.core.fs.db.repository;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsFeed;
+import com.ustadmobile.lib.db.entities.OpdsFeedWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsItem;
+import com.ustadmobile.lib.db.entities.OpdsItemWithLinks;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -64,6 +66,7 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
         //commit the item itself to the database
         if(itemToLoad instanceof OpdsFeed) {
             dbManager.getOpdsFeedDao().insert((OpdsFeed) itemToLoad);
+            persistFeedLinks();
         }
     }
 
@@ -74,11 +77,35 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
 
     @Override
     public void onEntryAdded(OpdsEntryWithRelations entry, OpdsItem parentFeed, int position) {
-        dbManager.getOpdsEntryDao().insert(entry);
+        if(position == 0) {
+            dbManager.getOpdsFeedDao().update((OpdsFeed)parentFeed);
+            persistFeedLinks();
+        }
+
+        long entryId = dbManager.getOpdsEntryDao().insert(entry);
+        if(entry.getLinks() != null) {
+            for(OpdsLink link : entry.getLinks()) {
+                link.setEntryId((int)entryId);
+            }
+            dbManager.getOpdsLinkDao().insert(entry.getLinks());
+        }
     }
 
     @Override
     public void onLinkAdded(OpdsLink link, OpdsItem parentItem, int position) {
 
     }
+
+    private void persistFeedLinks() {
+        OpdsFeedWithRelations itemWithLinks = (OpdsFeedWithRelations)itemToLoad;
+        if(itemWithLinks.getLinks() == null)
+            return;
+
+        for(OpdsLink link : itemWithLinks.getLinks()) {
+            link.setFeedId(itemWithLinks.getId());
+        }
+
+        dbManager.getOpdsLinkDao().insert(itemWithLinks.getLinks());
+    }
+
 }

@@ -16,4 +16,7 @@ public abstract class OpdsFeedDao {
 
     @UmInsert
     public abstract long insert(OpdsFeed feed);
+
+    public abstract void update(OpdsFeed feed);
+
 }

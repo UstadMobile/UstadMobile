@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntry;
 
 public abstract class OpdsEntryDao {
 
-    public abstract void insert(OpdsEntry entry);
+    public abstract long insert(OpdsEntry entry);
 
 
 

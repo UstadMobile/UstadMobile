@@ -3,6 +3,7 @@ package com.ustadmobile.core.db;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsFeedWithRelationsDao;
+import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.impl.DbManagerFactory;
 import com.ustadmobile.core.db.dao.OpdsFeedDao;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -39,7 +40,7 @@ public abstract class DbManager {
 
     public abstract OpdsEntryWithRelationsDao getOpdsEntryWithRelationsDao();
 
-
+    public abstract OpdsLinkDao getOpdsLinkDao();
 
 
     public abstract Object getContext();

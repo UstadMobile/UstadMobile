@@ -65,7 +65,7 @@ public class TestOpdsFeedEntryProvider extends TestCase{
                     (DataSource.Factory<Integer, OpdsEntryWithRelations>)entryProvider.getProvider();
             LiveData<PagedList<OpdsEntryWithRelations>> entryList = new LivePagedListBuilder(factory, 20).build();
             entryList.observeForever((t) -> {
-                if(t != null) {
+                if(t != null && entryList.getValue().size() > 0) {
                     OpdsEntryWithRelations entry = entryList.getValue().get(0);
                     assertNotNull(entry);
                     helper.onSuccess("OK");

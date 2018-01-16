@@ -11,6 +11,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by mike on 1/13/18.
@@ -196,7 +197,7 @@ public class OpdsItem {
             if(evtType == XmlPullParser.START_TAG) {
                 name = xpp.getName();
                 if(name.equals(TAG_ENTRY)) {
-                    com.ustadmobile.lib.db.entities.OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations();
+                    OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations();
                     newEntry.load(xpp, callback);
                     newEntry.setFeedIndex(entryCount);
                     newEntry.setFeedId(this.getId());
@@ -231,6 +232,14 @@ public class OpdsItem {
                         link.setFeedId(this.getId());
                     }
                     link.setLinkIndex(linkCount);
+
+                    if(this instanceof OpdsItemWithLinks) {
+                        OpdsItemWithLinks itemWithLinks = (OpdsItemWithLinks)this;
+                        if(itemWithLinks.getLinks() == null)
+                            itemWithLinks.setLinks(new ArrayList<>());
+
+                        itemWithLinks.getLinks().add(link);
+                    }
 
                     if(callback != null)
                         callback.onLinkAdded(link, this, linkCount);

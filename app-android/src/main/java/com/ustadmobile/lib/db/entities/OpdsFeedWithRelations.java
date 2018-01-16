@@ -8,16 +8,18 @@ import java.util.List;
  * Created by mike on 1/13/18.
  */
 
-public class OpdsFeedWithRelations extends com.ustadmobile.lib.db.entities.OpdsFeed {
+public class OpdsFeedWithRelations extends com.ustadmobile.lib.db.entities.OpdsFeed
+        implements OpdsItemWithLinks{
 
-    @Relation(parentColumn = "id", entityColumn = "feed_id", entity = OpdsEntry.class)
-    private List<OpdsEntryWithRelations> entries;
+    @Relation(parentColumn = "id", entityColumn = "feedId")
+    private List<OpdsLink> links;
 
-    public List<OpdsEntryWithRelations> getEntries() {
-        return entries;
+    public List<OpdsLink> getLinks() {
+        return links;
     }
 
-    public void setEntries(List<OpdsEntryWithRelations> entries) {
-        this.entries = entries;
+    public void setLinks(List<OpdsLink> links) {
+        this.links = links;
     }
+
 }

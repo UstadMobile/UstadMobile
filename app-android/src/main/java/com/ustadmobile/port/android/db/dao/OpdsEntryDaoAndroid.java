@@ -14,5 +14,5 @@ public abstract class OpdsEntryDaoAndroid extends OpdsEntryDao{
 
     @Insert
     @Override
-    public abstract void insert(OpdsEntry entry);
+    public abstract long insert(OpdsEntry entry);
 }
