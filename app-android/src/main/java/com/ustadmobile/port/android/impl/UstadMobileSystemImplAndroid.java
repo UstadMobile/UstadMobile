@@ -157,6 +157,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      */
     public static final HashMap<String, Class> viewNameToAndroidImplMap = new HashMap<>();
 
+    private boolean initRan = false;
+
     static {
 
         viewNameToAndroidImplMap.put(LoginView.VIEW_NAME, LoginDialogFragment.class);
@@ -388,6 +390,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     public void init(Object context) {
         super.init(context);
 
+        if(!initRan) {
+            try {
+                if(!dirExists(getSystemBaseDir(context))){
+                    makeDirectoryRecursive(getSystemBaseDir(context));
+                }
+                initRan = true;
+            }catch (IOException e) {
+                l(UMLog.CRITICAL, 0, "Failed to make base system dir");
+            }
+        }
 
         if(context instanceof Activity) {
             ((Activity)context).runOnUiThread(new Runnable() {
