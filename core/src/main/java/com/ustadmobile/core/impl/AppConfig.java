@@ -6,6 +6,8 @@ package com.ustadmobile.core.impl;
 
 public class AppConfig {
 
+    public static final String KEY_CONTENT_DIR_NAME = "content_dir";
+
     public static final String KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN = "login_before_open";
 
     public static final String KEY_LOGIN_REQUIRED_FOR_CONTENT_DOWNLOAD = "login_before_download";

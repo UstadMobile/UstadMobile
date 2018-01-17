@@ -562,7 +562,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
     @Override
     protected String getSystemBaseDir(Object context) {
-        return new File(Environment.getExternalStorageDirectory(), "ustadmobileContent").getAbsolutePath();
+        return new File(Environment.getExternalStorageDirectory(), getContentDirName(context))
+                .getAbsolutePath();
     }
 
     @Override
@@ -603,16 +604,16 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
 
 
     @Override
-    public String getSharedContentDir() {
+    public String getSharedContentDir(Object context) {
         File extStorage = Environment.getExternalStorageDirectory();
-        File ustadContentDir = new File(extStorage, "ustadmobileContent");
+        File ustadContentDir = new File(extStorage, getContentDirName(context));
         return ustadContentDir.getAbsolutePath();
     }
 
     @Override
-    public String getUserContentDirectory(String username) {
+    public String getUserContentDirectory(Object context, String username) {
         File userDir = new File(Environment.getExternalStorageDirectory(),
-                "ustadmobileContent/user-" + username);
+                getContentDirName(context) + "/user-" + username);
         return userDir.getAbsolutePath();
     }
 

@@ -184,6 +184,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
         List<UMStorageDir> dirList = new ArrayList<>();
         String systemBaseDir = getSystemBaseDir(context);
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final String contentDirName = getContentDirName(context);
 
         if((mode & CatalogPresenter.SHARED_RESOURCE) == CatalogPresenter.SHARED_RESOURCE) {
             dirList.add(new UMStorageDir(systemBaseDir, getString(MessageID.device, context),
@@ -193,7 +194,7 @@ public abstract class UstadMobileSystemImplSE extends UstadMobileSystemImpl impl
             String[] externalDirs = findRemovableStorage();
             for(String extDir : externalDirs) {
                 dirList.add(new UMStorageDir(UMFileUtil.joinPaths(new String[]{extDir,
-                        UstadMobileSystemImpl.CONTENT_DIR_NAME}),
+                        contentDirName}),
                         getString(MessageID.memory_card, context),
                         true, true, false, false));
             }

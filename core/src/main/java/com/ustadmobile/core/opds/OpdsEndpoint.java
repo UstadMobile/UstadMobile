@@ -117,9 +117,9 @@ public class OpdsEndpoint {
                 baseHref = (String)args.get(ARG_BASE_HREF);
             }else {
                 if((resourceMode & CatalogPresenter.USER_RESOURCE) == CatalogPresenter.USER_RESOURCE) {
-                    baseHref = impl.getUserContentDirectory(impl.getActiveUser(context));
+                    baseHref = impl.getUserContentDirectory(context, impl.getActiveUser(context));
                 }else {
-                    baseHref = impl.getSharedContentDir();
+                    baseHref = impl.getSharedContentDir(context);
                 }
             }
 

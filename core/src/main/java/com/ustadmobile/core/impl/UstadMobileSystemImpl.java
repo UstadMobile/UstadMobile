@@ -104,7 +104,7 @@ public abstract class UstadMobileSystemImpl {
     /**
      * Suggested name to create for content on Devices
      */
-    public static final String CONTENT_DIR_NAME = "ustadMobileContent";
+    public static final String DEFAULT_CONTENT_DIR_NAME = "ustadmobileContent";
 
     private MessagesHashtable messages;
 
@@ -470,7 +470,7 @@ public abstract class UstadMobileSystemImpl {
      * @deprecated - Use getStorageDirs and getCacheDirinstead
      * @return URI of the shared content directory
      */
-    public abstract String getSharedContentDir();
+    public abstract String getSharedContentDir(Object context);
 
     /**
      * Provides the path to content directory for a given user
@@ -480,7 +480,7 @@ public abstract class UstadMobileSystemImpl {
      *
      * @return URI of the given users content directory
      */
-    public abstract String getUserContentDirectory(String username);
+    public abstract String getUserContentDirectory(Object context, String username);
 
 
     /**
@@ -1224,6 +1224,11 @@ public abstract class UstadMobileSystemImpl {
             return true;
         }
     }
+
+    protected final String getContentDirName(Object context) {
+        return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context);
+    }
+
 }
 
 
