@@ -662,7 +662,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         if(downloadDestVector.isEmpty()) {
             throw new IllegalArgumentException("No download destination in acquisition feed for acquireCatalogEntries");
         }
-        File downloadDestDir = new File(((String[])downloadDestVector.get(0))[UstadJSOPDSEntry.LINK_HREF]);
+        File downloadDestDir = new File(((UmOpdsLink)downloadDestVector.get(0)).getHref());
         UmOpdsLink selfLink = getFeed().getAbsoluteSelfLink();
 
         if(selfLink == null)

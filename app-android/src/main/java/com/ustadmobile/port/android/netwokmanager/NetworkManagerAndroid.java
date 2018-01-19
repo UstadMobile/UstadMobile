@@ -33,7 +33,7 @@ import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -649,7 +649,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
     public int addNotification(int notificationType, String title, String message) {
 
         mNotifyManager = (NotificationManager) networkService.getSystemService(Context.NOTIFICATION_SERVICE);
-        mBuilder = new NotificationCompat.Builder(networkService);
+        mBuilder = new NotificationCompat.Builder(networkService, "um_download");
         mBuilder.setContentTitle(title)
                 .setColor(ContextCompat.getColor(getContext(), R.color.accent))
                 .setContentText(message)

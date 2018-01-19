@@ -126,12 +126,12 @@ public class UstadMobileSystemImplTest extends UstadMobileSystemImplSE {
     }
 
     @Override
-    public String getSharedContentDir() {
+    public String getSharedContentDir(Object context) {
         return testSystemBaseDir.getAbsolutePath();
     }
 
     @Override
-    public String getUserContentDirectory(String username) {
+    public String getUserContentDirectory(Object context, String username) {
         return null;
     }
 
