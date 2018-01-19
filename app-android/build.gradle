@@ -6,9 +6,19 @@ if (keyStorePropertiesExists) {
     keystoreProperties.load(new FileInputStream(rootProject.file("keystore.properties")))
 }
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'digital.wup:android-maven-publish:3.1.1'
+    }
+}
+
 apply plugin: 'com.android.library'
 apply plugin: "jacoco"
-apply plugin: 'maven-publish'
+apply plugin: 'digital.wup.android-maven-publish'
 
 configurations.all {
     exclude group: "net.sf.kxml", module: "kxml2"
@@ -419,45 +429,19 @@ task sourceJar(type: Jar) {
     classifier "source"
 }
 
-
-
 publishing {
     publications {
-
-        //Taken from: http://stackoverflow.com/questions/26874498/maven-publish-android-library-with-aar-and-source-jar
-
-        appAndroidLocalconfig(MavenPublication) {
+        //For the moment - publish only localconfig debug variant. Can publish others as per:
+        // https://github.com/wupdigital/android-maven-publish
+        mavenLocalconfigAar(MavenPublication){
+            from components.findByName("androidLocalconfigDebug")
             groupId 'com.ustadmobile.app'
             artifactId 'app-android'
             version rootProject.version
-            artifact(sourceJar)
-            artifact("$buildDir/outputs/aar/app-android-localconfig-release.aar")
-
-            pom.withXml {
-                def dependenciesNode = asNode().appendNode('dependencies')
-                //Iterate over the compile dependencies (we don't want the test ones), adding a <dependency> node for each
-                configurations.compile.allDependencies.each {
-                    if (it.group != null && (it.name != null || "unspecified".equals(it.name)) && it.version != null) {
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        if (it.group.equals("workspace") || it.group.equals("UstadMobile")) {
-                            dependencyNode.appendNode('groupId', "com.ustadmobile.app")
-                        } else {
-                            dependencyNode.appendNode('groupId', it.group)
-                        }
-
-                        dependencyNode.appendNode('artifactId', it.name)
-                        if (it.version.equals("unspecified")) {
-                            dependencyNode.appendNode('version', rootProject.version)
-                        } else {
-                            dependencyNode.appendNode('version', it.version)
-                        }
-
-                    }
-                }
-            }
-
         }
+
     }
+
     repositories {
         //Set this in projectdir/extrasettings.gradle
         maven {
