@@ -3,8 +3,8 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_catalog_entry_content_view"
     tools:context="com.ustadmobile.port.android.view.CatalogEntryActivity"
+    android:id="@+id/activity_catalog_entry_content_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_light">

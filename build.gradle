@@ -31,7 +31,7 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-version = "0.2.4.77"
+version = "0.2.4.78-LOCAL7"
 ext {
     ustadVersion = project.version
     ustadVersionCode = 148
