@@ -30,9 +30,11 @@
  */
 package com.ustadmobile.core.view;
 
+import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.util.Vector;
 
@@ -165,49 +167,10 @@ public interface CatalogView extends UstadView{
      */
     void setAlternativeTranslationLinks(String[] translationLinks, int disabledItem);
 
-    /**
-     * Add an entry to the catalog display list
-     *
-     * @param entry
-     */
-    void addEntry(UstadJSOPDSEntry entry);
-
-    /**
-     * Add an entry to the catalog display list at the specified index
-     *
-     * @param position
-     * @param entry
-     */
-    void addEntry(int position, UstadJSOPDSEntry entry);
-
-    void setEntryAt(int position, UstadJSOPDSEntry entry);
-
-    /**
-     * Remove an entry from the catalog display list
-     *
-     * @param entry
-     */
-    void removeEntry(UstadJSOPDSEntry entry);
-
-    void removeEntry(int index);
-
-    /**
-     * Return the number of entries in this view
-     *
-     * @return
-     */
-    int getNumEntries();
-
-    /**
-     * Get the index of a given entry id
-     *
-     * @param entryId
-     * @return
-     */
-    int indexOfEntry(String entryId);
-
     void setRefreshing(boolean isRefreshing);
 
     void setFilterOptions(OpdsFilterOptions filterOptions);
+
+    void setEntryProvider(UmProvider<OpdsEntryWithRelations> entryProvider);
 
 }

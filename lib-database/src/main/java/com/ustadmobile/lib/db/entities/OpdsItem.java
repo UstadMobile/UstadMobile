@@ -4,6 +4,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mike on 1/13/18.
@@ -77,7 +79,17 @@ public class OpdsItem {
      */
     public static final String CONTENT_TYPE_XHTML = "xhtml";
 
+    /**
+     * OPDS constant for the cover image / artwork for an item
+     * @type Strnig
+     */
+    public static String LINK_IMAGE = "http://opds-spec.org/image";
 
+    /**
+     * OPDS constnat for the thumbnail
+     * @type String
+     */
+    public static String LINK_REL_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
 
 
 
@@ -228,16 +240,6 @@ public class OpdsItem {
 
                     linkCount++;
 
-//                    for(i = 0; i < UstadJSOPDSItem.LINK_ATTRS_END; i++) {
-//                        linkAttrs[i] = xpp.getAttributeValue(null, ATTR_NAMES[i]);
-//                    }
-//
-//                    if(!linkAttrs[ATTR_REL].equals(LINK_REL_SELF_ABSOLUTE)) {
-//                        this.addLink(linkAttrs);
-//                    }else {
-//                        this.href = linkAttrs[ATTR_HREF];
-//                    }
-
                 }else if(name.equals(TAG_UPDATED) && xpp.next() == XmlPullParser.TEXT){
                     this.updated = xpp.getText();
                 }else if(name.equals(ATTR_SUMMARY) && xpp.next() == XmlPullParser.TEXT) {
@@ -293,6 +295,72 @@ public class OpdsItem {
         if(callback != null)
             callback.onDone(this);
     }
+
+    protected static List<OpdsLink> getLinks(List<OpdsLink> links, String linkRel, String mimeType,
+                                              String href, boolean relByPrefix,
+                                              boolean mimeTypeByPrefix, boolean hrefByPrefix,
+                                              int limit) {
+        List<OpdsLink> result = new ArrayList<>();
+
+        boolean matchRel, matchType, matchHref;
+        int matches = 0;
+        for(OpdsLink link : links){
+            matchRel = true;
+            matchType = true;
+            matchHref = true;
+
+            if(linkRel != null && link.getRel() != null) {
+                matchRel = relByPrefix ?
+                        link.getRel().startsWith(linkRel) :
+                        link.getRel().equals(linkRel);
+            }else if(linkRel != null && link.getRel() == null) {
+                matchRel = false;
+            }
+
+            if(mimeType != null && link.getMimeType() != null) {
+                matchType = mimeTypeByPrefix ?
+                        link.getMimeType().startsWith(mimeType) :
+                        link.getMimeType().equals(mimeType);
+            }else if(mimeType != null && link.getMimeType() == null) {
+                matchType = false;
+            }
+
+            if(href != null && link.getHref() != null) {
+                matchHref = hrefByPrefix ?
+                        link.getHref().startsWith(href)
+                        : link.getHref().equals(href);
+            }else if(href != null && link.getHref() == null){
+                matchHref = false;
+            }
+
+            if(matchRel && matchType && matchHref) {
+                result.add(link);
+                matches++;
+                if(limit > 0 && matches == limit)
+                    return result;
+            }
+        }
+
+        return result;
+    }
+
+    protected static OpdsLink getThumbnailLink(List<OpdsLink> itemLinks, boolean imgFallback) {
+        List<OpdsLink> links = getLinks(itemLinks, LINK_REL_THUMBNAIL, null, null,
+                false, false, false, 1);
+        OpdsLink link = null;
+        if(!links.isEmpty()) {
+            link = links.get(0);
+        }else if(imgFallback) {
+            links = getLinks(itemLinks, LINK_IMAGE, null, null, false,
+                    false, false, 1);
+            if(!links.isEmpty()) {
+                link = links.get(0);
+            }
+        }
+
+        return link;
+    }
+
 
 
 

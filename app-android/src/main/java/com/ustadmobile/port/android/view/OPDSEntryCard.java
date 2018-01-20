@@ -50,6 +50,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.core.view.UstadView;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.util.HashMap;
 
@@ -59,6 +60,9 @@ import java.util.HashMap;
 public class OPDSEntryCard extends android.support.v7.widget.CardView {
 
     private UstadJSOPDSEntry entry;
+
+    private OpdsEntryWithRelations opdsEntry;
+
 
     private static final HashMap<Integer, Integer> STATUS_TO_COLOR_MAP = new HashMap<>();
 
@@ -89,13 +93,25 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     }
 
 
+    @Deprecated
     public void setOPDSEntry(UstadJSOPDSEntry entry) {
         this.entry = entry;
-        String summary = entry.getSummary();
-        ((TextView)findViewById(R.id.opdsitem_title_text)).setText(entry.getTitle());
-        ((TextView)findViewById(R.id.opds_item_detail_text)).setText(summary != null ? summary : "");
+        if(entry != null) {
+            String summary = entry.getSummary();
+            ((TextView)findViewById(R.id.opdsitem_title_text)).setText(entry.getTitle());
+            ((TextView)findViewById(R.id.opds_item_detail_text)).setText(summary != null ? summary : "");
+        }else {
+
+        }
         mDownloadProgressView = findViewById(R.id.opds_item_download_progress_view);
     }
+
+    public void setOpdsEntry(OpdsEntryWithRelations opdsEntry) {
+        this.opdsEntry = opdsEntry;
+        ((TextView)findViewById(R.id.opdsitem_title_text)).setText(opdsEntry.getTitle());
+        mDownloadProgressView = findViewById(R.id.opds_item_download_progress_view);
+    }
+
 
     public UstadJSOPDSEntry getEntry() {
         return this.entry;

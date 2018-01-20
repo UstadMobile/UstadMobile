@@ -21,4 +21,8 @@ public class OpdsEntryWithRelations extends OpdsEntry implements OpdsItemWithLin
         this.links = links;
     }
 
+    public OpdsLink getThumbnail(boolean imgFallback) {
+        return getThumbnailLink(links, imgFallback);
+    }
+
 }
