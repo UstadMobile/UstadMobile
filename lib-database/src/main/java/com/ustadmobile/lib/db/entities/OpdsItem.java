@@ -231,18 +231,25 @@ public class OpdsItem {
                     }
 
                     link.setTitle(xpp.getAttributeValue(null, ATTR_TITLE));
-                    if(this instanceof OpdsEntry) {
+                    if(this instanceof com.ustadmobile.lib.db.entities.OpdsEntry) {
                         link.setEntryId(this.getId());
                     }else {
                         link.setFeedId(this.getId());
                     }
                     link.setLinkIndex(linkCount);
 
+                    if(this instanceof OpdsItemWithLinks) {
+                        OpdsItemWithLinks itemWithLinks = (OpdsItemWithLinks)this;
+                        if(itemWithLinks.getLinks() == null)
+                            itemWithLinks.setLinks(new ArrayList<>());
+
+                        itemWithLinks.getLinks().add(link);
+                    }
+
                     if(callback != null)
                         callback.onLinkAdded(link, this, linkCount);
 
                     linkCount++;
-
                 }else if(name.equals(TAG_UPDATED) && xpp.next() == XmlPullParser.TEXT){
                     this.updated = xpp.getText();
                 }else if(name.equals(ATTR_SUMMARY) && xpp.next() == XmlPullParser.TEXT) {

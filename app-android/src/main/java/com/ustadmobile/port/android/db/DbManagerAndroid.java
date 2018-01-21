@@ -33,7 +33,7 @@ public class DbManagerAndroid extends DbManager {
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
-        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb7")
+        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb8")
             .build();
         executorService = Executors.newCachedThreadPool();
     }

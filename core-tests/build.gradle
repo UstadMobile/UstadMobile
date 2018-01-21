@@ -10,14 +10,22 @@ buildscript {
     }
 }
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":core")
-    compile project(":sharedse")
+    api project(":core")
+    api project(":sharedse")
+    implementation project(":lib-database")
 
-    compile 'junit:junit:4.12'
+
+    implementation "net.sf.kxml:kxml2:2.3.0"
+    implementation "org.json:json:20160212"
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+    implementation 'org.nanohttpd:nanohttpd-nanolets:2.3.1';
+
+
+    implementation 'junit:junit:4.12'
 }
 
 jar {

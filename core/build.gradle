@@ -42,8 +42,8 @@ repositories {
 }
 
 dependencies {
-    implementation "org.json:json:20160212";
-    implementation "net.sf.kxml:kxml2:2.3.0";
+    implementation "org.json:json:20160212"
+    implementation "net.sf.kxml:kxml2:2.3.0"
     implementation 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0-SNAPSHOT'
     implementation project(":lib-database")
     implementation project(":lib-database-annotation")

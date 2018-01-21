@@ -16,6 +16,11 @@ dependencies {
     compile project(":core")
     compile project(":sharedse")
     compile project(":core-tests")
+    compile project(":lib-core-fs")
+    implementation project(":lib-database")
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+    implementation 'org.nanohttpd:nanohttpd-nanolets:2.3.1';
+
 
     compile 'junit:junit:4.12'
 }
