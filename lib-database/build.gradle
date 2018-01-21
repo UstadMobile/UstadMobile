@@ -4,6 +4,7 @@ apply plugin: "maven-publish"
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":lib-database-annotation")
     api "net.sf.kxml:kxml2:2.3.0";
     api project(":lib-util")
 }

@@ -1,6 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
-import com.ustadmobile.core.db.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
 import java.util.List;

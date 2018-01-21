@@ -1,11 +1,15 @@
 package com.ustadmobile.lib.db.entities;
 
+import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+
 /**
  * Created by mike on 1/13/18.
  */
-
+@UmEntity
 public class OpdsEntry extends OpdsItem {
 
+    @UmPrimaryKey
     private int feedId;
 
     private String entryId;

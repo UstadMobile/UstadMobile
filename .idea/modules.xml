@@ -13,6 +13,8 @@
       <module fileurl="file://$PROJECT_DIR$/lib-core-fs-jcommon/lib-core-fs-jcommon.iml" filepath="$PROJECT_DIR$/lib-core-fs-jcommon/lib-core-fs-jcommon.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-core-fs-tests/lib-core-fs-tests.iml" filepath="$PROJECT_DIR$/lib-core-fs-tests/lib-core-fs-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-database/lib-database.iml" filepath="$PROJECT_DIR$/lib-database/lib-database.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-database-annotation/lib-database-annotation.iml" filepath="$PROJECT_DIR$/lib-database-annotation/lib-database-annotation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-database-processor/lib-database-processor.iml" filepath="$PROJECT_DIR$/lib-database-processor/lib-database-processor.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-util/lib-util.iml" filepath="$PROJECT_DIR$/lib-util/lib-util.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse/sharedse.iml" filepath="$PROJECT_DIR$/sharedse/sharedse.iml" />
       <module fileurl="file://$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" filepath="$PROJECT_DIR$/sharedse-tests/sharedse-tests.iml" />
