@@ -86,13 +86,22 @@ public class OpdsItem {
      * OPDS constant for the cover image / artwork for an item
      * @type Strnig
      */
-    public static String LINK_IMAGE = "http://opds-spec.org/image";
+    public static final String LINK_IMAGE = "http://opds-spec.org/image";
 
     /**
      * OPDS constnat for the thumbnail
      * @type String
      */
-    public static String LINK_REL_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
+    public static final String LINK_REL_THUMBNAIL = "http://opds-spec.org/image/thumbnail";
+
+    /**
+     * OPDS constant for the standard acquisition link:
+     *
+     * http://opds-spec.org/acquisition
+     *
+     * @type String
+     */
+    public static final String LINK_REL_ACQUIRE = "http://opds-spec.org/acquisition";
 
 
 
@@ -306,15 +315,27 @@ public class OpdsItem {
             callback.onDone(this);
     }
 
-    protected static List<OpdsLink> getLinks(List<OpdsLink> links, String linkRel, String mimeType,
-                                              String href, boolean relByPrefix,
-                                              boolean mimeTypeByPrefix, boolean hrefByPrefix,
-                                              int limit) {
+    public OpdsLink getAcquisitionLink(String mimeType, boolean mimeTypeByPrefix) {
+        List<OpdsLink> result = getLinks(LINK_REL_ACQUIRE, mimeType, null, true, mimeTypeByPrefix, false, 1);
+        if(!result.isEmpty())
+            return result.get(0);
+        else
+            return null;
+    }
+
+    public List<OpdsLink> getLinks(String linkRel, String mimeType,
+                                   String href, boolean relByPrefix,
+                                   boolean mimeTypeByPrefix, boolean hrefByPrefix,
+                                   int limit) {
+        if(!(this instanceof OpdsItemWithLinks)) {
+            return null;
+        }
+
         List<OpdsLink> result = new ArrayList<>();
 
         boolean matchRel, matchType, matchHref;
         int matches = 0;
-        for(OpdsLink link : links){
+        for(OpdsLink link : ((OpdsItemWithLinks)this).getLinks()){
             matchRel = true;
             matchType = true;
             matchHref = true;
@@ -354,14 +375,14 @@ public class OpdsItem {
         return result;
     }
 
-    protected static OpdsLink getThumbnailLink(List<OpdsLink> itemLinks, boolean imgFallback) {
-        List<OpdsLink> links = getLinks(itemLinks, LINK_REL_THUMBNAIL, null, null,
+    public OpdsLink getThumbnailLink(boolean imgFallback) {
+        List<OpdsLink> links = getLinks(LINK_REL_THUMBNAIL, null, null,
                 false, false, false, 1);
         OpdsLink link = null;
         if(!links.isEmpty()) {
             link = links.get(0);
         }else if(imgFallback) {
-            links = getLinks(itemLinks, LINK_IMAGE, null, null, false,
+            links = getLinks(LINK_IMAGE, null, null, false,
                     false, false, 1);
             if(!links.isEmpty()) {
                 link = links.get(0);

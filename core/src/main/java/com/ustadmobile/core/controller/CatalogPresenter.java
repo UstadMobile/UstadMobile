@@ -42,6 +42,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     private CatalogView mView;
 
+    @Deprecated
     private UstadJSOPDSFeed feed;
 
     private UmLiveData<OpdsFeedWithRelations> feedLiveData;
@@ -218,6 +219,11 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     }
 
 
+    public void handleClickEntry(final OpdsEntryWithRelations entry) {
+        //if it has an acquisition or entry profile link - go to entry view - otherwise, catalogview
+
+    }
+
     /**
      * Triggered when the user selects an entry from the catalog. This could
      * be another OPDS catalog Feed to display or it could be a container
@@ -227,7 +233,11 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
      */
     public void handleClickEntry(final String entryId) {
         UstadJSOPDSEntry entry = feed.getEntryById(entryId);
+
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+
+
+
         if(!entry.getParentFeed().isAcquisitionFeed()) {
             //we are loading another opds catalog
             Vector entryLinks = entry.getLinks(null, UstadJSOPDSItem.TYPE_ATOMFEED,

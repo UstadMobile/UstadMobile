@@ -46,8 +46,6 @@ import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.model.CourseProgress;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -58,8 +56,6 @@ import java.util.HashMap;
  * Created by mike on 08/08/15.
  */
 public class OPDSEntryCard extends android.support.v7.widget.CardView {
-
-    private UstadJSOPDSEntry entry;
 
     private OpdsEntryWithRelations opdsEntry;
 
@@ -93,29 +89,16 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     }
 
 
-    @Deprecated
-    public void setOPDSEntry(UstadJSOPDSEntry entry) {
-        this.entry = entry;
-        if(entry != null) {
-            String summary = entry.getSummary();
-            ((TextView)findViewById(R.id.opdsitem_title_text)).setText(entry.getTitle());
-            ((TextView)findViewById(R.id.opds_item_detail_text)).setText(summary != null ? summary : "");
-        }else {
-
-        }
-        mDownloadProgressView = findViewById(R.id.opds_item_download_progress_view);
-    }
-
     public void setOpdsEntry(OpdsEntryWithRelations opdsEntry) {
         this.opdsEntry = opdsEntry;
         ((TextView)findViewById(R.id.opdsitem_title_text)).setText(opdsEntry.getTitle());
         mDownloadProgressView = findViewById(R.id.opds_item_download_progress_view);
     }
 
-
-    public UstadJSOPDSEntry getEntry() {
-        return this.entry;
+    public OpdsEntryWithRelations getOpdsEntry() {
+        return opdsEntry;
     }
+
 
     /**
      * set the status on whether a file can be downloaded locally or not

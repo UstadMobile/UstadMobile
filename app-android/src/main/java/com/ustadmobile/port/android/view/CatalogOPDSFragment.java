@@ -70,8 +70,6 @@ import com.ustadmobile.port.android.util.UMAndroidUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.WeakHashMap;
@@ -96,7 +94,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private Map<String, Boolean> idToProgressVisibleMap = new Hashtable<>();
 
-    private Vector<UstadJSOPDSEntry> mSelectedEntries;
+    private Vector<OpdsEntryWithRelations> mSelectedEntries;
 
     private boolean hasDisplayed = false;
 
@@ -228,12 +226,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         data.observe(this, pagedList -> adapter.setList(pagedList));
         mRecyclerView.setAdapter(adapter);
     }
-
-//    @Override
-//    public void addEntry(int index, UstadJSOPDSEntry entry) {
-//        entryList.add(index, entry);
-//        mRecyclerAdapter.notifyDataSetChanged();
-//    }
 
 
     @Override
@@ -376,12 +368,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         card.setSelected(nowSelected);
 
         if(nowSelected){
-            mSelectedEntries.addElement(card.getEntry());
+            mSelectedEntries.addElement(card.getOpdsEntry());
             if(mSelectedEntries.size() == 1 && getActivity() != null) {
                 getActivity().supportInvalidateOptionsMenu();
             }
         }else {
-            int removeIndex = UstadJSOPDSItem.indexOfItemInVector(card.getEntry().getItemId(), mSelectedEntries);
+            int removeIndex = UstadJSOPDSItem.indexOfItemInVector(card.getOpdsEntry().getItemId(), mSelectedEntries);
             if(removeIndex != -1)
                 mSelectedEntries.removeElementAt(removeIndex);
 
@@ -401,7 +393,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             if(mSelectedEntries.size() > 0) {
                 toggleEntrySelected(card);
             }else {
-                mCatalogPresenter.handleClickEntry(card.getEntry().getItemId());
+                mCatalogPresenter.handleClickEntry(card.getOpdsEntry().getItemId());
             }
             return;
         }
@@ -600,6 +592,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         public OpdsEntryViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             OPDSEntryCard cardView  = (OPDSEntryCard) LayoutInflater.from(parent.getContext()).inflate(
                     R.layout.fragment_opds_item, null);
+            cardView.setOnClickListener(CatalogOPDSFragment.this);
+            cardView.setOnLongClickListener(CatalogOPDSFragment.this);
             return new OpdsEntryViewHolder(cardView);
         }
 
@@ -609,7 +603,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             holder.mEntryCard.setOpdsEntry(entry);
             String imageUri = null;
             if(entry != null) {
-                OpdsLink imgLink = entry.getThumbnail(true);
+                OpdsLink imgLink = entry.getThumbnailLink(true);
                 if(imgLink != null)
                     imageUri = imgLink.getHref();
             }
