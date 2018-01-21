@@ -9,7 +9,6 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class OpdsEntry extends OpdsItem {
 
-    @UmPrimaryKey
     private int feedId;
 
     private String entryId;

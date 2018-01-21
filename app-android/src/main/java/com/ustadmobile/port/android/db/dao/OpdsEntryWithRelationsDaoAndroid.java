@@ -27,6 +27,6 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
         return () -> findEntriesByFeedR(feedId);
     }
 
-    @Query("Select * From OpdsEntry Where feed_id = :feedId")
+    @Query("Select * From OpdsEntry Where feedId = :feedId")
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByFeedR(int feedId);
 }

@@ -23,6 +23,9 @@ public class EntityProcessorRoom {
 
     public static void processorDir(File inDir, File outDir) throws IOException{
         JavaClassSource classSource = null;
+        if(!outDir.exists())
+            outDir.mkdirs();
+
         for(File srcFile : inDir.listFiles()) {
             File outFile = new File(outDir, srcFile.getName());
             JavaType parsedSource = Roaster.parse(srcFile);

@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: "maven-publish"
 
 task runOrmLiteGeneration(type: JavaExec) {
@@ -10,6 +10,7 @@ dependencies {
     compile project(":sharedse")
     compile project(":lib-core-fs")
     compile project(':lib-core-fs-jcommon')
+    implementation project(":lib-util")
 
     compile "com.j256.ormlite:ormlite-core:5.0"
     compile "com.j256.ormlite:ormlite-jdbc:5.0"

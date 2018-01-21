@@ -10,13 +10,14 @@ import java.util.List;
 
 public class OpdsFeedWithRelations extends OpdsFeed implements OpdsItemWithLinks{
 
+    @UmRelation(parentColumn = "id", entityColumn = "feedId")
     private List<OpdsLink> links;
 
     public List<OpdsLink> getLinks() {
         return links;
     }
 
-    @UmRelation(parentColumn = "id", entityColumn = "feedId")
+
     public void setLinks(List<OpdsLink> links) {
         this.links = links;
     }

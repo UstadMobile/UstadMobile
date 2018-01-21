@@ -147,9 +147,16 @@ afterEvaluate {
         variant.javaCompiler.dependsOn(copyLocalconfigXmlLocaleFilesFromCore)
         variant.javaCompiler.dependsOn(generateCoreStringToAndroidResMap)
         variant.javaCompiler.dependsOn(checkBuildConfig)
-        variant.preBuild.dependsOn(":lib-database-processor:runRoomProcessor")
+        variant.javaCompiler.dependsOn(generateRoomEntities)
     }
 }
+
+task generateRoomEntities {
+
+}
+
+generateRoomEntities.dependsOn(":lib-database-processor:runRoomProcessor")
+
 //TODO: Fix this for building as library
 tasks.whenTaskAdded { task ->
     if (task.name == "assembleRemotetestslaveDebug") {
@@ -167,6 +174,7 @@ android {
     sourceSets {
         main.assets.srcDirs += "../core/src/main/assets/"
         localconfig.assets.srcDirs += "../core/src/localconfig/assets/"
+        main.java.srcDirs += "build/generated/source/umentities"
     }
 
     compileOptions {
@@ -376,6 +384,7 @@ dependencies {
     api project(":lib-core-fs")
     api project(':lib-core-fs-jcommon')
     implementation project(":lib-database-annotation")
+    implementation project(":lib-util")
 
 
     androidTestApi project(":core-tests")

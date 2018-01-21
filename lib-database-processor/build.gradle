@@ -13,9 +13,10 @@ dependencies {
 }
 
 task runRoomProcessor(type: JavaExec) {
+    inputs.files("../lib-database/src/main/java/com/ustadmobile/lib/db/entities/*.java")
     classpath sourceSets.main.runtimeClasspath
     main = "com.ustadmobile.lib.dbprocessor.EntityProcessorRoom"
-    args "../lib-database/src/main/java/com/ustadmobile/lib/db/entities", "../app-android/src/main/java/com/ustadmobile/lib/db/entities"
+    args "../lib-database/src/main/java/com/ustadmobile/lib/db/entities", "../app-android/build/generated/source/umentities/com/ustadmobile/lib/db/entities"
 }
 
 sourceCompatibility = "1.7"
