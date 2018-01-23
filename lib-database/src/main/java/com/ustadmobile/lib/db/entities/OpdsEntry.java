@@ -106,6 +106,16 @@ public class OpdsEntry {
      */
     public static final String LINK_REL_ACQUIRE = "http://opds-spec.org/acquisition";
 
+    /**
+     * Type to be used to represent an OPDS entry as per the opds spec
+     *
+     * @type String
+     */
+    public static final String TYPE_ENTRY_OPDS =
+            "application/atom+xml;type=entry;profile=opds-catalog";
+
+    public static final String ENTRY_PROTOCOL = "entry:///";
+
 
     public interface OpdsItemLoadCallback {
 

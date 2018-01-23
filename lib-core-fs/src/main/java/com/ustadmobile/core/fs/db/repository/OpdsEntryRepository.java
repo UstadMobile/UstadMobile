@@ -44,4 +44,9 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
     public UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId) {
         return null;
     }
+
+    @Override
+    public UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid) {
+        return null;
+    }
 }

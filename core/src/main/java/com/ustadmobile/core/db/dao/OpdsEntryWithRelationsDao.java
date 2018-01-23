@@ -20,4 +20,8 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.id = OpdsEntry.id WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
     public abstract UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId);
 
+    @UmQuery("SELECT * from OpdsEntry where id = :uuid")
+    public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid);
+
+
 }

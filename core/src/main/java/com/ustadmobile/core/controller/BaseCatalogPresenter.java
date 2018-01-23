@@ -42,6 +42,8 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
 
     public static final String ARG_URL = "url";
 
+    public static final String ARG_BASE_HREF = "base";
+
     public static final String ARG_HTTPUSER = "httpu";
 
     public static final String ARG_HTTPPPASS = "httpp";

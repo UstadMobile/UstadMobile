@@ -19,10 +19,14 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
+import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 
@@ -218,8 +222,42 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
 
     public void handleClickEntry(final OpdsEntryWithRelations entry) {
-        //if it has an acquisition or entry profile link - go to entry view - otherwise, catalogview
+        OpdsLink acquisitionLink = entry.getAcquisitionLink(null, false);
+        Hashtable args = new Hashtable();
 
+        if(acquisitionLink != null) {
+            args.put(ARG_URL, "entry:///" + entry.getId());
+            args.put(ARG_BASE_HREF, feedLiveData.getValue().getUrl());
+            args.put(CatalogEntryPresenter.ARG_TITLEBAR_TEXT, feedLiveData.getValue().getTitle());
+            UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, args, getContext());
+            return;
+        }
+
+        List<OpdsLink> opdsLinks = entry.getLinks();
+        if(opdsLinks == null)
+            return;
+
+        String linkType;
+        for(OpdsLink link : opdsLinks) {
+            linkType = link.getMimeType();
+            if(linkType == null)
+                continue;
+
+            if(linkType.contains("type=entry")) {
+                args.put(ARG_URL, UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(),
+                        link.getHref()));
+                args.put(CatalogEntryPresenter.ARG_TITLEBAR_TEXT, feedLiveData.getValue().getTitle());
+                UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, args, getContext());
+                return;
+            }
+
+            if(linkType.contains("type=opds-catalog")) {
+                args.put(ARG_URL, UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(),
+                        link.getHref()));
+                UstadMobileSystemImpl.getInstance().go(CatalogView.VIEW_NAME, args, getContext());
+                return;
+            }
+        }
     }
 
     /**

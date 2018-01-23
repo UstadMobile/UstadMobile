@@ -396,7 +396,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             if(mSelectedEntries.size() > 0) {
                 toggleEntrySelected(card);
             }else {
-                mCatalogPresenter.handleClickEntry(card.getOpdsEntry().getItemId());
+                mCatalogPresenter.handleClickEntry(card.getOpdsEntry());
             }
             return;
         }

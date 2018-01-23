@@ -1,6 +1,8 @@
 package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.catalog.ContentTypeManager;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
@@ -20,6 +22,8 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
@@ -31,6 +35,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
+
+import static com.ustadmobile.lib.db.entities.OpdsEntry.ENTRY_PROTOCOL;
 
 /* $if umplatform != 2 $ */
 /* $endif */
@@ -87,6 +93,10 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     private boolean entryLoaded = false;
 
     private boolean seeAlsoVisible = false;
+
+    private UmLiveData<OpdsEntryWithRelations> entryLiveData;
+
+    private String baseHref;
 
 
     /**
@@ -204,18 +214,17 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     public void onCreate() {
         manager = UstadMobileSystemImpl.getInstance().getNetworkManager();
-        if(this.args.containsKey(ARG_ENTRY_OPDS_STR)) {
-            try {
-                entryFeed = new UstadJSOPDSFeed();
-                entryFeed.loadFromString(args.get(ARG_ENTRY_OPDS_STR).toString());
-                entry = entryFeed.getEntryById(args.get(ARG_ENTRY_ID).toString());
-                handleEntryReady();
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
-        }else {
-            entry = new UstadJSOPDSEntry(null);
-            entry.loadFromUrlAsync((String)args.get(ARG_URL), null, getContext(), this);
+
+        if(args.containsKey(ARG_BASE_HREF)) {
+            baseHref = (String)args.get(ARG_BASE_HREF);
+        }
+
+        String entryUri = (String)args.get(ARG_URL);
+        if(entryUri.startsWith(ENTRY_PROTOCOL)) {
+            String entryUuid = entryUri.substring(ENTRY_PROTOCOL.length());
+            entryLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+                    .getEntryByUuid(entryUuid);
+            entryLiveData.observe(this, this::handleEntryUpdated);
         }
 
         if(this.args.containsKey(ARG_TITLEBAR_TEXT))
@@ -223,6 +232,21 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
         UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
     }
+
+    public void handleEntryUpdated(OpdsEntryWithRelations entry) {
+        catalogEntryView.setEntryTitle(entry.getTitle());
+        catalogEntryView.setDescription(entry.getContent(), entry.getContentType());
+        OpdsLink acquisitionLink = entry.getAcquisitionLink(null, true);
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        if(acquisitionLink != null && acquisitionLink.getLength() > 0)
+            catalogEntryView.setSize(impl.getString(MessageID.size, getContext())
+                    + ": " + UMFileUtil.formatFileSize(acquisitionLink.getLength()));
+
+        OpdsLink thumbnailLink = entry.getThumbnailLink(true);
+        if(thumbnailLink != null)
+            catalogEntryView.setThumbnail(UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()));
+    }
+
 
     @Override
     public void onEntryLoaded(UstadJSOPDSItem item, int position, UstadJSOPDSEntry entry) {

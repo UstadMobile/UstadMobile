@@ -41,4 +41,12 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId) {
         return () -> findEntriesByParentR(parentId);
     }
+
+    @Override
+    public UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid) {
+        return new UmLiveDataAndroid<OpdsEntryWithRelations>(getEntryByUuidR(uuid));
+    }
+
+    @Query("SELECT * from OpdsEntry where id = :uuid")
+    public abstract LiveData<OpdsEntryWithRelations> getEntryByUuidR(String uuid);
 }
