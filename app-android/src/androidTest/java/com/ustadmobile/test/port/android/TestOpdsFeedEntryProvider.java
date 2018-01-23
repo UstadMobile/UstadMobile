@@ -8,10 +8,9 @@ import android.arch.paging.PagedList;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.OpdsFeedWithRelationsDao;
+import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsFeedWithRelations;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
 import com.ustadmobile.test.core.TestCaseCallbackHelper;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -41,15 +40,15 @@ public class TestOpdsFeedEntryProvider extends TestCase{
 
     @Test
     public void testOpdsFeedEntryProvider() {
-        OpdsFeedWithRelationsDao repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                .getOpdsFeedWithRelationsRepository();
+        OpdsEntryWithRelationsDao repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getOpdsEntryWithRelationsRepository();
         String opdsUrl = UMFileUtil.joinPaths(new String[] {
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/core/acquire-multi.opds"});
 
-        UmLiveData<OpdsFeedWithRelations> feed = repository.getFeedByUrl(opdsUrl);
+        UmLiveData<OpdsEntryWithRelations> feed = repository.getEntryByUrl(opdsUrl);
         TestCaseCallbackHelper helper = new TestCaseCallbackHelper(this);
 
-        OpdsFeedWithRelations[] returnedVal = new OpdsFeedWithRelations[1];
+        OpdsEntryWithRelations[] returnedVal = new OpdsEntryWithRelations[1];
         helper.add(20000, () -> {
             feed.observeForever((t) -> {
                 if(t != null) {
@@ -58,9 +57,9 @@ public class TestOpdsFeedEntryProvider extends TestCase{
                 }
             });
         }).add(20000, () -> {
-            OpdsFeedWithRelations returnedFeed = (OpdsFeedWithRelations)helper.getResult();
+            OpdsEntryWithRelations returnedFeed = (OpdsEntryWithRelations)helper.getResult();
             UmProvider<OpdsEntryWithRelations> entryProvider = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                    .getOpdsEntryWithRelationsDao().findEntriesByFeed(returnedFeed.getId());
+                    .getOpdsEntryWithRelationsDao().getEntriesByParent(returnedFeed.getId());
             DataSource.Factory<Integer, OpdsEntryWithRelations> factory =
                     (DataSource.Factory<Integer, OpdsEntryWithRelations>)entryProvider.getProvider();
             LiveData<PagedList<OpdsEntryWithRelations>> entryList = new LivePagedListBuilder(factory, 20).build();

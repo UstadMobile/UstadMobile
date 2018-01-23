@@ -15,6 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by mike on 1/20/18.
@@ -39,9 +42,22 @@ public class EntityProcessorRoom {
 
             classSource = (JavaClassSource)parsedSource;
 
+            String[] primaryKeys = new String[0];
+
             if(classSource.hasAnnotation(UmEntity.class)) {
-                classSource.addAnnotation("android.arch.persistence.room.Entity");
+                AnnotationSource entityAnnotation = classSource
+                        .addAnnotation("android.arch.persistence.room.Entity");
+
+                AnnotationSource annotationSource = classSource.getAnnotation(UmEntity.class);
+                if(annotationSource.getLiteralValue("primaryKeys") != null) {
+                    primaryKeys = annotationSource.getStringArrayValue("primaryKeys");
+                    if(primaryKeys != null && primaryKeys.length > 0) {
+                        entityAnnotation.setStringArrayValue("primaryKeys", primaryKeys);
+                    }
+                }
             }
+
+            List<String> primaryKeyList = Arrays.asList(primaryKeys);
 
             //iterate over fields
             for(FieldSource fieldSource: classSource.getFields()) {
@@ -57,6 +73,10 @@ public class EntityProcessorRoom {
                     if(!fieldSource.getType().isPrimitive())
                         fieldSource.addAnnotation("android.support.annotation.NonNull");
                 }
+
+                if(primaryKeyList.contains(fieldSource.getName()))
+                    fieldSource.addAnnotation("android.support.annotation.NonNull");
+
 
                 if(fieldSource.hasAnnotation(UmRelation.class)) {
                     AnnotationSource umRelationAnnotation = fieldSource.getAnnotation(UmRelation.class);

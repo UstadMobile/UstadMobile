@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.db.dao;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -12,7 +13,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntry;
 @Dao
 public abstract class OpdsEntryDaoAndroid extends OpdsEntryDao{
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     @Override
     public abstract long insert(OpdsEntry entry);
 }

@@ -5,8 +5,6 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
-import java.util.List;
-
 /**
  * Created by mike on 1/15/18.
  */
@@ -14,10 +12,12 @@ import java.util.List;
 public abstract class OpdsEntryWithRelationsDao {
 
     @UmQuery("SELECT * from OpdsEntry WHERE url = :url")
-    public abstract UmLiveData<List<OpdsEntryWithRelations>> getEntryByUrl(String url);
+    public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url);
 
     @UmQuery("SELECT * from OpdsEntry WHERE feed_id = :feedId")
     public abstract UmProvider<OpdsEntryWithRelations> findEntriesByFeed(String feedId);
 
+    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.id = OpdsEntry.id WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
+    public abstract UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId);
 
 }

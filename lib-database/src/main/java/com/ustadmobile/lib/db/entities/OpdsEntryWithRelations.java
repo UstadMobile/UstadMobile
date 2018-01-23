@@ -8,7 +8,7 @@ import java.util.List;
  * Created by mike on 1/13/18.
  */
 
-public class OpdsEntryWithRelations extends OpdsEntry implements OpdsItemWithLinks{
+public class OpdsEntryWithRelations extends OpdsEntry{
 
     @UmRelation(parentColumn = "id", entityColumn = "entryId")
     private List<OpdsLink> links;

@@ -5,12 +5,10 @@ import android.content.Context;
 
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
+import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
-import com.ustadmobile.core.db.dao.OpdsFeedDao;
-import com.ustadmobile.core.db.dao.OpdsFeedWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
-import com.ustadmobile.core.fs.db.repository.OpdsFeedRepository;
-import com.ustadmobile.port.android.db.dao.OpdsFeedDaoAndroid;
+import com.ustadmobile.core.fs.db.repository.OpdsEntryRepository;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,46 +25,29 @@ public class DbManagerAndroid extends DbManager {
 
     private ExecutorService executorService;
 
-    private OpdsFeedDaoAndroid opdsFeedDaoAndroid;
-
-    private OpdsFeedWithRelationsDao opdsFeedWithRelationsDao;
+    private OpdsEntryRepository opdsEntryRepository;
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
-        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb23")
+        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb25")
             .build();
         executorService = Executors.newCachedThreadPool();
     }
 
-    @Override
-    public OpdsFeedDao getOpdsFeedDao() {
-        if(opdsFeedDaoAndroid == null)
-            opdsFeedDaoAndroid = appDatabase.getOpdsFeedDao();
 
-        return opdsFeedDaoAndroid;
-    }
-
-    @Override
-    public OpdsFeedWithRelationsDao getOpdsFeedRepository() {
-        return null;
-    }
 
     @Override
     public Object getContext() {
         return context;
     }
 
-    @Override
-    public OpdsFeedWithRelationsDao getOpdsFeedWithRelationsDao() {
-        if(opdsFeedWithRelationsDao == null)
-            opdsFeedWithRelationsDao = appDatabase.getOpdsFeedWithRelationsDao();
-
-        return opdsFeedWithRelationsDao;
-    }
 
     @Override
-    public OpdsFeedWithRelationsDao getOpdsFeedWithRelationsRepository() {
-        return new OpdsFeedRepository(this, executorService);
+    public OpdsEntryWithRelationsDao getOpdsEntryWithRelationsRepository() {
+        if(opdsEntryRepository == null)
+            opdsEntryRepository = new OpdsEntryRepository(this, executorService);
+
+        return opdsEntryRepository;
     }
 
     @Override
@@ -82,5 +63,10 @@ public class DbManagerAndroid extends DbManager {
     @Override
     public OpdsLinkDao getOpdsLinkDao() {
         return appDatabase.getOpdsLinkDao();
+    }
+
+    @Override
+    public OpdsEntryParentToChildJoinDao getOpdsEntryParentToChildJoinDao() {
+        return appDatabase.getOpdsEntryParentToChildJoinDao();
     }
 }

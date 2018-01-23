@@ -21,13 +21,8 @@ import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsFeed;
-import com.ustadmobile.lib.db.entities.OpdsFeedWithRelations;
 
-import java.io.IOException;
-import java.util.Date;
 import java.util.Hashtable;
-import java.util.UUID;
 import java.util.Vector;
 
 
@@ -46,7 +41,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     @Deprecated
     private UstadJSOPDSFeed feed;
 
-    private UmLiveData<OpdsFeedWithRelations> feedLiveData;
+    private UmLiveData<OpdsEntryWithRelations> feedLiveData;
 
     private String loadedFeedId;
 
@@ -149,8 +144,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             mView.setFooterButtonVisible(false);
         }
 
-        feedLiveData = DbManager.getInstance(getContext()).getOpdsFeedWithRelationsRepository()
-                .getFeedByUrl(opdsUri);
+
+
+        feedLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+                .getEntryByUrl(opdsUri);
         feedLiveData.observe(this, this::handleFeedChanged);
 
         feed = new UstadJSOPDSFeed();
@@ -163,7 +160,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 
-    private void handleFeedChanged(OpdsFeedWithRelations opdsFeed) {
+    private void handleFeedChanged(OpdsEntryWithRelations opdsFeed) {
         if(opdsFeed != null && (loadedFeedId == null || !loadedFeedId.equals(opdsFeed.getId()))) {
             loadedFeedId = opdsFeed.getId();
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()

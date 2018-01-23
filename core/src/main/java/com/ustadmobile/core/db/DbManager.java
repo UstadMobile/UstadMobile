@@ -1,11 +1,11 @@
 package com.ustadmobile.core.db;
 
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
+import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
-import com.ustadmobile.core.db.dao.OpdsFeedWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.impl.DbManagerFactory;
-import com.ustadmobile.core.db.dao.OpdsFeedDao;
+import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 /**
@@ -27,20 +27,15 @@ public abstract class DbManager {
         return instance;
     }
 
-
-    public abstract OpdsFeedDao getOpdsFeedDao();
-
-    public abstract OpdsFeedWithRelationsDao getOpdsFeedRepository();
-
-    public abstract OpdsFeedWithRelationsDao getOpdsFeedWithRelationsDao();
-
-    public abstract OpdsFeedWithRelationsDao getOpdsFeedWithRelationsRepository();
+    public abstract OpdsEntryWithRelationsDao getOpdsEntryWithRelationsRepository();
 
     public abstract OpdsEntryDao getOpdsEntryDao();
 
     public abstract OpdsEntryWithRelationsDao getOpdsEntryWithRelationsDao();
 
     public abstract OpdsLinkDao getOpdsLinkDao();
+
+    public abstract OpdsEntryParentToChildJoinDao getOpdsEntryParentToChildJoinDao();
 
 
     public abstract Object getContext();

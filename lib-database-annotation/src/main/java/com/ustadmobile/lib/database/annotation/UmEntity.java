@@ -5,4 +5,7 @@ package com.ustadmobile.lib.database.annotation;
  */
 
 public @interface UmEntity {
+
+    String[] primaryKeys() default {};
+
 }

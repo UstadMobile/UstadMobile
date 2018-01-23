@@ -1,11 +1,10 @@
 package com.ustadmobile.core.fs.db.repository;
 
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsFeed;
-import com.ustadmobile.lib.db.entities.OpdsFeedWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsItem;
-import com.ustadmobile.lib.db.entities.OpdsItemWithLinks;
+
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
@@ -22,11 +21,11 @@ import java.util.UUID;
 /**
  * Created by mike on 1/13/18.
  */
-public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
+public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback {
 
     private DbManager dbManager;
 
-    private OpdsItem itemToLoad;
+    private OpdsEntry itemToLoad;
 
     private String url;
 
@@ -34,7 +33,7 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
 
     long feedId = -1;
 
-    public OpdsItemLoader(Object context, DbManager dbManager, OpdsItem itemToLoad, String url) {
+    public OpdsItemLoader(Object context, DbManager dbManager, OpdsEntry itemToLoad, String url) {
         this.dbManager = dbManager;
         this.itemToLoad = itemToLoad;
         this.url = url;
@@ -53,7 +52,7 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
             itemToLoad.setUrl(url);
             itemToLoad.setId(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
             //persist to the database so that items are correctly linked
-            dbManager.getOpdsFeedDao().insert((OpdsFeed)itemToLoad);
+            dbManager.getOpdsEntryDao().insert((OpdsEntry) itemToLoad);
 
             itemToLoad.load(xpp, this);
         }catch(IOException e) {
@@ -64,26 +63,21 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
     }
 
     @Override
-    public void onDone(OpdsItem item) {
+    public void onDone(OpdsEntry item) {
         //commit the item itself to the database
-        if(itemToLoad instanceof OpdsFeed) {
-            dbManager.getOpdsFeedDao().insert((OpdsFeed) itemToLoad);
-            persistFeedLinks();
-        }
-    }
 
-    @Override
-    public void onError(OpdsItem item, Throwable cause) {
+        dbManager.getOpdsEntryDao().insert((OpdsEntry)itemToLoad);
+        persistFeedLinks();
 
     }
 
     @Override
-    public void onEntryAdded(OpdsEntryWithRelations entry, OpdsItem parentFeed, int position) {
-        if(position == 0) {
-            dbManager.getOpdsFeedDao().update((OpdsFeed)parentFeed);
-            persistFeedLinks();
-        }
+    public void onError(OpdsEntry item, Throwable cause) {
 
+    }
+
+    @Override
+    public void onEntryAdded(OpdsEntryWithRelations entry, OpdsEntry parentFeed, int position) {
         entry.setId(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
 
         if(entry.getLinks() != null) {
@@ -92,16 +86,19 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
             }
             dbManager.getOpdsLinkDao().insert(entry.getLinks());
         }
+        OpdsEntryParentToChildJoin parentToChild = new OpdsEntryParentToChildJoin(parentFeed.getId(),
+                entry.getId(), position);
+        dbManager.getOpdsEntryParentToChildJoinDao().insert(parentToChild);
         dbManager.getOpdsEntryDao().insert(entry);
     }
 
     @Override
-    public void onLinkAdded(OpdsLink link, OpdsItem parentItem, int position) {
+    public void onLinkAdded(OpdsLink link, OpdsEntry parentItem, int position) {
 
     }
 
     private void persistFeedLinks() {
-        OpdsFeedWithRelations itemWithLinks = (OpdsFeedWithRelations)itemToLoad;
+        OpdsEntryWithRelations itemWithLinks = (OpdsEntryWithRelations) itemToLoad;
         if(itemWithLinks.getLinks() == null)
             return;
 
