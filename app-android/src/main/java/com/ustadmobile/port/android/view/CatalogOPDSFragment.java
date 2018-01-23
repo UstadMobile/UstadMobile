@@ -57,6 +57,7 @@ import android.widget.Button;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
@@ -65,12 +66,16 @@ import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.port.android.db.AppDatabase;
+import com.ustadmobile.port.android.db.AppDatabaseTypeConverters;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
@@ -599,9 +604,22 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
         @Override
         public void onBindViewHolder(OpdsEntryViewHolder holder, int position) {
-            OpdsEntryWithRelations entry = getItem(position);
+            final OpdsEntryWithRelations entry = getItem(position);
             holder.mEntryCard.setOpdsEntry(entry);
             String imageUri = null;
+
+            new Thread(() -> {
+                OpdsEntryWithRelations entry2 = entry;
+                List<OpdsLink> allLinks = DbManager.getInstance(CatalogOPDSFragment.this)
+                        .getOpdsLinkDao().getAllLinks();
+                System.out.println(entry2);
+                System.out.println(allLinks);
+
+                List<OpdsLink> linked = DbManager.getInstance(CatalogOPDSFragment.this)
+                        .getOpdsLinkDao().findLinkByEntryId(entry.getId());
+                System.out.println(linked);
+            }).start();
+
             if(entry != null) {
                 OpdsLink imgLink = entry.getThumbnailLink(true);
                 if(imgLink != null)

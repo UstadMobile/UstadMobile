@@ -17,7 +17,7 @@ public abstract class OpdsEntryWithRelationsDao {
     public abstract UmLiveData<List<OpdsEntryWithRelations>> getEntryByUrl(String url);
 
     @UmQuery("SELECT * from OpdsEntry WHERE feed_id = :feedId")
-    public abstract UmProvider<OpdsEntryWithRelations> findEntriesByFeed(int feedId);
+    public abstract UmProvider<OpdsEntryWithRelations> findEntriesByFeed(String feedId);
 
 
 }

@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+
 
 /**
  * Created by mike on 1/13/18.
@@ -12,9 +14,11 @@ public class OpdsLink {
     @UmPrimaryKey(autoIncrement = true)
     private int id;
 
-    private int feedId;
+    @UmIndexField
+    private String feedId;
 
-    private int entryId;
+    @UmIndexField
+    private String entryId;
 
     private int linkIndex;
 
@@ -38,19 +42,19 @@ public class OpdsLink {
         this.id = id;
     }
 
-    public int getFeedId() {
+    public String getFeedId() {
         return feedId;
     }
 
-    public void setFeedId(int feedId) {
+    public void setFeedId(String feedId) {
         this.feedId = feedId;
     }
 
-    public int getEntryId() {
+    public String getEntryId() {
         return entryId;
     }
 
-    public void setEntryId(int entryId) {
+    public void setEntryId(String entryId) {
         this.entryId = entryId;
     }
 

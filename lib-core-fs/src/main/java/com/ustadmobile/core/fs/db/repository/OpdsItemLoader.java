@@ -10,12 +10,14 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.impl.http.UmHttpRequest;
 import com.ustadmobile.core.impl.http.UmHttpResponse;
+import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 /**
  * Created by mike on 1/13/18.
@@ -49,9 +51,9 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
             requestIn = response.getResponseAsStream();
             XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(requestIn ,"UTF-8");
             itemToLoad.setUrl(url);
+            itemToLoad.setId(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
             //persist to the database so that items are correctly linked
-            feedId = dbManager.getOpdsFeedDao().insert((OpdsFeed)itemToLoad);
-            itemToLoad.setId((int)feedId);
+            dbManager.getOpdsFeedDao().insert((OpdsFeed)itemToLoad);
 
             itemToLoad.load(xpp, this);
         }catch(IOException e) {
@@ -82,13 +84,15 @@ public class OpdsItemLoader implements Runnable, OpdsItem.OpdsItemLoadCallback {
             persistFeedLinks();
         }
 
-        long entryId = dbManager.getOpdsEntryDao().insert(entry);
+        entry.setId(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+
         if(entry.getLinks() != null) {
             for(OpdsLink link : entry.getLinks()) {
-                link.setEntryId((int)entryId);
+                link.setEntryId(entry.getId());
             }
             dbManager.getOpdsLinkDao().insert(entry.getLinks());
         }
+        dbManager.getOpdsEntryDao().insert(entry);
     }
 
     @Override

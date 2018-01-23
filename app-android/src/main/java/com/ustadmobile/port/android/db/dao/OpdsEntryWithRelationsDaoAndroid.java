@@ -23,10 +23,10 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     }
 
     @Override
-    public UmProvider<OpdsEntryWithRelations> findEntriesByFeed(int feedId) {
+    public UmProvider<OpdsEntryWithRelations> findEntriesByFeed(String feedId) {
         return () -> findEntriesByFeedR(feedId);
     }
 
     @Query("Select * From OpdsEntry Where feedId = :feedId")
-    public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByFeedR(int feedId);
+    public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByFeedR(String feedId);
 }

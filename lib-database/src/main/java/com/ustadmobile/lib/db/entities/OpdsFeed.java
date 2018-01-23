@@ -10,8 +10,6 @@ public class OpdsFeed extends OpdsItem {
 
     private String feedId;
 
-
-
     public String getFeedId() {
         return feedId;
     }

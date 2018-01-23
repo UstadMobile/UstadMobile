@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
-import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
+
 
 /**
  * Created by mike on 1/13/18.
@@ -9,17 +9,17 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 @UmEntity
 public class OpdsEntry extends OpdsItem {
 
-    private int feedId;
+    private String feedId;
 
     private String entryId;
 
     private int feedIndex;
 
-    public int getFeedId() {
+    public String getFeedId() {
         return feedId;
     }
 
-    public void setFeedId(int feedId) {
+    public void setFeedId(String feedId) {
         this.feedId = feedId;
     }
 

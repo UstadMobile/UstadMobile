@@ -4,6 +4,7 @@ apply plugin: "maven-publish"
 dependencies {
     implementation "net.sf.kxml:kxml2:2.3.0";
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.github.fzakaria:ascii85:1.1'
 }
 
 sourceCompatibility = "1.8"

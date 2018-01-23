@@ -27,6 +27,7 @@ import com.ustadmobile.lib.db.entities.OpdsFeedWithRelations;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.UUID;
 import java.util.Vector;
 
 
@@ -47,7 +48,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     private UmLiveData<OpdsFeedWithRelations> feedLiveData;
 
-    private int loadedFeedId;
+    private String loadedFeedId;
 
     private UmProvider<OpdsEntryWithRelations> entryProvider;
 
@@ -163,7 +164,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     }
 
     private void handleFeedChanged(OpdsFeedWithRelations opdsFeed) {
-        if(opdsFeed != null && loadedFeedId != opdsFeed.getId()) {
+        if(opdsFeed != null && (loadedFeedId == null || !loadedFeedId.equals(opdsFeed.getId()))) {
             loadedFeedId = opdsFeed.getId();
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .findEntriesByFeed(loadedFeedId);

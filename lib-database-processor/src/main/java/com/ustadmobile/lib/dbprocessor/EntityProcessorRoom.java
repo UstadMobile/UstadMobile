@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.dbprocessor;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 import com.ustadmobile.lib.database.annotation.UmRelation;
 
@@ -52,6 +53,9 @@ public class EntityProcessorRoom {
                     String autoIncrementVal = umAnnotation.getLiteralValue("autoIncrement");
                     if(autoIncrementVal != null && autoIncrementVal.equals("true"))
                         pkAnnotation.setLiteralValue("autoGenerate", "true");
+
+                    if(!fieldSource.getType().isPrimitive())
+                        fieldSource.addAnnotation("android.support.annotation.NonNull");
                 }
 
                 if(fieldSource.hasAnnotation(UmRelation.class)) {
@@ -62,6 +66,11 @@ public class EntityProcessorRoom {
                             umRelationAnnotation.getStringValue("parentColumn"));
                     roomRelationAnnotation.setStringValue("entityColumn",
                             umRelationAnnotation.getStringValue("entityColumn"));
+                }
+
+                if(fieldSource.hasAnnotation(UmIndexField.class)) {
+                    fieldSource.addAnnotation("android.arch.persistence.room.ColumnInfo")
+                            .setLiteralValue("index", "true");
                 }
             }
 
