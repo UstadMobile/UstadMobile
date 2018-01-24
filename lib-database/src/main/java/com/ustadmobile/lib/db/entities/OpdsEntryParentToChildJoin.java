@@ -1,11 +1,15 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndex;
 
 /**
  * Created by mike on 1/23/18.
  */
-@UmEntity(primaryKeys = {"parentEntry", "childEntry"})
+@UmEntity(
+        primaryKeys = {"parentEntry", "childEntry"},
+        indices = {@UmIndex(name = "parent_index_unique", value = {"parentEntry", "childIndex"}, unique = true)}
+)
 public class OpdsEntryParentToChildJoin {
 
     private String parentEntry;

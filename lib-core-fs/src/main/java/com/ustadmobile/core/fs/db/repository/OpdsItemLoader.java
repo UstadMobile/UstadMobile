@@ -1,6 +1,7 @@
 package com.ustadmobile.core.fs.db.repository;
 
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.impl.UstadMobileSystemImplFs;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -31,13 +32,17 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
     private Object context;
 
+    private OpdsEntry.OpdsItemLoadCallback callback;
+
     long feedId = -1;
 
-    public OpdsItemLoader(Object context, DbManager dbManager, OpdsEntry itemToLoad, String url) {
+    public OpdsItemLoader(Object context, DbManager dbManager, OpdsEntry itemToLoad, String url,
+                          OpdsEntry.OpdsItemLoadCallback callback) {
         this.dbManager = dbManager;
         this.itemToLoad = itemToLoad;
         this.url = url;
         this.context = context;
+        this.callback = callback;
     }
 
     @Override
@@ -46,13 +51,24 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
         UmHttpRequest request = new UmHttpRequest(context, url);
         UmHttpResponse response = null;
         try {
-            response = UstadMobileSystemImpl.getInstance().makeRequestSync(request);
-            requestIn = response.getResponseAsStream();
+            if(request.getUrl().startsWith("asset:///")) {
+                UstadMobileSystemImplFs implFs = (UstadMobileSystemImplFs)UstadMobileSystemImpl.getInstance();
+                requestIn = implFs.getAssetSync(context, url.substring("asset:///".length()));
+            }else {
+                response = UstadMobileSystemImpl.getInstance().makeRequestSync(request);
+                requestIn = response.getResponseAsStream();
+            }
+
             XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(requestIn ,"UTF-8");
             itemToLoad.setUrl(url);
-            itemToLoad.setId(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+            if(itemToLoad.getId() == null) {
+                String entryId = dbManager.getOpdsEntryWithRelationsDao().getUuidForEntryUrl(url);
+                itemToLoad.setId(entryId != null ?
+                        entryId : UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+            }
+
             //persist to the database so that items are correctly linked
-            dbManager.getOpdsEntryDao().insert((OpdsEntry) itemToLoad);
+            dbManager.getOpdsEntryDao().insert(itemToLoad);
 
             itemToLoad.load(xpp, this);
         }catch(IOException e) {
@@ -68,12 +84,15 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
         dbManager.getOpdsEntryDao().insert((OpdsEntry)itemToLoad);
         persistFeedLinks();
-
+        if(callback != null) {
+            callback.onDone(item);
+        }
     }
 
     @Override
     public void onError(OpdsEntry item, Throwable cause) {
-
+        if(callback != null)
+            callback.onError(item, cause);
     }
 
     @Override
@@ -90,11 +109,15 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
                 entry.getId(), position);
         dbManager.getOpdsEntryParentToChildJoinDao().insert(parentToChild);
         dbManager.getOpdsEntryDao().insert(entry);
+
+        if(callback != null)
+            callback.onEntryAdded(entry, parentFeed, position);
     }
 
     @Override
     public void onLinkAdded(OpdsLink link, OpdsEntry parentItem, int position) {
-
+        if(callback != null)
+            callback.onLinkAdded(link, parentItem, position);
     }
 
     private void persistFeedLinks() {

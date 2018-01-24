@@ -130,19 +130,7 @@ public class OpdsEntry {
     }
 
 
-    private String feedId;
-
     private String entryId;
-
-    private int feedIndex;
-
-    public String getFeedId() {
-        return feedId;
-    }
-
-    public void setFeedId(String feedId) {
-        this.feedId = feedId;
-    }
 
     public String getEntryId() {
         return entryId;
@@ -151,15 +139,6 @@ public class OpdsEntry {
     public void setEntryId(String entryId) {
         this.entryId = entryId;
     }
-
-    public int getFeedIndex() {
-        return feedIndex;
-    }
-
-    public void setFeedIndex(int feedIndex) {
-        this.feedIndex = feedIndex;
-    }
-
 
     public String getId() {
         return id;
@@ -256,8 +235,6 @@ public class OpdsEntry {
                 if(name.equals(TAG_ENTRY)) {
                     OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations();
                     newEntry.load(xpp, callback);
-                    newEntry.setFeedIndex(entryCount);
-                    newEntry.setFeedId(this.getId());
                     entryCount++;
 
                     if(callback != null) {

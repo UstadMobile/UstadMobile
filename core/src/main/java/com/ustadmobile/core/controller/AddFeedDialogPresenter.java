@@ -1,7 +1,10 @@
 package com.ustadmobile.core.controller;
 
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.OpdsEndpoint;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -11,13 +14,18 @@ import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.AddFeedDialogView;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Handles adding a feed to the user's feed list. Those feeds are stored as OPDS text in the
@@ -28,7 +36,10 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
 
     private AddFeedDialogView addFeedDialogView;
 
+    @Deprecated
     private UstadJSOPDSFeed presetFeeds;
+
+    private List<OpdsEntryWithRelations> presetFeedsList;
 
     private int dropDownlSelectedIndex = 0;
 
@@ -36,54 +47,58 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
 
     public static final String ARG_PREFKEY = "pk";
 
+    public static final String ARG_UUID = "uuid";
+
     private UstadJSOPDSFeed loadingFeed;
 
     private String opdsUrlError = null;
+
+    private UmLiveData<OpdsEntryWithRelations> entry;
+
+    private UmLiveData<List<OpdsEntryWithRelations>> presetListLiveData;
+
+    private UmObserver<List<OpdsEntryWithRelations>> presetListObserver;
+
+    String loadedUuid;
+
+    private String uuidToAddTo;
 
     public AddFeedDialogPresenter(Object context, AddFeedDialogView addFeedDialogView) {
         super(context);
         this.addFeedDialogView = addFeedDialogView;
     }
 
-
     public void onCreate(Hashtable args, Hashtable savedState) {
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        prefkey = (String)args.get(ARG_PREFKEY);
-        impl.getAsset(context, "/com/ustadmobile/core/libraries.opds", new UmCallback<InputStream>() {
-            @Override
-            public void onSuccess(InputStream in) {
-                try {
-                    presetFeeds = new UstadJSOPDSFeed();
-                    XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
-                    presetFeeds.loadFromXpp(xpp, null);
+        uuidToAddTo = (String)args.get(ARG_UUID);
+        presetFeedsList = new ArrayList<>();
+        entry = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository().getEntryByUrl(
+                "asset:///com/ustadmobile/core/libraries.opds", "preset_libraries_opds");
+        entry.observe(this, this::handlePresetParentFeedUpdated);
+    }
 
-                    final String[] presetNames = new String[presetFeeds.size() + 2];
-                    presetNames[0] = "Select a feed";
-                    presetNames[1] = "Add by URL";
-                    for(int i = 0; i < presetFeeds.size(); i++) {
-                        presetNames[i + 2] = presetFeeds.getEntry(i).getTitle();
-                    }
+    private void handlePresetParentFeedUpdated(OpdsEntryWithRelations presetParent) {
+        if(loadedUuid == null && presetParent != null) {
+            loadedUuid = presetParent.getId();
+            presetListLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
+                    .getEntriesByParentAsList(loadedUuid);
+            presetListObserver = this::handlePresetFeedListUpdated;
+            presetListLiveData.observe(this, presetListObserver);
+        }
+    }
 
-                    addFeedDialogView.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            addFeedDialogView.setDropdownPresets(presetNames);
-                        }
-                    });
-                }catch(IOException e) {
-                    e.printStackTrace();
-                }catch(XmlPullParserException x) {
-                    x.printStackTrace();
-                }finally {
-                    UMIOUtils.closeInputStream(in);
-                }
+    private void handlePresetFeedListUpdated(List<OpdsEntryWithRelations> presetFeedsList) {
+        if(presetFeedsList != null) {
+            final String[] presetNames = new String[presetFeedsList.size() + 2];
+            presetNames[0] = "Select a feed";
+            presetNames[1] = "Add by URL";
+            for(int i = 0; i < presetFeedsList.size(); i++) {
+                presetNames[i + 2] = presetFeedsList.get(i).getTitle();
             }
+            this.presetFeedsList = presetFeedsList;
 
-            @Override
-            public void onFailure(Throwable exception) {
-                exception.printStackTrace();
-            }
-        });
+            addFeedDialogView.runOnUiThread( () -> addFeedDialogView.setDropdownPresets(presetNames));
+        }
     }
 
     public void handlePresetSelected(int index) {
@@ -94,8 +109,13 @@ public class AddFeedDialogPresenter extends UstadBaseController implements Ustad
     public void handleClickAdd() {
         if(dropDownlSelectedIndex > 1) {
             //take it from the libraries.opds preset that was selected
-            UstadJSOPDSEntry entry = presetFeeds.getEntry(dropDownlSelectedIndex - 2);
-            addFeed(entry, entry.getFirstLink(UstadJSOPDSItem.LINK_REL_SUBSECTION, null));
+            OpdsEntry addedEntry = presetFeedsList.get(dropDownlSelectedIndex-2);
+            OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
+                addedEntry.getId(), 0);
+            new Thread(() -> {
+                DbManager.getInstance(getContext()).getOpdsEntryParentToChildJoinDao().insert(join);
+                addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());
+            }).start();
         }else if(dropDownlSelectedIndex == 1) {
             addFeedDialogView.setUiEnabled(false);
             addFeedDialogView.setProgressVisible(true);

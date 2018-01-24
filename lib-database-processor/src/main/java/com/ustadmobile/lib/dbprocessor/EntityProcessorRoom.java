@@ -55,6 +55,46 @@ public class EntityProcessorRoom {
                         entityAnnotation.setStringArrayValue("primaryKeys", primaryKeys);
                     }
                 }
+
+                if(annotationSource.getLiteralValue("indices") != null) {
+                    AnnotationSource[] srcIndicesAnnotation =
+                            annotationSource.getAnnotationArrayValue("indices");
+                    classSource.addImport("android.arch.persistence.room.Index");
+
+                    StringBuffer dstValueSb = new StringBuffer();
+                    String name;
+                    String unique;
+                    String[] value;
+
+                    for(int i = 0; i < srcIndicesAnnotation.length; i++) {
+                        dstValueSb.append("{@Index(");
+                        name = srcIndicesAnnotation[i].getStringValue("name");
+                        if(name != null)
+                            dstValueSb.append("name = \"" + name + "\", ");
+
+                        unique = srcIndicesAnnotation[i].getLiteralValue("unique");
+                        if(unique != null)
+                            dstValueSb.append("unique = " + unique  +", ");
+
+                        value  = srcIndicesAnnotation[i].getStringArrayValue();
+                        if(value != null) {
+                            dstValueSb.append("value = {");
+                            for(int j = 0; j < value.length; j++){
+                                dstValueSb.append("\"" + value[j] + "\"");
+                                if(j < value.length -1 )
+                                    dstValueSb.append(",");
+                            }
+                            dstValueSb.append("}");
+                        }
+
+                        dstValueSb.append(")}");
+                        if(i < srcIndicesAnnotation.length - 1)
+                            dstValueSb.append(',').append('\n');
+                    }
+
+
+                    entityAnnotation.setLiteralValue("indices", dstValueSb.toString());
+                }
             }
 
             List<String> primaryKeyList = Arrays.asList(primaryKeys);

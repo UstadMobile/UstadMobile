@@ -8,4 +8,6 @@ public @interface UmEntity {
 
     String[] primaryKeys() default {};
 
+    UmIndex[] indices() default {};
+
 }

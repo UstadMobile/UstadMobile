@@ -8,6 +8,7 @@ import android.arch.persistence.room.Query;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.util.List;
@@ -19,23 +20,24 @@ import java.util.List;
 public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRelationsDao {
 
     @Override
-    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url) {
+    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryId,
+                                                            OpdsEntry.OpdsItemLoadCallback callback) {
         return new UmLiveDataAndroid<>(getEntryByUrlR(url));
     }
 
     @Query("SELECT * From OpdsEntry Where url = :url")
     public abstract LiveData<OpdsEntryWithRelations> getEntryByUrlR(String url);
 
+    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.id = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId")
+    public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);
+
     @Override
-    public UmProvider<OpdsEntryWithRelations> findEntriesByFeed(String feedId) {
-        return () -> findEntriesByFeedR(feedId);
+    public UmLiveData<List<OpdsEntryWithRelations>> getEntriesByParentAsList(String parentId){
+        return new UmLiveDataAndroid<>(findEntriesByParentAsListR(parentId));
     }
 
-    @Query("Select * From OpdsEntry Where feedId = :feedId")
-    public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByFeedR(String feedId);
-
-    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.id = OpdsEntry.id WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId")
-    public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);
+    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.id = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId")
+    public abstract LiveData<List<OpdsEntryWithRelations>> findEntriesByParentAsListR(String parentId);
 
     @Override
     public UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId) {
@@ -49,4 +51,8 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
     @Query("SELECT * from OpdsEntry where id = :uuid")
     public abstract LiveData<OpdsEntryWithRelations> getEntryByUuidR(String uuid);
+
+    @Override
+    @Query("SELECT id FROM OpdsEntry WHERE url = :url")
+    public abstract String getUuidForEntryUrl(String url);
 }

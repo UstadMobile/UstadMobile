@@ -14,4 +14,6 @@ public interface UmLiveData<T> {
 
     void observeForever(UmObserver<T> observer);
 
+    void removeObserver(UmObserver<T> observer);
+
 }

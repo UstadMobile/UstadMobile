@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.util.List;
@@ -25,19 +26,19 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
     }
 
     @Override
-    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url) {
+    public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryId,
+                                                            OpdsEntry.OpdsItemLoadCallback callback) {
         //get the result from the database
-        UmLiveData<OpdsEntryWithRelations> dbResult = dbManager.getOpdsEntryWithRelationsDao().getEntryByUrl(url);
+        UmLiveData<OpdsEntryWithRelations> dbResult = dbManager.getOpdsEntryWithRelationsDao()
+                .getEntryByUrl(url, entryId, callback);
+        OpdsEntryWithRelations entryWithRelations = new OpdsEntryWithRelations();
+        entryWithRelations.setId(entryId);
+
         executorService.execute(new OpdsItemLoader(dbManager.getContext(), dbManager,
-                new OpdsEntryWithRelations(), url));
+                entryWithRelations, url, callback));
 
         //execute something to check if required
         return dbResult;
-    }
-
-    @Override
-    public UmProvider<OpdsEntryWithRelations> findEntriesByFeed(String feedId) {
-        return null;
     }
 
     @Override
@@ -47,6 +48,16 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
 
     @Override
     public UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid) {
+        return null;
+    }
+
+    @Override
+    public UmLiveData<List<OpdsEntryWithRelations>> getEntriesByParentAsList(String parentId) {
+        return null;
+    }
+
+    @Override
+    public String getUuidForEntryUrl(String url) {
         return null;
     }
 }

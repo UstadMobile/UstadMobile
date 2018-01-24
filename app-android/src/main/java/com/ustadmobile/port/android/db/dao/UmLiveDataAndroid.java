@@ -44,4 +44,13 @@ public class UmLiveDataAndroid<T> implements UmLiveData<T> {
         src.observeForever(observerImpl);
         observersHashMap.put(observer, observerImpl);
     }
+
+    @Override
+    public void removeObserver(UmObserver<T> observer) {
+        Observer<T> observerImpl = observersHashMap.get(observer);
+        if(observerImpl != null) {
+            src.removeObserver(observerImpl);
+            observersHashMap.remove(observer);
+        }
+    }
 }
