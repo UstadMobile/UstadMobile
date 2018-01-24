@@ -6,11 +6,9 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
-import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
-import com.ustadmobile.core.opds.OpdsEndpoint;
 import com.ustadmobile.core.opds.OpdsFilterOptionField;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -20,20 +18,16 @@ import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AppView;
-import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
-import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
 
@@ -117,7 +111,9 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     boolean opdsChangeListenerRegistered = false;
 
-    private Vector selectedEntries;
+    private Set<String> selectedEntries;
+
+    private boolean deleteEntryFromFeedEnabled;
 
 
     public CatalogPresenter(Object context, CatalogView view) {
@@ -136,7 +132,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                     .substring(0, 2));
         }
 
-        selectedEntries = new Vector();
+        selectedEntries = new HashSet<>();
 
         if(args.containsKey(ARG_RESMOD)){
             resourceMode = ((Integer)args.get(ARG_RESMOD)).intValue();
@@ -182,6 +178,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
             libraryPresent.observe(this, presentObserver);
             mView.setAddOptionAvailable(true);
+            setDeleteEntryFromFeedEnabled(true);
         }
 
 
@@ -367,23 +364,21 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     }
 
     public void handleClickDelete() {
-        if(selectedEntries.size() > 0) {
-            if(feedPrefKey != null) {
-                UstadMobileSystemImpl.getInstance().getAppView(getContext()).showConfirmDialog(
-                        MessageID.delete, MessageID.delete_q, MessageID.ok, MessageID.cancel, 0,
-                        new AppViewChoiceListener() {
-                            @Override
-                            public void appViewChoiceSelected(int commandId, int choice) {
-                                if(choice == AppView.CHOICE_POSITIVE) {
-                                    OpdsEndpoint.getInstance().removeEntriesFromPreferenceKeyFeed(
-                                            feedPrefKey, opdsUri, feed, selectedEntries, context);
-                                    selectedEntries.removeAllElements();
-                                    mView.setSelectedEntries(selectedEntries);
-                                }
-                            }
+        if(selectedEntries.size() > 0 && deleteEntryFromFeedEnabled) {
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showConfirmDialog(
+                MessageID.delete, MessageID.delete_q, MessageID.ok, MessageID.cancel, 0,
+                    (commandId, choice) -> {
+                        if(choice == AppView.CHOICE_POSITIVE) {
+                            new Thread(() ->{
+                                DbManager.getInstance(getContext()).getOpdsEntryParentToChildJoinDao()
+                                    .deleteByParentIdAndChildId(feedLiveData.getValue().getId(),
+                                        new ArrayList<>(selectedEntries));
+                                selectedEntries.clear();
+                                mView.runOnUiThread(() ->mView.setSelectedEntries(selectedEntries));
+                            }).start();
                         }
+                    }
                 );
-            }
         }
     }
 
@@ -544,8 +539,16 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         }
     }
 
-    public void handleSelectedEntriesChanged(Vector selectedEntries) {
+    public void handleSelectedEntriesChanged(Set<String> selectedEntries) {
         this.selectedEntries = selectedEntries;
     }
 
+    public boolean isDeleteEntryFromFeedEnabled() {
+        return deleteEntryFromFeedEnabled;
+    }
+
+    public void setDeleteEntryFromFeedEnabled(boolean deleteEntryFromFeedEnabled) {
+        this.deleteEntryFromFeedEnabled = deleteEntryFromFeedEnabled;
+        mView.setDeleteOptionAvailable(deleteEntryFromFeedEnabled);
+    }
 }

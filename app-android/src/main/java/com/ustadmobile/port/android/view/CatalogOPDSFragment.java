@@ -61,20 +61,18 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.Vector;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 
@@ -97,14 +95,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private Map<String, Boolean> idToProgressVisibleMap = new Hashtable<>();
 
-    private Vector<OpdsEntryWithRelations> mSelectedEntries;
-
-    private boolean hasDisplayed = false;
-
     private SwipeRefreshLayout mSwipeRefreshLayout;
-
-    //Trackers whether or not there is a loading operation (e.g. refresh) going on
-    private boolean isLoading = false;
 
     private boolean mDeleteOptionAvailable;
 
@@ -122,8 +113,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private RecyclerView.LayoutManager mRecyclerLayoutManager;
 
-
-
     private boolean isRequesting=false;
 
     private String[] alternativeTranslationLanguages;
@@ -134,12 +123,13 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     private CatalogPresenter mCatalogPresenter;
 
-    private ArrayList<UstadJSOPDSEntry> entryList = new ArrayList<>();
-
     private OpdsFilterOptions filterOptions;
 
     private CatalogOPDSFragmentListener catalogOpdsFragmentListener;
 
+    private Set<String> selectedUuids;
+
+    private Set<OpdsEntryRecyclerAdapter.OpdsEntryViewHolder> boundViewHolders;
 
     /**
      * This interface *should* be implemented by any activity that holds a catalog fragment. The
@@ -198,7 +188,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         this.rootContainer = inflater.inflate(R.layout.fragment_catalog_opds, container, false);
-        mSelectedEntries = new Vector<>();
         setHasOptionsMenu(true);
 
         idToCardMap = new WeakHashMap<>();
@@ -217,6 +206,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         mCatalogPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getArguments()),
                 UMAndroidUtil.bundleToHashtable(savedInstanceState));
 
+        selectedUuids = new HashSet<>();
+        boundViewHolders = new HashSet<>();
 
         return rootContainer;
     }
@@ -226,7 +217,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         OpdsEntryRecyclerAdapter adapter = new OpdsEntryRecyclerAdapter();
         DataSource.Factory factory = (DataSource.Factory)entryProvider.getProvider();
         LiveData<PagedList<OpdsEntryWithRelations>> data =  new LivePagedListBuilder<>(factory, 20).build();
-        data.observe(this, pagedList -> adapter.setList(pagedList));
+        data.observe(this, adapter::setList);
         mRecyclerView.setAdapter(adapter);
     }
 
@@ -281,7 +272,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        if(mDeleteOptionAvailable && mSelectedEntries.size() > 0) {
+        if(mDeleteOptionAvailable && selectedUuids.size() > 0) {
             MenuItem item = menu.add(Menu.NONE, MENUCMDID_DELETE, 1, "");
             item.setIcon(R.drawable.ic_delete_white_24dp);
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -354,10 +345,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     @Override
     public void onPause() {
         super.onPause();
-//        if(mCatalogController != null) {
-//            mCatalogController.handleViewPause();
-//        }
-
     }
 
     @Override
@@ -367,24 +354,23 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     public void toggleEntrySelected(OPDSEntryCard card) {
-        boolean nowSelected = !card.isSelected();
-        card.setSelected(nowSelected);
+        boolean cardSelected = selectedUuids.contains(card.getOpdsEntry().getId());
+        cardSelected = !cardSelected;
 
-        if(nowSelected){
-            mSelectedEntries.addElement(card.getOpdsEntry());
-            if(mSelectedEntries.size() == 1 && getActivity() != null) {
-                getActivity().supportInvalidateOptionsMenu();
-            }
+        card.setSelected(cardSelected);
+        if(cardSelected) {
+            selectedUuids.add(card.getOpdsEntry().getId());
         }else {
-            int removeIndex = UstadJSOPDSItem.indexOfItemInVector(card.getOpdsEntry().getItemId(), mSelectedEntries);
-            if(removeIndex != -1)
-                mSelectedEntries.removeElementAt(removeIndex);
-
-            if(mSelectedEntries.size() == 0 && getActivity() != null)
-                getActivity().supportInvalidateOptionsMenu();
+            selectedUuids.remove(card.getOpdsEntry().getId());
         }
 
-        mCatalogPresenter.handleSelectedEntriesChanged(mSelectedEntries);
+        if(cardSelected && selectedUuids.size() == 1 && getActivity() != null) {
+            getActivity().invalidateOptionsMenu();
+        }else if(!cardSelected && selectedUuids.isEmpty()){
+            getActivity().invalidateOptionsMenu();
+        }
+
+        mCatalogPresenter.handleSelectedEntriesChanged(selectedUuids);
     }
 
 
@@ -393,7 +379,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public void onClick(View view) {
         if(view instanceof OPDSEntryCard) {
             OPDSEntryCard card = ((OPDSEntryCard)view);
-            if(mSelectedEntries.size() > 0) {
+            if(selectedUuids.size() > 0) {
                 toggleEntrySelected(card);
             }else {
                 mCatalogPresenter.handleClickEntry(card.getOpdsEntry());
@@ -503,25 +489,23 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public Vector getSelectedEntries() {
-        return mSelectedEntries;
-    }
+    public void setSelectedEntries(Set<String> selectedEntries) {
+        if(((selectedEntries.isEmpty() && !this.selectedUuids.isEmpty())
+            || (!selectedEntries.isEmpty() && this.selectedUuids.isEmpty()))
+            && getActivity() != null) {
 
-    @Override
-    public void setSelectedEntries(Vector entries) {
-        if((entries.size() == 0 && mSelectedEntries.size() > 0) || (entries.size() > 0 && mSelectedEntries.size() ==0)) {
-            getActivity().supportInvalidateOptionsMenu();
+            getActivity().invalidateOptionsMenu();
         }
 
-        this.mSelectedEntries = entries;
+        for(OpdsEntryRecyclerAdapter.OpdsEntryViewHolder holder : boundViewHolders) {
+            OpdsEntry entry = holder.mEntryCard.getOpdsEntry();
+            if(entry == null)
+                continue;
 
-        for(int i = 0; i < entryList.size(); i++) {
-            boolean isSelected = UstadJSOPDSItem.indexOfItemInVector(entryList.get(i).getItemId(), entries) != -1;
-            if(idToCardMap.containsKey(entryList.get(i).getItemId())) {
-                idToCardMap.get(entryList.get(i).getItemId()).setSelected(isSelected);
-            }
+            holder.mEntryCard.setSelected(selectedEntries.contains(entry.getId()));
         }
 
+        this.selectedUuids = selectedEntries;
     }
 
     @Override
@@ -606,28 +590,25 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             holder.mEntryCard.setOpdsEntry(entry);
             String imageUri = null;
 
-            new Thread(() -> {
-                OpdsEntryWithRelations entry2 = entry;
-                List<OpdsLink> allLinks = DbManager.getInstance(CatalogOPDSFragment.this)
-                        .getOpdsLinkDao().getAllLinks();
-                System.out.println(entry2);
-                System.out.println(allLinks);
-
-                List<OpdsLink> linked = DbManager.getInstance(CatalogOPDSFragment.this)
-                        .getOpdsLinkDao().findLinkByEntryId(entry.getId());
-                System.out.println(linked);
-            }).start();
-
             if(entry != null) {
                 OpdsLink imgLink = entry.getThumbnailLink(true);
                 if(imgLink != null)
                     imageUri = imgLink.getHref();
+
+                holder.mEntryCard.setSelected(selectedUuids.contains(entry.getId()));
+                boundViewHolders.add(holder);
             }
 
             if(imageUri != null) {
                 holder.mEntryCard.setThumbnailUrl(mCatalogPresenter.resolveLink(imageUri),
                         mCatalogPresenter, CatalogOPDSFragment.this);
             }
+        }
+
+        @Override
+        public void onViewRecycled(OpdsEntryViewHolder holder) {
+            super.onViewRecycled(holder);
+            boundViewHolders.remove(holder);
         }
     }
 

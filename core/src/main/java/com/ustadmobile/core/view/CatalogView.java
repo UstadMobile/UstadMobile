@@ -33,10 +33,9 @@ package com.ustadmobile.core.view;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
-import java.util.Vector;
+import java.util.Set;
 
 /**
  *
@@ -119,20 +118,13 @@ public interface CatalogView extends UstadView{
      */
     void setEntryProgress(String entryId, CourseProgress progress);
 
-    
-    /**
-     * Get the entries that have been selected by the user (e.g. by long press)
-     * 
-     * @return Array of entries selected by the user
-     */
-    Vector getSelectedEntries();
-    
+
     /**
      * Set the entries that are to be marked as selected
      * 
-     * @param entries Array of entries to be marked as selected
+     * @param entries Array of Strings with the uuid of the entries that should be shown as selected
      */
-    void setSelectedEntries(Vector entries);
+    void setSelectedEntries(Set<String> entries);
 
     public void refresh();
 

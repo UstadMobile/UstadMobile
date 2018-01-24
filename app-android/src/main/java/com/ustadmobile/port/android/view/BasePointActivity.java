@@ -149,6 +149,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putString(BasePointController.ARG_WELCOME_SCREEN_DISPLAYED,
                 String.valueOf(mBasePointController.isWelcomeScreenDisplayed()));
     }

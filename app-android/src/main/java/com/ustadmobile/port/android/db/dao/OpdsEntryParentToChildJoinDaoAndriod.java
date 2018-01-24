@@ -30,4 +30,7 @@ public abstract class OpdsEntryParentToChildJoinDaoAndriod extends OpdsEntryPare
 
     @Query("SELECT MAX(childIndex) FROM OpdsEntryParentToChildJoin WHERE parentEntry = :parentId")
     public abstract int getNumEntriesByParent(String parentId);
+
+    @Query("DELETE FROM OpdsEntryParentToChildJoin WHERE parentEntry = :parentId AND childEntry IN (:childId)")
+    public abstract int deleteByParentIdAndChildId(String parentId, List<String> childId);
 }
