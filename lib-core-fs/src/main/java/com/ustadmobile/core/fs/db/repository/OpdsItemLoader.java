@@ -81,8 +81,7 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
     @Override
     public void onDone(OpdsEntry item) {
         //commit the item itself to the database
-
-        dbManager.getOpdsEntryDao().insert((OpdsEntry)itemToLoad);
+        dbManager.getOpdsEntryDao().insert(itemToLoad);
         persistFeedLinks();
         if(callback != null) {
             callback.onDone(item);

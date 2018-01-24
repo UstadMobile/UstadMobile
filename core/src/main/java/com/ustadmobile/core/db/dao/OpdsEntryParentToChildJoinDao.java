@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 
 import java.util.List;
@@ -17,5 +18,8 @@ public abstract class OpdsEntryParentToChildJoinDao {
     public abstract List<OpdsEntryParentToChildJoin> findByParentAndEntry(String parentId, String childId);
 
     public abstract List<OpdsEntryParentToChildJoin> findAll();
+
+    @UmQuery("SELECT MAX(childIndex) FROM OpdsEntryParentToChildJoin WHERE parentEntry = :parentId")
+    public abstract int getNumEntriesByParent(String parentId);
 
 }

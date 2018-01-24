@@ -27,4 +27,7 @@ public abstract class OpdsEntryParentToChildJoinDaoAndriod extends OpdsEntryPare
     @Override
     @Query("Select * From OpdsEntryParentToChildJoin")
     public abstract List<OpdsEntryParentToChildJoin> findAll();
+
+    @Query("SELECT MAX(childIndex) FROM OpdsEntryParentToChildJoin WHERE parentEntry = :parentId")
+    public abstract int getNumEntriesByParent(String parentId);
 }
