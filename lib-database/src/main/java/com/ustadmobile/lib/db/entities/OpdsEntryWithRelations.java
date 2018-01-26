@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities;
 
+import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmRelation;
 
 import java.util.List;
@@ -12,6 +13,9 @@ public class OpdsEntryWithRelations extends OpdsEntry{
 
     @UmRelation(parentColumn = "id", entityColumn = "entryId")
     private List<OpdsLink> links;
+
+    @UmRelation(parentColumn = "entryId", entityColumn = "entryId")
+    private List<ContainerFileEntry> containerFileEntries;
 
     public List<OpdsLink> getLinks() {
         return links;
