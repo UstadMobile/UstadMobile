@@ -20,6 +20,8 @@ public class ContainerFile {
 
     private String dirPath;
 
+    private long lastUpdated;
+
     public int getId() {
         return id;
     }
@@ -50,5 +52,20 @@ public class ContainerFile {
 
     public void setDirPath(String dirPath) {
         this.dirPath = dirPath;
+    }
+
+    /**
+     * The time that this database entity was last updated with information from the file itself.
+     *  E.g. if the last modified time of the file is greater than this timestamp, the file must be
+     *  examined.
+     *
+     * @return
+     */
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated(long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

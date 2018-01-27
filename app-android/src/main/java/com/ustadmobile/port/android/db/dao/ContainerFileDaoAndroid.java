@@ -26,4 +26,8 @@ public abstract class ContainerFileDaoAndroid extends ContainerFileDao {
     @Override
     @Insert
     public abstract long insert(ContainerFile containerFile);
+
+    @Override
+    @Query("UPDATE ContainerFile SET lastUpdated = :lastUpdated WHERE id = :id")
+    public abstract void updateLastUpdatedById(int id, long lastUpdated);
 }

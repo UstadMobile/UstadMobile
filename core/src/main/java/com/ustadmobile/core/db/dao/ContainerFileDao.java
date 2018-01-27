@@ -13,5 +13,7 @@ public abstract class ContainerFileDao {
 
     public abstract long insert(ContainerFile containerFile);
 
+    public abstract void updateLastUpdatedById(int id, long lastUpdated);
+
 
 }

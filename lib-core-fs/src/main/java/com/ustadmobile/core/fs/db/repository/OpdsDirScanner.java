@@ -45,6 +45,8 @@ public class OpdsDirScanner implements Runnable{
                 containerFile.setDirPath(file.getParentFile().getAbsolutePath());
                 long containerFileId = dbManager.getContainerFileDao().insert(containerFile);
                 containerFile.setId((int)containerFileId);
+            }else if(containerFile.getLastUpdated() > file.lastModified()) {
+                continue;
             }
 
 
@@ -71,9 +73,16 @@ public class OpdsDirScanner implements Runnable{
                     containerFileEntries.add(fileEntry);
                 }
 
+                //delete old entry info on this file
+                dbManager.getContainerFileEntryDao()
+                        .deleteOpdsAndContainerFileEntriesByContainerFile(containerFile.getId());
+
+
                 //now persist everything for this file
                 dbManager.getContainerFileEntryDao().insert(containerFileEntries);
                 dbManager.getOpdsEntryDao().insertList(new ArrayList<>(entriesInFile));
+                dbManager.getContainerFileDao().updateLastUpdatedById(containerFile.getId(),
+                        System.currentTimeMillis());
                 break;
             }
 

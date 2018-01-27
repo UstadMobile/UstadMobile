@@ -31,12 +31,10 @@ public class DbManagerAndroid extends DbManager {
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
-        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb36")
+        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb37")
             .build();
         executorService = Executors.newCachedThreadPool();
     }
-
-
 
     @Override
     public Object getContext() {
