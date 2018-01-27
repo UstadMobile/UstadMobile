@@ -14,16 +14,19 @@ import com.ustadmobile.core.opf.UstadJSOPFItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by mike on 9/9/17.
  */
 
-public class EPUBTypePlugin extends ZippedContentTypePlugin {
+public class EPUBTypePlugin extends ContentTypePlugin {
 
     private static final String[] MIME_TYPES = new String[]{"application/epub+zip"};
 
@@ -37,91 +40,92 @@ public class EPUBTypePlugin extends ZippedContentTypePlugin {
     }
 
     @Override
-    public String[] getMimeTypes() {
-        return MIME_TYPES;
+    public List<String> getMimeTypes() {
+        return Arrays.asList(MIME_TYPES);
     }
 
     @Override
-    public String[] getFileExtensions() {
-        return EXTENSIONS;
+    public List<String> getFileExtensions() {
+        return Arrays.asList(EXTENSIONS);
     }
 
-    @Override
-    public EntryResult getEntry(String fileUri, String cacheEntryFileUri) {
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-        impl.l(UMLog.VERBOSE, 437, fileUri);
 
-        String containerFilename = UMFileUtil.getFilename(fileUri);
-        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileUri);
-        UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileUri, containerFilename,
-                cacheFeedID);
-
-        String absfileUri = UMFileUtil.ensurePathHasPrefix("file://", fileUri);
-
-        ZipFileHandle zipHandle = null;
-        InputStream zIs = null;
-        UstadOCF ocf;
-        UstadJSOPF opf;
-        UstadJSOPDSEntry epubEntry;
-
-        String thumbnailPathInZip = null;
-        String thumbnailMimeType = null;
-
-        long fileLength;
-
-        int j;
-
-        try {
-            zipHandle = impl.openZip(fileUri);
-            fileLength = impl.fileSize(fileUri);
-            zIs = zipHandle.openInputStream(OCF_CONTAINER_PATH);
-
-            if(zIs != null) {
-                ocf = UstadOCF.loadFromXML(impl.newPullParser(zIs));
-                UMIOUtils.closeInputStream(zIs);
-
-                for(j = 0; j < ocf.rootFiles.length; j++) {
-                    zIs = zipHandle.openInputStream(ocf.rootFiles[j].fullPath);
-                    opf = new UstadJSOPF();
-                    opf.loadFromOPF(impl.newPullParser(zIs),
-                            UstadJSOPF.PARSE_METADATA | UstadJSOPF.PARSE_MANIFEST);
-                    UMIOUtils.closeInputStream(zIs);
-                    zIs = null;
-
-                    epubEntry =new UstadJSOPDSEntry(result,opf,
-                            UstadJSOPDSItem.TYPE_EPUBCONTAINER, absfileUri);
-                    UmOpdsLink acquireLink = epubEntry.getLink(0);
-                    acquireLink.setLength(fileLength);
-                    epubEntry.setLinkAt(acquireLink, 0);
-
-                    UstadJSOPFItem coverItem = opf.getCoverImage(null);
-
-                    if(coverItem != null) {
-                        thumbnailPathInZip = UMFileUtil.resolveLink(ocf.rootFiles[j].fullPath,
-                                coverItem.href);
-                        thumbnailMimeType = coverItem.mimeType;
-                    }
-
-
-                    result.addEntry(epubEntry);
-                }
-            }else {
-                result = null;
-            }
-
-
-        }catch(Exception e) {
-            impl.l(UMLog.ERROR, 142, fileUri, e);
-        }finally {
-            UMIOUtils.closeInputStream(zIs);
-            UMIOUtils.closeZipFileHandle(zipHandle);
-        }
-
-
-        if(result != null) {
-            return new ZippedEntryResult(result, fileUri, thumbnailPathInZip, thumbnailMimeType);
-        }else {
-            return null;
-        }
-    }
+    //    @Override
+//    public EntryResult getEntry(String fileUri, String cacheEntryFileUri) {
+//        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//        impl.l(UMLog.VERBOSE, 437, fileUri);
+//
+//        String containerFilename = UMFileUtil.getFilename(fileUri);
+//        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileUri);
+//        UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileUri, containerFilename,
+//                cacheFeedID);
+//
+//        String absfileUri = UMFileUtil.ensurePathHasPrefix("file://", fileUri);
+//
+//        ZipFileHandle zipHandle = null;
+//        InputStream zIs = null;
+//        UstadOCF ocf;
+//        UstadJSOPF opf;
+//        UstadJSOPDSEntry epubEntry;
+//
+//        String thumbnailPathInZip = null;
+//        String thumbnailMimeType = null;
+//
+//        long fileLength;
+//
+//        int j;
+//
+//        try {
+//            zipHandle = impl.openZip(fileUri);
+//            fileLength = impl.fileSize(fileUri);
+//            zIs = zipHandle.openInputStream(OCF_CONTAINER_PATH);
+//
+//            if(zIs != null) {
+//                ocf = UstadOCF.loadFromXML(impl.newPullParser(zIs));
+//                UMIOUtils.closeInputStream(zIs);
+//
+//                for(j = 0; j < ocf.rootFiles.length; j++) {
+//                    zIs = zipHandle.openInputStream(ocf.rootFiles[j].fullPath);
+//                    opf = new UstadJSOPF();
+//                    opf.loadFromOPF(impl.newPullParser(zIs),
+//                            UstadJSOPF.PARSE_METADATA | UstadJSOPF.PARSE_MANIFEST);
+//                    UMIOUtils.closeInputStream(zIs);
+//                    zIs = null;
+//
+//                    epubEntry =new UstadJSOPDSEntry(result,opf,
+//                            UstadJSOPDSItem.TYPE_EPUBCONTAINER, absfileUri);
+//                    UmOpdsLink acquireLink = epubEntry.getLink(0);
+//                    acquireLink.setLength(fileLength);
+//                    epubEntry.setLinkAt(acquireLink, 0);
+//
+//                    UstadJSOPFItem coverItem = opf.getCoverImage(null);
+//
+//                    if(coverItem != null) {
+//                        thumbnailPathInZip = UMFileUtil.resolveLink(ocf.rootFiles[j].fullPath,
+//                                coverItem.href);
+//                        thumbnailMimeType = coverItem.mimeType;
+//                    }
+//
+//
+//                    result.addEntry(epubEntry);
+//                }
+//            }else {
+//                result = null;
+//            }
+//
+//
+//        }catch(Exception e) {
+//            impl.l(UMLog.ERROR, 142, fileUri, e);
+//        }finally {
+//            UMIOUtils.closeInputStream(zIs);
+//            UMIOUtils.closeZipFileHandle(zipHandle);
+//        }
+//
+//
+//        if(result != null) {
+//            return new ZippedEntryResult(result, fileUri, thumbnailPathInZip, thumbnailMimeType);
+//        }else {
+//            return null;
+//        }
+//    }
 }

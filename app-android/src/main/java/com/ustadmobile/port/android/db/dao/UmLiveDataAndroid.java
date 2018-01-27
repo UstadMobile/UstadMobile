@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.db.dao;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.ustadmobile.core.controller.UstadController;
 import com.ustadmobile.core.db.UmLiveData;
@@ -48,9 +50,27 @@ public class UmLiveDataAndroid<T> implements UmLiveData<T> {
     @Override
     public void removeObserver(UmObserver<T> observer) {
         Observer<T> observerImpl = observersHashMap.get(observer);
-        if(observerImpl != null) {
-            src.removeObserver(observerImpl);
-            observersHashMap.remove(observer);
+        if(observerImpl == null)
+            return;
+
+        Runnable removeObserverRunnable = () -> {
+            synchronized (UmLiveDataAndroid.this){
+                src.removeObserver(observerImpl);
+                observersHashMap.remove(observer);
+                notifyAll();
+            }
+        };
+
+        if(Looper.myLooper() == Looper.getMainLooper()) {
+            removeObserverRunnable.run();
+        }else {
+            synchronized (this) {
+                new Handler(Looper.getMainLooper()).post(removeObserverRunnable);
+                if(observersHashMap.containsKey(observer)){
+                    try { wait(); }
+                    catch(InterruptedException e) {}
+                }
+            }
         }
     }
 }

@@ -1,30 +1,35 @@
 package com.ustadmobile.lib.db.entities;
 
+import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
  * Created by mike on 1/25/18.
  */
-
+@UmEntity
 public class ContainerFileEntry {
 
-    @UmPrimaryKey
-    private int id;
+    @UmPrimaryKey(autoIncrement = true)
+    private int containerFileEntryId;
 
+    @UmIndexField
     private int containerFileId;
 
-    String entryId;
+    String containerEntryId;
 
-    private long updated;
+    private long containerEntryUpdated;
 
-    public int getId() {
-        return id;
+    @UmIndexField
+    private String opdsEntryUuid;
+
+    public int getContainerFileEntryId() {
+        return containerFileEntryId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setContainerFileEntryId(int containerFileEntryId) {
+        this.containerFileEntryId = containerFileEntryId;
     }
-
 
     public int getContainerFileId() {
         return containerFileId;
@@ -34,19 +39,27 @@ public class ContainerFileEntry {
         this.containerFileId = containerFileId;
     }
 
-    public String getEntryId() {
-        return entryId;
+    public String getContainerEntryId() {
+        return containerEntryId;
     }
 
-    public void setEntryId(String entryId) {
-        this.entryId = entryId;
+    public void setContainerEntryId(String containerEntryId) {
+        this.containerEntryId = containerEntryId;
     }
 
-    public long getUpdated() {
-        return updated;
+    public long getContainerEntryUpdated() {
+        return containerEntryUpdated;
     }
 
-    public void setUpdated(long updated) {
-        this.updated = updated;
+    public void setContainerEntryUpdated(long containerEntryUpdated) {
+        this.containerEntryUpdated = containerEntryUpdated;
+    }
+
+    public String getOpdsEntryUuid() {
+        return opdsEntryUuid;
+    }
+
+    public void setOpdsEntryUuid(String opdsEntryUuid) {
+        this.opdsEntryUuid = opdsEntryUuid;
     }
 }

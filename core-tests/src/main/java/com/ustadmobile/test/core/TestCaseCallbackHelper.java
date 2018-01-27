@@ -38,7 +38,7 @@ public class TestCaseCallbackHelper<T> implements UmCallback<T> {
     public void run(int runIndex) {
         runList.get(runIndex).run();
         synchronized (this) {
-            if(result == null && exception == null) {
+            if(result == null && exception == null && runIndex < (runList.size() - 1)) {
                 try { wait(waitList.get(runIndex));}
                 catch(InterruptedException e) {}
             }

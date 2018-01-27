@@ -14,7 +14,7 @@ public class OpdsEntryWithRelations extends OpdsEntry{
     @UmRelation(parentColumn = "id", entityColumn = "entryId")
     private List<OpdsLink> links;
 
-    @UmRelation(parentColumn = "entryId", entityColumn = "entryId")
+    @UmRelation(parentColumn = "entryId", entityColumn = "containerEntryId")
     private List<ContainerFileEntry> containerFileEntries;
 
     public List<OpdsLink> getLinks() {
@@ -25,4 +25,11 @@ public class OpdsEntryWithRelations extends OpdsEntry{
         this.links = links;
     }
 
+    public List<ContainerFileEntry> getContainerFileEntries() {
+        return containerFileEntries;
+    }
+
+    public void setContainerFileEntries(List<ContainerFileEntry> containerFileEntries) {
+        this.containerFileEntries = containerFileEntries;
+    }
 }

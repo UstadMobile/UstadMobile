@@ -32,6 +32,10 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);
 
     @Override
+    @Query("Select * from OpdsEntry WHERE url = :url")
+    public abstract OpdsEntryWithRelations getEntryByUrlStatic(String url);
+
+    @Override
     public UmLiveData<List<OpdsEntryWithRelations>> getEntriesByParentAsList(String parentId){
         return new UmLiveDataAndroid<>(findEntriesByParentAsListR(parentId));
     }
@@ -46,7 +50,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
 
     @Override
     public UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid) {
-        return new UmLiveDataAndroid<OpdsEntryWithRelations>(getEntryByUuidR(uuid));
+        return new UmLiveDataAndroid<>(getEntryByUuidR(uuid));
     }
 
     @Query("SELECT * from OpdsEntry where id = :uuid")
@@ -55,4 +59,15 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Override
     @Query("SELECT id FROM OpdsEntry WHERE url = :url")
     public abstract String getUuidForEntryUrl(String url);
+
+    @Query("SELECT * FROM OpdsEntry " +
+            "LEFT JOIN ContainerFileEntry on OpdsEntry.id = ContainerFileEntry.opdsEntryUuid " +
+            "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE ContainerFile.dirPath = :dir")
+    public abstract LiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryR(String dir);
+
+    @Override
+    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectory(String dir) {
+        return new UmLiveDataAndroid<>(findEntriesByContainerFileDirectoryR(dir));
+    }
 }

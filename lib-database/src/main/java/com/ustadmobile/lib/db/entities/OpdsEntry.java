@@ -12,6 +12,21 @@ import java.util.List;
 
 
 /**
+ * The OpdsEntry can represent one of three types of content entries:
+ *
+ * 1. An Entry that represents an entry in a container file (e.g. EPUB, SCORM, Xapi Package) file etc.
+ *  Depending on the type of container, one container file can contain more than one entry. In this
+ *  case there will be a corresponding ContainerFileEntry where the ContainerFileEntry.opdsEntryUuid =
+ *  OpdsEntry.id. ContainerFileEntry is a separate entity to make it easy to have a relationship field
+ *  on each OpdsEntry to determine if the given entry loaded from a catalog or sync'd entity is
+ *  present in a ContainerFile.
+ *
+ *
+ * 2. An OpdsFeed: The feed itself is an entry, and is joined it's child entries using an
+ *    OpdsEntryParentToChildJoin,
+ *
+ * 3. An Entry that is part of the main entity sync system between the client and the server.
+ *
  * Created by mike on 1/13/18.
  */
 @UmEntity

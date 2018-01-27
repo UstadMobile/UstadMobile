@@ -2,9 +2,12 @@ package com.ustadmobile.core.catalog.contenttype;
 
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A ContentTypePlugin provides support to use a specific file type (e.g. EPUB, Xapi Package, etc) on
@@ -42,16 +45,9 @@ public abstract class ContentTypePlugin {
      *
      * @return
      */
-    public abstract String[] getMimeTypes();
+    public abstract List<String> getMimeTypes();
 
-    public abstract String[] getFileExtensions();
+    public abstract List<String> getFileExtensions();
 
-    /**
-     * Generate an UstadJSOPDSEntry for the givne fileUri.
-     *
-     * @param fileUri
-     * @return
-     */
-    public abstract EntryResult getEntry(String fileUri, String cacheEntryFileUri);
 
 }

@@ -20,7 +20,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 
 /**
  * Created by mike on 9/13/17.
@@ -43,72 +45,72 @@ public class XapiPackageTypePlugin extends ZippedContentTypePlugin{
     }
 
     @Override
-    public String[] getMimeTypes() {
-        return MIME_TYPES;
+    public List<String> getMimeTypes() {
+        return Arrays.asList(MIME_TYPES);
     }
 
     @Override
-    public String[] getFileExtensions() {
-        return FILE_EXTENSIONS;
+    public List<String> getFileExtensions() {
+        return Arrays.asList(FILE_EXTENSIONS);
     }
 
-    @Override
-    public EntryResult getEntry(String fileUri, String cacheEntryFileUri) {
-        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-        String containerFilename = UMFileUtil.getFilename(fileUri);
-        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileUri);
-        UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileUri, containerFilename,
-                cacheFeedID);
-
-        ZipFileHandle zipHandle = null;
-        ZipEntryHandle entryHandle;
-        TinCanXML tinCanXML;
-        InputStream tinCanXmlIn = null;
-        UstadJSOPDSEntry tincanEntry = null;
-
-        try {
-            zipHandle = impl.openZip(fileUri);
-
-            //find tincan.xml
-            Enumeration entries = zipHandle.entries();
-
-            while(entries.hasMoreElements()) {
-                entryHandle = (ZipEntryHandle)entries.nextElement();
-                if(entryHandle.getName().endsWith(XML_FILE_NAME)) {
-                    try {
-                        tinCanXmlIn = zipHandle.openInputStream(entryHandle.getName());
-                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-                        UMIOUtils.readFully(tinCanXmlIn, bout, 1024);
-                        String tincanStr = new String(bout.toByteArray());
-                        System.out.println(tincanStr);
-                        ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
-
-                        XmlPullParser xpp = impl.newPullParser(bin, "UTF-8");
-                        tinCanXML = TinCanXML.loadFromXML(xpp);
-                        Activity launchActivity = tinCanXML.getLaunchActivity();
-                        if(launchActivity == null) {
-                            return null;//we can only use tincan.xml files with a launch entry
-                        }
-
-                        tincanEntry = new UstadJSOPDSEntry(result,
-                                launchActivity.getName(), launchActivity.getId(),
-                                UstadJSOPDSEntry.LINK_ACQUIRE, MIME_TYPES[0], fileUri);
-                        result.addEntry(tincanEntry);
-                        break;
-                    }catch(XmlPullParserException xe) {
-                        UstadMobileSystemImpl.l(UMLog.ERROR, 674, fileUri, xe);
-                    }
-                }
-            }
-        }catch(IOException ioe) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 675, fileUri, ioe);
-        }finally {
-            UMIOUtils.closeInputStream(tinCanXmlIn);
-            UMIOUtils.closeZipFileHandle(zipHandle);
-        }
-
-
-        return tincanEntry != null ? new ZippedEntryResult(result, fileUri, null, null) : null;
-    }
+//    @Override
+//    public EntryResult getEntry(String fileUri, String cacheEntryFileUri) {
+//        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//
+//        String containerFilename = UMFileUtil.getFilename(fileUri);
+//        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileUri);
+//        UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileUri, containerFilename,
+//                cacheFeedID);
+//
+//        ZipFileHandle zipHandle = null;
+//        ZipEntryHandle entryHandle;
+//        TinCanXML tinCanXML;
+//        InputStream tinCanXmlIn = null;
+//        UstadJSOPDSEntry tincanEntry = null;
+//
+//        try {
+//            zipHandle = impl.openZip(fileUri);
+//
+//            //find tincan.xml
+//            Enumeration entries = zipHandle.entries();
+//
+//            while(entries.hasMoreElements()) {
+//                entryHandle = (ZipEntryHandle)entries.nextElement();
+//                if(entryHandle.getName().endsWith(XML_FILE_NAME)) {
+//                    try {
+//                        tinCanXmlIn = zipHandle.openInputStream(entryHandle.getName());
+//                        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+//                        UMIOUtils.readFully(tinCanXmlIn, bout, 1024);
+//                        String tincanStr = new String(bout.toByteArray());
+//                        System.out.println(tincanStr);
+//                        ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+//
+//                        XmlPullParser xpp = impl.newPullParser(bin, "UTF-8");
+//                        tinCanXML = TinCanXML.loadFromXML(xpp);
+//                        Activity launchActivity = tinCanXML.getLaunchActivity();
+//                        if(launchActivity == null) {
+//                            return null;//we can only use tincan.xml files with a launch entry
+//                        }
+//
+//                        tincanEntry = new UstadJSOPDSEntry(result,
+//                                launchActivity.getName(), launchActivity.getId(),
+//                                UstadJSOPDSEntry.LINK_ACQUIRE, MIME_TYPES[0], fileUri);
+//                        result.addEntry(tincanEntry);
+//                        break;
+//                    }catch(XmlPullParserException xe) {
+//                        UstadMobileSystemImpl.l(UMLog.ERROR, 674, fileUri, xe);
+//                    }
+//                }
+//            }
+//        }catch(IOException ioe) {
+//            UstadMobileSystemImpl.l(UMLog.ERROR, 675, fileUri, ioe);
+//        }finally {
+//            UMIOUtils.closeInputStream(tinCanXmlIn);
+//            UMIOUtils.closeZipFileHandle(zipHandle);
+//        }
+//
+//
+//        return tincanEntry != null ? new ZippedEntryResult(result, fileUri, null, null) : null;
+//    }
 }

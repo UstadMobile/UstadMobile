@@ -19,4 +19,35 @@ public class DownloadJob {
 
     private long timeCompleted;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public long getTimeRequested() {
+        return timeRequested;
+    }
+
+    public void setTimeRequested(long timeRequested) {
+        this.timeRequested = timeRequested;
+    }
+
+    public long getTimeCompleted() {
+        return timeCompleted;
+    }
+
+    public void setTimeCompleted(long timeCompleted) {
+        this.timeCompleted = timeCompleted;
+    }
 }

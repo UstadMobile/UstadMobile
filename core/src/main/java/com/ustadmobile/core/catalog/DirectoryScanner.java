@@ -77,161 +77,161 @@ public class DirectoryScanner {
                                          String feedId, int resourceMode,
                                          UstadJSOPDSItem.OpdsItemLoadCallback callback,
                                          UstadJSOPDSFeed feed, Object context){
-        String baseHref = linkHrefMode == LINK_HREF_MODE_ID ? acquisitionLinkHrefPrefix : directoryUri;
-        if(feed == null)
-            feed  = new UstadJSOPDSFeed(UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHref),
-                title, feedId);
-
-        try {
-            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-
-            ContentTypePlugin[] supportedTypePlugins = UstadMobileSystemImpl.getInstance().getSupportedContentTypePlugins();
-            String[] dirContents = impl.listDirectory(directoryUri);
-            if(dirContents == null) {
-                //This directory does not exist - return null
-                return null;
-            }
-
-            String fileExt;
-            String containerLinkHref;
-            int j, k;
-            ContentTypePlugin.EntryResult entryResult;
-            UstadJSOPDSFeed fileFeed;
-            UstadJSOPDSFeed linkFeed;
-            InputStream linkFeedIn = null;
-
-            UstadJSOPDSEntry entry;
-            UmOpdsLink acquisitionLink;
-
-            String fileUri;
-            String linkFeedUri;
-            String cacheEntryUri;
-            InputStream thumbnailData = null;
-            OutputStream thumbnailOut = null;
-
-            for(int i = 0; i < dirContents.length; i++) {
-                fileExt = UMFileUtil.getExtension(dirContents[i]);
-                fileUri = UMFileUtil.joinPaths(new String[]{directoryUri, dirContents[i]});
-
-
-                if(fileExt == null)
-                    continue;
-
-                cacheEntryUri = UMFileUtil.removeExtension(dirContents[i]) + ".opds";
-
-                for(j = 0; j < supportedTypePlugins.length; j++) {
-                    if(UMUtil.getIndexInArray(fileExt, supportedTypePlugins[j].getFileExtensions()) != -1) {
-                        entryResult = supportedTypePlugins[j].getEntry(fileUri, cacheDirUri);
-
-                        if(entryResult == null || entryResult.getFeed().size() == 0)
-                            continue;//see if another plugin can handle it
-
-                        fileFeed = entryResult.getFeed();
-
-                        linkFeedUri = UMFileUtil.joinPaths(new String[]{directoryUri, dirContents[i]
-                                + ".links.opds"});
-                        linkFeed = null;
-
-                        if(impl.fileExists(linkFeedUri)) {
-                            linkFeed = new UstadJSOPDSFeed();
-                            try {
-                                linkFeedIn = impl.openFileInputStream(linkFeedUri);
-                                linkFeed.loadFromXpp(impl.newPullParser(linkFeedIn), null);
-                            }catch(XmlPullParserException x) {
-                                UstadMobileSystemImpl.l(UMLog.ERROR, 688, linkFeedUri, x);
-                            }catch(IOException e) {
-                                UstadMobileSystemImpl.l(UMLog.ERROR, 688, linkFeedUri, e);
-                            }finally {
-                                UMIOUtils.closeInputStream(linkFeedIn);
-                            }
-                        }
-
-                        for(k = 0; k < fileFeed.size(); k++) {
-                            entry =new UstadJSOPDSEntry(feed, fileFeed.getEntry(k));
-                            containerLinkHref = generateLink(fileUri, acquisitionLinkHrefPrefix,
-                                    null, entry.getItemId(), linkHrefMode);
-
-                            acquisitionLink = (UmOpdsLink)entry.getAcquisitionLinks().elementAt(0);
-                            acquisitionLink.setHref(containerLinkHref);
-//                            acquisitionLink[UstadJSOPDSItem.ATTR_HREF] = containerLinkHref;
-
-                            if(entryResult.getThumbnailMimeType() != null) {
-                                try {
-                                    thumbnailData = entryResult.getThumbnail();
-                                    if(thumbnailData == null)
-                                        throw new IOException("Thumbnail file not found");
-
-                                    String extension = UstadMobileSystemImpl.getInstance()
-                                            .getExtensionFromMimeType(entryResult.getThumbnailMimeType());
-
-                                    String thumbnailFilename = UMFileUtil.removeExtension(
-                                            UMFileUtil.getFilename(fileUri))  + "-tmb." + extension;
-                                    String thumbnailAbsolutePath = UMFileUtil.joinPaths(
-                                            new String[]{cacheDirUri, thumbnailFilename});
-                                    thumbnailOut = impl.openFileOutputStream(thumbnailAbsolutePath, 0);
-                                    UMIOUtils.readFully(thumbnailData, thumbnailOut, 8 * 1024);
-
-                                    entry.addLink(UstadJSOPDSItem.LINK_REL_THUMBNAIL,
-                                            entryResult.getThumbnailMimeType(),
-                                            generateLink(thumbnailAbsolutePath,
-                                                    entryThumbnailLinkHrefPrefix,
-                                                    null, entry.getItemId(),
-                                                    thumbnailHrefMode));
-
-                                }catch(IOException e) {
-                                    UstadMobileSystemImpl.l(UMLog.ERROR, 688, null, e);
-                                }finally {
-                                    UMIOUtils.closeInputStream(thumbnailData);
-                                    UMIOUtils.closeOutputStream(thumbnailOut);
-                                    thumbnailData = null;
-                                    thumbnailOut = null;
-                                }
-                            }
-
-                            if(linkFeed != null && linkFeed.getEntryById(entry.getItemId()) != null) {
-                                Vector allLinks = linkFeed.getEntryById(entry.getItemId()).getLinks();
-                                for(int l = 0; l < allLinks.size(); l++) {
-                                    entry.addLink((String[])allLinks.elementAt(l));
-                                }
-                            }
-
-                            feed.addEntry(entry);
-                            if(callback != null)
-                                callback.onEntryLoaded(feed, feed.size(), entry);
-
-                            CatalogEntryInfo thisEntryInfo = CatalogPresenter.getEntryInfo(
-                                    entry.getItemId(), resourceMode, context);
-                            if(thisEntryInfo == null) {
-                                impl.l(UMLog.VERBOSE, 409, dirContents[i]);
-                                thisEntryInfo = new CatalogEntryInfo();
-                                thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
-                                thisEntryInfo.fileURI = fileUri;
-                                thisEntryInfo.mimeType = entry.getFirstAcquisitionLink(null)
-                                        .getMimeType();
-
-                                thisEntryInfo.srcURLs = new String[] { dirContents[i] };
-
-
-                                CatalogPresenter.setEntryInfo(entry.getItemId(), thisEntryInfo,
-                                        resourceMode, context);
-                                if(impl.getNetworkManager() != null)
-                                    impl.getNetworkManager().handleEntryStatusChangeDiscovered(entry.getItemId(),
-                                            thisEntryInfo.acquisitionStatus);
-                            }
-
-                            if(thisEntryInfo.acquisitionStatus != STATUS_ACQUIRED) {
-                                thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
-                                CatalogPresenter.setEntryInfo(entry.getItemId(), thisEntryInfo,
-                                        resourceMode, context);
-                            }
-                        }
-                    }
-                }
-            }
-
-        }catch(IOException e) {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 673, directoryUri, e);
-        }
+//        String baseHref = linkHrefMode == LINK_HREF_MODE_ID ? acquisitionLinkHrefPrefix : directoryUri;
+//        if(feed == null)
+//            feed  = new UstadJSOPDSFeed(UMFileUtil.ensurePathHasPrefix(UMFileUtil.PROTOCOL_FILE, baseHref),
+//                title, feedId);
+//
+//        try {
+//            UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+//
+//            ContentTypePlugin[] supportedTypePlugins = UstadMobileSystemImpl.getInstance().getSupportedContentTypePlugins();
+//            String[] dirContents = impl.listDirectory(directoryUri);
+//            if(dirContents == null) {
+//                //This directory does not exist - return null
+//                return null;
+//            }
+//
+//            String fileExt;
+//            String containerLinkHref;
+//            int j, k;
+//            ContentTypePlugin.EntryResult entryResult;
+//            UstadJSOPDSFeed fileFeed;
+//            UstadJSOPDSFeed linkFeed;
+//            InputStream linkFeedIn = null;
+//
+//            UstadJSOPDSEntry entry;
+//            UmOpdsLink acquisitionLink;
+//
+//            String fileUri;
+//            String linkFeedUri;
+//            String cacheEntryUri;
+//            InputStream thumbnailData = null;
+//            OutputStream thumbnailOut = null;
+//
+//            for(int i = 0; i < dirContents.length; i++) {
+//                fileExt = UMFileUtil.getExtension(dirContents[i]);
+//                fileUri = UMFileUtil.joinPaths(new String[]{directoryUri, dirContents[i]});
+//
+//
+//                if(fileExt == null)
+//                    continue;
+//
+//                cacheEntryUri = UMFileUtil.removeExtension(dirContents[i]) + ".opds";
+//
+//                for(j = 0; j < supportedTypePlugins.length; j++) {
+//                    if(UMUtil.getIndexInArray(fileExt, supportedTypePlugins[j].getFileExtensions()) != -1) {
+//                        entryResult = supportedTypePlugins[j].getEntry(fileUri, cacheDirUri);
+//
+//                        if(entryResult == null || entryResult.getFeed().size() == 0)
+//                            continue;//see if another plugin can handle it
+//
+//                        fileFeed = entryResult.getFeed();
+//
+//                        linkFeedUri = UMFileUtil.joinPaths(new String[]{directoryUri, dirContents[i]
+//                                + ".links.opds"});
+//                        linkFeed = null;
+//
+//                        if(impl.fileExists(linkFeedUri)) {
+//                            linkFeed = new UstadJSOPDSFeed();
+//                            try {
+//                                linkFeedIn = impl.openFileInputStream(linkFeedUri);
+//                                linkFeed.loadFromXpp(impl.newPullParser(linkFeedIn), null);
+//                            }catch(XmlPullParserException x) {
+//                                UstadMobileSystemImpl.l(UMLog.ERROR, 688, linkFeedUri, x);
+//                            }catch(IOException e) {
+//                                UstadMobileSystemImpl.l(UMLog.ERROR, 688, linkFeedUri, e);
+//                            }finally {
+//                                UMIOUtils.closeInputStream(linkFeedIn);
+//                            }
+//                        }
+//
+//                        for(k = 0; k < fileFeed.size(); k++) {
+//                            entry =new UstadJSOPDSEntry(feed, fileFeed.getEntry(k));
+//                            containerLinkHref = generateLink(fileUri, acquisitionLinkHrefPrefix,
+//                                    null, entry.getItemId(), linkHrefMode);
+//
+//                            acquisitionLink = (UmOpdsLink)entry.getAcquisitionLinks().elementAt(0);
+//                            acquisitionLink.setHref(containerLinkHref);
+////                            acquisitionLink[UstadJSOPDSItem.ATTR_HREF] = containerLinkHref;
+//
+//                            if(entryResult.getThumbnailMimeType() != null) {
+//                                try {
+//                                    thumbnailData = entryResult.getThumbnail();
+//                                    if(thumbnailData == null)
+//                                        throw new IOException("Thumbnail file not found");
+//
+//                                    String extension = UstadMobileSystemImpl.getInstance()
+//                                            .getExtensionFromMimeType(entryResult.getThumbnailMimeType());
+//
+//                                    String thumbnailFilename = UMFileUtil.removeExtension(
+//                                            UMFileUtil.getFilename(fileUri))  + "-tmb." + extension;
+//                                    String thumbnailAbsolutePath = UMFileUtil.joinPaths(
+//                                            new String[]{cacheDirUri, thumbnailFilename});
+//                                    thumbnailOut = impl.openFileOutputStream(thumbnailAbsolutePath, 0);
+//                                    UMIOUtils.readFully(thumbnailData, thumbnailOut, 8 * 1024);
+//
+//                                    entry.addLink(UstadJSOPDSItem.LINK_REL_THUMBNAIL,
+//                                            entryResult.getThumbnailMimeType(),
+//                                            generateLink(thumbnailAbsolutePath,
+//                                                    entryThumbnailLinkHrefPrefix,
+//                                                    null, entry.getItemId(),
+//                                                    thumbnailHrefMode));
+//
+//                                }catch(IOException e) {
+//                                    UstadMobileSystemImpl.l(UMLog.ERROR, 688, null, e);
+//                                }finally {
+//                                    UMIOUtils.closeInputStream(thumbnailData);
+//                                    UMIOUtils.closeOutputStream(thumbnailOut);
+//                                    thumbnailData = null;
+//                                    thumbnailOut = null;
+//                                }
+//                            }
+//
+//                            if(linkFeed != null && linkFeed.getEntryById(entry.getItemId()) != null) {
+//                                Vector allLinks = linkFeed.getEntryById(entry.getItemId()).getLinks();
+//                                for(int l = 0; l < allLinks.size(); l++) {
+//                                    entry.addLink((String[])allLinks.elementAt(l));
+//                                }
+//                            }
+//
+//                            feed.addEntry(entry);
+//                            if(callback != null)
+//                                callback.onEntryLoaded(feed, feed.size(), entry);
+//
+//                            CatalogEntryInfo thisEntryInfo = CatalogPresenter.getEntryInfo(
+//                                    entry.getItemId(), resourceMode, context);
+//                            if(thisEntryInfo == null) {
+//                                impl.l(UMLog.VERBOSE, 409, dirContents[i]);
+//                                thisEntryInfo = new CatalogEntryInfo();
+//                                thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
+//                                thisEntryInfo.fileURI = fileUri;
+//                                thisEntryInfo.mimeType = entry.getFirstAcquisitionLink(null)
+//                                        .getMimeType();
+//
+//                                thisEntryInfo.srcURLs = new String[] { dirContents[i] };
+//
+//
+//                                CatalogPresenter.setEntryInfo(entry.getItemId(), thisEntryInfo,
+//                                        resourceMode, context);
+//                                if(impl.getNetworkManager() != null)
+//                                    impl.getNetworkManager().handleEntryStatusChangeDiscovered(entry.getItemId(),
+//                                            thisEntryInfo.acquisitionStatus);
+//                            }
+//
+//                            if(thisEntryInfo.acquisitionStatus != STATUS_ACQUIRED) {
+//                                thisEntryInfo.acquisitionStatus = STATUS_ACQUIRED;
+//                                CatalogPresenter.setEntryInfo(entry.getItemId(), thisEntryInfo,
+//                                        resourceMode, context);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//        }catch(IOException e) {
+//            UstadMobileSystemImpl.l(UMLog.ERROR, 673, directoryUri, e);
+//        }
 
 
         return feed;

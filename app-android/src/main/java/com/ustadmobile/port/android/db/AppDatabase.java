@@ -3,9 +3,9 @@ package com.ustadmobile.port.android.db;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 
-import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
-import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.lib.db.entities.*;
+import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
+import com.ustadmobile.port.android.db.dao.ContainerFileEntryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryParentToChildJoinDaoAndriod;
 import com.ustadmobile.port.android.db.dao.OpdsEntryWithRelationsDaoAndroid;
@@ -16,7 +16,10 @@ import com.ustadmobile.port.android.db.dao.OpdsLinkDaoAndroid;
  * Created by mike on 1/14/18.
  */
 @Database(version = 1, entities =  {
-        OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class
+        OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
+        ContainerFile.class, ContainerFileEntry.class, DownloadJob.class,
+        DownloadJobItem.class
+
 })
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -27,5 +30,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract OpdsLinkDaoAndroid getOpdsLinkDao();
 
     public abstract OpdsEntryParentToChildJoinDaoAndriod getOpdsEntryParentToChildJoinDao();
+
+    public abstract ContainerFileEntryDaoAndroid getContainerFileEntryDao();
+
+    public abstract ContainerFileDaoAndroid getContainerFileDao();
 
 }
