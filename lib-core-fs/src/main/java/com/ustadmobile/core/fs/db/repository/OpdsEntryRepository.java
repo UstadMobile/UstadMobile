@@ -32,7 +32,7 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
         UmLiveData<OpdsEntryWithRelations> dbResult = dbManager.getOpdsEntryWithRelationsDao()
                 .getEntryByUrl(url, entryId, callback);
         OpdsEntryWithRelations entryWithRelations = new OpdsEntryWithRelations();
-        entryWithRelations.setId(entryId);
+        entryWithRelations.setUuid(entryId);
 
         executorService.execute(new OpdsItemLoader(dbManager.getContext(), dbManager,
                 entryWithRelations, url, callback));

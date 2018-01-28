@@ -59,7 +59,7 @@ public class TestOpdsFeedEntryProvider extends TestCase{
         }).add(20000, () -> {
             OpdsEntryWithRelations returnedFeed = (OpdsEntryWithRelations)helper.getResult();
             UmProvider<OpdsEntryWithRelations> entryProvider = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                    .getOpdsEntryWithRelationsDao().getEntriesByParent(returnedFeed.getId());
+                    .getOpdsEntryWithRelationsDao().getEntriesByParent(returnedFeed.getUuid());
             DataSource.Factory<Integer, OpdsEntryWithRelations> factory =
                     (DataSource.Factory<Integer, OpdsEntryWithRelations>)entryProvider.getProvider();
             LiveData<PagedList<OpdsEntryWithRelations>> entryList = new LivePagedListBuilder(factory, 20).build();

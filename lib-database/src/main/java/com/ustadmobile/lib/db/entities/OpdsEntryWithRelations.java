@@ -11,7 +11,7 @@ import java.util.List;
 
 public class OpdsEntryWithRelations extends OpdsEntry{
 
-    @UmRelation(parentColumn = "id", entityColumn = "entryId")
+    @UmRelation(parentColumn = "uuid", entityColumn = "entryId")
     private List<OpdsLink> links;
 
     @UmRelation(parentColumn = "entryId", entityColumn = "containerEntryId")

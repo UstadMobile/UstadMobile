@@ -28,20 +28,20 @@ public abstract class OpdsEntryWithRelationsDao {
 
     public abstract OpdsEntryWithRelations getEntryByUrlStatic(String url);
 
-    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.id = OpdsEntry.id WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
+    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
     public abstract UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId);
 
-    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.id = OpdsEntry.id WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
+    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
     public abstract UmLiveData<List<OpdsEntryWithRelations>> getEntriesByParentAsList(String parentId);
 
-    @UmQuery("SELECT * from OpdsEntry where id = :uuid")
+    @UmQuery("SELECT * from OpdsEntry where uuid = :uuid")
     public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid);
 
-    @UmQuery("SELECT id FROM OpdsEntry WHERE url = :url")
+    @UmQuery("SELECT uuid FROM OpdsEntry WHERE url = :url")
     public abstract String getUuidForEntryUrl(String url);
 
     protected static final String findEntriesByContainerFileDirectorySql ="SELECT * FROM OpdsEntry " +
-            "LEFT JOIN ContainerFileEntry on OpdsEntry.id = ContainerFileEntry.opdsEntryUuid " +
+            "LEFT JOIN ContainerFileEntry on OpdsEntry.uuid = ContainerFileEntry.opdsEntryUuid " +
             "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id " +
             "WHERE ContainerFile.dirPath = :dir";
 

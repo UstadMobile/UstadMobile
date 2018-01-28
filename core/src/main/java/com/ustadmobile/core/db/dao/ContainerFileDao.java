@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 
 public abstract class ContainerFileDao {
 
-    public abstract ContainerFileWithRelations findContainerFileByDirPath(String dirPath);
+    public abstract ContainerFileWithRelations findContainerFileByPath(String path);
 
     public abstract long insert(ContainerFile containerFile);
 

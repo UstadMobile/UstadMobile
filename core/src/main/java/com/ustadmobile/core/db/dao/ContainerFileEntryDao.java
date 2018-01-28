@@ -15,7 +15,7 @@ public abstract class ContainerFileEntryDao {
     @UmInsert
     public abstract void insert(List<ContainerFileEntry> fileEntries);
 
-    @UmQuery("DELETE From OpdsEntry WHERE id in (Select opdsEntryUuid FROM ContainerFileEntry WHERE containerFileId = :containerFileId)")
+    @UmQuery("DELETE From OpdsEntry WHERE uuid in (Select opdsEntryUuid FROM ContainerFileEntry WHERE containerFileId = :containerFileId)")
     public abstract void deleteOpdsEntriesByContainerFile(int containerFileId);
 
     @UmQuery("DELETE FROM ContainerFileEntry WHERE containerFileId = :containerFileId")

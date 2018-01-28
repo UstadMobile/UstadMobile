@@ -28,7 +28,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Query("SELECT * From OpdsEntry Where url = :url")
     public abstract LiveData<OpdsEntryWithRelations> getEntryByUrlR(String url);
 
-    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.id = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
+    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByParentR(String parentId);
 
     @Override
@@ -40,7 +40,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
         return new UmLiveDataAndroid<>(findEntriesByParentAsListR(parentId));
     }
 
-    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.id = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
+    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
     public abstract LiveData<List<OpdsEntryWithRelations>> findEntriesByParentAsListR(String parentId);
 
     @Override
@@ -53,11 +53,11 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
         return new UmLiveDataAndroid<>(getEntryByUuidR(uuid));
     }
 
-    @Query("SELECT * from OpdsEntry where id = :uuid")
+    @Query("SELECT * from OpdsEntry where uuid = :uuid")
     public abstract LiveData<OpdsEntryWithRelations> getEntryByUuidR(String uuid);
 
     @Override
-    @Query("SELECT id FROM OpdsEntry WHERE url = :url")
+    @Query("SELECT uuid FROM OpdsEntry WHERE url = :url")
     public abstract String getUuidForEntryUrl(String url);
 
     @Query(findEntriesByContainerFileDirectorySql)

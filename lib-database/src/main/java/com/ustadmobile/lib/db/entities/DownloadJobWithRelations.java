@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DownloadJobWithRelations extends DownloadJob{
 
-    @UmRelation(parentColumn = "id", entityColumn = "downloadJobId")
+    @UmRelation(parentColumn = "uuid", entityColumn = "downloadJobId")
     private List <DownloadJobItem> downloadJobItems;
 
     public List<DownloadJobItem> getDownloadJobItems() {

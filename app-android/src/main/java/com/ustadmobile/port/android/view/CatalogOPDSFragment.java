@@ -57,7 +57,6 @@ import android.widget.Button;
 
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.opds.OpdsFilterOptions;
@@ -263,7 +262,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     /**
      * Get the OPDSEntryCard for the given OPDS Entry ID
      *
-     * @param id OPDS Entry id
+     * @param id OPDS Entry uuid
      * @return OPDSEntryCard representing this item
      */
     public OPDSEntryCard getEntryCardByOPDSID(String id) {
@@ -354,14 +353,14 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     public void toggleEntrySelected(OPDSEntryCard card) {
-        boolean cardSelected = selectedUuids.contains(card.getOpdsEntry().getId());
+        boolean cardSelected = selectedUuids.contains(card.getOpdsEntry().getUuid());
         cardSelected = !cardSelected;
 
         card.setSelected(cardSelected);
         if(cardSelected) {
-            selectedUuids.add(card.getOpdsEntry().getId());
+            selectedUuids.add(card.getOpdsEntry().getUuid());
         }else {
-            selectedUuids.remove(card.getOpdsEntry().getId());
+            selectedUuids.remove(card.getOpdsEntry().getUuid());
         }
 
         if(cardSelected && selectedUuids.size() == 1 && getActivity() != null) {
@@ -502,7 +501,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             if(entry == null)
                 continue;
 
-            holder.mEntryCard.setSelected(selectedEntries.contains(entry.getId()));
+            holder.mEntryCard.setSelected(selectedEntries.contains(entry.getUuid()));
         }
 
         this.selectedUuids = selectedEntries;
@@ -595,7 +594,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 if(imgLink != null)
                     imageUri = imgLink.getHref();
 
-                holder.mEntryCard.setSelected(selectedUuids.contains(entry.getId()));
+                holder.mEntryCard.setSelected(selectedUuids.contains(entry.getUuid()));
                 boundViewHolders.add(holder);
             }
 
@@ -615,7 +614,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public static final DiffCallback<OpdsEntryWithRelations> DIFF_CALLBACK = new DiffCallback<OpdsEntryWithRelations>() {
         @Override
         public boolean areItemsTheSame(@NonNull OpdsEntryWithRelations oldItem, @NonNull OpdsEntryWithRelations newItem) {
-            return oldItem.getId() == newItem.getId();
+            return oldItem.getUuid() == newItem.getUuid();
         }
 
         @Override

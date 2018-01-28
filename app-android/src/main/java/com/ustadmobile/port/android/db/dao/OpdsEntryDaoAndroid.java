@@ -25,7 +25,7 @@ public abstract class OpdsEntryDaoAndroid extends OpdsEntryDao{
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void insertList(List<OpdsEntry> entries);
 
-    @Query("SELECT (COUNT(*) > 0) From OpdsEntry WHERE id = :entryId")
+    @Query("SELECT (COUNT(*) > 0) From OpdsEntry WHERE uuid = :entryId")
     public abstract LiveData<Boolean> isEntryPresentR(String entryId);
 
     @Override

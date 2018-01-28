@@ -91,7 +91,7 @@ public class TestOpdsRepository extends TestCase {
 
             UmLiveData<List<OpdsEntryWithRelations>> childEntryListLiveData = DbManager
                     .getInstance(PlatformTestUtil.getTargetContext()).getOpdsEntryWithRelationsDao()
-                    .getEntriesByParentAsList(parent.getId());
+                    .getEntriesByParentAsList(parent.getUuid());
             UmObserver<List<OpdsEntryWithRelations>> observer = new UmObserver<List<OpdsEntryWithRelations>>() {
                 @Override
                 public void onChanged(List<OpdsEntryWithRelations> entryList) {

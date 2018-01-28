@@ -61,9 +61,9 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
             XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(requestIn ,"UTF-8");
             itemToLoad.setUrl(url);
-            if(itemToLoad.getId() == null) {
+            if(itemToLoad.getUuid() == null) {
                 String entryId = dbManager.getOpdsEntryWithRelationsDao().getUuidForEntryUrl(url);
-                itemToLoad.setId(entryId != null ?
+                itemToLoad.setUuid(entryId != null ?
                         entryId : UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
             }
 
@@ -96,16 +96,16 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
     @Override
     public void onEntryAdded(OpdsEntryWithRelations entry, OpdsEntry parentFeed, int position) {
-        entry.setId(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+        entry.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
 
         if(entry.getLinks() != null) {
             for(OpdsLink link : entry.getLinks()) {
-                link.setEntryId(entry.getId());
+                link.setEntryId(entry.getUuid());
             }
             dbManager.getOpdsLinkDao().insert(entry.getLinks());
         }
-        OpdsEntryParentToChildJoin parentToChild = new OpdsEntryParentToChildJoin(parentFeed.getId(),
-                entry.getId(), position);
+        OpdsEntryParentToChildJoin parentToChild = new OpdsEntryParentToChildJoin(parentFeed.getUuid(),
+                entry.getUuid(), position);
         dbManager.getOpdsEntryParentToChildJoinDao().insert(parentToChild);
         dbManager.getOpdsEntryDao().insert(entry);
 
@@ -125,7 +125,7 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
             return;
 
         for(OpdsLink link : itemWithLinks.getLinks()) {
-            link.setFeedId(itemWithLinks.getId());
+            link.setFeedId(itemWithLinks.getUuid());
         }
 
         dbManager.getOpdsLinkDao().insert(itemWithLinks.getLinks());

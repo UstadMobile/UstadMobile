@@ -59,7 +59,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
 
     private void handlePresetParentFeedUpdated(OpdsEntryWithRelations presetParent) {
         if(loadedUuid == null && presetParent != null) {
-            loadedUuid = presetParent.getId();
+            loadedUuid = presetParent.getUuid();
             presetListLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntriesByParentAsList(loadedUuid);
             presetListObserver = this::handlePresetFeedListUpdated;
@@ -91,7 +91,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
             //take it from the libraries.opds preset that was selected
             OpdsEntry addedEntry = presetFeedsList.get(dropDownlSelectedIndex-2);
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
-                addedEntry.getId(), 0);
+                addedEntry.getUuid(), 0);
             new Thread(() -> {
                 OpdsEntryParentToChildJoinDao dao = DbManager.getInstance(getContext())
                         .getOpdsEntryParentToChildJoinDao();
@@ -110,9 +110,9 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
 
     @Override
     public void onDone(OpdsEntry entry) {
-        if(entry.getItemId() != null && entry.getTitle() != null) {
+        if(entry.getEntryId() != null && entry.getTitle() != null) {
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
-                    entry.getId(), 0);
+                    entry.getUuid(), 0);
             new Thread(() -> {
                 OpdsEntryParentToChildJoinDao dao = DbManager.getInstance(getContext())
                         .getOpdsEntryParentToChildJoinDao();
@@ -122,7 +122,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
             }).start();
         }else {
             onError(entry,
-                    new IllegalArgumentException("No entry id or title - probably not an OPDS feed"));
+                    new IllegalArgumentException("No entry uuid or title - probably not an OPDS feed"));
         }
 
     }

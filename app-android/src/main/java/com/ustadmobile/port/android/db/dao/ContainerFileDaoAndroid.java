@@ -15,12 +15,12 @@ import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 @Dao
 public abstract class ContainerFileDaoAndroid extends ContainerFileDao {
 
-    @Query("Select * From ContainerFile WHERE dirPath = :dirPath")
-    public abstract ContainerFileWithRelations findContainerFileByDirPathR(String dirPath);
+    @Query("Select * From ContainerFile WHERE normalizedPath = :path ")
+    public abstract ContainerFileWithRelations findContainerFilePathR(String path);
 
     @Override
-    public ContainerFileWithRelations findContainerFileByDirPath(String dirPath){
-        return findContainerFileByDirPathR(dirPath);
+    public ContainerFileWithRelations findContainerFileByPath(String dirPath){
+        return findContainerFilePathR(dirPath);
     }
 
     @Override

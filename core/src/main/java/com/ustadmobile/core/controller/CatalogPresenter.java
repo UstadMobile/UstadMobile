@@ -114,6 +114,8 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     private boolean deleteEntryFromFeedEnabled;
 
+    private String title;
+
 
     public CatalogPresenter(Object context, CatalogView view) {
         super(context);
@@ -184,6 +186,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
                     .findEntriesByContainerFileDirectoryAsProvider(storageDirs[0].getDirURI());
             mView.setEntryProvider(entryProvider);
+            title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
         }
 
 
@@ -198,8 +201,9 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     }
 
     private void handleParentFeedLoaded(OpdsEntryWithRelations opdsFeed) {
-        if(opdsFeed != null && (loadedFeedId == null || !loadedFeedId.equals(opdsFeed.getId()))) {
-            loadedFeedId = opdsFeed.getId();
+        if(opdsFeed != null && (loadedFeedId == null || !loadedFeedId.equals(opdsFeed.getUuid()))) {
+            loadedFeedId = opdsFeed.getUuid();
+            title = opdsFeed.getTitle();
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntriesByParent(loadedFeedId);
             mView.setEntryProvider(entryProvider);
@@ -256,15 +260,19 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     public void handleClickEntry(final OpdsEntryWithRelations entry) {
         OpdsLink acquisitionLink = entry.getAcquisitionLink(null, false);
-        Hashtable args = new Hashtable();
+
 
         if(acquisitionLink != null) {
-            args.put(ARG_URL, "entry:///" + entry.getId());
-            args.put(ARG_BASE_HREF, feedLiveData.getValue().getUrl());
-            args.put(CatalogEntryPresenter.ARG_TITLEBAR_TEXT, feedLiveData.getValue().getTitle());
-            UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, args, getContext());
+            openCatalogEntryView(entry.getUuid());
             return;
         }
+
+        if(entry.getUrl() != null && UMFileUtil.isFileUri(entry.getUrl())) {
+            openCatalogEntryView(entry.getUuid());
+            return;
+        }
+
+        Hashtable args = new Hashtable();
 
         List<OpdsLink> opdsLinks = entry.getLinks();
         if(opdsLinks == null)
@@ -291,7 +299,23 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                 return;
             }
         }
+
+        //no relevant link found - but perhaps this is a file entry
     }
+
+    protected void openCatalogEntryView(String entryUuid) {
+        Hashtable args = new Hashtable();
+        args.put(ARG_URL, "entry:///" + entryUuid);
+
+        if(feedLiveData != null && feedLiveData.getValue() != null && feedLiveData.getValue().getUrl() != null)
+            args.put(ARG_BASE_HREF, feedLiveData.getValue().getUrl());
+
+        if(title != null)
+            args.put(CatalogEntryPresenter.ARG_TITLEBAR_TEXT, title);
+
+        UstadMobileSystemImpl.getInstance().go(CatalogEntryView.VIEW_NAME, args, getContext());
+    }
+
 
     /**
      * Triggered when the user selects an entry from the catalog. This could
@@ -325,7 +349,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     public void handleClickAdd() {
         Hashtable args = new Hashtable();
-        args.put(AddFeedDialogPresenter.ARG_UUID, feedLiveData.getValue().getId());
+        args.put(AddFeedDialogPresenter.ARG_UUID, feedLiveData.getValue().getUuid());
         UstadMobileSystemImpl.getInstance().go(AddFeedDialogView.VIEW_NAME, args, getContext());
     }
 
@@ -376,7 +400,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                         if(choice == AppView.CHOICE_POSITIVE) {
                             new Thread(() ->{
                                 DbManager.getInstance(getContext()).getOpdsEntryParentToChildJoinDao()
-                                    .deleteByParentIdAndChildId(feedLiveData.getValue().getId(),
+                                    .deleteByParentIdAndChildId(feedLiveData.getValue().getUuid(),
                                         new ArrayList<>(selectedEntries));
                                 selectedEntries.clear();
                                 mView.runOnUiThread(() ->mView.setSelectedEntries(selectedEntries));

@@ -36,7 +36,7 @@ public class OpdsDirScanner implements Runnable{
         for(File file : dirFile.listFiles()) {
             fileExtension = UMFileUtil.getExtension(file.getName());
             ContainerFileWithRelations containerFile = dbManager.getContainerFileDao()
-                    .findContainerFileByDirPath(file.getAbsolutePath());
+                    .findContainerFileByPath(file.getAbsolutePath());
             ArrayList<ContainerFileEntry> containerFileEntries = new ArrayList<>();
 
             if(containerFile == null){
@@ -67,9 +67,9 @@ public class OpdsDirScanner implements Runnable{
 
                 for(OpdsEntry entry : entriesInFile) {
                     ContainerFileEntry fileEntry = new ContainerFileEntry();
-                    fileEntry.setOpdsEntryUuid(entry.getId());
+                    fileEntry.setOpdsEntryUuid(entry.getUuid());
                     fileEntry.setContainerFileId(containerFile.getId());
-                    fileEntry.setContainerEntryId(entry.getItemId());
+                    fileEntry.setContainerEntryId(entry.getEntryId());
                     containerFileEntries.add(fileEntry);
                 }
 

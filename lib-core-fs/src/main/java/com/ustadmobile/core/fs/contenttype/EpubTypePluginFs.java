@@ -2,9 +2,6 @@ package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.core.catalog.contenttype.EPUBTypePlugin;
 import com.ustadmobile.core.db.DbManager;
-import com.ustadmobile.core.db.UmLiveData;
-import com.ustadmobile.core.db.UmObserver;
-import com.ustadmobile.core.fs.db.NotifyUmObserer;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.ocf.UstadOCFRootFile;
@@ -54,7 +51,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
 
                 if(entry == null) {
                     entry = new OpdsEntryWithRelations();
-                    entry.setId(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+                    entry.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
                     entry.setUrl(url);
                 }
 
@@ -66,7 +63,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
                 ocfIn.close();
 
                 entry.setTitle(opf.title);
-                entry.setItemId(opf.id);
+                entry.setEntryId(opf.id);
                 entry.setContent(opf.description);
                 entry.setContentType(OpdsEntry.CONTENT_TYPE_TEXT);
                 results.add(entry);

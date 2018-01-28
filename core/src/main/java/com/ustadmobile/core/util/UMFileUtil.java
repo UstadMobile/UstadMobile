@@ -738,6 +738,22 @@ public class UMFileUtil {
         return result;
     }
 
+    /**
+     * Make a rough guess if the given uri is a file or not.
+     *
+     * Will return true if the uri starts with file:/// or just /
+     *
+     * @param uri the uri to check to determine if it is a file uri or not. Should be an absolute
+     *            uri.
+     * @return True if it looks like a file as above, false otherwise
+     */
+    public static boolean isFileUri(String uri) {
+        if(uri.startsWith(PROTOCOL_FILE) || uri.startsWith("/"))
+            return true;
+        else
+            return false;
+    }
+
     
     
 }

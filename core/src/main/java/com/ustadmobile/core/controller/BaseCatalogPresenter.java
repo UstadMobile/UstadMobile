@@ -132,7 +132,7 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
     }
 
     /**
-     * Returns a hashtable in the form of language - entry id for the entry and any known translations
+     * Returns a hashtable in the form of language - entry uuid for the entry and any known translations
      *
      * @param entry
      *
