@@ -100,7 +100,7 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
         if(entry.getLinks() != null) {
             for(OpdsLink link : entry.getLinks()) {
-                link.setEntryId(entry.getUuid());
+                link.setEntryUuid(entry.getUuid());
             }
             dbManager.getOpdsLinkDao().insert(entry.getLinks());
         }
@@ -125,7 +125,7 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
             return;
 
         for(OpdsLink link : itemWithLinks.getLinks()) {
-            link.setFeedId(itemWithLinks.getUuid());
+            link.setEntryUuid(itemWithLinks.getUuid());
         }
 
         dbManager.getOpdsLinkDao().insert(itemWithLinks.getLinks());

@@ -16,8 +16,8 @@ public abstract class OpdsLinkDao {
     @UmInsert
     public abstract void insert(List<OpdsLink> links);
 
-    @UmQuery("SELECT * From OpdsLink WHERE entryId = :entryId")
-    public abstract List<OpdsLink> findLinkByEntryId(String entryId);
+    @UmQuery("SELECT * From OpdsLink WHERE entryId = :entryUuid")
+    public abstract List<OpdsLink> findLinkByEntryId(String entryUuid);
 
     public abstract List<OpdsLink> getAllLinks();
 

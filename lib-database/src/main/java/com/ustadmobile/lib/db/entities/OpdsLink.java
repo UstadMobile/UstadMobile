@@ -15,10 +15,7 @@ public class OpdsLink {
     private int id;
 
     @UmIndexField
-    private String feedId;
-
-    @UmIndexField
-    private String entryId;
+    private String entryUuid;
 
     private int linkIndex;
 
@@ -42,20 +39,12 @@ public class OpdsLink {
         this.id = id;
     }
 
-    public String getFeedId() {
-        return feedId;
+    public String getEntryUuid() {
+        return entryUuid;
     }
 
-    public void setFeedId(String feedId) {
-        this.feedId = feedId;
-    }
-
-    public String getEntryId() {
-        return entryId;
-    }
-
-    public void setEntryId(String entryId) {
-        this.entryId = entryId;
+    public void setEntryUuid(String entryUuid) {
+        this.entryUuid = entryUuid;
     }
 
     public int getLinkIndex() {

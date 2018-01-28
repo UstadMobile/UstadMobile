@@ -19,8 +19,8 @@ public abstract class OpdsLinkDaoAndroid extends OpdsLinkDao{
     @Insert
     public abstract void insert(List<OpdsLink> links);
 
-    @Query("SELECT * From OpdsLink WHERE entryId = :entryId")
-    public abstract List<OpdsLink> findLinkByEntryIdR(String entryId);
+    @Query("SELECT * From OpdsLink WHERE entryUuid = :entryUuid")
+    public abstract List<OpdsLink> findLinkByEntryIdR(String entryUuid);
 
     @Override
     public List<OpdsLink> findLinkByEntryId(String entryId) {

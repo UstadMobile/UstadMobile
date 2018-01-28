@@ -284,12 +284,7 @@ public class OpdsEntry {
                     }
 
                     link.setTitle(xpp.getAttributeValue(null, ATTR_TITLE));
-
-                    if(this instanceof OpdsEntry) {
-                        link.setEntryId(this.getUuid());
-                    }else {
-                        link.setFeedId(this.getUuid());
-                    }
+                    link.setEntryUuid(this.getUuid());
                     link.setLinkIndex(linkCount);
 
                     if(this instanceof OpdsEntryWithRelations) {
