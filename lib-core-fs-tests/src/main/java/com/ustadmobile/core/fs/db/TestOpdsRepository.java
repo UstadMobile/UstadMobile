@@ -87,7 +87,7 @@ public class TestOpdsRepository extends TestCase {
                     parent.getTitle());
             Assert.assertEquals("Loaded expected ID from feed",
                     "http://umcloud1.ustadmobile.com/opds/courseid/6CM",
-                    parent.getItemId());
+                    parent.getEntryId());
 
             UmLiveData<List<OpdsEntryWithRelations>> childEntryListLiveData = DbManager
                     .getInstance(PlatformTestUtil.getTargetContext()).getOpdsEntryWithRelationsDao()

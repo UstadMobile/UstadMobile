@@ -94,7 +94,7 @@ public class OpdsEntry {
 
     protected static final String TAG_UPDATED = "updated";
 
-    protected static final String TAG_ID = "uuid";
+    protected static final String TAG_ID = "id";
 
     protected static final String TAG_LINK = "link";
 
