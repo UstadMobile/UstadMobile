@@ -22,6 +22,7 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.ZipFile;
 
 /**
  * Created by mike on 12/26/17.
@@ -81,11 +82,21 @@ public class HttpCache implements HttpCacheResponse.ResponseCompleteListener{
             AbstractCacheResponse cacheResponse = null;
 
             if(request.getUrl().startsWith(PROTOCOL_FILE)) {
-                File responseFile = new File(UMFileUtil.stripPrefixIfPresent("file://",
-                        request.getUrl()));
-                cacheResponse = new FileProtocolCacheResponse(responseFile);
-                if(async) {
-                    responseCallback.onComplete(this, cacheResponse);
+                String filePath = UMFileUtil.stripPrefixIfPresent("file://", request.getUrl());
+                int zipSepPos = filePath.indexOf('!');
+                if(zipSepPos == -1) {
+                    File responseFile = new File(filePath);
+                    cacheResponse = new FileProtocolCacheResponse(responseFile);
+                    if(async) {
+                        responseCallback.onComplete(this, cacheResponse);
+                    }
+                }else {
+                    cacheResponse = new ZipEntryCacheResponse(
+                            new File(filePath.substring(0, zipSepPos)),
+                            filePath.substring(zipSepPos+1));
+                    if(async){
+                        responseCallback.onComplete(this, cacheResponse);
+                    }
                 }
 
                 return cacheResponse;

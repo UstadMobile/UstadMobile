@@ -60,7 +60,7 @@ public class UMFileUtil {
      * @param paths Array of paths to join
      * @return path components joined with a single FILE_SEP character between
      */
-    public static String joinPaths(String[] paths) {
+    public static String joinPaths(String... paths) {
         StringBuffer result = new StringBuffer();
         for(int i = 0; i < paths.length; i++) {
             String pathComp = paths[i];

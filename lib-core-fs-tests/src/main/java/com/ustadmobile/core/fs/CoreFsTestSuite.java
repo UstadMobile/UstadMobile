@@ -10,8 +10,8 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-//    TestHttpCache.class
-        TestOpdsRepository.class
+    TestHttpCache.class,
+    TestOpdsRepository.class
 })
 
 public class CoreFsTestSuite {

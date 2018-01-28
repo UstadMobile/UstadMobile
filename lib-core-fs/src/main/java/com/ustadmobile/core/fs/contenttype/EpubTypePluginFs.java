@@ -6,13 +6,17 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.ocf.UstadOCF;
 import com.ustadmobile.core.ocf.UstadOCFRootFile;
 import com.ustadmobile.core.opf.UstadJSOPF;
+import com.ustadmobile.core.opf.UstadJSOPFItem;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -30,11 +34,11 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
     public static final String OCF_CONTAINER_PATH = "META-INF/container.xml";
 
     @Override
-    public List<OpdsEntryWithRelations> getEntries(String fileUri, Object context) {
+    public List<OpdsEntryWithRelations> getEntries(File file, Object context) {
         InputStream ocfIn;
         List<OpdsEntryWithRelations> results = new ArrayList<>();
         try {
-            ZipFile epubZip = new ZipFile(fileUri);
+            ZipFile epubZip = new ZipFile(file);
             UstadOCF ocf = new UstadOCF();
             ZipEntry ocfEntry = epubZip.getEntry(OCF_CONTAINER_PATH);
             ocfIn = epubZip.getInputStream(ocfEntry);
@@ -44,7 +48,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
             ocfIn.close();
 
             for(UstadOCFRootFile root : ocf.rootFiles) {
-                String url = fileUri + "!" + root.fullPath;
+                String url = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() + "!" + root.fullPath;
 
                 OpdsEntryWithRelations entry = DbManager.getInstance(context)
                         .getOpdsEntryWithRelationsDao().getEntryByUrlStatic(url);
@@ -66,6 +70,19 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
                 entry.setEntryId(opf.id);
                 entry.setContent(opf.description);
                 entry.setContentType(OpdsEntry.CONTENT_TYPE_TEXT);
+
+                UstadJSOPFItem coverImageItem = opf.getCoverImage(null);
+                if(coverImageItem != null) {
+                    String coverImgHref = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() + "!" +
+                            UMFileUtil.resolveLink(root.fullPath, coverImageItem.href);
+                    OpdsLink coverImgLink = new OpdsLink(entry.getUuid(),
+                            coverImageItem.mimeType, coverImgHref, OpdsEntry.LINK_REL_THUMBNAIL);
+                    if(entry.getLinks() == null)
+                        entry.setLinks(new ArrayList<>());
+
+                    entry.getLinks().add(coverImgLink);
+                }
+
                 results.add(entry);
             }
         }catch(IOException|XmlPullParserException e) {

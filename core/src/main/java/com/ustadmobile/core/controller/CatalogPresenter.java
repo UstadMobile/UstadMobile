@@ -211,7 +211,11 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     }
 
     public String resolveLink(String href) {
-        return UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(), href);
+        //TODO: refactor this to using a base href variable instead
+        if(feedLiveData != null && feedLiveData.getValue() != null)
+            return UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(), href);
+        else
+            return href;
     }
 
     public int getResourceMode() {

@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -58,8 +59,8 @@ public class OpdsDirScanner implements Runnable{
                 if(!(plugin instanceof ContentTypePluginFs))
                     continue;
 
-                List<? extends OpdsEntry> entriesInFile = ((ContentTypePluginFs)plugin)
-                        .getEntries(file.getAbsolutePath(), dbManager.getContext());
+                List<OpdsEntryWithRelations> entriesInFile = ((ContentTypePluginFs)plugin)
+                        .getEntries(file, dbManager.getContext());
 
                 if(entriesInFile == null)
                     continue;
@@ -80,7 +81,14 @@ public class OpdsDirScanner implements Runnable{
 
                 //now persist everything for this file
                 dbManager.getContainerFileEntryDao().insert(containerFileEntries);
+
+                for(OpdsEntryWithRelations entry : entriesInFile) {
+                    if(entry.getLinks() != null)
+                        dbManager.getOpdsLinkDao().insert(entry.getLinks());
+                }
+
                 dbManager.getOpdsEntryDao().insertList(new ArrayList<>(entriesInFile));
+
                 dbManager.getContainerFileDao().updateLastUpdatedById(containerFile.getId(),
                         System.currentTimeMillis());
                 break;

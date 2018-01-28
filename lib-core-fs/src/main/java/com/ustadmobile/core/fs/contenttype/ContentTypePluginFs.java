@@ -2,6 +2,7 @@ package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -13,8 +14,8 @@ public interface ContentTypePluginFs {
     /**
      * Generate an UstadJSOPDSEntry for the givne fileUri.
      *
-     * @param fileUri
+     * @param file The path to the file to retrieve a
      * @return
      */
-    List<OpdsEntryWithRelations> getEntries(String fileUri, Object context);
+    List<OpdsEntryWithRelations> getEntries(File file, Object context);
 }

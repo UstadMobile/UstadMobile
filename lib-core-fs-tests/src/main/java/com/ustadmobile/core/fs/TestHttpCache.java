@@ -68,6 +68,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -310,6 +312,35 @@ public class TestHttpCache {
         testFileIn = new FileInputStream(testTmpFile);
         Assert.assertTrue("Byte array delivered is the same as original file",
                 UMTestUtil.areStreamsEqual(testFileIn, new ByteArrayInputStream(fileResponse.getResponseBody())));
+    }
+
+    @Test
+    public void testCacheZipEntryResponse() throws IOException {
+        Object context = PlatformTestUtil.getTargetContext();
+        UmHttpResponseNotifyCallback notifyCallback = new UmHttpResponseNotifyCallback();
+
+        //test that we can get a file from the disk using file:// requests
+        InputStream resourceIn = getClass().getResourceAsStream("/com/ustadmobile/test/core/thelittlechicks.epub");
+        File testTmpFile = File.createTempFile("testhttpcache-thelittlchicks", ".epub");
+        OutputStream testTmpFileOut = new FileOutputStream(testTmpFile);
+        UMIOUtils.readFully(resourceIn, testTmpFileOut);
+        resourceIn.close();
+        testTmpFileOut.close();
+
+        notifyCallback.clear();
+
+        String zipEntryUri = "file://" + testTmpFile.getAbsolutePath()+ "!EPUB/coverimg.jpg";
+
+        httpCache.get(new UmHttpRequest(context, zipEntryUri), notifyCallback);
+        AbstractCacheResponse zipResponse = (AbstractCacheResponse)notifyCallback.waitAndGetResponse(240000);
+        Assert.assertNotNull("Got zip entry response", zipResponse);
+
+        ZipFile zipFile = new ZipFile(testTmpFile.getAbsolutePath());
+        ZipEntry zipEntry = zipFile.getEntry("EPUB/coverimg.jpg");
+        byte[] btyesFromEntry = UMIOUtils.readStreamToByteArray(zipFile.getInputStream(zipEntry));
+        Assert.assertTrue(Arrays.equals(btyesFromEntry, zipResponse.getResponseBody()));
+
+        testTmpFile.delete();
     }
 
 

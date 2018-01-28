@@ -31,6 +31,18 @@ public class OpdsLink {
 
     private String title;
 
+    public OpdsLink() {
+
+    }
+
+    public OpdsLink(String entryUuid, String mimeType, String href, String rel) {
+        this.entryUuid = entryUuid;
+        this.mimeType = mimeType;
+        this.href = href;
+        this.rel = rel;
+    }
+
+
     public int getId() {
         return id;
     }
