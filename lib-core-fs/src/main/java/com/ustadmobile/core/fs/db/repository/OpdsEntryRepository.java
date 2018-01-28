@@ -47,9 +47,19 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
     }
 
     @Override
-    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectory(String dir) {
+    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(String dir) {
         UmLiveData<List<OpdsEntryWithRelations>> dbResult = dbManager.getOpdsEntryWithRelationsDao()
-                .findEntriesByContainerFileDirectory(dir);
+                .findEntriesByContainerFileDirectoryAsList(dir);
+
+        executorService.execute(new OpdsDirScanner(dbManager, dir));
+
+        return dbResult;
+    }
+
+    @Override
+    public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(String dir) {
+        UmProvider<OpdsEntryWithRelations> dbResult = dbManager.getOpdsEntryWithRelationsDao()
+                .findEntriesByContainerFileDirectoryAsProvider(dir);
 
         executorService.execute(new OpdsDirScanner(dbManager, dir));
 
@@ -75,4 +85,6 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
     public String getUuidForEntryUrl(String url) {
         return null;
     }
+
+
 }

@@ -6,11 +6,10 @@ import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
-import com.ustadmobile.core.opds.OpdsFilterOptionField;
-import com.ustadmobile.core.opds.OpdsFilterOptions;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
@@ -155,7 +154,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         if(opdsUri.startsWith("https://") || opdsUri.startsWith("http://")) {
             feedLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
                     .getEntryByUrl(opdsUri);
-            feedLiveData.observe(this, this::handleFeedChanged);
+            feedLiveData.observe(this, this::handleParentFeedLoaded);
         }else if(opdsUri.equals("entries:///my_library")) {
             final String libraryUuid = "my_library";
             UmLiveData<Boolean> libraryPresent = DbManager.getInstance(getContext())
@@ -163,7 +162,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             feedLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()
                     .getEntryByUuid(libraryUuid);
             feedLiveData.observe(CatalogPresenter.this,
-                    CatalogPresenter.this::handleFeedChanged);
+                    CatalogPresenter.this::handleParentFeedLoaded);
             UmObserver<Boolean> presentObserver = new UmObserver<Boolean>() {
                 @Override
                 public void onChanged(Boolean present) {
@@ -179,6 +178,12 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             libraryPresent.observe(this, presentObserver);
             mView.setAddOptionAvailable(true);
             setDeleteEntryFromFeedEnabled(true);
+        }else if(opdsUri.equals("entries:///findEntriesByContainerFileDirectory")) {
+            UMStorageDir[] storageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                    CatalogPresenter.SHARED_RESOURCE, getContext());
+            entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+                    .findEntriesByContainerFileDirectoryAsProvider(storageDirs[0].getDirURI());
+            mView.setEntryProvider(entryProvider);
         }
 
 
@@ -192,7 +197,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         UstadMobileSystemImpl.getInstance().getNetworkManager().removeAcquisitionTaskListener(this);
     }
 
-    private void handleFeedChanged(OpdsEntryWithRelations opdsFeed) {
+    private void handleParentFeedLoaded(OpdsEntryWithRelations opdsFeed) {
         if(opdsFeed != null && (loadedFeedId == null || !loadedFeedId.equals(opdsFeed.getId()))) {
             loadedFeedId = opdsFeed.getId();
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsDao()

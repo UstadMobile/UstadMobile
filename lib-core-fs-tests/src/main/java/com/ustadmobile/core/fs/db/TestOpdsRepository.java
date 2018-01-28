@@ -129,7 +129,7 @@ public class TestOpdsRepository extends TestCase {
 
         ArrayList<OpdsEntryWithRelations> entriesInDir = new ArrayList<>();
         UmLiveData<List<OpdsEntryWithRelations>> entriesInDirLiveData = repository
-                .findEntriesByContainerFileDirectory(tmpDir.getAbsolutePath());
+                .findEntriesByContainerFileDirectoryAsList(tmpDir.getAbsolutePath());
         UmObserver<List<OpdsEntryWithRelations>> observer = (entriesInDirList) -> {
             if(entriesInDirList != null && !entriesInDirList.isEmpty()) {
                 synchronized (TestOpdsRepository.this) {

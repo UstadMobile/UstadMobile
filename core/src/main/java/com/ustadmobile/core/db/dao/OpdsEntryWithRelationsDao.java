@@ -40,11 +40,16 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery("SELECT id FROM OpdsEntry WHERE url = :url")
     public abstract String getUuidForEntryUrl(String url);
 
-    @UmQuery("SELECT * FROM OpdsEntry " +
+    protected static final String findEntriesByContainerFileDirectorySql ="SELECT * FROM OpdsEntry " +
             "LEFT JOIN ContainerFileEntry on OpdsEntry.id = ContainerFileEntry.opdsEntryUuid " +
-            "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFileEntry.id " +
-            "WHERE ContainerFile.dirPath = :dir")
-    public abstract UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectory(String dir);
+            "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE ContainerFile.dirPath = :dir";
+
+    @UmQuery(findEntriesByContainerFileDirectorySql)
+    public abstract UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(String dir);
+
+    @UmQuery(findEntriesByContainerFileDirectorySql)
+    public abstract UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(String dir);
 
 
 }
