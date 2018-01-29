@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
+import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -22,6 +23,8 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.ContainerFile;
+import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UMUtil;
@@ -245,6 +248,12 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         OpdsLink thumbnailLink = entry.getThumbnailLink(true);
         if(thumbnailLink != null)
             catalogEntryView.setThumbnail(UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()));
+
+        if(entry.getContainerFileEntries() != null && entry.getContainerFileEntries().size() > 0)
+            updateButtonsByStatus(CatalogPresenter.STATUS_ACQUIRED);
+        else
+            updateButtonsByStatus(CatalogPresenter.STATUS_NOT_ACQUIRED);
+
     }
 
 
@@ -491,38 +500,65 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     }
 
     public void handleOpenEntry(UstadJSOPDSEntry entry) {
-        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
-                CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE, getContext());
-        UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
-        if (entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
-            //see if the user needs to login
-            if(impl.getActiveUser(context) == null
-                && impl.getAppConfigBoolean(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN, context)){
-                openAfterLoginOrRegister = true;
-                impl.go(LoginView.VIEW_NAME, context);
-                return;
-            }
+        //TODO: check if user login is required, and if so, is the user logged in?
 
-            Hashtable openArgs = new Hashtable();
-            openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
-            openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
-            openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
 
-            String viewName = ContentTypeManager.getViewNameForContentType(entryInfo.mimeType);
+        /**
+         * Find if this entry is in a ContainerFile
+         */
+        List<ContainerFileEntry> containerFileEntries = entryLiveData.getValue().getContainerFileEntries();
 
-            if(viewName != null) {
-                UstadMobileSystemImpl.getInstance().go(viewName, openArgs, getContext());
-            }else {
-                UstadMobileSystemImpl.l(UMLog.ERROR, 672, entryInfo.mimeType);
-                impl.getAppView(getContext()).showNotification(impl.getString(0, getContext()),
-                        AppView.LENGTH_LONG);
-            }
-        }else {
-            UstadMobileSystemImpl.l(UMLog.ERROR, 673, entryInfo != null ? entryInfo.toString() : null);
-            impl.getAppView(getContext()).showNotification(impl.getString(
-                    MessageID.error_opening_file, getContext()), AppView.LENGTH_LONG);
+        if(containerFileEntries != null && containerFileEntries.size() > 0) {
+            int containerFileId = containerFileEntries.get(0).getContainerFileId();
+            DbManager.getInstance(getContext()).getContainerFileDao()
+                    .getContainerFileByIdAsync(containerFileId, new BaseUmCallback<ContainerFile>() {
+                        @Override
+                        public void onSuccess(ContainerFile result) {
+                            Hashtable args = new Hashtable();
+                            args.put(ContainerController.ARG_CONTAINERURI, result.getNormalizedPath());
+                            args.put(ContainerController.ARG_MIMETYPE, result.getMimeType());
+                            args.put(ContainerController.ARG_OPFINDEX, Integer.valueOf(0));
+                            impl.go(ContentTypeManager.getViewNameForContentType(result.getMimeType()),
+                                    args, getContext());
+                        }
+                    });
         }
+
+
+
+//        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
+//                CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE, getContext());
+//
+//        if (entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
+//            //see if the user needs to login
+//            if(impl.getActiveUser(context) == null
+//                && impl.getAppConfigBoolean(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN, context)){
+//                openAfterLoginOrRegister = true;
+//                impl.go(LoginView.VIEW_NAME, context);
+//                return;
+//            }
+//
+//            Hashtable openArgs = new Hashtable();
+//            openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
+//            openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
+//            openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
+//
+//            String viewName = ContentTypeManager.getViewNameForContentType(entryInfo.mimeType);
+//
+//            if(viewName != null) {
+//                UstadMobileSystemImpl.getInstance().go(viewName, openArgs, getContext());
+//            }else {
+//                UstadMobileSystemImpl.l(UMLog.ERROR, 672, entryInfo.mimeType);
+//                impl.getAppView(getContext()).showNotification(impl.getString(0, getContext()),
+//                        AppView.LENGTH_LONG);
+//            }
+//        }else {
+//            UstadMobileSystemImpl.l(UMLog.ERROR, 673, entryInfo != null ? entryInfo.toString() : null);
+//            impl.getAppView(getContext()).showNotification(impl.getString(
+//                    MessageID.error_opening_file, getContext()), AppView.LENGTH_LONG);
+//        }
     }
 
     public void handleClickShare() {

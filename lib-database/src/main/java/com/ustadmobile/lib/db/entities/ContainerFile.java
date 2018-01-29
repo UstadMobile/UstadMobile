@@ -22,6 +22,8 @@ public class ContainerFile {
 
     private long lastUpdated;
 
+    private String mimeType;
+
     public int getId() {
         return id;
     }
@@ -67,5 +69,21 @@ public class ContainerFile {
 
     public void setLastUpdated(long lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    /**
+     * Get the mime type for this file. This is important as some different file types share the same
+     * extension (e.g. .zip for Xapi Package and SCORM files). The mime type is set by the
+     * OpdsDirScanner
+     *
+     * @return The mime type of this file, as specified by the ContentTypePlugin that generated
+     * the entry for it.
+     */
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 }

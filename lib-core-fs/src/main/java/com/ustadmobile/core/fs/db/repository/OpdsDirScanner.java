@@ -44,8 +44,6 @@ public class OpdsDirScanner implements Runnable{
                 containerFile = new ContainerFileWithRelations();
                 containerFile.setNormalizedPath(file.getAbsolutePath());
                 containerFile.setDirPath(file.getParentFile().getAbsolutePath());
-                long containerFileId = dbManager.getContainerFileDao().insert(containerFile);
-                containerFile.setId((int)containerFileId);
             }else if(containerFile.getLastUpdated() > file.lastModified()) {
                 continue;
             }
@@ -64,6 +62,11 @@ public class OpdsDirScanner implements Runnable{
 
                 if(entriesInFile == null)
                     continue;
+
+                //insert the row into the database only once we see we can understand it
+                containerFile.setMimeType(plugin.getMimeTypes().get(0));
+                long containerFileId = dbManager.getContainerFileDao().insert(containerFile);
+                containerFile.setId((int)containerFileId);
 
 
                 for(OpdsEntry entry : entriesInFile) {

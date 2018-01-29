@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 
@@ -15,5 +16,6 @@ public abstract class ContainerFileDao {
 
     public abstract void updateLastUpdatedById(int id, long lastUpdated);
 
+    public abstract void getContainerFileByIdAsync(int containerFileId, BaseUmCallback<ContainerFile> callback);
 
 }
