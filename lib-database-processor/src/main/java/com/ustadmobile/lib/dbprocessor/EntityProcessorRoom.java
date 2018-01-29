@@ -32,6 +32,10 @@ public class EntityProcessorRoom {
 
         for(File srcFile : inDir.listFiles()) {
             File outFile = new File(outDir, srcFile.getName());
+
+            if(!srcFile.getName().endsWith(".java"))
+                continue;
+
             JavaType parsedSource = Roaster.parse(srcFile);
 
             if(!(parsedSource instanceof JavaClassSource)) {
