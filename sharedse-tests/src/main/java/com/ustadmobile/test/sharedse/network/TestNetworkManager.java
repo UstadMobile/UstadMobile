@@ -1,12 +1,13 @@
 package com.ustadmobile.test.sharedse.network;
 
-import com.ustadmobile.core.impl.HTTPResult;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -66,7 +67,7 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceBluetoothMacAddress()!=null && node.getDeviceBluetoothMacAddress().equals(
+                if(node.getBluetoothMacAddress()!=null && node.getBluetoothMacAddress().equals(
                         bluetoothAddr)){
                     synchronized (nodeDiscoveryLock){
                         nodeDiscoveryLock.notify();
@@ -76,7 +77,7 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeUpdated(NetworkNode node) {
-                if(node.getDeviceBluetoothMacAddress()!=null && node.getDeviceBluetoothMacAddress().equals(
+                if(node.getBluetoothMacAddress()!=null && node.getBluetoothMacAddress().equals(
                         bluetoothAddr)){
                     synchronized (nodeDiscoveryLock){
                         nodeDiscoveryLock.notify();
@@ -96,8 +97,10 @@ public class TestNetworkManager {
         };
         manager.addNetworkManagerListener(responseListener);
 
+        NetworkNode nodeInDb = DbManager.getInstance(PlatformTestUtil.getTargetContext()).getNetworkNodeDao()
+                .findNodeByBluetoothAddress(bluetoothAddr);
 
-        if(manager.getNodeByBluetoothAddr(bluetoothAddr) == null) {
+        if(nodeInDb == null) {
             synchronized (nodeDiscoveryLock) {
                 try { nodeDiscoveryLock.wait(timeout ); }
                 catch(InterruptedException e ) {
@@ -106,8 +109,11 @@ public class TestNetworkManager {
             }
         }
 
+        nodeInDb = DbManager.getInstance(PlatformTestUtil.getTargetContext()).getNetworkNodeDao()
+                .findNodeByBluetoothAddress(bluetoothAddr);
+
         Assert.assertNotNull("Remote wifi direct device discovered",
-                manager.getNodeByBluetoothAddr(bluetoothAddr));
+                nodeInDb);
         manager.removeNetworkManagerListener(responseListener);
     }
 
@@ -138,11 +144,6 @@ public class TestNetworkManager {
 
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
 
-        //enable supernode mode on the remote test device
-//        String enableNodeUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=SUPERNODE&enabled=true";
-//        HTTPResult result = UstadMobileSystemImpl.getInstance().makeRequest(enableNodeUrl, null, null);
-//        Assert.assertEquals("Supernode mode reported as enabled", 200, result.getStatus());
-
         final Object nodeNSDiscoveryLock = new Object();
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
@@ -157,7 +158,7 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeDiscovered(NetworkNode node) {
-                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
+                if(node.getIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
                         (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
@@ -167,7 +168,7 @@ public class TestNetworkManager {
 
             @Override
             public void networkNodeUpdated(NetworkNode node) {
-                if(node.getDeviceIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
+                if(node.getIpAddress().equals(SharedSeTestSuite.REMOTE_SLAVE_SERVER) &&
                         (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT){
                     synchronized (nodeNSDiscoveryLock){
                         nodeNSDiscoveryLock.notify();
@@ -188,7 +189,10 @@ public class TestNetworkManager {
         };
         manager.addNetworkManagerListener(responseListener);
 
-        NetworkNode node =manager.getNodeByIpAddress(ipAddress);
+        NetworkNodeDao networkNodeDao = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getNetworkNodeDao();
+        NetworkNode node = networkNodeDao.findNodeByIpAddress(ipAddress);
+
         long timeSinceNsd =(Calendar.getInstance().getTimeInMillis() - (node != null ? node.getNetworkServiceLastUpdated() : 0));
         if(node == null || timeSinceNsd > NODE_DISCOVERY_TIMEOUT) {
             synchronized (nodeNSDiscoveryLock) {
@@ -200,7 +204,8 @@ public class TestNetworkManager {
         }
         manager.removeNetworkManagerListener(responseListener);
 
-        node=manager.getNodeByIpAddress(ipAddress);
+        node=networkNodeDao.findNodeByIpAddress(ipAddress);
+
         Assert.assertNotNull("Remote test slave node discovered via Network Service Discovery", node);
         boolean isWithinDiscoveryTimeRange=
                 (Calendar.getInstance().getTimeInMillis()-node.getNetworkServiceLastUpdated()) < NODE_DISCOVERY_TIMEOUT;
@@ -237,7 +242,7 @@ public class TestNetworkManager {
                 if(timeEnabled[0] == -1)
                     return;//not ready yet
 
-                if(node.getDeviceBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
+                if(node.getBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
                     long wifiDirectUpdated = node.getWifiDirectLastUpdated();
                     long nsdUpdated = node.getNetworkServiceLastUpdated();
                     if(wifiDirectUpdated > timeEnabled[0] && nsdUpdated > timeEnabled[0]) {
@@ -339,7 +344,7 @@ public class TestNetworkManager {
                 if(timeEnabled[0] == -1)
                     return;//not ready yet
 
-                if(node.getDeviceBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
+                if(node.getBluetoothMacAddress().equals(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE)) {
                     long wifiDirectUpdated = node.getWifiDirectLastUpdated();
                     long nsdUpdated = node.getNetworkServiceLastUpdated();
                     if(wifiDirectUpdated > timeEnabled[0] && nsdUpdated > timeEnabled[0]) {

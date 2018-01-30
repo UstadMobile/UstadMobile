@@ -10,7 +10,7 @@ import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -459,7 +459,9 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
             entryCheckResponse = selectEntryCheckResponse(feed.getEntry(index),
                     mirrorFinder.getEntryResponsesWithLocalFile(feed.getEntry(index).getItemId()));
 
-            NetworkNode responseNode = entryCheckResponse != null ? entryCheckResponse.getNetworkNode() : null;
+            //TODO: fix this to work using db
+//            NetworkNode responseNode = entryCheckResponse != null ? entryCheckResponse.getNetworkNode() : null;
+            NetworkNode responseNode = null;
             String currentSsid = networkManager.getCurrentWifiSsid();
             boolean wifiAvailable = currentSsid != null
                     || networkManager.getActionRequiredAfterGroupConnection() == NetworkManager.AFTER_GROUP_CONNECTION_RESTORE;
@@ -977,28 +979,30 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         if(!response.isFileAvailable())
             return 0;
 
-        int score = 0;
-        NetworkNode node = response.getNetworkNode();
-        if(response.getNetworkNode().isNsdActive()) {
-            score += SAME_NET_SCORE;
-        }else if(response.getNetworkNode().isWifiDirectActive()) {
-            score += WIFI_DIRECT_SCORE;
-        }
-
-
-        if(node.getAcquisitionHistory() != null) {
-            Iterator<AcquisitionTaskHistoryEntry> historyIterator = node.getAcquisitionHistory().iterator();
-            AcquisitionTaskHistoryEntry entry;
-            while(historyIterator.hasNext()) {
-                entry = historyIterator.next();
-                if(entry.getStatus() == UstadMobileSystemImpl.DLSTATUS_FAILED) {
-                    long timeSinceFail = Calendar.getInstance().getTimeInMillis() - entry.getTimeEnded();
-                    score += (1 - Math.min((float)timeSinceFail / FAILURE_MEMORY_TIME, 1)) * FAILED_NODE_SCORE;
-                }
-            }
-        }
-
-        return score;
+        //TODO: fix this to work using db
+        return -1;
+//        int score = 0;
+//        NetworkNode node = response.getNetworkNode();
+//        if(response.getNetworkNode().isNsdActive()) {
+//            score += SAME_NET_SCORE;
+//        }else if(response.getNetworkNode().isWifiDirectActive()) {
+//            score += WIFI_DIRECT_SCORE;
+//        }
+//
+//
+//        if(node.getAcquisitionHistory() != null) {
+//            Iterator<AcquisitionTaskHistoryEntry> historyIterator = node.getAcquisitionHistory().iterator();
+//            AcquisitionTaskHistoryEntry entry;
+//            while(historyIterator.hasNext()) {
+//                entry = historyIterator.next();
+//                if(entry.getStatus() == UstadMobileSystemImpl.DLSTATUS_FAILED) {
+//                    long timeSinceFail = Calendar.getInstance().getTimeInMillis() - entry.getTimeEnded();
+//                    score += (1 - Math.min((float)timeSinceFail / FAILURE_MEMORY_TIME, 1)) * FAILED_NODE_SCORE;
+//                }
+//            }
+//        }
+//
+//        return score;
     }
 
     public boolean isDownloadOnMobileDataEnabled() {

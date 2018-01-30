@@ -37,6 +37,8 @@ public abstract class DbManager {
 
     public abstract ContainerFileEntryDao getContainerFileEntryDao();
 
+    public abstract NetworkNodeDao getNetworkNodeDao();
+
     public abstract Object getContext();
 
 

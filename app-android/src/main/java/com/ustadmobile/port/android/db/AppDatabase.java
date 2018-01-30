@@ -6,6 +6,7 @@ import android.arch.persistence.room.RoomDatabase;
 import com.ustadmobile.lib.db.entities.*;
 import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
 import com.ustadmobile.port.android.db.dao.ContainerFileEntryDaoAndroid;
+import com.ustadmobile.port.android.db.dao.NetworkNodeDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryParentToChildJoinDaoAndriod;
 import com.ustadmobile.port.android.db.dao.OpdsEntryWithRelationsDaoAndroid;
@@ -18,7 +19,7 @@ import com.ustadmobile.port.android.db.dao.OpdsLinkDaoAndroid;
 @Database(version = 1, entities =  {
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
         ContainerFile.class, ContainerFileEntry.class, DownloadJob.class,
-        DownloadJobItem.class
+        DownloadJobItem.class, NetworkNode.class
 
 })
 public abstract class AppDatabase extends RoomDatabase {
@@ -34,5 +35,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract ContainerFileEntryDaoAndroid getContainerFileEntryDao();
 
     public abstract ContainerFileDaoAndroid getContainerFileDao();
+
+    public abstract NetworkNodeDaoAndroid getNetworkNodeDao();
 
 }

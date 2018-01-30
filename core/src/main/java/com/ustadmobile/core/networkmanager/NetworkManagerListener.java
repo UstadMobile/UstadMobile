@@ -21,13 +21,13 @@ public interface NetworkManagerListener extends NetworkManagerTaskListener{
      * Indicate that new NetworkNode has been discovered
      * @param node Discovered NetworkNode
      */
-    void networkNodeDiscovered(NetworkNode node);
+    void networkNodeDiscovered(com.ustadmobile.lib.db.entities.NetworkNode node);
 
     /**
      * Indicate that NetworkNode information has been updated
      * @param node Updated node
      */
-    void networkNodeUpdated(NetworkNode node);
+    void networkNodeUpdated(com.ustadmobile.lib.db.entities.NetworkNode node);
 
     /**
      * Indicates that Acquisition task has been started

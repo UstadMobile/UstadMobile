@@ -5,7 +5,7 @@ import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.SharedSeTestSuite;
@@ -86,7 +86,7 @@ public class TestEntryStatusTask{
     public void testEntryStatusBluetoothOnFailure() throws IOException, InterruptedException {
         String wrongBluetoothAddr = "00:AA:BB:CC:DD:EE";
         NetworkNode wrongNode = new NetworkNode(wrongBluetoothAddr, null);
-        wrongNode.setDeviceBluetoothMacAddress(wrongBluetoothAddr);
+        wrongNode.setBluetoothMacAddress(wrongBluetoothAddr);
         testEntryStatusBluetooth(null, wrongNode);
     }
 

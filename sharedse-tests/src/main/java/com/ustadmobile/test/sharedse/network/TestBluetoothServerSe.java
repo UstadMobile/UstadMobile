@@ -39,7 +39,7 @@ public class TestBluetoothServerSe implements BluetoothConnectionHandler {
         synchronized (bluetoothNodeLock){
             bluetoothNodeLock.wait(NODE_DISCOVERY_TIMEOUT);
         }
-        manager.connectBluetooth(manager.getKnownNodes().get(0).getDeviceBluetoothMacAddress(), this);
+        manager.connectBluetooth(manager.getKnownNodes().get(0).getBluetoothMacAddress(), this);
         Assert.assertTrue("Device not around not connected", !isConnectionCalled);
     }
 

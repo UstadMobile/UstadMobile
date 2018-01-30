@@ -6,6 +6,7 @@ import android.content.Context;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
@@ -34,7 +35,7 @@ public class DbManagerAndroid extends DbManager {
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
-        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb42")
+        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb43")
             .build();
         executorService = Executors.newCachedThreadPool();
     }
@@ -86,5 +87,10 @@ public class DbManagerAndroid extends DbManager {
     @Override
     public ContainerFileEntryDao getContainerFileEntryDao() {
         return appDatabase.getContainerFileEntryDao();
+    }
+
+    @Override
+    public NetworkNodeDao getNetworkNodeDao() {
+        return appDatabase.getNetworkNodeDao();
     }
 }

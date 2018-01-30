@@ -5,7 +5,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -101,7 +101,7 @@ public class TestWifiDirectPeerDiscovery {
         manager.addWifiDirectPeersListener(listener);
 
 
-        TestUtilsSE.requestSendFileViaWifiDirect(thisNode.getDeviceWifiDirectMacAddress(),
+        TestUtilsSE.requestSendFileViaWifiDirect(thisNode.getWifiDirectMacAddress(),
                 new String[]{TestEntryStatusTask.ENTRY_ID});
         if(!manager.isWifiDirectConnectionEstablished(TestConstants.TEST_REMOTE_SLAVE_SERVER_WLAN_MAC)) {
             //we should now get an incoming connection request

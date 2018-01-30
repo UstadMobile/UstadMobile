@@ -6,7 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -43,19 +43,20 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
     @Override
     public void onStart() {
-        networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        networkManager.setReceivingOn(true);
-        networkManager.addWifiDirectPeersListener(this);
-        NetworkNode thisNode = networkManager.getThisWifiDirectDevice();
-        if(thisNode != null) {
-            view.setDeviceName(thisNode.getDeviceWifiDirectName());
-        }
-        view.setMode(ReceiveCourseView.MODE_WAITING);
-
-        super.onStart();
-        if(networkManager.getWifiDirectGroupOwnerIp() != null) {
-            loadSharedCourse();
-        }
+//        TODO: implement this using db
+//        networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+//        networkManager.setReceivingOn(true);
+//        networkManager.addWifiDirectPeersListener(this);
+//        NetworkNode thisNode = networkManager.getThisWifiDirectDevice();
+//        if(thisNode != null) {
+//            view.setDeviceName(thisNode.getDeviceWifiDirectName());
+//        }
+//        view.setMode(ReceiveCourseView.MODE_WAITING);
+//
+//        super.onStart();
+//        if(networkManager.getWifiDirectGroupOwnerIp() != null) {
+//            loadSharedCourse();
+//        }
     }
 
     @Override

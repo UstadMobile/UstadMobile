@@ -2,6 +2,8 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
@@ -10,7 +12,7 @@ import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -34,13 +36,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
@@ -64,6 +67,8 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE
  */
 
 public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener, LocalMirrorFinder, EmbeddedHTTPD.ResponseListener {
+
+    protected ExecutorService executorService;
 
     /**
      * Flag to indicate type of notification used when supernode is active
@@ -135,6 +140,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     private Object mContext;
 
     private Vector<NetworkNode> knownNetworkNodes=new Vector<>();
+
+    private final Object knownNodesLock = new Object();
 
     private Vector<NetworkTask>[] tasksQueues = new Vector[] {
         new Vector<>(), new Vector<>()
@@ -306,6 +313,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         this.mContext = mContext;
 
+        executorService = Executors.newCachedThreadPool();
+
         try {
             /*
              * Do not use .l logging method here: when running sharedse mock tests, this gets called in the
@@ -388,12 +397,13 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     //TODO: remove mContext parameter
     public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
-        EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
-        task.setTaskType(NetworkManagerCore.QUEUE_ENTRY_STATUS);
-        task.setUseBluetooth(useBluetooth);
-        task.setUseHttp(useHttp);
-        queueTask(task);
-        return task.getTaskId();
+//        EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
+//        task.setTaskType(NetworkManagerCore.QUEUE_ENTRY_STATUS);
+//        task.setUseBluetooth(useBluetooth);
+//        task.setUseHttp(useHttp);
+//        queueTask(task);
+//        return task.getTaskId();
+        return -1;
     }
 
     public long requestFileStatus(String[] entryIds, boolean useBluetooth, boolean useHttp) {
@@ -551,42 +561,60 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param txtRecords Map of DNS-Text records
      */
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
-        if(serviceFullDomain.contains(WIFI_P2P_INSTANCE_NAME)){
-            String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
-            String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
-            int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
+        executorService.execute(() -> {
+            if(serviceFullDomain.contains(WIFI_P2P_INSTANCE_NAME)){
+                String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
+                String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
+                int port=Integer.parseInt(txtRecords.get(SD_TXT_KEY_PORT));
 
-            boolean newNode;
-            NetworkNode node = null;
-            synchronized (knownNetworkNodes) {
-                newNode = true;
-                if(ipAddr != null) {
-                    node = getNodeByIpAddress(ipAddr);
-                    newNode = (node == null);
+                boolean newNode = false;
+                NetworkNode node = null;
+                synchronized (knownNodesLock) {
+                    NetworkNodeDao networkNodeDao = DbManager.getInstance(getContext()).getNetworkNodeDao();
+                    node = networkNodeDao.findNodeByIpOrWifiDirectMacAddress(ipAddr, senderMacAddr);
+
+                    if(node == null) {
+                        node = new NetworkNode(senderMacAddr, ipAddr);
+                        newNode = true;
+                    }
+//
+//
+//                if(ipAddr != null) {
+//                    node = getNodeByIpAddress(ipAddr);
+//                    newNode = (node == null);
+//                }
+//
+//
+//                if(node == null) {
+//                    node = new NetworkNode(senderMacAddr,ipAddr);
+//                    node.setIpAddress(ipAddr);
+////                    knownNetworkNodes.add(node);
+//                }
+                    if(ipAddr != null)
+                        node.setIpAddress(ipAddr);
+
+                    node.setBluetoothMacAddress(btAddr);
+                    node.setWifiDirectMacAddress(senderMacAddr);
+                    node.setPort(port);
+                    node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
+
+                    if(newNode) {
+                        networkNodeDao.insert(node);
+                    }else {
+                        networkNodeDao.update(node);
+                    }
                 }
 
 
-                if(node == null) {
-                    node = new NetworkNode(senderMacAddr,ipAddr);
-                    node.setDeviceIpAddress(ipAddr);
-                    knownNetworkNodes.add(node);
+                if(newNode){
+                    queueStatusChecksForNewNode(node);
+                    fireNetworkNodeDiscovered(node);
+                }else{
+                    fireNetworkNodeUpdated(node);
                 }
-
-                node.setDeviceBluetoothMacAddress(btAddr);
-                node.setDeviceWifiDirectMacAddress(senderMacAddr);
-                node.setPort(port);
-                node.setWifiDirectLastUpdated(Calendar.getInstance().getTimeInMillis());
             }
+        });
 
-
-            if(newNode){
-                queueStatusChecksForNewNode(node);
-                fireNetworkNodeDiscovered(node);
-            }else{
-                fireNetworkNodeUpdated(node);
-            }
-
-        }
     }
 
     public void handleWifiDirectPeersChanged(List<NetworkNode> peers) {
@@ -603,19 +631,21 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     protected void fireWifiDirectPeersChanged() {
-        synchronized (peerChangeListeners) {
-            for(WifiP2pListener listener: peerChangeListeners) {
-                listener.peersChanged(knownPeers);
-            }
-        }
+//        TODO: re-enable this for db based version
+//        synchronized (peerChangeListeners) {
+//            for(WifiP2pListener listener: peerChangeListeners) {
+//                listener.peersChanged(knownPeers);
+//            }
+//        }
     }
 
     protected void fireWifiP2pConnectionChanged(boolean connected) {
-        synchronized (peerChangeListeners) {
-            for(WifiP2pListener listener : peerChangeListeners) {
-                listener.wifiP2pConnectionChanged(connected);
-            }
-        }
+//        TODO: re-enable this for db based version
+//        synchronized (peerChangeListeners) {
+//            for(WifiP2pListener listener : peerChangeListeners) {
+//                listener.wifiP2pConnectionChanged(connected);
+//            }
+//        }
     }
 
     protected void fireWifiP2pConnectionResult(String macAddress, boolean successful) {
@@ -662,34 +692,43 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param port Service port on host device
      */
     public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
-        NetworkNode node;
-        boolean newNode;
-        synchronized (knownNetworkNodes) {
-            if(ipAddress.equals(getDeviceIPAddress()) || ipAddress.equals("127.0.0.1"))
-                return;
+        executorService.execute(() -> {
+            NetworkNode node;
+            boolean newNode;
+            synchronized (knownNodesLock) {
+                if(ipAddress.equals(getDeviceIPAddress()) || ipAddress.equals("127.0.0.1"))
+                    return;
 
 
-            node = getNodeByIpAddress(ipAddress);
-            newNode = (node == null);
+                DbManager dbManager = DbManager.getInstance(getContext());
+                node = dbManager.getNetworkNodeDao().findNodeByIpAddress(ipAddress);
 
-            if(node == null) {
-                node = new NetworkNode(null,ipAddress);
-                knownNetworkNodes.add(node);
+//            node = getNodeByIpAddress(ipAddress);
+                newNode = (node == null);
+
+                if(node == null) {
+                    node = new NetworkNode(null,ipAddress);
+//                knownNetworkNodes.add(node);
+                }
+
+                node.setNsdServiceName(serviceName);
+                node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
+                node.setPort(port);
+
+                if(newNode)
+                    dbManager.getNetworkNodeDao().insert(node);
+                else
+                    dbManager.getNetworkNodeDao().update(node);
             }
 
-            node.setNsdServiceName(serviceName);
-            node.setNetworkServiceLastUpdated(Calendar.getInstance().getTimeInMillis());
-            node.setPort(port);
-        }
 
-
-        if(newNode){
-            queueStatusChecksForNewNode(node);
-            fireNetworkNodeDiscovered(node);
-        }else{
-            fireNetworkNodeUpdated(node);
-        }
-
+            if(newNode){
+                queueStatusChecksForNewNode(node);
+                fireNetworkNodeDiscovered(node);
+            }else{
+                fireNetworkNodeUpdated(node);
+            }
+        });
     }
 
     public void handleNetworkServiceRemoved(String serviceName) {
@@ -769,7 +808,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         synchronized (knownNetworkNodes) {
             String nodeIp;
             for(NetworkNode node : knownNetworkNodes) {
-                nodeIp = node.getDeviceIpAddress();
+                nodeIp = node.getIpAddress();
                 if(nodeIp != null && nodeIp.equals(ipAddr))
                     return node;
             }
@@ -787,7 +826,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         synchronized (knownNetworkNodes) {
             String nodeBtAddr;
             for(NetworkNode node : knownNetworkNodes) {
-                nodeBtAddr = node.getDeviceBluetoothMacAddress();
+                nodeBtAddr = node.getBluetoothMacAddress();
                 if(nodeBtAddr != null && nodeBtAddr.equals(bluetoothAddr))
                     return node;
             }
@@ -828,28 +867,29 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param status List of all entries status
      */
     public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds,List<Boolean> status) {
-        List<EntryCheckResponse> responseList;
-        EntryCheckResponse checkResponse;
-        long timeNow = Calendar.getInstance().getTimeInMillis();
-        for (int position=0;position<fileIds.size();position++){
-            checkResponse = getEntryResponse(fileIds.get(position), node);
-
-            responseList=getEntryResponses().get(fileIds.get(position));
-            if(responseList==null){
-                responseList=new ArrayList<>();
-                entryResponses.put(fileIds.get(position),responseList);
-            }
-
-            if(checkResponse == null) {
-                checkResponse = new EntryCheckResponse(node);
-                responseList.add(checkResponse);
-            }
-
-            checkResponse.setFileAvailable(status.get(position));
-            checkResponse.setLastChecked(timeNow);
-        }
-
-        fireFileStatusCheckInformationAvailable(fileIds);
+//        TODO: re-enable this for db based version
+//        List<EntryCheckResponse> responseList;
+//        EntryCheckResponse checkResponse;
+//        long timeNow = Calendar.getInstance().getTimeInMillis();
+//        for (int position=0;position<fileIds.size();position++){
+//            checkResponse = getEntryResponse(fileIds.get(position), node);
+//
+//            responseList=getEntryResponses().get(fileIds.get(position));
+//            if(responseList==null){
+//                responseList=new ArrayList<>();
+//                entryResponses.put(fileIds.get(position),responseList);
+//            }
+//
+//            if(checkResponse == null) {
+//                checkResponse = new EntryCheckResponse(node);
+//                responseList.add(checkResponse);
+//            }
+//
+//            checkResponse.setFileAvailable(status.get(position));
+//            checkResponse.setLastChecked(timeNow);
+//        }
+//
+//        fireFileStatusCheckInformationAvailable(fileIds);
     }
 
     /**
@@ -1634,13 +1674,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      */
     public void clearNetworkNodeAcquisitionHistory() {
-        Iterator<NetworkNode> nodeIterator = getKnownNodes().iterator();
-        NetworkNode node;
-        while(nodeIterator.hasNext()) {
-            node = nodeIterator.next();
-            if(node.getAcquisitionHistory() != null)
-                node.getAcquisitionHistory().clear();
-        }
+//        TODO: re-enable this for db based version
+//        Iterator<NetworkNode> nodeIterator = getKnownNodes().iterator();
+//        NetworkNode node;
+//        while(nodeIterator.hasNext()) {
+//            node = nodeIterator.next();
+//            if(node.getAcquisitionHistory() != null)
+//                node.getAcquisitionHistory().clear();
+//        }
     }
 
     public int getActionRequiredAfterGroupConnection() {
@@ -1766,7 +1807,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         String nodeMacAddr;
         for(NetworkNode node : list) {
-            nodeMacAddr = node.getDeviceWifiDirectMacAddress();
+            nodeMacAddr = node.getWifiDirectMacAddress();
             if(nodeMacAddr != null && nodeMacAddr.equalsIgnoreCase(macAddr))
                 return true;
         }

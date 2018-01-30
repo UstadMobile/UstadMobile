@@ -4,7 +4,7 @@ import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
@@ -50,10 +50,11 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
 
     public void onStart() {
         NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        peersChanged(networkManager.getKnownWifiDirectPeers());
-        networkManager.addWifiDirectPeersListener(this);
-        networkManager.addWifiDirectGroupListener(this);
-        networkManager.setSharedFeed(sharedEntries, sendTitle);
+        //TODO: implement this using db
+//        peersChanged(networkManager.getKnownWifiDirectPeers());
+//        networkManager.addWifiDirectPeersListener(this);
+//        networkManager.addWifiDirectGroupListener(this);
+//        networkManager.setSharedFeed(sharedEntries, sendTitle);
     }
 
     public void onStop() {
@@ -73,18 +74,18 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
         ArrayList<String> ids = new ArrayList<>();
         ArrayList<String> names = new ArrayList<>();
         for(NetworkNode peer : peers){
-            ids.add(peer.getDeviceWifiDirectMacAddress());
+            ids.add(peer.getWifiDirectMacAddress());
             names.add(peer.getDeviceWifiDirectName());
         }
 
         view.setReceivers(ids, names);
         for(NetworkNode peer : peers) {
-            view.setReceiverStatus(peer.getDeviceWifiDirectMacAddress(),
+            view.setReceiverStatus(peer.getWifiDirectMacAddress(),
                     peer.getWifiDirectDeviceStatus());
 
 
             if(chosenMacAddr != null
-                    && chosenMacAddr.equalsIgnoreCase(peer.getDeviceWifiDirectMacAddress())) {
+                    && chosenMacAddr.equalsIgnoreCase(peer.getWifiDirectMacAddress())) {
 
                 switch(peer.getWifiDirectDeviceStatus()) {
                     case NetworkNode.STATUS_FAILED:

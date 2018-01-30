@@ -75,11 +75,13 @@ public class WiFiDirectGroup {
     }
 
     public boolean groupIncludes(String deviceMacAddr){
-        NetworkNode owner = getGroupOwner();
-        if(owner != null && owner.getDeviceWifiDirectMacAddress() != null
-                && owner.getDeviceWifiDirectMacAddress().equalsIgnoreCase(deviceMacAddr))
-            return true;
-
-        return NetworkManager.isMacAddrInList(getGroupClients(), deviceMacAddr);
+//        TODO: implement this using db
+//        NetworkNode owner = getGroupOwner();
+//        if(owner != null && owner.getWifiDirectMacAddress() != null
+//                && owner.getWifiDirectMacAddress().equalsIgnoreCase(deviceMacAddr))
+//            return true;
+//
+//        return NetworkManager.isMacAddrInList(getGroupClients(), deviceMacAddr);
+        return false;
     }
 }

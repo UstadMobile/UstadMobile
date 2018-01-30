@@ -1,0 +1,103 @@
+apply plugin: 'com.android.application'
+
+ext.buildConfigProperties = new Properties()
+ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.default.properties")))
+if (project.file("../app-android/buildconfig.local.properties").exists()) {
+    ext.buildConfigProperties.load(new FileInputStream(project.file("../app-android/buildconfig.local.properties")))
+}
+
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+
+    defaultConfig {
+        applicationId "com.toughra.ustadmobile.testserver"
+        minSdkVersion 16
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions "config"
+
+    productFlavors {
+        /*
+         * The localconfig flavor is created based on the buildconfig.local.properties settings
+         */
+        localconfig {
+            dimension "config"
+            applicationId project.ext.buildConfigProperties['android.applicationId'] + "testserver"
+            testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".testserver.test"
+            versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
+            manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName'] + " Test Server"]
+        }
+
+        /*
+         * The vanilla config flavor is here for convenience : it's the same as having no
+         * buildconfig.local.properties and relying on what's in buildconfig.default.properties
+         *
+         * It's just here to make life easier so you can switch flavors in Android studio without
+         * having to remove the local config files themselves
+         */
+        vanilla {
+            dimension "config"
+            applicationId "com.toughra.ustadmobile.testserver"
+            testApplicationId "com.toughra.ustadmobile.appandroid.testserver.test"
+            versionCode rootProject.ext.ustadVersionCode
+            manifestPlaceholders = ["appName": "Ustad Mobile Test Server"]
+        }
+    }
+
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.android.support:appcompat-v7:27.0.2'
+        force 'com.android.support:cardview-v7:27.0.2'
+        force 'com.android.support:design:27.0.2'
+        force 'com.android.support:support-v4:27.0.2'
+    }
+
+    exclude group: "net.sf.kxml", module: "kxml2"
+    exclude group: "org.json", module: "json"
+    exclude module: "lib-database"
+
+}
+
+
+dependencies {
+    api project(':core')
+    api project(':sharedse')
+    api project(":app-android")
+    api project(":core-tests")
+    api project(":sharedse-tests")
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta4'
+    implementation group: 'com.android.support', name: "appcompat-v7", version: "27.0.2"
+    implementation group: 'com.android.support', name: "cardview-v7", version: "27.0.2"
+    implementation group: 'com.android.support', name: "design", version: "27.0.2"
+    implementation group: 'com.android.support', name: "support-v4", version: "27.0.2"
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}

@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view;
+package com.ustadmobile.lib.androidtestserver.view;
 
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -12,14 +12,15 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
-import com.toughra.ustadmobile.R;
+import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.OpdsEndpoint;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
+import com.ustadmobile.port.android.view.UstadBaseActivity;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
+import com.ustadmobile.umtestserver.R;
 
 import java.io.IOException;
 
@@ -32,7 +33,7 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_remote_test_slave_server_acitivity);
+        setContentView(R.layout.activity_remote_test_slave_server);
         ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, 1);
     }
 
@@ -55,13 +56,11 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
     }
 
     protected void scanFeed() {
-        try {
-            UstadJSOPDSFeed deviceFeed = (UstadJSOPDSFeed) OpdsEndpoint.getInstance().loadItem(
-                    OpdsEndpoint.OPDS_PROTO_DEVICE, null, this, null);
-            Toast.makeText(this, "Device feed scanned.", Toast.LENGTH_LONG).show();
-        }catch(IOException e) {
+        String contentDir = UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
+                this)[0].getDirURI();
 
-        }
+        DbManager.getInstance(this).getOpdsEntryWithRelationsRepository()
+                .findEntriesByContainerFileDirectoryAsList(contentDir);
     }
 
     /**

@@ -3,9 +3,10 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
-import com.ustadmobile.core.networkmanager.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.NetworkNode;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,7 +38,6 @@ import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_S
  */
 
 public class EntryStatusTask extends NetworkTask implements BluetoothConnectionHandler{
-
     private List<String> entryIdList;
     private List<NetworkNode> networkNodeList;
 
@@ -96,15 +96,15 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             if(networkManager.isWiFiEnabled() && isUseHttp()
                     && networkManager.getDeviceIPAddress() != null
                     && node.getNsdServiceName() != null
-                    && node.getDeviceIpAddress() != null) {
+                    && node.getIpAddress() != null) {
                 UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #"
-                        + index + " - http to " + node.getDeviceIpAddress() + ":" + node.getPort()
+                        + index + " - http to " + node.getIpAddress() + ":" + node.getPort()
                         + " (" + node.getNsdServiceName() + ")");
                 getEntryStatusHttp(node);
                 connectNextNode(index + 1);
             }else if(networkManager.isBluetoothEnabled() && isUseBluetooth()
-                        && node.getDeviceBluetoothMacAddress() != null) {
-                String bluetoothAddr = networkNodeList.get(currentNode).getDeviceBluetoothMacAddress();
+                        && node.getBluetoothMacAddress() != null) {
+                String bluetoothAddr = networkNodeList.get(currentNode).getBluetoothMacAddress();
                 UstadMobileSystemImpl.l(UMLog.VERBOSE, 400, mkLogPrefix() + " connect node #" + index
                         + " to bluetooth addr " + bluetoothAddr);
                 networkManager.connectBluetooth(bluetoothAddr, this);
@@ -125,7 +125,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
         InputStream httpIn = null;
         List<Boolean> statusResults = null;
         try {
-            URL apiEndpointUrl = new URL("http://" + node.getDeviceIpAddress() + ":"
+            URL apiEndpointUrl = new URL("http://" + node.getIpAddress() + ":"
                     + node.getPort() + "/catalog/entry_status");
             JSONObject entryIds = new JSONObject();
             JSONArray entryArr = new JSONArray(entryIdList);

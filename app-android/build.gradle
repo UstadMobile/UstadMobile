@@ -238,11 +238,11 @@ android {
             manifestPlaceholders = ["appName": "Ustad Mobile"]
         }
 
-        remotetestslave {
-            dimension "config"
-            testApplicationId "com.toughra.testslave.test"
-            manifestPlaceholders = ["appName": "UM Test Server"]
-        }
+//        remotetestslave {
+//            dimension "config"
+//            testApplicationId "com.toughra.testslave.test"
+//            manifestPlaceholders = ["appName": "UM Test Server"]
+//        }
 
     }
 
@@ -350,7 +350,6 @@ task generateCoreStringToAndroidResMap {
         String[] outDirNames = new String[3]
         outDirNames[MAIN] = "vanilla"
         outDirNames[LOCALCONFIG] = "localconfig"
-        outDirNames[2] = "remotetestslave"
 
 
 
@@ -363,14 +362,6 @@ task generateCoreStringToAndroidResMap {
             File outFile = new File(outDir, "MessageIDMap.java")
             outFile.setText(genSrcHeader + genSrcBody[i] + genSrcFooter, "UTF-8")
         }
-
-        //put the vanilla MessageIDMap in remotetestslave
-        File remoteTestSlaveOutDir = project.file("src/remotetestslave/java/com/ustadmobile/port/android/generated")
-        if (!remoteTestSlaveOutDir.exists()) {
-            remoteTestSlaveOutDir.mkdirs()
-        }
-        File remoteTestSlaveOutFile = new File(remoteTestSlaveOutDir, "MessageIDMap.java")
-        remoteTestSlaveOutFile.setText(genSrcHeader + genSrcBody[MAIN] + genSrcFooter, "UTF-8")
 
 
     }
@@ -410,8 +401,6 @@ dependencies {
     androidTestApi project(":sharedse-tests")
     androidTestApi project(":lib-core-fs-tests")
 
-    remotetestslaveApi project(":core-tests")
-    remotetestslaveApi project(":sharedse-tests")
     api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
 
 
@@ -422,8 +411,8 @@ dependencies {
 
 
     implementation 'com.github.clans:fab:1.6.4'
-    implementation 'com.android.support.constraint:constraint-layout:1.0.0-alpha5'
-    implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.42-SNAPSHOT'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta4'
+    implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'
     implementation 'de.hdodenhof:circleimageview:2.1.0'
     implementation 'com.txusballesteros:FitChart:1.0' //used for learner progress view
     implementation "com.google.android:flexbox:0.3.0"
