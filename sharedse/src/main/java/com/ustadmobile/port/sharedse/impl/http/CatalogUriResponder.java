@@ -1,11 +1,14 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
+import com.google.gson.Gson;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.OpdsEndpoint;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
+import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
 
 import org.json.JSONArray;
@@ -16,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.zip.ZipEntry;
@@ -161,35 +165,24 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
                                                        NanoHTTPD.IHTTPSession session,
                                                        String normalizedUri) throws IOException, NanoHTTPD.ResponseException {
 
+        Object context = getContext(uriResource);
         HashMap<String, String> files = new HashMap<>();
         session.parseBody(files);
         String jsonRequest = session.getQueryParameterString();
         JSONObject requestJsonObj = new JSONObject(jsonRequest);
         JSONArray requestEntryIds = requestJsonObj.getJSONArray(EntryStatusTask.ENTRY_RESPONSE_ENTRIES_KEY);
 
-        JSONObject responseJsonObj = new JSONObject();
-        JSONObject responseEntries = new JSONObject();
-        responseJsonObj.put(EntryStatusTask.ENTRY_RESPONSE_ENTRIES_KEY, responseEntries);
-
-        Object context = getContext(uriResource);
-
-        boolean available;
-        CatalogEntryInfo entryInfo;
-        String entryId;
-        JSONObject entryObj;
+        String[] entryIdList = new String[requestEntryIds.length()];
         for(int i = 0; i < requestEntryIds.length(); i++) {
-            entryId = requestEntryIds.getString(i);
-            entryInfo = CatalogPresenter.getEntryInfo(entryId,
-                    CatalogPresenter.SHARED_RESOURCE, context);
-            entryObj = new JSONObject();
-            responseEntries.put(entryId, entryObj);
-            available = entryInfo != null
-                    && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED;
-            entryObj.put(EntryStatusTask.ENTRY_RESPONSE_KEY_AVAILABLE, available);
+            entryIdList[i] = requestEntryIds.getString(i);
         }
 
-        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
-                "application/json", responseJsonObj.toString());
+        List<ContainerFileEntry> containerFileEntries = DbManager
+                .getInstance(context).getContainerFileEntryDao()
+                .findContainerFileEntriesByEntryIds(entryIdList);
+        Gson gson = new Gson();
+        return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "application/json",
+                gson.toJson(containerFileEntries));
     }
 
     public NanoHTTPD.Response handleEntryRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session) throws IOException {

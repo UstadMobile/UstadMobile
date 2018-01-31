@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
@@ -135,8 +136,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
     protected void getEntryStatusHttp(NetworkNode node) {
         HttpURLConnection connection = null;
         OutputStream httpOut = null;
-        InputStream httpIn = null;
-        List<Boolean> statusResults = null;
+        Reader httpReader = null;
         try {
             URL apiEndpointUrl = new URL("http://" + node.getIpAddress() + ":"
                     + node.getPort() + "/catalog/entry_status");
@@ -156,43 +156,27 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
             connection.connect();
             int responseCode = connection.getResponseCode();
+
             if(responseCode >= 200 &&  responseCode < 300) {
-                httpIn = connection.getInputStream();
-                ByteArrayOutputStream responseBuf = new ByteArrayOutputStream();
-                UMIOUtils.readFully(httpIn, responseBuf, 1024);
-                httpIn.close();
+                httpReader = new InputStreamReader(connection.getInputStream());
+                Type gsonType = new TypeToken<List<ContainerFileEntry>>(){}.getType();
+                List<ContainerFileEntry> containerFileEntries = new Gson().fromJson(httpReader,
+                        gsonType);
 
-                JSONObject responseObj = new JSONObject(new String(responseBuf.toByteArray(),
-                        "UTF-8"));
-                JSONObject entriesMap = responseObj.getJSONObject(ENTRY_RESPONSE_ENTRIES_KEY);
-                JSONObject entryObj;
-
-                statusResults = new ArrayList<>();
-                boolean isAvailable;
-                for(int i = 0; i < entryIdList.size(); i++) {
-                    if(!entriesMap.has(entryIdList.get(i))) {
-                        isAvailable = false;
-                    }else {
-                        entryObj = entriesMap.getJSONObject(entryIdList.get(i));
-                        isAvailable = entryObj.getBoolean(ENTRY_RESPONSE_KEY_AVAILABLE);
-                    }
-
-                    statusResults.add(isAvailable);
-                }
                 UstadMobileSystemImpl.l(UMLog.INFO, 376, mkLogPrefix()
                         + " - successfully processed http response");
+
+                networkManager.handleEntriesStatusUpdate(node, entryIdList, containerFileEntries);
+
             }
         }catch(Exception e) {
             e.printStackTrace();
         }finally {
             UMIOUtils.closeOutputStream(httpOut);
-            UMIOUtils.closeInputStream(httpIn);
+            UMIOUtils.closeQuietly(httpReader);
         }
 
         UstadMobileSystemImpl.l(UMLog.INFO, 382, mkLogPrefix() + " - done with node");
-
-//        if(statusResults != null)
-//            networkManager.handleEntriesStatusUpdate(node, entryIdList, statusResults);
     }
 
     /**

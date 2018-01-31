@@ -118,7 +118,7 @@ public class TestNetworkManager {
     }
 
 
-//    @Test
+    @Test
     public void testNetworkServiceDiscovery() throws IOException{
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
 

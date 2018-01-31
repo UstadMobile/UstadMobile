@@ -68,7 +68,7 @@ public class TestEntryStatusTask{
         Assert.assertTrue("Supernode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
 
-//    @Test
+    @Test
     public void testEntryStatusHttp() throws IOException, InterruptedException {
         NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
 

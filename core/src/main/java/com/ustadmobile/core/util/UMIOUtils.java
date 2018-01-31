@@ -39,6 +39,7 @@ import com.ustadmobile.core.impl.ZipFileHandle;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -66,6 +67,16 @@ public class UMIOUtils {
                 in.close();
             }
         }catch(IOException e) {
+        }
+    }
+
+    public static final void closeQuietly(Closeable closeable) {
+        if(closeable != null){
+            try {
+                closeable.close();
+            }catch(IOException e) {
+
+            }
         }
     }
     
