@@ -8,6 +8,8 @@ import android.arch.persistence.room.Update;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 
+import java.util.List;
+
 /**
  * Created by mike on 1/30/18.
  */
@@ -33,4 +35,8 @@ public abstract class NetworkNodeDaoAndroid extends NetworkNodeDao {
     @Override
     @Update
     public abstract void update(NetworkNode node);
+
+    @Override
+    @Query("Select * From NetworkNode")
+    public abstract List<NetworkNode> findAllActiveNodes();
 }

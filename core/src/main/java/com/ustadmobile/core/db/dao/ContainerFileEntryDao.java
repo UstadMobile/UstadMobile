@@ -26,6 +26,8 @@ public abstract class ContainerFileEntryDao {
         deleteContainerFileEntriesByContainerFile(containerFileId);
     }
 
+    @UmQuery("SELECT containerEntryId, containerEntryUpdated FROM ContainerFileEntry WHERE containerEntryId IN (:entryIds)")
+    public abstract List<ContainerFileEntry> findContainerFileEntriesByEntryIds(String[] entryIds);
 
 
 }

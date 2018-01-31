@@ -39,6 +39,8 @@ public abstract class DbManager {
 
     public abstract NetworkNodeDao getNetworkNodeDao();
 
+    public abstract EntryStatusResponseDao getEntryStatusResponseDao();
+
     public abstract Object getContext();
 
 

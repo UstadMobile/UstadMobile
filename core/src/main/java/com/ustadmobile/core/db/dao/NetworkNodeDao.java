@@ -29,5 +29,8 @@ public abstract class NetworkNodeDao {
 
     public abstract void update(NetworkNode node);
 
+    @UmQuery("Select * From NetworkNode")
+    public abstract List<NetworkNode> findAllActiveNodes();
+
 
 }

@@ -7,6 +7,7 @@ import android.arch.persistence.room.Transaction;
 
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
 import com.ustadmobile.core.impl.UmCallback;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 
@@ -34,4 +35,8 @@ public abstract class ContainerFileEntryDaoAndroid extends ContainerFileEntryDao
         super.deleteOpdsAndContainerFileEntriesByContainerFile(containerFileId);
     }
 
+    //TODO: rework this to avoid writing file paths etc for remote devices
+    @Override
+    @Query("SELECT * FROM ContainerFileEntry WHERE containerEntryId IN (:entryIds)")
+    public abstract List<ContainerFileEntry> findContainerFileEntriesByEntryIds(String[] entryIds);
 }

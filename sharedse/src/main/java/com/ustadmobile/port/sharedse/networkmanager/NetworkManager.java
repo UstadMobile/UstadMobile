@@ -12,6 +12,8 @@ import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
+import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -66,7 +68,8 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE
  * @see com.ustadmobile.core.networkmanager.NetworkManagerCore
  */
 
-public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener, LocalMirrorFinder, EmbeddedHTTPD.ResponseListener {
+public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener,
+        LocalMirrorFinder, EntryStatusTask.NetworkNodeListProvider, EmbeddedHTTPD.ResponseListener {
 
     protected ExecutorService executorService;
 
@@ -397,13 +400,17 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     //TODO: remove mContext parameter
     public long requestFileStatus(List<String> entryIds,Object mContext,List<NetworkNode> nodeList, boolean useBluetooth, boolean useHttp){
-//        EntryStatusTask task = new EntryStatusTask(entryIds,nodeList,this);
-//        task.setTaskType(NetworkManagerCore.QUEUE_ENTRY_STATUS);
-//        task.setUseBluetooth(useBluetooth);
-//        task.setUseHttp(useHttp);
-//        queueTask(task);
-//        return task.getTaskId();
-        return -1;
+        EntryStatusTask task = new EntryStatusTask(entryIds,this,this);
+        task.setTaskType(NetworkManagerCore.QUEUE_ENTRY_STATUS);
+        task.setUseBluetooth(useBluetooth);
+        task.setUseHttp(useHttp);
+        queueTask(task);
+        return task.getTaskId();
+    }
+
+    @Override
+    public List<NetworkNode> getNetworkNodes() {
+        return DbManager.getInstance(getContext()).getNetworkNodeDao().findAllActiveNodes();
     }
 
     public long requestFileStatus(String[] entryIds, boolean useBluetooth, boolean useHttp) {
@@ -821,6 +828,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Get known network node using it's bluetooth address
      * @param bluetoothAddr Node's bluetooth address to search for.
      * @return NetworkNode object
+     *
+     * @Deprecated Use the database instead
      */
     public NetworkNode getNodeByBluetoothAddr(String bluetoothAddr) {
         synchronized (knownNetworkNodes) {
@@ -860,37 +869,68 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public abstract void connectBluetooth(String deviceAddress,BluetoothConnectionHandler handler);
 
-    /**
-     * Method which invoked when entry status responses is are received
-     * @param node NetworkNode on which entry status check task was executed on.
-     * @param fileIds List of all entries
-     * @param status List of all entries status
-     */
-    public void handleEntriesStatusUpdate(NetworkNode node, List<String> fileIds,List<Boolean> status) {
-//        TODO: re-enable this for db based version
-//        List<EntryCheckResponse> responseList;
-//        EntryCheckResponse checkResponse;
-//        long timeNow = Calendar.getInstance().getTimeInMillis();
-//        for (int position=0;position<fileIds.size();position++){
-//            checkResponse = getEntryResponse(fileIds.get(position), node);
-//
-//            responseList=getEntryResponses().get(fileIds.get(position));
-//            if(responseList==null){
-//                responseList=new ArrayList<>();
-//                entryResponses.put(fileIds.get(position),responseList);
-//            }
-//
-//            if(checkResponse == null) {
-//                checkResponse = new EntryCheckResponse(node);
-//                responseList.add(checkResponse);
-//            }
-//
-//            checkResponse.setFileAvailable(status.get(position));
-//            checkResponse.setLastChecked(timeNow);
+    public void handleEntriesStatusUpdate(NetworkNode node, List<String> entryIds,
+                                          List<ContainerFileEntry> availableEntries) {
+
+        List<String> remainingEntries = new ArrayList<>(entryIds);
+        ArrayList<EntryStatusResponse> entryStatusResponses = new ArrayList<>();
+        long responseTime = System.currentTimeMillis();
+
+        for(ContainerFileEntry availableEntry : availableEntries) {
+            entryStatusResponses.add(new EntryStatusResponse(availableEntry.getContainerEntryId(),
+                    node.getId(), responseTime, 0, true));
+            remainingEntries.remove(availableEntry.getContainerEntryId());
+        }
+
+        for(String unavailableEntryId : remainingEntries) {
+            entryStatusResponses.add(new EntryStatusResponse(unavailableEntryId, node.getId(),
+                    responseTime,0, false));
+        }
+
+        DbManager.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
+        fireFileStatusCheckInformationAvailable(entryIds);
+    }
+
+//    /**
+//     * Method which invoked when entry status responses is are received
+//     * @param node NetworkNode on which entry status check task was executed on.
+//     * @param entryIds List of all entries
+//     * @param status List of all entries status
+//     */
+//    public void handleEntriesStatusUpdate(NetworkNode node, List<String> entryIds, List<Boolean> status) {
+//        ArrayList<EntryStatusResponse> entryStatusResponses = new ArrayList<>();
+//        long responseTime = System.currentTimeMillis();
+//        for(int i = 0; i < entryIds.size(); i++) {
+//            entryStatusResponses.add(new EntryStatusResponse(entryIds.get(i), node.getId(),
+//                    responseTime, 0, status.get(i)));
 //        }
 //
-//        fireFileStatusCheckInformationAvailable(fileIds);
-    }
+//        DbManager.getInstance(getContext()).getEntryStatusResponseDao().insert(entryStatusResponses);
+//        fireFileStatusCheckInformationAvailable(entryIds);
+//
+////        List<EntryCheckResponse> responseList;
+////        EntryCheckResponse checkResponse;
+////        long timeNow = Calendar.getInstance().getTimeInMillis();
+////        for (int position=0;position<fileIds.size();position++){
+////            checkResponse = getEntryResponse(fileIds.get(position), node);
+////
+////            responseList=getEntryResponses().get(fileIds.get(position));
+////            if(responseList==null){
+////                responseList=new ArrayList<>();
+////                entryResponses.put(fileIds.get(position),responseList);
+////            }
+////
+////            if(checkResponse == null) {
+////                checkResponse = new EntryCheckResponse(node);
+////                responseList.add(checkResponse);
+////            }
+////
+////            checkResponse.setFileAvailable(status.get(position));
+////            checkResponse.setLastChecked(timeNow);
+////        }
+////
+////        fireFileStatusCheckInformationAvailable(fileIds);
+//    }
 
     /**
      * Method which get particular entry status response on a specific node from list of responses.

@@ -1,8 +1,11 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
+import com.google.gson.Gson;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URLDecoder;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -118,21 +122,13 @@ public abstract class BluetoothServer implements WiFiDirectGroupListener{
         if(clientInput.startsWith(CMD_ENTRY_STATUS_QUERY)) {
             System.out.print("BluetoothSReceived command "+clientInput);
             String[] entryIds = clientInput.substring(CMD_ENTRY_STATUS_QUERY.length()+1).split(";");
-            boolean[] results = new boolean[entryIds.length];
-            CatalogEntryInfo info;
-            String response = CMD_ENTRY_STATUS_FEEDBACK+" ";
-            for(int i = 0; i < entryIds.length; i++) {
-                info = CatalogPresenter.getEntryInfo(URLDecoder.decode(entryIds[i], "UTF-8"),
-                        CatalogPresenter.SHARED_RESOURCE, networkManager.getContext());
-                results[i] = info != null && info.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED;
-                response += results[i] ? '1' : '0';
-                if(i < entryIds.length - 1)
-                    response += CMD_SEPARATOR;
-            }
-            response += '\n';
-            System.out.print("Sending response "+response);
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            List<ContainerFileEntry> containerFileEntries = DbManager
+                    .getInstance(networkManager.getContext()).getContainerFileEntryDao()
+                    .findContainerFileEntriesByEntryIds(entryIds);
+            Gson gson = new Gson();
+            String str = gson.toJson(containerFileEntries) + "\r\n";
+            outputStream.write(str.getBytes("UTF-8"));
+
             UMIOUtils.closeOutputStream(outputStream);
             UMIOUtils.closeInputStream(inputStream);
         }
