@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -92,13 +93,20 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
             OpdsEntry addedEntry = presetFeedsList.get(dropDownlSelectedIndex-2);
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
                 addedEntry.getUuid(), 0);
-            new Thread(() -> {
-                OpdsEntryParentToChildJoinDao dao = DbManager.getInstance(getContext())
-                        .getOpdsEntryParentToChildJoinDao();
-                join.setChildIndex(dao.getNumEntriesByParent(uuidToAddTo)+1);
-                dao.insert(join);
-                addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());
-            }).start();
+            OpdsEntryParentToChildJoinDao dao = DbManager.getInstance(getContext())
+                    .getOpdsEntryParentToChildJoinDao();
+            join.setChildIndex(dao.getNumEntriesByParent(uuidToAddTo)+1);
+            dao.insertAsync(join, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
         }else if(dropDownlSelectedIndex == 1) {
             addFeedDialogView.setUiEnabled(false);
             addFeedDialogView.setProgressVisible(true);
@@ -113,13 +121,20 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
         if(entry.getEntryId() != null && entry.getTitle() != null) {
             OpdsEntryParentToChildJoin join = new OpdsEntryParentToChildJoin(uuidToAddTo,
                     entry.getUuid(), 0);
-            new Thread(() -> {
-                OpdsEntryParentToChildJoinDao dao = DbManager.getInstance(getContext())
-                        .getOpdsEntryParentToChildJoinDao();
-                join.setChildIndex(dao.getNumEntriesByParent(uuidToAddTo)+1);
-                dao.insert(join);
-                addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());
-            }).start();
+            OpdsEntryParentToChildJoinDao dao = DbManager.getInstance(getContext())
+                    .getOpdsEntryParentToChildJoinDao();
+            join.setChildIndex(dao.getNumEntriesByParent(uuidToAddTo)+1);
+            dao.insertAsync(join, new UmCallback<Integer>() {
+                @Override
+                public void onSuccess(Integer result) {
+                    addFeedDialogView.runOnUiThread(() -> addFeedDialogView.dismiss());
+                }
+
+                @Override
+                public void onFailure(Throwable exception) {
+
+                }
+            });
         }else {
             onError(entry,
                     new IllegalArgumentException("No entry uuid or title - probably not an OPDS feed"));

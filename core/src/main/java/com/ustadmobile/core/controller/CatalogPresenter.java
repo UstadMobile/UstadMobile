@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -402,13 +403,20 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                 MessageID.delete, MessageID.delete_q, MessageID.ok, MessageID.cancel, 0,
                     (commandId, choice) -> {
                         if(choice == AppView.CHOICE_POSITIVE) {
-                            new Thread(() ->{
-                                DbManager.getInstance(getContext()).getOpdsEntryParentToChildJoinDao()
-                                    .deleteByParentIdAndChildId(feedLiveData.getValue().getUuid(),
-                                        new ArrayList<>(selectedEntries));
-                                selectedEntries.clear();
-                                mView.runOnUiThread(() ->mView.setSelectedEntries(selectedEntries));
-                            }).start();
+                            DbManager.getInstance(getContext()).getOpdsEntryParentToChildJoinDao()
+                                    .deleteByParentIdAndChildIdAsync(feedLiveData.getValue().getUuid(),
+                                            new ArrayList<>(selectedEntries), new UmCallback<Integer>() {
+                                                @Override
+                                                public void onSuccess(Integer result) {
+                                                    selectedEntries.clear();
+                                                    mView.runOnUiThread(() -> mView.setSelectedEntries(selectedEntries));
+                                                }
+
+                                                @Override
+                                                public void onFailure(Throwable exception) {
+
+                                                }
+                                            });
                         }
                     }
                 );
