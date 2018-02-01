@@ -192,6 +192,11 @@ public abstract class UstadMobileSystemImpl {
     public static final int DLSTATUS_PAUSED = 4;
 
     /**
+     * Indicates that a download has not actually started yet
+     */
+    public static final int DLSTATUS_NOT_STARTED = 0;
+
+    /**
      * The maximum number of sessions to show for the user to be able to resume
      * This is limited both for usability and performance.
      */

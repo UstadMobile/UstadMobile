@@ -14,6 +14,8 @@ public class DownloadJobItem {
 
     private int downloadJobId;
 
+    private String opdsEntryUuid;
+
     private String entryId;
 
     private long updated;
@@ -21,6 +23,20 @@ public class DownloadJobItem {
     private int status;
 
     private int containerFileId;
+
+    private long downloadLength;
+
+    public DownloadJobItem() {
+
+    }
+
+    public DownloadJobItem(OpdsEntryWithRelations entry, DownloadJob job) {
+        this.downloadJobId = job.getId();
+        this.entryId = entry.getEntryId();
+//        this.updated = entry.getUpdated();
+
+//        TODO: determine the length of this download
+    }
 
     public int getId() {
         return id;
@@ -68,5 +84,13 @@ public class DownloadJobItem {
 
     public void setContainerFileId(int containerFileId) {
         this.containerFileId = containerFileId;
+    }
+
+    public long getDownloadLength() {
+        return downloadLength;
+    }
+
+    public void setDownloadLength(long downloadLength) {
+        this.downloadLength = downloadLength;
     }
 }

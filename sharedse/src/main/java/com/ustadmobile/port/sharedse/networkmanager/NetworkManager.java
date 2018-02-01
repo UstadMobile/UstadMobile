@@ -3,6 +3,7 @@ package com.ustadmobile.port.sharedse.networkmanager;
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -13,6 +14,8 @@ import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -21,6 +24,7 @@ import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.core.util.UMUUID;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
@@ -163,7 +167,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
     private Vector<WiFiDirectGroupListener> wifiDirectGroupListeners = new Vector<>();
 
-    private Map<String,AcquisitionTask> entryAcquisitionTaskMap=new HashMap<>();
+    private Map<String,DownloadTask> entryAcquisitionTaskMap=new HashMap<>();
 
     /**
      * The main HTTP server which runs on a dynamic port
@@ -432,6 +436,23 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
 
+    public long buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, boolean recursive) {
+        DownloadJobDao jobDao = DbManager.getInstance(getContext()).getDownloadJobDao();
+
+        DownloadJob job = new DownloadJob();
+        job.setId((int)jobDao.insert(job));
+        job.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
+
+        ArrayList<DownloadJobItem> jobItems = new ArrayList<>();
+        for(OpdsEntryWithRelations entry : rootEntries) {
+            jobItems.add(new DownloadJobItem(entry, job));
+        }
+
+        return job.getId();
+    }
+
+
+
     /**
      * Method which invoked when making file acquisition request.
      * @param feed OPDS file feed
@@ -445,13 +466,17 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      */
     public long requestAcquisition(UstadJSOPDSFeed feed, LocalMirrorFinder mirrorFinder,
                                               boolean localNetworkEnabled, boolean wifiDirectEnabled){
-        AcquisitionTask task=new AcquisitionTask(feed,this);
-        task.setMirrorFinder(mirrorFinder);
-        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
-        task.setLocalNetworkDownloadEnabled(localNetworkEnabled);
-        task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
-        queueTask(task);
-        return task.getTaskId();
+
+
+
+//        DownloadTask task=new DownloadTask(feed,this);
+//        task.setMirrorFinder(mirrorFinder);
+//        task.setTaskType(QUEUE_ENTRY_ACQUISITION);
+//        task.setLocalNetworkDownloadEnabled(localNetworkEnabled);
+//        task.setWifiDirectDownloadEnabled(wifiDirectEnabled);
+//        queueTask(task);
+//        return task.getTaskId();
+        return 0;
     }
 
     public long requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled){
@@ -584,19 +609,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                         node = new NetworkNode(senderMacAddr, ipAddr);
                         newNode = true;
                     }
-//
-//
-//                if(ipAddr != null) {
-//                    node = getNodeByIpAddress(ipAddr);
-//                    newNode = (node == null);
-//                }
-//
-//
-//                if(node == null) {
-//                    node = new NetworkNode(senderMacAddr,ipAddr);
-//                    node.setIpAddress(ipAddr);
-////                    knownNetworkNodes.add(node);
-//                }
+
                     if(ipAddr != null)
                         node.setIpAddress(ipAddr);
 
@@ -1414,7 +1427,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Fire acquisition progress updates to the listening part of the app
      * @param entryId
      */
-    protected void fireAcquisitionProgressUpdate(String entryId, AcquisitionTask task){
+    protected void fireAcquisitionProgressUpdate(String entryId, DownloadTask task){
         synchronized (acquisitionListeners) {
             for(AcquisitionListener listener : acquisitionListeners){
                 listener.acquisitionProgressUpdate(entryId, task.getStatusByEntryId(entryId));
@@ -1427,7 +1440,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Fire acquisition status change to all listening parts of the app
      * @param entryId
      */
-    protected void fireAcquisitionStatusChanged(String entryId, AcquisitionTask.Status status){
+    protected void fireAcquisitionStatusChanged(String entryId, DownloadTask.Status status){
         UstadMobileSystemImpl.l(UMLog.DEBUG, 645, "fireAcquisitionStatusChanged: " + entryId +
                 " : " + status.getStatus());
         synchronized (acquisitionListeners) {
@@ -1445,7 +1458,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param entryId Entry id for which status has been discovered
      */
     public void handleEntryStatusChangeDiscovered(String entryId, int acquisitionStatus) {
-        AcquisitionTask.Status status = new AcquisitionTask.Status();
+        DownloadTask.Status status = new DownloadTask.Status();
         status.setStatus(acquisitionStatus);
         UstadMobileSystemImpl.l(UMLog.DEBUG, 645, "handleEntryStatusChangeDiscovered: " + entryId +
                 " : " + status.getStatus());
@@ -1458,11 +1471,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @return The task carrying out acquisition of this entry, or null if it's not being acquired by any known task
      */
-    public AcquisitionTask getAcquisitionTaskByEntryId(String entryId) {
+    public DownloadTask getAcquisitionTaskByEntryId(String entryId) {
         synchronized (tasksQueues[QUEUE_ENTRY_ACQUISITION]) {
-            AcquisitionTask acquisitionTask;
+            DownloadTask acquisitionTask;
             for(int i = 0; i < tasksQueues[QUEUE_ENTRY_ACQUISITION].size(); i++) {
-                acquisitionTask = (AcquisitionTask)tasksQueues[QUEUE_ENTRY_ACQUISITION].get(i);
+                acquisitionTask = (DownloadTask)tasksQueues[QUEUE_ENTRY_ACQUISITION].get(i);
                 if(acquisitionTask.taskIncludesEntry(entryId))
                     return acquisitionTask;
             }
@@ -1500,7 +1513,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Return the Entry ID to AcquisitionTask map
      * @return
      */
-    public Map<String,AcquisitionTask> getEntryAcquisitionTaskMap(){
+    public Map<String,DownloadTask> getEntryAcquisitionTaskMap(){
         return entryAcquisitionTaskMap;
     }
 

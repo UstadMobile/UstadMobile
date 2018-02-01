@@ -10,6 +10,8 @@ import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
+import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -30,7 +32,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -59,9 +60,11 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
  *
  * @author kileha3
  */
-public class AcquisitionTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
+public class DownloadTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
     private UstadJSOPDSFeed feed;
+
+    private DownloadJobWithRelations downloadJob;
 
     protected NetworkManagerTaskListener listener;
 
@@ -195,7 +198,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
                 currentEntryStatus.setCurrentSpeed(httpDownload.getCurrentDownloadSpeed());
 
                 networkManager.fireAcquisitionProgressUpdate(
-                        getFeed().getEntry(currentEntryIdIndex).getItemId(), AcquisitionTask.this);
+                        getFeed().getEntry(currentEntryIdIndex).getItemId(), DownloadTask.this);
                 networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,progress,
                         getFeed().getEntry(currentEntryIdIndex).getTitle(),message);
 
@@ -209,7 +212,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
         @Override
         public void run() {
             UstadMobileSystemImpl.l(UMLog.WARN, 213, getLogPrefix() + ": wifi connect timeout.");
-            AcquisitionTask.this.handleAttemptFailed();
+            DownloadTask.this.handleAttemptFailed();
         }
     }
 
@@ -290,14 +293,16 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     /**
      * Create file acquisition task
-     * @param feed OPDS feed
+     * @param downloadJob downloadJob
      * @param networkManager NetworkManager reference which handle all network operations.
      */
-    public AcquisitionTask(UstadJSOPDSFeed feed,NetworkManager networkManager){
+    public DownloadTask(DownloadJobWithRelations downloadJob, NetworkManager networkManager){
         super(networkManager);
+        this.downloadJob = downloadJob;
+
         this.networkManager = networkManager;
 
-        this.feed=feed;
+//        this.feed=feed;
         networkManager.addNetworkManagerListener(this);
         this.mirrorFinder = networkManager;
 
@@ -788,7 +793,7 @@ public class AcquisitionTask extends NetworkTask implements BluetoothConnectionH
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof AcquisitionTask && getFeed().equals(this.feed);
+        return object instanceof DownloadTask && getFeed().equals(this.feed);
     }
 
     @Override

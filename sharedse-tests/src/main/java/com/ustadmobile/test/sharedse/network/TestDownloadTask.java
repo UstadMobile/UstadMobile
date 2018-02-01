@@ -2,19 +2,13 @@ package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.impl.HTTPResult;
-import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
-import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
-import com.ustadmobile.core.networkmanager.AcquisitionListener;
-import com.ustadmobile.port.sharedse.networkmanager.AcquisitionTask;
-import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
+import com.ustadmobile.port.sharedse.networkmanager.DownloadTask;
 import com.ustadmobile.port.sharedse.networkmanager.LocalMirrorFinder;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
@@ -33,15 +27,11 @@ import org.junit.Test;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -51,7 +41,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  *
  * Created by kileha3 on 17/05/2017.
  */
-public class TestAcquisitionTask {
+public class TestDownloadTask {
 
     private static final int DEFAULT_ACQUIRE_TIMEOUT = 120000;//default acquire timeout: 2mins
 
@@ -330,7 +320,7 @@ public class TestAcquisitionTask {
         NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
         UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
         manager.requestAcquisition(feed, manager, false, false);
-        AcquisitionTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
+        DownloadTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
         try { Thread.sleep(1000); }
         catch(InterruptedException e){}
         task.stop(NetworkTask.STATUS_STOPPED);

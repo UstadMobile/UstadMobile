@@ -41,6 +41,8 @@ public abstract class DbManager {
 
     public abstract EntryStatusResponseDao getEntryStatusResponseDao();
 
+    public abstract DownloadJobDao getDownloadJobDao();
+
     public abstract Object getContext();
 
 
