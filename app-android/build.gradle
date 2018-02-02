@@ -202,7 +202,6 @@ android {
     buildToolsVersion "27.0.3"
 
     defaultConfig {
-
         minSdkVersion 16
         targetSdkVersion 27
         versionCode rootProject.ext.ustadVersionCode
@@ -238,12 +237,6 @@ android {
             manifestPlaceholders = ["appName": "Ustad Mobile"]
         }
 
-//        remotetestslave {
-//            dimension "config"
-//            testApplicationId "com.toughra.testslave.test"
-//            manifestPlaceholders = ["appName": "UM Test Server"]
-//        }
-
     }
 
     buildTypes {
@@ -255,6 +248,7 @@ android {
 
         debug {
             testCoverageEnabled = true
+            multiDexEnabled true
         }
     }
 }
@@ -377,6 +371,7 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
+    debugApi "com.android.support:multidex:1.0.2"
 
     androidTestApi project(":core-tests")
 
