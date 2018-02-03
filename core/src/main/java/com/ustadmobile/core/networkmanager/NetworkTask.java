@@ -31,20 +31,49 @@ public abstract class NetworkTask {
 
     private boolean stopped;
 
+    public static final int STATUS_NOT_QUEUED = 0;
 
-    public static final int STATUS_WAITING = 0;
+    //Waiting type statuses - 1-10
 
-    public static final int STATUS_RUNNING = 1;
+    public static final int STATUS_QUEUED = 3;
 
-    public static final int STATUS_RETRY_LATER = 2;
+    /**
+     * Waiting for a connection. Could be waiting for Wifi / p2p availability if the download job
+     * should complete without using mobile data. Could also be waiting for any kind of network if
+     * the job does not depend on wifi.
+     */
+    public static final int STATUS_WAITING_FOR_CONNECTION = 4;
 
-    public static final int STATUS_COMPLETE = 4;
+    public static final int STATUS_WAIT_FOR_RETRY = 5;
 
-    public static final int STATUS_FAILED = 8;
+    //Running statuses - 11-20
 
-    public static final int STATUS_STOPPED = 16;
+    /**
+     * The DownloadTask has been created and is starting. Done to ensure that there is no possibility
+     * of two tasks being queued accidently at the same time.
+     */
+    public static final int STATUS_STARTING = 11;
 
-    public static final int STATUS_WAITING_FOR_NETWORK = 32;
+    public static final int STATUS_RUNNING = 12;
+
+
+    //Complete statuses where the job is not part of the queue - 21-30
+
+    public static final int STATUS_COMPLETE = 24;
+
+    public static final int STATUS_FAILED = 25;
+
+    public static final int STATUS_STOPPED = 26;
+
+
+    @Deprecated
+    public static final int STATUS_WAITING = 1;
+
+    @Deprecated
+    public static final int STATUS_RETRY_LATER = 23;
+
+    @Deprecated
+    public static final int STATUS_WAITING_FOR_NETWORK = 27;
 
     private int status = STATUS_WAITING;
 

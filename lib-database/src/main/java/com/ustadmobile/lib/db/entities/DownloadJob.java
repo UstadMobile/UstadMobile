@@ -50,4 +50,5 @@ public class DownloadJob {
     public void setTimeCompleted(long timeCompleted) {
         this.timeCompleted = timeCompleted;
     }
+
 }

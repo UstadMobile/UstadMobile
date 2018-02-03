@@ -3,6 +3,7 @@ package com.ustadmobile.core.db;
 import com.ustadmobile.core.db.dao.*;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.db.impl.DbManagerFactory;
+import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 
 /**
  * Created by mike on 1/13/18.
@@ -42,6 +43,8 @@ public abstract class DbManager {
     public abstract EntryStatusResponseDao getEntryStatusResponseDao();
 
     public abstract DownloadJobDao getDownloadJobDao();
+
+    public abstract DownloadJobItemHistoryDao getDownloadJobItemHistoryDao();
 
     public abstract Object getContext();
 

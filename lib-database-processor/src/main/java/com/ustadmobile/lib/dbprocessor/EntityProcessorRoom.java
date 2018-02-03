@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.dbprocessor;
 
+import com.ustadmobile.lib.database.annotation.UmEmbedded;
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
@@ -135,6 +136,10 @@ public class EntityProcessorRoom {
                 if(fieldSource.hasAnnotation(UmIndexField.class)) {
                     fieldSource.addAnnotation("android.arch.persistence.room.ColumnInfo")
                             .setLiteralValue("index", "true");
+                }
+
+                if(fieldSource.hasAnnotation(UmEmbedded.class)) {
+                    fieldSource.addAnnotation("android.arch.persistence.room.Embedded");
                 }
             }
 

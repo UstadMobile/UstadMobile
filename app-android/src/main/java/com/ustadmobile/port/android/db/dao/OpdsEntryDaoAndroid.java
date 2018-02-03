@@ -32,4 +32,8 @@ public abstract class OpdsEntryDaoAndroid extends OpdsEntryDao{
     public UmLiveData<Boolean> isEntryPresent(String entryId) {
         return new UmLiveDataAndroid<>(isEntryPresentR(entryId));
     }
+
+    @Override
+    @Query("Select title From OpdsEntry Where uuid = :uuid")
+    public abstract String findTitleByUuid(String uuid);
 }

@@ -93,4 +93,12 @@ public class DownloadJobItem {
     public void setDownloadLength(long downloadLength) {
         this.downloadLength = downloadLength;
     }
+
+    public String getOpdsEntryUuid() {
+        return opdsEntryUuid;
+    }
+
+    public void setOpdsEntryUuid(String opdsEntryUuid) {
+        this.opdsEntryUuid = opdsEntryUuid;
+    }
 }

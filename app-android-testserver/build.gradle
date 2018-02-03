@@ -19,6 +19,7 @@ android {
 
     defaultConfig {
         applicationId "com.toughra.ustadmobile.testserver"
+//        multiDexEnabled true
         minSdkVersion 16
         targetSdkVersion 27
         versionCode 1
@@ -90,6 +91,8 @@ dependencies {
     api project(":sharedse-tests")
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+//    api 'com.android.support:multidex:1.0.2'
 
     implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta4'
     implementation group: 'com.android.support', name: "appcompat-v7", version: "27.0.2"

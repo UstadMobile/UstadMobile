@@ -6,6 +6,8 @@ import android.content.Context;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
+import com.ustadmobile.core.db.dao.DownloadJobDao;
+import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
@@ -98,5 +100,15 @@ public class DbManagerAndroid extends DbManager {
     @Override
     public EntryStatusResponseDao getEntryStatusResponseDao() {
         return appDatabase.getEntryStatusResponseDao();
+    }
+
+    @Override
+    public DownloadJobDao getDownloadJobDao() {
+        return appDatabase.getDownloadJobDao();
+    }
+
+    @Override
+    public DownloadJobItemHistoryDao getDownloadJobItemHistoryDao() {
+        return appDatabase.getDownloadJobItemHistoryDao();
     }
 }

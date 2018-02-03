@@ -2,6 +2,8 @@ package com.ustadmobile.port.sharedse.networkmanager;
 
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
@@ -10,8 +12,11 @@ import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
-import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
+import com.ustadmobile.lib.db.entities.EntryStatusResponse;
+import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.core.opds.UstadJSOPDSEntry;
@@ -62,9 +67,12 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.NOTIFI
  */
 public class DownloadTask extends NetworkTask implements BluetoothConnectionHandler,NetworkManagerListener{
 
+    @Deprecated
     private UstadJSOPDSFeed feed;
 
     private DownloadJobWithRelations downloadJob;
+
+    private DownloadJobItem currentDownloadJobItem;
 
     protected NetworkManagerTaskListener listener;
 
@@ -94,7 +102,10 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     private String message=null;
 
+    @Deprecated
     private EntryCheckResponse entryCheckResponse;
+
+    private EntryStatusResponseWithNode entryStatusResponse;
 
     private static final int MAXIMUM_ATTEMPT_COUNT = 10;
 
@@ -159,12 +170,15 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     protected NetworkManager networkManager;
 
+    @Deprecated
     private AcquisitionTaskHistoryEntry currentHistoryEntry;
+
+    private DownloadJobItemHistory currentItemHistory;
 
     public static final int SAME_NET_SCORE = 600;
     public static final int WIFI_DIRECT_SCORE = 500;
     public static final int FAILED_NODE_SCORE = -400;
-    public static final float FAILURE_MEMORY_TIME = 20 * 60 * 1000;
+    public static final int FAILURE_MEMORY_TIME = 20 * 60 * 1000;
 
     private Timer wifiConnectTimeoutTimer;
 
@@ -309,30 +323,30 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         //mark entries as about to be acquired
         UmOpdsLink entryAcquireLink;
         Status entryStatus;
-        for(int i = 0; i < feed.size(); i++) {
-            CatalogEntryInfo info = CatalogPresenter.getEntryInfo(feed.getEntry(i).getItemId(),
-                    CatalogPresenter.SHARED_RESOURCE,networkManager.getContext());
-
-            if(info == null) {
-                info = new CatalogEntryInfo();
-                info.acquisitionStatus = CatalogPresenter.STATUS_NOT_ACQUIRED;
-            }
-
-            if(info.acquisitionStatus == CatalogPresenter.STATUS_NOT_ACQUIRED) {
-                entryAcquireLink = feed.getEntry(i).getFirstAcquisitionLink(null);
-                info.acquisitionStatus = CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS;
-                info.mimeType = entryAcquireLink.getMimeType();
-                info.srcURLs = new String[]{UMFileUtil.resolveLink(
-                    feed.getAbsoluteSelfLink().getHref(),
-                    entryAcquireLink.getHref())};
-            }
-
-            CatalogPresenter.setEntryInfo(feed.getEntry(i).getItemId(), info, CatalogPresenter.SHARED_RESOURCE,
-                networkManager.getContext());
-            entryStatus = new Status();
-            entryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_PENDING);
-            statusMap.put(feed.getEntry(i).getItemId(), new Status());
-        }
+//        for(int i = 0; i < feed.size(); i++) {
+//            CatalogEntryInfo info = CatalogPresenter.getEntryInfo(feed.getEntry(i).getItemId(),
+//                    CatalogPresenter.SHARED_RESOURCE,networkManager.getContext());
+//
+//            if(info == null) {
+//                info = new CatalogEntryInfo();
+//                info.acquisitionStatus = CatalogPresenter.STATUS_NOT_ACQUIRED;
+//            }
+//
+//            if(info.acquisitionStatus == CatalogPresenter.STATUS_NOT_ACQUIRED) {
+//                entryAcquireLink = feed.getEntry(i).getFirstAcquisitionLink(null);
+//                info.acquisitionStatus = CatalogPresenter.STATUS_ACQUISITION_IN_PROGRESS;
+//                info.mimeType = entryAcquireLink.getMimeType();
+//                info.srcURLs = new String[]{UMFileUtil.resolveLink(
+//                    feed.getAbsoluteSelfLink().getHref(),
+//                    entryAcquireLink.getHref())};
+//            }
+//
+//            CatalogPresenter.setEntryInfo(feed.getEntry(i).getItemId(), info, CatalogPresenter.SHARED_RESOURCE,
+//                networkManager.getContext());
+//            entryStatus = new Status();
+//            entryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_PENDING);
+//            statusMap.put(feed.getEntry(i).getItemId(), new Status());
+//        }
     }
 
     /**
@@ -425,51 +439,62 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         if(isStopped())
             return;
 
-        if(index < feed.size()) {
+        if(index < downloadJob.getDownloadJobItems().size()) {
             currentEntryIdIndex = index;
-            currentEntryStatus = statusMap.get(feed.getEntry(index).getItemId());
-            currentHistoryEntry = new AcquisitionTaskHistoryEntry(feed.getEntry(index).getItemId());
+            currentDownloadJobItem = downloadJob.getDownloadJobItems().get(currentEntryIdIndex);
+            currentItemHistory = new DownloadJobItemHistory();
             attemptCount++;
             currentGroupSSID = null;
 
-            List<AcquisitionTaskHistoryEntry> entryHistoryList = acquisitionHistoryMap.get(
-                    feed.getEntry(currentEntryIdIndex).getItemId());
-            if(entryHistoryList == null) {
-                entryHistoryList = new ArrayList<>();
-                acquisitionHistoryMap.put(feed.getEntry(currentEntryIdIndex).getItemId(), entryHistoryList);
-            }
-            entryHistoryList.add(currentHistoryEntry);
+//            List<AcquisitionTaskHistoryEntry> entryHistoryList = acquisitionHistoryMap.get(
+//                    feed.getEntry(currentEntryIdIndex).getItemId());
+//            if(entryHistoryList == null) {
+//                entryHistoryList = new ArrayList<>();
+//                acquisitionHistoryMap.put(feed.getEntry(currentEntryIdIndex).getItemId(), entryHistoryList);
+//            }
+//            entryHistoryList.add(currentHistoryEntry);
 
             UstadMobileSystemImpl.l(UMLog.INFO, 303, getLogPrefix() + ": acquireFile: file:" + index + " id: "
-                    + feed.getEntry(currentEntryIdIndex).getItemId());
+                    + downloadJob.getDownloadJobItems().get(currentEntryIdIndex).getEntryId());
             setWaitingForWifiConnection(false);
 
-            if(httpDownload!=null){
+            if(httpDownload != null){
                 currentEntryStatus.setDownloadedSoFar(httpDownload.getDownloadedSoFar());
                 currentEntryStatus.setTotalSize(httpDownload.getTotalSize());
             }
 
             currentEntryStatus.setStatus(UstadMobileSystemImpl.DLSTATUS_RUNNING);
-            networkManager.fireAcquisitionStatusChanged(getFeed().getEntry(currentEntryIdIndex).getItemId(),
+            networkManager.fireAcquisitionStatusChanged(currentDownloadJobItem.getEntryId(),
                     currentEntryStatus);
 
             //TODO: Move hardcoded strings to locale constants
-            message=getFeed().size() > 1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
-                    +getFeed().size() +" files":"Downloading file";
+            message= downloadJob.getDownloadJobItems().size() > 1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
+                    +downloadJob.getDownloadJobItems().size() +" files":"Downloading file";
 
+            String entryTitle = DbManager.getInstance(networkManager.getContext()).getOpdsEntryDao()
+                    .findTitleByUuid(currentDownloadJobItem.getOpdsEntryUuid());
             networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
-                    getFeed().getEntry(currentEntryIdIndex).getTitle(),message);
+                    entryTitle, message);
             long currentDownloadId = new AtomicInteger().incrementAndGet();
-            String entryId = feed.getEntry(currentEntryIdIndex).getItemId();
-            entryCheckResponse = selectEntryCheckResponse(feed.getEntry(index),
-                    mirrorFinder.getEntryResponsesWithLocalFile(feed.getEntry(index).getItemId()));
+            String entryId = currentDownloadJobItem.getEntryId();
+
+
+            DbManager dbManager = DbManager.getInstance(networkManager.getContext());
+            List<EntryStatusResponseWithNode> statusResponses = dbManager.getEntryStatusResponseDao()
+                    .findByEntryIdAndAvailability(currentDownloadJobItem.getEntryId(), true);
+
+//            entryCheckResponse = selectEntryCheckResponse(feed.getEntry(index),
+//                    mirrorFinder.getEntryResponsesWithLocalFile(feed.getEntry(index).getItemId()));
+            entryStatusResponse = selectEntryStatusResponse(statusResponses,
+                    dbManager.getDownloadJobItemHistoryDao());
 
             //TODO: fix this to work using db
 //            NetworkNode responseNode = entryCheckResponse != null ? entryCheckResponse.getNetworkNode() : null;
-            NetworkNode responseNode = null;
+            NetworkNode responseNode = entryStatusResponse.getNetworkNode();
             String currentSsid = networkManager.getCurrentWifiSsid();
             boolean wifiAvailable = currentSsid != null
                     || networkManager.getActionRequiredAfterGroupConnection() == NetworkManager.AFTER_GROUP_CONNECTION_RESTORE;
+
             String feedEntryAcquisitionUrl =  UMFileUtil.resolveLink(
                     feed.getAbsoluteSelfLink().getHref(),
                     feed.getEntry(currentEntryIdIndex).getFirstAcquisitionLink(null).getHref());
@@ -505,6 +530,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             }else {
                 //we're stuck -
                 UstadMobileSystemImpl.l(UMLog.INFO, 0, getLogPrefix() + " download over data disabled, no wifi available - cleanup and wait");
+                //TODO: change this for new status flags
                 cleanup(STATUS_WAITING_FOR_NETWORK);
                 return;
             }
@@ -945,69 +971,77 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         return feed.getEntryById(entryId) != null;
     }
 
+
+
+
     /**
      * Selects the optimal entry check response to download if any
      *
      * @param responses
      * @return
      */
-    public EntryCheckResponse selectEntryCheckResponse(UstadJSOPDSEntry entry, List<EntryCheckResponse> responses) {
+    public EntryStatusResponseWithNode selectEntryStatusResponse(List<EntryStatusResponseWithNode> responses,
+                                                                DownloadJobItemHistoryDao historyDao) {
         if(responses == null || responses.size() == 0) {
             return null;
         }
 
         if(responses.size() == 1) {
-            return scoreEntryCheckResponse(responses.get(0)) > 0 ? responses.get(0) : null;
+            return scoreEntryStatusResponse(responses.get(0), new HashMap<>(), historyDao) > 0 ?
+                    responses.get(0) : null;
         }
 
-        final HashMap<EntryCheckResponse, Integer> entryCheckScores = new HashMap<>();
+        final HashMap<EntryStatusResponseWithNode, Integer> entryCheckScores = new HashMap<>();
 
-        ArrayList<EntryCheckResponse> listToSort = new ArrayList<>(responses);
-        Collections.sort(listToSort, new Comparator<EntryCheckResponse>() {
-            @Override
-            public int compare(EntryCheckResponse response1, EntryCheckResponse response2) {
-                if(!entryCheckScores.containsKey(response1))
-                    entryCheckScores.put(response1, scoreEntryCheckResponse(response1));
+        final HashMap<Integer, List<DownloadJobItemHistory>> nodeHistoryCache = new HashMap<>();
+        ArrayList<EntryStatusResponseWithNode> listToSort = new ArrayList<>(responses);
+        Collections.sort(listToSort, (response1, response2) -> {
+            if(!entryCheckScores.containsKey(response1))
+                entryCheckScores.put(response1, scoreEntryStatusResponse(response1, nodeHistoryCache,
+                        historyDao));
 
-                if(!entryCheckScores.containsKey(response2))
-                    entryCheckScores.put(response2, scoreEntryCheckResponse(response2));
+            if(!entryCheckScores.containsKey(response2))
+                entryCheckScores.put(response2, scoreEntryStatusResponse(response2, nodeHistoryCache,
+                        historyDao));
 
-                return entryCheckScores.get(response2) - entryCheckScores.get(response1);
-            }
+            return entryCheckScores.get(response2) - entryCheckScores.get(response1);
         });
 
-        EntryCheckResponse bestResponse = listToSort.get(0);
+
+        EntryStatusResponseWithNode bestResponse = listToSort.get(0);
         return bestResponse != null && entryCheckScores.get(bestResponse) >0 ? bestResponse : null;
     }
 
-    private int scoreEntryCheckResponse(EntryCheckResponse response) {
-        if(!response.isFileAvailable())
+    private int scoreEntryStatusResponse(EntryStatusResponseWithNode response,
+                                         HashMap<Integer, List<DownloadJobItemHistory>> nodeHistoryCache,
+                                         DownloadJobItemHistoryDao historyDao) {
+        if(!response.isAvailable())
             return 0;
 
-        //TODO: fix this to work using db
-        return -1;
-//        int score = 0;
-//        NetworkNode node = response.getNetworkNode();
-//        if(response.getNetworkNode().isNsdActive()) {
-//            score += SAME_NET_SCORE;
-//        }else if(response.getNetworkNode().isWifiDirectActive()) {
-//            score += WIFI_DIRECT_SCORE;
-//        }
-//
-//
-//        if(node.getAcquisitionHistory() != null) {
-//            Iterator<AcquisitionTaskHistoryEntry> historyIterator = node.getAcquisitionHistory().iterator();
-//            AcquisitionTaskHistoryEntry entry;
-//            while(historyIterator.hasNext()) {
-//                entry = historyIterator.next();
-//                if(entry.getStatus() == UstadMobileSystemImpl.DLSTATUS_FAILED) {
-//                    long timeSinceFail = Calendar.getInstance().getTimeInMillis() - entry.getTimeEnded();
-//                    score += (1 - Math.min((float)timeSinceFail / FAILURE_MEMORY_TIME, 1)) * FAILED_NODE_SCORE;
-//                }
-//            }
-//        }
-//
-//        return score;
+        int score = 0;
+
+        NetworkNode node = response.getNetworkNode();
+        if(node.isNsdActive()) {
+            score += SAME_NET_SCORE;
+        }else if(node.isWifiDirectActive()) {
+            score += WIFI_DIRECT_SCORE;
+        }
+
+        List<DownloadJobItemHistory> itemHistoryList = nodeHistoryCache.get(node.getNodeId());
+        if(itemHistoryList == null) {
+            itemHistoryList = historyDao.findHistoryItemsByNetworkNodeSince(node.getNodeId(),
+                    System.currentTimeMillis() - FAILURE_MEMORY_TIME);
+            nodeHistoryCache.put(node.getNodeId(), itemHistoryList);
+        }
+
+        for(DownloadJobItemHistory itemHistory : itemHistoryList) {
+            if(!itemHistory.isSuccessful()) {
+                long timeSinceFail = Calendar.getInstance().getTimeInMillis() - itemHistory.getEndTime();
+                score += (1 - Math.min((float)timeSinceFail / FAILURE_MEMORY_TIME, 1)) * FAILED_NODE_SCORE;
+            }
+        }
+
+        return score;
     }
 
     public boolean isDownloadOnMobileDataEnabled() {

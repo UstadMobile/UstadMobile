@@ -27,6 +27,10 @@ android {
         abortOnError false
     }
 
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -38,6 +42,7 @@ android {
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
+        manifestPlaceholders = [applicationClass : "android.app.Application"]
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -82,7 +87,8 @@ android {
             applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
-            manifestPlaceholders = ["appName": "Ustad Mobile"]
+            manifestPlaceholders = [appName: "Ustad Mobile", applicationClass : "android.support.multidex.MultiDexApplication"]
+            multiDexEnabled true
         }
     }
 
@@ -122,11 +128,15 @@ dependencies {
 
     api project(":app-android")
 
+    vanillaApi "com.android.support:multidex:1.0.2"
+
+
     api fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
+//    api 'com.android.support:multidex:1.0.2'
     testImplementation 'junit:junit:4.12'
 }
 

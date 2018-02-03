@@ -14,7 +14,6 @@ import org.junit.BeforeClass;
 /**
  * Created by mike on 5/22/17.
  */
-
 public class SharedSeTestSuiteRunAndroid extends SharedSeTestSuite{
 
     public static final ServiceTestRule mServiceRule = new ServiceTestRule();

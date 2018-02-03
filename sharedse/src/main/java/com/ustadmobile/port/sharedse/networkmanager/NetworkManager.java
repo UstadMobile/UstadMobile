@@ -16,6 +16,7 @@ import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -75,7 +76,7 @@ import static com.ustadmobile.core.buildconfig.CoreBuildConfig.WIFI_P2P_INSTANCE
 public abstract class NetworkManager implements NetworkManagerCore, NetworkManagerTaskListener,
         LocalMirrorFinder, EntryStatusTask.NetworkNodeListProvider, EmbeddedHTTPD.ResponseListener {
 
-    protected ExecutorService executorService;
+    protected ExecutorService dbExecutorService;
 
     /**
      * Flag to indicate type of notification used when supernode is active
@@ -153,6 +154,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     private Vector<NetworkTask>[] tasksQueues = new Vector[] {
         new Vector<>(), new Vector<>()
     };
+
+    private Set<DownloadTask> activeDownloadTasks;
 
 
     private Vector<NetworkManagerListener> networkManagerListeners = new Vector<>();
@@ -320,7 +323,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         this.mContext = mContext;
 
-        executorService = Executors.newCachedThreadPool();
+        dbExecutorService = Executors.newCachedThreadPool();
 
         try {
             /*
@@ -450,6 +453,38 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         return job.getId();
     }
+
+
+    public void queueDownloadJob(int downloadJobId) {
+        //just set the status of the job and let it be found using a query
+        dbExecutorService.execute(() -> {
+            DbManager.getInstance(getContext()).getDownloadJobDao().queueDownload(
+                    downloadJobId, NetworkTask.STATUS_QUEUED, System.currentTimeMillis());
+            checkDownloadJobQueue();
+        });
+    }
+
+    /**
+     *
+     */
+    public void checkDownloadJobQueue(){
+        if(activeDownloadTasks.isEmpty()){
+            DownloadJobWithRelations job = DbManager.getInstance(getContext())
+                    .getDownloadJobDao().findNextDownloadJobAndSetStartingStatus();
+            if(job == null)
+                return;//nothing to do
+
+            DownloadTask task = new DownloadTask(job, this);
+            task.start();
+        }
+    }
+
+
+    public void handleDownloadTaskStatusChanged() {
+
+    }
+
+
 
 
 
@@ -593,7 +628,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param txtRecords Map of DNS-Text records
      */
     public void handleWifiDirectSdTxtRecordsAvailable(String serviceFullDomain,String senderMacAddr, HashMap<String, String> txtRecords) {
-        executorService.execute(() -> {
+        dbExecutorService.execute(() -> {
             if(serviceFullDomain.contains(WIFI_P2P_INSTANCE_NAME)){
                 String ipAddr = txtRecords.get(SD_TXT_KEY_IP_ADDR);
                 String btAddr = txtRecords.get(SD_TXT_KEY_BT_MAC);
@@ -712,7 +747,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param port Service port on host device
      */
     public void handleNetworkServerDiscovered(String serviceName,String ipAddress,int port){
-        executorService.execute(() -> {
+        dbExecutorService.execute(() -> {
             NetworkNode node;
             boolean newNode;
             synchronized (knownNodesLock) {
@@ -891,12 +926,12 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
         for(ContainerFileEntry availableEntry : availableEntries) {
             entryStatusResponses.add(new EntryStatusResponse(availableEntry.getContainerEntryId(),
-                    node.getId(), responseTime, 0, true));
+                    node.getNodeId(), responseTime, 0, true));
             remainingEntries.remove(availableEntry.getContainerEntryId());
         }
 
         for(String unavailableEntryId : remainingEntries) {
-            entryStatusResponses.add(new EntryStatusResponse(unavailableEntryId, node.getId(),
+            entryStatusResponses.add(new EntryStatusResponse(unavailableEntryId, node.getNodeId(),
                     responseTime,0, false));
         }
 

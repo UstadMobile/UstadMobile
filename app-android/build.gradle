@@ -208,6 +208,7 @@ android {
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
+        manifestPlaceholders = [applicationClass : "android.app.Application"]
     }
 
     flavorDimensions "config"
@@ -235,20 +236,34 @@ android {
             testApplicationId "com.toughra.ustadmobile.test"
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile"]
+
+            multiDexEnabled true
+            manifestPlaceholders = [appName: "Ustad Mobile", applicationClass : "android.support.multidex.MultiDexApplication"]
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
+        }
+
+        vanillamultidex {
+            dimension "config"
+
+            //TODO: put what's needed in here - keep this as it's own flavor.
         }
 
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
 
         debug {
+            minifyEnabled true
+            useProguard false
             testCoverageEnabled = true
-            multiDexEnabled true
         }
     }
 }
@@ -371,7 +386,7 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
-    debugApi "com.android.support:multidex:1.0.2"
+    vanillaApi "com.android.support:multidex:1.0.2"
 
     androidTestApi project(":core-tests")
 

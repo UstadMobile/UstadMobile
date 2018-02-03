@@ -6,6 +6,7 @@ import android.arch.persistence.room.Query;
 
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
+import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
 
 import java.util.List;
 
@@ -15,6 +16,11 @@ import java.util.List;
 @Dao
 public abstract class EntryStatusResponseDaoAndroid extends EntryStatusResponseDao{
 
+    @Override
+    @Query("SELECT EntryStatusResponse.* FROM EntryStatusResponse " +
+            " LEFT JOIN NetworkNode ON EntryStatusResponse.responderNodeId = NetworkNode.nodeId " +
+            "WHERE entryId = :entryId AND available = :available ")
+    public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(String entryId, boolean available);
 
     @Override
     @Insert

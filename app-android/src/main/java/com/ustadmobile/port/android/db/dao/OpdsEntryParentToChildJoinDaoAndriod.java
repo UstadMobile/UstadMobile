@@ -1,3 +1,4 @@
+
 package com.ustadmobile.port.android.db.dao;
 
 import android.arch.persistence.room.Dao;

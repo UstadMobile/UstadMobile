@@ -18,17 +18,21 @@ public class EntryStatusResponse {
 
     private long responseTime;
 
-    private int nodeId;
+    private int responderNodeId;
 
     private boolean available;
 
-    public EntryStatusResponse(String entryId, int nodeId, long responseTime, long updated,
+    public EntryStatusResponse(String entryId, int responderNodeId, long responseTime, long updated,
                                boolean available) {
         this.entryId = entryId;
-        this.nodeId = nodeId;
+        this.responderNodeId = responderNodeId;
         this.updated = updated;
         this.responseTime = responseTime;
         this.available = available;
+    }
+
+    public EntryStatusResponse() {
+
     }
 
     public int getId() {
@@ -63,12 +67,12 @@ public class EntryStatusResponse {
         this.responseTime = responseTime;
     }
 
-    public int getNodeId() {
-        return nodeId;
+    public int getResponderNodeId() {
+        return responderNodeId;
     }
 
-    public void setNodeId(int nodeId) {
-        this.nodeId = nodeId;
+    public void setResponderNodeId(int responderNodeId) {
+        this.responderNodeId = responderNodeId;
     }
 
     public boolean isAvailable() {
