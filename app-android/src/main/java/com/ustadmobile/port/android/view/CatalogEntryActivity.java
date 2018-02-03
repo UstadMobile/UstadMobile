@@ -30,12 +30,12 @@ import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.fs.view.ImageLoader;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
@@ -415,7 +415,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     @Override
     public void setDescription(String description, String contentType) {
         TextView descriptionTextView = ((TextView)findViewById(R.id.activity_catalog_entry_description));
-        if(contentType.equals(UstadJSOPDSEntry.CONTENT_TYPE_XHTML)) {
+        if(OpdsEntry.CONTENT_TYPE_XHTML.equals(contentType)) {
             descriptionTextView.setText(Html.fromHtml(description));
         }else {
             descriptionTextView.setText(description);

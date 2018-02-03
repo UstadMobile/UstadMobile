@@ -1,60 +1,74 @@
 package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.core.catalog.contenttype.ScormTypePlugin;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.scorm.ScormManifest;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.util.UmUuidUtil;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Created by mike on 2/3/18.
  */
 
 public class ScormTypePluginFs extends ScormTypePlugin implements ContentTypePluginFs {
+
     @Override
     public List<OpdsEntryWithRelations> getEntries(File file, Object context) {
-        return null;
+        InputStream manifestIn = null;
+        OpdsEntryWithRelations entry = null;
+
+        String url = UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath();
+
+
+        ZipFile zipFile = null;
+        try {
+            zipFile = new ZipFile(file);
+            ZipEntry zipEntry = zipFile.getEntry("imsmanifest.xml");
+
+            if(zipEntry == null)
+                return null;
+
+            entry = DbManager.getInstance(context)
+                    .getOpdsEntryWithRelationsDao().getEntryByUrlStatic(url);
+
+            if(entry == null){
+                entry = new OpdsEntryWithRelations();
+                entry.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+                entry.setUrl(url);
+            }
+
+            ScormManifest manifest = new ScormManifest();
+            manifestIn = zipFile.getInputStream(zipEntry);
+            manifest.loadFromInputStream(manifestIn);
+
+            entry.setTitle(manifest.getDefaultOrganization().getTitle());
+            entry.setEntryId(manifest.getIdentifier());
+        }catch(IOException|XmlPullParserException e) {
+            e.printStackTrace();
+        }finally{
+            UMIOUtils.closeQuietly(manifestIn);
+            if(zipFile != null){
+                try { zipFile.close(); }
+                catch(IOException e) {}
+            }
+        }
+
+        ArrayList<OpdsEntryWithRelations> result = new ArrayList<>();
+        result.add(entry);
+        return result;
     }
 
-    //    @Override
-//    public EntryResult getEntry(String fileUri, String cacheEntryFileUri) {
-//        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
-//
-//        InputStream manifestIn = null;
-//        UstadJSOPDSEntry entry = null;
-//
-//        String containerFilename = UMFileUtil.getFilename(fileUri);
-//        String cacheFeedID = CatalogPresenter.sanitizeIDForFilename(fileUri);
-//        UstadJSOPDSFeed result = new UstadJSOPDSFeed(fileUri, containerFilename,
-//                cacheFeedID);
-//        try {
-//            ZipFileHandle zipHandle = impl.openZip(fileUri);
-//            ZipEntryHandle entryHandle = zipHandle.getEntry("imsmanifest.xml");
-//            if(entryHandle == null)
-//                return null;
-//
-//
-//            ScormManifest manifest = new ScormManifest();
-//            manifestIn = zipHandle.openInputStream("imsmanifest.xml");
-//            manifest.loadFromInputStream(manifestIn);
-//
-//            entry = new UstadJSOPDSEntry(result, manifest.getDefaultOrganization().getTitle(),
-//                    manifest.getIdentifier(),
-//                    UstadJSOPDSEntry.LINK_ACQUIRE, MIME_TYPES[0], fileUri);
-//            result.addEntry(entry);
-//
-//        }catch(IOException e) {
-//            e.printStackTrace();
-//        }catch(XmlPullParserException x) {
-//            x.printStackTrace();
-//        }catch(Exception e3) {
-//            e3.printStackTrace();
-//        }
-//
-//        if(entry == null ){
-//            System.out.println("WTF");
-//        }
-//
-//        return entry != null ? new ZippedEntryResult(result, fileUri, null, null) : null;
-//    }
 }

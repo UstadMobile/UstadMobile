@@ -60,6 +60,8 @@ import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
+import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
+import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
 import com.ustadmobile.core.impl.ContainerMountRequest;
 import com.ustadmobile.core.impl.TinCanQueueListener;
 import com.ustadmobile.core.impl.UMDownloadCompleteReceiver;
@@ -215,11 +217,10 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
      */
     private HashMap<TinCanQueueListener, XapiStatementsForwardingListener> queueStatusListeners;
 
-
     private UmOpdsDbManagerAndroid opdsDbManager;
 
     private static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[] {
-            new EpubTypePluginFs()};
+            new EpubTypePluginFs(), new ScormTypePluginFs(), new XapiPackageTypePluginFs()};
 
     private ExecutorService bgExecutorService = Executors.newCachedThreadPool();
 
