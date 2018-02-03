@@ -13,9 +13,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by varuna on 8/23/2017.
+ *
+ * Note: UmBaseApplication extends MultidexApplication on the multidex variant, but extends the
+ * normal android.app.Application on non-multidex variants.
+ *
  */
-
-public class App extends Application {
+public class App extends UmBaseApplication {
 
     private int syncJobId;
 

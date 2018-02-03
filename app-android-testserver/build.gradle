@@ -50,6 +50,14 @@ android {
             manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName'] + " Test Server"]
         }
 
+        vanilla {
+            dimension "config"
+            applicationId "com.toughra.ustadmobile.testserver"
+            testApplicationId "com.toughra.ustadmobile.appandroid.testserver.test"
+            versionCode rootProject.ext.ustadVersionCode
+            manifestPlaceholders = ["appName": "Ustad Mobile Test Server"]
+        }
+
         /*
          * The vanilla config flavor is here for convenience : it's the same as having no
          * buildconfig.local.properties and relying on what's in buildconfig.default.properties
@@ -57,12 +65,16 @@ android {
          * It's just here to make life easier so you can switch flavors in Android studio without
          * having to remove the local config files themselves
          */
-        vanilla {
+        vanillamultidex {
             dimension "config"
             applicationId "com.toughra.ustadmobile.testserver"
             testApplicationId "com.toughra.ustadmobile.appandroid.testserver.test"
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile Test Server"]
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
         }
     }
 

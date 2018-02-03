@@ -29,9 +29,9 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-//import org.mockito.AdditionalMatchers;
-//import org.mockito.Mockito;
-//import org.mockito.internal.matchers.GreaterThan;
+import org.mockito.AdditionalMatchers;
+import org.mockito.Mockito;
+import static org.mockito.Mockito.eq;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
+
+import static org.mockito.AdditionalMatchers.eq;
 
 /**
  * Test the acquisition task. The OPDS feed on which the acquisition is based and the EPUBs are in
@@ -393,34 +395,39 @@ public class TestDownloadTask {
         long timeNow = Calendar.getInstance().getTimeInMillis();
 
         NetworkNode wifiDirectNode = new NetworkNode("00:00:00:00:00:01", null);
+        wifiDirectNode.setNodeId(0);
         wifiDirectNode.setWifiDirectLastUpdated(timeNow);
         EntryStatusResponseWithNode wifiDirectResponse = new EntryStatusResponseWithNode();
         wifiDirectResponse.setAvailable(true);
+        wifiDirectResponse.setNetworkNode(wifiDirectNode);
 
         NetworkNode sameNetworkNode = new NetworkNode(null, "127.0.0.2");
+        sameNetworkNode.setNodeId(1);
         sameNetworkNode.setNetworkServiceLastUpdated(timeNow);
         sameNetworkNode.setNsdServiceName("lan-node");
 
         EntryStatusResponseWithNode sameNetworkResponse = new EntryStatusResponseWithNode(sameNetworkNode);
         sameNetworkResponse.setAvailable(true);
+        sameNetworkResponse.setNetworkNode(sameNetworkNode);
 
         ArrayList<EntryStatusResponseWithNode> responseList = new ArrayList<>();
         responseList.add(wifiDirectResponse);
         responseList.add(sameNetworkResponse);
 
-//        DownloadJobItemHistoryDao historyDao1 = Mockito.mock(DownloadJobItemHistoryDao.class);
+        DownloadJobItemHistoryDao historyDao1 = Mockito.mock(DownloadJobItemHistoryDao.class);
         Assert.assertTrue(true);
-//        Mockito.when(historyDao1.findHistoryItemsByNetworkNodeSince(0, AdditionalMatchers.gt(0)))
-//                .thenReturn(new ArrayList<DownloadJobItemHistory>());
-//
+
+        Mockito.when(historyDao1.findHistoryItemsByNetworkNodeSince(eq(sameNetworkNode.getNodeId()), AdditionalMatchers.gt(0)))
+                .thenReturn(new ArrayList<DownloadJobItemHistory>());
+
 //        UstadJSOPDSFeed acquisitionFeed = makeAcquisitionTestFeed();
-////        AcquisitionTask task = new AcquisitionTask(makeAcquisitionTestFeed(),
-////                UstadMobileSystemImplSE.getInstanceSE().getNetworkManager());
-//
-//        DownloadTask task = new DownloadTask(null,
-//                (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
-//        Assert.assertEquals("When WiFi direct and local network responses are available, local network response will be chosen",
-//                sameNetworkResponse, task.selectEntryStatusResponse(responseList, historyDao1));
+//        AcquisitionTask task = new AcquisitionTask(makeAcquisitionTestFeed(),
+//                UstadMobileSystemImplSE.getInstanceSE().getNetworkManager());
+
+        DownloadTask task = new DownloadTask(null,
+                (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
+        Assert.assertEquals("When WiFi direct and local network responses are available, local network response will be chosen",
+                sameNetworkResponse, task.selectEntryStatusResponse(responseList, historyDao1));
 
 
 //        /*

@@ -388,7 +388,7 @@ dependencies {
     implementation project(":lib-database-annotation")
     implementation project(":lib-util")
 
-    vanillaApi "com.android.support:multidex:1.0.2"
+    vanillamultidexApi "com.android.support:multidex:1.0.2"
 
     androidTestApi project(":core-tests")
 
@@ -436,6 +436,8 @@ dependencies {
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
     androidTestImplementation 'com.android.support.test:runner:1.0.0'
     androidTestImplementation 'com.android.support.test:rules:1.0.0'
+
+    androidTestImplementation "org.mockito:mockito-android:2.13.0"
 }
 
 task sourceJar(type: Jar) {

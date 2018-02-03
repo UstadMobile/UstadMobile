@@ -4,5 +4,5 @@
     package="com.toughra.ustadmobile">
 
 
-    <application android:supportsRtl="true" android:name="android.support.multidex.MultiDexApplication"/>
+    <application android:supportsRtl="true" android:name="com.ustadmobile.port.android.App"/>
 </manifest>
