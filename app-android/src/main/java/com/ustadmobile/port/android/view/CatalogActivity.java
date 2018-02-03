@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 
 
@@ -42,7 +42,8 @@ public class CatalogActivity extends UstadBaseActivity  {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION, this);
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, this), this);
                 return true;
         }
 

@@ -20,6 +20,7 @@ import android.view.MenuItem;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -271,7 +272,8 @@ public abstract class UstadBaseActivity extends AppCompatActivity implements Ser
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case android.R.id.home:
-                UstadMobileSystemImpl.getInstance().go(CoreBuildConfig.FIRST_DESTINATION, this);
+                UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                impl.go(impl.getAppConfigString(AppConfig.KEY_FIRST_DEST, null, this), this);
                 return true;
 
 

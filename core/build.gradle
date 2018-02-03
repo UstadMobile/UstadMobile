@@ -150,8 +150,6 @@ task generateCoreBuildConfig (type: de.fuerstenau.gradle.buildconfig.GenerateBui
     buildConfigField "boolean", "BASEPOINT_BROWSEBUTTON_ENABLED", project.ext.buildConfigProperties["appBasepointBrowseButtonUrl"].equals("") ? "false" : "true"
     buildConfigField "boolean", "BASEPOINT_FILTER_BY_UI_LANG", project.ext.buildConfigProperties["appBasepointFilterByUiLang"]
     buildConfigField "boolean", "LOGIN_TITLEBAR_VISIBLE", project.ext.buildConfigProperties["appLoginTitleBarVisible"]
-    buildConfigField "String", "FIRST_DESTINATION", project.ext.buildConfigProperties["appFirstDest"]
-    buildConfigField "boolean", "LOGIN_BEFORE_FIRST_DESTINATION", project.ext.buildConfigProperties["appLoginBeforeFirstDest"]
     buildConfigField "boolean", "LOGIN_BEFORE_DOWNLOAD", project.ext.buildConfigProperties["appLoginBeforeDownload"]
     buildConfigField "String", "DEFAULT_PREFERRED_ACQUISITION_FORMATS", project.ext.buildConfigProperties["appPreferredAcquisitionFormats"]
     buildConfigField "int", "ACQUISITION_SELECT_WEIGHT_LANGUAGE", project.ext.buildConfigProperties['appAcquisitionLanguagePrefWeight']

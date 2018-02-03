@@ -72,7 +72,6 @@ android {
             applicationId project.ext.buildConfigProperties['android.applicationId']
             testApplicationId = project.ext.buildConfigProperties['android.applicationId'] + ".test"
             versionCode rootProject.ext.ustadVersionCode + Integer.parseInt(rootProject.ext.buildConfigProperties['localVersionCode'])
-            manifestPlaceholders = ["appName": rootProject.ext.buildConfigProperties['appName']]
         }
 
         /*
@@ -87,8 +86,6 @@ android {
             applicationId "com.toughra.ustadmobile"
             testApplicationId "com.toughra.ustadmobile.appandroid.test"
             versionCode rootProject.ext.ustadVersionCode
-            manifestPlaceholders = [appName: "Ustad Mobile", applicationClass : "android.support.multidex.MultiDexApplication"]
-            multiDexEnabled true
         }
     }
 

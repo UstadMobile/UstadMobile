@@ -217,7 +217,7 @@ core/src/main/java/com/ustadmobile/core/buildconfig/CoreBuildConfig.java
 core/src/main/java/com/ustadmobile/core/generated/*
 app-android/src/main/java/com/ustadmobile/port/android/generated/*
 app-android/src/vanilla/java/com/ustadmobile/port/android/generated/*
-app-android/src/remotetestslave/java/com/ustadmobile/port/android/generated/*
+app-android/src/vanillamultidex/java/com/ustadmobile/port/android/generated/*
 
 #Copied core resources
 app-android/src/main/assets/com/ustadmobile/core

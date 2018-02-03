@@ -237,31 +237,31 @@ android {
             versionCode rootProject.ext.ustadVersionCode
             manifestPlaceholders = ["appName": "Ustad Mobile"]
 
-            multiDexEnabled true
+
             manifestPlaceholders = [appName: "Ustad Mobile", applicationClass : "android.support.multidex.MultiDexApplication"]
-            packagingOptions { //Required: otherwise we get complaints on assembling
-                merge "META-INF/INDEX.LIST"
-            }
+
         }
 
         vanillamultidex {
             dimension "config"
-
-            //TODO: put what's needed in here - keep this as it's own flavor.
+            multiDexEnabled true
+            packagingOptions { //Required: otherwise we get complaints on assembling
+                merge "META-INF/INDEX.LIST"
+            }
         }
 
     }
 
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
 
         debug {
-            minifyEnabled true
+            minifyEnabled false
             useProguard false
             testCoverageEnabled = true
         }
@@ -298,7 +298,7 @@ task generateCoreStringToAndroidResMap {
     inputs.files("core/locale/*/*.xml")
 
     doLast {
-        int MAIN = 0, LOCALCONFIG = 1
+        int MAIN = 0, LOCALCONFIG = 1, VANILLAMULTIDEX = 2
         String[] dirNames = new String[2]
         dirNames[MAIN] = "vanilla"
         dirNames[LOCALCONFIG] = "localconfig"
@@ -359,17 +359,19 @@ task generateCoreStringToAndroidResMap {
         String[] outDirNames = new String[3]
         outDirNames[MAIN] = "vanilla"
         outDirNames[LOCALCONFIG] = "localconfig"
+        outDirNames[VANILLAMULTIDEX] = "vanillamultidex"
 
 
 
-        for (int i = 0; i < dirNames.length; i++) {
-            File outDir = project.file("src/" + dirNames[i] + "/java/com/ustadmobile/port/android/generated")
+        for (int i = 0; i < outDirNames.length; i++) {
+            File outDir = project.file("src/" + outDirNames[i] + "/java/com/ustadmobile/port/android/generated")
             if (!outDir.isDirectory()) {
                 outDir.mkdirs()
             }
 
             File outFile = new File(outDir, "MessageIDMap.java")
-            outFile.setText(genSrcHeader + genSrcBody[i] + genSrcFooter, "UTF-8")
+            int idMapIndex = i == VANILLAMULTIDEX ? MAIN : i;
+            outFile.setText(genSrcHeader + genSrcBody[idMapIndex] + genSrcFooter, "UTF-8")
         }
 
 

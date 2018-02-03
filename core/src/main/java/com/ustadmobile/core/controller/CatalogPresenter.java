@@ -117,6 +117,9 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
     private String title;
 
+    /** App config key pointing to the url of the initial my library contents to show */
+    public static final String APPCONFIG_DEFAULT_MY_LIBRARY = "default_my_library";
+
 
     public CatalogPresenter(Object context, CatalogView view) {
         super(context);
@@ -170,9 +173,10 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                 @Override
                 public void onChanged(Boolean present) {
                     if(!present){
+                        String presetUrl = UstadMobileSystemImpl.getInstance().getAppConfigString(
+                                APPCONFIG_DEFAULT_MY_LIBRARY, null, getContext());
                         DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
-                                .getEntryByUrl("asset:///com/ustadmobile/core/feed-defaults/"
-                                        + libraryUuid+ ".opds", libraryUuid);
+                                .getEntryByUrl(presetUrl, libraryUuid);
                         libraryPresent.removeObserver(this);
                     }
                 }

@@ -357,27 +357,18 @@ public abstract class UstadMobileSystemImpl {
      * Starts the user interface for the app
      */
     public void startUI(Object context) {
-        final UstadMobileSystemImpl impl = this;
-
         String activeUser = getActiveUser(context);
         String activeUserAuth = getActiveUserAuth(context);
         getLogger().l(UMLog.VERBOSE, 402, activeUser);
 
-        if(CoreBuildConfig.LOGIN_BEFORE_FIRST_DESTINATION && (activeUser == null || activeUserAuth == null)) {
+
+
+        if(getAppConfigBoolean(AppConfig.KEY_FIRST_DEST_LOGIN_REQUIRED, context)
+                && (activeUser == null || activeUserAuth == null)) {
             go(LoginView.VIEW_NAME, null, context);
         }else {
-            go(CoreBuildConfig.FIRST_DESTINATION, context);
+            go(getAppConfigString(AppConfig.KEY_FIRST_DEST, null, context), context);
         }
-
-        /*
-        if(activeUser == null || activeUserAuth == null) {
-
-        }else {
-            Hashtable args = BasePointController.makeDefaultBasePointArgs(context);
-            go(BasePointView.VIEW_NAME, args, context);
-
-        }
-        */
     }
 
     /**

@@ -12,4 +12,8 @@ public class AppConfig {
 
     public static final String KEY_LOGIN_REQUIRED_FOR_CONTENT_DOWNLOAD = "login_before_download";
 
+    public static final String KEY_FIRST_DEST = "first_dest";
+
+    public static final String KEY_FIRST_DEST_LOGIN_REQUIRED = "first_dest_login_required";
+
 }
