@@ -27,6 +27,18 @@ public class DownloadJobItemHistory {
 
     private long endTime;
 
+    public DownloadJobItemHistory() {
+
+    }
+
+    public DownloadJobItemHistory(int networkNode, int mode, boolean successful, long startTime, long endTime){
+        this.networkNode = networkNode;
+        this.mode = mode;
+        this.successful = successful;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
 
     public int getId() {
         return id;

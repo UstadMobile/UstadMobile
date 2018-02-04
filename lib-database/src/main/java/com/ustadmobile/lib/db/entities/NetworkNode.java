@@ -71,7 +71,7 @@ public class NetworkNode {
         return nodeId;
     }
 
-    public void setNodeId(int id) {
+    public void setNodeId(int nodeId) {
         this.nodeId = nodeId;
     }
 

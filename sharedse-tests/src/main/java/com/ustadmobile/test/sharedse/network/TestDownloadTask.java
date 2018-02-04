@@ -4,13 +4,11 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
-import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.DownloadTask;
@@ -29,9 +27,8 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.eq;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -40,11 +37,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
-import static org.mockito.AdditionalMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.mockito.AdditionalMatchers.gt;
 
 /**
  * Test the acquisition task. The OPDS feed on which the acquisition is based and the EPUBs are in
@@ -414,121 +413,134 @@ public class TestDownloadTask {
         responseList.add(wifiDirectResponse);
         responseList.add(sameNetworkResponse);
 
-        DownloadJobItemHistoryDao historyDao1 = Mockito.mock(DownloadJobItemHistoryDao.class);
-        Assert.assertTrue(true);
+        DownloadJobItemHistoryDao mockHistoryDao1 = mock(DownloadJobItemHistoryDao.class);
 
-        Mockito.when(historyDao1.findHistoryItemsByNetworkNodeSince(eq(sameNetworkNode.getNodeId()), AdditionalMatchers.gt(0)))
+
+        DownloadJobItemHistory historyItem1 = new DownloadJobItemHistory();
+        ArrayList<DownloadJobItemHistory> list1 = new ArrayList<>();
+        list1.add(historyItem1);
+        when(mockHistoryDao1.findHistoryItemsByNetworkNodeSince(anyInt(), anyLong()))
                 .thenReturn(new ArrayList<DownloadJobItemHistory>());
-
-//        UstadJSOPDSFeed acquisitionFeed = makeAcquisitionTestFeed();
-//        AcquisitionTask task = new AcquisitionTask(makeAcquisitionTestFeed(),
-//                UstadMobileSystemImplSE.getInstanceSE().getNetworkManager());
 
         DownloadTask task = new DownloadTask(null,
                 (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager());
         Assert.assertEquals("When WiFi direct and local network responses are available, local network response will be chosen",
-                sameNetworkResponse, task.selectEntryStatusResponse(responseList, historyDao1));
+                sameNetworkResponse, task.selectEntryStatusResponse(responseList, mockHistoryDao1));
 
 
-//        /*
-//         * When given a choice between a node with failures and a node without - select the node without recent failures
-//         */
-//        NetworkNode nodeWithoutFailures = new NetworkNode(null, "127.0.0.1");
-//        nodeWithoutFailures.setNetworkServiceLastUpdated(timeNow);
-//        nodeWithoutFailures.setNsdServiceName("without-failures");
-//        EntryCheckResponse nodeWithoutFailuresResponse = new EntryCheckResponse(nodeWithoutFailures);
-//        nodeWithoutFailuresResponse.setFileAvailable(true);
-//
-//        NetworkNode nodeWithFailures= new NetworkNode(null, "127.0.0.2");
-//        nodeWithFailures.setNetworkServiceLastUpdated(timeNow);
-//        nodeWithoutFailures.setNsdServiceName("with-failures");
-//        EntryCheckResponse nodeWithFailuresResponse = new EntryCheckResponse(nodeWithFailures);
-//        nodeWithFailuresResponse.setFileAvailable(true);
-//        long failureTime = timeNow - 20000;//20 seconds ago
-//        AcquisitionTaskHistoryEntry failureEntry = new AcquisitionTaskHistoryEntry(
-//            acquisitionFeed.getEntry(0).getItemId(), "http://127.0.0.2:8001/catalog/entry/foo",
-//                NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, failureTime,
-//                failureTime, UstadMobileSystemImpl.DLSTATUS_FAILED);
-//        nodeWithFailures.addAcquisitionHistoryEntry(failureEntry);
-//        responseList.clear();
-//        responseList.add(nodeWithFailuresResponse);
-//        responseList.add(nodeWithoutFailuresResponse);
-//        Assert.assertEquals("When downloading prefer a network node without recent failures",
-//                nodeWithoutFailuresResponse, task.selectEntryCheckResponse(acquisitionFeed.getEntry(0),
-//                responseList));
-//
-//        /*
-//         * When nodes have failed - choose the node where it has been the longest time since that failure
-//         */
-//        responseList.clear();
-//        NetworkNode[] nodesWithFailures = new NetworkNode[4];
-//        EntryCheckResponse[] nodeWithFailuresResponses = new EntryCheckResponse[4];
-//        for(int i = 0; i < nodesWithFailures.length; i++) {
-//            nodesWithFailures[i] = new NetworkNode(null, "127.0.0." + i);
-//            nodesWithFailures[i].setNetworkServiceLastUpdated(timeNow);
-//            nodesWithFailures[i].setNsdServiceName("node-with-failures-"+i);
-//            failureTime = timeNow - (((long)AcquisitionTask.FAILURE_MEMORY_TIME / 4)*i);
-//            AcquisitionTaskHistoryEntry nodeWithFailuresEntry = new AcquisitionTaskHistoryEntry(
-//                acquisitionFeed.getEntry(0).getItemId(), "http://127.0.0." + i +":8000/catalog/foo",
-//                NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, failureTime, failureTime,
-//                UstadMobileSystemImpl.DLSTATUS_FAILED);
-//            nodesWithFailures[i].addAcquisitionHistoryEntry(nodeWithFailuresEntry);
-//            nodeWithFailuresResponses[i] = new EntryCheckResponse(nodesWithFailures[i]);
-//            nodeWithFailuresResponses[i].setFileAvailable(true);
-//            responseList.add(nodeWithFailuresResponses[i]);
-//        }
-//
-//        Assert.assertEquals("When nodes have failed choose the node where the failure was least recent",
-//                nodeWithFailuresResponses[3], task.selectEntryCheckResponse(acquisitionFeed.getEntry(0),
-//                responseList));
-//
-//        /**
-//         * When update times are too old or there are too many failures - null should be returned
-//         */
-//        NetworkNode[] nodesWithMultipleFailures = new NetworkNode[3];
-//        EntryCheckResponse[] nodesWithMultipleFailuresResponse = new EntryCheckResponse[3];
-//        responseList.clear();
-//        long failTime = timeNow - (long)(AcquisitionTask.FAILURE_MEMORY_TIME / 4);
-//        int numFailures = 4;
-//        for(int i = 0; i < nodesWithMultipleFailuresResponse.length; i++) {
-//            nodesWithMultipleFailures[i] = new NetworkNode(null, "127.0.0." +i);
-//            nodesWithMultipleFailuresResponse[i] = new EntryCheckResponse(nodesWithMultipleFailures[i]);
-//            nodesWithMultipleFailuresResponse[i].setFileAvailable(true);
-//
-//            for(int j = 0; j < numFailures; j++) {
-//                AcquisitionTaskHistoryEntry nodeWithMultipleFailuresEntry = new AcquisitionTaskHistoryEntry(
-//                        acquisitionFeed.getEntry(0).getItemId(), "http://127.0.0.2:8000/catalog/foo",
-//                        NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK, failTime, failTime,
-//                        UstadMobileSystemImpl.DLSTATUS_FAILED);
-//                nodesWithMultipleFailures[i].addAcquisitionHistoryEntry(nodeWithMultipleFailuresEntry);
-//            }
-//            responseList.add(nodesWithMultipleFailuresResponse[i]);
-//        }
-//
-//        Assert.assertNull("When too many failures have occurred result will be null",
-//            task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), responseList));
-//
-//        /**
-//         * When there is only one acceptable entryResponse = return it
-//         */
-//        responseList.clear();
-//        responseList.add(wifiDirectResponse);
-//        Assert.assertEquals("When there is one acceptable EntryResponse - it is returned",
-//                wifiDirectResponse, task.selectEntryCheckResponse(acquisitionFeed.getEntry(0),
-//                responseList));
-//
-//        /**
-//         * When there is one unacceptable response - result should be null
-//         */
-//        responseList.clear();
-//        responseList.add(nodesWithMultipleFailuresResponse[0]);
-//        Assert.assertNull("When there is one unacceptable EntryResponse result is null",
-//            task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), responseList));
-//
-//        Assert.assertNull("When responseList is empty select response returns null",
-//            task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), new ArrayList<EntryCheckResponse>()));
-//
-//        Assert.assertNull("When resposneList is null select response returns null",
-//                task.selectEntryCheckResponse(acquisitionFeed.getEntry(0), null));
+        /*
+         * When given a choice between a node with failures and a node without - select the node without recent failures
+         */
+        NetworkNode nodeWithoutFailures = new NetworkNode(null, "127.0.0.1");
+        nodeWithoutFailures.setNodeId(3);
+        nodeWithoutFailures.setNetworkServiceLastUpdated(timeNow);
+        nodeWithoutFailures.setNsdServiceName("without-failures");
+        EntryStatusResponseWithNode nodeWithoutFailuresResponse = new EntryStatusResponseWithNode(nodeWithoutFailures);
+        nodeWithoutFailuresResponse.setAvailable(true);
+
+        NetworkNode nodeWithFailures= new NetworkNode(null, "127.0.0.2");
+        nodeWithFailures.setNetworkServiceLastUpdated(timeNow);
+        nodeWithoutFailures.setNsdServiceName("with-failures");
+        EntryStatusResponseWithNode nodeWithFailuresResponse = new EntryStatusResponseWithNode(nodeWithFailures);
+        nodeWithFailuresResponse.setAvailable(true);
+        long failureTime = timeNow - 20000;//20 seconds ago
+
+        DownloadJobItemHistory failureHistoryEntry = new DownloadJobItemHistory(
+                nodeWithFailures.getNodeId(), NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK,
+                false, failureTime - 10000, failureTime);
+        ArrayList<DownloadJobItemHistory> failureList = new ArrayList<>();
+        failureList.add(failureHistoryEntry);
+        DownloadJobItemHistoryDao historyDao2 = Mockito.mock(DownloadJobItemHistoryDao.class);
+        when(historyDao2.findHistoryItemsByNetworkNodeSince(eq(nodeWithFailures.getNodeId()), gt(0L)))
+                .thenReturn(failureList);
+
+        responseList.clear();
+        responseList.add(nodeWithFailuresResponse);
+        responseList.add(nodeWithoutFailuresResponse);
+        Assert.assertEquals("When downloading prefer a network node without recent failures",
+                nodeWithoutFailuresResponse, task.selectEntryStatusResponse(responseList,
+                historyDao2));
+
+        /*
+         * When nodes have failed - choose the node where it has been the longest time since that failure
+         */
+        responseList.clear();
+        NetworkNode[] nodesWithFailures = new NetworkNode[4];
+        EntryStatusResponseWithNode[] nodeWithFailuresResponses = new EntryStatusResponseWithNode[4];
+        DownloadJobItemHistoryDao historyDao3 = Mockito.mock(DownloadJobItemHistoryDao.class);
+        for(int i = 0; i < nodesWithFailures.length; i++) {
+            nodesWithFailures[i] = new NetworkNode(null, "127.0.0." + i);
+            nodesWithFailures[i].setNodeId(i);
+            nodesWithFailures[i].setNetworkServiceLastUpdated(timeNow);
+            nodesWithFailures[i].setNsdServiceName("node-with-failures-"+i);
+            failureTime = timeNow - (((long)DownloadTask.FAILURE_MEMORY_TIME / 4)*i);
+            DownloadJobItemHistory nodeWithFailuresHistory = new DownloadJobItemHistory(
+                    nodesWithFailures[i].getNodeId(), NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK,
+                    false, failureTime, failureTime);
+
+            when(historyDao3.findHistoryItemsByNetworkNodeSince(eq(i), gt(0L)))
+                    .thenReturn(Arrays.asList(nodeWithFailuresHistory));
+
+            nodeWithFailuresResponses[i] = new EntryStatusResponseWithNode(nodesWithFailures[i]);
+            nodeWithFailuresResponses[i].setAvailable(true);
+            responseList.add(nodeWithFailuresResponses[i]);
+        }
+
+        Assert.assertEquals("When nodes have failed choose the node where the failure was least recent",
+                nodeWithFailuresResponses[3], task.selectEntryStatusResponse(responseList, historyDao3));
+
+        /**
+         * When update times are too old or there are too many failures - null should be returned
+         */
+        DownloadJobItemHistoryDao mockHistoryDao4 = mock(DownloadJobItemHistoryDao.class);
+        NetworkNode[] nodesWithMultipleFailures = new NetworkNode[3];
+        EntryStatusResponseWithNode[] nodesWithMultipleFailuresResponse = new EntryStatusResponseWithNode[3];
+        responseList.clear();
+        long failTime = timeNow - (long)(DownloadTask.FAILURE_MEMORY_TIME / 4);
+        int numFailures = 4;
+        for(int i = 0; i < nodesWithMultipleFailuresResponse.length; i++) {
+            nodesWithMultipleFailures[i] = new NetworkNode(null, "127.0.0." +i);
+            nodesWithMultipleFailures[i].setNodeId(i);
+            nodesWithMultipleFailuresResponse[i] = new EntryStatusResponseWithNode(nodesWithMultipleFailures[i]);
+            nodesWithMultipleFailuresResponse[i].setAvailable(true);
+
+            ArrayList<DownloadJobItemHistory> itemHistoryList = new ArrayList<>();
+            for(int j = 0; j < numFailures; j++) {
+                DownloadJobItemHistory itemHistory = new DownloadJobItemHistory(
+                        nodesWithMultipleFailures[i].getNodeId(), NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK,
+                        false, failTime, failTime);
+                itemHistoryList.add(itemHistory);
+            }
+            responseList.add(nodesWithMultipleFailuresResponse[i]);
+            when(mockHistoryDao4.findHistoryItemsByNetworkNodeSince(eq(i), gt(0L)))
+                .thenReturn(itemHistoryList);
+        }
+
+        Assert.assertNull("When too many failures have occurred result will be null",
+            task.selectEntryStatusResponse(responseList, mockHistoryDao4));
+
+        /**
+         * When there is only one acceptable entryResponse = return it
+         */
+        responseList.clear();
+        responseList.add(wifiDirectResponse);
+        Assert.assertEquals("When there is one acceptable EntryResponse - it is returned",
+                wifiDirectResponse, task.selectEntryStatusResponse(responseList,
+                mock(DownloadJobItemHistoryDao.class)));
+
+        /**
+         * When there is one unacceptable response - result should be null
+         */
+        responseList.clear();
+        responseList.add(nodesWithMultipleFailuresResponse[0]);
+
+        Assert.assertNull("When there is one unacceptable EntryResponse result is null",
+            task.selectEntryStatusResponse(responseList, mockHistoryDao4));
+
+        Assert.assertNull("When responseList is empty select response returns null",
+            task.selectEntryStatusResponse(new ArrayList<EntryStatusResponseWithNode>(), mockHistoryDao4));
+
+        Assert.assertNull("When responseList is null select response returns null",
+                task.selectEntryStatusResponse(null, mockHistoryDao4));
     }
 }
