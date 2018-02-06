@@ -294,6 +294,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
     public NetworkManager() {
+        activeDownloadTasks = new HashSet<>();
     }
 
     /**
@@ -439,7 +440,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
 
-    public long buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, boolean recursive) {
+    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, boolean recursive) {
         DownloadJobDao jobDao = DbManager.getInstance(getContext()).getDownloadJobDao();
 
         DownloadJob job = new DownloadJob();
@@ -450,8 +451,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         for(OpdsEntryWithRelations entry : rootEntries) {
             jobItems.add(new DownloadJobItem(entry, job));
         }
+        DbManager.getInstance(getContext()).getDownloadJobItemDao().insertList(jobItems);
 
-        return job.getId();
+        return job;
     }
 
 

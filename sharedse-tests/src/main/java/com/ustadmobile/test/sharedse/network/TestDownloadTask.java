@@ -2,14 +2,29 @@ package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
+import com.ustadmobile.core.fs.db.ContainerFileHelper;
+import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
+import com.ustadmobile.core.networkmanager.AcquisitionListener;
+import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
+import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
+import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.lib.util.UmUuidUtil;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.DownloadTask;
 import com.ustadmobile.port.sharedse.networkmanager.LocalMirrorFinder;
@@ -39,6 +54,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
+import java.util.UUID;
 
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -93,12 +110,21 @@ public class TestDownloadTask {
         final Object acquireLock = new Object();
 
         //make sure we don't have any of the entries in question already
-        CatalogPresenter.removeEntry(ENTRY_ID_PRESENT, CatalogPresenter.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
-        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
+        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
-        final long[] testTaskId = new long[1];
+        ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
+                ENTRY_ID_PRESENT);
+        ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
+                ENTRY_ID_NOT_PRESENT);
+
+
+//        CatalogPresenter.removeEntry(ENTRY_ID_PRESENT, CatalogPresenter.SHARED_RESOURCE,
+//                PlatformTestUtil.getTargetContext());
+//        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
+//                PlatformTestUtil.getTargetContext());
+
+        final DownloadJob job = makeDownloadJob(manager);
+
         NetworkManagerListener responseListener = new NetworkManagerListener() {
             @Override
             public void fileStatusCheckInformationAvailable(String[] fileIds) {
@@ -106,7 +132,7 @@ public class TestDownloadTask {
 
             @Override
             public void networkTaskStatusChanged(NetworkTask task) {
-                if(task.getTaskId() == testTaskId[0] && (task.isFinished() || task.isRetryNeeded())) {
+                if(task.getTaskId() == job.getId() && (task.isFinished() || task.isRetryNeeded())) {
                     synchronized (acquireLock) {
                         acquireLock.notifyAll();
                     }
@@ -134,31 +160,34 @@ public class TestDownloadTask {
         manager.addNetworkManagerListener(responseListener);
 //        int numAcquisitions = remoteNode.getAcquisitionHistory() != null ?
 //                remoteNode.getAcquisitionHistory().size() : 0;
-//
-//        AcquisitionListener acquisitionListener =new AcquisitionListener() {
-//            @Override
-//            public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
-//
-//            }
-//
-//            @Override
-//            public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-//                UstadMobileSystemImpl.l(UMLog.INFO, 335, "acquisition status changed: " + entryId +
-//                        " : " +status.getStatus());
-//            }
-//        };
-//
-//        manager.addAcquisitionTaskListener(acquisitionListener);
-//
+
+        AcquisitionListener acquisitionListener =new AcquisitionListener() {
+            @Override
+            public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
+
+            }
+
+            @Override
+            public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
+                UstadMobileSystemImpl.l(UMLog.INFO, 335, "acquisition status changed: " + entryId +
+                        " : " +status.getStatus());
+            }
+        };
+
+        manager.addAcquisitionTaskListener(acquisitionListener);
+
 //        UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
+
 //        testTaskId[0] = manager.requestAcquisition(feed, mirrorFinder,localNetworkEnabled,wifiDirectEnabled);
+
 //        AcquisitionTask task = (AcquisitionTask)manager.getTaskById(testTaskId[0],
 //                NetworkManager.QUEUE_ENTRY_ACQUISITION);
 //        Assert.assertNotNull("Task created for acquisition", task);
-//        synchronized (acquireLock){
-//            acquireLock.wait(acquireTimeout);
-//        }
-//
+        manager.queueDownloadJob(job.getId());
+        synchronized (acquireLock){
+            acquireLock.wait(acquireTimeout);
+        }
+
 //        List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
 //        int lastIndex = entryHistoryList.size()-1;
 //        int networkDownloadedFrom =entryHistoryList.get(lastIndex).getMode();
@@ -199,26 +228,58 @@ public class TestDownloadTask {
         testAcquisition(remoteNode, mirrorFinder, localNetworkEnabled, wifiDirectEnabled, expectedLocalDownloadMode, DEFAULT_ACQUIRE_TIMEOUT);
     }
 
-    private static UstadJSOPDSFeed makeAcquisitionTestFeed() throws XmlPullParserException, IOException{
-        //Create a feed manually
-        String catalogUrl = UMFileUtil.joinPaths(new String[]{
-                httpRoot, "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds"});
-        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(catalogUrl);
-        HttpURLConnection urlConnection = (HttpURLConnection)new URL(catalogUrl).openConnection();
+    private static DownloadJob makeDownloadJob(NetworkManager manager) throws XmlPullParserException, IOException{
+        //Create a Download Job manually - just insert the OpdsEntries and Links, then make the job.
+        String catalogUrl = UMFileUtil.joinPaths(httpRoot,
+                "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds");
 
-        InputStream in = urlConnection.getInputStream();
-        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
-        feed.loadFromXpp(xpp, null);
-        in.close();
+        OpdsEntryWithRelations entry1 = new OpdsEntryWithRelations();
+        entry1.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+        entry1.setEntryId(ENTRY_ID_PRESENT);
+        entry1.setTitle("The Little Chicks");
+        entry1.setUrl(catalogUrl);
+        OpdsLink acquireLink1 = new OpdsLink(entry1.getUuid(), "application/epub+zip",
+                "thelittlechicks.epub?speedLimit=128000", OpdsEntry.LINK_REL_ACQUIRE);
+        entry1.setLinks(Arrays.asList(acquireLink1));
 
-        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
-        feed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
-                FEED_LINK_MIME, destinationDir);
-        feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
-                catalogUrl);
 
-        return feed;
+        OpdsEntryWithRelations entry2 = new OpdsEntryWithRelations();
+        entry2.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+        entry2.setEntryId(ENTRY_ID_NOT_PRESENT);
+        entry2.setTitle("I come from a cloud");
+        entry2.setUrl(catalogUrl);
+        OpdsLink acquireLink2 = new OpdsLink(entry2.getUuid(), "application/epub+zip",
+                "icomefromacloud.epub?speedLimit=128000", OpdsEntry.LINK_REL_ACQUIRE);
+        entry2.setLinks(Arrays.asList(acquireLink2));
+
+
+        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+        dbManager.getOpdsLinkDao().insert(Arrays.asList(acquireLink1, acquireLink2));
+        dbManager.getOpdsEntryDao().insertList(Arrays.asList((OpdsEntry)entry1, entry2));
+
+
+//        TODO: use networkmanager to do this
+        DownloadJob job = manager.buildDownloadJob(Arrays.asList(entry1, entry2), false);
+        return job;
+
+
+
+//        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(catalogUrl);
+//        HttpURLConnection urlConnection = (HttpURLConnection)new URL(catalogUrl).openConnection();
+//
+//        InputStream in = urlConnection.getInputStream();
+//        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
+//        feed.loadFromXpp(xpp, null);
+//        in.close();
+//
+//        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
+//                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+//        feed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
+//                FEED_LINK_MIME, destinationDir);
+//        feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
+//                catalogUrl);
+//
+//        return feed;
     }
 
 
@@ -230,7 +291,7 @@ public class TestDownloadTask {
      * @throws InterruptedException
      * @throws XmlPullParserException
      */
-//    @Test
+    @Test
     public void testAcquisitionLocalWifi() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
@@ -312,43 +373,43 @@ public class TestDownloadTask {
      */
 //    @Test
     public void testAcquisitionStop() throws Exception {
-        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
-        CatalogPresenter.removeEntry(ENTRY_ID_PRESENT, CatalogPresenter.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
-        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
-                PlatformTestUtil.getTargetContext());
-
-        Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
-
-        TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
-                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
-        TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
-                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
-
-
-        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-        UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
-        manager.requestAcquisition(feed, manager, false, false);
-        DownloadTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
-        try { Thread.sleep(1000); }
-        catch(InterruptedException e){}
-        task.stop(NetworkTask.STATUS_STOPPED);
-        try { Thread.sleep(3000); }
-        catch(InterruptedException e){}
-        //TODO: Fix me - what's happening: Acquisition Task is being restarted when stopped, timer task is null on acquisitiontask.java line 325
-
-        Assert.assertEquals("Task status is stopped", NetworkTask.STATUS_STOPPED, task.getStatus());
-        Assert.assertTrue("Task is stopped", task.isStopped());
-        CatalogEntryInfo presentEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_PRESENT,
-                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-        Assert.assertEquals("Entry 1 not acquired", CatalogPresenter.STATUS_NOT_ACQUIRED,
-                presentEntryInfo.acquisitionStatus);
-        CatalogEntryInfo notPresentEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_NOT_PRESENT,
-                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-        Assert.assertEquals("Entry 2 not acquired", CatalogPresenter.STATUS_NOT_ACQUIRED,
-                notPresentEntryInfo.acquisitionStatus);
-        Assert.assertTrue("Supernode mode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
+//        final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+//        SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
+//        CatalogPresenter.removeEntry(ENTRY_ID_PRESENT, CatalogPresenter.SHARED_RESOURCE,
+//                PlatformTestUtil.getTargetContext());
+//        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
+//                PlatformTestUtil.getTargetContext());
+//
+//        Assert.assertTrue("Supernode mode enabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(true));
+//
+//        TestNetworkManager.testWifiDirectDiscovery(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE,
+//                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+//        TestNetworkManager.testNetworkServiceDiscovery(SharedSeTestSuite.REMOTE_SLAVE_SERVER,
+//                TestNetworkManager.NODE_DISCOVERY_TIMEOUT);
+//
+//
+//        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+//        UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
+//        manager.requestAcquisition(feed, manager, false, false);
+//        DownloadTask task = manager.getAcquisitionTaskByEntryId(ENTRY_ID_PRESENT);
+//        try { Thread.sleep(1000); }
+//        catch(InterruptedException e){}
+//        task.stop(NetworkTask.STATUS_STOPPED);
+//        try { Thread.sleep(3000); }
+//        catch(InterruptedException e){}
+//        //TODO: Fix me - what's happening: Acquisition Task is being restarted when stopped, timer task is null on acquisitiontask.java line 325
+//
+//        Assert.assertEquals("Task status is stopped", NetworkTask.STATUS_STOPPED, task.getStatus());
+//        Assert.assertTrue("Task is stopped", task.isStopped());
+//        CatalogEntryInfo presentEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_PRESENT,
+//                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+//        Assert.assertEquals("Entry 1 not acquired", CatalogPresenter.STATUS_NOT_ACQUIRED,
+//                presentEntryInfo.acquisitionStatus);
+//        CatalogEntryInfo notPresentEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_NOT_PRESENT,
+//                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
+//        Assert.assertEquals("Entry 2 not acquired", CatalogPresenter.STATUS_NOT_ACQUIRED,
+//                notPresentEntryInfo.acquisitionStatus);
+//        Assert.assertTrue("Supernode mode disabled", TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
 
     }
 

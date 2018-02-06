@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.db.dao;
 
 import android.arch.persistence.room.Dao;
+import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
@@ -50,4 +51,12 @@ public abstract class ContainerFileDaoAndroid extends ContainerFileDao implement
     public void getContainerFileByIdAsync(int containerFileId, BaseUmCallback<ContainerFile> callback){
         executor.execute(() -> callback.onSuccess(getContainerFileEntryByIdR(containerFileId)));
     }
+
+    @Override
+    @Query("SELECT * FROM ContainerFile WHERE id = :id")
+    public abstract ContainerFileWithRelations getContainerFileById(int id);
+
+    @Override
+    @Delete
+    public abstract void delete(ContainerFile containerFile);
 }

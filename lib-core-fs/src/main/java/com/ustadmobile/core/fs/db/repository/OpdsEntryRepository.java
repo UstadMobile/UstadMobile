@@ -25,6 +25,7 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
         this.executorService = executorService;
     }
 
+    //TODO: rename entryId parameter - it's misleading when it is really uuid
     @Override
     public UmLiveData<OpdsEntryWithRelations> getEntryByUrl(String url, String entryId,
                                                             OpdsEntry.OpdsItemLoadCallback callback) {
@@ -86,5 +87,23 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
         return null;
     }
 
+    @Override
+    public OpdsEntryWithRelations getEntryByUuidStatic(String uuid) {
+        return null;
+    }
 
+    @Override
+    public String findParentUrlByChildUuid(String childUuid) {
+        return null;
+    }
+
+    @Override
+    public int deleteOpdsEntriesByUuids(List<String> entryUuids) {
+        return 0;
+    }
+
+    @Override
+    public int deleteLinksByOpdsEntryUuids(List<String> entryUuids) {
+        return 0;
+    }
 }

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 
 import java.util.List;
@@ -12,4 +13,8 @@ public abstract class DownloadJobItemHistoryDao {
 
     public abstract List<DownloadJobItemHistory> findHistoryItemsByNetworkNodeSince(int nodeId, long since);
 
+    @UmInsert
+    public abstract long insert(DownloadJobItemHistory downloadJobItemHistory);
+
+    public abstract void update(DownloadJobItemHistory downloadJobItemHistory);
 }

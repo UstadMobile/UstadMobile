@@ -44,6 +44,8 @@ public abstract class DbManager {
 
     public abstract DownloadJobDao getDownloadJobDao();
 
+    public abstract DownloadJobItemDao getDownloadJobItemDao();
+
     public abstract DownloadJobItemHistoryDao getDownloadJobItemHistoryDao();
 
     public abstract Object getContext();

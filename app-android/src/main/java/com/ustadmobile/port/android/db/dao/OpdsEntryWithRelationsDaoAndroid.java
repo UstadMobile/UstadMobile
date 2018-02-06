@@ -75,4 +75,23 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(String dir) {
         return () -> findEntriesByContainerFileDirectoryAsProviderR(dir);
     }
+
+    @Override
+    @Query("SELECT OpdsEntry.url FROM OpdsEntryParentToChildJoin " +
+            " LEFT JOIN OpdsEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsEntry.uuid " +
+            " WHERE OpdsEntryParentToChildJoin.childEntry = :childUuid")
+    public abstract String findParentUrlByChildUuid(String childUuid);
+
+    @Override
+    @Query("Select * From OpdsEntry WHERE uuid = :uuid")
+    public abstract OpdsEntryWithRelations getEntryByUuidStatic(String uuid);
+
+    @Override
+    @Query("DELETE FROM OpdsEntry WHERE uuid in (:entryUuids)")
+    public abstract int deleteOpdsEntriesByUuids(List<String> entryUuids);
+
+    @Override
+    @Query("DELETE FROM OpdsLink WHERE entryUuid in (:entryUuids)")
+    public abstract int deleteLinksByOpdsEntryUuids(List<String> entryUuids);
+
 }

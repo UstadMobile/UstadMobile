@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
+import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -39,4 +40,24 @@ public abstract class ContainerFileEntryDaoAndroid extends ContainerFileEntryDao
     @Override
     @Query("SELECT * FROM ContainerFileEntry WHERE containerEntryId IN (:entryIds)")
     public abstract List<ContainerFileEntry> findContainerFileEntriesByEntryIds(String[] entryIds);
+
+    @Override
+    @Query("SELECT * FROM ContainerFileEntry " +
+            "LEFT JOIN ContainerFile ON ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE ContainerFileEntry.containerEntryId = :entryId")
+    public abstract ContainerFileEntryWithContainerFile findContainerFileEntryWithContainerFileByEntryId(String entryId);
+
+    @Override
+    @Query("SELECT * FROM ContainerFileEntry " +
+                  "LEFT JOIN ContainerFile ON ContainerFileEntry.containerFileId = ContainerFile.id " +
+                  "WHERE ContainerFileEntry.containerEntryId = :entryId")
+    public abstract List<ContainerFileEntryWithContainerFile> findContainerFileEntriesWithContainerFileByEntryId(String entryId);
+
+    @Override
+    @Query("SELECT opdsEntryUuid FROM ContainerFileEntry WHERE containerFileId = :containerFileId")
+    protected abstract List<String> findOpdsEntryUuidsByContainerFileId(int containerFileId);
+
+    @Override
+    @Query("DELETE from ContainerFileEntry Where containerFileId = :containerFileId")
+    protected abstract void deleteByContainerFileId(int containerFileId);
 }

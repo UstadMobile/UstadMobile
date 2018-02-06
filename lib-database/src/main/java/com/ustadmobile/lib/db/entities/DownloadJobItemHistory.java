@@ -39,6 +39,10 @@ public class DownloadJobItemHistory {
         this.endTime = endTime;
     }
 
+    public DownloadJobItemHistory(NetworkNode node, int mode, long startTime) {
+
+    }
+
 
     public int getId() {
         return id;

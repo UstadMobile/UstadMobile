@@ -10,6 +10,7 @@ import com.ustadmobile.lib.db.entities.*;
 import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
 import com.ustadmobile.port.android.db.dao.ContainerFileEntryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobDaoAndroid;
+import com.ustadmobile.port.android.db.dao.DownloadJobItemDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobItemHistoryDaoAndroid;
 import com.ustadmobile.port.android.db.dao.EntryStatusResponseDaoAndroid;
 import com.ustadmobile.port.android.db.dao.NetworkNodeDaoAndroid;
@@ -47,6 +48,8 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract EntryStatusResponseDaoAndroid getEntryStatusResponseDao();
 
     public abstract DownloadJobDaoAndroid getDownloadJobDao();
+
+    public abstract DownloadJobItemDaoAndroid getDownloadJobItemDao();
 
     public abstract DownloadJobItemHistoryDaoAndroid getDownloadJobItemHistoryDao();
 

@@ -13,9 +13,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-//        TestNetworkManager.class,
+        TestNetworkManager.class,
 //        TestWifiDirectPeerDiscovery.class,
-//        TestEntryStatusTask.class,
+        TestEntryStatusTask.class,
 //        TestNetworkManagerEntryStatusMonitoring.class,
         TestDownloadTask.class,
 //        TestWifiDirectGroupConnection.class

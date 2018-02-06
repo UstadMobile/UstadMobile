@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.db.dao.ContainerFileEntryDao;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
+import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
@@ -38,7 +39,7 @@ public class DbManagerAndroid extends DbManager {
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
-        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb44")
+        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb45")
             .build();
         executorService = Executors.newCachedThreadPool();
     }
@@ -110,5 +111,10 @@ public class DbManagerAndroid extends DbManager {
     @Override
     public DownloadJobItemHistoryDao getDownloadJobItemHistoryDao() {
         return appDatabase.getDownloadJobItemHistoryDao();
+    }
+
+    @Override
+    public DownloadJobItemDao getDownloadJobItemDao() {
+        return appDatabase.getDownloadJobItemDao();
     }
 }

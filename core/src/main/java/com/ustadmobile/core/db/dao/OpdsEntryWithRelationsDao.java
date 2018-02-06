@@ -2,10 +2,13 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,6 +40,10 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery("SELECT * from OpdsEntry where uuid = :uuid")
     public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid);
 
+    @UmQuery("SELECT * from OpdsEntry where uuid = :uuid")
+    public abstract OpdsEntryWithRelations getEntryByUuidStatic(String uuid);
+
+
     @UmQuery("SELECT uuid FROM OpdsEntry WHERE url = :url")
     public abstract String getUuidForEntryUrl(String url);
 
@@ -50,6 +57,40 @@ public abstract class OpdsEntryWithRelationsDao {
 
     @UmQuery(findEntriesByContainerFileDirectorySql)
     public abstract UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(String dir);
+
+    /**
+     * Convenience method used by the download task when it needs to resolve a relative link. When
+     * The OpdsEntry is a child entry loads from a feed it will not itself have a URL. We thus need
+     * the url of the parent.
+     *
+     * Note : Technically an entry can have multiple parents. Entries loaded from an Opds feed will
+     * not have that. Thus the first parent in the list will be the feed for the entry from which it
+     * was loaded.
+     *
+     * @param childUuid Uuid of the child entry, for which we want to find the parent's url
+     *
+     * @return The url of the (first) parent entry.
+     */
+    @UmQuery("SELECT OpdsEntry.url FROM OpdsEntryParentToChildJoin " +
+            " LEFT JOIN OpdsEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsEntry.uuid " +
+            " WHERE OpdsEntryParentToChildJoin.childEntry = :childUuid")
+    public abstract String findParentUrlByChildUuid(String childUuid);
+
+    /**
+     * Method to delete a given list of entries and any links that are associated with them
+     */
+    public long deleteEntriesWithRelationsByUuids(List<String> entryUuids){
+        deleteLinksByOpdsEntryUuids(entryUuids);
+        return deleteOpdsEntriesByUuids(entryUuids);
+    }
+
+    @UmQuery("DELETE FROM OpdsEntry WHERE uuid in (:entryUuids)")
+    public abstract int deleteOpdsEntriesByUuids(List<String> entryUuids);
+
+
+    @UmQuery("DELETE FROM OpdsLink WHERE entryUuid in (:entryUuids)")
+    public abstract int deleteLinksByOpdsEntryUuids(List<String> entryUuids);
+
 
 
 }
