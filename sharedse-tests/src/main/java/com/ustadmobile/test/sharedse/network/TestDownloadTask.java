@@ -10,11 +10,6 @@ import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.networkmanager.AcquisitionListener;
-import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
-import com.ustadmobile.core.networkmanager.NetworkManagerCore;
-import com.ustadmobile.core.opds.UstadJSOPDSFeed;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
@@ -50,6 +45,7 @@ import org.mockito.Mockito;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -75,7 +71,6 @@ public class TestDownloadTask {
 
     private static final int DEFAULT_ACQUIRE_TIMEOUT = 120000;//default acquire timeout: 2mins
 
-    private static final String FEED_LINK_MIME ="application/dir";
     private static final String ENTRY_ID_PRESENT ="202b10fe-b028-4b84-9b84-852aa766607d";
     private static final String ENTRY_ID_NOT_PRESENT = "b649852e-2bf9-45ab-839e-ec5bb00ca19d";
     public static final String[] ENTRY_IDS = new String[]{ENTRY_ID_PRESENT,ENTRY_ID_NOT_PRESENT};
@@ -107,7 +102,11 @@ public class TestDownloadTask {
         }
     }
 
-    public static void testAcquisition(NetworkNode remoteNode, LocalMirrorFinder mirrorFinder, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode, int acquireTimeout) throws IOException, InterruptedException,XmlPullParserException{
+    public static void testAcquisition(NetworkNode remoteNode, LocalMirrorFinder mirrorFinder,
+                                       boolean localNetworkEnabled, boolean wifiDirectEnabled,
+                                       int expectedLocalDownloadMode, int acquireTimeout)
+            throws IOException, InterruptedException,XmlPullParserException{
+
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         manager.clearNetworkNodeAcquisitionHistory();
         final Object acquireLock = new Object();
@@ -115,18 +114,14 @@ public class TestDownloadTask {
         //make sure we don't have any of the entries in question already
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
+        long startTime = System.currentTimeMillis();
+
         ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
                 ENTRY_ID_PRESENT);
         ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
                 ENTRY_ID_NOT_PRESENT);
 
-
-//        CatalogPresenter.removeEntry(ENTRY_ID_PRESENT, CatalogPresenter.SHARED_RESOURCE,
-//                PlatformTestUtil.getTargetContext());
-//        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
-//                PlatformTestUtil.getTargetContext());
-
-        DownloadJob job = makeDownloadJob(manager);
+        DownloadJob job = makeDownloadJob(manager, wifiDirectEnabled, localNetworkEnabled);
         UmLiveData<DownloadJobWithRelations> jobLiveData = dbManager.getDownloadJobDao().getByIdLive(
                 job.getId());
 
@@ -138,66 +133,6 @@ public class TestDownloadTask {
             }
         };
 
-//
-
-//        NetworkManagerListener responseListener = new NetworkManagerListener() {
-//            @Override
-//            public void fileStatusCheckInformationAvailable(String[] fileIds) {
-//            }
-//
-//            @Override
-//            public void networkTaskStatusChanged(NetworkTask task) {
-//                if(task.getTaskId() == job.getId() && (task.isFinished() || task.isRetryNeeded())) {
-//                    synchronized (acquireLock) {
-//                        acquireLock.notifyAll();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void networkNodeDiscovered(NetworkNode node) {
-//            }
-//
-//            @Override
-//            public void networkNodeUpdated(NetworkNode node) {
-//
-//            }
-//
-//            @Override
-//            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int sources) {
-//            }
-//
-//            @Override
-//            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
-//
-//            }
-//        };
-//        manager.addNetworkManagerListener(responseListener);
-//        int numAcquisitions = remoteNode.getAcquisitionHistory() != null ?
-//                remoteNode.getAcquisitionHistory().size() : 0;
-
-//        AcquisitionListener acquisitionListener =new AcquisitionListener() {
-//            @Override
-//            public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
-//
-//            }
-//
-//            @Override
-//            public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-//                UstadMobileSystemImpl.l(UMLog.INFO, 335, "acquisition status changed: " + entryId +
-//                        " : " +status.getStatus());
-//            }
-//        };
-
-//        manager.addAcquisitionTaskListener(acquisitionListener);
-
-//        UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
-
-//        testTaskId[0] = manager.requestAcquisition(feed, mirrorFinder,localNetworkEnabled,wifiDirectEnabled);
-
-//        AcquisitionTask task = (AcquisitionTask)manager.getTaskById(testTaskId[0],
-//                NetworkManager.QUEUE_ENTRY_ACQUISITION);
-//        Assert.assertNotNull("Task created for acquisition", task);
         jobLiveData.observeForever(observer);
 
         manager.queueDownloadJob(job.getId());
@@ -210,47 +145,43 @@ public class TestDownloadTask {
 
         jobLiveData.removeObserver(observer);
 
-//        List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
-//        int lastIndex = entryHistoryList.size()-1;
-//        int networkDownloadedFrom =entryHistoryList.get(lastIndex).getMode();
-//        UstadMobileSystemImpl.l(UMLog.DEBUG, 646, "Test task id = " + task.getTaskId());
-//        Assert.assertEquals("Last history entry was downloaded from expected network", expectedLocalDownloadMode,
-//                networkDownloadedFrom);
-//        int lastHistoryStatus = entryHistoryList.get(entryHistoryList.size()-1).getStatus();
-//        Assert.assertEquals("Last history entry was successful", UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL,
-//                lastHistoryStatus);
+        DownloadJobItem presentJobItem = jobLiveData.getValue().getJobItemByEntryId(ENTRY_ID_PRESENT);
+        List<DownloadJobItemHistory> presentJobHistoryList = dbManager.getDownloadJobItemHistoryDao()
+                .findHistoryItemsByDownloadJobItem(presentJobItem.getId());
+
+        UstadMobileSystemImpl.l(UMLog.DEBUG, 646, "Test job id = " + job.getId());
+        DownloadJobItemHistory lastHistoryItem = presentJobHistoryList.get(presentJobHistoryList.size()-1);
+        Assert.assertEquals("Last history entry was downloaded from expected network", expectedLocalDownloadMode,
+                lastHistoryItem.getMode());
+        Assert.assertTrue("Last history entry was successful", lastHistoryItem.isSuccessful());
 //
 //        //check history was recorded on the node
 //        //Assertion has failed 27/06/17 - not able to reproduce again.
-//        if(expectedLocalDownloadMode != NetworkManager.DOWNLOAD_FROM_CLOUD) {
-//            Assert.assertNotNull("Remote node has acquisition history", remoteNode.getAcquisitionHistory());
-//            Assert.assertTrue("Remote node has at least one additional acquisition history entries",
-//                    remoteNode.getAcquisitionHistory().size() > numAcquisitions);
-//        }
-//
-//        CatalogEntryInfo localEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_PRESENT,
-//                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-//        Assert.assertEquals("File was downloaded successfully from node on same network",
-//                CatalogPresenter.STATUS_ACQUIRED, localEntryInfo.acquisitionStatus);
-//        Assert.assertTrue("File downloaded via local network is present",
-//                new File(localEntryInfo.fileURI).exists());
-//
-//        CatalogEntryInfo cloudEntryInfo = CatalogPresenter.getEntryInfo(ENTRY_ID_NOT_PRESENT,
-//                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext());
-//        Assert.assertEquals("File was downloaded successfully from cloud",
-//                CatalogPresenter.STATUS_ACQUIRED, cloudEntryInfo.acquisitionStatus);
-//        Assert.assertTrue("File downloaded via cloud is present",
-//                new File(cloudEntryInfo.fileURI).exists());
-//
-//        manager.removeNetworkManagerListener(responseListener);
-//        manager.removeAcquisitionTaskListener(acquisitionListener);
+        if(expectedLocalDownloadMode != NetworkManager.DOWNLOAD_FROM_CLOUD) {
+            List<DownloadJobItemHistory> nodeHistoryList = dbManager.getDownloadJobItemHistoryDao()
+                    .findHistoryItemsByNetworkNodeSince(remoteNode.getNodeId(), startTime);
+            Assert.assertNotNull("Remote node has acquisition history", nodeHistoryList);
+            Assert.assertTrue("Remote node has at least one additional acquisition history entries",
+                    nodeHistoryList.size() > 0);
+        }
+
+        ContainerFileEntryWithContainerFile localContainerFile = dbManager.getContainerFileEntryDao()
+                .findContainerFileEntryWithContainerFileByEntryId(ENTRY_ID_PRESENT);
+        Assert.assertTrue("Downloaded container file for locally downloaded entry exists after download",
+                new File(localContainerFile.getContainerFile().getNormalizedPath()).exists());
+
+        ContainerFileEntryWithContainerFile cloudContainerFile = dbManager.getContainerFileEntryDao()
+                .findContainerFileEntryWithContainerFileByEntryId(ENTRY_ID_NOT_PRESENT);
+        Assert.assertTrue("Downloaded container file for cloud downloaded entry exists after download",
+                new File(cloudContainerFile.getContainerFile().getNormalizedPath()).exists());
     }
 
     public static void testAcquisition(NetworkNode remoteNode, LocalMirrorFinder mirrorFinder, boolean localNetworkEnabled, boolean wifiDirectEnabled, int expectedLocalDownloadMode) throws IOException, InterruptedException,XmlPullParserException{
         testAcquisition(remoteNode, mirrorFinder, localNetworkEnabled, wifiDirectEnabled, expectedLocalDownloadMode, DEFAULT_ACQUIRE_TIMEOUT);
     }
 
-    private static DownloadJob makeDownloadJob(NetworkManager manager) throws XmlPullParserException, IOException{
+    private static DownloadJob makeDownloadJob(NetworkManager manager, boolean wifiDirectDownloadEnabled,
+                                               boolean lanDownloadEnabled) throws XmlPullParserException, IOException{
         //Create a Download Job manually - just insert the OpdsEntries and Links, then make the job.
         String catalogUrl = UMFileUtil.joinPaths(httpRoot,
                 "com/ustadmobile/test/sharedse/test-acquisition-task-feed.opds");
@@ -283,27 +214,9 @@ public class TestDownloadTask {
 //        TODO: use networkmanager to do this
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
-        DownloadJob job = manager.buildDownloadJob(Arrays.asList(entry1, entry2), storageDir, false);
+        DownloadJob job = manager.buildDownloadJob(Arrays.asList(entry1, entry2), storageDir, false,
+                wifiDirectDownloadEnabled, lanDownloadEnabled);
         return job;
-
-
-
-//        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(catalogUrl);
-//        HttpURLConnection urlConnection = (HttpURLConnection)new URL(catalogUrl).openConnection();
-//
-//        InputStream in = urlConnection.getInputStream();
-//        XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(in);
-//        feed.loadFromXpp(xpp, null);
-//        in.close();
-//
-//        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-//                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
-//        feed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
-//                FEED_LINK_MIME, destinationDir);
-//        feed.addLink(UstadJSOPDSItem.LINK_REL_SELF_ABSOLUTE, UstadJSOPDSItem.TYPE_ACQUISITIONFEED,
-//                catalogUrl);
-//
-//        return feed;
     }
 
 
@@ -326,7 +239,8 @@ public class TestDownloadTask {
         //TODO: Test entry status over http here
 
 
-        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        NetworkNode remoteNode = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getNetworkNodeDao().findNodeByIpAddress(TestConstants.TEST_REMOTE_SLAVE_SERVER);
         testAcquisition(remoteNode, manager, true, false, NetworkManager.DOWNLOAD_FROM_PEER_ON_SAME_NETWORK);
         Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }

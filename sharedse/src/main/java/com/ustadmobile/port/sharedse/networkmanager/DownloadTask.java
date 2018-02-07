@@ -14,7 +14,6 @@ import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
-import com.ustadmobile.core.opds.entities.UmOpdsLink;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.ustadmobile.port.sharedse.networkmanager.BluetoothServer.CMD_SEPARATOR;
@@ -68,16 +66,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     protected NetworkManagerTaskListener listener;
 
-    /**
-     * Flag to indicate file destination index in array.
-     */
-    private static final int FILE_DESTINATION_INDEX=1;
-
-    /**
-     * Flag to indicate file download URL index in array
-     */
-    private static final int FILE_DOWNLOAD_URL_INDEX=0;
-
     private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
 
     private int currentEntryIdIndex;
@@ -107,9 +95,9 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     private ResumableHttpDownload httpDownload=null;
 
-    private boolean localNetworkDownloadEnabled = true;
-
-    private boolean wifiDirectDownloadEnabled = true;
+//    private boolean localNetworkDownloadEnabled = true;
+//
+//    private boolean wifiDirectDownloadEnabled = true;
 
     /**
      * Map all entry download statuses to their entry ID.
@@ -117,15 +105,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      */
     protected Map<String, Status> statusMap = new Hashtable<>();
 
-    @Deprecated
-    private Status currentEntryStatus =null;
-
     private String currentEntryTitle;
-
-    /**
-     * Map all AcquisitionTaskHistoryEntry to their respective entry IDs
-     */
-    private Map<String, List<AcquisitionTaskHistoryEntry>> acquisitionHistoryMap = new HashMap<>();
 
     /**
      * The task wants to connect to the "normal" wifi e.g. for download from the cloud or for
@@ -170,7 +150,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     @Deprecated
     private AcquisitionTaskHistoryEntry currentHistoryEntry;
 
-    private DownloadJobItemHistory currentItemHistory;
+//    private DownloadJobItemHistory currentItemHistory;
 
     public static final int SAME_NET_SCORE = 600;
     public static final int WIFI_DIRECT_SCORE = 500;
@@ -395,7 +375,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         if(index < downloadJob.getDownloadJobItems().size()) {
             currentEntryIdIndex = index;
             currentDownloadJobItem = downloadJob.getDownloadJobItems().get(currentEntryIdIndex);
-            currentItemHistory = new DownloadJobItemHistory();
             attemptCount++;
             currentGroupSSID = null;
 
@@ -459,14 +438,14 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                     UstadMobileSystemImpl.l(UMLog.ERROR, 667, getLogPrefix() + " p2p download, group owner IP is null!");
                     handleAttemptFailed();
                 }
-            }else if(localNetworkDownloadEnabled && entryStatusResponse != null
+            }else if(downloadJob.isLanDownloadEnabled() && entryStatusResponse != null
                     && networkManager.getCurrentWifiSsid() != null
                     && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 targetNetwork = TARGET_NETWORK_NORMAL;
                 currentDownloadUrl = "http://"+entryStatusResponse.getNetworkNode().getIpAddress()+":"
                         +entryStatusResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
                 currentDownloadMode = DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
-            }else if(wifiDirectDownloadEnabled && entryStatusResponse != null
+            }else if(downloadJob.isWifiDirectDownloadEnabled() && entryStatusResponse != null
                     && networkManager.isWiFiEnabled()
                     && responseNode.getTimeSinceWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
                 targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
@@ -486,7 +465,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
             currentJobItemHistory = new DownloadJobItemHistory(
                     entryStatusResponse != null ? entryStatusResponse.getNetworkNode() : null,
-                    currentDownloadMode, System.currentTimeMillis());
+                    currentDownloadJobItem, currentDownloadMode, System.currentTimeMillis());
 
             UstadMobileSystemImpl.l(UMLog.INFO, 336, getLogPrefix() + ": acquire item " + index +
                     "  id " + currentDownloadJobItem.getEntryId() + " Mode = " + currentDownloadMode
@@ -808,59 +787,12 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         }
     }
 
-    /**
-     * If enabled the task will attempt to acquire the requested entries from another node on the same
-     * wifi network directly (nodes discovered using Network Service Discovery - NSD).
-     *
-     * @return boolean: True if enabled, false otherwise
-     */
-    public boolean isLocalNetworkDownloadEnabled() {
-        return localNetworkDownloadEnabled;
-    }
-
-    public void setLocalNetworkDownloadEnabled(boolean localNetworkDownloadEnabled) {
-        this.localNetworkDownloadEnabled = localNetworkDownloadEnabled;
-    }
-
-    /**
-     * If enabled the task will attempt to acquire the requested entries from another node using
-     * wifi direct. The node will be contacted using bluetooth and then a wifi group connection
-     * will be created.
-     *
-     * @return boolean: True if enabled, false otherwise
-     */
-    public boolean isWifiDirectDownloadEnabled() {
-        return wifiDirectDownloadEnabled;
-    }
-
-    /**
-     * Method which decide whether Wi-Fi direct should be used as one
-     * of file acquisition mode or not. By default it is allowed but otherwise
-     * it will be disabled hence only other ways can be used to acquire a file.
-     * @param wifiDirectDownloadEnabled: Logical boolean to enable and disable downloading a file using Wi-Fi direct
-     */
-    public void setWifiDirectDownloadEnabled(boolean wifiDirectDownloadEnabled) {
-        this.wifiDirectDownloadEnabled = wifiDirectDownloadEnabled;
-    }
-
     public LocalMirrorFinder getMirrorFinder() {
         return mirrorFinder;
     }
 
     public void setMirrorFinder(LocalMirrorFinder mirrorFinder) {
         this.mirrorFinder = mirrorFinder;
-    }
-
-    /**
-     * Gets the AcquisitionTaskHistory of a particular entry. The history is a list of
-     * AcquisitionTaskHistoryEntry from the first activity to the last activity (e.g. most recent).
-     *
-     * @param entryId OPDS Entry ID to check on
-     * @return List of AcquisitionTaskHisotryEntry if this entry is part of the task and activity
-     * has taken place, null otherwise.
-     */
-    public List<AcquisitionTaskHistoryEntry> getAcquisitionHistoryByEntryId(String entryId) {
-        return acquisitionHistoryMap.get(entryId);
     }
 
     /**
@@ -873,9 +805,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     public boolean taskIncludesEntry(String entryId) {
         return downloadJob.getJobItemByEntryId(entryId) != null;
     }
-
-
-
 
     /**
      * Selects the optimal entry check response to download if any
@@ -924,7 +853,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         int score = 0;
 
         NetworkNode node = response.getNetworkNode();
-        //TODO: fix this
         if(node == null)
             return -1;
 

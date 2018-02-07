@@ -24,6 +24,10 @@ public class DownloadJob {
 
     private String destinationDir;
 
+    private boolean wifiDirectDownloadEnabled;
+
+    private boolean lanDownloadEnabled;
+
     public int getId() {
         return id;
     }
@@ -62,6 +66,35 @@ public class DownloadJob {
 
     public void setDestinationDir(String destinationDir) {
         this.destinationDir = destinationDir;
+    }
+
+    /**
+     * If enabled the task will attempt to acquire the requested entries from another node using
+     * wifi direct. The node will be contacted using bluetooth and then a wifi group connection
+     * will be created.
+     *
+     * @return boolean: True if enabled, false otherwise
+     */
+    public boolean isWifiDirectDownloadEnabled() {
+        return wifiDirectDownloadEnabled;
+    }
+
+    public void setWifiDirectDownloadEnabled(boolean wifiDirectDownloadEnabled) {
+        this.wifiDirectDownloadEnabled = wifiDirectDownloadEnabled;
+    }
+
+    /**
+     * If enabled the task will attempt to acquire the requested entries from another node on the same
+     * wifi network directly (nodes discovered using Network Service Discovery - NSD).
+     *
+     * @return boolean: True if enabled, false otherwise
+     */
+    public boolean isLanDownloadEnabled() {
+        return lanDownloadEnabled;
+    }
+
+    public void setLanDownloadEnabled(boolean lanDownloadEnabled) {
+        this.lanDownloadEnabled = lanDownloadEnabled;
     }
 
     @Override

@@ -17,6 +17,8 @@ public class DownloadJobItemHistory {
     //Foreign key for the networknode this is connected to
     private int networkNode;
 
+    private int downloadJobItemId;
+
     private int mode;
 
     private long numBytes;
@@ -39,8 +41,15 @@ public class DownloadJobItemHistory {
         this.endTime = endTime;
     }
 
-    public DownloadJobItemHistory(NetworkNode node, int mode, long startTime) {
+    public DownloadJobItemHistory(NetworkNode node, DownloadJobItem item, int mode, long startTime) {
+        if(node != null)
+            networkNode = node.getNodeId();
 
+        if(item != null)
+            downloadJobItemId = item.getId();
+
+        this.mode = mode;
+        this.startTime= startTime;
     }
 
 
@@ -106,5 +115,13 @@ public class DownloadJobItemHistory {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
+    }
+
+    public int getDownloadJobItemId() {
+        return downloadJobItemId;
+    }
+
+    public void setDownloadJobItemId(int downloadJobItemId) {
+        this.downloadJobItemId = downloadJobItemId;
     }
 }

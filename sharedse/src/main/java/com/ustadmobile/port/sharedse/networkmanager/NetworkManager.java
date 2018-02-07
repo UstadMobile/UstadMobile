@@ -440,13 +440,18 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
 
-    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir, boolean recursive) {
+    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
+                                        boolean recursive, boolean wifiDirectEnabled,
+                                        boolean localWifiEnabled) {
         DownloadJobDao jobDao = DbManager.getInstance(getContext()).getDownloadJobDao();
 
         DownloadJob job = new DownloadJob();
         job.setDestinationDir(destintionDir);
         job.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
+        job.setLanDownloadEnabled(localWifiEnabled);
+        job.setWifiDirectDownloadEnabled(wifiDirectEnabled);
         job.setId((int)jobDao.insert(job));
+
 
 
         ArrayList<DownloadJobItem> jobItems = new ArrayList<>();
@@ -456,6 +461,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         DbManager.getInstance(getContext()).getDownloadJobItemDao().insertList(jobItems);
 
         return job;
+    }
+
+    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,
+                                        boolean recursive){
+        return buildDownloadJob(rootEntries,  destinationDir, recursive, true, true);
     }
 
 
@@ -1472,21 +1482,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         synchronized (acquisitionListeners) {
             for(AcquisitionListener listener : acquisitionListeners){
                 listener.acquisitionProgressUpdate(entryId, task.getStatusByEntryId(entryId));
-            }
-        }
-    }
-
-
-    /**
-     * Fire acquisition status change to all listening parts of the app
-     * @param entryId
-     */
-    protected void fireAcquisitionStatusChanged(String entryId, DownloadTask.Status status){
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 645, "fireAcquisitionStatusChanged: " + entryId +
-                " : " + status.getStatus());
-        synchronized (acquisitionListeners) {
-            for(AcquisitionListener listener : acquisitionListeners){
-                listener.acquisitionStatusChanged(entryId, status);
             }
         }
     }

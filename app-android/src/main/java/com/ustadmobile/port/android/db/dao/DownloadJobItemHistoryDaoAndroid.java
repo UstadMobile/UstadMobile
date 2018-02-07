@@ -21,6 +21,10 @@ public abstract class DownloadJobItemHistoryDaoAndroid extends DownloadJobItemHi
     @Query("SELECT * FROM DownloadJobItemHistory WHERE networkNode = :nodeId AND startTime >= :since")
     public abstract List<DownloadJobItemHistory> findHistoryItemsByNetworkNodeSince(int nodeId, long since);
 
+    @Override
+    @Query("SELECT * From DownloadJobItemHistory WHERE downloadJobItemId = :downloadJobItemId")
+    public abstract List<DownloadJobItemHistory> findHistoryItemsByDownloadJobItem(int downloadJobItemId);
+
     @Insert
     public abstract long insert(DownloadJobItemHistory downloadJobItemHistory);
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
 
 import java.util.List;
@@ -17,4 +18,7 @@ public abstract class DownloadJobItemHistoryDao {
     public abstract long insert(DownloadJobItemHistory downloadJobItemHistory);
 
     public abstract void update(DownloadJobItemHistory downloadJobItemHistory);
+
+    @UmQuery("SELECT * From DownloadJobItemHistory WHERE downloadJobItemId = :downloadJobItemId")
+    public abstract List<DownloadJobItemHistory> findHistoryItemsByDownloadJobItem(int downloadJobItemId);
 }
