@@ -29,79 +29,85 @@ public class OpdsDirScanner implements Runnable{
         this.dirName = dirName;
     }
 
+    public OpdsDirScanner(DbManager dbManager) {
+        this.dbManager = dbManager;
+    }
+
 
     @Override
     public void run() {
         File dirFile = new File(dirName);
-        String fileExtension;
+
         for(File file : dirFile.listFiles()) {
-            fileExtension = UMFileUtil.getExtension(file.getName());
-            ContainerFileWithRelations containerFile = dbManager.getContainerFileDao()
-                    .findContainerFileByPath(file.getAbsolutePath());
-            ArrayList<ContainerFileEntry> containerFileEntries = new ArrayList<>();
+            scanFile(file);
+        }
+    }
 
-            if(containerFile == null){
-                containerFile = new ContainerFileWithRelations();
-                containerFile.setNormalizedPath(file.getAbsolutePath());
-                containerFile.setDirPath(file.getParentFile().getAbsolutePath());
-            }else if(containerFile.getLastUpdated() > file.lastModified()) {
-                continue;
-            }
+    public ContainerFileWithRelations scanFile(File file) {
+        String fileExtension = UMFileUtil.getExtension(file.getName());
+        ContainerFileWithRelations containerFile = dbManager.getContainerFileDao()
+                .findContainerFileByPath(file.getAbsolutePath());
+        ArrayList<ContainerFileEntry> containerFileEntries = new ArrayList<>();
 
-
-
-            for(ContentTypePlugin plugin : UstadMobileSystemImpl.getInstance().getSupportedContentTypePlugins()) {
-                if(!plugin.getFileExtensions().contains(fileExtension))
-                    continue;
-
-                if(!(plugin instanceof ContentTypePluginFs))
-                    continue;
-
-                List<OpdsEntryWithRelations> entriesInFile = ((ContentTypePluginFs)plugin)
-                        .getEntries(file, dbManager.getContext());
-
-                if(entriesInFile == null)
-                    continue;
-
-                //insert the row into the database only once we see we can understand it
-                containerFile.setMimeType(plugin.getMimeTypes().get(0));
-                long containerFileId = dbManager.getContainerFileDao().insert(containerFile);
-                containerFile.setId((int)containerFileId);
-
-
-                for(OpdsEntry entry : entriesInFile) {
-                    ContainerFileEntry fileEntry = new ContainerFileEntry();
-                    fileEntry.setOpdsEntryUuid(entry.getUuid());
-                    fileEntry.setContainerFileId(containerFile.getId());
-                    fileEntry.setContainerEntryId(entry.getEntryId());
-                    containerFileEntries.add(fileEntry);
-                }
-
-                //delete old entry info on this file
-                dbManager.getContainerFileEntryDao()
-                        .deleteOpdsAndContainerFileEntriesByContainerFile(containerFile.getId());
-
-
-                //now persist everything for this file
-                dbManager.getContainerFileEntryDao().insert(containerFileEntries);
-
-                for(OpdsEntryWithRelations entry : entriesInFile) {
-                    if(entry.getLinks() != null)
-                        dbManager.getOpdsLinkDao().insert(entry.getLinks());
-                }
-
-                dbManager.getOpdsEntryDao().insertList(new ArrayList<>(entriesInFile));
-
-                dbManager.getContainerFileDao().updateLastUpdatedById(containerFile.getId(),
-                        System.currentTimeMillis());
-                break;
-            }
-
-
-
+        if(containerFile == null){
+            containerFile = new ContainerFileWithRelations();
+            containerFile.setNormalizedPath(file.getAbsolutePath());
+            containerFile.setDirPath(file.getParentFile().getAbsolutePath());
+        }else if(containerFile.getLastUpdated() > file.lastModified()) {
+            return containerFile;
         }
 
 
 
+        for(ContentTypePlugin plugin : UstadMobileSystemImpl.getInstance().getSupportedContentTypePlugins()) {
+            if(!plugin.getFileExtensions().contains(fileExtension))
+                continue;
+
+            if(!(plugin instanceof ContentTypePluginFs))
+                continue;
+
+            List<OpdsEntryWithRelations> entriesInFile = ((ContentTypePluginFs)plugin)
+                    .getEntries(file, dbManager.getContext());
+
+            if(entriesInFile == null)
+                continue;
+
+            //insert the row into the database only once we see we can understand it
+            containerFile.setMimeType(plugin.getMimeTypes().get(0));
+            long containerFileId = dbManager.getContainerFileDao().insert(containerFile);
+            containerFile.setId((int)containerFileId);
+
+
+            for(OpdsEntry entry : entriesInFile) {
+                ContainerFileEntry fileEntry = new ContainerFileEntry();
+                fileEntry.setOpdsEntryUuid(entry.getUuid());
+                fileEntry.setContainerFileId(containerFile.getId());
+                fileEntry.setContainerEntryId(entry.getEntryId());
+                containerFileEntries.add(fileEntry);
+            }
+
+            containerFile.setEntries(containerFileEntries);
+
+            //delete old entry info on this file
+            dbManager.getContainerFileEntryDao()
+                    .deleteOpdsAndContainerFileEntriesByContainerFile(containerFile.getId());
+
+
+            //now persist everything for this file
+            dbManager.getContainerFileEntryDao().insert(containerFileEntries);
+
+            for(OpdsEntryWithRelations entry : entriesInFile) {
+                if(entry.getLinks() != null)
+                    dbManager.getOpdsLinkDao().insert(entry.getLinks());
+            }
+
+            dbManager.getOpdsEntryDao().insertList(new ArrayList<>(entriesInFile));
+
+            dbManager.getContainerFileDao().updateLastUpdatedById(containerFile.getId(),
+                    System.currentTimeMillis());
+            break;
+        }
+
+        return containerFile;
     }
 }

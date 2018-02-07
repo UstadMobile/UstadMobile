@@ -4,9 +4,11 @@ import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UMStorageDir;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -20,6 +22,7 @@ import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory;
+import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.EntryStatusResponseWithNode;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
@@ -123,58 +126,70 @@ public class TestDownloadTask {
 //        CatalogPresenter.removeEntry(ENTRY_ID_NOT_PRESENT, CatalogPresenter.SHARED_RESOURCE,
 //                PlatformTestUtil.getTargetContext());
 
-        final DownloadJob job = makeDownloadJob(manager);
+        DownloadJob job = makeDownloadJob(manager);
+        UmLiveData<DownloadJobWithRelations> jobLiveData = dbManager.getDownloadJobDao().getByIdLive(
+                job.getId());
 
-        NetworkManagerListener responseListener = new NetworkManagerListener() {
-            @Override
-            public void fileStatusCheckInformationAvailable(String[] fileIds) {
-            }
-
-            @Override
-            public void networkTaskStatusChanged(NetworkTask task) {
-                if(task.getTaskId() == job.getId() && (task.isFinished() || task.isRetryNeeded())) {
-                    synchronized (acquireLock) {
-                        acquireLock.notifyAll();
-                    }
+        UmObserver<DownloadJobWithRelations> observer = (downloadJob) -> {
+            synchronized (acquireLock) {
+                if(downloadJob != null && downloadJob.getStatus() > 20) {
+                    acquireLock.notifyAll();
                 }
             }
-
-            @Override
-            public void networkNodeDiscovered(NetworkNode node) {
-            }
-
-            @Override
-            public void networkNodeUpdated(NetworkNode node) {
-
-            }
-
-            @Override
-            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int sources) {
-            }
-
-            @Override
-            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
-
-            }
         };
-        manager.addNetworkManagerListener(responseListener);
+
+//
+
+//        NetworkManagerListener responseListener = new NetworkManagerListener() {
+//            @Override
+//            public void fileStatusCheckInformationAvailable(String[] fileIds) {
+//            }
+//
+//            @Override
+//            public void networkTaskStatusChanged(NetworkTask task) {
+//                if(task.getTaskId() == job.getId() && (task.isFinished() || task.isRetryNeeded())) {
+//                    synchronized (acquireLock) {
+//                        acquireLock.notifyAll();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void networkNodeDiscovered(NetworkNode node) {
+//            }
+//
+//            @Override
+//            public void networkNodeUpdated(NetworkNode node) {
+//
+//            }
+//
+//            @Override
+//            public void fileAcquisitionInformationAvailable(String entryId, long downloadId, int sources) {
+//            }
+//
+//            @Override
+//            public void wifiConnectionChanged(String ssid, boolean connected, boolean connectedOrConnecting) {
+//
+//            }
+//        };
+//        manager.addNetworkManagerListener(responseListener);
 //        int numAcquisitions = remoteNode.getAcquisitionHistory() != null ?
 //                remoteNode.getAcquisitionHistory().size() : 0;
 
-        AcquisitionListener acquisitionListener =new AcquisitionListener() {
-            @Override
-            public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
+//        AcquisitionListener acquisitionListener =new AcquisitionListener() {
+//            @Override
+//            public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
+//
+//            }
+//
+//            @Override
+//            public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
+//                UstadMobileSystemImpl.l(UMLog.INFO, 335, "acquisition status changed: " + entryId +
+//                        " : " +status.getStatus());
+//            }
+//        };
 
-            }
-
-            @Override
-            public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-                UstadMobileSystemImpl.l(UMLog.INFO, 335, "acquisition status changed: " + entryId +
-                        " : " +status.getStatus());
-            }
-        };
-
-        manager.addAcquisitionTaskListener(acquisitionListener);
+//        manager.addAcquisitionTaskListener(acquisitionListener);
 
 //        UstadJSOPDSFeed feed = makeAcquisitionTestFeed();
 
@@ -183,10 +198,17 @@ public class TestDownloadTask {
 //        AcquisitionTask task = (AcquisitionTask)manager.getTaskById(testTaskId[0],
 //                NetworkManager.QUEUE_ENTRY_ACQUISITION);
 //        Assert.assertNotNull("Task created for acquisition", task);
+        jobLiveData.observeForever(observer);
+
         manager.queueDownloadJob(job.getId());
         synchronized (acquireLock){
             acquireLock.wait(acquireTimeout);
         }
+
+        Assert.assertEquals("Download job reported as complete",
+                NetworkTask.STATUS_COMPLETE, jobLiveData.getValue().getStatus());
+
+        jobLiveData.removeObserver(observer);
 
 //        List<AcquisitionTaskHistoryEntry> entryHistoryList = task.getAcquisitionHistoryByEntryId(ENTRY_ID_PRESENT);
 //        int lastIndex = entryHistoryList.size()-1;
@@ -259,7 +281,9 @@ public class TestDownloadTask {
 
 
 //        TODO: use networkmanager to do this
-        DownloadJob job = manager.buildDownloadJob(Arrays.asList(entry1, entry2), false);
+        String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+        DownloadJob job = manager.buildDownloadJob(Arrays.asList(entry1, entry2), storageDir, false);
         return job;
 
 

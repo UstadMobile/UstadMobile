@@ -1,10 +1,13 @@
 package com.ustadmobile.port.android.db.dao;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
+import android.arch.persistence.room.Update;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
@@ -36,4 +39,15 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
         return super.findNextDownloadJobAndSetStartingStatus();
     }
 
+    @Override
+    public UmLiveData<DownloadJobWithRelations> getByIdLive(int id) {
+        return new UmLiveDataAndroid<>(getByIdLiveR(id));
+    }
+
+    @Override
+    @Update
+    public abstract void update(DownloadJob job);
+
+    @Query("SELECT * From DownloadJob WHERE id = :id")
+    public abstract LiveData<DownloadJobWithRelations> getByIdLiveR(int id);
 }

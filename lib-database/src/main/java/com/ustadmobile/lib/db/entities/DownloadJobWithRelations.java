@@ -20,4 +20,17 @@ public class DownloadJobWithRelations extends DownloadJob{
     public void setDownloadJobItems(List<DownloadJobItem> downloadJobItems) {
         this.downloadJobItems = downloadJobItems;
     }
+
+    public DownloadJobItem getJobItemByEntryId(String entryId){
+        if(downloadJobItems == null)
+            return null;
+
+        for(DownloadJobItem item : downloadJobItems) {
+            if (entryId.equals(item.getEntryId()))
+                return item;
+        }
+
+        return null;
+    }
+
 }

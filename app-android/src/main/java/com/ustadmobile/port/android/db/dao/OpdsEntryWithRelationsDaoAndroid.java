@@ -94,4 +94,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Query("DELETE FROM OpdsLink WHERE entryUuid in (:entryUuids)")
     public abstract int deleteLinksByOpdsEntryUuids(List<String> entryUuids);
 
+    @Override
+    @Query(findEntriesByContainerFileSql)
+    public abstract List<OpdsEntryWithRelations> findEntriesByContainerFileNormalizedPath(String normalizedPath);
 }

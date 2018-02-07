@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.db.dao;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.Query;
 
 import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -17,4 +18,11 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
     @Override
     @Insert
     public abstract void insertList(List<DownloadJobItem> jobItems);
+
+    @Override
+    @Query("Update DownloadJobItem SET " +
+            "status = :status, downloadedSoFar = :downloadedSoFar, " +
+            "downloadLength = :downloadLength, currentSpeed = :currentSpeed " +
+            " WHERE id = :downloadJobItemId")
+    public abstract void updateDownloadJobItemStatus(int downloadJobItemId, int status, long downloadedSoFar, long downloadLength, long currentSpeed);
 }

@@ -13,11 +13,16 @@ public class DownloadJob {
     @UmPrimaryKey(autoIncrement = true)
     private int id;
 
+    /**
+     * Status as per flags on NetworkTask
+     */
     private int status;
 
     private long timeRequested;
 
     private long timeCompleted;
+
+    private String destinationDir;
 
     public int getId() {
         return id;
@@ -51,4 +56,35 @@ public class DownloadJob {
         this.timeCompleted = timeCompleted;
     }
 
+    public String getDestinationDir() {
+        return destinationDir;
+    }
+
+    public void setDestinationDir(String destinationDir) {
+        this.destinationDir = destinationDir;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DownloadJob)) return false;
+
+        DownloadJob that = (DownloadJob) o;
+
+        if (id != that.id) return false;
+        if (status != that.status) return false;
+        if (timeRequested != that.timeRequested) return false;
+        if (timeCompleted != that.timeCompleted) return false;
+        return destinationDir.equals(that.destinationDir);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + status;
+        result = 31 * result + (int) (timeRequested ^ (timeRequested >>> 32));
+        result = 31 * result + (int) (timeCompleted ^ (timeCompleted >>> 32));
+        result = 31 * result + destinationDir.hashCode();
+        return result;
+    }
 }

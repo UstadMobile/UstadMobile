@@ -440,12 +440,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         return requestFileStatus(entryIds, mContext, nodeList, true, true);
     }
 
-    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, boolean recursive) {
+    public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir, boolean recursive) {
         DownloadJobDao jobDao = DbManager.getInstance(getContext()).getDownloadJobDao();
 
         DownloadJob job = new DownloadJob();
-        job.setId((int)jobDao.insert(job));
+        job.setDestinationDir(destintionDir);
         job.setStatus(UstadMobileSystemImpl.DLSTATUS_NOT_STARTED);
+        job.setId((int)jobDao.insert(job));
+
 
         ArrayList<DownloadJobItem> jobItems = new ArrayList<>();
         for(OpdsEntryWithRelations entry : rootEntries) {
@@ -1448,6 +1450,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Method which is responsible for adding all acquisition listeners.
      * @param listener AcquisitionListener to listen to and fire events accordingly
      */
+    @Deprecated
     public void addAcquisitionTaskListener(AcquisitionListener listener){
         acquisitionListeners.add(listener);
     }
@@ -1456,6 +1459,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * Method which is responsible for removing all listeners added
      * @param listener
      */
+    @Deprecated
     public void removeAcquisitionTaskListener(AcquisitionListener listener){
         acquisitionListeners.remove(listener);
     }

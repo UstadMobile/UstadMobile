@@ -17,7 +17,7 @@ import java.util.List;
 public abstract class EntryStatusResponseDaoAndroid extends EntryStatusResponseDao{
 
     @Override
-    @Query("SELECT EntryStatusResponse.* FROM EntryStatusResponse " +
+    @Query("SELECT * FROM EntryStatusResponse " +
             " LEFT JOIN NetworkNode ON EntryStatusResponse.responderNodeId = NetworkNode.nodeId " +
             "WHERE entryId = :entryId AND available = :available ")
     public abstract List<EntryStatusResponseWithNode> findByEntryIdAndAvailability(String entryId, boolean available);

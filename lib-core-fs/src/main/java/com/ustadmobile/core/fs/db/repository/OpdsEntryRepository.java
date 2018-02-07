@@ -4,9 +4,11 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
+import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
@@ -66,6 +68,15 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
 
         return dbResult;
     }
+
+    public List<OpdsEntryWithRelations> findEntriesByContainerFileNormalizedPath(String containerFilePath) {
+        OpdsDirScanner scanner = new OpdsDirScanner(dbManager);
+        ContainerFileWithRelations containerFile = scanner.scanFile(new File(containerFilePath));
+
+        return dbManager.getOpdsEntryWithRelationsDao().findEntriesByContainerFileNormalizedPath(
+                containerFilePath);
+    }
+
 
     @Override
     public UmProvider<OpdsEntryWithRelations> getEntriesByParent(String parentId) {

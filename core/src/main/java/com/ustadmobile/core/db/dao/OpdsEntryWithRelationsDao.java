@@ -58,6 +58,15 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery(findEntriesByContainerFileDirectorySql)
     public abstract UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(String dir);
 
+    protected static final String findEntriesByContainerFileSql = "SELECT * FROM OpdsEntry " +
+            "LEFT JOIN ContainerFileEntry on OpdsEntry.uuid = ContainerFileEntry.opdsEntryUuid " +
+            "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE ContainerFile.normalizedPath = :normalizedPath";
+
+    @UmQuery(findEntriesByContainerFileSql)
+    public abstract List<OpdsEntryWithRelations> findEntriesByContainerFileNormalizedPath(String normalizedPath);
+
+
     /**
      * Convenience method used by the download task when it needs to resolve a relative link. When
      * The OpdsEntry is a child entry loads from a feed it will not itself have a URL. We thus need

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.db.dao;
 
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
@@ -25,6 +26,9 @@ public abstract class DownloadJobDao {
     @UmQuery("UPDATE DownloadJob SET status = :status WHERE id = :jobId")
     public abstract long updateJobStatus(int id, int status);
 
+
+    public abstract void update(DownloadJob job);
+
     /**
      * Convenience method as a transaction to avoid the possibility of getting the same
      * download job running twice.
@@ -39,6 +43,9 @@ public abstract class DownloadJobDao {
 
         return nextJob;
     }
+
+    @UmQuery("SELECT * From DownloadJob where id = :id")
+    public abstract UmLiveData<DownloadJobWithRelations> getByIdLive(int id);
 
 
 }
