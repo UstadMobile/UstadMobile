@@ -60,6 +60,8 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
 
     public static final String ENTRY_RESPONSE_ENTRIES_KEY = "e";
 
+    public static final int HTTP_CONNECT_TIMEOUT = 6000;
+
     interface NetworkNodeListProvider {
 
         List<NetworkNode> getNetworkNodes();
@@ -146,6 +148,7 @@ public class EntryStatusTask extends NetworkTask implements BluetoothConnectionH
             byte[] postPayload = entryIds.toString().getBytes("UTF-8");
 
             connection = (HttpURLConnection)apiEndpointUrl.openConnection();
+            connection.setConnectTimeout(HTTP_CONNECT_TIMEOUT);
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
 

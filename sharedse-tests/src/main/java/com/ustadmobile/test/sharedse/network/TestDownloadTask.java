@@ -211,7 +211,6 @@ public class TestDownloadTask {
         dbManager.getOpdsEntryDao().insertList(Arrays.asList((OpdsEntry)entry1, entry2));
 
 
-//        TODO: use networkmanager to do this
         String storageDir = UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
         DownloadJob job = manager.buildDownloadJob(Arrays.asList(entry1, entry2), storageDir, false,
@@ -245,7 +244,7 @@ public class TestDownloadTask {
         Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
 
-//    @Test
+    @Test
     public void testAcquisitionWifiDirect() throws IOException, InterruptedException, XmlPullParserException {
         final NetworkManager manager= UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
@@ -255,8 +254,10 @@ public class TestDownloadTask {
         TestEntryStatusTask.testEntryStatusBluetooth(TestEntryStatusTask.EXPECTED_AVAILABILITY,
                 TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
 
-        NetworkNode remoteNode = manager.getNodeByBluetoothAddr(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
-        testAcquisition(remoteNode, manager, false, true, NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
+        NetworkNode remoteNode = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getNetworkNodeDao().findNodeByBluetoothAddress(TestConstants.TEST_REMOTE_BLUETOOTH_DEVICE);
+        testAcquisition(remoteNode, manager, false, true,
+                NetworkManager.DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK);
         Assert.assertTrue(TestUtilsSE.setRemoteTestSlaveSupernodeEnabled(false));
     }
 

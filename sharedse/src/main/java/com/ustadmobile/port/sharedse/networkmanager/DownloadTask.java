@@ -628,7 +628,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 currentGroupSSID =groupInfo[0];
                 passphrase = groupInfo[1];
                 currentDownloadUrl = "http://" + currentGroupIPAddress + ":" +
-                        entryStatusResponse.getNetworkNode().getPort() + "/catalog/entry" +
+                        entryStatusResponse.getNetworkNode().getPort() + "/catalog/entry/" +
                         currentDownloadJobItem.getEntryId();
 
                 UstadMobileSystemImpl.l(UMLog.INFO, 318, getLogPrefix() + ": bluetooth says connect to '" +
