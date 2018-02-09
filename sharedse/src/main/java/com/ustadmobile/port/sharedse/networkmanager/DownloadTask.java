@@ -369,140 +369,142 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
      * </p>
      */
     private void acquireFile(int index){
-        if(isStopped())
-            return;
+        new Thread(() -> {
+            if (isStopped())
+                return;
 
-        if(index < downloadJob.getDownloadJobItems().size()) {
-            currentEntryIdIndex = index;
-            currentDownloadJobItem = downloadJob.getDownloadJobItems().get(currentEntryIdIndex);
-            attemptCount++;
-            currentGroupSSID = null;
-
-
-            UstadMobileSystemImpl.l(UMLog.INFO, 303, getLogPrefix() + ": acquireFile: file:" + index + " id: "
-                    + downloadJob.getDownloadJobItems().get(currentEntryIdIndex).getEntryId());
-            setWaitingForWifiConnection(false);
-
-            //TODO: Move hardcoded strings to locale constants
-            message= downloadJob.getDownloadJobItems().size() > 1 ? "Downloading "+(currentEntryIdIndex+1)+" of "
-                    +downloadJob.getDownloadJobItems().size() +" files":"Downloading file";
-
-            currentEntryTitle = DbManager.getInstance(networkManager.getContext()).getOpdsEntryDao()
-                    .findTitleByUuid(currentDownloadJobItem.getOpdsEntryUuid());
-            networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
-                    currentEntryTitle, message);
-            long currentDownloadId = new AtomicInteger().incrementAndGet();
-            String entryId = currentDownloadJobItem.getEntryId();
+            if (index < downloadJob.getDownloadJobItems().size()) {
+                currentEntryIdIndex = index;
+                currentDownloadJobItem = downloadJob.getDownloadJobItems().get(currentEntryIdIndex);
+                attemptCount++;
+                currentGroupSSID = null;
 
 
-            DbManager dbManager = DbManager.getInstance(networkManager.getContext());
-            List<EntryStatusResponseWithNode> statusResponses = dbManager.getEntryStatusResponseDao()
-                    .findByEntryIdAndAvailability(currentDownloadJobItem.getEntryId(), true);
+                UstadMobileSystemImpl.l(UMLog.INFO, 303, getLogPrefix() + ": acquireFile: file:" + index + " id: "
+                        + downloadJob.getDownloadJobItems().get(currentEntryIdIndex).getEntryId());
+                setWaitingForWifiConnection(false);
 
-            entryStatusResponse = selectEntryStatusResponse(statusResponses,
-                    dbManager.getDownloadJobItemHistoryDao());
+                //TODO: Move hardcoded strings to locale constants
+                message = downloadJob.getDownloadJobItems().size() > 1 ? "Downloading " + (currentEntryIdIndex + 1) + " of "
+                        + downloadJob.getDownloadJobItems().size() + " files" : "Downloading file";
 
-            NetworkNode responseNode = entryStatusResponse != null ?
-                    entryStatusResponse.getNetworkNode() : null;
-            String currentSsid = networkManager.getCurrentWifiSsid();
-            boolean wifiAvailable = currentSsid != null
-                    || networkManager.getActionRequiredAfterGroupConnection() == NetworkManager.AFTER_GROUP_CONNECTION_RESTORE;
+                currentEntryTitle = DbManager.getInstance(networkManager.getContext()).getOpdsEntryDao()
+                        .findTitleByUuid(currentDownloadJobItem.getOpdsEntryUuid());
+                networkManager.addNotification(NOTIFICATION_TYPE_ACQUISITION,
+                        currentEntryTitle, message);
+                long currentDownloadId = new AtomicInteger().incrementAndGet();
+                String entryId = currentDownloadJobItem.getEntryId();
 
-            OpdsEntryWithRelations entryWithRelations = dbManager.getOpdsEntryWithRelationsDao()
-                    .getEntryByUuidStatic(currentDownloadJobItem.getOpdsEntryUuid());
-            OpdsLink acquisitionLink = entryWithRelations.getAcquisitionLink(null, true);
-            currentExpectedMimeType = acquisitionLink.getMimeType();
-            String feedEntryAcquisitionUrl = acquisitionLink.getHref();
-            if(!UMFileUtil.isUriAbsolute(feedEntryAcquisitionUrl)){
-                if(entryWithRelations.getUrl() != null){
-                    feedEntryAcquisitionUrl = UMFileUtil.resolveLink(entryWithRelations.getUrl(),
-                            feedEntryAcquisitionUrl);
-                }else {
-                    String parentUrl = dbManager.getOpdsEntryWithRelationsDao()
-                            .findParentUrlByChildUuid(entryWithRelations.getUuid());
-                    if(parentUrl != null){
-                        feedEntryAcquisitionUrl = UMFileUtil.resolveLink(parentUrl,
+
+                DbManager dbManager = DbManager.getInstance(networkManager.getContext());
+                List<EntryStatusResponseWithNode> statusResponses = dbManager.getEntryStatusResponseDao()
+                        .findByEntryIdAndAvailability(currentDownloadJobItem.getEntryId(), true);
+
+                entryStatusResponse = selectEntryStatusResponse(statusResponses,
+                        dbManager.getDownloadJobItemHistoryDao());
+
+                NetworkNode responseNode = entryStatusResponse != null ?
+                        entryStatusResponse.getNetworkNode() : null;
+                String currentSsid = networkManager.getCurrentWifiSsid();
+                boolean wifiAvailable = currentSsid != null
+                        || networkManager.getActionRequiredAfterGroupConnection() == NetworkManager.AFTER_GROUP_CONNECTION_RESTORE;
+
+                OpdsEntryWithRelations entryWithRelations = dbManager.getOpdsEntryWithRelationsDao()
+                        .getEntryByUuidStatic(currentDownloadJobItem.getOpdsEntryUuid());
+                OpdsLink acquisitionLink = entryWithRelations.getAcquisitionLink(null, true);
+                currentExpectedMimeType = acquisitionLink.getMimeType();
+                String feedEntryAcquisitionUrl = acquisitionLink.getHref();
+                if (!UMFileUtil.isUriAbsolute(feedEntryAcquisitionUrl)) {
+                    if (entryWithRelations.getUrl() != null) {
+                        feedEntryAcquisitionUrl = UMFileUtil.resolveLink(entryWithRelations.getUrl(),
                                 feedEntryAcquisitionUrl);
+                    } else {
+                        String parentUrl = dbManager.getOpdsEntryWithRelationsDao()
+                                .findParentUrlByChildUuid(entryWithRelations.getUuid());
+                        if (parentUrl != null) {
+                            feedEntryAcquisitionUrl = UMFileUtil.resolveLink(parentUrl,
+                                    feedEntryAcquisitionUrl);
+                        }
                     }
                 }
-            }
 
-            if(feedEntryAcquisitionUrl.startsWith("p2p://")) {
-                targetNetwork = TARGET_NETWORK_WIFIDIRECT;
-                currentDownloadUrl = feedEntryAcquisitionUrl.replace("p2p://", "http://");
-                String groupOwnerIp = networkManager.getWifiDirectGroupOwnerIp();
-                if(groupOwnerIp != null) {
-                    currentDownloadUrl = currentDownloadUrl.replace("groupowner", groupOwnerIp);
-                }else {
-                    //TODO: If this happens - try to reconnect to the group owner.
-                    UstadMobileSystemImpl.l(UMLog.ERROR, 667, getLogPrefix() + " p2p download, group owner IP is null!");
-                    handleAttemptFailed();
+                if (feedEntryAcquisitionUrl.startsWith("p2p://")) {
+                    targetNetwork = TARGET_NETWORK_WIFIDIRECT;
+                    currentDownloadUrl = feedEntryAcquisitionUrl.replace("p2p://", "http://");
+                    String groupOwnerIp = networkManager.getWifiDirectGroupOwnerIp();
+                    if (groupOwnerIp != null) {
+                        currentDownloadUrl = currentDownloadUrl.replace("groupowner", groupOwnerIp);
+                    } else {
+                        //TODO: If this happens - try to reconnect to the group owner.
+                        UstadMobileSystemImpl.l(UMLog.ERROR, 667, getLogPrefix() + " p2p download, group owner IP is null!");
+                        handleAttemptFailed();
+                    }
+                } else if (downloadJob.isLanDownloadEnabled() && entryStatusResponse != null
+                        && networkManager.getCurrentWifiSsid() != null
+                        && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
+                    targetNetwork = TARGET_NETWORK_NORMAL;
+                    currentDownloadUrl = "http://" + entryStatusResponse.getNetworkNode().getIpAddress() + ":"
+                            + entryStatusResponse.getNetworkNode().getPort() + "/catalog/entry/" + entryId;
+                    currentDownloadMode = DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
+                } else if (downloadJob.isWifiDirectDownloadEnabled() && entryStatusResponse != null
+                        && networkManager.isWiFiEnabled()
+                        && responseNode.getTimeSinceWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
+                    targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
+                    currentDownloadMode = DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
+                } else if (wifiAvailable || isDownloadOnMobileDataEnabled()) {
+                    //download from cloud
+                    targetNetwork = wifiAvailable ? TARGET_NETWORK_NORMAL : TARGET_NETWORK_MOBILE_DATA;
+                    currentDownloadUrl = feedEntryAcquisitionUrl;
+                    currentDownloadMode = DOWNLOAD_FROM_CLOUD;
+                } else {
+                    //we're stuck -
+                    UstadMobileSystemImpl.l(UMLog.INFO, 0, getLogPrefix() + " download over data disabled, no wifi available - cleanup and wait");
+                    //TODO: change this for new status flags
+                    cleanup(STATUS_WAITING_FOR_CONNECTION);
+                    return;
                 }
-            }else if(downloadJob.isLanDownloadEnabled() && entryStatusResponse != null
-                    && networkManager.getCurrentWifiSsid() != null
-                    && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                targetNetwork = TARGET_NETWORK_NORMAL;
-                currentDownloadUrl = "http://"+entryStatusResponse.getNetworkNode().getIpAddress()+":"
-                        +entryStatusResponse.getNetworkNode().getPort()+"/catalog/entry/"+entryId;
-                currentDownloadMode = DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
-            }else if(downloadJob.isWifiDirectDownloadEnabled() && entryStatusResponse != null
-                    && networkManager.isWiFiEnabled()
-                    && responseNode.getTimeSinceWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT){
-                targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
-                currentDownloadMode = DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
-            }else if(wifiAvailable|| isDownloadOnMobileDataEnabled()){
-                //download from cloud
-                targetNetwork = wifiAvailable ? TARGET_NETWORK_NORMAL : TARGET_NETWORK_MOBILE_DATA;
-                currentDownloadUrl = feedEntryAcquisitionUrl;
-                currentDownloadMode = DOWNLOAD_FROM_CLOUD;
-            }else {
-                //we're stuck -
-                UstadMobileSystemImpl.l(UMLog.INFO, 0, getLogPrefix() + " download over data disabled, no wifi available - cleanup and wait");
-                //TODO: change this for new status flags
-                cleanup(STATUS_WAITING_FOR_CONNECTION);
-                return;
-            }
 
-            currentJobItemHistory = new DownloadJobItemHistory(
-                    entryStatusResponse != null ? entryStatusResponse.getNetworkNode() : null,
-                    currentDownloadJobItem, currentDownloadMode, System.currentTimeMillis());
+                currentJobItemHistory = new DownloadJobItemHistory(
+                        entryStatusResponse != null ? entryStatusResponse.getNetworkNode() : null,
+                        currentDownloadJobItem, currentDownloadMode, System.currentTimeMillis());
 
-            UstadMobileSystemImpl.l(UMLog.INFO, 336, getLogPrefix() + ": acquire item " + index +
-                    "  id " + currentDownloadJobItem.getEntryId() + " Mode = " + currentDownloadMode
-                    + " target network = " + targetNetwork);
+                UstadMobileSystemImpl.l(UMLog.INFO, 336, getLogPrefix() + ": acquire item " + index +
+                        "  id " + currentDownloadJobItem.getEntryId() + " Mode = " + currentDownloadMode
+                        + " target network = " + targetNetwork);
 
-            if(targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT)) {
-                UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + " : use WiFi direct");
-                downloadCurrentFile(currentDownloadUrl, NetworkManager.DOWNLOAD_FROM_PEER_WIFIDIRECT);
-            }else if(targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT_GROUP)) {
-                UstadMobileSystemImpl.l(UMLog.INFO, 316,getLogPrefix() +  ": Connect bluetooth");
-                networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
-                        currentDownloadMode);
-                networkManager.connectBluetooth(entryStatusResponse.getNetworkNode().getBluetoothMacAddress()
-                        ,this);
-            }else if(targetNetwork.equals(TARGET_NETWORK_NORMAL)) {
-                //String currentSsid = networkManager.getCurrentWifiSsid();
-                boolean isConnectedToWifiDirectGroup = networkManager.isConnectedToWifiDirectLegacyGroup();
-
-                if(currentSsid != null && !isConnectedToWifiDirectGroup){
-                    UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + ": use current normal network");
+                if (targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT)) {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + " : use WiFi direct");
+                    downloadCurrentFile(currentDownloadUrl, NetworkManager.DOWNLOAD_FROM_PEER_WIFIDIRECT);
+                } else if (targetNetwork.equals(TARGET_NETWORK_WIFIDIRECT_GROUP)) {
+                    UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + ": Connect bluetooth");
                     networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
                             currentDownloadMode);
+                    networkManager.connectBluetooth(entryStatusResponse.getNetworkNode().getBluetoothMacAddress()
+                            , this);
+                } else if (targetNetwork.equals(TARGET_NETWORK_NORMAL)) {
+                    //String currentSsid = networkManager.getCurrentWifiSsid();
+                    boolean isConnectedToWifiDirectGroup = networkManager.isConnectedToWifiDirectLegacyGroup();
+
+                    if (currentSsid != null && !isConnectedToWifiDirectGroup) {
+                        UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + ": use current normal network");
+                        networkManager.handleFileAcquisitionInformationAvailable(entryId, currentDownloadId,
+                                currentDownloadMode);
+                        downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
+                    } else {
+                        UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + ": restore wifi");
+                        setWaitingForWifiConnection(true);
+                        networkManager.restoreWifi();
+                    }
+                } else if (targetNetwork.equals(TARGET_NETWORK_MOBILE_DATA)) {
+                    UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, getLogPrefix() + " download via mobile data");
                     downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
-                }else {
-                    UstadMobileSystemImpl.l(UMLog.INFO, 316, getLogPrefix() + ": restore wifi");
-                    setWaitingForWifiConnection(true);
-                    networkManager.restoreWifi();
+                } else {
+                    UstadMobileSystemImpl.l(UMLog.CRITICAL, 0, getLogPrefix() + " invalid download outcome");
                 }
-            }else if(targetNetwork.equals(TARGET_NETWORK_MOBILE_DATA)){
-                UstadMobileSystemImpl.l(UMLog.VERBOSE, 0, getLogPrefix() + " download via mobile data");
-                downloadCurrentFile(currentDownloadUrl, currentDownloadMode);
-            }else {
-                UstadMobileSystemImpl.l(UMLog.CRITICAL, 0, getLogPrefix() +  " invalid download outcome");
+            } else {
+                cleanup(STATUS_COMPLETE);
             }
-        }else{
-            cleanup(STATUS_COMPLETE);
-        }
+        }).start();
     }
 
     /**

@@ -7,6 +7,7 @@ import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
+import com.ustadmobile.port.android.impl.UMLogAndroid;
 
 import java.util.Vector;
 
@@ -78,7 +79,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
     private synchronized void checkQueue(){
         //remove previous entry if it has failed too many times
         if(currentEntry == null && backlog.size() > 0 && backlog.elementAt(0).numAttempts > 4) {
-            Log.e(NetworkManagerAndroid.TAG, "Network Service: failed to resolve "
+            Log.e(UMLogAndroid.LOGTAG, "NSDHelper: Network Service: failed to resolve "
                 + backlog.elementAt(0).serviceInfo + " after "
                 + backlog.elementAt(0).numAttempts + " attempts.");
             backlog.removeElementAt(0);
@@ -91,7 +92,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
             mNsdManager.resolveService(currentEntry.serviceInfo, new NsdManager.ResolveListener() {
                 @Override
                 public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                    Log.d(NetworkManagerAndroid.TAG, "Network Service Resolved Successfully. " + serviceInfo);
+                    Log.d(UMLogAndroid.LOGTAG, "NSDHelper: Network Service Resolved Successfully. " + serviceInfo);
 
                     synchronized(NSDHelperAndroid.this) {
                         managerAndroid.handleNetworkServerDiscovered(serviceInfo.getServiceName(),
@@ -104,7 +105,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
 
                 @Override
                 public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                    Log.e(NetworkManagerAndroid.TAG, "Network Service Failed to resolve"
+                    Log.e(UMLogAndroid.LOGTAG, "NSDHelper: Network Service Failed to resolve"
                             + serviceInfo.getServiceName() + "  error "
                             + getFailureReasonName(errorCode));
                     synchronized (NSDHelperAndroid.this) {
@@ -144,31 +145,31 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
 
             @Override
             public void onDiscoveryStarted(String regType) {
-                Log.d(NetworkManagerAndroid.TAG, "Network Service discovery started");
+                Log.d(UMLogAndroid.LOGTAG, "NSDHelper: Network Service discovery started");
                 isDiscoveringNetworkService=true;
             }
 
             @Override
             public void onServiceFound(final NsdServiceInfo service) {
-                Log.d(NetworkManagerAndroid.TAG, "serviceFound " + service.getServiceName()+" "+service.getHost());
+                Log.d(UMLogAndroid.LOGTAG, "NSDHelper: serviceFound " + service.getServiceName()+" "+service.getHost());
                 queueResolveService(service);
             }
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
-                Log.i(NetworkManagerAndroid.TAG, "Network Service lost: " + service.getServiceName()
+                Log.i(UMLogAndroid.LOGTAG, "NSDHelper: Network Service lost: " + service.getServiceName()
                         + " from host " + service.getHost());
                 managerAndroid.handleNetworkServiceRemoved(service.getServiceName());
             }
 
             @Override
             public void onDiscoveryStopped(String serviceType) {
-                Log.i(NetworkManagerAndroid.TAG, "Network Service Discovery stopped");
+                Log.i(UMLogAndroid.LOGTAG, "NSDHelper: Network Service Discovery stopped");
             }
 
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" +
+                Log.e(UMLogAndroid.LOGTAG, "NSDHelper: Network Service Discovery failed: Error code:" +
                         getFailureReasonName(errorCode));
                 //TODO: this should not be called
                 //mNsdManager.stopServiceDiscovery(this);
@@ -176,7 +177,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(NetworkManagerAndroid.TAG, "Network Service Discovery failed: Error code:" + errorCode);
+                Log.e(UMLogAndroid.LOGTAG, "NSDHelper: Network Service Discovery failed: Error code:" + errorCode);
                 //TODO: This needs to retry stopping after an interval.
                 //mNsdManager.stopServiceDiscovery(this);
             }
@@ -205,7 +206,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
             @Override
             public void onServiceRegistered(NsdServiceInfo serviceInfo) {
                 nsdServiceInfo=serviceInfo;
-                Log.d(NetworkManagerAndroid.TAG,"Network Service discovery service registered successfully:"
+                Log.d(UMLogAndroid.LOGTAG, "NSDHelper: Network Service discovery service registered successfully:"
                         + " "+serviceInfo.getServiceName()+  "." + serviceInfo.getServiceType()
                         + " port:"+serviceInfo.getPort());
 
@@ -213,18 +214,18 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
 
             @Override
             public void onRegistrationFailed(NsdServiceInfo serviceInf, int error) {
-                Log.e(NetworkManagerAndroid.TAG,"Network Service Discovery failed to register "+serviceInf.getServiceName()+" "
+                Log.e(UMLogAndroid.LOGTAG, "NSDHelper: Network Service Discovery failed to register "+serviceInf.getServiceName()+" "
                         +getFailureReasonName(error));
             }
 
             @Override
             public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-                Log.d(NetworkManagerAndroid.TAG, "Network service discovery: successfully unregistered " + serviceInfo.getServiceName());
+                Log.d(UMLogAndroid.LOGTAG, "NSDHelper: Network service discovery: successfully unregistered " + serviceInfo.getServiceName());
             }
 
             @Override
             public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.d(NetworkManagerAndroid.TAG, "Network service discovery: failed to unregister "
+                Log.d(UMLogAndroid.LOGTAG, "NSDHelper: Network service discovery: failed to unregister "
                         + serviceInfo.getServiceName() + " error " + getFailureReasonName(errorCode));
             }
 
@@ -254,7 +255,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
         serviceInfo.setPort(managerAndroid.getHttpListeningPort());
         lookupNsdManager();
         mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD,networkRegistrationListener);
-        Log.d(NetworkManagerAndroid.TAG,"Registering network service "+networkServiceName);
+        Log.d(UMLogAndroid.LOGTAG, "NSDHelper: Registering network service "+networkServiceName);
     }
 
     /**
@@ -273,7 +274,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
      */
 
     public void startNSDiscovery(){
-        Log.i(NetworkManagerAndroid.TAG, "NSDHelperAndroid: start NS discovery");
+        Log.i(UMLogAndroid.LOGTAG, "NSDHelper: NSDHelperAndroid: start NS discovery");
         stopNSDiscovery();
         initializeServiceDiscoveryListener();
         lookupNsdManager();
