@@ -176,7 +176,12 @@ public class ResumableHttpDownload {
                 dlPartFile.delete();
             }
 
-            con = (HttpURLConnection)url.openConnection();
+            if(connectionOpener != null) {
+                con = (HttpURLConnection)connectionOpener.openConnection(url);
+            }else {
+                con = (HttpURLConnection) url.openConnection();
+            }
+
             con.setRequestProperty(HTTP_HEADER_ACCEPT_ENCODING, HTTP_ENCODING_IDENTITY);
             con.setConnectTimeout(HTTP_CONNECT_TIMEOUT);
             con.setReadTimeout(HTTP_READ_TIMEOUT);
