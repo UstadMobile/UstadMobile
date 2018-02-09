@@ -33,6 +33,8 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
 
     public static final String CMD_SEND_COURSE = "SENDCOURSE";
 
+    public static final String CMD_PING = "PING";
+
     public static final String CMD_MANGLE_WIFI_DIRECT_GROUP = "";
 
     public static final int GROUP_CREATION_TIMEOUT = 60*1000;
@@ -140,6 +142,8 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
                 }
 
                 return response;
+            }else if(CMD_PING.equals(command)){
+                return newFixedLengthResponse("Pong");
             }
         }catch(Exception e) {
             e.printStackTrace();

@@ -39,7 +39,7 @@ public class DbManagerAndroid extends DbManager {
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
-        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb53")
+        appDatabase = Room.databaseBuilder(this.context, AppDatabase.class, "appdb54")
             .build();
         executorService = Executors.newCachedThreadPool();
     }

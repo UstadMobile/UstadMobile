@@ -13,7 +13,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.net.Uri;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
@@ -49,7 +51,9 @@ import com.ustadmobile.port.android.impl.http.AndroidAssetsHandler;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothServer;
+import com.ustadmobile.port.sharedse.networkmanager.DefaultURLConnectionOpener;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.port.sharedse.networkmanager.URLConnectionOpener;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 
 import java.io.File;
@@ -72,6 +76,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
+
+
+import javax.net.SocketFactory;
 
 import edu.rit.se.wifibuddy.DnsSdTxtRecord;
 import edu.rit.se.wifibuddy.FailureReason;
@@ -214,10 +224,15 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
     private int p2pSwitchOffLagTime = (10 * 60 * 1000);
 
+    private NetworkRequestHelper networkRequestHelper;
+
+    //Used to create a SocketFactory which is bound to this network
+    private SocketFactory currentWifiNetworkSocketFactory;
+
     /**
      * As per the wifi direct spec these are primary device types we are not interested in
      */
-    private static final List<String> HIDDEN_WIFI_P2P_DEVICE_TYPES = Arrays.asList(new String[]{
+    private static final List<String> HIDDEN_WIFI_P2P_DEVICE_TYPES = Arrays.asList(
             "2",//input device
             "3",//printers, scanners, fax machines
             "4",//camera
@@ -227,7 +242,15 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
             "8",//multimedia devices
             "9",//gaming devices
             "11"//audio devices
-    });
+    );
+
+    protected volatile boolean waitingForWifiUrlConnectionOpener = false;
+
+    private final Object wifiUrlConnectionOpenerLock = new Object();
+
+    private final ReentrantLock wifiNetworkObjLock = new ReentrantLock();
+
+    private final Condition wifiNetworkReadyCondition = wifiNetworkObjLock.newCondition();
 
     private Runnable checkWifiLocksRunnable = new Runnable() {
         @Override
@@ -414,12 +437,59 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                     NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                     boolean isConnected = info.isConnected();
                     boolean isConnecting = info.isConnectedOrConnecting();
+
+                    //TODO: probably better to use the EXTRA_ info here
                     String ssid = wifiManager.getConnectionInfo() != null ?
                             wifiManager.getConnectionInfo().getSSID() : null;
+
+
                     ssid = normalizeAndroidWifiSsid(ssid);
-                    UstadMobileSystemImpl.l(UMLog.DEBUG, 647, "Network: State Changed Action - ssid: "
-                            + ssid + " connected:" + isConnected + " connectedorConnecting: " + isConnecting);
+                    String stateName = "";
+                    switch(info.getState()){
+                        case CONNECTED:
+                            stateName = "connected";
+                            break;
+
+                        case CONNECTING:
+                            stateName = "connecting";
+                            break;
+
+                        case DISCONNECTED:
+                            stateName = "disconnected";
+                            break;
+
+                        case DISCONNECTING:
+                            stateName = "disconnecting";
+                            break;
+
+                        case SUSPENDED:
+                            stateName = "suspended";
+                            break;
+
+                        case UNKNOWN:
+                            stateName = "unknown";
+                            break;
+                    }
+                    UstadMobileSystemImpl.l(UMLog.DEBUG, 647, "Network: State Changed Action: " +
+                            stateName + " - ssid: "  + ssid + " connected:" + isConnected +
+                            " connectedorConnecting: " + isConnecting);
                     handleWifiConnectionChanged(ssid, isConnected, isConnecting);
+
+                    if(Build.VERSION.SDK_INT >= 21) {
+                        if(isConnected){
+                            NetworkRequest.Builder builder = new NetworkRequest.Builder();
+                            builder.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+                            networkRequestHelper = new NetworkRequestHelper(NetworkManagerAndroid.this,
+                                    connectivityManager, ssid);
+                            connectivityManager.registerNetworkCallback(builder.build(),
+                                    networkRequestHelper);
+                        }else {
+                            synchronized (wifiUrlConnectionOpenerLock){
+                                wifiUrlConnectionOpener = null;
+                            }
+                        }
+                    }
+
                     break;
 
                 case WifiManager.SUPPLICANT_STATE_CHANGED_ACTION:
@@ -696,6 +766,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                 && connectivityManager.getActiveNetworkInfo() != null
                 && connectivityManager.getActiveNetworkInfo().getType()
                 == ConnectivityManager.TYPE_WIFI;
+
         String deviceBluetoothMacAddress=getBluetoothMacAddress();
         String deviceIpAddress=isConnected ? getDeviceIPAddress():"";
         HashMap<String,String> record=new HashMap<>();
@@ -831,10 +902,10 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
 
 
 
+
     /**
      * @exception InterruptedException
      */
-
     @Override
     public void connectWifi(String ssid, String passphrase) {
         resetWifiIfRequired();
@@ -863,6 +934,8 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
                 "successful?"  + successful +  " priority = " + wifiConfig.priority);
     }
 
+
+
     private void resetWifiIfRequired(){
         /*
          * Android 4.4 has been observed on Samsung Galaxy Ace (Andriod 4.4.2 - SM-G313F) to refuse to connect
@@ -885,6 +958,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
             do{
                 try {Thread.sleep(300); }
                 catch(InterruptedException e) {}
+                waitTime += 300;
             }while(waitTime < 10000 && wifiManager.getConfiguredNetworks() == null);
         }
     }
@@ -894,6 +968,64 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         temporaryWifiDirectSsids.add(ssid);
         super.connectToWifiDirectGroup(ssid, passphrase);
     }
+
+    @Override
+    public SocketFactory getWifiSocketFactory() {
+        return currentWifiNetworkSocketFactory;
+    }
+
+    protected void setWifiSocketFactory(SocketFactory factory){
+        this.currentWifiNetworkSocketFactory = factory;
+    }
+
+    /**
+     * Gets a URL connection opener that is tied to the wifi network. When we connect to another
+     * node using a wifi direct legacy connection (group ssid + passphrase), this is a 'normal' AP
+     * mode connection that has no Internet. Android 21+ will not route any traffic via a network
+     * that has no Internet connection unless we obtain the corresponding Network object and use
+     * it to open a URL connection or to create a socket factory.
+     *
+     * The URLConnectionOpener is set by NetworkRequestHelper which is triggered by the
+     * WIFI_STATE_CHANGED broadcast. This method will block for up to 10 seconds until it is available.
+     *
+     * @return URLConnectionOpener tied to the wifi network
+     */
+    @Override
+    public URLConnectionOpener getWifiUrlConnectionOpener() {
+        if(Build.VERSION.SDK_INT < 21) {
+            return new DefaultURLConnectionOpener();
+        }
+
+        wifiNetworkObjLock.lock();
+        if(wifiUrlConnectionOpener == null) {
+            try {
+                try {wifiNetworkReadyCondition.await(10, TimeUnit.SECONDS);}
+                catch (InterruptedException e) {}
+            } finally {
+                wifiNetworkObjLock.unlock();
+            }
+        }
+
+
+        return wifiUrlConnectionOpener;
+    }
+
+    /**
+     * Set the Wifi bound URLConnectionOpener
+     *
+     * @param connectionOpener
+     */
+    protected void setWifiUrlConnectionOpener(URLConnectionOpener connectionOpener) {
+        wifiNetworkObjLock.lock();
+        try {
+            this.wifiUrlConnectionOpener = connectionOpener;
+            wifiNetworkReadyCondition.signalAll();
+        }finally {
+            wifiNetworkObjLock.unlock();
+        }
+
+    }
+
 
     @Override
     public void connectToWifiDirectNode(String deviceAddress) {
@@ -969,7 +1101,7 @@ public class NetworkManagerAndroid extends NetworkManager implements EmbeddedHTT
         if (info != null && info.isConnected()) {
             /*Check connection if is of type WiFi*/
             if (info.getTypeName().equalsIgnoreCase("WIFI")) {
-                WifiInfo wifiInfo=wifiManager.getConnectionInfo();    //get connection details using info object.
+                WifiInfo wifiInfo = wifiManager.getConnectionInfo();    //get connection details using info object.
                 return normalizeAndroidWifiSsid(wifiInfo.getSSID());
             }
         }

@@ -537,6 +537,10 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 networkManager.updateNotification(NOTIFICATION_TYPE_ACQUISITION,0,
                         currentEntryTitle ,message);
                 httpDownload=new ResumableHttpDownload(fileUrl,fileDestination.getAbsolutePath());
+
+//                if(currentDownloadMode == DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK)
+//                    httpDownload.setConnectionOpener(networkManager.getWifiUrlConnectionOpener());
+
                 if(httpDownload.getTotalSize() > 0){
                     currentDownloadJobItem.setDownloadLength(httpDownload.getTotalSize());
                 }

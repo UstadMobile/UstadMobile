@@ -88,6 +88,7 @@ public class ResumableHttpDownload {
 
     private int progressHistoryStackSize = 5;
 
+    private URLConnectionOpener connectionOpener;
 
     public ResumableHttpDownload(String httpSrc, String destinationFile){
         this.httpSrc = httpSrc;
@@ -132,7 +133,13 @@ public class ResumableHttpDownload {
              */
             if(dlPartFileExists && dlPartFileSize > 0 && (dlInfoProperties.containsKey(HTTP_HEADER_LAST_MODIFIED)
                     || dlInfoProperties.containsKey(HTTP_HEADER_ETAG))) {
-                con = (HttpURLConnection) url.openConnection();
+
+                if(connectionOpener != null) {
+                    con = (HttpURLConnection)connectionOpener.openConnection(url);
+                }else {
+                    con = (HttpURLConnection) url.openConnection();
+                }
+
                 con.setConnectTimeout(HTTP_CONNECT_TIMEOUT);
                 con.setReadTimeout(HTTP_READ_TIMEOUT);
                 con.setRequestMethod("HEAD");
@@ -370,5 +377,11 @@ public class ResumableHttpDownload {
         return stopped;
     }
 
+    public URLConnectionOpener getConnectionOpener() {
+        return connectionOpener;
+    }
 
+    public void setConnectionOpener(URLConnectionOpener connectionOpener) {
+        this.connectionOpener = connectionOpener;
+    }
 }

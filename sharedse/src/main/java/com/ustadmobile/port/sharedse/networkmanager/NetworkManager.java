@@ -54,6 +54,8 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
 
+import javax.net.SocketFactory;
+
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
 
@@ -259,6 +261,8 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     private Vector<WifiP2pListener> peerChangeListeners = new Vector<>();
 
     private boolean receivingOn = false;
+
+    protected URLConnectionOpener wifiUrlConnectionOpener;
 
     /**
      * The time that the shared feed will be available
@@ -1347,6 +1351,21 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         }
 
         connectWifi(ssid, passphrase);
+    }
+
+    /**
+     * Can be overridden if needed so that the download task can get a socket factory that is
+     * bound to the wifi network. When Android connects to a wifi network that has no Internet,
+     * (e.g. a WiFi Direct legacy group network)
+     *
+     * @return
+     */
+    public SocketFactory getWifiSocketFactory(){
+        return SocketFactory.getDefault();
+    }
+
+    public URLConnectionOpener getWifiUrlConnectionOpener(){
+        return wifiUrlConnectionOpener;
     }
 
     /**

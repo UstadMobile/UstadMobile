@@ -93,6 +93,7 @@ public class NSDHelperAndroid implements INsdHelperAndroid {
                 @Override
                 public void onServiceResolved(NsdServiceInfo serviceInfo) {
                     Log.d(UMLogAndroid.LOGTAG, "NSDHelper: Network Service Resolved Successfully. " + serviceInfo);
+                    Log.d(UMLogAndroid.LOGTAG, "Network Service Resolved Successfully. " + serviceInfo);
 
                     synchronized(NSDHelperAndroid.this) {
                         managerAndroid.handleNetworkServerDiscovered(serviceInfo.getServiceName(),

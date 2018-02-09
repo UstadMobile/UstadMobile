@@ -9,6 +9,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.port.sharedse.networkmanager.URLConnectionOpener;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
@@ -32,7 +33,7 @@ public class TestWifiDirectGroupConnection {
 
     public static final int CONNECTION_TIMEOUT = 90 * 1000;
 
-    private static final int CONNECTION_TEST_COUNT = 3;
+    private static final int CONNECTION_TEST_COUNT = 1;
 
     private String groupSsid;
 
@@ -116,12 +117,20 @@ public class TestWifiDirectGroupConnection {
 
                 UstadMobileSystemImpl.l(UMLog.DEBUG, 700, "Connected to group SSID: " +
                     manager.getCurrentWifiSsid());
-                Assert.assertEquals("Connected to created group ssid: as per getCurrentWifiSsid", groupSsid,
-                        manager.getCurrentWifiSsid());
+//                Assert.assertEquals("Connected to created group ssid: as per getCurrentWifiSsid", groupSsid,
+//                        manager.getCurrentWifiSsid());
                 Assert.assertEquals("Connected to created group ssid: as per ssid passed to event", groupSsid,
                         connectedSsid[0]);
+                String pingUrl = PlatformTestUtil.getRemoteTestEndpoint() + "?cmd=PING";
+                URLConnectionOpener opener=  manager.getWifiUrlConnectionOpener();
+                HttpURLConnection con = (HttpURLConnection)opener.openConnection(new URL(pingUrl));
+                con.setConnectTimeout(10000);
+                int responseCode = con.getResponseCode();
+                Assert.assertEquals("Can communicate over network after connection", 200,
+                        responseCode);
+                con.disconnect();
 
-                try { Thread.sleep(2000); }
+                try { Thread.sleep(5000); }
                 catch(InterruptedException e) {}
 
                 manager.restoreWifi();
