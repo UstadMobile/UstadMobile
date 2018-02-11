@@ -34,6 +34,10 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
     @Query("UPDATE DownloadJob SET status = :status WHERE id = :jobId")
     public abstract long updateJobStatus(int jobId, int status);
 
+    @Override
+    @Query("UPDATE DownloadJob SET status = :setTo WHERE status BETWEEN :rangeFrom AND :rangeTo")
+    public abstract void updateJobStatusByRange(int rangeFrom, int rangeTo, int setTo);
+
     @Transaction
     public DownloadJobWithRelations findNextDownloadJobAndSetStartingStatus(){
         return super.findNextDownloadJobAndSetStartingStatus();

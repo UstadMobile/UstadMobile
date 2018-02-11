@@ -47,6 +47,12 @@ public class SharedSeNetworkTestSuiteRunAndroid extends SharedSeNetworkTestSuite
 
     /*
      * See also: grant permissions for the test application id using the shell e.g.
+     *
+     * Warning: these don't all work because of a bug in the testing library:
+     *  https://issuetracker.google.com/issues/64389280
+     *
+     *  So you still have to run:
+     *
      * $ adb shell pm grant com.toughra.ustadmobile.uswdp.test android.permission.ACCESS_COARSE_LOCATION
      * $ adb shell pm grant com.toughra.ustadmobile.uswdp.test android.permission.ACCESS_FINE_LOCATION
      */

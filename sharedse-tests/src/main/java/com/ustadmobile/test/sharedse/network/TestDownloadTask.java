@@ -94,6 +94,12 @@ public class TestDownloadTask {
         SharedSeNetworkTestSuite.assumeNetworkHardwareEnabled();
     }
 
+    @BeforeClass
+    public static void stopAllOtherDownloads() {
+        DbManager.getInstance(PlatformTestUtil.getTargetContext()).getDownloadJobDao()
+                .updateJobStatusByRange(0, 20, NetworkTask.STATUS_STOPPED);
+    }
+
     @AfterClass
     public static void stopHttpResourcesServer() throws IOException {
         if(resourcesHttpd != null) {

@@ -26,6 +26,8 @@ public abstract class DownloadJobDao {
     @UmQuery("UPDATE DownloadJob SET status = :status WHERE id = :jobId")
     public abstract long updateJobStatus(int id, int status);
 
+    @UmQuery("UPDATE DownloadJob SET status = :setTo WHERE status BETWEEN :rangeFrom AND :rangeTo")
+    public abstract void updateJobStatusByRange(int rangeFrom, int rangeTo, int setTo);
 
     public abstract void update(DownloadJob job);
 
