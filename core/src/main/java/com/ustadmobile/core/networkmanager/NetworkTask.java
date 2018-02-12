@@ -35,6 +35,24 @@ public abstract class NetworkTask {
 
     //Waiting type statuses - 1-10
 
+    /*
+     * Statuses are grouped in ranges:
+     * 0:       not queued
+     * 1-10     waiting (inc. wait for retry)
+     * 11-20    active/running
+     * 21-30    finished
+     */
+
+    /**
+     * The minimum value of waiting type statuses e.g. queued, waiting for connection, etc.
+     */
+    public static final int STATUS_WAITING_MIN = 1;
+
+    /**
+     * The maximum value of waiting type statuses - e.g.
+     */
+    public static final int STATUS_WAITING_MAX = 10;
+
     public static final int STATUS_QUEUED = 3;
 
     /**
@@ -48,6 +66,9 @@ public abstract class NetworkTask {
 
     //Running statuses - 11-20
 
+    public static final int STATUS_RUNNING_MIN = 11;
+
+    public static final int STATUS_RUNNING_MAX = 20;
     /**
      * The DownloadTask has been created and is starting. Done to ensure that there is no possibility
      * of two tasks being queued accidently at the same time.
@@ -58,6 +79,10 @@ public abstract class NetworkTask {
 
 
     //Complete statuses where the job is not part of the queue - 21-30
+
+    public static final int STATUS_COMPLETE_MIN = 20;
+
+    public static final int STATUS_COMPLETE_MAX = 30;
 
     public static final int STATUS_COMPLETE = 24;
 

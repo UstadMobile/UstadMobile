@@ -29,4 +29,10 @@ public abstract class DownloadJobItemDao {
                 item.getDownloadLength(), item.getCurrentSpeed());
     }
 
+    @UmQuery("Select * FROM DownloadJobItem WHERE entryId = :entryId AND status BETWEEN :statusFrom AND :statusTo")
+    public abstract UmLiveData<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRange(String entryId,
+                                                                                  int statusFrom,
+                                                                                  int statusTo);
+
+
 }

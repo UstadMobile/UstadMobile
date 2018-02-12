@@ -301,7 +301,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                 return;
             }
 
-            if(linkType.contains("type=opds-catalog")) {
+            if(linkType.contains("kind=navigation")) {
                 args.put(ARG_URL, UMFileUtil.resolveLink(feedLiveData.getValue().getUrl(),
                         link.getHref()));
                 UstadMobileSystemImpl.getInstance().go(CatalogView.VIEW_NAME, args, getContext());

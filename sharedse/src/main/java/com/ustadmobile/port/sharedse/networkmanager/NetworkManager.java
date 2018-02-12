@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
@@ -465,6 +466,13 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         DbManager.getInstance(getContext()).getDownloadJobItemDao().insertList(jobItems);
 
         return job;
+    }
+
+    public void buildDownloadJobAsync(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
+                                      boolean recursive, boolean wifiDirectEnabled,
+                                      boolean localWifiEnabled, UmCallback<DownloadJob> callback) {
+        dbExecutorService.execute(() -> callback.onSuccess(buildDownloadJob(rootEntries, destintionDir,
+                recursive, wifiDirectEnabled, localWifiEnabled)));
     }
 
     public DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,

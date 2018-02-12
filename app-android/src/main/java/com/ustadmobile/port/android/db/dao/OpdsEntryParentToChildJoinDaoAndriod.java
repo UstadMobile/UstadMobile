@@ -36,6 +36,11 @@ public abstract class OpdsEntryParentToChildJoinDaoAndriod extends OpdsEntryPare
     }
 
     @Override
+    public void insertAsLastEntryForParentAsync(OpdsEntryParentToChildJoin entry, UmCallback<Long> callback) {
+        executorService.execute(() -> callback.onSuccess(insertAsLastEntryForParent(entry)));
+    }
+
+    @Override
     @Query("Select * From OpdsEntryParentToChildJoin WHERE parentEntry = :parentId and childEntry = :childId")
     public abstract List<OpdsEntryParentToChildJoin> findByParentAndEntry(String parentId, String childId);
 

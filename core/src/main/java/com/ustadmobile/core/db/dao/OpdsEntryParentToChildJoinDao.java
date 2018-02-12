@@ -18,6 +18,12 @@ public abstract class OpdsEntryParentToChildJoinDao {
 
     public abstract void insertAsync(OpdsEntryParentToChildJoin entry, UmCallback<Integer> callback);
 
+    public abstract void insertAsLastEntryForParentAsync(OpdsEntryParentToChildJoin entry, UmCallback<Long> callback);
+
+    public long insertAsLastEntryForParent(OpdsEntryParentToChildJoin entry) {
+        entry.setChildIndex(getNumEntriesByParent(entry.getParentEntry()) + 1);
+        return insert(entry);
+    }
 
     public abstract List<OpdsEntryParentToChildJoin> findByParentAndEntry(String parentId, String childId);
 

@@ -2,6 +2,8 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.UMStorageDir;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
@@ -10,12 +12,16 @@ import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.opds.entities.UmOpdsLink;
+import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UMUtil;
 import com.ustadmobile.core.view.AppViewChoiceListener;
 import com.ustadmobile.core.view.CatalogEntryView;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -97,12 +103,32 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
         onDownloadStarted();
     }
 
+    @Deprecated
     public void handleClickDownload(UstadJSOPDSFeed acquisitionFeed, Vector selectedEntries) {
         Vector availableLanguages = acquisitionFeed.getAvailableLanguages();
         acquisitionLanguageChoices = new String[availableLanguages.size()];
         availableLanguages.copyInto(acquisitionLanguageChoices);
 
         handleClickDownload(acquisitionFeed, selectedEntries, acquisitionLanguageChoices, false);
+    }
+
+    public void handleClickDownload(List<OpdsEntryWithRelations> entriesToDownload){
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        UMStorageDir[] storageDirs = impl.getStorageDirs(CatalogPresenter.SHARED_RESOURCE, getContext());
+        impl.getNetworkManager().buildDownloadJobAsync(entriesToDownload,
+                storageDirs[0].getDirURI(), false, true, true,
+                new UmCallback<DownloadJob>() {
+                    @Override
+                    public void onSuccess(DownloadJob result) {
+                        impl.getNetworkManager().queueDownloadJob(result.getId());
+                    }
+
+                    @Override
+                    public void onFailure(Throwable exception) {
+
+                    }
+                });
+
     }
 
 
@@ -308,6 +334,26 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
         switch(status.getStatus()) {
             case UstadMobileSystemImpl.DLSTATUS_RUNNING:
                 int kbpsSpeed = Math.round((float)status.getCurrentSpeed() / 1000f);
+                return impl.getString(MessageID.downloading, getContext()) + ":"
+                        + impl.formatInteger(kbpsSpeed) + " "
+                        + impl.getString(MessageID.kilobytes_per_second_abbreviated, getContext());
+            default:
+                return "";
+        }
+    }
+
+    /**
+     * Make a message to dislpay to the user on the status of the download
+     *
+     * @param item The DownloadJobItem
+     *
+     * @return Formatted string to show user e.g. Downloading: XXXX KB/s
+     */
+    protected String formatDownloadStatusText(DownloadJobItem item) {
+        final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        switch(item.getStatus()) {
+            case UstadMobileSystemImpl.DLSTATUS_RUNNING:
+                int kbpsSpeed = Math.round((float)item.getCurrentSpeed() / 1000f);
                 return impl.getString(MessageID.downloading, getContext()) + ":"
                         + impl.formatInteger(kbpsSpeed) + " "
                         + impl.getString(MessageID.kilobytes_per_second_abbreviated, getContext());

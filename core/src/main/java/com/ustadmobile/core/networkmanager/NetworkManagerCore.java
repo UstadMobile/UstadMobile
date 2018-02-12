@@ -1,6 +1,9 @@
 package com.ustadmobile.core.networkmanager;
 
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.util.List;
 
@@ -31,6 +34,19 @@ public interface NetworkManagerCore {
     void setSuperNodeEnabled(Object context,boolean enabled);
 
     long requestAcquisition(UstadJSOPDSFeed feed, boolean localNetworkEnabled, boolean wifiDirectEnabled);
+
+    DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destinationDir,
+                                 boolean recursive);
+
+    DownloadJob buildDownloadJob(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
+                                 boolean recursive, boolean wifiDirectEnabled,
+                                 boolean localWifiEnabled);
+
+    void buildDownloadJobAsync(List<OpdsEntryWithRelations> rootEntries, String destintionDir,
+                               boolean recursive, boolean wifiDirectEnabled,
+                               boolean localWifiEnabled, UmCallback<DownloadJob> callback);
+
+    void queueDownloadJob(int downloadJobId);
 
     void addAcquisitionTaskListener(AcquisitionListener listener);
 

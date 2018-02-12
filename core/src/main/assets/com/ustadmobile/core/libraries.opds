@@ -19,4 +19,15 @@
            rel="subsection"/>
     </entry>
 
+    <entry>
+       <title>African Storybook Project</title>
+       <id>com.ustadmobile.presetfeeds.atoll</id>
+       <link href="http://www.ustadmobile.com/files/asb/index.opds"
+           type="application/atom+xml;profile=opds-catalog;kind=navigation"
+           rel="subsection"/>
+       <link href="http://www.ustadmobile.com/files/asb/asblogo.png"
+           type="image/png"
+           rel="http://opds-spec.org/image/thumbnail"/>
+    </entry>
+
 </feed>

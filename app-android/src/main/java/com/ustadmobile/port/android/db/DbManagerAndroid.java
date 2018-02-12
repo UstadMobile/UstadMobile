@@ -17,6 +17,7 @@ import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
 import com.ustadmobile.core.fs.db.repository.OpdsEntryRepository;
 import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
+import com.ustadmobile.port.android.db.dao.OpdsEntryParentToChildJoinDaoAndriod;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,6 +37,8 @@ public class DbManagerAndroid extends DbManager {
     private OpdsEntryRepository opdsEntryRepository;
 
     private ContainerFileDaoAndroid containerFileDao;
+
+    private OpdsEntryParentToChildJoinDaoAndriod opdsEntryParentToChildJoinDao;
 
     public DbManagerAndroid(Object context) {
         this.context = ((Context)context).getApplicationContext();
@@ -75,7 +78,12 @@ public class DbManagerAndroid extends DbManager {
 
     @Override
     public OpdsEntryParentToChildJoinDao getOpdsEntryParentToChildJoinDao() {
-        return appDatabase.getOpdsEntryParentToChildJoinDao();
+        if(opdsEntryParentToChildJoinDao == null){
+            opdsEntryParentToChildJoinDao = appDatabase.getOpdsEntryParentToChildJoinDao();
+            opdsEntryParentToChildJoinDao.setExecutorService(executorService);
+        }
+
+        return opdsEntryParentToChildJoinDao;
     }
 
     @Override
