@@ -216,6 +216,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         OpdsEntryRecyclerAdapter adapter = new OpdsEntryRecyclerAdapter();
         DataSource.Factory factory = (DataSource.Factory)entryProvider.getProvider();
         LiveData<PagedList<OpdsEntryWithRelations>> data =  new LivePagedListBuilder<>(factory, 20).build();
+
         data.observe(this, adapter::setList);
         mRecyclerView.setAdapter(adapter);
     }
@@ -614,12 +615,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     public static final DiffCallback<OpdsEntryWithRelations> DIFF_CALLBACK = new DiffCallback<OpdsEntryWithRelations>() {
         @Override
         public boolean areItemsTheSame(@NonNull OpdsEntryWithRelations oldItem, @NonNull OpdsEntryWithRelations newItem) {
-            return oldItem.getUuid() == newItem.getUuid();
+            return oldItem.getUuid().equals(newItem.getUuid());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull OpdsEntryWithRelations oldItem, @NonNull OpdsEntryWithRelations newItem) {
-            return oldItem.getTitle() != null && newItem.getTitle().equals(newItem.getTitle());
+            return oldItem.getTitle() != null && oldItem.getTitle().equals(newItem.getTitle());
         }
     };
 

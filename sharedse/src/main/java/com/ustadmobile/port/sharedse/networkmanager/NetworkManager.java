@@ -513,7 +513,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
 
 
 
-
     /**
      * Method which invoked when making file acquisition request.
      * @param feed OPDS file feed

@@ -42,6 +42,12 @@ import java.util.Set;
  * @author varuna
  */
 public interface CatalogView extends UstadView{
+
+    interface CardView {
+
+        void setStatus();
+
+    }
     
     public int CMD_DOWNLOADALL = 0;
     
