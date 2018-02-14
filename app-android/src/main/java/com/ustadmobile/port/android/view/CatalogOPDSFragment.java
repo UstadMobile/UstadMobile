@@ -599,10 +599,12 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                 boundViewHolders.add(holder);
             }
 
-            if(imageUri != null) {
-                holder.mEntryCard.setThumbnailUrl(mCatalogPresenter.resolveLink(imageUri),
-                        mCatalogPresenter, CatalogOPDSFragment.this);
+            if(imageUri != null){
+                imageUri = mCatalogPresenter.resolveLink(imageUri);
             }
+
+            holder.mEntryCard.setThumbnailUrl(imageUri, mCatalogPresenter,
+                    CatalogOPDSFragment.this);
         }
 
         @Override

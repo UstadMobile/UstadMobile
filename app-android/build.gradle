@@ -422,6 +422,7 @@ dependencies {
     implementation group: 'com.android.support', name: "support-v4", version: "[26+, 27+]"
 
 
+    implementation 'com.squareup.picasso:picasso:2.5.2'
     implementation 'com.github.clans:fab:1.6.4'
     implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta4'
     implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'

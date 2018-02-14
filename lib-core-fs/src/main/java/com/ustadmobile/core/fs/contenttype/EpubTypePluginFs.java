@@ -41,6 +41,10 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
             ZipFile epubZip = new ZipFile(file);
             UstadOCF ocf = new UstadOCF();
             ZipEntry ocfEntry = epubZip.getEntry(OCF_CONTAINER_PATH);
+
+            if(ocfEntry == null)
+                return null;
+
             ocfIn = epubZip.getInputStream(ocfEntry);
             XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(ocfIn,
                     "UTF-8");

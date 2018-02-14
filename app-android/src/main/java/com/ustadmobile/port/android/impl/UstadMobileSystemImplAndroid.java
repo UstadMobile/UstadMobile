@@ -55,6 +55,7 @@ import android.webkit.MimeTypeMap;
 import android.webkit.WebView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.controller.CatalogPresenter;
@@ -97,6 +98,7 @@ import com.ustadmobile.nanolrs.core.manager.UserManager;
 import com.ustadmobile.nanolrs.core.model.User;
 import com.ustadmobile.nanolrs.core.persistence.PersistenceManager;
 import com.ustadmobile.port.android.generated.MessageIDMap;
+import com.ustadmobile.port.android.impl.http.UmHttpCachePicassoRequestHandler;
 import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.opds.db.UmOpdsDbManagerAndroid;
@@ -401,6 +403,12 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
             }catch (IOException e) {
                 l(UMLog.CRITICAL, 0, "Failed to make base system dir");
             }
+
+            Context appContext = ((Context)context).getApplicationContext();
+
+            Picasso.Builder picassoBuilder = new Picasso.Builder(appContext);
+            picassoBuilder.addRequestHandler(new UmHttpCachePicassoRequestHandler(appContext));
+            Picasso.setSingletonInstance(picassoBuilder.build());
         }
 
         if(context instanceof Activity) {

@@ -41,6 +41,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
@@ -174,28 +175,12 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
         }
     }
 
-    /**
-     * Set the thumbnail for this OPDS entry card
-     *
-     * @param bitmap Bitmap with thumbnail image
-     */
-    public void setThumbnail(Bitmap bitmap) {
-        ((ImageView)findViewById(R.id.opds_item_thumbnail)).setImageBitmap(bitmap);
-    }
-
     public void setThumbnailUrl(final String url, final UstadBaseController controller, final UstadView view) {
-        ImageLoader.getInstance().loadImage(url, new ImageLoader.ImageLoadTarget() {
-            @Override
-            public void setImageFromBytes(byte[] buf) {
-                final Bitmap imgBitmap = BitmapFactory.decodeByteArray(buf, 0, buf.length);
-                view.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setThumbnail(imgBitmap);
-                    }
-                });
-            }
-        }, controller);
+        ImageView thumbImageView =(ImageView)findViewById(R.id.opds_item_thumbnail);
+        if(url != null)
+            Picasso.with(getContext()).load("um-"+url).fit().centerInside().into(thumbImageView);
+        else
+            thumbImageView.setImageResource(android.R.color.transparent);
     }
 
 

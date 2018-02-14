@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogEntryPresenter;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
@@ -379,10 +380,11 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setThumbnail(String iconFileUri) {
+        ImageView coverImageView = (ImageView)findViewById(getThumbnailImageViewId());
         if(iconFileUri != null)
-            ImageLoader.getInstance().loadImage(iconFileUri, thumbnailLoadTarget, mPresenter);
+            Picasso.with(this).load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
         else
-            ((ImageView)findViewById(getThumbnailImageViewId())).setImageResource(R.drawable.cover);
+            Picasso.with(this).load(R.drawable.cover).fit().centerInside().into(coverImageView);
     }
 
     @Override

@@ -5,12 +5,15 @@
     android:orientation="vertical"
     tools:context="com.ustadmobile.port.android.view.SplashScreenActivity">
 
+    <!--    removed for memory debugging purposes
+            android:src="@drawable/umlogoheader"
+
+        -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitStart"
         android:adjustViewBounds="true"
-        android:src="@drawable/umlogoheader"
         android:id="@+id/imageView2"
         android:layout_above="@+id/textView2"
         android:layout_alignParentLeft="true"
