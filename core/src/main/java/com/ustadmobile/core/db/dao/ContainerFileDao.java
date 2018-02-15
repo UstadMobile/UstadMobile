@@ -45,4 +45,5 @@ public abstract class ContainerFileDao {
     @UmDelete
     public abstract void delete(ContainerFile containerFile);
 
+    public abstract List<ContainerFile> findFilesByDirectory(String dirPath);
 }

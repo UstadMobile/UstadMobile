@@ -10,6 +10,7 @@ import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -51,6 +52,10 @@ public abstract class ContainerFileDaoAndroid extends ContainerFileDao implement
     public void getContainerFileByIdAsync(int containerFileId, BaseUmCallback<ContainerFile> callback){
         executor.execute(() -> callback.onSuccess(getContainerFileEntryByIdR(containerFileId)));
     }
+
+    @Override
+    @Query("SELECT * From ContainerFile WHERE dirPath = :dirPath")
+    public abstract List<ContainerFile> findFilesByDirectory(String dirPath);
 
     @Override
     @Query("SELECT * FROM ContainerFile WHERE id = :id")

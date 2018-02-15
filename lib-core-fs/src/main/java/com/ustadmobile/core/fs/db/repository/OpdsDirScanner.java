@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.fs.contenttype.ContentTypePluginFs;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -38,8 +39,21 @@ public class OpdsDirScanner implements Runnable{
     public void run() {
         File dirFile = new File(dirName);
 
-        for(File file : dirFile.listFiles()) {
-            scanFile(file);
+        //make sure entries that are in the database in this directory are actually still there
+        List<ContainerFile> containerFilesInDir = DbManager.getInstance(dbManager.getContext())
+                .getContainerFileDao().findFilesByDirectory(dirFile.getAbsolutePath());
+
+        File file = null;
+        for(ContainerFile containerFile : containerFilesInDir) {
+            file = new File(containerFile.getNormalizedPath());
+            if(!file.exists()){
+                dbManager.getContainerFileDao().deleteContainerFileAndRelations(dbManager.getContext(),
+                        containerFile);
+            }
+        }
+
+        for(File scanfile : dirFile.listFiles()) {
+            scanFile(scanfile );
         }
     }
 

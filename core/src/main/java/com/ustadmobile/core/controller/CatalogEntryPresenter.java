@@ -242,6 +242,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         if(this.args.containsKey(ARG_TITLEBAR_TEXT))
             catalogEntryView.setTitlebarText((String)this.args.get(ARG_TITLEBAR_TEXT));
 
+        catalogEntryView.setLearnerProgressVisible(false);
+
         UstadMobileSystemImpl.getInstance().getNetworkManager().addAcquisitionTaskListener(this);
     }
 
@@ -427,14 +429,14 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 //    }
 
     protected void updateLearnerProgress() {
-        CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(
-                new String[]{entry.getItemId()}, getContext());
-        if(progress == null || progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
-            catalogEntryView.setLearnerProgressVisible(false);
-        }else {
-            catalogEntryView.setLearnerProgressVisible(true);
-            catalogEntryView.setLearnerProgress(progress);
-        }
+//        CourseProgress progress = UstadMobileSystemImpl.getInstance().getCourseProgress(
+//                new String[]{entry.getItemId()}, getContext());
+//        if(progress == null || progress.getStatus() == CourseProgress.STATUS_NOT_STARTED) {
+//            catalogEntryView.setLearnerProgressVisible(false);
+//        }else {
+//            catalogEntryView.setLearnerProgressVisible(true);
+//            catalogEntryView.setLearnerProgress(progress);
+//        }
 
     }
 
