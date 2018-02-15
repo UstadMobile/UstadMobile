@@ -772,7 +772,7 @@ public class UMFileUtil {
      * @return True if it looks like a file as above, false otherwise
      */
     public static boolean isFileUri(String uri) {
-        if(uri.startsWith(PROTOCOL_FILE) || uri.startsWith("/"))
+        if(uri.startsWith("file:/") || uri.startsWith("/"))
             return true;
         else
             return false;

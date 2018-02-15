@@ -28,7 +28,7 @@ import com.ustadmobile.port.sharedse.impl.zip.ZipFileHandleSharedSE;
  * Created by mike on 9/14/17.
  */
 
-public class XapiPackageActivity extends UstadBaseActivity implements XapiPackageView {
+public class XapiPackageActivity extends ZippedContentActivity implements XapiPackageView {
 
     private XapiPackagePresenter mPresenter;
 
@@ -37,30 +37,6 @@ public class XapiPackageActivity extends UstadBaseActivity implements XapiPackag
     private String mMountedPath;
 
     private WebView mWebView;
-
-    private static class MountZipAsyncTask extends AsyncTask<String, Void, String> {
-
-        private NetworkManagerAndroid networkManagerAndroid;
-
-        private UmCallback callback;
-
-        private MountZipAsyncTask(NetworkManagerAndroid networkManagerAndroid, UmCallback callback) {
-            this.networkManagerAndroid = networkManagerAndroid;
-            this.callback = callback;
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            String mountedUri = networkManagerAndroid.mountZipOnHttp(strings[0], null, false, null);
-            return UMFileUtil.joinPaths(new String[]{networkManagerAndroid.getLocalHttpUrl(),
-                    mountedUri});
-        }
-
-        @Override
-        protected void onPostExecute(String mountedPath) {
-            callback.onSuccess(mountedPath);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -109,9 +109,14 @@
             android:name="com.evernote.android.job.gcm.PlatformGcmService"
             tools:node="remove" />
 
-        <activity android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
+        <activity
+            android:name="com.ustadmobile.port.android.view.ScormPackageActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
-            android:label=""></activity>
+            android:label="" />
+
+        <activity android:name="com.ustadmobile.port.android.view.H5PContentActivity"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:label=""/>
     </application>
 
 </manifest>

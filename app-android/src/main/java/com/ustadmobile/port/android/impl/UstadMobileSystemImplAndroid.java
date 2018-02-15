@@ -61,6 +61,7 @@ import com.ustadmobile.core.catalog.contenttype.*;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UserSettingsController;
 import com.ustadmobile.core.fs.contenttype.EpubTypePluginFs;
+import com.ustadmobile.core.fs.contenttype.H5PContentTypeFs;
 import com.ustadmobile.core.fs.contenttype.ScormTypePluginFs;
 import com.ustadmobile.core.fs.contenttype.XapiPackageTypePluginFs;
 import com.ustadmobile.core.impl.ContainerMountRequest;
@@ -81,6 +82,7 @@ import com.ustadmobile.core.view.BasePointView;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
 import com.ustadmobile.core.view.ContainerView;
+import com.ustadmobile.core.view.H5PContentView;
 import com.ustadmobile.core.view.LoginView;
 import com.ustadmobile.core.view.RegistrationView;
 import com.ustadmobile.core.view.ScormPackageView;
@@ -189,6 +191,7 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
         viewNameToAndroidImplMap.put(XapiPackageView.VIEW_NAME, XapiPackageActivity.class);
         viewNameToAndroidImplMap.put(AddFeedDialogView.VIEW_NAME, AddFeedDialogFragment.class);
         viewNameToAndroidImplMap.put(ScormPackageView.VIEW_NAME, ScormPackageActivity.class);
+        viewNameToAndroidImplMap.put(H5PContentView.VIEW_NAME, H5PContentActivity.class);
     }
 
 
@@ -222,7 +225,8 @@ public class UstadMobileSystemImplAndroid extends UstadMobileSystemImplSE {
     private UmOpdsDbManagerAndroid opdsDbManager;
 
     private static final ContentTypePlugin[] SUPPORTED_CONTENT_TYPES = new ContentTypePlugin[] {
-            new EpubTypePluginFs(), new ScormTypePluginFs(), new XapiPackageTypePluginFs()};
+            new EpubTypePluginFs(), new ScormTypePluginFs(), new XapiPackageTypePluginFs(),
+            new H5PContentTypeFs()};
 
     private ExecutorService bgExecutorService = Executors.newCachedThreadPool();
 

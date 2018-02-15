@@ -121,6 +121,9 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
         String pathInZip = requestUri.substring(
                 uriResource.getUri().length() - URI_ROUTE_POSTFIX.length());
         ZipFile zipFile = uriResource.initParameter(0, ZipFile.class);
+
+        //normalize the path
+        pathInZip = pathInZip.replace("//", "/");
         ZipEntry entry = zipFile.getEntry(pathInZip);
 
         if(session.getUri().endsWith("/")) {
