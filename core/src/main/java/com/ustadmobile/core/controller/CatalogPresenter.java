@@ -20,6 +20,7 @@ import com.ustadmobile.core.view.AddFeedDialogView;
 import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.CatalogView;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
@@ -194,7 +195,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
             }
 
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
-                    .findEntriesByContainerFileDirectoryAsProvider(dirsToList);
+                    .findEntriesByContainerFileDirectoryAsProvider(dirsToList, null);
             mView.setEntryProvider(entryProvider);
             title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
         }
@@ -486,7 +487,38 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     }
 
     public void handleRefresh() {
-        mView.setRefreshing(true);
+        if(opdsUri != null && opdsUri.equals("entries:///findEntriesByContainerFileDirectory")) {
+            UMStorageDir[] storageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
+                    CatalogPresenter.SHARED_RESOURCE, getContext());
+            List<String> dirsToList = new ArrayList<>();
+            for (int i = 0; i < storageDirs.length; i++) {
+                dirsToList.add(storageDirs[i].getDirURI());
+            }
+
+            DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+                    .findEntriesByContainerFileDirectoryAsProvider(dirsToList, new OpdsEntry.OpdsItemLoadCallback() {
+                        @Override
+                        public void onDone(OpdsEntry item) {
+                            mView.runOnUiThread( () -> mView.setRefreshing(false));
+                        }
+
+                        @Override
+                        public void onEntryAdded(OpdsEntryWithRelations childEntry, OpdsEntry parentFeed, int position) {
+
+                        }
+
+                        @Override
+                        public void onLinkAdded(OpdsLink link, OpdsEntry parentItem, int position) {
+
+                        }
+
+                        @Override
+                        public void onError(OpdsEntry item, Throwable cause) {
+
+                        }
+                    });
+            mView.setRefreshing(true);
+        }
     }
 
     /**

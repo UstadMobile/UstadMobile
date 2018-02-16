@@ -64,7 +64,8 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public abstract LiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryR(List<String> dirList);
 
     @Override
-    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(List<String> dirList) {
+    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(
+            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
         return new UmLiveDataAndroid<>(findEntriesByContainerFileDirectoryR(dirList));
     }
 
@@ -72,7 +73,8 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProviderR(List<String> dirList);
 
     @Override
-    public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(List<String> dirList) {
+    public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(
+            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
         return () -> findEntriesByContainerFileDirectoryAsProviderR(dirList);
     }
 

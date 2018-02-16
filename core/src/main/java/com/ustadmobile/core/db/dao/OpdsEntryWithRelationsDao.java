@@ -53,10 +53,12 @@ public abstract class OpdsEntryWithRelationsDao {
             "WHERE ContainerFile.dirPath IN (:dirList)";
 
     @UmQuery(findEntriesByContainerFileDirectorySql)
-    public abstract UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(List<String> dirList);
+    public abstract UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(
+            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
 
     @UmQuery(findEntriesByContainerFileDirectorySql)
-    public abstract UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(List<String> dirList);
+    public abstract UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(
+            List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback);
 
     protected static final String findEntriesByContainerFileSql = "SELECT * FROM OpdsEntry " +
             "LEFT JOIN ContainerFileEntry on OpdsEntry.uuid = ContainerFileEntry.opdsEntryUuid " +

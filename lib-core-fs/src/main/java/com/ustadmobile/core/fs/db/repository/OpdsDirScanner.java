@@ -25,9 +25,17 @@ public class OpdsDirScanner implements Runnable{
 
     private List<String> dirNames;
 
-    public OpdsDirScanner(DbManager dbManager, List<String> dirNames) {
+    private OpdsEntry.OpdsItemLoadCallback callback;
+
+    public OpdsDirScanner(DbManager dbManager, List<String> dirNames,
+                          OpdsEntry.OpdsItemLoadCallback callback) {
         this.dbManager = dbManager;
         this.dirNames = dirNames;
+        this.callback = callback;
+    }
+
+    public OpdsDirScanner(DbManager dbManager, List<String> dirNames) {
+        this(dbManager, dirNames, null);
     }
 
     public OpdsDirScanner(DbManager dbManager) {
@@ -61,6 +69,9 @@ public class OpdsDirScanner implements Runnable{
                 scanFile(scanfile);
             }
         }
+
+        if(callback != null)
+            callback.onDone(null);
 
     }
 
