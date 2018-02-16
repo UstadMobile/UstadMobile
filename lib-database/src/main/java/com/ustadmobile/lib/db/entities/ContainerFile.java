@@ -11,7 +11,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class ContainerFile {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int id;
+    private Integer id;
 
     @UmIndexField
     private String normalizedPath;
@@ -24,11 +24,11 @@ public class ContainerFile {
 
     private String mimeType;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

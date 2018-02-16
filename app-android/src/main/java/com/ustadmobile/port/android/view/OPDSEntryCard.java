@@ -32,8 +32,6 @@
 package com.ustadmobile.port.android.view;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -44,13 +42,12 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.toughra.ustadmobile.R;
 import com.ustadmobile.core.controller.CatalogPresenter;
-import com.ustadmobile.core.controller.UstadBaseController;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.model.CourseProgress;
-import com.ustadmobile.core.fs.view.ImageLoader;
-import com.ustadmobile.core.view.UstadView;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.port.android.util.UmAndroidImageUtil;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -175,12 +172,20 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
         }
     }
 
-    public void setThumbnailUrl(final String url, final UstadBaseController controller, final UstadView view) {
-        ImageView thumbImageView =(ImageView)findViewById(R.id.opds_item_thumbnail);
-        if(url != null)
-            Picasso.with(getContext()).load("um-"+url).fit().centerInside().into(thumbImageView);
-        else
+    public void setThumbnailUrl(final String url, final String mimeType) {
+        final ImageView thumbImageView =(ImageView)findViewById(R.id.opds_item_thumbnail);
+        if(url == null) {
             thumbImageView.setImageResource(android.R.color.transparent);
+            return;
+        }
+
+        if(UmAndroidImageUtil.isSvg(mimeType)) {
+            UmAndroidImageUtil.loadSvgIntoImageView(url, thumbImageView);
+        }else {
+            Picasso.with(getContext()).load("um-"+url).fit().centerInside().into(thumbImageView);
+        }
+
+
     }
 
 

@@ -430,6 +430,7 @@ dependencies {
     implementation "com.google.android:flexbox:0.3.0"
     implementation 'org.jmdns:jmdns:3.5.2'
     implementation 'com.github.fzakaria:ascii85:1.1'
+    implementation 'com.pixplicity.sharp:library:1.1.0'
     androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation group: "com.android.support", name: "support-annotations", version: "[26+, 27+]"
 

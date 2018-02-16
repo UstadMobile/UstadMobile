@@ -2,15 +2,19 @@ package com.ustadmobile.core.fs.contenttype;
 
 import com.ustadmobile.core.catalog.contenttype.H5PContentType;
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -48,6 +52,36 @@ public class H5PContentTypeFs extends H5PContentType implements ContentTypePlugi
             }
 
             entry.setTitle(h5pJsonObj.getString("title"));
+
+            //Try to get the thumbnail
+            try {
+                String mainLib = h5pJsonObj.getString("mainLibrary");
+                JSONArray preloadedDeps  = h5pJsonObj.getJSONArray("preloadedDependencies");
+
+                for(int i = 0; i < preloadedDeps.length(); i++) {
+                    JSONObject depObj = preloadedDeps.getJSONObject(i);
+                    if(depObj.getString("machineName").equals(mainLib)) {
+                        String mainLibDir = mainLib + '-' + depObj.getString("majorVersion") +
+                                '.' + depObj.getString("minorVersion");
+                        ZipEntry iconEntry = zipFile.getEntry(mainLibDir+"/icon.svg");
+                        if(iconEntry != null){
+                            String coverHref =  UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() +
+                                    "!" +mainLibDir +"/icon.svg";
+
+                            OpdsLink thumbnailLink = new OpdsLink(entry.getUuid(),
+                                    "image/svg+xml", coverHref, OpdsEntryWithRelations.LINK_REL_THUMBNAIL);
+
+                            if(entry.getLinks() == null)
+                                entry.setLinks(new ArrayList<>());
+
+                            entry.getLinks().add(thumbnailLink);
+                            break;
+                        }
+                    }
+                }
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
 
             //This is not an ideal solution
             entry.setEntryId(fileUri);

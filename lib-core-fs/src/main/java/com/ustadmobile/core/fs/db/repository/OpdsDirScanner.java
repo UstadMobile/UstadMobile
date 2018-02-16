@@ -93,11 +93,13 @@ public class OpdsDirScanner implements Runnable{
             if(entriesInFile == null)
                 continue;
 
-            //insert the row into the database only once we see we can understand it
             containerFile.setMimeType(plugin.getMimeTypes().get(0));
-            long containerFileId = dbManager.getContainerFileDao().insert(containerFile);
-            containerFile.setId((int)containerFileId);
 
+            //insert the row into the database only once we see we can understand it
+            if(containerFile.getId() == null) {
+                long containerFileId = dbManager.getContainerFileDao().insert(containerFile);
+                containerFile.setId((int)containerFileId);
+            }
 
             for(OpdsEntry entry : entriesInFile) {
                 ContainerFileEntry fileEntry = new ContainerFileEntry();

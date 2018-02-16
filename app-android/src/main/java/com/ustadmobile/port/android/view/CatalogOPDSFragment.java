@@ -429,14 +429,6 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     }
 
     @Override
-    public void setEntrythumbnail(final String entryId, String iconUrl) {
-        idToThumbnailUrlMap.put(entryId, iconUrl);
-        OPDSEntryCard card = idToCardMap.get(entryId);
-        if(card != null)
-            card.setThumbnailUrl(iconUrl, mCatalogPresenter, this);
-    }
-
-    @Override
     public void setEntryProgress(final String entryId, final CourseProgress progress) {
         super.runOnUiThread(new Runnable() {
             @Override
@@ -588,23 +580,21 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         public void onBindViewHolder(OpdsEntryViewHolder holder, int position) {
             final OpdsEntryWithRelations entry = getItem(position);
             holder.mEntryCard.setOpdsEntry(entry);
+            OpdsLink imgLink = null;
             String imageUri = null;
 
             if(entry != null) {
-                OpdsLink imgLink = entry.getThumbnailLink(true);
-                if(imgLink != null)
+                imgLink = entry.getThumbnailLink(true);
+                if(imgLink != null) {
                     imageUri = imgLink.getHref();
+                    imageUri = mCatalogPresenter.resolveLink(imageUri);
+
+                    holder.mEntryCard.setThumbnailUrl(imageUri, imgLink.getMimeType());
+                }
 
                 holder.mEntryCard.setSelected(selectedUuids.contains(entry.getUuid()));
                 boundViewHolders.add(holder);
             }
-
-            if(imageUri != null){
-                imageUri = mCatalogPresenter.resolveLink(imageUri);
-            }
-
-            holder.mEntryCard.setThumbnailUrl(imageUri, mCatalogPresenter,
-                    CatalogOPDSFragment.this);
         }
 
         @Override

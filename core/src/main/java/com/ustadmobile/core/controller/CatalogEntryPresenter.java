@@ -257,11 +257,15 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
                     + ": " + UMFileUtil.formatFileSize(acquisitionLink.getLength()));
 
         OpdsLink thumbnailLink = entry.getThumbnailLink(true);
+
+
         if(thumbnailLink != null)
-            catalogEntryView.setThumbnail(UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()));
+            catalogEntryView.setThumbnail(UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
+                    thumbnailLink.getMimeType());
 
         if(entry.getContainerFileEntries() != null && entry.getContainerFileEntries().size() > 0)
             updateButtonsByStatus(CatalogPresenter.STATUS_ACQUIRED);
+
         else
             updateButtonsByStatus(CatalogPresenter.STATUS_NOT_ACQUIRED);
 

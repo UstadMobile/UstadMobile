@@ -66,14 +66,6 @@ public interface CatalogView extends UstadView{
      */
     public void setEntryStatus(String entryId, int status);
     
-    /**
-     * Set the thumbnail for the given entry.  Loading the thumbnails is threaded
-     * and this method should handle putting calls onto the UI thread as required
-     * 
-     * @param entryId the entry id for the entry to s
-     * @param iconFileURI A file with an icon image
-     */
-    public void setEntrythumbnail(String entryId, String iconFileURI);
 
     /**
      * Set the background for the given catalog entry.  This is not found in standard OPDS

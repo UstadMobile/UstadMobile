@@ -12,7 +12,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 public class OpdsLink {
 
     @UmPrimaryKey(autoIncrement = true)
-    private int id;
+    private Integer id;
 
     @UmIndexField
     private String entryUuid;
@@ -43,11 +43,11 @@ public class OpdsLink {
     }
 
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

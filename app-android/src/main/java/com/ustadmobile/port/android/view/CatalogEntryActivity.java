@@ -38,6 +38,7 @@ import com.ustadmobile.core.view.DismissableDialog;
 import com.ustadmobile.core.fs.view.ImageLoader;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
+import com.ustadmobile.port.android.util.UmAndroidImageUtil;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -379,12 +380,16 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
     }
 
     @Override
-    public void setThumbnail(String iconFileUri) {
-        ImageView coverImageView = (ImageView)findViewById(getThumbnailImageViewId());
-        if(iconFileUri != null)
-            Picasso.with(this).load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
-        else
+    public void setThumbnail(String iconFileUri, String mimeType) {
+        ImageView coverImageView = findViewById(getThumbnailImageViewId());
+
+        if(iconFileUri == null){
             Picasso.with(this).load(R.drawable.cover).fit().centerInside().into(coverImageView);
+        }else if(UmAndroidImageUtil.isSvg(mimeType)) {
+            UmAndroidImageUtil.loadSvgIntoImageView(iconFileUri, coverImageView);
+        }else {
+            Picasso.with(this).load("um-"+ iconFileUri).fit().centerInside().into(coverImageView);
+        }
     }
 
     @Override

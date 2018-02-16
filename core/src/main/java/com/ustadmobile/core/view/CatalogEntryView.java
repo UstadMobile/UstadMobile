@@ -61,7 +61,7 @@ public interface CatalogEntryView extends UstadView {
      *
      * @param iconFileUri
      */
-    void setThumbnail(String iconFileUri);
+    void setThumbnail(String iconFileUri, String mimeType);
 
     void setMode(int mode);
 
