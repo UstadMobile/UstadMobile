@@ -44,19 +44,19 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
     @Override
     public void onStart() {
 //        TODO: implement this using db
-//        networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
-//        networkManager.setReceivingOn(true);
-//        networkManager.addWifiDirectPeersListener(this);
-//        NetworkNode thisNode = networkManager.getThisWifiDirectDevice();
-//        if(thisNode != null) {
-//            view.setDeviceName(thisNode.getDeviceWifiDirectName());
-//        }
-//        view.setMode(ReceiveCourseView.MODE_WAITING);
-//
-//        super.onStart();
-//        if(networkManager.getWifiDirectGroupOwnerIp() != null) {
-//            loadSharedCourse();
-//        }
+        networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
+        networkManager.setReceivingOn(true);
+        networkManager.addWifiDirectPeersListener(this);
+        NetworkNode thisNode = networkManager.getThisWifiDirectDevice();
+        if(thisNode != null) {
+            view.setDeviceName(thisNode.getDeviceWifiDirectName());
+        }
+        view.setMode(ReceiveCourseView.MODE_WAITING);
+
+        super.onStart();
+        if(networkManager.getWifiDirectGroupOwnerIp() != null) {
+            loadSharedCourse();
+        }
     }
 
     @Override

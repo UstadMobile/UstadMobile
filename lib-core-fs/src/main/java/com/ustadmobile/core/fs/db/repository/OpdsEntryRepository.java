@@ -50,21 +50,21 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
     }
 
     @Override
-    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(String dir) {
+    public UmLiveData<List<OpdsEntryWithRelations>> findEntriesByContainerFileDirectoryAsList(List<String> dirList) {
         UmLiveData<List<OpdsEntryWithRelations>> dbResult = dbManager.getOpdsEntryWithRelationsDao()
-                .findEntriesByContainerFileDirectoryAsList(dir);
+                .findEntriesByContainerFileDirectoryAsList(dirList);
 
-        executorService.execute(new OpdsDirScanner(dbManager, dir));
+        executorService.execute(new OpdsDirScanner(dbManager, dirList));
 
         return dbResult;
     }
 
     @Override
-    public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(String dir) {
+    public UmProvider<OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProvider(List<String> dirList) {
         UmProvider<OpdsEntryWithRelations> dbResult = dbManager.getOpdsEntryWithRelationsDao()
-                .findEntriesByContainerFileDirectoryAsProvider(dir);
+                .findEntriesByContainerFileDirectoryAsProvider(dirList);
 
-        executorService.execute(new OpdsDirScanner(dbManager, dir));
+        executorService.execute(new OpdsDirScanner(dbManager, dirList));
 
         return dbResult;
     }

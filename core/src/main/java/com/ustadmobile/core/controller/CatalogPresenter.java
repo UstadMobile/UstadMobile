@@ -188,8 +188,13 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
         }else if(opdsUri.equals("entries:///findEntriesByContainerFileDirectory")) {
             UMStorageDir[] storageDirs = UstadMobileSystemImpl.getInstance().getStorageDirs(
                     CatalogPresenter.SHARED_RESOURCE, getContext());
+            List<String> dirsToList = new ArrayList<>();
+            for(int i = 0; i < storageDirs.length; i++) {
+                dirsToList.add(storageDirs[i].getDirURI());
+            }
+
             entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
-                    .findEntriesByContainerFileDirectoryAsProvider(storageDirs[0].getDirURI());
+                    .findEntriesByContainerFileDirectoryAsProvider(dirsToList);
             mView.setEntryProvider(entryProvider);
             title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
         }

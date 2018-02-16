@@ -58,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="status"
+            android:text=""
             android:maxLines="2"
             android:ellipsize="end"
             android:id="@+id/opds_item_detail_text"

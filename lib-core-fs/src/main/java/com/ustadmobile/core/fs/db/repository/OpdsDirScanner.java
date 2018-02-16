@@ -23,11 +23,11 @@ public class OpdsDirScanner implements Runnable{
 
     private DbManager dbManager;
 
-    private String dirName;
+    private List<String> dirNames;
 
-    public OpdsDirScanner(DbManager dbManager, String dirName) {
+    public OpdsDirScanner(DbManager dbManager, List<String> dirNames) {
         this.dbManager = dbManager;
-        this.dirName = dirName;
+        this.dirNames = dirNames;
     }
 
     public OpdsDirScanner(DbManager dbManager) {
@@ -37,24 +37,31 @@ public class OpdsDirScanner implements Runnable{
 
     @Override
     public void run() {
-        File dirFile = new File(dirName);
+        for(String dirName : dirNames) {
+            File dirFile = new File(dirName);
 
-        //make sure entries that are in the database in this directory are actually still there
-        List<ContainerFile> containerFilesInDir = DbManager.getInstance(dbManager.getContext())
-                .getContainerFileDao().findFilesByDirectory(dirFile.getAbsolutePath());
+            //make sure entries that are in the database in this directory are actually still there
+            List<ContainerFile> containerFilesInDir = DbManager.getInstance(dbManager.getContext())
+                    .getContainerFileDao().findFilesByDirectory(dirFile.getAbsolutePath());
 
-        File file = null;
-        for(ContainerFile containerFile : containerFilesInDir) {
-            file = new File(containerFile.getNormalizedPath());
-            if(!file.exists()){
-                dbManager.getContainerFileDao().deleteContainerFileAndRelations(dbManager.getContext(),
-                        containerFile);
+            File file = null;
+            for(ContainerFile containerFile : containerFilesInDir) {
+                file = new File(containerFile.getNormalizedPath());
+                if(!file.exists()){
+                    dbManager.getContainerFileDao().deleteContainerFileAndRelations(dbManager.getContext(),
+                            containerFile);
+                }
+            }
+
+            File[] dirFilesList = dirFile.listFiles();
+            if(dirFilesList == null)
+                continue;//dir does not actually exist
+
+            for(File scanfile : dirFilesList) {
+                scanFile(scanfile);
             }
         }
 
-        for(File scanfile : dirFile.listFiles()) {
-            scanFile(scanfile );
-        }
     }
 
     public ContainerFileWithRelations scanFile(File file) {

@@ -51,10 +51,10 @@ public class SendCoursePresenter extends UstadBaseController implements WifiP2pL
     public void onStart() {
         NetworkManager networkManager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         //TODO: implement this using db
-//        peersChanged(networkManager.getKnownWifiDirectPeers());
-//        networkManager.addWifiDirectPeersListener(this);
-//        networkManager.addWifiDirectGroupListener(this);
-//        networkManager.setSharedFeed(sharedEntries, sendTitle);
+        peersChanged(networkManager.getKnownWifiDirectPeers());
+        networkManager.addWifiDirectPeersListener(this);
+        networkManager.addWifiDirectGroupListener(this);
+        networkManager.setSharedFeed(sharedEntries, sendTitle);
     }
 
     public void onStop() {
