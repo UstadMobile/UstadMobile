@@ -220,7 +220,8 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         menu.add(Menu.NONE, BasePointController.CMD_SHARE_APP, 0, R.string.share_application);
-        menu.add(Menu.NONE, BasePointController.CMD_RECEIVE_ENTRY, 1, R.string.receive);
+//        Temporarily removed
+//        menu.add(Menu.NONE, BasePointController.CMD_RECEIVE_ENTRY, 1, R.string.receive);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -382,8 +383,7 @@ public class BasePointActivity extends UstadBaseActivity implements BasePointVie
                 ((CatalogOPDSFragment)currentFrag).onClick(view);
             }
         }else {
-            CheckBox zipCheckbox = (CheckBox)shareAppDialog.findViewById(
-                    R.id.fragment_share_app_zip_checkbox);
+            CheckBox zipCheckbox = shareAppDialog.findViewById(R.id.fragment_share_app_zip_checkbox);
             mBasePointController.handleClickConfirmShareApp(zipCheckbox.isChecked());
         }
     }

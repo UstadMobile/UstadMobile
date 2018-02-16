@@ -278,9 +278,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
             item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
 
-        MenuItem shareItem = menu.add(Menu.NONE, MENUCMD_SHARE, 2, "");
-        shareItem.setIcon(R.drawable.ic_share_white_24dp);
-        shareItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+//        Temporarily hidden
+//        MenuItem shareItem = menu.add(Menu.NONE, MENUCMD_SHARE, 2, "");
+//        shareItem.setIcon(R.drawable.ic_share_white_24dp);
+//        shareItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         if(alternativeTranslationLanguages != null) {
             SubMenu languagesSubmenu = menu.addSubMenu(Menu.NONE, 700, 3, "");

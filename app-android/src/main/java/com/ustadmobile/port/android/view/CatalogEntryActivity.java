@@ -322,7 +322,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.catalog_entry_presenter, menu);
         if(!shareButtonVisible) {
-            menu.removeItem(R.id.menu_catalog_entry_presenter_share);
+//            menu.removeItem(R.id.menu_catalog_entry_presenter_share);
         }
 
         return true;
@@ -381,7 +381,7 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public void setThumbnail(String iconFileUri, String mimeType) {
-        ImageView coverImageView = findViewById(getThumbnailImageViewId());
+        ImageView coverImageView = (ImageView)findViewById(getThumbnailImageViewId());
 
         if(iconFileUri == null){
             Picasso.with(this).load(R.drawable.cover).fit().centerInside().into(coverImageView);
@@ -488,10 +488,10 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.menu_catalog_entry_presenter_share) {
-            mPresenter.handleClickShare();
-            return true;
-        }
+//        if(item.getItemId() == R.id.menu_catalog_entry_presenter_share) {
+//            mPresenter.handleClickShare();
+//            return true;
+//        }
 
         return super.onOptionsItemSelected(item);
     }

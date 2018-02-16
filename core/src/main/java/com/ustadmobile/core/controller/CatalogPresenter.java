@@ -518,6 +518,8 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                         }
                     });
             mView.setRefreshing(true);
+        }else {
+            mView.setRefreshing(false);
         }
     }
 

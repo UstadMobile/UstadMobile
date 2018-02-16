@@ -590,40 +590,6 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
                         }
                     });
         }
-
-
-
-//        CatalogEntryInfo entryInfo = CatalogPresenter.getEntryInfo(entry.getItemId(),
-//                CatalogPresenter.SHARED_RESOURCE | CatalogPresenter.USER_RESOURCE, getContext());
-//
-//        if (entryInfo != null && entryInfo.acquisitionStatus == CatalogPresenter.STATUS_ACQUIRED) {
-//            //see if the user needs to login
-//            if(impl.getActiveUser(context) == null
-//                && impl.getAppConfigBoolean(AppConfig.KEY_LOGIN_REQUIRED_FOR_CONTENT_OPEN, context)){
-//                openAfterLoginOrRegister = true;
-//                impl.go(LoginView.VIEW_NAME, context);
-//                return;
-//            }
-//
-//            Hashtable openArgs = new Hashtable();
-//            openArgs.put(ContainerController.ARG_CONTAINERURI, entryInfo.fileURI);
-//            openArgs.put(ContainerController.ARG_MIMETYPE, entryInfo.mimeType);
-//            openArgs.put(ContainerController.ARG_OPFINDEX, new Integer(0));
-//
-//            String viewName = ContentTypeManager.getViewNameForContentType(entryInfo.mimeType);
-//
-//            if(viewName != null) {
-//                UstadMobileSystemImpl.getInstance().go(viewName, openArgs, getContext());
-//            }else {
-//                UstadMobileSystemImpl.l(UMLog.ERROR, 672, entryInfo.mimeType);
-//                impl.getAppView(getContext()).showNotification(impl.getString(0, getContext()),
-//                        AppView.LENGTH_LONG);
-//            }
-//        }else {
-//            UstadMobileSystemImpl.l(UMLog.ERROR, 673, entryInfo != null ? entryInfo.toString() : null);
-//            impl.getAppView(getContext()).showNotification(impl.getString(
-//                    MessageID.error_opening_file, getContext()), AppView.LENGTH_LONG);
-//        }
     }
 
     public void handleClickShare() {

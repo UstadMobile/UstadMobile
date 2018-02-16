@@ -52,36 +52,46 @@ public class H5PContentTypeFs extends H5PContentType implements ContentTypePlugi
             }
 
             entry.setTitle(h5pJsonObj.getString("title"));
+//          TODO: Unfortunately the SVG files in H5P appear to use features that are unsupported by
+//              many SVG rendering libs, and display on Android and Ubuntu as a black square.
 
-            //Try to get the thumbnail
-            try {
-                String mainLib = h5pJsonObj.getString("mainLibrary");
-                JSONArray preloadedDeps  = h5pJsonObj.getJSONArray("preloadedDependencies");
+            OpdsLink thumbnailLink = new OpdsLink(entry.getUuid(),
+                                    "image/png", "http://www.ustadmobile.com/files/h5plogo.png",
+                    OpdsEntryWithRelations.LINK_REL_THUMBNAIL);
+            if(entry.getLinks() == null)
+                entry.setLinks(new ArrayList<>());
 
-                for(int i = 0; i < preloadedDeps.length(); i++) {
-                    JSONObject depObj = preloadedDeps.getJSONObject(i);
-                    if(depObj.getString("machineName").equals(mainLib)) {
-                        String mainLibDir = mainLib + '-' + depObj.getString("majorVersion") +
-                                '.' + depObj.getString("minorVersion");
-                        ZipEntry iconEntry = zipFile.getEntry(mainLibDir+"/icon.svg");
-                        if(iconEntry != null){
-                            String coverHref =  UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() +
-                                    "!" +mainLibDir +"/icon.svg";
+            entry.getLinks().add(thumbnailLink);
 
-                            OpdsLink thumbnailLink = new OpdsLink(entry.getUuid(),
-                                    "image/svg+xml", coverHref, OpdsEntryWithRelations.LINK_REL_THUMBNAIL);
-
-                            if(entry.getLinks() == null)
-                                entry.setLinks(new ArrayList<>());
-
-                            entry.getLinks().add(thumbnailLink);
-                            break;
-                        }
-                    }
-                }
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
+//            //Try to get the thumbnail
+//            try {
+//                String mainLib = h5pJsonObj.getString("mainLibrary");
+//                JSONArray preloadedDeps  = h5pJsonObj.getJSONArray("preloadedDependencies");
+//
+//                for(int i = 0; i < preloadedDeps.length(); i++) {
+//                    JSONObject depObj = preloadedDeps.getJSONObject(i);
+//                    if(depObj.getString("machineName").equals(mainLib)) {
+//                        String mainLibDir = mainLib + '-' + depObj.getString("majorVersion") +
+//                                '.' + depObj.getString("minorVersion");
+//                        ZipEntry iconEntry = zipFile.getEntry(mainLibDir+"/icon.svg");
+//                        if(iconEntry != null){
+//                            String coverHref =  UMFileUtil.PROTOCOL_FILE + file.getAbsolutePath() +
+//                                    "!" +mainLibDir +"/icon.svg";
+//
+//                            OpdsLink thumbnailLink = new OpdsLink(entry.getUuid(),
+//                                    "image/svg+xml", coverHref, OpdsEntryWithRelations.LINK_REL_THUMBNAIL);
+//
+//                            if(entry.getLinks() == null)
+//                                entry.setLinks(new ArrayList<>());
+//
+//                            entry.getLinks().add(thumbnailLink);
+//                            break;
+//                        }
+//                    }
+//                }
+//            }catch(Exception e) {
+//                e.printStackTrace();
+//            }
 
             //This is not an ideal solution
             entry.setEntryId(fileUri);
