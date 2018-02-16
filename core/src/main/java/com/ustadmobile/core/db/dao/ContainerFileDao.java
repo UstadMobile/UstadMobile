@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.BaseUmCallback;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
@@ -46,4 +47,7 @@ public abstract class ContainerFileDao {
     public abstract void delete(ContainerFile containerFile);
 
     public abstract List<ContainerFile> findFilesByDirectory(String dirPath);
+
+    @UmQuery("SELECT fileSize FROM ContainerFile WHERE id = :containerFileId")
+    public abstract void findContainerFileLengthAsync(int containerFileId, UmCallback<Long> callback);
 }

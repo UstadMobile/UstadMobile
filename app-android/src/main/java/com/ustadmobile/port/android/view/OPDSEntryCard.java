@@ -47,7 +47,6 @@ import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.port.android.util.UmAndroidImageUtil;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -147,8 +146,8 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     }
 
     public void setOPDSEntryOverlay(int overlay) {
-        ImageView statusIconView = (ImageView)findViewById(R.id.opds_item_status_icon);
-        TextView statusText = (TextView)findViewById(R.id.opds_item_status_text);
+        ImageView statusIconView = findViewById(R.id.opds_item_status_icon);
+        TextView statusText = findViewById(R.id.opds_item_status_text);
         switch(overlay) {
             case CatalogPresenter.STATUS_ACQUIRED:
                 findViewById(R.id.opds_item_download_progress_view).setVisibility(View.GONE);

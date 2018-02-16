@@ -8,6 +8,7 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.core.impl.UMLog;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.model.CourseProgress;
@@ -252,9 +253,9 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
         catalogEntryView.setDescription(entry.getContent(), entry.getContentType());
         OpdsLink acquisitionLink = entry.getAcquisitionLink(null, true);
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+        long containerSize = -1;
         if(acquisitionLink != null && acquisitionLink.getLength() > 0)
-            catalogEntryView.setSize(impl.getString(MessageID.size, getContext())
-                    + ": " + UMFileUtil.formatFileSize(acquisitionLink.getLength()));
+            containerSize = acquisitionLink.getLength();
 
         OpdsLink thumbnailLink = entry.getThumbnailLink(true);
 
@@ -263,15 +264,40 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
             catalogEntryView.setThumbnail(UMFileUtil.resolveLink(baseHref, thumbnailLink.getHref()),
                     thumbnailLink.getMimeType());
 
-        if(entry.getContainerFileEntries() != null && entry.getContainerFileEntries().size() > 0)
+        int containerFileId = -1;
+        if(entry.getContainerFileEntries() != null && entry.getContainerFileEntries().size() > 0) {
             updateButtonsByStatus(CatalogPresenter.STATUS_ACQUIRED);
-
-        else
+            containerFileId = entry.getContainerFileEntries().get(0).getContainerFileId();
+        }else {
             updateButtonsByStatus(CatalogPresenter.STATUS_NOT_ACQUIRED);
+        }
 
         if(currentEntryId == null || !currentEntryId.equals(entry.getEntryId())){
             if(entryDownloadJobItemObserver != null)
                 entryDownloadJobLiveData.removeObserver(entryDownloadJobItemObserver);
+        }
+
+        String sizePrefix =  impl.getString(MessageID.size, getContext()) +  ": ";
+
+        if(containerSize <= 0 && containerFileId != -1){
+            DbManager.getInstance(getContext()).getContainerFileDao().findContainerFileLengthAsync(
+                    containerFileId, new UmCallback<Long>() {
+                        @Override
+                        public void onSuccess(Long result) {
+                            catalogEntryView.runOnUiThread(() -> catalogEntryView.setSize(sizePrefix +
+                                    UMFileUtil.formatFileSize(result)));
+                        }
+
+                        @Override
+                        public void onFailure(Throwable exception) {
+
+                        }
+                    }
+            );
+        }else if(containerSize > 0){
+            catalogEntryView.setSize(sizePrefix + UMFileUtil.formatFileSize(containerSize));
+        }else{
+            catalogEntryView.setSize("");
         }
 
         entryDownloadJobItemObserver = this::handleDownloadJobItemUpdated;

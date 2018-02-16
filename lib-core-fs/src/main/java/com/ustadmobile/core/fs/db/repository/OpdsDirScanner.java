@@ -94,6 +94,7 @@ public class OpdsDirScanner implements Runnable{
                 continue;
 
             containerFile.setMimeType(plugin.getMimeTypes().get(0));
+            containerFile.setFileSize(file.length());
 
             //insert the row into the database only once we see we can understand it
             if(containerFile.getId() == null) {

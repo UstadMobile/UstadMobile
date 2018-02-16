@@ -24,6 +24,8 @@ public class ContainerFile {
 
     private String mimeType;
 
+    private long fileSize;
+
     public Integer getId() {
         return id;
     }
@@ -85,5 +87,13 @@ public class ContainerFile {
 
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
     }
 }

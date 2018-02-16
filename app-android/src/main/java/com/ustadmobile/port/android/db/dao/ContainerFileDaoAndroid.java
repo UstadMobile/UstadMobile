@@ -7,6 +7,7 @@ import android.arch.persistence.room.Query;
 
 import com.ustadmobile.core.db.dao.ContainerFileDao;
 import com.ustadmobile.core.impl.BaseUmCallback;
+import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 
@@ -64,4 +65,12 @@ public abstract class ContainerFileDaoAndroid extends ContainerFileDao implement
     @Override
     @Delete
     public abstract void delete(ContainerFile containerFile);
+
+    @Query("SELECT fileSize FROM ContainerFile WHERE id = :containerFileId")
+    public abstract Long findContainerFileLength(int containerFileId);
+
+    @Override
+    public void findContainerFileLengthAsync(int containerFileId, UmCallback<Long> callback){
+        executor.execute(() -> callback.onSuccess(findContainerFileLength(containerFileId)));
+    }
 }
