@@ -7,8 +7,9 @@ import com.ustadmobile.core.util.UMIOUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 
 /**
  * Created by mike on 1/28/18.
@@ -16,7 +17,7 @@ import java.util.zip.ZipFile;
 
 public class ZipEntryCacheResponse extends AbstractCacheResponse {
 
-    private ZipEntry zipEntry;
+    private FileHeader zipEntry;
 
     private ZipFile zipFile;
 
@@ -29,8 +30,16 @@ public class ZipEntryCacheResponse extends AbstractCacheResponse {
         this.entryPath = entryPath;
         try {
             this.zipFile = new ZipFile(file);
-            this.zipEntry = zipFile.getEntry(entryPath);
-        }catch(IOException e) {
+            if(zipFile.isEncrypted()) {
+                DecryptionSecretProvider secretProvider = UstadMobileSystemImpl.getInstance()
+                        .getDecryptionSecretProvider();
+                if(secretProvider != null){
+                    zipFile.setPassword(secretProvider.getSecret(file.getAbsolutePath())
+                            .getAsCharArray());
+                }
+            }
+            this.zipEntry = zipFile.getFileHeader(entryPath);
+        }catch(ZipException e) {
             e.printStackTrace();
         }
     }
@@ -40,9 +49,9 @@ public class ZipEntryCacheResponse extends AbstractCacheResponse {
         switch (headerName) {
             case UmHttpRequest.HEADER_CONTENT_TYPE:
                 return UstadMobileSystemImpl.getInstance().getMimeTypeFromExtension(
-                        UMFileUtil.getExtension(zipEntry.getName()));
+                        UMFileUtil.getExtension(zipEntry.getFileName()));
             case UmHttpRequest.HEADER_CONTENT_LENGTH:
-                return String.valueOf(zipEntry.getSize());
+                return String.valueOf(zipEntry.getUncompressedSize());
 
             default:
                 return null;
@@ -51,18 +60,28 @@ public class ZipEntryCacheResponse extends AbstractCacheResponse {
 
     @Override
     public byte[] getResponseBody() throws IOException {
-        if(zipEntry != null)
-            return UMIOUtils.readStreamToByteArray(zipFile.getInputStream(zipEntry));
-        else
-            throw new IOException("Cannot ready entry: " + file.getAbsolutePath() + "!" + entryPath);
+        if(zipEntry != null) {
+            try {
+                return UMIOUtils.readStreamToByteArray(zipFile.getInputStream(zipEntry));
+            }catch(ZipException e) {
+                throw new IOException(e);
+            }
+        }
+
+        throw new IOException("Cannot ready entry: " + file.getAbsolutePath() + "!" + entryPath);
     }
 
     @Override
     public InputStream getResponseAsStream() throws IOException {
-        if(zipEntry != null)
-            return zipFile.getInputStream(zipEntry);
-        else
-            throw new IOException("Cannot ready entry: " + file.getAbsolutePath() + "!" + entryPath);
+        if(zipEntry != null) {
+            try {
+                return zipFile.getInputStream(zipEntry);
+            }catch(ZipException e) {
+                throw new IOException(e);
+            }
+        }
+
+        throw new IOException("Cannot ready entry: " + file.getAbsolutePath() + "!" + entryPath);
     }
 
     @Override

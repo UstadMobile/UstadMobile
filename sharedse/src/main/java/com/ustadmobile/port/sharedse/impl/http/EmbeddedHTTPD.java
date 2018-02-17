@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.WeakHashMap;
-import java.util.zip.ZipFile;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -153,12 +154,22 @@ public class EmbeddedHTTPD extends RouterNanoHTTPD implements ResponseMonitoredI
 
         try {
             ZipFile zipFile = new ZipFile(zipPath);
+            if(zipFile.isEncrypted()) {
+                final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
+                if(impl.getDecryptionSecretProvider() != null) {
+                    zipFile.setPassword(impl.getDecryptionSecretProvider().getSecret(zipPath)
+                            .getAsCharArray());
+                }else {
+                    throw new IOException("encrypted file: but no encryption secret provider is available");
+                }
+
+            }
             addRoute(PREFIX_MOUNT + mountPath + "/" + MountedZipHandler.URI_ROUTE_POSTFIX,
                     MountedZipHandler.class, zipFile, epubHtmlFilterEnabled, epubScriptPath);
             String fullPath = toFullZipMountPath(mountPath);
             mountedZips.put(fullPath, zipFile);
             return toFullZipMountPath(mountPath);
-        }catch(IOException e) {
+        }catch(IOException|ZipException e) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 90, zipPath, e);
         }
 

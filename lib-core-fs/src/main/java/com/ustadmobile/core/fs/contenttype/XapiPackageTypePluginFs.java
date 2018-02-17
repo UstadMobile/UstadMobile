@@ -13,6 +13,10 @@ import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -22,11 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * Created by mike on 2/3/18.
@@ -39,7 +41,7 @@ public class XapiPackageTypePluginFs extends XapiPackageTypePlugin implements Co
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
         ZipFile zipFile = null;
-        ZipEntry zipEntry = null;
+        FileHeader zipEntry = null;
 
         TinCanXML tinCanXML;
         InputStream tinCanXmlIn = null;
@@ -47,14 +49,14 @@ public class XapiPackageTypePluginFs extends XapiPackageTypePlugin implements Co
         OpdsEntryWithRelations tincanEntry = null;
 
         try {
-            zipFile = new ZipFile(file);
+            zipFile = ZipContentTypePluginHelper.openAndUnlock(file);
 
             //find tincan.xml
-            Enumeration<? extends ZipEntry> entries = zipFile.entries();
+            Iterator<FileHeader> entries = zipFile.getFileHeaders().iterator();
 
-            while(entries.hasMoreElements()) {
-                zipEntry = entries.nextElement();
-                if(zipEntry.getName().endsWith(XML_FILE_NAME)) {
+            while(entries.hasNext()) {
+                zipEntry = entries.next();
+                if(zipEntry.getFileName().endsWith(XML_FILE_NAME)) {
                     try {
                         tinCanXmlIn = zipFile.getInputStream(zipEntry);
                         ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -90,14 +92,10 @@ public class XapiPackageTypePluginFs extends XapiPackageTypePlugin implements Co
                     }
                 }
             }
-        }catch(IOException ioe) {
+        }catch(IOException|ZipException ioe) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 675, file.getAbsolutePath(), ioe);
         }finally {
             UMIOUtils.closeInputStream(tinCanXmlIn);
-            if(zipFile != null) {
-                try { zipFile.close();}
-                catch(IOException e) {}
-            }
         }
 
         if(tincanEntry == null) {

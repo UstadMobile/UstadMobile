@@ -6,8 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -109,7 +110,7 @@ public abstract class FileResponder {
 
     public static class ZipEntrySource implements IFileSource {
 
-        private ZipEntry entry;
+        private FileHeader entry;
 
         private ZipFile zipFile;
 
@@ -118,24 +119,39 @@ public abstract class FileResponder {
          * @param entry
          * @param zipFile
          */
-        public ZipEntrySource(ZipEntry entry, ZipFile zipFile) {
+        public ZipEntrySource(FileHeader entry, ZipFile zipFile) {
             this.entry = entry;
             this.zipFile = zipFile;
         }
 
+        public ZipEntrySource(ZipFile zipFile, String pathInZip) {
+            this.zipFile = zipFile;
+            try {
+                this.entry = zipFile.getFileHeader(pathInZip);
+            }catch(ZipException e) {
+
+            }
+        }
+
+
+
         @Override
         public long getLength() {
-            return entry.getSize();
+            return entry.getUncompressedSize();
         }
 
         @Override
         public long getLastModifiedTime() {
-            return entry.getTime();
+            return entry.getLastModFileTime();
         }
 
         @Override
         public InputStream getInputStream() throws IOException {
-            return zipFile.getInputStream(entry);
+            try {
+                return zipFile.getInputStream(entry);
+            }catch(ZipException ze) {
+                throw new IOException(ze);
+            }
         }
 
         @Override
@@ -145,7 +161,7 @@ public abstract class FileResponder {
 
         @Override
         public String getName() {
-            return entry.getName();
+            return entry.getFileName();
         }
     }
 

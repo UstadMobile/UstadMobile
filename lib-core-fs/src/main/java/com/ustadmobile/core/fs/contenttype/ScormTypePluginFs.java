@@ -8,6 +8,10 @@ import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.util.UmUuidUtil;
 
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
@@ -16,8 +20,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 /**
  * Created by mike on 2/3/18.
@@ -35,8 +37,8 @@ public class ScormTypePluginFs extends ScormTypePlugin implements ContentTypePlu
 
         ZipFile zipFile = null;
         try {
-            zipFile = new ZipFile(file);
-            ZipEntry zipEntry = zipFile.getEntry("imsmanifest.xml");
+            zipFile = ZipContentTypePluginHelper.openAndUnlock(file);
+            FileHeader zipEntry = zipFile.getFileHeader("imsmanifest.xml");
 
             if(zipEntry == null)
                 return null;
@@ -56,14 +58,10 @@ public class ScormTypePluginFs extends ScormTypePlugin implements ContentTypePlu
 
             entry.setTitle(manifest.getDefaultOrganization().getTitle());
             entry.setEntryId(manifest.getIdentifier());
-        }catch(IOException|XmlPullParserException e) {
+        }catch(IOException|XmlPullParserException|ZipException e) {
             e.printStackTrace();
         }finally{
             UMIOUtils.closeQuietly(manifestIn);
-            if(zipFile != null){
-                try { zipFile.close(); }
-                catch(IOException e) {}
-            }
         }
 
         ArrayList<OpdsEntryWithRelations> result = new ArrayList<>();

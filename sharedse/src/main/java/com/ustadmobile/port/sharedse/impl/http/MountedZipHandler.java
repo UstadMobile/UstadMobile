@@ -9,12 +9,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
+
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -106,7 +107,7 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
 
         @Override
         public boolean exists() {
-            return true;
+            return src.exists();
         }
 
         @Override
@@ -124,13 +125,12 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
 
         //normalize the path
         pathInZip = pathInZip.replace("//", "/");
-        ZipEntry entry = zipFile.getEntry(pathInZip);
 
         if(session.getUri().endsWith("/")) {
             return listDirectory(pathInZip, zipFile);
         }
 
-        IFileSource src = new ZipEntrySource(entry, zipFile);
+        IFileSource src = new ZipEntrySource(zipFile, pathInZip);
         String extension = UMFileUtil.getExtension(pathInZip);
 
         if(uriResource.initParameter(1, Boolean.class) && HTML_EXTENSIONS.contains(extension)) {
@@ -138,6 +138,8 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
         }
 
         return newResponseFromFile(uriResource, session, src);
+
+
     }
 
     public NanoHTTPD.Response listDirectory(String dirInZip, ZipFile zipfile) {
@@ -151,19 +153,25 @@ public class MountedZipHandler extends FileResponder implements RouterNanoHTTPD.
         if(!dirInZip.endsWith("/"))
             dirInZip += "/";
 
-        Enumeration<? extends ZipEntry> entries = zipfile.entries();
+
+
+        List<FileHeader> entries;
+        try {
+            entries = zipfile.getFileHeaders();
+        }catch(ZipException ze) {
+            ze.printStackTrace();
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
+                    "text/plain", ze.toString());
+        }
+
         List<String> filesInDir = new ArrayList<>();
         List<String> subdirs = new ArrayList<>();
 
-        ZipEntry currentEntry;
-        String currentDirName;
-
         String pathAfterDir;
         int lastSepPos;
-        while(entries.hasMoreElements()) {
-            currentEntry = entries.nextElement();
-            if(currentEntry.getName().substring(0, dirInZip.length()).equals(dirInZip)) {
-                pathAfterDir = currentEntry.getName().substring(dirInZip.length());
+        for(FileHeader currentEntry : entries) {
+            if(currentEntry.getFileName().substring(0, dirInZip.length()).equals(dirInZip)) {
+                pathAfterDir = currentEntry.getFileName().substring(dirInZip.length());
 
                 lastSepPos = pathAfterDir.indexOf('/');
                 if(lastSepPos == -1) {

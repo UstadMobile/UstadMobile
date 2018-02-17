@@ -22,8 +22,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.model.FileHeader;
 
 /**
  * Created by mike on 1/26/18.
@@ -38,9 +39,10 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
         InputStream ocfIn;
         List<OpdsEntryWithRelations> results = new ArrayList<>();
         try {
-            ZipFile epubZip = new ZipFile(file);
+            ZipFile epubZip = ZipContentTypePluginHelper.openAndUnlock(file);
+
             UstadOCF ocf = new UstadOCF();
-            ZipEntry ocfEntry = epubZip.getEntry(OCF_CONTAINER_PATH);
+            FileHeader ocfEntry = epubZip.getFileHeader(OCF_CONTAINER_PATH);
 
             if(ocfEntry == null)
                 return null;
@@ -63,7 +65,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
                     entry.setUrl(url);
                 }
 
-                ZipEntry opfEntry = epubZip.getEntry(root.fullPath);
+                FileHeader opfEntry = epubZip.getFileHeader(root.fullPath);
                 ocfIn = epubZip.getInputStream(opfEntry);
                 xpp = UstadMobileSystemImpl.getInstance().newPullParser(ocfIn, "UTF-8");
                 UstadJSOPF opf = new UstadJSOPF();
@@ -89,7 +91,7 @@ public class EpubTypePluginFs extends EPUBTypePlugin implements ContentTypePlugi
 
                 results.add(entry);
             }
-        }catch(IOException|XmlPullParserException e) {
+        }catch(IOException|XmlPullParserException|ZipException e) {
             e.printStackTrace();
             return null;
         }

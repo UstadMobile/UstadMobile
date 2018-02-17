@@ -2,27 +2,28 @@ package com.ustadmobile.port.sharedse.impl.zip;
 
 import com.ustadmobile.core.impl.ZipEntryHandle;
 
-import java.util.zip.ZipEntry;
+import net.lingala.zip4j.model.FileHeader;
+
 
 /**
  * Created by mike on 8/29/15.
  */
 public class ZipEntryHandleSharedSE implements ZipEntryHandle {
 
-    private ZipEntry entry;
+    private FileHeader entry;
 
-    public ZipEntryHandleSharedSE(ZipEntry entry) {
+    public ZipEntryHandleSharedSE(FileHeader entry) {
         this.entry = entry;
     }
 
     @Override
     public long getSize() {
-        return entry.getSize();
+        return entry.getUncompressedSize();
     }
 
     @Override
     public String getName() {
-        return entry.getName();
+        return entry.getFileName();
     }
 
     @Override

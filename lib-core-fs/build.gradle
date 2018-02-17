@@ -10,6 +10,8 @@ dependencies {
     testCompile project(":sharedse-tests")
     testCompile project(":app-javase")
     implementation project(":lib-database")
+
+    implementation "net.lingala.zip4j:zip4j:1.3.2"
     ext.testDbDependency = rootProject.ext.buildConfigProperties['test.jdbc.dbDriverDependency']
     testCompile "$testDbDependency"
     testCompile 'com.squareup.okhttp3:okhttp:3.9.0'

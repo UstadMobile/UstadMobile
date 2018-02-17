@@ -23,6 +23,7 @@ import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 import com.ustadmobile.umtestserver.R;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.ustadmobile.port.android.view.SplashScreenActivity.REQUIRED_PERMISSIONS;
 
@@ -60,7 +61,7 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
                 this)[0].getDirURI();
 
         DbManager.getInstance(this).getOpdsEntryWithRelationsRepository()
-                .findEntriesByContainerFileDirectoryAsList(contentDir);
+                .findEntriesByContainerFileDirectoryAsList(Arrays.asList(contentDir), null);
     }
 
     /**

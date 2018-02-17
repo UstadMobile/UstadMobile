@@ -25,7 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.router.RouterNanoHTTPD;
@@ -154,12 +155,22 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
             if(zipMap.containsKey(containerFileEntry.getContainerFile().getNormalizedPath())) {
                 zipFile = (ZipFile)zipMap.get(containerFileEntry.getContainerFile().getNormalizedPath());
             }else {
-                zipFile = new ZipFile(containerFile);
-                zipMap.put(containerFileEntry.getContainerFile().getNormalizedPath(), zipFile);
+                if(!containerFile.exists()) {
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
+                            "text/plain","Not found: " + normalizedUri);
+                }
+
+                try {
+                    zipFile = new ZipFile(containerFile);
+                    zipMap.put(containerFileEntry.getContainerFile().getNormalizedPath(), zipFile);
+                }catch(ZipException e) {
+                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
+                            "text/plain", e.toString());
+                }
+
             }
 
-            ZipEntry fileEntry = zipFile.getEntry(pathInZip);
-            return newResponseFromFile(method, uriResource, session, new ZipEntrySource(fileEntry, zipFile));
+            return newResponseFromFile(method, uriResource, session, new ZipEntrySource(zipFile, pathInZip));
         }
     }
 

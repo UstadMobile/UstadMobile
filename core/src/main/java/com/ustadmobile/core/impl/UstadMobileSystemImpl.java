@@ -213,6 +213,9 @@ public abstract class UstadMobileSystemImpl {
 
     protected static Hashtable MIME_TYPES_REVERSE = new Hashtable();
 
+    private DecryptionSecretProvider decryptionSecretProvider;
+
+
     static {
         MIME_TYPES.put("image/jpg", "jpg");
         MIME_TYPES.put("image/jpeg", "jpg");
@@ -1226,6 +1229,32 @@ public abstract class UstadMobileSystemImpl {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context);
     }
 
+    /**
+     * A DecryptionSecretProvider can be used to provide a decryption secret, that can be used to
+     * protect particular types of content. This can be useful when Ustad Mobile is used as a library
+     * in another app.
+     *
+     * It is up to the underlying user of the library to provide
+     * an implementation.
+     *
+     * @return
+     */
+    public DecryptionSecretProvider getDecryptionSecretProvider() {
+        return decryptionSecretProvider;
+    }
+
+    /**
+     * Set the DecryptionSecretProvider that will be used to provide a decryption secret, that can be
+     * used to protect particular types of content. This can be useful when Ustad Mobile is used as a library
+     * in another app.
+     *
+     * This method must be called before the app attempts to scan content files or open them.
+     *
+     * @param decryptionSecretProvider
+     */
+    public void setDecryptionSecretProvider(DecryptionSecretProvider decryptionSecretProvider) {
+        this.decryptionSecretProvider = decryptionSecretProvider;
+    }
 }
 
 

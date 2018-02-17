@@ -82,6 +82,9 @@ import java.util.Vector;
 
 import com.ustadmobile.core.listener.ActiveSyncListener;
 import com.ustadmobile.core.listener.ActiveUserListener;
+
+import net.lingala.zip4j.exception.ZipException;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
