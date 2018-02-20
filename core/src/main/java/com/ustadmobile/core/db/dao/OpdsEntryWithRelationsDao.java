@@ -2,13 +2,11 @@ package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +34,9 @@ public abstract class OpdsEntryWithRelationsDao {
 
     @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
     public abstract UmLiveData<List<OpdsEntryWithRelations>> getEntriesByParentAsList(String parentId);
+
+    @UmQuery("SELECT * from OpdsEntry INNER JOIN OpdsEntryToParentOpdsEntry on OpdsEntry.uuid = OpdsEntry.uuid WHERE OpdsEntryToParentOpdsEntry.parentEntry = :parentId")
+    public abstract List<OpdsEntryWithRelations> getEntriesByParentAsListStatic(String parentId);
 
     @UmQuery("SELECT * from OpdsEntry where uuid = :uuid")
     public abstract UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid);
@@ -102,6 +103,8 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery("DELETE FROM OpdsLink WHERE entryUuid in (:entryUuids)")
     public abstract int deleteLinksByOpdsEntryUuids(List<String> entryUuids);
 
+    @UmQuery("SELECT * FROM OpdsEntryWithRelations WHERE uuid in (:uuids)")
+    public abstract List<OpdsEntryWithRelationsAndContainerMimeType> findByUuidsWithContainerMimeType(List<String> uuids);
 
 
 }

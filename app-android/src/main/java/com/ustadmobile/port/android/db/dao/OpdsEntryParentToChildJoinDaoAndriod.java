@@ -31,6 +31,10 @@ public abstract class OpdsEntryParentToChildJoinDaoAndriod extends OpdsEntryPare
     public abstract long insert(OpdsEntryParentToChildJoin entry);
 
     @Override
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    public abstract void insertAll(List<OpdsEntryParentToChildJoin> entryList);
+
+    @Override
     public void insertAsync(OpdsEntryParentToChildJoin entry, UmCallback<Integer> callback) {
         executorService.execute(() -> callback.onSuccess((int)insert(entry)));
     }

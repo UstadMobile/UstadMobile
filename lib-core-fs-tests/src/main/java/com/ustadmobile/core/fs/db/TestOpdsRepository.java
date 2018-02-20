@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -129,7 +130,8 @@ public class TestOpdsRepository extends TestCase {
 
         ArrayList<OpdsEntryWithRelations> entriesInDir = new ArrayList<>();
         UmLiveData<List<OpdsEntryWithRelations>> entriesInDirLiveData = repository
-                .findEntriesByContainerFileDirectoryAsList(tmpDir.getAbsolutePath());
+                .findEntriesByContainerFileDirectoryAsList(Arrays.asList(tmpDir.getAbsolutePath()),
+                        null);
         UmObserver<List<OpdsEntryWithRelations>> observer = (entriesInDirList) -> {
             if(entriesInDirList != null && !entriesInDirList.isEmpty()) {
                 synchronized (TestOpdsRepository.this) {

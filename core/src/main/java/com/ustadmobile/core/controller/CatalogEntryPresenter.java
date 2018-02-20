@@ -74,8 +74,10 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
     public static final String APP_CONFIG_DISPLAY_MODE = "catalog_entry_display_mode";
 
 
+    @Deprecated
     private UstadJSOPDSEntry entry;
 
+    @Deprecated
     private UstadJSOPDSFeed entryFeed;
 
     private NetworkManagerCore manager;
@@ -594,8 +596,8 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
     public void handleClickShare() {
         Hashtable args = new Hashtable();
-        args.put("title", entry.getTitle());
-        args.put("entries", new String[]{entry.getItemId()});
+        args.put("title", entryLiveData.getValue().getTitle());
+        args.put("entries", new String[]{entryLiveData.getValue().getUuid()});
         UstadMobileSystemImpl.getInstance().go("SendCourse", args, getContext());
     }
 

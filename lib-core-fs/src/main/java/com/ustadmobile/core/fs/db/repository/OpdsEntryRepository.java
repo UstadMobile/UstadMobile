@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 
 import java.io.File;
 import java.util.List;
@@ -118,5 +119,15 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
     @Override
     public int deleteLinksByOpdsEntryUuids(List<String> entryUuids) {
         return 0;
+    }
+
+    @Override
+    public List<OpdsEntryWithRelationsAndContainerMimeType> findByUuidsWithContainerMimeType(List<String> uuids) {
+        return null;
+    }
+
+    @Override
+    public List<OpdsEntryWithRelations> getEntriesByParentAsListStatic(String parentId) {
+        return null;
     }
 }

@@ -488,10 +488,10 @@ public class CatalogEntryActivity extends UstadBaseActivity implements CatalogEn
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-//        if(item.getItemId() == R.id.menu_catalog_entry_presenter_share) {
-//            mPresenter.handleClickShare();
-//            return true;
-//        }
+        if(item.getItemId() == R.id.menu_catalog_entry_presenter_share) {
+            mPresenter.handleClickShare();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }

@@ -1,7 +1,5 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.dao.DownloadJobDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
@@ -21,12 +19,15 @@ import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.EntryStatusResponse;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
-import com.ustadmobile.core.opds.UstadJSOPDSEntry;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
-import com.ustadmobile.core.util.UMUUID;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
+import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.lib.util.UmUuidUtil;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
@@ -49,6 +50,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -193,7 +195,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * The feed that the user wants to share at the moment
      */
-    protected UstadJSOPDSFeed sharedFeed;
+    protected String sharedFeedUuid;
 
     public static final int SHARED_FEED_PORT = 8006;
 
@@ -1683,12 +1685,12 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @param sharedFeed
      */
-    public void setSharedFeed(UstadJSOPDSFeed sharedFeed) {
+    public void setSharedFeed(String sharedFeedUuid) {
         synchronized (sharedFeedLock) {
-            this.sharedFeed = sharedFeed;
+            this.sharedFeedUuid = sharedFeedUuid;
 
             cancelStopSharedFeedHttpdTimerTask();
-            if(sharedFeed != null) {
+            if(sharedFeedUuid != null) {
                 if(sharedFeedHttpd == null) {
                     sharedFeedHttpd = new RouterNanoHTTPD(SHARED_FEED_PORT);
                     try {
@@ -1706,22 +1708,26 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     sharedFeedHttpd.removeRoute("(.*)");
                 }
 
-                sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeed, this);
+                sharedFeedHttpd.addRoute("(.*)", OPDSFeedUriResponder.class, sharedFeedUuid, this, getContext());
 
                 updateClientServices();
-            }else if(sharedFeed == null) {
+            }else if(sharedFeedUuid == null) {
                 UstadMobileSystemImpl.l(UMLog.INFO, 301, "setSharedFeed: shared feed is now null");
                 updateClientServices();
                 cancelStopSharedFeedHttpdTimerTask();
                 submitCancelSharedFeedHttpdTimerTask();
             }
 
-            httpd.addRoute(CATALOG_HTTP_SHARED_URI, OPDSFeedUriResponder.class, sharedFeed);
+//            httpd.addRoute(CATALOG_HTTP_SHARED_URI, OPDSFeedUriResponder.class, sha);
         }
     }
 
-    public UstadJSOPDSFeed getSharedFeed() {
-        return sharedFeed;
+    /**
+     * The Uuid i
+     * @return
+     */
+    public String getSharedFeed() {
+        return sharedFeedUuid;
     }
 
     private void cancelStopSharedFeedHttpdTimerTask() {
@@ -1757,30 +1763,57 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * Set the shared http endpoint catalog using an array of entry ids to be shared
      *
-     * @param entryIds
+     * @param uuids
      */
-    public void setSharedFeed(String[] entryIds, String title) {
+    public void setSharedFeed(String[] uuids, String title) {
         //TODO: replace this hardcoded value with something generic that gets replaced by client
+
+        //TODO: if there is already a shared feed, delete the old one from the database
         String feedSrcHref = "p2p://groupowner:" + getHttpListeningPort() + "/";
-        UstadJSOPDSFeed feed = new UstadJSOPDSFeed(feedSrcHref, title,
-                UMUUID.randomUUID().toString());
-        UstadJSOPDSEntry entry;
-        CatalogEntryInfo entryInfo;
-        for(int i = 0; i < entryIds.length; i++) {
-            entryInfo = CatalogPresenter.getEntryInfo(entryIds[i], CatalogPresenter.SHARED_RESOURCE,
-                    getContext());
 
-            if(entryInfo == null || entryInfo.acquisitionStatus != CatalogPresenter.STATUS_ACQUIRED)
-                continue;//cannot be shared if it has not been acquired.
+        OpdsEntryWithRelations sharedFeed = new OpdsEntryWithRelations();
+        sharedFeed.setUrl(feedSrcHref);
+        sharedFeed.setTitle(title);
+        sharedFeed.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
 
-            entry = new UstadJSOPDSEntry(feed, "Shared: " + entryInfo.fileURI, entryIds[i],
-                    UstadJSOPDSFeed.LINK_ACQUIRE, entryInfo.mimeType,
-                    UMFileUtil.joinPaths(new String[] {CATALOG_HTTP_ENDPOINT_PREFIX, "entry",
-                            entryIds[i]}));
-            feed.addEntry(entry);
-        }
+        List<OpdsEntryParentToChildJoin> joinList = new ArrayList<>();
+        List<OpdsEntry> sharedEntries = new ArrayList<>();
+        List<OpdsLink> sharedLinks = new ArrayList<>();
+        dbExecutorService.execute(() -> {
+            List<OpdsEntryWithRelationsAndContainerMimeType> entriesToShareSrc = DbManager.getInstance(getContext())
+                    .getOpdsEntryWithRelationsDao().findByUuidsWithContainerMimeType(Arrays.asList(uuids));
 
-        setSharedFeed(feed);
+
+            for(int i = 0; i < entriesToShareSrc.size(); i++) {
+                OpdsEntryWithRelationsAndContainerMimeType entry = entriesToShareSrc.get(i);
+                OpdsEntryWithRelations sharedEntry = new OpdsEntryWithRelations();
+                sharedEntry.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+                sharedEntry.setTitle(entry.getTitle());
+                sharedEntry.setEntryId(entry.getEntryId());
+
+                if(entry.getContainerMimeType() == null) {
+                    //for now - we can't share that
+                    continue;
+                }
+
+                OpdsLink link = new OpdsLink(sharedEntry.getUuid(), entry.getContainerMimeType(),
+                        UMFileUtil.joinPaths(CATALOG_HTTP_ENDPOINT_PREFIX, "entry",
+                                entry.getEntryId()), OpdsEntry.LINK_REL_ACQUIRE);
+
+                sharedEntries.add(sharedEntry);
+                sharedLinks.add(link);
+                joinList.add(new OpdsEntryParentToChildJoin(sharedFeed.getUuid(), sharedEntry.getUuid(),
+                        i));
+            }
+
+            //persist to the database
+            DbManager dbManager = DbManager.getInstance(getContext());
+            dbManager.getOpdsEntryDao().insert(sharedFeed);
+            dbManager.getOpdsEntryDao().insertList(sharedEntries);
+            dbManager.getOpdsLinkDao().insert(sharedLinks);
+            dbManager.getOpdsEntryParentToChildJoinDao().insertAll(joinList);
+            setSharedFeed(sharedFeed.getUuid());
+        });
     }
 
     /**
@@ -1845,11 +1878,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      * @param feed
      * @param destinationMacAddr
      */
-    public void shareFeed(UstadJSOPDSFeed feed, String destinationMacAddr) {
-        setSharedFeed(feed);
-        if(!isWifiDirectConnectionEstablished(destinationMacAddr))
-            connectToWifiDirectNode(destinationMacAddr);
-    }
+//    public void shareFeed(UstadJSOPDSFeed feed, String destinationMacAddr) {
+//        setSharedFeed(feed);
+//        if(!isWifiDirectConnectionEstablished(destinationMacAddr))
+//            connectToWifiDirectNode(destinationMacAddr);
+//    }
 
     public void shareEntries(String[] entryIds, String title, String destinationMacAddr) {
         setSharedFeed(entryIds, title);

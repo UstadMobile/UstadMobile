@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 
 import java.util.List;
 
@@ -49,6 +50,10 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     }
 
     @Override
+    @Query("SELECT OpdsEntry.* from OpdsEntry INNER JOIN OpdsEntryParentToChildJoin on OpdsEntry.uuid = OpdsEntryParentToChildJoin.childEntry WHERE OpdsEntryParentToChildJoin.parentEntry = :parentId ORDER BY childIndex")
+    public abstract List<OpdsEntryWithRelations> getEntriesByParentAsListStatic(String parentId);
+
+    @Override
     public UmLiveData<OpdsEntryWithRelations> getEntryByUuid(String uuid) {
         return new UmLiveDataAndroid<>(getEntryByUuidR(uuid));
     }
@@ -68,6 +73,8 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
             List<String> dirList, OpdsEntry.OpdsItemLoadCallback callback) {
         return new UmLiveDataAndroid<>(findEntriesByContainerFileDirectoryR(dirList));
     }
+
+
 
     @Query(findEntriesByContainerFileDirectorySql)
     public abstract DataSource.Factory<Integer, OpdsEntryWithRelations> findEntriesByContainerFileDirectoryAsProviderR(List<String> dirList);
@@ -99,4 +106,13 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Override
     @Query(findEntriesByContainerFileSql)
     public abstract List<OpdsEntryWithRelations> findEntriesByContainerFileNormalizedPath(String normalizedPath);
+
+
+    @Override
+    @Query("SELECT OpdsEntry.*, ContainerFile.mimeType as containerMimeType FROM OpdsEntry " +
+            "LEFT JOIN ContainerFileEntry on OpdsEntry.entryId = ContainerFileEntry.containerEntryId " +
+            "LEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id " +
+            "WHERE OpdsEntry.uuid in (:uuids)")
+    public abstract List<OpdsEntryWithRelationsAndContainerMimeType> findByUuidsWithContainerMimeType(List<String> uuids);
+
 }

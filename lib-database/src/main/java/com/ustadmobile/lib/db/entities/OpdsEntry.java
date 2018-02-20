@@ -88,7 +88,9 @@ public class OpdsEntry {
     protected static final String ATTR_PUBLISHER = "publisher";
 
 
-    protected static final String TAG_ENTRY = "entry";
+    public static final String TAG_ENTRY = "entry";
+
+    public static final String TAG_FEED = "feed";
 
     protected static final String TAG_CONTENT = "content";
 
@@ -97,6 +99,10 @@ public class OpdsEntry {
     protected static final String TAG_ID = "id";
 
     protected static final String TAG_LINK = "link";
+
+    protected static final String TAG_PUBLISHER = "publisher";
+
+    protected static final String TAG_LANGUAGE = "language";
 
     /**
      * Entry content type - text
@@ -138,6 +144,12 @@ public class OpdsEntry {
             "application/atom+xml;type=entry;profile=opds-catalog";
 
     public static final String ENTRY_PROTOCOL = "entry:///";
+
+    public static final String NS_ATOM = "http://www.w3.org/2005/Atom";
+
+    public static final String NS_DC = "http://purl.org/dc/terms/";
+
+    public static final String NS_OPDS = "http://opds-spec.org/2010/catalog";
 
 
     public interface OpdsItemLoadCallback {

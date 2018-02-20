@@ -35,12 +35,24 @@ public class ResponseMonitoredInputStream extends FilterInputStream{
         this.response = response;
     }
 
+    public ResponseMonitoredInputStream(InputStream inputStream) {
+        super(inputStream);
+    }
+
     public OnCloseListener getOnCloseListener() {
         return onCloseListener;
     }
 
     public void setOnCloseListener(OnCloseListener onCloseListener) {
         this.onCloseListener = onCloseListener;
+    }
+
+    public NanoHTTPD.Response getResponse() {
+        return response;
+    }
+
+    public void setResponse(NanoHTTPD.Response response) {
+        this.response = response;
     }
 
     @Override
