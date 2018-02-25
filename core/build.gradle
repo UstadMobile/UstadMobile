@@ -1,4 +1,6 @@
 import java.util.concurrent.atomic.AtomicInteger
+import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * Core module build script : see buildconfig.core.default.gradle for configuration
@@ -203,6 +205,185 @@ task prepareLocale (type: de.fuerstenau.gradle.buildconfig.GenerateBuildConfigTa
     }
 }
 compileJava.dependsOn(prepareLocale)
+
+/*
+ * Generate .properties version of the core locale files, a class that extends GWT Messages, and
+ * a helper with a switch statement that will retrieve a String value given the numerical message id.
+ */
+task generateLocaleAsPropertiesFiles {
+    inputs.files("core/locale/*/*.xml")
+    doLast {
+        //map in the form of filename-localename
+        HashMap<String, Properties> mainPropsMap = new HashMap()
+        File outDir = new File("${projectDir}/build/generated/locale-properties")
+
+        if(!outDir.exists()) {
+            outDir.mkdirs()
+        }
+
+        File mainOutDir = new File(outDir, "main")
+        if(!mainOutDir.exists()) {
+            mainOutDir.mkdir()
+        }
+
+        File mainPropsOutDir = new File(mainOutDir, "props")
+        if(!mainPropsOutDir.exists()) {
+            mainPropsOutDir.mkdir()
+        }
+
+        rootProject.fileTree(dir : "core/locale/main", include: "**/*.xml").each() { File file ->
+            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+
+            String parentName = file.getParentFile().getName()
+            System.out.println("process:" + file + " from " + parentName)
+
+            String localeSuffix = ""
+            if(parentName.contains("-")) {
+                localeSuffix = "_" + parentName.substring(parentName.indexOf("-")+1)
+            }
+
+            Properties props = new Properties()
+            String baseName = file.getName().substring(0, file.getName().length() - 4)//chop off ".xml"
+            baseName += localeSuffix
+
+            System.out.println("Generating: " + baseName + ".properties")
+            mainPropsMap.put(baseName, props)
+
+            xmlDoc.string.each() { str ->
+                String msgName = str.@name
+                String msgValue = str.text()
+                props.setProperty(msgName, msgValue)
+            }
+
+            File outFile = new File(mainPropsOutDir, baseName + ".properties")
+            props.store(new FileWriter(outFile), "Generated: DO NOT MODIFY : see core/locale")
+        }
+
+        File localconfigOutDir = new File(outDir, "localconfig")
+        if(!localconfigOutDir.exists()) {
+            localconfigOutDir.mkdir()
+        }
+
+        File localconfigPropsOutDir = new File(localconfigOutDir, "props")
+        if(!localconfigPropsOutDir.exists()) {
+            localconfigPropsOutDir.mkdir()
+        }
+
+        rootProject.fileTree(dir : "core/locale/localconfig", include: "**/*.xml").each() { File file ->
+            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+
+            String parentName = file.getParentFile().getName()
+            System.out.println("process:" + file + " from " + parentName)
+
+            String localeSuffix = ""
+            if(parentName.contains("-")) {
+                localeSuffix = "_" + parentName.substring(parentName.indexOf("-")+1)
+            }
+
+            String baseName = file.getName().substring(0, file.getName().length() - 4)//chop off ".xml"
+            baseName += localeSuffix
+
+            Properties props = new Properties()
+            Properties mainprops = mainPropsMap.get(baseName)
+            Enumeration<String> mainKeys = mainprops.keys()
+            while(mainKeys.hasMoreElements()) {
+                String propName = mainKeys.nextElement()
+                String propValue = mainprops.get(propName)
+                props.setProperty(propName, propValue)
+            }
+
+            xmlDoc.string.each() { str ->
+                String msgName = str.@name
+                String msgValue = str.text()
+                props.setProperty(msgName, msgValue)
+            }
+
+            File outFile = new File(localconfigPropsOutDir, baseName + ".properties")
+            props.store(new FileWriter(outFile), "Generated: DO NOT MODIFY : see core/locale")
+        }
+
+
+
+
+        Set<String> mainMessageIds = new HashSet<>()
+        rootProject.fileTree(dir : "core/locale/main/values", include: "*.xml").each() { File file ->
+            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+            xmlDoc.string.each() { str ->
+                String messageName = str.@name
+                mainMessageIds.add(messageName)
+            }
+        }
+
+        Set<String> localMessageIds = new HashSet<>()
+        localMessageIds.addAll(mainMessageIds)
+        rootProject.fileTree(dir : "core/locale/localconfig/values", include: "*.xml").each() { File file ->
+            def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+            xmlDoc.string.each() { str ->
+                String messageName = str.@name
+                localMessageIds.add(messageName)
+            }
+        }
+
+
+
+        //now generate the required Java sources for GWT
+        File[] outDirs = new File[2]
+        outDirs[0] = new File(mainOutDir, "java")
+        outDirs[1] = new File(localconfigOutDir, "java")
+
+        Set<String>[] messageIdSets = new Set<>[2]
+        messageIdSets[0] = mainMessageIds
+        messageIdSets[1] = localMessageIds
+
+        for(int i = 0; i < outDirs.length; i++) {
+            if(!outDirs[i].exists()) {
+                outDirs[i].mkdirs()
+            }
+
+            StringBuilder msgInterface = new StringBuilder()
+            msgInterface.append("package com.ustadmobile.core.generated.locale;\n")
+            msgInterface.append("public interface UmMessages extends com.google.gwt.i18n.client.Messages{\n")
+
+
+            StringBuilder msgHelper = new StringBuilder()
+            msgHelper.append("package com.ustadmobile.core.generated.locale;\n")
+                    .append("public class UmMessagesHelper {\n")
+                    .append("\tpublic static String getMessage(int messageCode, UmMessages messages) {\n")
+                    .append("\t\tswitch(messageCode){\n")
+
+            Iterator<String> messageIdIterator = messageIdSets[i].iterator()
+            while(messageIdIterator.hasNext()) {
+                String messageId = messageIdIterator.next()
+
+                msgInterface.append("\tString " + messageId +"();\n\n")
+
+                msgHelper.append("\t\t\tcase MessageID." + messageId + ":\n")
+                        .append("\t\t\t\treturn messages." + messageId +"();\n")
+            }
+
+            msgInterface.append("\n}\n")
+            msgHelper.append("\t\t}\n\t}\n}")
+
+            File pkgDir = new File(outDirs[i], "java/com/ustadmobile/core/generated/locale")
+            if(!pkgDir.exists()) {
+                pkgDir.mkdirs()
+            }
+
+            Path msgInterfacePath = new File(pkgDir, "UmMessages.java").toPath()
+            Files.write(msgInterfacePath, msgInterface.toString().getBytes("UTF-8"))
+
+            Path msgHelperPath = new File(pkgDir, "UmMessagesHelper.java").toPath()
+            Files.write(msgHelperPath, msgHelper.toString().getBytes("UTF-8"))
+        }
+
+
+
+
+
+    }
+
+
+}
 
 /*
  * Added to overcome limitation on Android studio as per:
