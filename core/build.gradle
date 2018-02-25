@@ -364,7 +364,7 @@ task generateLocaleAsPropertiesFiles {
             msgInterface.append("\n}\n")
             msgHelper.append("\t\t}\n\t}\n}")
 
-            File pkgDir = new File(outDirs[i], "java/com/ustadmobile/core/generated/locale")
+            File pkgDir = new File(outDirs[i], "com/ustadmobile/core/generated/locale")
             if(!pkgDir.exists()) {
                 pkgDir.mkdirs()
             }
