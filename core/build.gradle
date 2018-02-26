@@ -1,6 +1,7 @@
 import java.util.concurrent.atomic.AtomicInteger
 import java.nio.file.Files
 import java.nio.file.Path
+import java.io.File
 
 /**
  * Core module build script : see buildconfig.core.default.gradle for configuration
@@ -376,14 +377,42 @@ task generateLocaleAsPropertiesFiles {
             Files.write(msgHelperPath, msgHelper.toString().getBytes("UTF-8"))
         }
 
-
-
-
-
     }
-
-
 }
+
+task convertAppConfigToPropertiesXml {
+    doLast{
+        String appConfigPropertiesInStr
+        String pathSep = String.valueOf(java.io.File.pathSeparator)
+        if(project.hasProperty("appConfigPropertiesIn")){
+            appConfigPropertiesInStr = appConfigPropertiesIn
+        }else {
+            appConfigPropertiesInStr = "${projectDir}/src/main/assets/com/ustadmobile/core/appconfig.properties" +
+                 pathSep + "${projectDir}/src/localconfig/assets/com/ustadmobile/core/appconfig.properties"
+        }
+
+        String xmlConfigOutDir = null
+        if(project.hasProperty("appConfigPropertiesXmlOutDir")){
+            xmlConfigOutDir = appConfigPropertiesXmlOutDir
+        }
+
+        String[] appConfigPropertiesInArr = appConfigPropertiesInStr.split(pathSep)
+        for(int i = 0; i < appConfigPropertiesInArr.length; i++) {
+            Properties props = new Properties();
+            File propertiesInFile = new File(appConfigPropertiesInArr[i])
+            props.load(new FileInputStream(propertiesInFile))
+
+            File outDir = xmlConfigOutDir != null ? xmlConfigOutDir : propertiesInFile.getParentFile()
+            File outFile = new File(outDir, propertiesInFile.getName() + ".xml")
+            FileOutputStream fout = new FileOutputStream(outFile)
+            props.storeToXML(fout, "appconfig.properties", "UTF-8")
+            fout.flush()
+            fout.close()
+            System.out.println("Wrote properties to : " + outFile.getAbsolutePath())
+        }
+    }
+}
+
 
 /*
  * Added to overcome limitation on Android studio as per:
