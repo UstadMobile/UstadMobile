@@ -380,6 +380,15 @@ task generateLocaleAsPropertiesFiles {
     }
 }
 
+/**
+ * Convert app config properties to XML properties. By default this will convert
+ *  src/main/assets/com/ustadmobile/core/appconfig.properties
+ *  src/localconfig/assets/com/ustadmobile/core/appconfig.properties
+ *
+ *  and place XML properties files into build/generated/properties-appconfig .
+ *
+ *  This is used for appconfig on GWT as GWT does not support reading normal .properties files.
+ */
 task convertAppConfigToPropertiesXml {
     doLast{
         String appConfigPropertiesInStr
@@ -394,15 +403,24 @@ task convertAppConfigToPropertiesXml {
         String xmlConfigOutDir = null
         if(project.hasProperty("appConfigPropertiesXmlOutDir")){
             xmlConfigOutDir = appConfigPropertiesXmlOutDir
+        }else {
+            xmlConfigOutDir = "${projectDir}/build/generated/properties-appconfig/main/assets/com/ustadmobile/core/" +
+                    pathSep + "${projectDir}/build/generated/properties-appconfig/localconfig/assets/com/ustadmobile/core/"
         }
 
         String[] appConfigPropertiesInArr = appConfigPropertiesInStr.split(pathSep)
+        String[] appConfigPropertiesXmlOutDirArr = xmlConfigOutDir.split(pathSep)
+
         for(int i = 0; i < appConfigPropertiesInArr.length; i++) {
             Properties props = new Properties();
             File propertiesInFile = new File(appConfigPropertiesInArr[i])
             props.load(new FileInputStream(propertiesInFile))
 
-            File outDir = xmlConfigOutDir != null ? xmlConfigOutDir : propertiesInFile.getParentFile()
+            File outDir = new File(appConfigPropertiesXmlOutDirArr[i])
+            if(!outDir.exists()) {
+                outDir.mkdirs()
+            }
+
             File outFile = new File(outDir, propertiesInFile.getName() + ".xml")
             FileOutputStream fout = new FileOutputStream(outFile)
             props.storeToXML(fout, "appconfig.properties", "UTF-8")
