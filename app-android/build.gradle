@@ -206,6 +206,10 @@ android {
         versionName rootProject.version
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "long", "TIMESTAMP", System.currentTimeMillis() + "L"
+        buildConfigField "String", "ACRA_HTTP_URI", "\"" + project.ext.buildConfigProperties["android.acra.httpUri"] + "\""
+        buildConfigField "String", "ACRA_BASIC_LOGIN", "\"" + project.ext.buildConfigProperties["android.acra.basicLogin"] + "\""
+        buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"]+ "\""
+
         manifestPlaceholders = [applicationClass: "android.app.Application"]
     }
 
@@ -420,17 +424,40 @@ dependencies {
     implementation group: 'com.android.support', name: "support-v4", version: "[26+, 27+]"
 
 
+    //Image loading library
     implementation 'com.squareup.picasso:picasso:2.5.2'
+
+    //Floating action button with support for popup choices
     implementation 'com.github.clans:fab:1.6.4'
+
     implementation 'com.android.support.constraint:constraint-layout:1.1.0-beta4'
+
+    //Wifi direct library
     implementation 'com.ustadmobile.wifibuddy:wifibuddy:1.1.45-SNAPSHOT'
+
+
     implementation 'de.hdodenhof:circleimageview:2.1.0'
-    implementation 'com.txusballesteros:FitChart:1.0' //used for learner progress view
+
+    //used for learner progress view
+    implementation 'com.txusballesteros:FitChart:1.0'
+
     implementation "com.google.android:flexbox:0.3.0"
+
+    //Used for dns local network discovery on Android versions lower than 5.0
     implementation 'org.jmdns:jmdns:3.5.2'
+
+    //ASCII 85 used to encode
     implementation 'com.github.fzakaria:ascii85:1.1'
     implementation 'com.pixplicity.sharp:library:1.1.0'
+
+    //Support for encrypted zips
     implementation "net.lingala.zip4j:zip4j:1.3.2"
+
+    //Crash reporting
+    def acraVersion = '5.1.1'
+    implementation "ch.acra:acra-http:$acraVersion"
+    implementation "ch.acra:acra-dialog:$acraVersion"
+
     androidTestImplementation 'junit:junit:4.12'
     androidTestImplementation group: "com.android.support", name: "support-annotations", version: "[26+, 27+]"
 
