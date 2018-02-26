@@ -10,6 +10,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -171,5 +172,11 @@ public class OpdsEntryWithRelations extends OpdsEntry{
         xs.setPrefix("", NS_ATOM);
         xs.setPrefix("dc", NS_DC);
         xs.setPrefix("opds", NS_OPDS);
+    }
+
+    public static List<OpdsEntry> toOpdsEntryList(List<OpdsEntryWithRelations> entryWithRelList) {
+        ArrayList<OpdsEntry> entryList = new ArrayList<>(entryWithRelList);
+
+        return entryList;
     }
 }

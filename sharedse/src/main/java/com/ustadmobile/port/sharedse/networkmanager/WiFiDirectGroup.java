@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.networkmanager;
 
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 
 import java.util.List;
 
@@ -75,13 +75,11 @@ public class WiFiDirectGroup {
     }
 
     public boolean groupIncludes(String deviceMacAddr){
-//        TODO: implement this using db
-//        NetworkNode owner = getGroupOwner();
-//        if(owner != null && owner.getWifiDirectMacAddress() != null
-//                && owner.getWifiDirectMacAddress().equalsIgnoreCase(deviceMacAddr))
-//            return true;
-//
-//        return NetworkManager.isMacAddrInList(getGroupClients(), deviceMacAddr);
-        return false;
+        NetworkNode owner = getGroupOwner();
+        if(owner != null && owner.getWifiDirectMacAddress() != null
+                && owner.getWifiDirectMacAddress().equalsIgnoreCase(deviceMacAddr))
+            return true;
+
+        return NetworkManager.isMacAddrInList(getGroupClients(), deviceMacAddr);
     }
 }

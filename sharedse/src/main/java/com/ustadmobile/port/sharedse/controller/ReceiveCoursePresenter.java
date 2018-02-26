@@ -2,12 +2,18 @@ package com.ustadmobile.port.sharedse.controller;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.controller.UstadBaseController;
+import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
+import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithChildEntries;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WifiP2pListener;
@@ -16,7 +22,11 @@ import com.ustadmobile.port.sharedse.view.ReceiveCourseView;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SHARED_FEED_PORT;
 
 /**
  * Created by mike on 8/22/17.
@@ -26,7 +36,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
 
     private ReceiveCourseView view;
 
-    private UstadJSOPDSFeed sharedFeed;
+    private OpdsEntryWithChildEntries sharedFeed;
 
     private NetworkManager networkManager;
 
@@ -78,7 +88,7 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
     }
 
     public void run() {
-        UstadJSOPDSFeed loadedFeed = null;
+        OpdsEntryWithChildEntries loadedFeed = null;
         for(int i = 0; loadedFeed == null && i < MAX_LOAD_COURSE_ATTEMPTS; i++) {
             try {
                 loadedFeed = networkManager.getOpdsFeedSharedByWifiP2pGroupOwner();
@@ -138,9 +148,24 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
     public void handleClickAccept() {
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, getContext())[0].getDirURI();
-        sharedFeed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
-                "application/dir", destinationDir);
-        networkManager.requestAcquisition(sharedFeed, true, true);
+
+        List<OpdsLink> linkList = new ArrayList<>();
+        for(OpdsEntryWithRelations entry : sharedFeed.getChildEntries()) {
+            OpdsLink acquireLink = sharedFeed.getAcquisitionLink(null, false);
+            String linkHref = "p2p://groupowner:" + SHARED_FEED_PORT + "/catalog/entry/" +
+                    entry.getEntryId();
+            linkList.add(new OpdsLink(entry.getUuid(), acquireLink.getMimeType(),linkHref,
+                    OpdsEntry.LINK_REL_ACQUIRE));
+        }
+
+        DbManager.getInstance(getContext()).getOpdsLinkDao().insert(linkList);
+
+        DbManager.getInstance(getContext()).getOpdsEntryDao().insertList(
+                OpdsEntryWithRelations.toOpdsEntryList(sharedFeed.getChildEntries()));
+
+        DownloadJob job = networkManager.buildDownloadJob(sharedFeed.getChildEntries(), destinationDir,
+            false);
+        networkManager.queueDownloadJob(job.getId());
     }
 
     public void handleClickDecline() {

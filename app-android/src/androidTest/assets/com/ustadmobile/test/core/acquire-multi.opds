@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" 
+  xmlns:dc="http://purl.org/dc/terms/" 
+  xmlns:opds="http://opds-spec.org/2010/catalog">
+    <id>http://umcloud1.ustadmobile.com/opds/courseid/6CM</id>
+    
+    <link rel="start"
+                href="/opds/"
+                type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="self"
+		href="/acquire.opds"
+		type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <title>Hills and Such</title>
+    <updated>2015-02-09T21:00:57Z</updated>
+    <author>
+	<name>Mike Test4</name> 
+	<uri>/user/6</uri>
+    </author>
+
+    <entry>
+        <title>Small</title>
+        <link rel="http://opds-spec.org/acquisition"
+	        href="small.pdf"
+            type="application/pdf"/>
+   
+        <link rel="http://opds-spec.org/acquisition"
+            href="small.epub"
+            type="application/epub+zip"/>
+        
+        <link rel="http://opds-spec.org/acquisition"
+            href="small-msword.docx"
+            type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"/>
+            
+        <id>4f382c43-1e92-4fe9-bce0-e03b6c11336f</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">A Small Block about Zombocom</content>
+    </entry>
+
+    <entry>
+        <title>Big</title>
+
+        <id>4f382c43-1e92-4fe9-bce0-e03b6c11336a</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">A Small Block about Zombocom</content>
+
+        <link rel="http://opds-spec.org/acquisition"
+                    hreflang="fa"
+        	        href="big-fa.epub"
+                    type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+                    hreflang="ps"
+                    href="big-ps.epub"
+                    type="application/epub+zip"/>
+
+        <link rel="http://opds-spec.org/acquisition"
+                    hreflang="en"
+                    href="big-en.epub"
+                    type="application/epub+zip"/>
+
+
+    </entry>
+
+    <entry>
+            <title>Medium</title>
+
+            <id>4f382c43-1e92-4fe9-bce0-e03b6c11336c</id>
+            <updated>2015-02-09T18:58:12Z</updated>
+            <author>
+                <name>Varuna Singh</name>
+                <uri>/user/2</uri>
+            </author>
+            <content type="text">A Small Block about Zombocom</content>
+
+            <link rel="http://opds-spec.org/acquisition"
+                        hreflang="fa"
+            	        href="big-fa.epub"
+                        type="application/epub+zip"/>
+
+            <link rel="http://opds-spec.org/acquisition"
+                        hreflang="ps"
+                        href="big-ps.epub"
+                        type="application/pdf"/>
+
+            <link rel="http://opds-spec.org/acquisition"
+                        hreflang="en"
+                        href="big-en.epub"
+                        type="application/epub+zip"/>
+
+
+    </entry>
+
+    <entry>
+                <title>Fancy</title>
+
+                <id>4f382c43-1e92-4fe9-bce0-e03b6c1133dd</id>
+                <updated>2015-02-09T18:58:12Z</updated>
+                <author>
+                    <name>Varuna Singh</name>
+                    <uri>/user/2</uri>
+                </author>
+                <content type="xhtml">
+                    <div align="center">
+                        A Small Block about Zombocom
+
+                        <b>Content is HTML</b>
+                    </div>
+                </content>
+
+                <link rel="http://opds-spec.org/acquisition"
+                            hreflang="fa"
+                	        href="big-fa.epub"
+                            type="application/epub+zip"/>
+
+                <link rel="http://opds-spec.org/acquisition"
+                            hreflang="ps"
+                            href="big-ps.epub"
+                            type="application/pdf"/>
+
+                <link rel="http://opds-spec.org/acquisition"
+                            hreflang="en"
+                            href="big-en.epub"
+                            type="application/epub+zip"/>
+
+
+        </entry>
+
+
+</feed>

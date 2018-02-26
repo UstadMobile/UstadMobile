@@ -3,7 +3,7 @@ package com.ustadmobile.port.android.netwokmanager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
 
-import com.ustadmobile.core.networkmanager.NetworkNode;
+import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 
 import java.util.ArrayList;

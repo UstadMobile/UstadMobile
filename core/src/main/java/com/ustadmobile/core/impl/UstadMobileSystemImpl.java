@@ -280,6 +280,9 @@ public abstract class UstadMobileSystemImpl {
         }
 
         loadActiveUserInfo(context);
+        setDecryptionSecretProvider((url) -> {
+            return () -> "fefe1010fe".toCharArray();
+        });
 
         initRan = true;
     }

@@ -24,6 +24,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryParentToChildJoin;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithChildEntries;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 import com.ustadmobile.lib.db.entities.OpdsLink;
@@ -33,6 +34,7 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
@@ -713,21 +715,19 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     protected void fireWifiDirectPeersChanged() {
-//        TODO: re-enable this for db based version
-//        synchronized (peerChangeListeners) {
-//            for(WifiP2pListener listener: peerChangeListeners) {
-//                listener.peersChanged(knownPeers);
-//            }
-//        }
+        synchronized (peerChangeListeners) {
+            for(WifiP2pListener listener: peerChangeListeners) {
+                listener.peersChanged(knownPeers);
+            }
+        }
     }
 
     protected void fireWifiP2pConnectionChanged(boolean connected) {
-//        TODO: re-enable this for db based version
-//        synchronized (peerChangeListeners) {
-//            for(WifiP2pListener listener : peerChangeListeners) {
-//                listener.wifiP2pConnectionChanged(connected);
-//            }
-//        }
+        synchronized (peerChangeListeners) {
+            for(WifiP2pListener listener : peerChangeListeners) {
+                listener.wifiP2pConnectionChanged(connected);
+            }
+        }
     }
 
     protected void fireWifiP2pConnectionResult(String macAddress, boolean successful) {
@@ -1896,7 +1896,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
      *
      * @return
      */
-    public UstadJSOPDSFeed getOpdsFeedSharedByWifiP2pGroupOwner()throws IOException, XmlPullParserException {
+    public OpdsEntryWithChildEntries getOpdsFeedSharedByWifiP2pGroupOwner()throws IOException, XmlPullParserException {
         String groupOwner = getWifiDirectGroupOwnerIp();
         if(groupOwner == null) {
             UstadMobileSystemImpl.l(UMLog.ERROR, 664,
@@ -1910,7 +1910,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         IOException ioe = null;
         XmlPullParserException xe = null;
         InputStream feedIn = null;
-        UstadJSOPDSFeed feed = null;
+        OpdsEntryWithChildEntries feed = null;
         String feedUrl = "http://" + groupOwner + ":" + NetworkManager.SHARED_FEED_PORT +"/";
 
 
@@ -1922,7 +1922,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             feedConnection.setConnectTimeout(3000);
             feedConnection.setReadTimeout(3000);
             feedIn = feedConnection.getInputStream();
-            feed = new UstadJSOPDSFeed(feedUrl, feedIn, "UTF-8");
+//            feed = new UstadJSOPDSFeed(feedUrl, feedIn, "UTF-8");
+            feed = new OpdsEntryWithChildEntries();
+            feed.setUrl(feedUrl);
+            XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(feedIn, "UTF-8");
+            feed.load(xpp, null);
         }catch(IOException e) {
             ioe = e;
             UstadMobileSystemImpl.l(UMLog.ERROR, 665, "Exception loading opds shared feed", e);
