@@ -20,6 +20,8 @@ import com.ustadmobile.port.android.netwokmanager.NetworkManagerAndroid;
 import com.ustadmobile.port.android.netwokmanager.NetworkServiceAndroid;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
+import org.acra.ACRA;
+
 public class ScormPackageActivity extends UstadBaseActivity implements ScormPackageView {
 
     private NetworkManagerAndroid networkManagerAndroid;
@@ -45,13 +47,19 @@ public class ScormPackageActivity extends UstadBaseActivity implements ScormPack
         @Override
         protected String doInBackground(String... strings) {
             String mountedUri = networkManagerAndroid.mountZipOnHttp(strings[0], null, false, null);
-            return UMFileUtil.joinPaths(new String[]{networkManagerAndroid.getLocalHttpUrl(),
-                    mountedUri});
+            return mountedUri != null ?
+                    UMFileUtil.joinPaths(networkManagerAndroid.getLocalHttpUrl(), mountedUri) : null;
         }
 
         @Override
         protected void onPostExecute(String mountedPath) {
-            callback.onSuccess(mountedPath);
+            if(mountedPath != null) {
+                callback.onSuccess(mountedPath);
+            }else {
+                Exception mountException= new RuntimeException("Zip mounted as null: corrupt file?");
+                ACRA.getErrorReporter().handleSilentException(mountException);
+                callback.onFailure(mountException);
+            }
         }
     }
 
