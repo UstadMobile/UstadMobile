@@ -383,11 +383,15 @@ public class OpdsEntry {
             return null;
         }
 
+        OpdsEntryWithRelations thisWithRelations = (OpdsEntryWithRelations)this;
+        if(thisWithRelations.getLinks() == null)
+            return null;
+
         List<OpdsLink> result = new ArrayList<>();
 
         boolean matchRel, matchType, matchHref;
         int matches = 0;
-        for(OpdsLink link : ((OpdsEntryWithRelations)this).getLinks()){
+        for(OpdsLink link : thisWithRelations.getLinks()){
             matchRel = true;
             matchType = true;
             matchHref = true;

@@ -106,5 +106,8 @@ public abstract class OpdsEntryWithRelationsDao {
     @UmQuery("SELECT * FROM OpdsEntryWithRelations WHERE uuid in (:uuids)")
     public abstract List<OpdsEntryWithRelationsAndContainerMimeType> findByUuidsWithContainerMimeType(List<String> uuids);
 
+    @UmQuery("SELECT uuid From OpdsEntry WHERE entryId = :entryId")
+    public abstract List<String> getUuidsForEntryId(String entryId);
+
 
 }

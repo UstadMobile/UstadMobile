@@ -1,11 +1,13 @@
 package com.ustadmobile.test.sharedse.http;
 
+import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroup;
 import com.ustadmobile.port.sharedse.networkmanager.WiFiDirectGroupListener;
+import com.ustadmobile.test.core.impl.PlatformTestUtil;
 
 import org.json.JSONObject;
 
@@ -83,11 +85,13 @@ public class RemoteTestServerHttpd extends NanoHTTPD {
             }else if(CMD_SEND_COURSE.equals(command)){
                 String destMacAddr = decodedParams.get("dst").get(0);
                 List<String> entryIdsToSend = decodedParams.get("entryId");
-                String[] entryIdsToSendArr = new String[entryIdsToSend.size()];
+                List<String> uuids = DbManager.getInstance(networkManager.getContext())
+                        .getOpdsEntryWithRelationsDao().getUuidsForEntryId(entryIdsToSend.get(0));
+                String[] entryIdsToSendArr = new String[1];
                 entryIdsToSend.toArray(entryIdsToSendArr);
-                networkManager.setSharedFeed(entryIdsToSendArr, "Remote test server shared feed");
-                TestServerFileSender sender = new TestServerFileSender(destMacAddr, entryIdsToSendArr,
-                        networkManager);
+                networkManager.setSharedFeed(new String[]{uuids.get(0)}, "Remote test server shared feed");
+                TestServerFileSender sender = new TestServerFileSender(destMacAddr,
+                        new String[]{uuids.get(0)},  networkManager);
                 sender.start();
                 return newFixedLengthResponse("OK");
             }else if(CMD_CREATEGROUP.equals(command)) {

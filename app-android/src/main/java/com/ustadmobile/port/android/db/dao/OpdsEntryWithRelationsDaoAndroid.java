@@ -115,4 +115,7 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
             "WHERE OpdsEntry.uuid in (:uuids)")
     public abstract List<OpdsEntryWithRelationsAndContainerMimeType> findByUuidsWithContainerMimeType(List<String> uuids);
 
+    @Override
+    @Query("SELECT uuid From OpdsEntry WHERE entryId = :entryId")
+    public abstract List<String> getUuidsForEntryId(String entryId);
 }

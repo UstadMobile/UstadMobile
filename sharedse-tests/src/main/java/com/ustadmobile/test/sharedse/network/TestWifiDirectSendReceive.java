@@ -1,12 +1,22 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
+import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.lib.db.entities.DownloadJob;
+import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
+import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithChildEntries;
+import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
+import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WifiP2pListener;
@@ -19,13 +29,16 @@ import org.junit.Test;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SHARED_FEED_PORT;
 
 /**
  * Created by mike on 8/14/17.
  */
 
-public class TestWifiDirectPeerDiscovery {
+public class TestWifiDirectSendReceive {
 
     public static final int PEER_DISCOVERY_TIMEOUT = 120000;
 
@@ -111,49 +124,60 @@ public class TestWifiDirectPeerDiscovery {
             }
         }
 
-//        UstadJSOPDSFeed feed = manager.getOpdsFeedSharedByWifiP2pGroupOwner();
-//        manager.removeWifiDirectPeersListener(listener);
-//
-//        Assert.assertNotNull("Loaded shared feed object", feed);
-//        Assert.assertNotNull("Feed contains the expected entry",
-//                feed.getEntryById(TestEntryStatusTask.ENTRY_ID));
-//
-//        //now acquire that feed - make this a feed that will work for acquisition
-//        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
-//                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
-//        feed.addLink(NetworkManagerCore.LINK_REL_DOWNLOAD_DESTINATION,
-//                "application/dir", destinationDir);
-//
-//        final int[] acquisitionStatus = new int[1];
-//        final Object acquisitionLock = new Object();
-//        AcquisitionListener acquisitionListener = new AcquisitionListener() {
-//            @Override
-//            public void acquisitionProgressUpdate(String entryId, AcquisitionTaskStatus status) {
-//
-//            }
-//
-//            @Override
-//            public void acquisitionStatusChanged(String entryId, AcquisitionTaskStatus status) {
-//                if(entryId.equals(TestEntryStatusTask.ENTRY_ID)) {
-//                    acquisitionStatus[0] = status.getStatus();
-//                    if(status.getStatus() == UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL) {
-//                        synchronized (acquisitionLock) {
-//                            acquisitionLock.notify();
-//                        }
-//                    }
-//                }
-//            }
-//        };
-//
-//        manager.addAcquisitionTaskListener(acquisitionListener);
-//        manager.requestAcquisition(feed, true, true);
-//        synchronized (acquisitionLock) {
-//            try { acquisitionLock.wait(60000); }
-//            catch(InterruptedException e) {}
-//        }
-//        Assert.assertEquals("Acquisition of shared feed completed successfully",
-//                acquisitionStatus[0], UstadMobileSystemImpl.DLSTATUS_SUCCESSFUL);
-//
+        OpdsEntryWithChildEntries feed = manager.getOpdsFeedSharedByWifiP2pGroupOwner();
+        manager.removeWifiDirectPeersListener(listener);
+
+        Assert.assertNotNull("Loaded shared feed object", feed);
+        Assert.assertNotNull("Feed contains the expected entry",
+                feed.getChildEntryByEntryId(TestEntryStatusTask.ENTRY_ID));
+
+        //now acquire that feed - make this a feed that will work for acquisition
+        String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
+                CatalogPresenter.SHARED_RESOURCE, PlatformTestUtil.getTargetContext())[0].getDirURI();
+
+        final Object acquireLock = new Object();
+
+        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+
+        List<OpdsLink> linkList = new ArrayList<>();
+        for(OpdsEntryWithRelations entry : feed.getChildEntries()) {
+            OpdsLink acquireLink = entry.getAcquisitionLink(null, false);
+            String linkHref = "p2p://groupowner:" + SHARED_FEED_PORT + "/catalog/entry/" +
+                    entry.getEntryId();
+            linkList.add(new OpdsLink(entry.getUuid(), acquireLink.getMimeType(),linkHref,
+                    OpdsEntry.LINK_REL_ACQUIRE));
+        }
+
+        dbManager.getOpdsLinkDao().insert(linkList);
+
+        dbManager.getOpdsEntryDao().insertList(
+                OpdsEntryWithRelations.toOpdsEntryList(feed.getChildEntries()));
+
+        NetworkManager networkManager = (NetworkManager)UstadMobileSystemImpl.getInstance().getNetworkManager();
+        DownloadJob job = networkManager.buildDownloadJob(feed.getChildEntries(), destinationDir,
+                false);
+        networkManager.queueDownloadJob(job.getId());
+
+        UmLiveData<DownloadJobWithRelations> jobLiveData = dbManager.getDownloadJobDao().getByIdLive(
+                job.getId());
+
+        UmObserver<DownloadJobWithRelations> observer = (downloadJob) -> {
+            synchronized (acquireLock) {
+                if(downloadJob != null && downloadJob.getStatus() > 20) {
+                    acquireLock.notifyAll();
+                }
+            }
+        };
+
+        jobLiveData.observeForever(observer);
+
+        synchronized (acquireLock) {
+            try { acquireLock.wait(60000*4); }
+            catch(InterruptedException e) {}
+        }
+
+        Assert.assertEquals("Download job reported as complete",
+                NetworkTask.STATUS_COMPLETE, jobLiveData.getValue().getStatus());
     }
 
 

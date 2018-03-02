@@ -14,11 +14,11 @@ import org.junit.runners.Suite;
 
 @Suite.SuiteClasses({
         TestNetworkManager.class,
-//        TestWifiDirectPeerDiscovery.class,
+        TestWifiDirectSendReceive.class,
         TestEntryStatusTask.class,
 //        TestNetworkManagerEntryStatusMonitoring.class,
         TestDownloadTask.class,
-//        TestWifiDirectGroupConnection.class
+        TestWifiDirectGroupConnection.class
 })
 public class SharedSeNetworkTestSuite {
 

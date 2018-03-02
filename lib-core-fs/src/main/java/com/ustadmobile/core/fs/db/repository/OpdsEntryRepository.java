@@ -130,4 +130,9 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
     public List<OpdsEntryWithRelations> getEntriesByParentAsListStatic(String parentId) {
         return null;
     }
+
+    @Override
+    public List<String> getUuidsForEntryId(String entryId) {
+        return null;
+    }
 }

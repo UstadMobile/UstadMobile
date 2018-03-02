@@ -1875,17 +1875,18 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * Share the given feed using WiFi direct to the specified destination mac address.
      *
-     * @param feed
+     * @param feedUuid
      * @param destinationMacAddr
      */
-//    public void shareFeed(UstadJSOPDSFeed feed, String destinationMacAddr) {
-//        setSharedFeed(feed);
-//        if(!isWifiDirectConnectionEstablished(destinationMacAddr))
-//            connectToWifiDirectNode(destinationMacAddr);
-//    }
+    @Deprecated
+    public void shareFeed(String feedUuid, String destinationMacAddr) {
+        setSharedFeed(feedUuid);
+        if(!isWifiDirectConnectionEstablished(destinationMacAddr))
+            connectToWifiDirectNode(destinationMacAddr);
+    }
 
-    public void shareEntries(String[] entryIds, String title, String destinationMacAddr) {
-        setSharedFeed(entryIds, title);
+    public void shareEntries(String[] uuids, String title, String destinationMacAddr) {
+        setSharedFeed(uuids, title);
         if(!isWifiDirectConnectionEstablished(destinationMacAddr))
             connectToWifiDirectNode(destinationMacAddr);
     }
@@ -1919,10 +1920,9 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
             URL feedUrlObj = new URL(feedUrl);
             feedConnection = (HttpURLConnection)feedUrlObj.openConnection(Proxy.NO_PROXY);
             feedConnection.setUseCaches(false);
-            feedConnection.setConnectTimeout(3000);
-            feedConnection.setReadTimeout(3000);
+            feedConnection.setConnectTimeout(15000);
+            feedConnection.setReadTimeout(15000);
             feedIn = feedConnection.getInputStream();
-//            feed = new UstadJSOPDSFeed(feedUrl, feedIn, "UTF-8");
             feed = new OpdsEntryWithChildEntries();
             feed.setUrl(feedUrl);
             XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(feedIn, "UTF-8");

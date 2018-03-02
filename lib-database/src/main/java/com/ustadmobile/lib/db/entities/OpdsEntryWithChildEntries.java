@@ -1,11 +1,14 @@
 package com.ustadmobile.lib.db.entities;
 
+import com.ustadmobile.lib.util.UmUuidUtil;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by mike on 2/20/18.
@@ -26,6 +29,9 @@ public class OpdsEntryWithChildEntries extends OpdsEntryWithRelations {
 
         @Override
         public void onEntryAdded(OpdsEntryWithRelations childEntry, OpdsEntry parentFeed, int position) {
+            if(childEntry.getUuid() == null)
+                childEntry.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+
             childEntries.add(childEntry);
             if(loadCallback != null)
                 loadCallback.onEntryAdded(childEntry, parentFeed, position);
@@ -50,6 +56,21 @@ public class OpdsEntryWithChildEntries extends OpdsEntryWithRelations {
 
     public void setChildEntries(List<OpdsEntryWithRelations> childEntries) {
         this.childEntries = childEntries;
+    }
+
+    public OpdsEntry getChildEntryByEntryId(String entryId) {
+        if(childEntries == null)
+            return null;
+
+        for(OpdsEntryWithRelations entry : childEntries) {
+            if(entry == null)
+                continue;
+
+            if(entry.getEntryId() != null && entry.getEntryId().equals(entryId))
+                return entry;
+        }
+
+        return null;
     }
 
     @Override
