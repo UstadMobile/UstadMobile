@@ -7,6 +7,8 @@ import com.ustadmobile.core.generated.locale.MessageID;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
@@ -148,24 +150,34 @@ public class ReceiveCoursePresenter extends UstadBaseController implements WifiP
     public void handleClickAccept() {
         String destinationDir= UstadMobileSystemImpl.getInstance().getStorageDirs(
                 CatalogPresenter.SHARED_RESOURCE, getContext())[0].getDirURI();
+        List<OpdsLink> baseLinks =sharedFeed.getLinks(OpdsEntry.LINK_REL_P2P_SELF, null, null,
+                false, false, false ,1);
+        if(baseLinks == null || baseLinks.isEmpty()) {
+            UstadMobileSystemImpl.getInstance().getAppView(getContext()).showNotification(
+                    "Sharing incompatbile: does not include sefl link", AppView.LENGTH_LONG);
+            return;
+        }
+
+        String baseHref = baseLinks.get(0).getHref();
 
         List<OpdsLink> linkList = new ArrayList<>();
         for(OpdsEntryWithRelations entry : sharedFeed.getChildEntries()) {
-            OpdsLink acquireLink = sharedFeed.getAcquisitionLink(null, false);
-            String linkHref = "p2p://groupowner:" + SHARED_FEED_PORT + "/catalog/entry/" +
-                    entry.getEntryId();
+            OpdsLink acquireLink = entry.getAcquisitionLink(null, false);
+            String linkHref = UMFileUtil.resolveLink(baseHref, acquireLink.getHref());
             linkList.add(new OpdsLink(entry.getUuid(), acquireLink.getMimeType(),linkHref,
                     OpdsEntry.LINK_REL_ACQUIRE));
         }
 
-        DbManager.getInstance(getContext()).getOpdsLinkDao().insert(linkList);
+        new Thread(() -> {
+            DbManager.getInstance(getContext()).getOpdsLinkDao().insert(linkList);
 
-        DbManager.getInstance(getContext()).getOpdsEntryDao().insertList(
-                OpdsEntryWithRelations.toOpdsEntryList(sharedFeed.getChildEntries()));
+            DbManager.getInstance(getContext()).getOpdsEntryDao().insertList(
+                    OpdsEntryWithRelations.toOpdsEntryList(sharedFeed.getChildEntries()));
 
-        DownloadJob job = networkManager.buildDownloadJob(sharedFeed.getChildEntries(), destinationDir,
-            false);
-        networkManager.queueDownloadJob(job.getId());
+            DownloadJob job = networkManager.buildDownloadJob(sharedFeed.getChildEntries(), destinationDir,
+                    false);
+            networkManager.queueDownloadJob(job.getId());
+        }).start();
     }
 
     public void handleClickDecline() {

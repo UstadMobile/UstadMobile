@@ -120,8 +120,6 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
                 EmbeddedHTTPD.class);
 
 
-//        CatalogEntryInfo info = CatalogPresenter.getEntryInfo(uuid, CatalogPresenter.SHARED_RESOURCE,
-//                getContext(uriResource));
         ContainerFileEntryWithContainerFile containerFileEntry = DbManager.getInstance(getContext(uriResource))
                 .getContainerFileEntryDao().findContainerFileEntryWithContainerFileByEntryId(entryId);
 

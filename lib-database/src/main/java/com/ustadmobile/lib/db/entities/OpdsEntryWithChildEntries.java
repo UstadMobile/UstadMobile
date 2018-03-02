@@ -37,6 +37,7 @@ public class OpdsEntryWithChildEntries extends OpdsEntryWithRelations {
                 loadCallback.onEntryAdded(childEntry, parentFeed, position);
         }
 
+
         @Override
         public void onLinkAdded(OpdsLink link, OpdsEntry parentItem, int position) {
             if(loadCallback != null)

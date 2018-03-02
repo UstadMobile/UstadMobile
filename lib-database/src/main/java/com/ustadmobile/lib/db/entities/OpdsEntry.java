@@ -135,6 +135,8 @@ public class OpdsEntry {
      */
     public static final String LINK_REL_ACQUIRE = "http://opds-spec.org/acquisition";
 
+    public static final String LINK_REL_P2P_SELF = "http://www.ustadmobile.com/ns/opds/p2p-self";
+
     /**
      * Type to be used to represent an OPDS entry as per the opds spec
      *
@@ -142,6 +144,8 @@ public class OpdsEntry {
      */
     public static final String TYPE_ENTRY_OPDS =
             "application/atom+xml;type=entry;profile=opds-catalog";
+
+    public static final String TYPE_OPDS_ACQUISITION_FEED = "application/atom+xml;profile=opds-catalog;kind=acquisition";
 
     public static final String ENTRY_PROTOCOL = "entry:///";
 
@@ -369,7 +373,7 @@ public class OpdsEntry {
 
     public OpdsLink getAcquisitionLink(String mimeType, boolean mimeTypeByPrefix) {
         List<OpdsLink> result = getLinks(LINK_REL_ACQUIRE, mimeType, null, true, mimeTypeByPrefix, false, 1);
-        if(!result.isEmpty())
+        if(result != null && !result.isEmpty())
             return result.get(0);
         else
             return null;

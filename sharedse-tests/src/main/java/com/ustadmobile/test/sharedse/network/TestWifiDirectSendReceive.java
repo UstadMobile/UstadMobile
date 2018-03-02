@@ -4,11 +4,13 @@ import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
 import com.ustadmobile.lib.db.entities.NetworkNode;
@@ -86,6 +88,9 @@ public class TestWifiDirectSendReceive {
 
     @Test
     public void testReceiveFile() throws IOException, XmlPullParserException{
+        ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
+                TestEntryStatusTask.ENTRY_ID);
+
         NetworkManager manager = UstadMobileSystemImplSE.getInstanceSE().getNetworkManager();
         NetworkNode thisNode = manager.getThisWifiDirectDevice();
 
@@ -139,11 +144,14 @@ public class TestWifiDirectSendReceive {
 
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
+        String feedBaseHref = feed.getLinks(OpdsEntry.LINK_REL_P2P_SELF, null, null,
+                false, false, false ,1).get(0)
+                .getHref();
+
         List<OpdsLink> linkList = new ArrayList<>();
         for(OpdsEntryWithRelations entry : feed.getChildEntries()) {
             OpdsLink acquireLink = entry.getAcquisitionLink(null, false);
-            String linkHref = "p2p://groupowner:" + SHARED_FEED_PORT + "/catalog/entry/" +
-                    entry.getEntryId();
+            String linkHref = UMFileUtil.resolveLink(feedBaseHref, acquireLink.getHref());
             linkList.add(new OpdsLink(entry.getUuid(), acquireLink.getMimeType(),linkHref,
                     OpdsEntry.LINK_REL_ACQUIRE));
         }

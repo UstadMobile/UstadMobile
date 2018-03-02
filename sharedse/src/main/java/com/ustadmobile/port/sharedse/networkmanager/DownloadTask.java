@@ -567,10 +567,15 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
 
             if(downloadCompleted){
+                UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
+                        " : Download completed successfully, saved to " + fileDestination.getAbsolutePath());
                 mDbManager.getOpdsEntryWithRelationsRepository().
                         findEntriesByContainerFileNormalizedPath(fileDestination.getAbsolutePath());
+                UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
+                        " : indexed in database");
                 attemptCount = 0;
                 entryAcquisitionThread =null;
+
                 acquireFile(currentEntryIdIndex + 1);
             }else {
                 UstadMobileSystemImpl.l(UMLog.ERROR, 660, getLogPrefix() + " : item " + currentEntryIdIndex +
@@ -890,7 +895,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     }
 
     protected String getLogPrefix() {
-        return "AcquisitionTask #" + getTaskId() + " Item # " + currentEntryIdIndex + " Attempt # "
+        return "DownloadTask #" + getTaskId() + " Item # " + currentEntryIdIndex + " Attempt # "
                 + attemptCount;
     }
 

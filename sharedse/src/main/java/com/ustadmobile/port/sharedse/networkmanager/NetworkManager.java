@@ -39,9 +39,11 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1776,9 +1778,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
         sharedFeed.setTitle(title);
         sharedFeed.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
 
+        OpdsLink p2pSelfLink = new OpdsLink(sharedFeed.getUuid(), OpdsEntry.TYPE_OPDS_ACQUISITION_FEED,
+                "p2p://groupowner:" + getHttpListeningPort() + "/", OpdsEntry.LINK_REL_P2P_SELF);
+
         List<OpdsEntryParentToChildJoin> joinList = new ArrayList<>();
         List<OpdsEntry> sharedEntries = new ArrayList<>();
         List<OpdsLink> sharedLinks = new ArrayList<>();
+        sharedLinks.add(p2pSelfLink);
+
         dbExecutorService.execute(() -> {
             List<OpdsEntryWithRelationsAndContainerMimeType> entriesToShareSrc = DbManager.getInstance(getContext())
                     .getOpdsEntryWithRelationsDao().findByUuidsWithContainerMimeType(Arrays.asList(uuids));
@@ -1796,9 +1803,16 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     continue;
                 }
 
+                String entryIdEncoded = entry.getEntryId();
+                try {
+                    entryIdEncoded = URLEncoder.encode(entryIdEncoded, "UTF-8");
+                }catch(UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
                 OpdsLink link = new OpdsLink(sharedEntry.getUuid(), entry.getContainerMimeType(),
-                        UMFileUtil.joinPaths(CATALOG_HTTP_ENDPOINT_PREFIX, "entry",
-                                entry.getEntryId()), OpdsEntry.LINK_REL_ACQUIRE);
+                        UMFileUtil.joinPaths(CATALOG_HTTP_ENDPOINT_PREFIX, "entry", entryIdEncoded),
+                        OpdsEntry.LINK_REL_ACQUIRE);
 
                 sharedEntries.add(sharedEntry);
                 sharedLinks.add(link);
