@@ -30,6 +30,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeTyp
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UmUuidUtil;
 import com.ustadmobile.nanolrs.http.NanoLrsHttpd;
+import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.port.sharedse.impl.http.MountedZipHandler;
 import com.ustadmobile.port.sharedse.impl.http.OPDSFeedUriResponder;
@@ -39,11 +40,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1685,7 +1684,7 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     /**
      * Sets the shared http endpoint catalog.
      *
-     * @param sharedFeed
+     * @param sharedFeedUuid
      */
     public void setSharedFeed(String sharedFeedUuid) {
         synchronized (sharedFeedLock) {
@@ -1803,15 +1802,11 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
                     continue;
                 }
 
-                String entryIdEncoded = entry.getEntryId();
-                try {
-                    entryIdEncoded = URLEncoder.encode(entryIdEncoded, "UTF-8");
-                }catch(UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
+                String entryIdEncoded = CatalogUriResponder.doubleUrlEncode(entry.getEntryId());
 
                 OpdsLink link = new OpdsLink(sharedEntry.getUuid(), entry.getContainerMimeType(),
-                        UMFileUtil.joinPaths(CATALOG_HTTP_ENDPOINT_PREFIX, "entry", entryIdEncoded),
+                        UMFileUtil.joinPaths(CATALOG_HTTP_ENDPOINT_PREFIX,
+                                CatalogUriResponder.CONTAINER_DL_PATH_COMPONENT, entryIdEncoded),
                         OpdsEntry.LINK_REL_ACQUIRE);
 
                 sharedEntries.add(sharedEntry);

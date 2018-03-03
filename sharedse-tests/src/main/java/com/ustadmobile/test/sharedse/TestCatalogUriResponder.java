@@ -1,10 +1,13 @@
-package com.ustadmobile.test.port.sharedse;
+package com.ustadmobile.test.sharedse;
 
 import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
+import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMIOUtils;
+import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.network.TestEntryStatusTask;
@@ -13,6 +16,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -21,8 +25,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
+import fi.iki.elonen.router.RouterNanoHTTPD;
 
 /**
  * Created by mike on 8/28/17.
@@ -32,6 +41,10 @@ public class TestCatalogUriResponder {
 
     @Before
     public void copyEntry() throws IOException{
+        //Remove the local entry if it is present
+        ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
+                SharedSeTestSuite.ENTRY_ID_LOCAL);
+
         Object context = PlatformTestUtil.getTargetContext();
         UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
 
@@ -58,12 +71,16 @@ public class TestCatalogUriResponder {
             UMIOUtils.closeInputStream(entryIn);
             UMIOUtils.throwIfNotNullIO(ioe);
         }
-        CatalogEntryInfo entryInfo = new CatalogEntryInfo();
-        entryInfo.fileURI = entryTmpFile.getAbsolutePath();
-        entryInfo.acquisitionStatus = CatalogPresenter.STATUS_ACQUIRED;
-        entryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
-        CatalogPresenter.setEntryInfo(TestEntryStatusTask.ENTRY_ID, entryInfo,
-                CatalogPresenter.SHARED_RESOURCE, context);
+
+        DbManager.getInstance(PlatformTestUtil.getTargetContext()).getOpdsEntryWithRelationsRepository().
+                findEntriesByContainerFileNormalizedPath(entryTmpFile.getAbsolutePath());
+
+//        CatalogEntryInfo entryInfo = new CatalogEntryInfo();
+//        entryInfo.fileURI = entryTmpFile.getAbsolutePath();
+//        entryInfo.acquisitionStatus = CatalogPresenter.STATUS_ACQUIRED;
+//        entryInfo.mimeType = UstadJSOPDSItem.TYPE_EPUBCONTAINER;
+//        CatalogPresenter.setEntryInfo(TestEntryStatusTask.ENTRY_ID, entryInfo,
+//                CatalogPresenter.SHARED_RESOURCE, context);
     }
 
     @After
@@ -98,8 +115,10 @@ public class TestCatalogUriResponder {
         };
         httpd.addResponseListener(listener);
 
+        String entryIdEncoded = URLEncoder.encode(URLEncoder.encode(TestEntryStatusTask.ENTRY_ID,
+            "UTF-8"), "UTF-8");
         URL catalogEntryUrl = new URL("http://localhost:" + httpd.getListeningPort() +
-                "/catalog/entry/" + TestEntryStatusTask.ENTRY_ID);
+                "/catalog/container-dl/" + entryIdEncoded);
 
         IOException ioe = null;
         InputStream urlIn = null;
@@ -119,7 +138,23 @@ public class TestCatalogUriResponder {
         UMIOUtils.throwIfNotNullIO(ioe);
 
         Assert.assertEquals("response started called once", 1, responseStartedEvtCount[0]);
-//        Assert.assertEquals("Response finished event called once", 1, responseFinishedEvtCount[0]);
     }
+
+    @Test
+    public void testCatalogUriResponderNoParam() throws IOException {
+        NanoHTTPD.IHTTPSession mockSession = Mockito.mock(NanoHTTPD.IHTTPSession.class);
+        RouterNanoHTTPD.UriResource mockUriResource = Mockito.mock(RouterNanoHTTPD.UriResource.class);
+        Mockito.when(mockSession.getUri()).thenReturn("/catalog/container/");
+        Map<String, List<String>> paramsMaps = new HashMap<>();
+        Mockito.when(mockSession.getParameters()).thenReturn(paramsMaps);
+        CatalogUriResponder responder = new CatalogUriResponder();
+
+        Map<String, String> queryParams = new HashMap<>();
+        NanoHTTPD.Response response = responder.get(mockUriResource, queryParams, mockSession);
+        Assert.assertEquals("No entryId provides 400 return code", 400,
+                response.getStatus().getRequestStatus());
+
+    }
+
 
 }

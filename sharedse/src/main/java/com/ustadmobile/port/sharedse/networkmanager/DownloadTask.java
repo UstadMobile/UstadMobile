@@ -18,6 +18,7 @@ import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
+import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -444,7 +445,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                         && responseNode.getTimeSinceNetworkServiceLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
                     targetNetwork = TARGET_NETWORK_NORMAL;
                     currentDownloadUrl = "http://" + entryStatusResponse.getNetworkNode().getIpAddress() + ":"
-                            + entryStatusResponse.getNetworkNode().getPort() + "/catalog/entry/" + entryId;
+                            + entryStatusResponse.getNetworkNode().getPort() + "/catalog/container-dl/" +
+                            CatalogUriResponder.doubleUrlEncode(entryId);
                     currentDownloadMode = DOWNLOAD_FROM_PEER_ON_SAME_NETWORK;
                 } else if (downloadJob.isWifiDirectDownloadEnabled() && entryStatusResponse != null
                         && networkManager.isWiFiEnabled()
@@ -639,8 +641,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 currentGroupSSID =groupInfo[0];
                 passphrase = groupInfo[1];
                 currentDownloadUrl = "http://" + currentGroupIPAddress + ":" +
-                        entryStatusResponse.getNetworkNode().getPort() + "/catalog/entry/" +
-                        currentDownloadJobItem.getEntryId();
+                        entryStatusResponse.getNetworkNode().getPort() + "/catalog/container-dl/" +
+                        CatalogUriResponder.doubleUrlEncode(currentDownloadJobItem.getEntryId());
 
                 UstadMobileSystemImpl.l(UMLog.INFO, 318, getLogPrefix() + ": bluetooth says connect to '" +
                     currentGroupSSID + "' download Url = " + currentDownloadUrl);

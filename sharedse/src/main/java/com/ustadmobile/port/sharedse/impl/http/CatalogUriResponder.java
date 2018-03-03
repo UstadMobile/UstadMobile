@@ -1,14 +1,10 @@
 package com.ustadmobile.port.sharedse.impl.http;
 
 import com.google.gson.Gson;
-import com.ustadmobile.core.controller.CatalogEntryInfo;
-import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
-import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.opds.OpdsEndpoint;
 import com.ustadmobile.core.opds.UstadJSOPDSFeed;
 import com.ustadmobile.core.opds.UstadJSOPDSItem;
-import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileEntryWithContainerFile;
 import com.ustadmobile.port.sharedse.networkmanager.EntryStatusTask;
@@ -20,11 +16,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.zip.ZipEntry;
+
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 
@@ -41,20 +39,30 @@ import fi.iki.elonen.router.RouterNanoHTTPD;
  * It makes the following available over HTTP:
  *
  * /catalog/acquire.opds - Acquisition feed listing all known entries on this device
- * /catalog/entry/uuid - Provides the entry file (e.g. epub)
+ *
+ *
+ * /catalog/container-dl/entryId[/last-updated] - Provides the entry file (e.g. epub)
+ *   entryId - the entryId DOUBLE ENCODED - as NanoHTTPD does not provide access to the raw uri.
+ *
+ * /catalog/container-content/entryId/last-updated/path-in-container
+ *
  * /catalog/entry/uuid/some/file - Where the entry is a zip (e.g. epub) this directly serves some/file from the zip container
  *
  * Created by mike on 2/21/17.
  */
 public class CatalogUriResponder extends FileResponder implements RouterNanoHTTPD.UriResponder {
 
-    public static final String ENTRY_PATH_COMPONENT = "/entry/";
+    public static final String ENTRY_PATH_COMPONENT = "/container/";
+
+    public static final String CONTAINER_DL_PATH_COMPONENT = "/container-dl/";
 
     public static final int INIT_PARAM_INDEX_CONTEXT = 0;
 
     public static final int INIT_PARAM_INDEX_HASHMAP = 1;
 
     public static final int INIT_PARAM_INDEX_EMBEDDEDHTTPD = 2;
+
+    public static final String QUERY_ARG_ENTRYID = "entryId";
 
     @Override
     public NanoHTTPD.Response get(RouterNanoHTTPD.UriResource uriResource, Map<String, String> urlParams, NanoHTTPD.IHTTPSession session) {
@@ -72,8 +80,8 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
                 NanoHTTPD.Response r = NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.OK,
                     UstadJSOPDSItem.TYPE_ACQUISITIONFEED, bin, bout.size());
                 return r;
-            }else if(normalizedUri.contains(ENTRY_PATH_COMPONENT)) {
-                return handleEntryRequest(uriResource, NanoHTTPD.Method.GET, session, normalizedUri);
+            }else if(session.getUri().contains(CONTAINER_DL_PATH_COMPONENT)) {
+                return handleContainerFileRequest(uriResource, NanoHTTPD.Method.GET, session, normalizedUri);
             }
         }catch(IOException e) {
             e.printStackTrace();
@@ -112,13 +120,15 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         return uriResource.initParameter(INIT_PARAM_INDEX_CONTEXT, Object.class);
     }
 
-    public NanoHTTPD.Response handleEntryRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session, String normalizedUri) throws IOException{
-        normalizedUri = normalizedUri != null ? normalizedUri : RouterNanoHTTPD.normalizeUri(session.getUri());
-        int[] containerIdRange = getEntryUuidSubstringRange(normalizedUri);
-        String entryId = normalizedUri.substring(containerIdRange[0], containerIdRange[1]);
+    public NanoHTTPD.Response handleContainerFileRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session, String normalizedUri) throws IOException{
+        String uri = session.getUri();
+        String entryId = uri.substring(uri.indexOf(CONTAINER_DL_PATH_COMPONENT) +
+            CONTAINER_DL_PATH_COMPONENT.length());
+
+        entryId = URLDecoder.decode(entryId, "UTF-8");
+
         EmbeddedHTTPD httpd = uriResource.initParameter(INIT_PARAM_INDEX_EMBEDDEDHTTPD,
                 EmbeddedHTTPD.class);
-
 
         ContainerFileEntryWithContainerFile containerFileEntry = DbManager.getInstance(getContext(uriResource))
                 .getContainerFileEntryDao().findContainerFileEntryWithContainerFileByEntryId(entryId);
@@ -130,46 +140,50 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         }
 
         File containerFile = new File(containerFileEntry.getContainerFile().getNormalizedPath());
-        if(containerIdRange[1] == normalizedUri.length()) {
-            //this is the end of the path : serve the container file itself
-            NanoHTTPD.Response entryResponse = newResponseFromFile(method, uriResource,
-                    session, new FileSource(containerFile));
 
-            if(entryResponse.getData() != null) { //null data = HEAD method response with no data
-                ResponseMonitoredInputStream streamMonitor = new ResponseMonitoredInputStream(
-                        entryResponse.getData(), entryResponse);
-                streamMonitor.setOnCloseListener(httpd);
-                entryResponse.setData(streamMonitor);
-                httpd.handleResponseStarted(entryResponse);
-                return entryResponse;
-            }
+        NanoHTTPD.Response entryResponse = newResponseFromFile(method, uriResource,
+                session, new FileSource(containerFile));
 
+        if(entryResponse.getData() != null) { //null data = HEAD method response with no data
+            ResponseMonitoredInputStream streamMonitor = new ResponseMonitoredInputStream(
+                    entryResponse.getData(), entryResponse);
+            streamMonitor.setOnCloseListener(httpd);
+            entryResponse.setData(streamMonitor);
+            httpd.handleResponseStarted(entryResponse);
             return entryResponse;
-        }else {
-            //serve a particular file from the container
-            String pathInZip = normalizedUri.substring(containerIdRange[1] + 1);
-            WeakHashMap zipMap = uriResource.initParameter(INIT_PARAM_INDEX_HASHMAP, WeakHashMap.class);
-            ZipFile zipFile;
-            if(zipMap.containsKey(containerFileEntry.getContainerFile().getNormalizedPath())) {
-                zipFile = (ZipFile)zipMap.get(containerFileEntry.getContainerFile().getNormalizedPath());
-            }else {
-                if(!containerFile.exists()) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                            "text/plain","Not found: " + normalizedUri);
-                }
-
-                try {
-                    zipFile = new ZipFile(containerFile);
-                    zipMap.put(containerFileEntry.getContainerFile().getNormalizedPath(), zipFile);
-                }catch(ZipException e) {
-                    return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
-                            "text/plain", e.toString());
-                }
-
-            }
-
-            return newResponseFromFile(method, uriResource, session, new ZipEntrySource(zipFile, pathInZip));
         }
+
+        return entryResponse;
+
+    }
+
+    public NanoHTTPD.Response handleContainerEntryResponse(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session, String normalizedUri){
+//        TODO: re-implement this for when we are using this for serving contents over HTTP e.g. for the GWT client
+        //serve a particular file from the container
+//        String pathInZip = normalizedUri.substring(containerIdRange[1] + 1);
+//        WeakHashMap zipMap = uriResource.initParameter(INIT_PARAM_INDEX_HASHMAP, WeakHashMap.class);
+//        ZipFile zipFile;
+//        if(zipMap.containsKey(containerFileEntry.getContainerFile().getNormalizedPath())) {
+//            zipFile = (ZipFile)zipMap.get(containerFileEntry.getContainerFile().getNormalizedPath());
+//        }else {
+//            if(!containerFile.exists()) {
+//                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
+//                        "text/plain","Not found: " + normalizedUri);
+//            }
+//
+//            try {
+//                zipFile = new ZipFile(containerFile);
+//                zipMap.put(containerFileEntry.getContainerFile().getNormalizedPath(), zipFile);
+//            }catch(ZipException e) {
+//                return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.INTERNAL_ERROR,
+//                        "text/plain", e.toString());
+//            }
+//
+//        }
+//
+//        return newResponseFromFile(method, uriResource, session, new ZipEntrySource(zipFile, pathInZip));
+        return null;
+
     }
 
     public NanoHTTPD.Response handleEntryStatusRequest(RouterNanoHTTPD.UriResource uriResource,
@@ -197,8 +211,8 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
                 gson.toJson(containerFileEntries));
     }
 
-    public NanoHTTPD.Response handleEntryRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session) throws IOException {
-        return handleEntryRequest(uriResource, method, session, RouterNanoHTTPD.normalizeUri(session.getUri()));
+    public NanoHTTPD.Response handleContainerFileRequest(RouterNanoHTTPD.UriResource uriResource, NanoHTTPD.Method method, NanoHTTPD.IHTTPSession session) throws IOException {
+        return handleContainerFileRequest(uriResource, method, session, RouterNanoHTTPD.normalizeUri(session.getUri()));
     }
 
 
@@ -213,7 +227,7 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
         int containerIdStart = uri.indexOf(ENTRY_PATH_COMPONENT)
                 + ENTRY_PATH_COMPONENT.length();
         int containerIdEnd = uri.indexOf('/', containerIdStart);
-        if(containerIdEnd == -1)
+//        if(containerIdEnd == -1)
             containerIdEnd = uri.length();
 
         return new int[]{containerIdStart, containerIdEnd};
@@ -237,7 +251,7 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
             if(NanoHTTPD.Method.HEAD.toString().equalsIgnoreCase(method)) {
                 String normalizedUri = RouterNanoHTTPD.normalizeUri(session.getUri());
                 if(normalizedUri.contains(ENTRY_PATH_COMPONENT)) {
-                    return handleEntryRequest(uriResource, NanoHTTPD.Method.HEAD, session);
+                    return handleContainerFileRequest(uriResource, NanoHTTPD.Method.HEAD, session);
                 }
             }
         }catch(IOException e) {
@@ -247,5 +261,20 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
 
         return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "text/plain",
                 "Request not understood by .other method: " + method);
+    }
+
+    /**
+     *
+     * @param str
+     * @return
+     */
+    public static String doubleUrlEncode(String str) {
+        try {
+            return URLEncoder.encode(URLEncoder.encode(str, "UTF-8"), "UTF-8");
+        }catch(IOException e) {
+            e.printStackTrace();//can only occur on a system that does not support utf8
+        }
+
+        return null;
     }
 }
