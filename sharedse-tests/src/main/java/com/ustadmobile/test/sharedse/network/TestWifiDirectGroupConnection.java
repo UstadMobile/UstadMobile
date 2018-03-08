@@ -10,6 +10,7 @@ import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.port.sharedse.networkmanager.URLConnectionOpener;
+import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.http.RemoteTestServerHttpd;
 
@@ -29,6 +30,7 @@ import java.net.URL;
  *
  * Created by mike on 6/2/17.
  */
+@PeerServerRequiredTest
 public class TestWifiDirectGroupConnection {
 
     public static final int CONNECTION_TIMEOUT = 90 * 1000;

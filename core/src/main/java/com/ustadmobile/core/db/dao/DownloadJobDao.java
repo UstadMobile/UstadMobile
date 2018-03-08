@@ -31,6 +31,9 @@ public abstract class DownloadJobDao {
 
     public abstract void update(DownloadJob job);
 
+    @UmQuery("SELECT * FROM DownloadJob WHERE id = :id")
+    public abstract DownloadJobWithRelations findById(int id);
+
     /**
      * Convenience method as a transaction to avoid the possibility of getting the same
      * download job running twice.

@@ -8,6 +8,7 @@ package com.ustadmobile.core.controller;
 
 import com.ustadmobile.core.buildconfig.CoreBuildConfig;
 import com.ustadmobile.core.generated.locale.MessageID;
+import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.UmCallback;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.util.UMFileUtil;
@@ -93,7 +94,18 @@ public class BasePointController extends UstadBaseController implements DialogRe
         basePointView.setMenuItems(impl.getActiveUser(getContext()) != null ?
                 CoreBuildConfig.BASEPOINT_MENU_AUTHENTICATED : CoreBuildConfig.BASEPOINT_MENU_GUEST);
 
-        Vector catalogTabs = UMFileUtil.splitCombinedViewArguments(args, "catalog", '-');
+        Vector catalogTabs = null;
+        if(args != null) {
+            catalogTabs = UMFileUtil.splitCombinedViewArguments(args, "catalog", '-');
+        }
+
+        if(catalogTabs == null || catalogTabs.isEmpty()) {
+            String defaultArgs = UstadMobileSystemImpl.getInstance().getAppConfigString(AppConfig.KEY_FIRST_DEST,
+                    null, getContext());
+            catalogTabs = UMFileUtil.splitCombinedViewArguments(UMFileUtil.parseURLQueryString(defaultArgs),
+                    "catalog", '-');
+        }
+
         for(int i = 0; i < catalogTabs.size(); i++) {
             basePointView.addTab((Hashtable)catalogTabs.elementAt(i));
         }

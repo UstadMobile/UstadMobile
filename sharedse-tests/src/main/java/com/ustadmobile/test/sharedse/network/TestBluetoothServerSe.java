@@ -3,6 +3,7 @@ package com.ustadmobile.test.sharedse.network;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.BluetoothConnectionHandler;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 
 import org.junit.Assert;
@@ -17,7 +18,7 @@ import static com.ustadmobile.test.sharedse.network.TestNetworkManager.NODE_DISC
 /**
  * Created by mike on 5/10/17.
  */
-
+@PeerServerRequiredTest
 public class TestBluetoothServerSe implements BluetoothConnectionHandler {
 
     private boolean isConnectionCalled = false;

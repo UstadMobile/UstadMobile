@@ -1504,32 +1504,6 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     }
 
     /**
-     * Fire acquisition progress updates to the listening part of the app
-     * @param entryId
-     */
-    protected void fireAcquisitionProgressUpdate(String entryId, DownloadTask task){
-        synchronized (acquisitionListeners) {
-            for(AcquisitionListener listener : acquisitionListeners){
-                listener.acquisitionProgressUpdate(entryId, task.getStatusByEntryId(entryId));
-            }
-        }
-    }
-
-    /**
-     * This method is to be called when other components (e.g. directory scanner etc) discover
-     * new content, or catalog discover content that was previously thought to have been acquired
-     * is no longer around (e.g. the user manually deleted or moved files)
-     *
-     * @param entryId Entry id for which status has been discovered
-     */
-    public void handleEntryStatusChangeDiscovered(String entryId, int acquisitionStatus) {
-        DownloadTask.Status status = new DownloadTask.Status();
-        status.setStatus(acquisitionStatus);
-        UstadMobileSystemImpl.l(UMLog.DEBUG, 645, "handleEntryStatusChangeDiscovered: " + entryId +
-                " : " + status.getStatus());
-    }
-
-    /**
      * Find the acquisition task for the given entry id
      *
      * @param entryId Entry ID to find

@@ -9,6 +9,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.SharedSeTestSuite;
@@ -27,7 +28,7 @@ import java.util.Calendar;
 /**
  * Created by kileha3 on 16/05/2017.
  */
-
+@PeerServerRequiredTest
 public class TestNetworkManager {
     public static final int NODE_DISCOVERY_TIMEOUT =(5*60 * 1000)+2000;//2min2sec in ms
 

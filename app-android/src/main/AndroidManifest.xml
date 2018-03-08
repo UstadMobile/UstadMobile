@@ -78,7 +78,8 @@
             android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.BasePointActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize"
+            android:theme="@style/Theme.UstadTheme" />
         <activity
             android:name="com.ustadmobile.port.android.view.AttendanceActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize"

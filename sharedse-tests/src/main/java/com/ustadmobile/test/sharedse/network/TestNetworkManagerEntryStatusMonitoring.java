@@ -6,6 +6,7 @@ import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
+import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
 import com.ustadmobile.test.sharedse.TestUtilsSE;
 
 import org.junit.Assert;
@@ -18,6 +19,7 @@ import java.util.Iterator;
 /**
  * Test the mechanism by which we wathc the entry status
  */
+@PeerServerRequiredTest
 public class TestNetworkManagerEntryStatusMonitoring {
 
     @Test(timeout = TestEntryStatusTask.AVAILABILITY_MONITOR_TIMEOUT)

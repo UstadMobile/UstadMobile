@@ -68,6 +68,13 @@ public class OpdsEntry {
 
     protected String url;
 
+    private int entryType;
+
+    public static final int ENTRY_TYPE_OPDS_FEED = 1;
+
+    public static final int ENTRY_TYPE_OPDS_FEED_ENTRY = 2;
+
+    public static final int ENTRY_TYPE_OPDS_ENTRY_STANDALONE = 3;
 
     protected static final String ATTR_REL = "rel";
 
@@ -136,6 +143,8 @@ public class OpdsEntry {
     public static final String LINK_REL_ACQUIRE = "http://opds-spec.org/acquisition";
 
     public static final String LINK_REL_P2P_SELF = "http://www.ustadmobile.com/ns/opds/p2p-self";
+
+    public static final String LINK_REL_SUBSECTION = "subsection";
 
     /**
      * Type to be used to represent an OPDS entry as per the opds spec
@@ -260,6 +269,13 @@ public class OpdsEntry {
         this.url = url;
     }
 
+    public int getEntryType() {
+        return entryType;
+    }
+
+    public void setEntryType(int entryType) {
+        this.entryType = entryType;
+    }
 
     public void load(XmlPullParser xpp, OpdsItemLoadCallback callback) throws IOException, XmlPullParserException {
         int evtType;
@@ -272,8 +288,19 @@ public class OpdsEntry {
         while((evtType = xpp.next()) != XmlPullParser.END_DOCUMENT) {
             if(evtType == XmlPullParser.START_TAG) {
                 name = xpp.getName();
+
+                //TODO: Test this with standalone entry OPDS file
+                if(getEntryType() == 0) {
+                    if (name.equals(TAG_ENTRY))
+                        setEntryType(ENTRY_TYPE_OPDS_ENTRY_STANDALONE);
+                    else if (name.equals(TAG_FEED))
+                        setEntryType(ENTRY_TYPE_OPDS_FEED);
+                }
+
+
                 if(name.equals(TAG_ENTRY)) {
                     OpdsEntryWithRelations newEntry = new OpdsEntryWithRelations();
+                    newEntry.setEntryType(ENTRY_TYPE_OPDS_FEED_ENTRY);
                     newEntry.load(xpp, callback);
                     entryCount++;
 

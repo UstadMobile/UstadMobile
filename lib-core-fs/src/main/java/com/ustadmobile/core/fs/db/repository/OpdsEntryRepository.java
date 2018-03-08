@@ -47,7 +47,18 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
 
     @Override
     public OpdsEntryWithRelations getEntryByUrlStatic(String url) {
-        return null;
+        OpdsEntryWithRelations entry = dbManager.getOpdsEntryWithRelationsDao()
+                .getEntryByUrlStatic(url);
+
+        if(entry != null) {
+            return entry;//todo: check validity / http headers etc.
+        }
+
+        entry = new OpdsEntryWithRelations();
+        OpdsItemLoader loader = new OpdsItemLoader(dbManager.getContext(), dbManager, entry, url, null);
+        loader.run();
+
+        return entry;
     }
 
     @Override

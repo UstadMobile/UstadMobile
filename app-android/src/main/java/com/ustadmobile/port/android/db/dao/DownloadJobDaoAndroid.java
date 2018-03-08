@@ -54,4 +54,7 @@ public abstract class DownloadJobDaoAndroid extends DownloadJobDao {
 
     @Query("SELECT * From DownloadJob WHERE id = :id")
     public abstract LiveData<DownloadJobWithRelations> getByIdLiveR(int id);
+
+    @Query("SELECT * FROM DownloadJob WHERE id = :id")
+    public abstract DownloadJobWithRelations findById(int id);
 }

@@ -119,5 +119,15 @@
 
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/opds_item_download_icon"
+            android:layout_below="@+id/opds_item_status_layout"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_file_download_black_24dp"
+            android:contentDescription="@string/download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
     </RelativeLayout>
 </com.ustadmobile.port.android.view.OPDSEntryCard>

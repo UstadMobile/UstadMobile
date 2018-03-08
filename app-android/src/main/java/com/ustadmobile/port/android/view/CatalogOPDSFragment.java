@@ -74,6 +74,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import static com.ustadmobile.core.controller.BaseCatalogPresenter.ARG_URL;
+
 
 /**
  * An Android Fragment that implements the CatalogView to show an OPDS Catalog
@@ -129,6 +131,8 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
     private Set<String> selectedUuids;
 
     private Set<OpdsEntryRecyclerAdapter.OpdsEntryViewHolder> boundViewHolders;
+
+    public static final int OPDS_URI_TAG = 1000021;
 
     /**
      * This interface *should* be implemented by any activity that holds a catalog fragment. The
@@ -200,6 +204,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         mRecyclerLayoutManager = new LinearLayoutManager(getContext());
         mRecyclerView.setLayoutManager(mRecyclerLayoutManager);
 
+
         mCatalogPresenter = new CatalogPresenter(getContext(), this);
 
         mCatalogPresenter.onCreate(UMAndroidUtil.bundleToHashtable(getArguments()),
@@ -208,6 +213,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         selectedUuids = new HashSet<>();
         boundViewHolders = new HashSet<>();
 
+        rootContainer.setTag(getArguments().getString(ARG_URL));
         return rootContainer;
     }
 
@@ -553,7 +559,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         return mAddOptionAvailable;
     }
 
-    class OpdsEntryRecyclerAdapter extends PagedListAdapter<OpdsEntryWithRelations, OpdsEntryRecyclerAdapter.OpdsEntryViewHolder> {
+    public class OpdsEntryRecyclerAdapter extends PagedListAdapter<OpdsEntryWithRelations, OpdsEntryRecyclerAdapter.OpdsEntryViewHolder> {
 
         public class OpdsEntryViewHolder extends RecyclerView.ViewHolder {
             public OPDSEntryCard mEntryCard;

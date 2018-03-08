@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.port.sharedse.impl.UstadMobileSystemImplSE;
 import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.port.sharedse.networkmanager.WifiP2pListener;
+import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
 import com.ustadmobile.test.sharedse.TestUtilsSE;
@@ -39,7 +40,7 @@ import static com.ustadmobile.port.sharedse.networkmanager.NetworkManager.SHARED
 /**
  * Created by mike on 8/14/17.
  */
-
+@PeerServerRequiredTest
 public class TestWifiDirectSendReceive {
 
     public static final int PEER_DISCOVERY_TIMEOUT = 120000;

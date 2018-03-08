@@ -127,6 +127,11 @@ public class CatalogUriResponder extends FileResponder implements RouterNanoHTTP
 
         entryId = URLDecoder.decode(entryId, "UTF-8");
 
+        if(entryId.length() == 0) {
+            return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST,
+                    "text/plain", "no entryid specified");
+        }
+
         EmbeddedHTTPD httpd = uriResource.initParameter(INIT_PARAM_INDEX_EMBEDDEDHTTPD,
                 EmbeddedHTTPD.class);
 

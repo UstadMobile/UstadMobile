@@ -31,32 +31,32 @@ public class TestXapiPackageViewAndroid extends TestXapiPackageView {
 
     private static File testXapiFile;
 
-    @BeforeClass
-    public static void copyTestFile() throws IOException{
-        InputStream in = null;
-        FileOutputStream fout = null;
-        IOException ioe = null;
-
-        try {
-            testXapiFile = File.createTempFile("TestXapiPackage", "zip");
-            in = TestXapiPackageView.class.getResourceAsStream(
-                    "/com/ustadmobile/test/core/JsTetris_TCAPI.zip");
-            fout = new FileOutputStream(testXapiFile);
-            UMIOUtils.readFully(in, fout, 8*1024);
-        }catch(IOException e) {
-            ioe = e;
-        }finally {
-            UMIOUtils.closeInputStream(in);
-            UMIOUtils.closeOutputStream(fout);
-            UMIOUtils.throwIfNotNullIO(ioe);
-        }
-    }
-
-    @AfterClass
-    public static void cleanupTestFile() {
-        if(testXapiFile != null)
-            testXapiFile.delete();
-    }
+//    @BeforeClass
+//    public static void copyTestFile() throws IOException{
+//        InputStream in = null;
+//        FileOutputStream fout = null;
+//        IOException ioe = null;
+//
+//        try {
+//            testXapiFile = File.createTempFile("TestXapiPackage", "zip");
+//            in = TestXapiPackageView.class.getResourceAsStream(
+//                    "/com/ustadmobile/test/core/JsTetris_TCAPI.zip");
+//            fout = new FileOutputStream(testXapiFile);
+//            UMIOUtils.readFully(in, fout, 8*1024);
+//        }catch(IOException e) {
+//            ioe = e;
+//        }finally {
+//            UMIOUtils.closeInputStream(in);
+//            UMIOUtils.closeOutputStream(fout);
+//            UMIOUtils.throwIfNotNullIO(ioe);
+//        }
+//    }
+//
+//    @AfterClass
+//    public static void cleanupTestFile() {
+//        if(testXapiFile != null)
+//            testXapiFile.delete();
+//    }
 
     @Override
     public XapiPackageView getView() {

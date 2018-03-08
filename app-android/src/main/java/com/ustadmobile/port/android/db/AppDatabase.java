@@ -3,12 +3,11 @@ package com.ustadmobile.port.android.db;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.RoomDatabase;
 
-import com.ustadmobile.core.db.dao.DownloadJobDao;
-import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
-import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.lib.db.entities.*;
 import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
 import com.ustadmobile.port.android.db.dao.ContainerFileEntryDaoAndroid;
+import com.ustadmobile.port.android.db.dao.CrawJoblItemDaoAndroid;
+import com.ustadmobile.port.android.db.dao.CrawlJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobItemDaoAndroid;
 import com.ustadmobile.port.android.db.dao.DownloadJobItemHistoryDaoAndroid;
@@ -27,7 +26,7 @@ import com.ustadmobile.port.android.db.dao.OpdsLinkDaoAndroid;
         OpdsEntry.class, OpdsLink.class, OpdsEntryParentToChildJoin.class,
         ContainerFile.class, ContainerFileEntry.class, DownloadJob.class,
         DownloadJobItem.class, NetworkNode.class, EntryStatusResponse.class,
-        DownloadJobItemHistory.class
+        DownloadJobItemHistory.class, CrawlJob.class, CrawlJobItem.class
 })
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -52,5 +51,9 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract DownloadJobItemDaoAndroid getDownloadJobItemDao();
 
     public abstract DownloadJobItemHistoryDaoAndroid getDownloadJobItemHistoryDao();
+
+    public abstract CrawlJobDaoAndroid getCrawlJobDao();
+
+    public abstract CrawJoblItemDaoAndroid getDownloadJobCrawlItemDao();
 
 }

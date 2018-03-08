@@ -74,12 +74,4 @@ public interface NetworkManagerCore {
 
     NetworkTask getTaskById(long taskId, int queueType);
 
-    /**
-     * This method is to be called when other components (e.g. directory scanner etc) discover
-     * new content, or catalog discover content that was previously thought to have been acquired
-     * is no longer around (e.g. the user manually deleted or moved files)
-     *
-     * @param entryId Entry id for which status has been discovered
-     */
-    public void handleEntryStatusChangeDiscovered(String entryId, int acquisitionStatus);
 }

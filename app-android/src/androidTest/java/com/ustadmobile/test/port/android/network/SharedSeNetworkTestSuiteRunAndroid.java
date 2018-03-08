@@ -22,7 +22,6 @@ import org.junit.Rule;
 /**
  * Created by mike on 8/9/17.
  */
-
 public class SharedSeNetworkTestSuiteRunAndroid extends SharedSeNetworkTestSuite {
 
     public static final ServiceTestRule mServiceRule = new ServiceTestRule();

@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskHistoryEntry;
-import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.core.networkmanager.NetworkManagerTaskListener;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
@@ -30,9 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -100,12 +97,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 //
 //    private boolean wifiDirectDownloadEnabled = true;
 
-    /**
-     * Map all entry download statuses to their entry ID.
-     * Useful when retrieving current status of entry acquisition task.
-     */
-    protected Map<String, Status> statusMap = new Hashtable<>();
-
     private String currentEntryTitle;
 
     /**
@@ -166,6 +157,9 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     private String currentExpectedMimeType;
 
+
+
+
     /**
      * Monitor file acquisition task progress and report it to the rest of the app (UI).
      * <p>
@@ -206,79 +200,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
     }
 
 
-    @Deprecated
-    public static class Status implements AcquisitionTaskStatus{
-
-        long downloadedSoFar;
-
-        long totalSize;
-
-        int status;
-
-        long currentSpeed;
-
-        public Status() {
-
-        }
-
-        /**
-         * Get all the bytes downloaded so far from the source file.
-         * @return long: Total bytes downloaded so far
-         */
-        public synchronized long getDownloadedSoFar() {
-            return downloadedSoFar;
-        }
-
-        /**
-         * Set all the bytes downloaded so far from the source file
-         * @param downloadedSoFar long: Total bytes downloaded so far
-         *
-         */
-        protected synchronized void setDownloadedSoFar(long downloadedSoFar) {
-            this.downloadedSoFar = downloadedSoFar;
-        }
-
-        /**
-         * Get file size (Total bytes in the file)
-         * @return long: File size
-         */
-        public long getTotalSize() {
-            return totalSize;
-        }
-
-        /**
-         * Set total file size.
-         * @param totalSize long: total bytes in the file.
-         */
-        protected synchronized void setTotalSize(long totalSize) {
-            this.totalSize = totalSize;
-        }
-
-
-        /**
-         * Get file acquisition status
-         * @return
-         */
-        public int getStatus() {
-            return status;
-        }
-
-        /**
-         * Set file acquisition status
-         * @param status int:
-         */
-        protected synchronized void setStatus(int status) {
-            this.status = status;
-        }
-
-        public long getCurrentSpeed() {
-            return currentSpeed;
-        }
-
-        protected void setCurrentSpeed(long currentSpeed) {
-            this.currentSpeed = currentSpeed;
-        }
-    }
 
 
     /**
@@ -694,17 +615,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             httpDownload.stop();
 
         cleanup(statusAfterStopped);
-    }
-
-    /**
-     * Get specific entry status.
-     * @param entryId: Entry Id which identifies an Entry
-     * @return Status: Status object in which extra information
-     *                 for the particular entry acquisition
-     *                 can be found
-     */
-    public Status getStatusByEntryId(String entryId) {
-        return statusMap.get(entryId);
     }
 
     @Override

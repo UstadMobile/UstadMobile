@@ -212,6 +212,9 @@ android {
         buildConfigField "String", "ACRA_BASIC_PASS", "\"" + project.ext.buildConfigProperties["android.acra.basicPass"]+ "\""
 
         manifestPlaceholders = [applicationClass: "android.app.Application"]
+
+        testInstrumentationRunnerArgument "notAnnotation", "com.ustadmobile.test.core.annotation.PeerServerRequiredTest"
+//        testInstrumentationRunnerArgument "annotation", "android.support.test.filters.MediumTest"
     }
 
     flavorDimensions "config"
@@ -425,6 +428,11 @@ dependencies {
     implementation group: 'com.android.support', name: "support-v4", version: "[26+, 27+]"
 
 
+    androidTestImplementation group: 'com.android.support', name: "appcompat-v7", version: "27.0.2"
+    androidTestImplementation group: 'com.android.support', name: "cardview-v7", version: "27.0.2"
+    androidTestImplementation group: 'com.android.support', name: "design", version: "27.0.2"
+    androidTestImplementation group: 'com.android.support', name: "support-v4", version: "27.0.2"
+
     //Image loading library
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
@@ -460,11 +468,14 @@ dependencies {
     implementation "ch.acra:acra-dialog:$acraVersion"
 
     androidTestImplementation 'junit:junit:4.12'
-    androidTestImplementation group: "com.android.support", name: "support-annotations", version: "[26+, 27+]"
+    androidTestImplementation group: "com.android.support", name: "support-annotations", version: "27.0.2"
 
     //As per: https://developer.android.com/topic/libraries/testing-support-library/packages.html#gradle-dependencies
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-contrib:3.0.1'
+
 
     androidTestImplementation "org.mockito:mockito-android:2.13.0"
 }
@@ -494,3 +505,4 @@ publishing {
         }
     }
 }
+

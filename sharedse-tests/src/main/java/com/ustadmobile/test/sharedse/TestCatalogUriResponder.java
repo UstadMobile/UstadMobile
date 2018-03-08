@@ -144,7 +144,7 @@ public class TestCatalogUriResponder {
     public void testCatalogUriResponderNoParam() throws IOException {
         NanoHTTPD.IHTTPSession mockSession = Mockito.mock(NanoHTTPD.IHTTPSession.class);
         RouterNanoHTTPD.UriResource mockUriResource = Mockito.mock(RouterNanoHTTPD.UriResource.class);
-        Mockito.when(mockSession.getUri()).thenReturn("/catalog/container/");
+        Mockito.when(mockSession.getUri()).thenReturn("/catalog/container-dl/");
         Map<String, List<String>> paramsMaps = new HashMap<>();
         Mockito.when(mockSession.getParameters()).thenReturn(paramsMaps);
         CatalogUriResponder responder = new CatalogUriResponder();

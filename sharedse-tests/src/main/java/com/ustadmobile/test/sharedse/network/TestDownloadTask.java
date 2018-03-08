@@ -30,6 +30,7 @@ import com.ustadmobile.port.sharedse.networkmanager.NetworkManager;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.test.core.annotation.PeerServerRequiredTest;
 import com.ustadmobile.test.core.buildconfig.TestConstants;
 import com.ustadmobile.test.core.impl.ClassResourcesResponder;
 import com.ustadmobile.test.core.impl.PlatformTestUtil;
@@ -67,6 +68,7 @@ import static org.mockito.AdditionalMatchers.gt;
  *
  * Created by kileha3 on 17/05/2017.
  */
+@PeerServerRequiredTest
 public class TestDownloadTask {
 
     private static final int DEFAULT_ACQUIRE_TIMEOUT = 120000;//default acquire timeout: 2mins
