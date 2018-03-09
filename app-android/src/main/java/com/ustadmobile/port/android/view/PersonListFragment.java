@@ -1,72 +1,38 @@
 package com.ustadmobile.port.android.view;
 
 import android.os.Bundle;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.toughra.ustadmobile.R;
-import com.ustadmobile.core.controller.ControllerReadyListener;
-import com.ustadmobile.core.controller.UstadController;
-import com.ustadmobile.core.model.ListableEntity;
-import com.ustadmobile.port.android.util.UMAndroidUtil;
-import com.ustadmobile.port.sharedse.controller.PersonListController;
-import com.ustadmobile.port.sharedse.view.PersonListView;
-
-import java.util.List;
+import com.ustadmobile.core.db.UmProvider;
+import com.ustadmobile.core.view.PersonListView;
+import com.ustadmobile.lib.db.entities.Person;
 
 /**
- * Created by mike on 20/11/16.
+ * Created by mike on 3/8/18.
  */
-@Deprecated
-public class PersonListFragment extends EntityListFragment implements PersonListView, ControllerReadyListener, SwipeRefreshLayout.OnRefreshListener {
 
-    private PersonListController mPersonListController;
+public class PersonListFragment extends UstadBaseFragment implements PersonListView{
 
+    private View rootView;
+
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        PersonListController.makeControllerForView(this, UMAndroidUtil.bundleToHashtable(getArguments()),
-//                this);
-    }
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        rootView = inflater.inflate(R.layout.fragment_person_list, container, false);
 
 
-    @Override
-    public void controllerReady(UstadController controller, int flags) {
-        mPersonListController = (PersonListController)controller;
-        setEntityList(mPersonListController.getList());
-    }
-
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        refreshLayout.setEnabled(true);
-        refreshLayout.setOnRefreshListener(this);
-        return view;
-    }
-
-
-    public void setEntityList(List<? extends ListableEntity> list)  {
-        super.setEntityList(list);
-        mAdapter.setDetailTextVisible(false);
-        mAdapter.setStatusVisible(false);
-        mAdapter.setEntityIconId(R.drawable.ic_person_black_24dp);
+        return rootView;
     }
 
     @Override
-    public void onRefresh() {
-        mPersonListController.handleRefresh();
+    public void setProvider(UmProvider<Person> provider) {
+
     }
 
-    @Override
-    public void setRefreshing(boolean refreshingActive) {
-        getActivity().runOnUiThread(new Runnable() {
-            public void run() {
-                refreshLayout.setRefreshing(false);
-            }
-        });
-    }
+
 }

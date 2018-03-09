@@ -23,7 +23,7 @@ public class ClassManagementActivity2 extends UstadBaseActivity implements Class
 
     private Hashtable baseArgs;
 
-    public static final Class[] TAB_CLASSES = new Class[]{PersonListFragment.class, AttendanceListFragment.class};
+    public static final Class[] TAB_CLASSES = new Class[]{Object.class, AttendanceListFragment.class};
 
     private ClassManagementPagerAdapter2 mPagerAdapter;
 
