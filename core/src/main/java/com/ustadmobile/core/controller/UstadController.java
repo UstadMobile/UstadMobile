@@ -36,13 +36,13 @@ import com.ustadmobile.core.view.UstadView;
  *
  * @author mike
  */
-public interface UstadController {    
+public interface UstadController<V extends UstadView> {
     
-    public void setView(UstadView view);
+    void setView(V view);
     
-    public UstadView getView();
+    V getView();
     
-    public Object getContext();
+    Object getContext();
     
     
 }

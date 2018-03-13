@@ -13,6 +13,15 @@ public class DownloadJobWithRelations extends DownloadJob{
     @UmRelation(parentColumn = "id", entityColumn = "downloadJobId")
     private List <DownloadJobItem> downloadJobItems;
 
+    public DownloadJobWithRelations() {
+
+    }
+
+    public DownloadJobWithRelations(long createdTime) {
+        super(createdTime);
+    }
+
+
     public List<DownloadJobItem> getDownloadJobItems() {
         return downloadJobItems;
     }

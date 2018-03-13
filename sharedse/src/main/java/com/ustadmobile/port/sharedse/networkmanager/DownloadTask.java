@@ -374,7 +374,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                         && responseNode.getTimeSinceWifiDirectLastUpdated() < NetworkManager.ALLOWABLE_DISCOVERY_RANGE_LIMIT) {
                     targetNetwork = TARGET_NETWORK_WIFIDIRECT_GROUP;
                     currentDownloadMode = DOWNLOAD_FROM_PEER_ON_DIFFERENT_NETWORK;
-                } else if (wifiAvailable || isDownloadOnMobileDataEnabled()) {
+                } else if (wifiAvailable || downloadJob.isMobileDataEnabled()) {
                     //download from cloud
                     targetNetwork = wifiAvailable ? TARGET_NETWORK_NORMAL : TARGET_NETWORK_MOBILE_DATA;
                     currentDownloadUrl = feedEntryAcquisitionUrl;
@@ -802,9 +802,6 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
         return score;
     }
 
-    public boolean isDownloadOnMobileDataEnabled() {
-        return false;
-    }
 
     protected String getLogPrefix() {
         return "DownloadTask #" + getTaskId() + " Item # " + currentEntryIdIndex + " Attempt # "

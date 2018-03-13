@@ -37,6 +37,13 @@ public class OpdsEntryWithRelations extends OpdsEntry{
         return containerFileEntries;
     }
 
+    public OpdsEntryWithRelations(String uuid, String entryId, String title) {
+        super(uuid, entryId, title);
+    }
+
+    public OpdsEntryWithRelations() {
+    }
+
     public void setContainerFileEntries(List<ContainerFileEntry> containerFileEntries) {
         this.containerFileEntries = containerFileEntries;
     }

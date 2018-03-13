@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 /**
@@ -12,14 +13,18 @@ public class DownloadJobItem {
     @UmPrimaryKey(autoIncrement = true)
     private int id;
 
+    @UmIndexField
     private int downloadJobId;
 
+    @UmIndexField
     private String opdsEntryUuid;
 
+    @UmIndexField
     private String entryId;
 
     private long updated;
 
+    @UmIndexField
     private int status;
 
     private int containerFileId;
@@ -35,12 +40,15 @@ public class DownloadJobItem {
     }
 
     public DownloadJobItem(OpdsEntryWithRelations entry, DownloadJob job) {
-        this.downloadJobId = job.getId();
+        this(entry, job.getId());
+//        TODO: determine the length of this download
+    }
+
+    public DownloadJobItem(OpdsEntryWithRelations entry, int downloadJobId) {
+        this.downloadJobId = downloadJobId;
         this.entryId = entry.getEntryId();
         this.opdsEntryUuid = entry.getUuid();
-//        this.updated = entry.getUpdated();
 
-//        TODO: determine the length of this download
     }
 
     public int getId() {

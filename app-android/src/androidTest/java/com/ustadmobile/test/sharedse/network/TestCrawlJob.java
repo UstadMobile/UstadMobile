@@ -117,8 +117,7 @@ public class TestCrawlJob {
                 "http://localhost:" + resourcesHttpd.getListeningPort(),
                 "res/com/ustadmobile/test/sharedse/crawlme/index.opds");
         CrawlJob crawlJob = new CrawlJob();
-        crawlJob.setAddContainersToDownloadJob(true);
-        crawlJob.setDownloadJobId(job.getId());
+        crawlJob.setContainersDownloadJobId(job.getId());
         crawlJob.setCrawlJobId((int)dbManager.getCrawlJobDao().insert(crawlJob));
 
         CrawlJobItem rootCrawlItem = new CrawlJobItem(crawlJob.getCrawlJobId(), opdsRootIndexUrl,

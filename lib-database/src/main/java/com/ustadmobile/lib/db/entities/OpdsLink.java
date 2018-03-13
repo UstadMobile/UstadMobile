@@ -23,6 +23,7 @@ public class OpdsLink {
 
     private String href;
 
+    @UmIndexField
     private String rel;
 
     private long length;

@@ -18,6 +18,8 @@ public class DownloadJob {
      */
     private int status;
 
+    private long timeCreated;
+
     private long timeRequested;
 
     private long timeCompleted;
@@ -27,6 +29,17 @@ public class DownloadJob {
     private boolean wifiDirectDownloadEnabled;
 
     private boolean lanDownloadEnabled;
+
+    private boolean mobileDataEnabled;
+
+    public DownloadJob(){
+
+    }
+
+    public DownloadJob(long timeCreated) {
+        this.timeCreated = timeCreated;
+    }
+
 
     public int getId() {
         return id;
@@ -42,6 +55,14 @@ public class DownloadJob {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public long getTimeCreated() {
+        return timeCreated;
+    }
+
+    public void setTimeCreated(long timeCreated) {
+        this.timeCreated = timeCreated;
     }
 
     public long getTimeRequested() {
@@ -95,6 +116,14 @@ public class DownloadJob {
 
     public void setLanDownloadEnabled(boolean lanDownloadEnabled) {
         this.lanDownloadEnabled = lanDownloadEnabled;
+    }
+
+    public boolean isMobileDataEnabled() {
+        return mobileDataEnabled;
+    }
+
+    public void setMobileDataEnabled(boolean mobileDataEnabled) {
+        this.mobileDataEnabled = mobileDataEnabled;
     }
 
     @Override

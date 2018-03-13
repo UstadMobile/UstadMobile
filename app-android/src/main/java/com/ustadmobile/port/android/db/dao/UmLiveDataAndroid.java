@@ -34,9 +34,14 @@ public class UmLiveDataAndroid<T> implements UmLiveData<T> {
 
     @Override
     public void observe(UstadController controller, UmObserver<T> observer) {
-        LifecycleOwner owner = (LifecycleOwner)controller.getContext();
         Observer<T> observerImpl = observer::onChanged;
-        src.observe(owner, observerImpl);
+        if(controller.getContext() instanceof LifecycleOwner) {
+            LifecycleOwner owner = (LifecycleOwner)controller.getContext();
+            src.observe(owner, observerImpl);
+        }else {
+            src.observeForever(observerImpl);
+        }
+
         observersHashMap.put(observer, observerImpl);
     }
 

@@ -73,6 +73,14 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     private DownloadProgressView mDownloadProgressView;
 
 
+    public interface OnClickDownloadListener{
+
+        void onClickDownload(OpdsEntryWithRelations entry);
+
+    }
+
+    private OnClickDownloadListener onClickDownloadListener;
+
     public OPDSEntryCard(Context ctx) {
         super(ctx);
     }
@@ -84,6 +92,8 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
     public OPDSEntryCard(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+
+
 
 
     public void setOpdsEntry(OpdsEntryWithRelations opdsEntry) {
@@ -183,8 +193,6 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
         }else {
             Picasso.with(getContext()).load("um-"+url).fit().centerInside().into(thumbImageView);
         }
-
-
     }
 
 
@@ -200,6 +208,22 @@ public class OPDSEntryCard extends android.support.v7.widget.CardView {
                 progressViewHolder.setProgress(progress);
                 break;
         }
+    }
+
+
+
+    public OnClickDownloadListener getOnClickDownloadListener() {
+        return onClickDownloadListener;
+    }
+
+    public void setOnClickDownloadListener(OnClickDownloadListener onClickDownloadListener) {
+        this.onClickDownloadListener = onClickDownloadListener;
+        findViewById(R.id.opds_item_download_icon).setOnClickListener(this::handleClickDownloadIcon);
+    }
+
+    public void handleClickDownloadIcon(View view){
+        if(onClickDownloadListener != null)
+            onClickDownloadListener.onClickDownload(opdsEntry);
     }
 
 }

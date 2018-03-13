@@ -12,13 +12,9 @@ public class CrawlJob {
     @UmPrimaryKey(autoIncrement = true)
     private Integer crawlJobId;
 
-    private String rootOpdsUuid;
-
     private int status;
 
-    private boolean addContainersToDownloadJob = false;
-
-    private int downloadJobId;
+    private int containersDownloadJobId = -1;
 
     public Integer getCrawlJobId() {
         return crawlJobId;
@@ -26,14 +22,6 @@ public class CrawlJob {
 
     public void setCrawlJobId(Integer crawlJobId) {
         this.crawlJobId = crawlJobId;
-    }
-
-    public String getRootOpdsUuid() {
-        return rootOpdsUuid;
-    }
-
-    public void setRootOpdsUuid(String rootOpdsUuid) {
-        this.rootOpdsUuid = rootOpdsUuid;
     }
 
     public int getStatus() {
@@ -44,19 +32,23 @@ public class CrawlJob {
         this.status = status;
     }
 
-    public boolean isAddContainersToDownloadJob() {
-        return addContainersToDownloadJob;
+    /**
+     * If >= 0, containers that are found on this crawl will be added as DownloadJobItems to the
+     * given download job
+     *
+     * @return The id of the download job that containers, discovered on this crawl, should be added to
+     */
+    public int getContainersDownloadJobId() {
+        return containersDownloadJobId;
     }
 
-    public void setAddContainersToDownloadJob(boolean addContainersToDownloadJob) {
-        this.addContainersToDownloadJob = addContainersToDownloadJob;
-    }
-
-    public int getDownloadJobId() {
-        return downloadJobId;
-    }
-
-    public void setDownloadJobId(int downloadJobId) {
-        this.downloadJobId = downloadJobId;
+    /**
+     * If >= 0, containers that are found on this crawl will be added as DownloadJobItems to the
+     * given download job
+     *
+     * @param containersDownloadJobId
+     */
+    public void setContainersDownloadJobId(int containersDownloadJobId) {
+        this.containersDownloadJobId = containersDownloadJobId;
     }
 }

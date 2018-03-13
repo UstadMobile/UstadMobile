@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryDownloadStatus;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 
@@ -110,4 +111,85 @@ public abstract class OpdsEntryWithRelationsDao {
     public abstract List<String> getUuidsForEntryId(String entryId);
 
 
+    protected static final String GET_DOWNLOAD_STATUS_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId) AS (         \n" +
+            "\tVALUES(:entryId)         \n" +
+            "\tUNION         \n" +
+            "\tSELECT OpdsChildEntry.entryId FROM          \n" +
+            "\tOpdsEntryParentToChildJoin          \n" +
+            "\t\tJOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid         \n" +
+            "\t\tJOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid,         \n" +
+            "\tOpdsEntry_recursive         \n" +
+            "\tWHERE \n" +
+            "\tOpdsParentEntry.entryId = OpdsEntry_recursive.entryId         \n" +
+            ")         \n" +
+            "                     \n" +
+            "SELECT \n" +
+            "SUM(totalBytesDownloaded) AS totalBytesDownloaded,          \n" +
+            "SUM(linkLength) as totalSize,          \n" +
+            "SUM(numContainers) AS entriesWithContainer,         \n" +
+            "SUM(numContainersDownloaded) AS containersDownloaded,         \n" +
+            "SUM(numContainersDownloadPending) AS containersDownloadPending         \n" +
+            "FROM (         \n" +
+            "\tSELECT DistinctEntries.entryId As distinctEntryId, ContainerFile.fileSize, DownloadJobItem.downloadedSoFar as downloadedSoFar,         \n" +
+            "\tCASE         \n" +
+            "\t\tWHEN ContainerFileEntry.containerEntryId IS NOT NULL THEN 1         \n" +
+            "        WHEN DownloadJobItem.entryId IS NOT NULL THEN 1         \n" +
+            "        WHEN OpdsLink.id IS NOT NULL THEN 1         \n" +
+            "        ELSE 0         \n" +
+            "\tEND AS numContainers,         \n" +
+            "    \n" +
+            "\tCASE          \n" +
+            "\t\tWHEN ContainerFileEntry.containerEntryId IS NOT NULL THEN 1         \n" +
+            "        ELSE 0         \n" +
+            "    END AS numContainersDownloaded,         \n" +
+            "\tCASE         \n" +
+            "\t\tWHEN ContainerFileEntry.containerEntryId IS NULL AND DownloadJobItem.entryId IS NOT NULL THEN 1         \n" +
+            "\t\tELSE 0         \n" +
+            "\tEND AS numContainersDownloadPending,         \n" +
+            "\tCASE           \n" +
+            "\t\tWHEN ContainerFile.id IS NOT NULL THEN ContainerFile.fileSize         \n" +
+            "\t\tWHEN DownloadJobItem.downloadedSoFar > 0 THEN DownloadJobItem.downloadedSoFar         \n" +
+            "\t\tELSE 0         \n" +
+            "\tEND AS totalBytesDownloaded,         \n" +
+            "                     \n" +
+            "\tCASE         \n" +
+            "\t\tWHEN ContainerFile.id IS NOT NULL THEN ContainerFile.fileSize         \n" +
+            "\t\tWHEN DownloadJobItem.entryId IS NOT NULL THEN DownloadJobItem.downloadLength         \n" +
+            "\t\tWHEN OpdsLink.id IS NOT NULL THEN OpdsLink.length         \n" +
+            "\t\tELSE 0         \n" +
+            "\tEND AS linkLength         \n" +
+            "                         \n" +
+            "\tFROM OpdsEntry_recursive AS DistinctEntries         \n" +
+            "\t\tLEFT JOIN ContainerFileEntry on ContainerFileEntry.containerFileEntryId = (SELECT containerFileEntryId FROM ContainerFileEntry WHERE ContainerFileEntry.containerEntryId = DistinctEntries.entryId LIMIT 1)         \n" +
+            "\t\tLEFT JOIN ContainerFile on ContainerFileEntry.containerFileId = ContainerFile.id         \n" +
+            "\t\tLEFT JOIN DownloadJobItem on DownloadJobItem.id = (SELECT DownloadJobItem.id FROM DownloadJobItem LEFT JOIN DownloadJob ON DownloadJobItem.downloadJobId = DownloadJob.id WHERE DownloadJobItem.entryId = DistinctEntries.entryId AND DownloadJob.status > 0 AND DownloadJob.status < 20)         \n" +
+            "\t\tLEFT JOIN OpdsEntry on OpdsEntry.uuid = (         \n" +
+            "\t\t\tSELECT OpdsEntry.uuid FROM OpdsEntry WHERE OpdsEntry.entryId = DistinctEntries.entryId ORDER BY OpdsEntry.updated LIMIT 1          \n" +
+            "\t\t)         \n" +
+            "\t\tLEFT JOIN OpdsLink On OpdsLink.id = (\n" +
+            "\t\t\tSELECT OpdsLink.id FROM OpdsLink WHERE OpdsLink.entryUuid = OpdsEntry.uuid AND OpdsLink.rel LIKE \"http://opds-spec.org/acquisition%\" LIMIT 1\n" +
+            "\t\t)         \n" +
+            ")";
+    @UmQuery(GET_DOWNLOAD_STATUS_SQL)
+    public abstract OpdsEntryDownloadStatus getEntryDownloadStatus(String entryId);
+
+    @UmQuery(GET_DOWNLOAD_STATUS_SQL)
+    public abstract UmLiveData<OpdsEntryDownloadStatus> getEntryDownloadStatusLive(String entryId);
+
+
+    protected static final String GET_CHILD_ENTRIES_RECURSIVE_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId) AS (\n" +
+            "\tVALUES(:entryId)\n" +
+            "\tUNION\n" +
+            "\tSELECT OpdsChildEntry.entryId FROM \n" +
+            "\tOpdsEntryParentToChildJoin \n" +
+            "\t\tJOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid\n" +
+            "\t\tJOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid,\n" +
+            "\tOpdsEntry_recursive\n" +
+            "\tWHERE\n" +
+            "\t\tOpdsParentEntry.entryId = OpdsEntry_recursive.entryId\n" +
+            ")\n" +
+            "\n" +
+            "SELECT entryId FROM OpdsEntry_recursive";
+    @UmQuery(GET_CHILD_ENTRIES_RECURSIVE_SQL)
+    public abstract List<String> findAllChildEntryIdsRecursive(String entryId);
 }

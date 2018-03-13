@@ -37,4 +37,8 @@ public abstract class CrawJoblItemDaoAndroid extends CrawJoblItemDao {
     public CrawlJobItem findNextItemAndUpdateStatus(int downloadJobId, int status) {
         return super.findNextItemAndUpdateStatus(downloadJobId, status);
     }
+
+    @Override
+    @Insert
+    public abstract void insertAll(List<CrawlJobItem> item);
 }

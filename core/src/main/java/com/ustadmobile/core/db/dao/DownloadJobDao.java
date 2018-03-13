@@ -6,6 +6,7 @@ import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobWithRelations;
+import com.ustadmobile.lib.db.entities.DownloadJobWithTotals;
 
 /**
  * Created by mike on 1/31/18.
@@ -51,6 +52,16 @@ public abstract class DownloadJobDao {
 
     @UmQuery("SELECT * From DownloadJob where id = :id")
     public abstract UmLiveData<DownloadJobWithRelations> getByIdLive(int id);
+
+    @UmQuery("SELECT * FROM DownloadJob ORDER BY timeCreated ASC LIMIT 1")
+    public abstract DownloadJobWithRelations findLastCreated();
+
+    @UmQuery("SELECT DownloadJob.*, " +
+            " (SELECT COUNT(*) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.id) AS numJobItems, " +
+            " (SELECT SUM(DownloadJobItem.downloadLength) FROM DownloadJobItem WHERE DownloadJobItem.downloadJobId = DownloadJob.id) AS totalDownloadSize " +
+            " FROM DownloadJob Where DownloadJob.id= :id")
+    public abstract UmLiveData<DownloadJobWithTotals> findByIdWithTotals(int id);
+
 
 
 }

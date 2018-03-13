@@ -46,9 +46,9 @@ import java.util.Vector;
  * 
  * @author mike
  */
-public abstract class UstadBaseController implements UstadController {
+public abstract class UstadBaseController<V extends UstadView> implements UstadController<V> {
 
-    private UstadView view;
+    protected V view;
     
     protected Object context;
     
@@ -70,16 +70,7 @@ public abstract class UstadBaseController implements UstadController {
     public static final int[] STANDARD_APPMENU_STRIDS = new int[]{MessageID.home,
         MessageID.about, MessageID.settings,MessageID.logout};
 
-
-    /**
-     * Create a new controller with the given context
-     * 
-     * @param context System dependent context object
-     * @param statusEventListeningEnabled Whether or not to register for status event updates and pass to the view
-     */
-    public UstadBaseController(Object context, boolean statusEventListeningEnabled) {
-        this.context = context;
-    }
+    private Hashtable arguments;
 
     /**
      * Create a new controller with the given context
@@ -87,15 +78,22 @@ public abstract class UstadBaseController implements UstadController {
      * @param context System dependent context objec
      */
     public UstadBaseController(Object context) {
-        this(context, true);
+        this.context = context;
     }
+
+    public UstadBaseController(Object context, Hashtable arguments, V view) {
+        this.context = context;
+        this.arguments = arguments;
+        this.view = view;
+    }
+
     
     /**
      * Set the view that this controller is associated with
      * 
      * @param view 
      */
-    public void setView(UstadView view) {
+    public void setView(V view) {
         this.view = view;
     }
 
@@ -103,10 +101,10 @@ public abstract class UstadBaseController implements UstadController {
      * Get the view this controller is associated with
      * @return View this controller is associated with
      */
-    public UstadView getView() {
+    public V getView() {
         return this.view;
     }
-    
+
     /**
      * Get the system dependent context for this controller
      * 
@@ -115,12 +113,20 @@ public abstract class UstadBaseController implements UstadController {
     public Object getContext() {
         return this.context;
     }
-    
-    /**
-     * Must call all view methods that set UI strings - e.g.  when the
-     * locale is changed
-     */
-    public abstract void setUIStrings();
+
+
+    public void onCreate(Hashtable savedState) {
+
+    }
+
+    public void onStart() {
+
+    }
+
+
+    public void onStop() {
+
+    }
 
     /**
      * Called when the view is destroyed and removed from memory. onDestroy in Android, when the form
@@ -135,13 +141,15 @@ public abstract class UstadBaseController implements UstadController {
         }
     }
 
-    public void onStop() {
 
-    }
 
-    public void onStart() {
+    /**
+     * Must call all view methods that set UI strings - e.g.  when the
+     * locale is changed
+     */
+    public abstract void setUIStrings();
 
-    }
+
 
 
     /**
@@ -187,7 +195,16 @@ public abstract class UstadBaseController implements UstadController {
     protected synchronized void setDestroyed(boolean isDestroyed) {
         this.isDestroyed = isDestroyed;
     }
-    
+
+    public Hashtable getArguments() {
+        return arguments;
+    }
+
+    protected void setArguments(Hashtable arguments) {
+        this.arguments = arguments;
+    }
+
+
     /**
      * Handle when users have clicked a standard option from the menu
      * 

@@ -67,10 +67,6 @@ public abstract class BaseCatalogPresenter extends UstadBaseController implement
     }
 
 
-    public BaseCatalogPresenter(Object context, boolean statusEventListeningEnabled) {
-        super(context, statusEventListeningEnabled);
-    }
-
     public BaseCatalogPresenter(Object context) {
         super(context);
     }

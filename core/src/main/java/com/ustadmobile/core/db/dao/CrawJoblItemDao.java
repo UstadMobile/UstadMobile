@@ -20,6 +20,8 @@ public abstract class CrawJoblItemDao {
     @UmInsert
     public abstract void insert(CrawlJobItem item);
 
+    public abstract void insertAll(List<CrawlJobItem> item);
+
     public CrawlJobItem findNextItemAndUpdateStatus(int downloadJobId, int status){
         CrawlJobItem item = findNextItemForJob(downloadJobId);
         if(item != null) {

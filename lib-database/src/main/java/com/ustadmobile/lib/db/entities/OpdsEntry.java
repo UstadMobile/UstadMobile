@@ -1,6 +1,8 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndex;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -44,6 +46,7 @@ public class OpdsEntry {
     /**
      * The entryId as defined by the id element in an OPDS feed
      */
+    @UmIndexField
     private String entryId;
 
 
@@ -54,6 +57,7 @@ public class OpdsEntry {
 
     protected String title;
 
+    @UmIndexField
     protected String updated;
 
     protected String summary;
@@ -176,6 +180,17 @@ public class OpdsEntry {
         void onError(OpdsEntry item, Throwable cause);
 
     }
+
+    public OpdsEntry(String uuid, String entryId, String title) {
+        this.uuid = uuid;
+        this.entryId = entryId;
+        this.title = title;
+    }
+
+    public OpdsEntry() {
+
+    }
+
 
 
     /**

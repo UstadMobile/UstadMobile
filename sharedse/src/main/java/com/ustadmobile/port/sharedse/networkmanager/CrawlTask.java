@@ -68,6 +68,7 @@ public class CrawlTask extends NetworkTask {
                 OpdsEntryWithRelations itemEntry;
                 if(item.getUri().startsWith("http://") || item.getUri().startsWith("https://")){
                     List<OpdsEntryWithRelations> allItems = new ArrayList<>();
+                    List<DownloadJobItem> downloadJobItems = new ArrayList<>();
                     itemEntry = dbManager.getOpdsEntryWithRelationsRepository().getEntryByUrlStatic(
                             item.getUri());
                     if(itemEntry.getEntryType() == OpdsEntry.ENTRY_TYPE_OPDS_ENTRY_STANDALONE) {
@@ -79,10 +80,15 @@ public class CrawlTask extends NetworkTask {
 
                     for(OpdsEntryWithRelations entry : allItems) {
                         OpdsLink opdsLink = entry.getAcquisitionLink(null, false);
-                        if(opdsLink != null) {
+                        if(crawlJob.getContainersDownloadJobId() != -1 && opdsLink != null) {
                             //add this as an item that needs to be downloaded - downloadjobitem
-                            DownloadJobItem jobItem = new DownloadJobItem();
-                            System.out.println("Add job item for " + opdsLink.getHref());
+                            DownloadJobItem jobItem = new DownloadJobItem(entry,
+                                    crawlJob.getContainersDownloadJobId());
+                            if(opdsLink.getLength() > 0){
+                                jobItem.setDownloadLength(opdsLink.getLength());
+                            }
+
+                            downloadJobItems.add(jobItem);
                         }
 
                         List<OpdsLink> subsectionLinks = entry.getLinks(OpdsEntry.LINK_REL_SUBSECTION,
@@ -104,6 +110,7 @@ public class CrawlTask extends NetworkTask {
                         }
                     }
 
+                    dbManager.getDownloadJobItemDao().insertList(downloadJobItems);
                     dbManager.getDownloadJobCrawlItemDao().updateStatus(item.getId(), STATUS_COMPLETE);
                 }
             }

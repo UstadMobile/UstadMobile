@@ -16,7 +16,8 @@ public class ContainerFileEntry {
     @UmIndexField
     private int containerFileId;
 
-    String containerEntryId;
+    @UmIndexField
+    private String containerEntryId;
 
     private long containerEntryUpdated;
 

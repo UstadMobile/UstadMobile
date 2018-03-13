@@ -67,6 +67,7 @@ import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.port.android.util.UMAndroidUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -555,6 +556,10 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
         });
     }
 
+    public void handleClickDownload(OpdsEntryWithRelations entry){
+        mCatalogPresenter.handleClickDownload(Arrays.asList(entry));
+    }
+
     public boolean isAddOptionAvailable() {
         return mAddOptionAvailable;
     }
@@ -580,6 +585,7 @@ public class CatalogOPDSFragment extends UstadBaseFragment implements View.OnCli
                     R.layout.fragment_opds_item, null);
             cardView.setOnClickListener(CatalogOPDSFragment.this);
             cardView.setOnLongClickListener(CatalogOPDSFragment.this);
+            cardView.setOnClickDownloadListener(CatalogOPDSFragment.this::handleClickDownload);
             return new OpdsEntryViewHolder(cardView);
         }
 

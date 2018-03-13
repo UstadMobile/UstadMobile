@@ -16,6 +16,10 @@ public abstract class DownloadJobItemDao {
     @UmInsert
     public abstract void insertList(List<DownloadJobItem> jobItems);
 
+    @UmInsert
+    public abstract long insert(DownloadJobItem item);
+
+
     @UmQuery("Update DownloadJobItem SET " +
             "status = :status, downloadedSoFar = :downlaodedSoFar, " +
             "downloadLength = :downloadLength, currentSpeed = :currentSpeed" +

@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
 import com.ustadmobile.lib.database.annotation.UmIndex;
+import com.ustadmobile.lib.database.annotation.UmIndexField;
 
 /**
  * Created by mike on 1/23/18.
@@ -12,8 +13,10 @@ import com.ustadmobile.lib.database.annotation.UmIndex;
 )
 public class OpdsEntryParentToChildJoin {
 
+    @UmIndexField
     private String parentEntry;
 
+    @UmIndexField
     private String childEntry;
 
     private int childIndex;

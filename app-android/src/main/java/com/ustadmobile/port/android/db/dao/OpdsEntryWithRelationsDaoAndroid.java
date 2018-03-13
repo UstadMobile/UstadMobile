@@ -9,6 +9,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryDownloadStatus;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 
@@ -118,4 +119,21 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     @Override
     @Query("SELECT uuid From OpdsEntry WHERE entryId = :entryId")
     public abstract List<String> getUuidsForEntryId(String entryId);
+
+
+    @Override
+    @Query(GET_DOWNLOAD_STATUS_SQL)
+    public abstract OpdsEntryDownloadStatus getEntryDownloadStatus(String entryId);
+
+    @Override
+    public UmLiveData<OpdsEntryDownloadStatus> getEntryDownloadStatusLive(String entryId) {
+        return new UmLiveDataAndroid<>(getEntryDownloadStatusLive_Room(entryId));
+    }
+
+    @Query(GET_DOWNLOAD_STATUS_SQL)
+    public abstract LiveData<OpdsEntryDownloadStatus> getEntryDownloadStatusLive_Room(String entryId);
+
+    @Override
+    @Query(GET_CHILD_ENTRIES_RECURSIVE_SQL)
+    public abstract List<String> findAllChildEntryIdsRecursive(String entryId);
 }

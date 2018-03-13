@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -406,6 +407,24 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
     public void handleClickDownloadAll() {
         handleClickDownload(feed, feed.getAllEntries());
     }
+
+    public void handleClickDownload(List<OpdsEntryWithRelations> entries) {
+        ArrayList<String> entryUris = new ArrayList<>();
+        for(int i = 0; i < entries.size(); i++) {
+            List<OpdsLink> subsectionLinks = entries.get(i).getLinks(OpdsEntry.LINK_REL_SUBSECTION,
+                    null, null, false, false, false, 1);
+            if(subsectionLinks != null && !subsectionLinks.isEmpty()){
+                entryUris.add(resolveLink(subsectionLinks.get(0).getHref()));
+            }
+        }
+
+        String[] entryUrisArray = new String[entryUris.size()];
+        entryUrisArray = entryUris.toArray(entryUrisArray);
+        Hashtable args = new Hashtable();
+        args.put("r_uris", entryUrisArray);
+        UstadMobileSystemImpl.getInstance().go("StartDownload", args, getContext());
+    }
+
 
     public void handleClickDelete() {
         if(selectedEntries.size() > 0 && deleteEntryFromFeedEnabled) {

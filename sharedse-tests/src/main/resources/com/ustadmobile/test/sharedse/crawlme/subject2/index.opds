@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<feed xmlns="http://www.w3.org/2005/Atom" 
+  xmlns:dc="http://purl.org/dc/terms/" 
+  xmlns:opds="http://opds-spec.org/2010/catalog">
+    <id>3d468ae1-f8ca-4c78-b0d5-975efc76bceb</id>
+    
+    <link rel="start"
+                href="/opds/"
+                type="application/atom+xml;profile=opds-catalog;kind=navigation"/>
+    <link rel="self"
+		href="/acquire.opds"
+		type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
+    <title>Crawl Test</title>
+    <updated>2015-02-09T21:00:57Z</updated>
+    <author>
+	<name>Mike Test4</name> 
+	<uri>/user/6</uri>
+    </author>
+
+    <entry>
+        <title>Subject 2 - Part 1</title>
+        <link rel="http://opds-spec.org/acquisition"
+	        href="2a.epub"
+            type="application/epub+zip"/>
+            
+        <id>1bbf1957-092b-446b-8b86-63042f8169d1</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Subject 1</content>
+    </entry>
+
+    <entry>
+        <title>Subject 2 - Part 2</title>
+        <link rel="http://opds-spec.org/acquisition"
+	        href="2b.epub"
+            type="application/epub+zip"/>
+            
+        <id>7eaa7e5c-8b26-450e-b39c-755c16a2e4fc</id>
+        <updated>2015-02-09T18:58:12Z</updated>
+        <author>
+            <name>Varuna Singh</name>
+            <uri>/user/2</uri>
+        </author>
+        <content type="text">Subject 2</content>
+    </entry>
+
+</feed>

@@ -21,6 +21,10 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
     @Insert
     public abstract void insertList(List<DownloadJobItem> jobItems);
 
+    @Insert
+    @Override
+    public abstract long insert(DownloadJobItem item);
+
     @Override
     @Query("Update DownloadJobItem SET " +
             "status = :status, downloadedSoFar = :downloadedSoFar, " +
