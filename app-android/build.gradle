@@ -396,7 +396,7 @@ dependencies {
 
     vanillamultidexApi "com.android.support:multidex:1.0.2"
 
-    androidTestApi project(":core-tests")
+    androidTestImplementation project(":core-tests")
 
     project.ext.nanoLrsVersion = rootProject.ext.nanoLrsVersion
     api "com.ustadmobile.nanolrs:nanolrs-core:$nanoLrsVersion"
