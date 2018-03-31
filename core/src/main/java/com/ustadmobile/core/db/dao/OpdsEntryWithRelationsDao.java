@@ -4,7 +4,8 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryDownloadStatus;
+import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
+import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 
@@ -111,7 +112,7 @@ public abstract class OpdsEntryWithRelationsDao {
     public abstract List<String> getUuidsForEntryId(String entryId);
 
 
-    protected static final String GET_DOWNLOAD_STATUS_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId) AS (         \n" +
+    public static final String GET_DOWNLOAD_STATUS_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId) AS (         \n" +
             "\tVALUES(:entryId)         \n" +
             "\tUNION         \n" +
             "\tSELECT OpdsChildEntry.entryId FROM          \n" +
@@ -170,11 +171,11 @@ public abstract class OpdsEntryWithRelationsDao {
             "\t\t\tSELECT OpdsLink.id FROM OpdsLink WHERE OpdsLink.entryUuid = OpdsEntry.uuid AND OpdsLink.rel LIKE \"http://opds-spec.org/acquisition%\" LIMIT 1\n" +
             "\t\t)         \n" +
             ")";
-    @UmQuery(GET_DOWNLOAD_STATUS_SQL)
-    public abstract OpdsEntryDownloadStatus getEntryDownloadStatus(String entryId);
+//    @UmQuery(GET_DOWNLOAD_STATUS_SQL)
+//    public abstract OpdsEntryStatusCache getEntryDownloadStatus(String entryId);
 
-    @UmQuery(GET_DOWNLOAD_STATUS_SQL)
-    public abstract UmLiveData<OpdsEntryDownloadStatus> getEntryDownloadStatusLive(String entryId);
+//    @UmQuery(GET_DOWNLOAD_STATUS_SQL)
+//    public abstract UmLiveData<OpdsEntryStatusCache> getEntryDownloadStatusLive(String entryId);
 
 
     protected static final String GET_CHILD_ENTRIES_RECURSIVE_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId) AS (\n" +
@@ -192,4 +193,25 @@ public abstract class OpdsEntryWithRelationsDao {
             "SELECT entryId FROM OpdsEntry_recursive";
     @UmQuery(GET_CHILD_ENTRIES_RECURSIVE_SQL)
     public abstract List<String> findAllChildEntryIdsRecursive(String entryId);
+
+    public List<OpdsEntryAncestor> getAncestors(List<String> entryIds) {
+        return getAncestors_RecursiveQuery(entryIds);
+    }
+
+    protected static final String GET_ANCESTOR_ENTRIES_RECURSIVE_SQL = "WITH RECURSIVE OpdsEntry_recursive(entryId, descendantId) AS (\n" +
+            "\tSELECT OpdsEntry.entryId as entryId, OpdsEntry.entryId as descendantId FROM OpdsEntry WHERE OpdsEntry.entryId IN (:entryIds)\n" +
+            "\tUNION\n" +
+            "\tSELECT OpdsParentEntry.entryId AS entryId, OpdsEntry_recursive.entryId AS descendantId FROM \n" +
+            "\tOpdsEntryParentToChildJoin \n" +
+            "\t\tJOIN OpdsEntry OpdsChildEntry ON OpdsEntryParentToChildJoin.childEntry = OpdsChildEntry.uuid\n" +
+            "\t\tJOIN OpdsEntry OpdsParentEntry ON OpdsEntryParentToChildJoin.parentEntry = OpdsParentEntry.uuid,\n" +
+            "\tOpdsEntry_recursive\n" +
+            "\tWHERE\n" +
+            "\t\tOpdsChildEntry.entryId = OpdsEntry_recursive.entryId\n" +
+            ")\n" +
+            "SELECT * FROM OpdsEntry_recursive ";
+    @UmQuery(GET_ANCESTOR_ENTRIES_RECURSIVE_SQL)
+    public abstract List<OpdsEntryAncestor> getAncestors_RecursiveQuery(List<String> entryIds);
+
+
 }

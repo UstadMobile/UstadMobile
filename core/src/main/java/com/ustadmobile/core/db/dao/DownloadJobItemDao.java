@@ -38,5 +38,7 @@ public abstract class DownloadJobItemDao {
                                                                                   int statusFrom,
                                                                                   int statusTo);
 
+    @UmQuery("SELECT * FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
+    public abstract List<DownloadJobItem> findAllByDownloadJob(int downloadJobId);
 
 }

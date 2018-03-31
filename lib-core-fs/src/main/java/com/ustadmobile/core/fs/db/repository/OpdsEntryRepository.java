@@ -6,7 +6,8 @@ import com.ustadmobile.core.db.UmProvider;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
-import com.ustadmobile.lib.db.entities.OpdsEntryDownloadStatus;
+import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
+import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelationsAndContainerMimeType;
 
@@ -148,18 +149,25 @@ public class OpdsEntryRepository extends OpdsEntryWithRelationsDao {
         return null;
     }
 
-    @Override
-    public OpdsEntryDownloadStatus getEntryDownloadStatus(String entryId) {
-        return null;
-    }
+//    @Override
+//    public OpdsEntryStatusCache getEntryDownloadStatus(String entryId) {
+//        return null;
+//    }
+//
+//    @Override
+//    public UmLiveData<OpdsEntryStatusCache> getEntryDownloadStatusLive(String entryId) {
+//        return null;
+//    }
+
 
     @Override
     public List<String> findAllChildEntryIdsRecursive(String entryId) {
         return null;
     }
 
+
     @Override
-    public UmLiveData<OpdsEntryDownloadStatus> getEntryDownloadStatusLive(String entryId) {
+    public List<OpdsEntryAncestor> getAncestors_RecursiveQuery(List<String> entryIds) {
         return null;
     }
 }

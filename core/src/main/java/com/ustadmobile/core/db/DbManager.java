@@ -29,6 +29,10 @@ public abstract class DbManager {
 
     public abstract OpdsEntryWithRelationsDao getOpdsEntryWithRelationsDao();
 
+    public abstract OpdsEntryStatusCacheDao getOpdsEntryStatusCacheDao();
+
+    public abstract OpdsEntryStatusCacheAncestorDao getOpdsEntryStatusCacheAncestorDao();
+
     public abstract OpdsLinkDao getOpdsLinkDao();
 
     public abstract OpdsEntryParentToChildJoinDao getOpdsEntryParentToChildJoinDao();

@@ -39,4 +39,8 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
 
     @Query("SELECT * FROM DownloadJobItem WHERE entryId = :entryId AND status BETWEEN :statusFrom AND :statusTo")
     public abstract LiveData<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRangeR(String entryId, int statusFrom, int statusTo);
+
+    @Query("SELECT * FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
+    @Override
+    public abstract List<DownloadJobItem> findAllByDownloadJob(int downloadJobId);
 }

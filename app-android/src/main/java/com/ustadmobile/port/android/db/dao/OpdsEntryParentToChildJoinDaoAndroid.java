@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutorService;
  * Created by mike on 1/23/18.
  */
 @Dao
-public abstract class OpdsEntryParentToChildJoinDaoAndriod extends OpdsEntryParentToChildJoinDao implements UmDaoAndroid{
+public abstract class OpdsEntryParentToChildJoinDaoAndroid extends OpdsEntryParentToChildJoinDao implements UmDaoAndroid{
 
     private ExecutorService executorService;
 
