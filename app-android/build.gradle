@@ -415,9 +415,9 @@ dependencies {
 
 
 
-    androidTestApi project(":core-tests")
-    androidTestApi project(":sharedse-tests")
-    androidTestApi project(":lib-core-fs-tests")
+    androidTestImplementation project(":core-tests")
+    androidTestImplementation project(":sharedse-tests")
+    androidTestImplementation project(":lib-core-fs-tests")
 
     api 'com.ustadmobile.qrcodelibomrfork:qrcode-core:1.0.3'
 
