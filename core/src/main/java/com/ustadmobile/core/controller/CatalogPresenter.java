@@ -160,7 +160,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
 
 
         if(opdsUri.startsWith("https://") || opdsUri.startsWith("http://")) {
-            feedLiveData = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+            feedLiveData = DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
                     .getEntryByUrl(opdsUri);
             feedLiveData.observe(this, this::handleParentFeedLoaded);
         }else if(opdsUri.equals("entries:///my_library")) {
@@ -177,7 +177,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                     if(!present){
                         String presetUrl = UstadMobileSystemImpl.getInstance().getAppConfigString(
                                 APPCONFIG_DEFAULT_MY_LIBRARY, null, getContext());
-                        DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+                        DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
                                 .getEntryByUrl(presetUrl, libraryUuid);
                         libraryPresent.removeObserver(this);
                     }
@@ -195,7 +195,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                 dirsToList.add(storageDirs[i].getDirURI());
             }
 
-            entryProvider = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+            entryProvider = DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
                     .findEntriesByContainerFileDirectoryAsProvider(dirsToList, null);
             mView.setEntryProvider(entryProvider);
             title = UstadMobileSystemImpl.getInstance().getString(MessageID.downloaded, getContext());
@@ -514,7 +514,7 @@ public class CatalogPresenter extends BaseCatalogPresenter implements Acquisitio
                 dirsToList.add(storageDirs[i].getDirURI());
             }
 
-            DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+            DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
                     .findEntriesByContainerFileDirectoryAsProvider(dirsToList, new OpdsEntry.OpdsItemLoadCallback() {
                         @Override
                         public void onDone(OpdsEntry item) {

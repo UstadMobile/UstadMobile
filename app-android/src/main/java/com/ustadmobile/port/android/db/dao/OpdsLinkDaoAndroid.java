@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.db.dao;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
@@ -16,7 +17,7 @@ import java.util.List;
 public abstract class OpdsLinkDaoAndroid extends OpdsLinkDao{
 
     @Override
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void insert(List<OpdsLink> links);
 
     @Query("SELECT * From OpdsLink WHERE entryUuid = :entryUuid")

@@ -13,13 +13,14 @@ import com.ustadmobile.core.db.dao.DownloadJobItemDao;
 import com.ustadmobile.core.db.dao.DownloadJobItemHistoryDao;
 import com.ustadmobile.core.db.dao.EntryStatusResponseDao;
 import com.ustadmobile.core.db.dao.NetworkNodeDao;
+import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.db.dao.OpdsEntryDao;
 import com.ustadmobile.core.db.dao.OpdsEntryParentToChildJoinDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheAncestorDao;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
 import com.ustadmobile.core.db.dao.OpdsLinkDao;
-import com.ustadmobile.core.fs.db.repository.OpdsEntryRepository;
+import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.port.android.db.dao.ContainerFileDaoAndroid;
 import com.ustadmobile.port.android.db.dao.OpdsEntryParentToChildJoinDaoAndroid;
 
@@ -38,7 +39,7 @@ public class DbManagerAndroid extends DbManager {
 
     private ExecutorService executorService;
 
-    private OpdsEntryRepository opdsEntryRepository;
+    private OpdsAtomFeedRepositoryImpl opdsAtomFeedRepository;
 
     private ContainerFileDaoAndroid containerFileDao;
 
@@ -58,11 +59,11 @@ public class DbManagerAndroid extends DbManager {
 
 
     @Override
-    public OpdsEntryWithRelationsDao getOpdsEntryWithRelationsRepository() {
-        if(opdsEntryRepository == null)
-            opdsEntryRepository = new OpdsEntryRepository(this, executorService);
+    public OpdsAtomFeedRepository getOpdsAtomFeedRepository() {
+        if(opdsAtomFeedRepository == null)
+            opdsAtomFeedRepository = new OpdsAtomFeedRepositoryImpl(this, executorService);
 
-        return opdsEntryRepository;
+        return opdsAtomFeedRepository;
     }
 
     @Override

@@ -19,13 +19,15 @@
 
     <entry>
         <title>Small</title>
+
+        <link rel="http://opds-spec.org/acquisition"
+            href="small.epub"
+            type="application/epub+zip"
+            length="1000"/>
+
         <link rel="http://opds-spec.org/acquisition"
 	        href="small.pdf"
             type="application/pdf"/>
-   
-        <link rel="http://opds-spec.org/acquisition"
-            href="small.epub"
-            type="application/epub+zip"/>
         
         <link rel="http://opds-spec.org/acquisition"
             href="small-msword.docx"
@@ -54,7 +56,8 @@
         <link rel="http://opds-spec.org/acquisition"
                     hreflang="fa"
         	        href="big-fa.epub"
-                    type="application/epub+zip"/>
+                    type="application/epub+zip"
+                    length="5000"/>
 
         <link rel="http://opds-spec.org/acquisition"
                     hreflang="ps"
@@ -83,7 +86,8 @@
             <link rel="http://opds-spec.org/acquisition"
                         hreflang="fa"
             	        href="big-fa.epub"
-                        type="application/epub+zip"/>
+                        type="application/epub+zip"
+                        length="4500"/>
 
             <link rel="http://opds-spec.org/acquisition"
                         hreflang="ps"
@@ -118,7 +122,8 @@
                 <link rel="http://opds-spec.org/acquisition"
                             hreflang="fa"
                 	        href="big-fa.epub"
-                            type="application/epub+zip"/>
+                            type="application/epub+zip"
+                            length="4200"/>
 
                 <link rel="http://opds-spec.org/acquisition"
                             hreflang="ps"

@@ -23,7 +23,7 @@
             href="subject1/index.opds"
             type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
             
-        <id>d58c92a8-46a5-4e49-a747-e3927fce7b4b</id>
+        <id>http://umcloud1.ustadmobile.com/opds/test-crawl/subject1</id>
         <updated>2015-02-09T18:58:12Z</updated>
         <author>
             <name>Varuna Singh</name>
@@ -38,7 +38,7 @@
             href="subject2/index.opds"
             type="application/atom+xml;profile=opds-catalog;kind=acquisition"/>
             
-        <id>3d468ae1-f8ca-4c78-b0d5-975efc76bceb</id>
+        <id>http://umcloud1.ustadmobile.com/opds/test-crawl/subject2</id>
         <updated>2015-02-09T18:58:12Z</updated>
         <author>
             <name>Varuna Singh</name>

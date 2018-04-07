@@ -33,9 +33,14 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
     public abstract void updateDownloadJobItemStatus(int downloadJobItemId, int status, long downloadedSoFar, long downloadLength, long currentSpeed);
 
     @Override
-    public UmLiveData<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRange(String entryId, int statusFrom, int statusTo) {
+    public UmLiveData<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRangeLive(String entryId, int statusFrom, int statusTo) {
         return new UmLiveDataAndroid<>(findDownloadJobItemByEntryIdAndStatusRangeR(entryId, statusFrom, statusTo));
     }
+
+    @Query("Select * FROM DownloadJobItem WHERE entryId = :entryId AND status BETWEEN :statusFrom AND :statusTo")
+    public abstract List<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRange(String entryId,
+                                                                                     int statusFrom,
+                                                                                     int statusTo);
 
     @Query("SELECT * FROM DownloadJobItem WHERE entryId = :entryId AND status BETWEEN :statusFrom AND :statusTo")
     public abstract LiveData<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRangeR(String entryId, int statusFrom, int statusTo);
@@ -43,4 +48,9 @@ public abstract class DownloadJobItemDaoAndroid extends DownloadJobItemDao {
     @Query("SELECT * FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
     @Override
     public abstract List<DownloadJobItem> findAllByDownloadJob(int downloadJobId);
+
+    @Query("SELECT id FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
+    @Override
+    public abstract int[] findAllIdsByDownloadJob(int downloadJobId);
+
 }

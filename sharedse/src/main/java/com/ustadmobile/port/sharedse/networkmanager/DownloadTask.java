@@ -62,6 +62,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
 
     private DownloadJobItem currentDownloadJobItem;
 
+    private int currentEntryStatusCacheId;
+
     protected NetworkManagerTaskListener listener;
 
     private static final int DOWNLOAD_TASK_UPDATE_TIME=500;
@@ -185,6 +187,9 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
                 currentDownloadJobItem.setStatus(STATUS_RUNNING);
                 currentDownloadJobItem.setDownloadLength(httpDownload.getTotalSize());
                 mDbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(currentDownloadJobItem);
+
+                mDbManager.getOpdsEntryStatusCacheDao().handleDownloadJobProgress(
+                        currentEntryStatusCacheId, currentDownloadJobItem.getId());
             }
         }
     }
@@ -298,6 +303,8 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             if (index < downloadJob.getDownloadJobItems().size()) {
                 currentEntryIdIndex = index;
                 currentDownloadJobItem = downloadJob.getDownloadJobItems().get(currentEntryIdIndex);
+                currentEntryStatusCacheId = mDbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
+                        currentDownloadJobItem.getEntryId());
                 attemptCount++;
                 currentGroupSSID = null;
 
@@ -492,7 +499,7 @@ public class DownloadTask extends NetworkTask implements BluetoothConnectionHand
             if(downloadCompleted){
                 UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
                         " : Download completed successfully, saved to " + fileDestination.getAbsolutePath());
-                mDbManager.getOpdsEntryWithRelationsRepository().
+                mDbManager.getOpdsAtomFeedRepository().
                         findEntriesByContainerFileNormalizedPath(fileDestination.getAbsolutePath());
                 UstadMobileSystemImpl.l(UMLog.INFO, 3010, getLogPrefix() +  " : item " +
                         " : indexed in database");

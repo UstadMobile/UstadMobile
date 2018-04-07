@@ -69,7 +69,7 @@ public class CrawlTask extends NetworkTask {
                 if(item.getUri().startsWith("http://") || item.getUri().startsWith("https://")){
                     List<OpdsEntryWithRelations> allItems = new ArrayList<>();
                     List<DownloadJobItem> downloadJobItems = new ArrayList<>();
-                    itemEntry = dbManager.getOpdsEntryWithRelationsRepository().getEntryByUrlStatic(
+                    itemEntry = dbManager.getOpdsAtomFeedRepository().getEntryByUrlStatic(
                             item.getUri());
                     if(itemEntry.getEntryType() == OpdsEntry.ENTRY_TYPE_OPDS_ENTRY_STANDALONE) {
                         allItems.add(itemEntry);

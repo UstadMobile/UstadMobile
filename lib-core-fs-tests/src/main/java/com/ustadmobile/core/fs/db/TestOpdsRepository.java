@@ -3,8 +3,9 @@ package com.ustadmobile.core.fs.db;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
-import com.ustadmobile.core.fs.db.repository.OpdsEntryRepository;
+import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -48,8 +49,8 @@ public class TestOpdsRepository extends TestCase {
 
     @Test
     public void testOpdsRepositoryLoadFromFeed() {
-        OpdsEntryWithRelationsDao repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                .getOpdsEntryWithRelationsRepository();
+        OpdsAtomFeedRepository repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getOpdsAtomFeedRepository();
 
         String opdsUrl = UMFileUtil.joinPaths(new String[] {
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/core/acquire-multi.opds"});
@@ -125,8 +126,8 @@ public class TestOpdsRepository extends TestCase {
         fout.flush();
         fout.close();
 
-        OpdsEntryRepository repository = (OpdsEntryRepository)DbManager
-                .getInstance(PlatformTestUtil.getTargetContext()).getOpdsEntryWithRelationsRepository();
+        OpdsAtomFeedRepositoryImpl repository = (OpdsAtomFeedRepositoryImpl)DbManager
+                .getInstance(PlatformTestUtil.getTargetContext()).getOpdsAtomFeedRepository();
 
         ArrayList<OpdsEntryWithRelations> entriesInDir = new ArrayList<>();
         UmLiveData<List<OpdsEntryWithRelations>> entriesInDirLiveData = repository

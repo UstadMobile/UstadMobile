@@ -1,8 +1,10 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.core.db.DbManager;
+import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
+import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
@@ -21,9 +23,18 @@ import java.util.List;
  */
 public abstract class OpdsEntryStatusCacheDao {
 
+    /**
+     * Insert a new OpdsEntryStatusCache object
+     *
+     * @param status
+     */
     @UmInsert
     public abstract void insert(OpdsEntryStatusCache status);
 
+    /**
+     * Insert a list of new OpdsEntryStatusCache objects
+     * @param statuses
+     */
     public abstract void insertList(List<OpdsEntryStatusCache> statuses);
 
     /**
@@ -36,6 +47,17 @@ public abstract class OpdsEntryStatusCacheDao {
     @UmQuery("SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId")
     public abstract Integer findUidByEntryId(String entryId);
 
+
+    /**
+     * Get a live data result for the given entryId
+     *
+     * @param entryId Entry ID to lookup the status of
+     *
+     * @return LiveData object with the OpdsEntryStatusCache for the given object
+     */
+    @UmQuery("SELECT * From OpdsEntryStatusCache WHERE statusEntryId = :entryId")
+    public abstract UmLiveData<OpdsEntryStatusCache> findByEntryIdLive(String entryId);
+
     /**
      * Get the OpdsEntryStatusCache object for the given entryId
      *
@@ -47,19 +69,39 @@ public abstract class OpdsEntryStatusCacheDao {
     public abstract OpdsEntryStatusCache findByEntryId(String entryId);
 
     /**
+     * Get the OpdsEntryStatusCache object by the primary key
+     *
+     * @param statusCacheUid
+     *
+     * @return
+     */
+    @UmQuery("SELECT * FROM OpdsEntryStatusCache WHERE statusCacheUid = :statusCacheUid")
+    public abstract OpdsEntryStatusCache findByStatusCacheUid(int statusCacheUid);
+
+
+    /**
+     * Lookup the OpdsEntryStatusCache object by a given DownloadJobItemId
+     * @param downloadJobItemId id of the DownloadJobItem
+     *
+     * @return OpdsEntryStatusCache associated with the given download job item, or null if it doesn't exist
+     */
+    @UmQuery("SELECT OpdsEntryStatusCache.* FROM OpdsEntryStatusCache " +
+            "            LEFT JOIN DownloadJobItem ON DownloadJobItem.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "            WHERE DownloadJobItem.id = :downloadJobItemId")
+    public abstract OpdsEntryStatusCache findByDownloadJobItemId(int downloadJobItemId);
+
+
+    /**
      * When from OpdsRepository for loading HTTP feeds over OPDS or using the main sync arch. Update
      * the given loadedEntry, and all ancestors. This routine will determine the ancestors for the
      * each loaded entry.
      *
      * @param dbManager DbManager object
-     * @param loadedEntries - these MUST have been already committed to the database
-     * @param oldEntries if this entry has already been loaded, this should be it's previous state.
-     *                   This is used to calculate the difference (e.g. size change).
+     * @param loadedEntries The entries that have just been loaded. These MUST have been already
+     *                      committed to the OpdsEntry database.
      */
-    public void handleOpdsEntriesLoaded(DbManager dbManager, List<OpdsEntryWithRelations> loadedEntries,
-                                        List<OpdsEntryWithRelations> oldEntries) {
+    public void handleOpdsEntriesLoaded(DbManager dbManager, List<OpdsEntryWithRelations> loadedEntries) {
         OpdsEntryWithRelations loadedEntry;
-        OpdsEntryWithRelations oldEntry;
 
         //determine which entries do not have a corresponding EntryStatusCache yet
         HashMap<String, OpdsEntryWithRelations> entryIdToEntryMap = new HashMap<>();
@@ -68,18 +110,28 @@ public abstract class OpdsEntryStatusCacheDao {
         for(int i = 0; i < loadedEntries.size(); i++) {
             loadedEntry = loadedEntries.get(i);
             entryIdToEntryMap.put(loadedEntry.getEntryId(), loadedEntry);
-            if(oldEntries == null || oldEntries.get(i) == null) {
-                newStatusCachesEntryIds.add(loadedEntry.getEntryId());
-            }
+            newStatusCachesEntryIds.add(loadedEntry.getEntryId());
         }
 
-        newStatusCachesEntryIds = findEntryIdsNotPresent(newStatusCachesEntryIds);
-        for(String entryId : newStatusCachesEntryIds){
-            OpdsEntryWithRelations newStatusCacheEntry = entryIdToEntryMap.get(entryId);
-            OpdsLink link = newStatusCacheEntry.getAcquisitionLink(null, true);
-            newStatusCaches.add(new OpdsEntryStatusCache(entryId, link != null ? link.getLength() : 0));
+        List<String> entryIdsToAdd = findEntryIdsNotPresent(newStatusCachesEntryIds);
+        List<OpdsEntryStatusCache> oldEntryStatusCaches = findByEntryIdList(newStatusCachesEntryIds);
+        HashMap<String, OpdsEntryStatusCache>  entryStatusCacheMap = new HashMap<>();
+
+        for(OpdsEntryStatusCache oldEntryStatusCache : oldEntryStatusCaches){
+            entryStatusCacheMap.put(oldEntryStatusCache.getStatusEntryId(), oldEntryStatusCache);
         }
 
+        OpdsEntryStatusCache newEntryStatusCache;
+        for(String entryId : entryIdsToAdd){
+            newEntryStatusCache = new OpdsEntryStatusCache(entryId, 0);
+            newStatusCaches.add(newEntryStatusCache);
+            entryStatusCacheMap.put(entryId, newEntryStatusCache);
+        }
+
+        /*
+         * Insert any entries that were not present yet, and for each one insert it and a
+         * relationship entity to link it to all it's ancestors
+         */
         if(!newStatusCaches.isEmpty()) {
             //insert new status cache objects
             insertList(newStatusCaches);
@@ -104,30 +156,42 @@ public abstract class OpdsEntryStatusCacheDao {
                     entryIdToUidMap.put(ancestor.getEntryId(), ancestorOpdsEntryStatusCacheId);
                 }
 
-                cacheAncestors.add(new OpdsEntryStatusCacheAncestor(opdsEntryStatusCacheId,
-                        ancestorOpdsEntryStatusCacheId));
+                if(opdsEntryStatusCacheId != null && ancestorOpdsEntryStatusCacheId != null) {
+                    //Some entries (e.g. the master library list) might not have statuscacheid objects, so avoid handling them
+                    cacheAncestors.add(new OpdsEntryStatusCacheAncestor(opdsEntryStatusCacheId,
+                            ancestorOpdsEntryStatusCacheId));
+                }
             }
 
             dbManager.getOpdsEntryStatusCacheAncestorDao().insertAll(cacheAncestors);
         }
 
 
+        OpdsEntryStatusCache currentStatusCache;
         for(int i = 0; i < loadedEntries.size(); i++) {
             loadedEntry = loadedEntries.get(i);
-            oldEntry = oldEntries != null ? oldEntries.get(i) : null;
+            currentStatusCache = entryStatusCacheMap.get(loadedEntry.getEntryId());
+
+//            oldEntry = oldEntries != null ? oldEntries.get(i) : null;
             OpdsLink loadedLink = loadedEntry.getAcquisitionLink(null, true);
-            OpdsLink oldEntryLink = (oldEntry != null) ? oldEntry.getAcquisitionLink(null, false) : null;
+//            OpdsLink oldEntryLink = (oldEntry != null) ? oldEntry.getAcquisitionLink(null, false) : null;
 
             int deltaTotalSize = 0;
             int deltaNumEntriesWithContainer = 0;
-            if(loadedLink != null){
-                deltaTotalSize += loadedLink.getLength();
+            long linkLength = loadedLink != null ? loadedLink.getLength() : 0;
+
+            boolean isDownloadedOrDownloadPending = (currentStatusCache != null &&
+                    (currentStatusCache.isEntryContainerDownloaded() || currentStatusCache.isEntryContainerDownloadPending()));
+
+            if(loadedLink != null && !isDownloadedOrDownloadPending){
+                deltaTotalSize += linkLength;
                 deltaNumEntriesWithContainer++;
             }
 
-            if(oldEntryLink != null) {
-                deltaTotalSize -= oldEntryLink.getLength();
-                deltaNumEntriesWithContainer--;
+            if(currentStatusCache != null && !isDownloadedOrDownloadPending) {
+                deltaTotalSize -= currentStatusCache.getEntrySize();
+                if(currentStatusCache.isEntryHasContainer())
+                    deltaNumEntriesWithContainer--;
             }
 
             if(deltaTotalSize == 0 && deltaNumEntriesWithContainer == 0) {
@@ -136,8 +200,10 @@ public abstract class OpdsEntryStatusCacheDao {
             }
 
             //now update this entry and all ancestors
-            handleOpdsEntryLoadedUpdate(loadedEntry.getEntryId(), deltaTotalSize,
+            handleOpdsEntryLoadedUpdateIncAncestors(loadedEntry.getEntryId(), deltaTotalSize,
                     deltaNumEntriesWithContainer);
+            handleOpdsEntryLoadedUpdateEntry(loadedEntry.getEntryId(), linkLength,
+                    loadedLink != null);
         }
     }
 
@@ -148,37 +214,60 @@ public abstract class OpdsEntryStatusCacheDao {
      *
      * @return A list of all those entryIds which have an entry in the OpdsEntry table but have no corresponding OpdsEntryStatusCache entity
      */
-    @UmQuery("SELECT OpdsEntry.entryId " +
+    @UmQuery("SELECT DISTINCT OpdsEntry.entryId " +
             " FROM OpdsEntry LEFT JOIN OpdsEntryStatusCache ON OpdsEntry.entryId = OpdsEntryStatusCache.statusEntryId " +
             " WHERE OpdsEntry.entryId IN (:entryIds) AND OpdsEntryStatusCache.statusEntryId IS NULL")
-    public abstract List<String> findEntryIdsNotPresent(List<String> entryIds);
+    protected abstract List<String> findEntryIdsNotPresent(List<String> entryIds);
+
+    /**
+     *
+     * @param entryIds
+     * @return
+     */
+    @UmQuery("SELECT * FROM OpdsEntryStatusCache WHERE statusEntryId IN (:entryIds)")
+    protected abstract List<OpdsEntryStatusCache> findByEntryIdList(List<String> entryIds);
 
     /**
      * Update the given EntryId with information discovered when the OpdsEntry is loaded for the first time.
      * This updates the entry and all its known ancestors.
      *
      * @param entryId OPDS entry ID
-     * @param deltaTotalSize the difference between the previous total size and the new total size
-     * @param deltaEntriesWithContainer the difference between the number of previously known containers, and now
+     * @param deltaTotalSizeIncDescendants the difference between the previous total size and the new total size
+     * @param deltaEntriesWithContainerIncDescendants the difference between the number of previously known containers, and now
      */
-    @UmQuery("UPDATE OpdsEntryStatusCache \n" +
-            "SET" +
-            "totalSize = totalSize + :deltaTotalSize " +
-            "entriesWithContainer = entriesWithContainer + :deltaEntriesWithContainer" +
+    @UmQuery("UPDATE OpdsEntryStatusCache " +
+            "SET " +
+            "sizeIncDescendants = sizeIncDescendants  + :deltaSizeIncDescendants, " +
+            "entriesWithContainerIncDescendants = entriesWithContainerIncDescendants + :deltaEntriesWithContainerIncDescendants " +
             "WHERE statusCacheUid IN \n" +
             " (SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId))")
-    protected abstract void handleOpdsEntryLoadedUpdate(String entryId, int deltaTotalSize, int deltaEntriesWithContainer);
+    protected abstract void handleOpdsEntryLoadedUpdateIncAncestors(String entryId,
+                                                                    int deltaTotalSizeIncDescendants,
+                                                                    int deltaEntriesWithContainerIncDescendants);
+
+    @UmQuery("UPDATE OpdsEntryStatusCache " +
+            "SET " +
+            "entrySize = :size, " +
+            "entryHasContainer = :hasContainer " +
+            "WHERE statusEntryId = :entryId")
+    protected abstract void handleOpdsEntryLoadedUpdateEntry(String entryId, long size, boolean hasContainer);
 
 
     /**
      * Run when a download job is queued, or when using the crawl manager, if the job is already queued.
      *
-     * @param downloadJobId
+     * @param downloadJobItemId The id of the DownloadJobItem for the download that has been started
      */
-    public void handleDownloadJobQueued(int downloadJobId) {
-        updateOnDownloadJobItemQueued(downloadJobId, 1);
-        updateAcquisitionStatus(downloadJobId, OpdsEntryStatusCache.ACQUISITION_STATUS_ACQUIRED);
+    public void handleDownloadJobQueued(int downloadJobItemId) {
+        OpdsEntryStatusCache statusCache = findByDownloadJobItemId(downloadJobItemId);
+        if(!(statusCache.isEntryContainerDownloaded() || statusCache.isEntryContainerDownloadPending())) {
+            updateOnDownloadJobItemQueuedIncAncestors(statusCache.getStatusCacheUid(), downloadJobItemId,
+                    1);
+            updateOnDownloadJobItemQueuedEntry(statusCache.getStatusCacheUid(), downloadJobItemId);
+        }
     }
+
+
 
     /**
      * Update the OpdsEntryStatusCache as required when a download job item is queued. This can change
@@ -188,53 +277,107 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param downloadJobId The ID of the DownloadJobItem object that has been queued.
      * @param deltaContainersDownloadPending The change in the number of containers that are now pending download (generally 1)
      */
-    @UmQuery("Update OpdsEntryStatusCache \n" +
-            "SET \n" +
-            "\ttotalSize = totalSize + (\n" +
-            "\t\tSELECT \n" +
-            "\t\t\t(DownloadJobItem.downloadLength - OpdsEntryStatusCache.acquisitionLinkLength) AS deltaTotalSize \n" +
-            "\t\tFROM\n" +
-            "\t\t\tDownloadJobItem LEFT JOIN OpdsEntryStatusCache ON DownloadJobItem.entryId = OpdsEntryStatusCache.statusEntryId\n" +
-            "\t\tWHERE \n" +
-            "\t\t\tDownloadJobItem.id = :downloadJobId\n" +
-            "\t)\n" +
-            "WHERE statusCacheUid IN\n" +
-            "\t (SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = (SELECT entryId FROM DownloadJobItem WHERE id = :downloadJobId)))\n" +
-            "AND (SELECT acquisitionStatus FROM OpdsEntryStatusCache WHERE OpdsEntryStatusCache.statusEntryId = (SELECT entryId FROM DownloadJobItem WHERE id = :downloadJobId)) = 0")
-    protected abstract void updateOnDownloadJobItemQueued(int downloadJobId, int deltaContainersDownloadPending);
+    @UmQuery("Update OpdsEntryStatusCache " +
+            "SET " +
+            "sizeIncDescendants = sizeIncDescendants+ (" +
+            "SELECT " +
+            "(DownloadJobItem.downloadLength - OpdsEntryStatusCache.entrySize) AS deltaTotalSize " +
+            "FROM " +
+            "DownloadJobItem LEFT JOIN OpdsEntryStatusCache ON DownloadJobItem.entryId = OpdsEntryStatusCache.statusEntryId " +
+            "WHERE " +
+            "DownloadJobItem.id = :downloadJobId " +
+            ")," +
+            "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltaContainersDownloadPending " +
+            "WHERE statusCacheUid IN " +
+            "  (SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :statusCacheUid)")
+    protected abstract void updateOnDownloadJobItemQueuedIncAncestors(int statusCacheUid, int downloadJobId, int deltaContainersDownloadPending);
+
+    @UmQuery("Update OpdsEntryStatusCache " +
+            "SET " +
+            "entrySize = (SELECT downloadLength FROM DownloadJobItem WHERE id = :downloadJobId), " +
+            "entryContainerDownloadPending = 1 " +
+            " WHERE statusCacheUid = :statusCacheUid")
+    protected abstract void updateOnDownloadJobItemQueuedEntry(int downloadJobId, int statusCacheUid);
+
 
     /**
-     * Update the acquisitionStatus of the given OpdsEntryStatusCache object for the given ID of a
-     * DownloadJobItem
+     * This method needs to be called by the DownloadTask as a download progresses. It will update the
+     * bytesSoFar for the given entry and all it's ancestors.
      *
-     * @param downloadJobId The ID of the DownloadJobItem that has been queued
-     * @param acquisitionStatus the acquisition status to set
+     * @param entryStatusCacheUid The entryStatusCacheUid for the entry that is being updated.
+     * @param downloadJobItemId The id of the DownloadJobItem that is downloading this entry. This
+     *                          MUST have been updated in the database first, the Update statement
+     *                          will use the DownloadJobItem table itself to lookup the current
+     *                          progress of a download job item.
      */
-    @UmQuery("UPDATE OpdsEntryStatusCache \n" +
-            "SET \n" +
-            "acquisitionStatus = :acquisitionStatus \n" +
-            "WHERE OpdsEntryStatusCache.statusCacheUid = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = (SELECT entryId FROM DownloadJobItem WHERE id = :downloadJobId))")
-    protected abstract void updateAcquisitionStatus(int downloadJobId, int acquisitionStatus);
+    public void handleDownloadJobProgress(int entryStatusCacheUid, int downloadJobItemId){
+        updateActiveBytesDownloadedSoFarIncAncestors(entryStatusCacheUid, downloadJobItemId);
+        updateActiveBytesDownloadedSoFarEntry(entryStatusCacheUid, downloadJobItemId);
+    }
+
+
+    @UmQuery("Update OpdsEntryStatusCache " +
+            "SET " +
+            "pendingDownloadBytesSoFarIncDescendants= pendingDownloadBytesSoFarIncDescendants + (" +
+            "(SELECT downloadedSoFar FROM DownloadJobItem WHERE id = :downloadJobItemId) - " +
+            "(SELECT entryPendingDownloadBytesSoFar FROM OpdsEntryStatusCache WHERE statusCacheUid = :entryStatusCacheId))" +
+            "WHERE statusCacheUid IN " +
+            "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = :entryStatusCacheId)")
+    protected abstract void updateActiveBytesDownloadedSoFarIncAncestors(int entryStatusCacheId, int downloadJobItemId);
+
+    @UmQuery("UPDATE OpdsEntryStatusCache " +
+            "SET entryPendingDownloadBytesSoFar = (SELECT downloadedSoFar FROM DownloadJobItem WHERE id = :downloadJobItemId) " +
+            "WHERE statusCacheUid = :entryStatusCacheId")
+    protected abstract void updateActiveBytesDownloadedSoFarEntry(int entryStatusCacheId, int downloadJobItemId);
 
 
     /**
-     * Update the number of bytes downloaded so far for a given entry and all its known ancestors.
-     * Generally executed when a download job item has marked current progress.
+     * This method needs to be called when a container has been downloaded, or discovered on disk.
      *
-     * @param entryId The entry ID to update
-     * @param deltaDownloadedBytesSoFar The change in the number of bytes downloaded so far for the
-     *                                  given entry.
+     * @param entryStatusCache The OpdsEntryStatusCache representing the given id.
+     * @param containerFile The ContainerFile that contains the given entry.
      */
-    @UmQuery("UPDATE OpdsEntryStatusCache\n" +
-            "SET\n" +
-            "sumActiveDownloadsBytesSoFar = sumActiveDownloadsBytesSoFar + :deltaDownloadedBytesSoFar\n" +
-            "WHERE statusCacheUid IN \n" +
-            "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId))")
-    public abstract void updateSumActiveBytesDownloadedSoFarByEntryId(String entryId, int deltaDownloadedBytesSoFar);
+    public void handleContainerDownloadedOrDiscovered(OpdsEntryStatusCache entryStatusCache, ContainerFile containerFile){
+        long deltaPendingDownloadBytesSoFar = entryStatusCache.getEntryPendingDownloadBytesSoFar() * -1;
+        int deltaContainersDownloadPending = entryStatusCache.isEntryContainerDownloadPending() ? -1 : 0;
+        long deltaContainersDownloadedSize = containerFile.getFileSize() - entryStatusCache.getEntryContainerDownloadedSize();
+        int deltaContainersDownloaded = entryStatusCache.isEntryContainerDownloaded() ? 0 : 1;
+        long deltaSize = containerFile.getFileSize() - entryStatusCache.getEntrySize();
+
+        updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
+                deltaPendingDownloadBytesSoFar, deltaContainersDownloadPending,
+                deltaContainersDownloadedSize, deltaContainersDownloaded, deltaSize);
+
+        updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0,
+                false, containerFile.getFileSize(), true);
+    }
+
+    /**
+     * Synonymous to handleContainerDownloadedOrDiscovered(findByStatusCacheUid(entryStatusUid)...
+     *
+     * @param entryStatusUid The UID of the OpdsEntryStatusCache that represents the entry that has
+     *                       been downloaded or discovered.
+     * @param containerFile The ContainerFile object that contains the given entry.
+     */
+    public void handleContainerDownloadedOrDiscovered(int entryStatusUid, ContainerFile containerFile) {
+        handleContainerDownloadedOrDiscovered(findByStatusCacheUid(entryStatusUid), containerFile);
+    }
+
+    /**
+     * Synonymous to handleContainerDownloadedOrDiscovered(findByEnrtyId(entryId))...
+     *
+     * @param entryId The Entry ID of the container that has been downloaded or discovered
+     * @param containerFile The containerFile object that contains the given entry
+     */
+    public void handleContainerDownloadedOrDiscovered(String entryId, ContainerFile containerFile) {
+        handleContainerDownloadedOrDiscovered(findByEntryId(entryId), containerFile);
+    }
+
 
 
     /**
-     * Update the entry and all it's ancestors when the entry is acquired.
+     * Update the entry and all it's ancestors when the entry is acquired, deleted, download aborted
+     * etc.
      *
      * @param entryId The entry ID to update
      * @param deltaDownloadedBytesSoFar The change in the number of bytes downloaded so far by active
@@ -249,10 +392,45 @@ public abstract class OpdsEntryStatusCacheDao {
      * @param deltaTotalSize The change (if any) in the total size of known entries. Would normally
      *                       be the difference between the expected and actual download size.
      */
-    public abstract void updateOnContainerAcquired(String entryId, long deltaDownloadedBytesSoFar,
-                                                       int deltaContainersDownloadPending,
-                                                        long deltaContainersDownloadedSize,
-                                                        long deltaContainersDownloaded,
-                                                        long deltaTotalSize);
+    @UmQuery("UPDATE OpdsEntryStatusCache\n" +
+            "SET\n" +
+            "pendingDownloadBytesSoFarIncDescendants = pendingDownloadBytesSoFarIncDescendants + :deltaPendingDownloadBytesSoFar,\n" +
+            "containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors + :deltacontainersDownloadPending,\n" +
+            "containersDownloadedSizeIncDescendants = containersDownloadedSizeIncDescendants + :deltaContainersDownloadedSize,\n" +
+            "containersDownloadedIncDescendants = containersDownloadedIncDescendants + :deltaContainersDownloaded,\n" +
+            "sizeIncDescendants = sizeIncDescendants + :deltaSize\n" +
+            "WHERE statusCacheUid IN\n" +
+            "(SELECT ancestorOpdsEntryStatusCacheId FROM OpdsEntryStatusCacheAncestor WHERE opdsEntryStatusCacheId = (SELECT statusCacheUid FROM OpdsEntryStatusCache WHERE statusEntryId = :entryId))")
+    protected abstract void updateOnContainerStatusChangedIncAncestors(String entryId, long deltaDownloadedBytesSoFar,
+                                                                       int deltaContainersDownloadPending,
+                                                                       long deltaContainersDownloadedSize,
+                                                                       long deltaContainersDownloaded,
+                                                                       long deltaTotalSize);
+
+    /**
+     * Update the entry properties when the entry is acquired, deleted, download aborted etc.
+     *
+     * @param statusCacheUid The UID of the OpdsEntryStatusCache object.
+     * @param pendingDownloadBytesSoFar Currently pending download bytes so far.
+     * @param containerDownloadPending True if the container's download is pending,
+     * @param containerDownloadedSize The currently downloaded container size (0 if not downloaded,
+     *                                or the file size of the container if it is downloaded).
+     * @param containerDownloaded True if the container for this entry has been downloaded, false otherwise.
+     */
+    @UmQuery("UPDATE OpdsEntryStatusCache " +
+            "SET " +
+            "entryPendingDownloadBytesSoFar = :pendingDownloadBytesSoFar, " +
+            "entryContainerDownloadPending = :containerDownloadPending,  " +
+            "entryContainerDownloadedSize = :containerDownloadedSize, " +
+            "entryContainerDownloaded = :containerDownloaded," +
+            "entrySize = :containerDownloadedSize " +
+            "WHERE statusCacheUid = :statusCacheUid")
+    protected abstract void updateOnContainerStatusChangedEntry(int statusCacheUid,
+                                                                long pendingDownloadBytesSoFar,
+                                                                boolean containerDownloadPending,
+                                                                long containerDownloadedSize,
+                                                                boolean containerDownloaded);
+
+
 
 }

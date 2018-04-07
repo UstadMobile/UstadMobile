@@ -5,20 +5,15 @@ import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmObserver;
 import com.ustadmobile.core.generated.locale.MessageID;
-import com.ustadmobile.core.impl.AppConfig;
 import com.ustadmobile.core.impl.BaseUmCallback;
 import com.ustadmobile.core.impl.UMLog;
 import com.ustadmobile.core.impl.UmCallback;
-import com.ustadmobile.core.impl.UstadMobileConstants;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.model.CourseProgress;
 import com.ustadmobile.core.networkmanager.AcquisitionListener;
 import com.ustadmobile.core.networkmanager.AcquisitionTaskStatus;
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest;
-import com.ustadmobile.core.networkmanager.EntryCheckResponse;
 import com.ustadmobile.core.networkmanager.NetworkManagerCore;
 import com.ustadmobile.core.networkmanager.NetworkManagerListener;
-import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.NetworkNode;
 import com.ustadmobile.core.networkmanager.NetworkTask;
@@ -32,11 +27,9 @@ import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 import com.ustadmobile.lib.util.UMUtil;
-import com.ustadmobile.core.view.AppView;
 import com.ustadmobile.core.view.CatalogEntryView;
 import com.ustadmobile.core.view.DialogResultListener;
 import com.ustadmobile.core.view.DismissableDialog;
-import com.ustadmobile.core.view.LoginView;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -304,7 +297,7 @@ public class CatalogEntryPresenter extends BaseCatalogPresenter implements Acqui
 
         entryDownloadJobItemObserver = this::handleDownloadJobItemUpdated;
         entryDownloadJobLiveData = DbManager.getInstance(getContext()).getDownloadJobItemDao()
-                .findDownloadJobItemByEntryIdAndStatusRange(entry.getEntryId(),
+                .findDownloadJobItemByEntryIdAndStatusRangeLive(entry.getEntryId(),
                         NetworkTask.STATUS_WAITING_MIN, NetworkTask.STATUS_RUNNING_MAX);
         entryDownloadJobLiveData.observe(this, entryDownloadJobItemObserver);
 

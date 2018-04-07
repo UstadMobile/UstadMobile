@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities;
 
 import com.ustadmobile.lib.database.annotation.UmEntity;
+import com.ustadmobile.lib.database.annotation.UmIndex;
 import com.ustadmobile.lib.database.annotation.UmIndexField;
 import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 
@@ -8,7 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmPrimaryKey;
 /**
  * Created by mike on 1/13/18.
  */
-@UmEntity
+@UmEntity(indices = {@UmIndex(name = "idx_uuid_linkIndex", unique = true, value = {"entryUuid", "linkIndex"})})
 public class OpdsLink {
 
     @UmPrimaryKey(autoIncrement = true)

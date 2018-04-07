@@ -60,7 +60,7 @@ public class RemoteTestSlaveServerActivity extends UstadBaseActivity implements 
         String contentDir = UstadMobileSystemImpl.getInstance().getStorageDirs(CatalogPresenter.SHARED_RESOURCE,
                 this)[0].getDirURI();
 
-        DbManager.getInstance(this).getOpdsEntryWithRelationsRepository()
+        DbManager.getInstance(this).getOpdsAtomFeedRepository()
                 .findEntriesByContainerFileDirectoryAsList(Arrays.asList(contentDir), null);
     }
 

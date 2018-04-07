@@ -1,8 +1,12 @@
 package com.ustadmobile.test.sharedse.network;
 
 import com.ustadmobile.core.db.DbManager;
-import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
+import com.ustadmobile.core.db.UmLiveData;
+import com.ustadmobile.core.db.UmObserver;
+import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
 import com.ustadmobile.core.networkmanager.NetworkTask;
+import com.ustadmobile.core.util.UMFileUtil;
+import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.DownloadJob;
 import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
@@ -30,7 +34,7 @@ import java.util.UUID;
  */
 
 @UmSmallTest
-public class TestDownloadStatus {
+public class TestOpdsEntryStatus {
 
     static final int ENTRY_SIZE_LINK_LENGTH = 1000;
 
@@ -48,10 +52,9 @@ public class TestDownloadStatus {
     }
 
     @Test
-    public void testAcquisitionStatus() {
+    public void testEntryStatusCacheLifecycle() {
         DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
 
-        System.out.println(OpdsEntryWithRelationsDao.GET_DOWNLOAD_STATUS_SQL);
         List<OpdsEntry> entryList = new ArrayList<>();
         List<OpdsEntryWithRelations> entryWithRelationsList = new ArrayList<>();
         List<OpdsLink> linkList = new ArrayList<>();
@@ -94,13 +97,12 @@ public class TestDownloadStatus {
         dbManager.getOpdsEntryParentToChildJoinDao().insertAll(parentToChildJoins);
 
 //        TODO: Add the link to the entry
-        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager, entryWithRelationsList,
-                null);
+        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager, entryWithRelationsList);
 
 
         OpdsEntryStatusCache status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
         Assert.assertEquals("Subsection total size includes all child entries",
-                ENTRY_SIZE_LINK_LENGTH * NUM_ENTRIES_IN_SUBSECTION, status.getTotalSize());
+                ENTRY_SIZE_LINK_LENGTH * NUM_ENTRIES_IN_SUBSECTION, status.getSizeIncDescendants());
 
         //now mark a download as in progress
         dbManager.getDownloadJobItemDao().insertList(jobItemList);
@@ -113,33 +115,111 @@ public class TestDownloadStatus {
 
         status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
         Assert.assertEquals("After queueing download job items, total size should be readjusted",
-                ENTRY_SIZE_DOWNLOAD_LENGTH * NUM_ENTRIES_IN_SUBSECTION, status.getTotalSize());
+                ENTRY_SIZE_DOWNLOAD_LENGTH * NUM_ENTRIES_IN_SUBSECTION, status.getSizeIncDescendants());
 
 
         //now mark progress on a download
-        dbManager.getOpdsEntryStatusCacheDao().updateSumActiveBytesDownloadedSoFarByEntryId(jobItemList.get(0).getEntryId(),
-                500);
+        jobItemList.get(0).setStatus(NetworkTask.STATUS_RUNNING);
+        jobItemList.get(0).setDownloadedSoFar(500);
+        int jobItemId = dbManager.getDownloadJobItemDao().findDownloadJobItemByEntryIdAndStatusRange(
+                jobItemList.get(0).getEntryId(), 0, NetworkTask.STATUS_COMPLETE).get(0)
+                .getDownloadJobId();
+        jobItemList.get(0).setId(jobItemId);
+        int statusCacheUid = dbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
+                jobItemList.get(0).getEntryId());
+        dbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(jobItemList.get(0));
+
+
+        dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobProgress(statusCacheUid,
+                jobItemList.get(0).getDownloadJobId());
 
         status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
         Assert.assertEquals("When download progress is logged on a child entry, that is reflected on the parent",
-                500, status.getSumActiveDownloadsBytesSoFar());
+                500, status.getPendingDownloadBytesSoFarIncDescendants());
 
         //now mark one entry as complete, with a downloaded container
-        dbManager.getOpdsEntryStatusCacheDao().updateOnContainerAcquired(jobItemList.get(0).getEntryId(),
-                -500, -1,
-                ENTRY_SIZE_CONTAINER_LENGTH, 1,
-                (ENTRY_SIZE_CONTAINER_LENGTH - ENTRY_SIZE_DOWNLOAD_LENGTH));
+        ContainerFile containerFile = new ContainerFile();
+        containerFile.setFileSize(ENTRY_SIZE_CONTAINER_LENGTH);
+        dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadedOrDiscovered(statusCacheUid,
+                containerFile);
+
         status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
         Assert.assertEquals("Downloaded bytes is updated after download finishes",
-                ENTRY_SIZE_CONTAINER_LENGTH, status.getSumContainersDownloadedSize());
+                ENTRY_SIZE_CONTAINER_LENGTH, status.getContainersDownloadedSizeIncDescendants());
         Assert.assertEquals("After download finishes, bytes in progress is 0, ", 0,
-                status.getSumActiveDownloadsBytesSoFar());
+                status.getPendingDownloadBytesSoFarIncDescendants());
         Assert.assertEquals("After download item finishes, bytes downloaded equals 1 container length",
-                ENTRY_SIZE_CONTAINER_LENGTH, status.getSumContainersDownloadedSize());
+                ENTRY_SIZE_CONTAINER_LENGTH, status.getContainersDownloadedSizeIncDescendants());
 
         Assert.assertEquals("After one download item finishes, num items pending is one fewer",
-                NUM_ENTRIES_IN_SUBSECTION - 1  , status.getContainersDownloadPending());
+                NUM_ENTRIES_IN_SUBSECTION - 1  , status.getContainersDownloadPendingIncAncestors());
 
+    }
+
+
+    @Test
+    public void testStatusFromAtomFeedRepositoryLoad() {
+        DbManager dbManager = DbManager.getInstance(PlatformTestUtil.getTargetContext());
+        OpdsAtomFeedRepository repo = dbManager.getOpdsAtomFeedRepository();
+        final Object loadLock = new Object();
+        final Object observerLock = new Object();
+
+        UmLiveData<OpdsEntryWithRelations> parentLiveData = repo.getEntryByUrl(
+                UMFileUtil.joinPaths(ResourcesHttpdTestServer.getHttpRoot(),
+                        "com/ustadmobile/test/core/acquire-multi.opds"), null,
+                new OpdsEntry.OpdsItemLoadCallback() {
+                    @Override
+                    public void onDone(OpdsEntry item) {
+                        synchronized (loadLock){
+                            loadLock.notifyAll();
+                        }
+                    }
+
+                    @Override
+                    public void onEntryAdded(OpdsEntryWithRelations childEntry, OpdsEntry parentFeed, int position) {
+
+                    }
+
+                    @Override
+                    public void onLinkAdded(OpdsLink link, OpdsEntry parentItem, int position) {
+
+                    }
+
+                    @Override
+                    public void onError(OpdsEntry item, Throwable cause) {
+
+                    }
+                });
+
+        UmObserver<OpdsEntryWithRelations> parentObserver = (parentEntry) -> {
+            if(parentEntry != null) {
+                synchronized (observerLock){
+                    observerLock.notifyAll();
+                }
+            }
+        };
+        parentLiveData.observeForever(parentObserver);
+
+        if(parentLiveData.getValue() == null){
+            synchronized (observerLock) {
+                try {observerLock.wait(2000); }
+                catch(InterruptedException e) {}
+            }
+        }
+
+        Assert.assertNotNull("Parent loaded", parentLiveData.getValue());
+
+        synchronized (loadLock) {
+            try { loadLock.wait(100000); }
+            catch(InterruptedException e) {}
+        }
+        OpdsEntryStatusCache statusCache = dbManager.getOpdsEntryStatusCacheDao()
+                .findByEntryId(parentLiveData.getValue().getEntryId());
+        Assert.assertNotNull("Parent has status cache value", statusCache);
+        Assert.assertEquals("Parent has child entries", 4,
+                statusCache.getEntriesWithContainerIncDescendants());
+        Assert.assertEquals("Total recursive size of containers is 14700", 14700,
+                statusCache.getSizeIncDescendants());
     }
 
 

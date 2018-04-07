@@ -489,8 +489,14 @@ public abstract class NetworkManager implements NetworkManagerCore, NetworkManag
     public void queueDownloadJob(int downloadJobId) {
         //just set the status of the job and let it be found using a query
         dbExecutorService.execute(() -> {
-            DbManager.getInstance(getContext()).getDownloadJobDao().queueDownload(
-                    downloadJobId, NetworkTask.STATUS_QUEUED, System.currentTimeMillis());
+            DbManager dbManager = DbManager.getInstance(getContext());
+            dbManager.getDownloadJobDao().queueDownload(downloadJobId, NetworkTask.STATUS_QUEUED,
+                    System.currentTimeMillis());
+            int[] downloadJobItemIds = dbManager.getDownloadJobItemDao().findAllIdsByDownloadJob(
+                    downloadJobId);
+            for(int downloadJobItemId : downloadJobItemIds) {
+                dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobQueued(downloadJobItemId);
+            }
             checkDownloadJobQueue();
         });
     }

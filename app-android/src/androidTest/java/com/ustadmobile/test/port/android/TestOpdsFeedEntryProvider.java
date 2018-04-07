@@ -8,7 +8,8 @@ import android.arch.paging.PagedList;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.UmProvider;
-import com.ustadmobile.core.db.dao.OpdsEntryWithRelationsDao;
+import com.ustadmobile.core.db.dao.OpdsAtomFeedRepository;
+import com.ustadmobile.core.fs.db.repository.OpdsAtomFeedRepositoryImpl;
 import com.ustadmobile.core.util.UMFileUtil;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.test.core.ResourcesHttpdTestServer;
@@ -40,8 +41,8 @@ public class TestOpdsFeedEntryProvider extends TestCase{
 
     @Test
     public void testOpdsFeedEntryProvider() {
-        OpdsEntryWithRelationsDao repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
-                .getOpdsEntryWithRelationsRepository();
+        OpdsAtomFeedRepository repository = DbManager.getInstance(PlatformTestUtil.getTargetContext())
+                .getOpdsAtomFeedRepository();
         String opdsUrl = UMFileUtil.joinPaths(new String[] {
                 ResourcesHttpdTestServer.getHttpRoot(), "com/ustadmobile/test/core/acquire-multi.opds"});
 

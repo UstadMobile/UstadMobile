@@ -31,28 +31,31 @@ public class OpdsEntryStatusCache {
     @UmIndexField
     private String statusEntryId;
 
+    private long pendingDownloadBytesSoFarIncDescendants;
 
-    private long sumActiveDownloadsBytesSoFar;
+    private long entryPendingDownloadBytesSoFar;
 
-    private long sumContainersDownloadedSize;
+    private long containersDownloadedSizeIncDescendants;
 
-    private long acquisitionLinkLength;
+    private long entryContainerDownloadedSize;
 
-    private long totalSize;
+    private long sizeIncDescendants;
 
-    private int entriesWithContainer;
+    private long entrySize;
 
-    private int containersDownloaded;
+    private int entriesWithContainerIncDescendants;
 
-    private int containersDownloadPending;
+    private boolean entryHasContainer;
 
-    private int acquisitionStatus;
+    private int containersDownloadedIncDescendants;
 
-    public static final int ACQUISITION_STATUS_UNACQUIRED = 0;
+    private boolean entryContainerDownloaded;
 
-    public static final int ACQUISITION_STATUS_IN_PROGRESS = 1;
+    private int containersDownloadPendingIncAncestors;
 
-    public static final int ACQUISITION_STATUS_ACQUIRED = 2;
+    private boolean entryContainerDownloadPending;
+
+    private long entryAcquisitionLinkLength;
 
     public OpdsEntryStatusCache() {
 
@@ -62,9 +65,9 @@ public class OpdsEntryStatusCache {
         this.statusEntryId = statusEntryId;
     }
 
-    public OpdsEntryStatusCache(String statusEntryId, long acquisitionLinkLength) {
+    public OpdsEntryStatusCache(String statusEntryId, long entryAcquisitionLinkLength) {
         this.statusEntryId = statusEntryId;
-        this.acquisitionLinkLength = acquisitionLinkLength;
+        this.entryAcquisitionLinkLength = entryAcquisitionLinkLength;
     }
 
     /**
@@ -123,16 +126,24 @@ public class OpdsEntryStatusCache {
      *
      * @return The total size (in bytes) of this entry and all its known descendents.
      */
-    public long getTotalSize() {
-        return totalSize;
+    public long getSizeIncDescendants() {
+        return sizeIncDescendants;
     }
 
     /**
      * To be used only by the ORM
-     * @param totalSize
+     * @param sizeIncDescendants
      */
-    public void setTotalSize(long totalSize) {
-        this.totalSize = totalSize;
+    public void setSizeIncDescendants(long sizeIncDescendants) {
+        this.sizeIncDescendants = sizeIncDescendants;
+    }
+
+    public long getEntrySize() {
+        return entrySize;
+    }
+
+    public void setEntrySize(long entrySize) {
+        this.entrySize = entrySize;
     }
 
     /**
@@ -141,17 +152,17 @@ public class OpdsEntryStatusCache {
      *
      * @return Total number of entries that have a container
      */
-    public int getEntriesWithContainer() {
-        return entriesWithContainer;
+    public int getEntriesWithContainerIncDescendants() {
+        return entriesWithContainerIncDescendants;
     }
 
     /**
      * To be used only by the ORM
      *
-     * @param entriesWithContainer
+     * @param entriesWithContainerIncDescendants
      */
-    public void setEntriesWithContainer(int entriesWithContainer) {
-        this.entriesWithContainer = entriesWithContainer;
+    public void setEntriesWithContainerIncDescendants(int entriesWithContainerIncDescendants) {
+        this.entriesWithContainerIncDescendants = entriesWithContainerIncDescendants;
     }
 
     /**
@@ -159,33 +170,49 @@ public class OpdsEntryStatusCache {
      *
      * @return The total number of containers that have been downloaded, including all known descendents
      */
-    public int getContainersDownloaded() {
-        return containersDownloaded;
+    public int getContainersDownloadedIncDescendants() {
+        return containersDownloadedIncDescendants;
     }
 
     /**
      * To be used only by the ORM
      *
-     * @param containersDownloaded
+     * @param containersDownloadedIncDescendants
      */
-    public void setContainersDownloaded(int containersDownloaded) {
-        this.containersDownloaded = containersDownloaded;
+    public void setContainersDownloadedIncDescendants(int containersDownloadedIncDescendants) {
+        this.containersDownloadedIncDescendants = containersDownloadedIncDescendants;
+    }
+
+    public boolean isEntryContainerDownloaded() {
+        return entryContainerDownloaded;
+    }
+
+    public void setEntryContainerDownloaded(boolean entryContainerDownloaded) {
+        this.entryContainerDownloaded = entryContainerDownloaded;
     }
 
     /**
      * The total number of containers for which a download is pending (queued, but not yet complete)
      * @return
      */
-    public int getContainersDownloadPending() {
-        return containersDownloadPending;
+    public int getContainersDownloadPendingIncAncestors() {
+        return containersDownloadPendingIncAncestors;
     }
 
     /**
      *
-     * @param containersDownloadPending
+     * @param containersDownloadPendingIncAncestors
      */
-    public void setContainersDownloadPending(int containersDownloadPending) {
-        this.containersDownloadPending = containersDownloadPending;
+    public void setContainersDownloadPendingIncAncestors(int containersDownloadPendingIncAncestors) {
+        this.containersDownloadPendingIncAncestors = containersDownloadPendingIncAncestors;
+    }
+
+    public boolean isEntryContainerDownloadPending() {
+        return entryContainerDownloadPending;
+    }
+
+    public void setEntryContainerDownloadPending(boolean entryContainerDownloadPending) {
+        this.entryContainerDownloadPending = entryContainerDownloadPending;
     }
 
     /**
@@ -194,18 +221,26 @@ public class OpdsEntryStatusCache {
      *
      * @return The sum (in bytes) of bytes downlaoded so far for this and all known descendent entries
      */
-    public long getSumActiveDownloadsBytesSoFar() {
-        return sumActiveDownloadsBytesSoFar;
+    public long getPendingDownloadBytesSoFarIncDescendants() {
+        return pendingDownloadBytesSoFarIncDescendants;
     }
 
     /**
      * Set the sum of bytes downloaded for this and all known currently active descendent entries.
      * Should be used only by the ORM.
      *
-     * @param sumActiveDownloadsBytesSoFar
+     * @param pendingDownloadBytesSoFarIncDescendants
      */
-    public void setSumActiveDownloadsBytesSoFar(long sumActiveDownloadsBytesSoFar) {
-        this.sumActiveDownloadsBytesSoFar = sumActiveDownloadsBytesSoFar;
+    public void setPendingDownloadBytesSoFarIncDescendants(long pendingDownloadBytesSoFarIncDescendants) {
+        this.pendingDownloadBytesSoFarIncDescendants = pendingDownloadBytesSoFarIncDescendants;
+    }
+
+    public long getEntryPendingDownloadBytesSoFar() {
+        return entryPendingDownloadBytesSoFar;
+    }
+
+    public void setEntryPendingDownloadBytesSoFar(long entryPendingDownloadBytesSoFar) {
+        this.entryPendingDownloadBytesSoFar = entryPendingDownloadBytesSoFar;
     }
 
     /**
@@ -215,17 +250,25 @@ public class OpdsEntryStatusCache {
      * @return Total size (in bytes) of all containers that have been downloaded for this entry and
      * all known descendent entries (recursive).
      */
-    public long getSumContainersDownloadedSize() {
-        return sumContainersDownloadedSize;
+    public long getContainersDownloadedSizeIncDescendants() {
+        return containersDownloadedSizeIncDescendants;
     }
 
     /**
      * For use only by the ORM
      *
-     * @param sumContainersDownloadedSize
+     * @param containersDownloadedSizeIncDescendants
      */
-    public void setSumContainersDownloadedSize(long sumContainersDownloadedSize) {
-        this.sumContainersDownloadedSize = sumContainersDownloadedSize;
+    public void setContainersDownloadedSizeIncDescendants(long containersDownloadedSizeIncDescendants) {
+        this.containersDownloadedSizeIncDescendants = containersDownloadedSizeIncDescendants;
+    }
+
+    public long getEntryContainerDownloadedSize() {
+        return entryContainerDownloadedSize;
+    }
+
+    public void setEntryContainerDownloadedSize(long entryContainerDownloadedSize) {
+        this.entryContainerDownloadedSize = entryContainerDownloadedSize;
     }
 
     /**
@@ -234,33 +277,19 @@ public class OpdsEntryStatusCache {
      *
      * @return Length of the OPDS acquisition link that has been used for size calculation
      */
-    public long getAcquisitionLinkLength() {
-        return acquisitionLinkLength;
+    public long getEntryAcquisitionLinkLength() {
+        return entryAcquisitionLinkLength;
     }
 
-    public void setAcquisitionLinkLength(long acquisitionLinkLength) {
-        this.acquisitionLinkLength = acquisitionLinkLength;
+    public void setEntryAcquisitionLinkLength(long entryAcquisitionLinkLength) {
+        this.entryAcquisitionLinkLength = entryAcquisitionLinkLength;
     }
 
-    /**
-     * The acquisition status of this entry as per the ACQUISITION_STATUS_ flags
-     *
-     * @see #ACQUISITION_STATUS_UNACQUIRED
-     * @see #ACQUISITION_STATUS_IN_PROGRESS
-     * @see #ACQUISITION_STATUS_ACQUIRED
-     *
-     * @return the acquisition status of this entry
-     */
-    public int getAcquisitionStatus() {
-        return acquisitionStatus;
+    public boolean isEntryHasContainer() {
+        return entryHasContainer;
     }
 
-    /**
-     * For use only by the ORM
-     *
-     * @param acquisitionStatus
-     */
-    public void setAcquisitionStatus(int acquisitionStatus) {
-        this.acquisitionStatus = acquisitionStatus;
+    public void setEntryHasContainer(boolean entryHasContainer) {
+        this.entryHasContainer = entryHasContainer;
     }
 }

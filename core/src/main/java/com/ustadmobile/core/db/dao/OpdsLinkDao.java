@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao;
 
 import com.ustadmobile.lib.database.annotation.UmInsert;
+import com.ustadmobile.lib.database.annotation.UmOnConflictStrategy;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 
 public abstract class OpdsLinkDao {
 
-    @UmInsert
+    @UmInsert(onConflict = UmOnConflictStrategy.REPLACE)
     public abstract void insert(List<OpdsLink> links);
 
     @UmQuery("SELECT * From OpdsLink WHERE entryId = :entryUuid")

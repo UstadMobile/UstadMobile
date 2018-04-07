@@ -114,42 +114,45 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         DownloadJobWithRelations jobWithRelations = dbManager.getDownloadJobDao().findById(job.getId());
         DownloadTask downloadTask = new DownloadTask(jobWithRelations, networkManager);
 
-//        TODO: Update to use the new OpdsEntryStatusCache,.
-//        UmLiveData<OpdsEntryStatusCache> dlStatus = dbManager.getOpdsEntryWithRelationsDao()
-//                .getEntryDownloadStatusLive(CRAWL_ROOT_ENTRY_ID);
-//
-//        final boolean[] receivedProgressUpdate = new boolean[1];
-//        UmObserver<OpdsEntryStatusCache> statusUmObserver = (downloadStatus) -> {
-//            if(downloadStatus.getTotalBytesDownloaded() < downloadStatus.getTotalSize()) {
-//                receivedProgressUpdate[0] = true;
-//            }
-//        };
+        UmLiveData<OpdsEntryStatusCache> dlStatus = dbManager.getOpdsEntryStatusCacheDao().
+                findByEntryIdLive(CRAWL_ROOT_ENTRY_ID);
 
-//        UmLiveData<DownloadJobWithRelations> downloadJobLiveData = dbManager.getDownloadJobDao()
-//                .getByIdLive(job.getId());
-//        UmObserver<DownloadJobWithRelations> downloadJobObserver = (downloadJobLiveDataUpdate) -> {
-//            if (downloadJobLiveDataUpdate.getStatus() == NetworkTask.STATUS_COMPLETE) {
-//                synchronized (lock) {
-//                    try { lock.notifyAll();}
-//                    catch(Exception e) {}
-//                }
-//            }
-//        };
-//        downloadJobLiveData.observeForever(downloadJobObserver);
-//
-//        dlStatus.observeForever(statusUmObserver);
-//        downloadTask.start();
-//
-//        synchronized (lock){
-//            try {lock.wait(120000);}
-//            catch(InterruptedException e) {}
-//        }
-//
-//        DownloadJob completedJob =dbManager.getDownloadJobDao().findById(job.getId());
-//        Assert.assertEquals("Download job status reported as completed", NetworkTask.STATUS_COMPLETE,
-//                completedJob.getStatus());
-//        Assert.assertEquals("Status shows all child entries downloaded",
-//                dlStatus.getValue().getTotalSize(), dlStatus.getValue().getTotalBytesDownloaded());
+
+        final boolean[] receivedProgressUpdate = new boolean[1];
+        UmObserver<OpdsEntryStatusCache> statusUmObserver = (downloadStatus) -> {
+            if(downloadStatus.getContainersDownloadPendingIncAncestors() < downloadStatus.getSizeIncDescendants()) {
+                receivedProgressUpdate[0] = true;
+            }
+        };
+
+        UmLiveData<DownloadJobWithRelations> downloadJobLiveData = dbManager.getDownloadJobDao()
+                .getByIdLive(job.getId());
+        UmObserver<DownloadJobWithRelations> downloadJobObserver = (downloadJobLiveDataUpdate) -> {
+            if (downloadJobLiveDataUpdate.getStatus() == NetworkTask.STATUS_COMPLETE) {
+                synchronized (lock) {
+                    try { lock.notifyAll();}
+                    catch(Exception e) {}
+                }
+            }
+        };
+        downloadJobLiveData.observeForever(downloadJobObserver);
+
+        dlStatus.observeForever(statusUmObserver);
+        downloadTask.start();
+
+        synchronized (lock){
+            try {lock.wait(120000);}
+            catch(InterruptedException e) {}
+        }
+
+        DownloadJob completedJob =dbManager.getDownloadJobDao().findById(job.getId());
+
+        Assert.assertEquals("Download job status reported as completed", NetworkTask.STATUS_COMPLETE,
+                completedJob.getStatus());
+        Assert.assertEquals("Status shows all child entries downloaded",
+                dlStatus.getValue().getSizeIncDescendants(), dlStatus.getValue().getContainersDownloadedSizeIncDescendants());
+        Assert.assertEquals("4 containers downloaded in total",4,
+                dlStatus.getValue().getContainersDownloadedIncDescendants());
 
         //now delete them all
         for(String entryId : childEntries) {

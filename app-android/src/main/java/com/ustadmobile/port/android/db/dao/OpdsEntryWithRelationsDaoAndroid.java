@@ -98,6 +98,17 @@ public abstract class OpdsEntryWithRelationsDaoAndroid extends OpdsEntryWithRela
     public abstract OpdsEntryWithRelations getEntryByUuidStatic(String uuid);
 
     @Override
+    @Query("SELECT * FROM OpdsEntry WHERE entryId = :entryId LIMIT 1")
+    public abstract OpdsEntryWithRelations findFirstByEntryIdStatic(String entryId);
+
+    @Override
+    @Query("SELECT OpdsEntry.uuid FROM OpdsEntry " +
+            "LEFT JOIN OpdsEntryParentToChildJoin ON OpdsEntryParentToChildJoin.childEntry = OpdsEntry.uuid " +
+            "LEFT JOIN OpdsEntry OpdsEntryParent ON OpdsEntryParentToChildJoin.parentEntry = OpdsEntryParent.uuid " +
+            "WHERE OpdsEntry.entryId = :entryId AND OpdsEntryParent.url = :parentUrl ")
+    public abstract String findUuidByEntryIdAndParentUrl(String entryId, String parentUrl);
+
+    @Override
     @Query("DELETE FROM OpdsEntry WHERE uuid in (:entryUuids)")
     public abstract int deleteOpdsEntriesByUuids(List<String> entryUuids);
 

@@ -53,7 +53,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
         final UstadMobileSystemImpl impl = UstadMobileSystemImpl.getInstance();
         uuidToAddTo = (String)args.get(ARG_UUID);
         presetFeedsList = new ArrayList<>();
-        entry = DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository().getEntryByUrl(
+        entry = DbManager.getInstance(getContext()).getOpdsAtomFeedRepository().getEntryByUrl(
                 "asset:///com/ustadmobile/core/libraries.opds", "preset_libraries_opds");
         entry.observe(this, this::handlePresetParentFeedUpdated);
     }
@@ -112,7 +112,7 @@ public class AddFeedDialogPresenter extends UstadBaseController implements OpdsE
             addFeedDialogView.setUiEnabled(false);
             addFeedDialogView.setProgressVisible(true);
             String feedUrl = addFeedDialogView.getOpdsUrl();
-            DbManager.getInstance(getContext()).getOpdsEntryWithRelationsRepository()
+            DbManager.getInstance(getContext()).getOpdsAtomFeedRepository()
                     .getEntryByUrl(feedUrl, null, this);
         }
     }

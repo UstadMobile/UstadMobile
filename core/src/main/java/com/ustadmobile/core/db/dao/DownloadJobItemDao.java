@@ -34,11 +34,23 @@ public abstract class DownloadJobItemDao {
     }
 
     @UmQuery("Select * FROM DownloadJobItem WHERE entryId = :entryId AND status BETWEEN :statusFrom AND :statusTo")
-    public abstract UmLiveData<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRange(String entryId,
-                                                                                  int statusFrom,
-                                                                                  int statusTo);
+    public abstract UmLiveData<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRangeLive(String entryId,
+                                                                                               int statusFrom,
+                                                                                               int statusTo);
+
+    @UmQuery("Select * FROM DownloadJobItem WHERE entryId = :entryId AND status BETWEEN :statusFrom AND :statusTo")
+    public abstract List<DownloadJobItem> findDownloadJobItemByEntryIdAndStatusRange(String entryId,
+                                                                                   int statusFrom,
+                                                                                   int statusTo);
+
+
 
     @UmQuery("SELECT * FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
     public abstract List<DownloadJobItem> findAllByDownloadJob(int downloadJobId);
+
+    @UmQuery("SELECT id FROM DownloadJobItem WHERE downloadJobId = :downloadJobId")
+    public abstract int[] findAllIdsByDownloadJob(int downloadJobId);
+
+
 
 }

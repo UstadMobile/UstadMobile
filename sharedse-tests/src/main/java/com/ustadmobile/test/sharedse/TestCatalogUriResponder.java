@@ -1,11 +1,9 @@
 package com.ustadmobile.test.sharedse;
 
-import com.ustadmobile.core.controller.CatalogEntryInfo;
 import com.ustadmobile.core.controller.CatalogPresenter;
 import com.ustadmobile.core.db.DbManager;
 import com.ustadmobile.core.fs.db.ContainerFileHelper;
 import com.ustadmobile.core.impl.UstadMobileSystemImpl;
-import com.ustadmobile.core.opds.UstadJSOPDSItem;
 import com.ustadmobile.core.util.UMIOUtils;
 import com.ustadmobile.port.sharedse.impl.http.CatalogUriResponder;
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD;
@@ -72,7 +70,7 @@ public class TestCatalogUriResponder {
             UMIOUtils.throwIfNotNullIO(ioe);
         }
 
-        DbManager.getInstance(PlatformTestUtil.getTargetContext()).getOpdsEntryWithRelationsRepository().
+        DbManager.getInstance(PlatformTestUtil.getTargetContext()).getOpdsAtomFeedRepository().
                 findEntriesByContainerFileNormalizedPath(entryTmpFile.getAbsolutePath());
 
 //        CatalogEntryInfo entryInfo = new CatalogEntryInfo();

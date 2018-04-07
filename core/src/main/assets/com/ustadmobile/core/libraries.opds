@@ -25,7 +25,7 @@
 
     <entry>
        <title>African Storybook Project</title>
-       <id>com.ustadmobile.presetfeeds.atoll</id>
+       <id>http://www.africanstorybook.org</id>
        <link href="http://www.ustadmobile.com/files/asb/index.opds"
            type="application/atom+xml;profile=opds-catalog;kind=navigation"
            rel="subsection"/>

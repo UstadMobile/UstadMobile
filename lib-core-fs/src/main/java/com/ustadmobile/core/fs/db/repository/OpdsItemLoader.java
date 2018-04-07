@@ -17,6 +17,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -26,7 +27,7 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
     private DbManager dbManager;
 
-    private OpdsEntry itemToLoad;
+    private OpdsEntryWithRelations itemToLoad;
 
     private String url;
 
@@ -36,7 +37,13 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
     long feedId = -1;
 
-    public OpdsItemLoader(Object context, DbManager dbManager, OpdsEntry itemToLoad, String url,
+    //The OpdsEntry parent of this feed, as it was before we loaded this entry.
+    private OpdsEntryWithRelations existingEntry;
+
+    private boolean itemToLoadInserted = false;
+
+
+    public OpdsItemLoader(Object context, DbManager dbManager, OpdsEntryWithRelations itemToLoad, String url,
                           OpdsEntry.OpdsItemLoadCallback callback) {
         this.dbManager = dbManager;
         this.itemToLoad = itemToLoad;
@@ -51,6 +58,8 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
         UmHttpRequest request = new UmHttpRequest(context, url);
         UmHttpResponse response = null;
         try {
+            existingEntry = dbManager.getOpdsEntryWithRelationsDao().getEntryByUrlStatic(url);
+
             if(request.getUrl().startsWith("asset:///")) {
                 UstadMobileSystemImplFs implFs = (UstadMobileSystemImplFs)UstadMobileSystemImpl.getInstance();
                 requestIn = implFs.getAssetSync(context, url.substring("asset:///".length()));
@@ -62,13 +71,9 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
             XmlPullParser xpp = UstadMobileSystemImpl.getInstance().newPullParser(requestIn ,"UTF-8");
             itemToLoad.setUrl(url);
             if(itemToLoad.getUuid() == null) {
-                String entryId = dbManager.getOpdsEntryWithRelationsDao().getUuidForEntryUrl(url);
-                itemToLoad.setUuid(entryId != null ?
-                        entryId : UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+                itemToLoad.setUuid((existingEntry != null && existingEntry.getUuid() != null) ?
+                        existingEntry.getUuid() : UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
             }
-
-            //persist to the database so that items are correctly linked
-            dbManager.getOpdsEntryDao().insert(itemToLoad);
 
             itemToLoad.load(xpp, this);
         }catch(IOException e) {
@@ -96,7 +101,17 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
     @Override
     public void onEntryAdded(OpdsEntryWithRelations entry, OpdsEntry parentFeed, int position) {
-        entry.setUuid(UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
+        if(!itemToLoadInserted)
+            insertItemToLoad();
+
+
+//        OpdsEntryWithRelations previousEntry = dbManager.getOpdsEntryWithRelationsDao()
+//                .findFirstByEntryIdStatic(entry.getEntryId());
+        String previousEntryUuid = dbManager.getOpdsEntryWithRelationsDao()
+                .findUuidByEntryIdAndParentUrl(entry.getEntryId(), url);
+
+        entry.setUuid(previousEntryUuid != null ? previousEntryUuid:
+                UmUuidUtil.encodeUuidWithAscii85(UUID.randomUUID()));
 
         if(entry.getLinks() != null) {
             for(OpdsLink link : entry.getLinks()) {
@@ -109,6 +124,9 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
         dbManager.getOpdsEntryParentToChildJoinDao().insert(parentToChild);
         dbManager.getOpdsEntryDao().insert(entry);
 
+        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager,
+                Arrays.asList(entry));
+
         if(callback != null)
             callback.onEntryAdded(entry, parentFeed, position);
     }
@@ -119,8 +137,18 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
             callback.onLinkAdded(link, parentItem, position);
     }
 
+    private void insertItemToLoad() {
+        dbManager.getOpdsEntryDao().insert(itemToLoad);
+//        TODO: existing entry should be checked before the insert!
+
+
+        dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager,
+                Arrays.asList(itemToLoad));
+        itemToLoadInserted = true;
+    }
+
     private void persistFeedLinks() {
-        OpdsEntryWithRelations itemWithLinks = (OpdsEntryWithRelations) itemToLoad;
+        OpdsEntryWithRelations itemWithLinks = itemToLoad;
         if(itemWithLinks.getLinks() == null)
             return;
 

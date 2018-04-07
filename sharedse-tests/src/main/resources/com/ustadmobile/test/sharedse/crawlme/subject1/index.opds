@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom" 
   xmlns:dc="http://purl.org/dc/terms/" 
   xmlns:opds="http://opds-spec.org/2010/catalog">
-    <id>d58c92a8-46a5-4e49-a747-e3927fce7b4b</id>
+    <id>http://umcloud1.ustadmobile.com/opds/test-crawl/subject1</id>
     
     <link rel="start"
                 href="/opds/"
@@ -23,7 +23,7 @@
 	        href="1a.epub"
             type="application/epub+zip"/>
             
-        <id>71cf0767-b9cd-4f44-8d3c-84560de119ed</id>
+        <id>http://umcloud1.ustadmobile.com/opds/test-crawl/subject1/1a</id>
         <updated>2015-02-09T18:58:12Z</updated>
         <author>
             <name>Varuna Singh</name>
@@ -38,7 +38,7 @@
 	        href="1b.epub"
             type="application/epub+zip"/>
             
-        <id>11f33295-bcc4-4a44-a863-7c0ad84e2650</id>
+        <id>http://umcloud1.ustadmobile.com/opds/test-crawl/subject1/1b</id>
         <updated>2015-02-09T18:58:12Z</updated>
         <author>
             <name>Varuna Singh</name>
