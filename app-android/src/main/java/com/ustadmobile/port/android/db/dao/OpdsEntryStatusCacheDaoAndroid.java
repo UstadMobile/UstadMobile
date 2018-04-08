@@ -9,6 +9,7 @@ import android.arch.persistence.room.Update;
 
 import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.core.db.dao.OpdsEntryStatusCacheDao;
+import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 
@@ -170,12 +171,25 @@ public abstract class OpdsEntryStatusCacheDaoAndroid extends OpdsEntryStatusCach
             "entryContainerDownloadPending = :containerDownloadPending,  " +
             "entryContainerDownloadedSize = :containerDownloadedSize, " +
             "entryContainerDownloaded = :containerDownloaded," +
-            "entrySize = :containerDownloadedSize " +
+            "entrySize = :entrySize " +
             "WHERE statusCacheUid = :statusCacheUid")
     @Override
     public abstract void updateOnContainerStatusChangedEntry(int statusCacheUid,
                                                              long pendingDownloadBytesSoFar,
                                                              boolean containerDownloadPending,
                                                              long containerDownloadedSize,
-                                                             boolean containerDownloaded);
+                                                             boolean containerDownloaded,
+                                                             long entrySize);
+
+    @Query("SELECT * From OpdsEntryStatusCache " +
+            "LEFT JOIN ContainerFileEntry ON OpdsEntryStatusCache.statusEntryId = ContainerFileEntry.containerEntryId " +
+            "WHERE " +
+            "OpdsEntryStatusCache.statusEntryId IN (:entryIdsToCheck) " +
+            "AND " +
+            "ContainerFileEntry.containerEntryId IS NULL " +
+            "AND " +
+            "OpdsEntryStatusCache.entryContainerDownloaded = 1")
+    protected abstract List<OpdsEntryStatusCache> findDeletedEntriesToUpdate(List<String> entryIdsToCheck);
+
+
 }

@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.UmLiveData;
 import com.ustadmobile.lib.database.annotation.UmInsert;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
+import com.ustadmobile.lib.db.entities.DownloadJobItem;
 import com.ustadmobile.lib.db.entities.OpdsEntryAncestor;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryStatusCacheAncestor;
@@ -349,7 +350,8 @@ public abstract class OpdsEntryStatusCacheDao {
                 deltaContainersDownloadedSize, deltaContainersDownloaded, deltaSize);
 
         updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0,
-                false, containerFile.getFileSize(), true);
+                false, containerFile.getFileSize(), true,
+                containerFile.getFileSize());
     }
 
     /**
@@ -423,13 +425,86 @@ public abstract class OpdsEntryStatusCacheDao {
             "entryContainerDownloadPending = :containerDownloadPending,  " +
             "entryContainerDownloadedSize = :containerDownloadedSize, " +
             "entryContainerDownloaded = :containerDownloaded," +
-            "entrySize = :containerDownloadedSize " +
+            "entrySize = :entrySize " +
             "WHERE statusCacheUid = :statusCacheUid")
     protected abstract void updateOnContainerStatusChangedEntry(int statusCacheUid,
                                                                 long pendingDownloadBytesSoFar,
                                                                 boolean containerDownloadPending,
                                                                 long containerDownloadedSize,
-                                                                boolean containerDownloaded);
+                                                                boolean containerDownloaded,
+                                                                long entrySize);
+
+
+    @UmQuery("SELECT * From OpdsEntryStatusCache LEFT JOIN ContainerFileEntry ON OpdsEntryStatusC")
+    protected abstract List<OpdsEntryStatusCache> findDeletedEntriesToUpdate(List<String> entryIdsToCheck);
+
+    /**
+     * This method should be called when a container file is deleted. Given a list of known entries
+     * that were previously in the container, it will update those which do not have any container
+     * remaining. If an entry was downloaded twice and is present in more than one file, then it will
+     * be ignored until the entry no longer exists in any known downloaded container file.
+     *
+     * @param entryIdsInContainer List of entry ids that were known to be in the deleted container.
+     */
+    public void handleContainerDeleted(List<String> entryIdsInContainer) {
+        for(OpdsEntryStatusCache deletedEntry : findDeletedEntriesToUpdate(entryIdsInContainer)) {
+            handleContainerDeleted(deletedEntry);
+        }
+    }
+
+    /**
+     * This method should be called when an already downloaded entry is known to be deleted, and
+     * there are no further containers that have this entry.
+     *
+     * @param entryStatusCache
+     */
+    public void handleContainerDeleted(OpdsEntryStatusCache entryStatusCache) {
+        long deltaContainersDownloadedSize = entryStatusCache.getEntryContainerDownloadedSize() * -1;
+        int deltaContainersDownloaded = entryStatusCache.isEntryContainerDownloaded() ? -1 : 0;
+        long deltaSize = entryStatusCache.getEntryAcquisitionLinkLength() -
+                entryStatusCache.getEntryContainerDownloadedSize();
+
+        updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
+                0, 0,
+                deltaContainersDownloadedSize, deltaContainersDownloaded, deltaSize);
+
+        updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(),
+                entryStatusCache.getEntryPendingDownloadBytesSoFar(),
+                entryStatusCache.isEntryContainerDownloadPending(), 0, false,
+                entryStatusCache.getEntryAcquisitionLinkLength());
+    }
+
+    /**
+     * Synonymous to handleContainerDeleted(findEntryById(entryId))...
+     *
+     * @param entryId The Entry ID of the entry that has been deleted
+     */
+    public void handleContainerDeleted(String entryId){
+        handleContainerDeleted(findByEntryId(entryId));
+    }
+
+    /**
+     * This method should be called whne an entry that was being downloaded (and for which there was
+     * a corresponding call to handleDownloadJobQueued ) is no longer being downloaded - e.g. it has
+     * failed permanently or been cancelled by the user
+     *
+     * @param entryStatusCache The OpdsEntryStatusCache representing the download that is being aborted
+     */
+    public void handleContainerDownloadAborted(OpdsEntryStatusCache entryStatusCache){
+        long deltaDownloadedBytesSoFar = entryStatusCache.getEntryPendingDownloadBytesSoFar() * -1;
+        int deltaContainerDownloadPending = entryStatusCache.isEntryContainerDownloadPending() ? -1 : 0;
+        long newEntrySize = entryStatusCache.isEntryContainerDownloaded() ? entryStatusCache.getEntrySize()
+                : entryStatusCache.getEntryAcquisitionLinkLength();
+        long deltaSize = entryStatusCache.getEntryAcquisitionLinkLength() - newEntrySize;
+
+        updateOnContainerStatusChangedIncAncestors(entryStatusCache.getStatusEntryId(),
+                deltaDownloadedBytesSoFar, deltaContainerDownloadPending, 0, 0,
+                deltaSize);
+
+        updateOnContainerStatusChangedEntry(entryStatusCache.getStatusCacheUid(), 0, false,
+                entryStatusCache.getEntryContainerDownloadedSize(), entryStatusCache.isEntryContainerDownloaded(),
+                deltaSize);
+    }
 
 
 

@@ -51,8 +51,12 @@ public abstract class ContainerFileEntryDao {
     @UmQuery("SELECT opdsEntryUuid FROM ContainerFileEntry WHERE containerFileId = :containerFileId")
     protected abstract List<String> findOpdsEntryUuidsByContainerFileId(int containerFileId);
 
+    @UmQuery("SELECT containerEntryId FROM ContainerFileEntry WHERE containerFileId = :containerFileId")
+    public abstract List<String> findEntryIdsByContainerFile(int containerFileId);
+
     @UmQuery("DELETE from ContainerFileEntry Where containerFileId = :containerFileId")
     protected abstract void deleteByContainerFileId(int containerFileId);
+
 
 
 }

@@ -58,6 +58,10 @@ public abstract class ContainerFileEntryDaoAndroid extends ContainerFileEntryDao
     protected abstract List<String> findOpdsEntryUuidsByContainerFileId(int containerFileId);
 
     @Override
+    @Query("SELECT containerEntryId FROM ContainerFileEntry WHERE containerFileId = :containerFileId")
+    public abstract List<String> findEntryIdsByContainerFile(int containerFileId);
+
+    @Override
     @Query("DELETE from ContainerFileEntry Where containerFileId = :containerFileId")
     protected abstract void deleteByContainerFileId(int containerFileId);
 }

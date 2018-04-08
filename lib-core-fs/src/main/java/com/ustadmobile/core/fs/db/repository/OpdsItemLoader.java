@@ -139,9 +139,6 @@ public class OpdsItemLoader implements Runnable, OpdsEntry.OpdsItemLoadCallback 
 
     private void insertItemToLoad() {
         dbManager.getOpdsEntryDao().insert(itemToLoad);
-//        TODO: existing entry should be checked before the insert!
-
-
         dbManager.getOpdsEntryStatusCacheDao().handleOpdsEntriesLoaded(dbManager,
                 Arrays.asList(itemToLoad));
         itemToLoadInserted = true;

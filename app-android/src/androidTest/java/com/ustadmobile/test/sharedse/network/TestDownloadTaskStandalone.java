@@ -154,11 +154,20 @@ public class TestDownloadTaskStandalone extends TestWithNetworkService {
         Assert.assertEquals("4 containers downloaded in total",4,
                 dlStatus.getValue().getContainersDownloadedIncDescendants());
 
-        //now delete them all
+        //now delete them all. We need to rerun the find query, if these entries were unknown before they
+        // would not have been discovered
+        childEntries = dbManager.getOpdsEntryWithRelationsDao().findAllChildEntryIdsRecursive(CRAWL_ROOT_ENTRY_ID);
         for(String entryId : childEntries) {
             ContainerFileHelper.getInstance().deleteAllContainerFilesByEntryId(PlatformTestUtil.getTargetContext(),
                     entryId);
         }
 
+        //now make sure that the entries have been marked as deleted
+        OpdsEntryStatusCache rootStatusCache = dbManager.getOpdsEntryStatusCacheDao()
+                .findByEntryId(CRAWL_ROOT_ENTRY_ID);
+        Assert.assertEquals("After entries are deleted, 0 entries are marked as being downloaded",
+                0, rootStatusCache.getContainersDownloadedIncDescendants());
+        Assert.assertEquals("After entries are deleted, total downloaded file size is 0",
+                0, rootStatusCache.getContainersDownloadedSizeIncDescendants());
     }
 }

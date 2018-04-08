@@ -154,6 +154,32 @@ public class TestOpdsEntryStatus {
         Assert.assertEquals("After one download item finishes, num items pending is one fewer",
                 NUM_ENTRIES_IN_SUBSECTION - 1  , status.getContainersDownloadPendingIncAncestors());
 
+        //For the second entry - set it as in progress downloading, and then test what happens if the download is aborted
+        int jobItemId2 = dbManager.getDownloadJobItemDao().findDownloadJobItemByEntryIdAndStatusRange(
+                jobItemList.get(1).getEntryId(), 0, NetworkTask.STATUS_COMPLETE).get(0)
+                .getDownloadJobId();
+        int statusCacheUid2 = dbManager.getOpdsEntryStatusCacheDao().findUidByEntryId(
+                jobItemList.get(1).getEntryId());
+        jobItemList.get(1).setId(jobItemId2);
+
+        jobItemList.get(1).setStatus(NetworkTask.STATUS_RUNNING);
+        jobItemList.get(1).setDownloadedSoFar(500);
+        dbManager.getDownloadJobItemDao().updateDownloadJobItemStatus(jobItemList.get(1));
+        dbManager.getOpdsEntryStatusCacheDao().handleDownloadJobProgress(statusCacheUid2, jobItemId2);
+
+        status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
+        Assert.assertEquals("On setting second item to be in progress, bytes in progress = 500",
+                500, status.getPendingDownloadBytesSoFarIncDescendants());
+
+        OpdsEntryStatusCache abortedEntryStatusCache = dbManager.getOpdsEntryStatusCacheDao()
+                .findByEntryId(jobItemList.get(1).getEntryId());
+        //mark the download as aborted
+        dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadAborted(abortedEntryStatusCache);
+        status = dbManager.getOpdsEntryStatusCacheDao().findByEntryId(subsectionParent.getEntryId());
+        Assert.assertEquals("After download aborted, pending download bytes = 0",
+                0, status.getPendingDownloadBytesSoFarIncDescendants());
+        Assert.assertEquals("After download aborted, number of containers download pending = 98",
+                NUM_ENTRIES_IN_SUBSECTION - 2, status.getContainersDownloadPendingIncAncestors());
     }
 
 

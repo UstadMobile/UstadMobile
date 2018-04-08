@@ -7,7 +7,6 @@ import com.ustadmobile.lib.database.annotation.UmDelete;
 import com.ustadmobile.lib.database.annotation.UmQuery;
 import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
-import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.util.List;
 
@@ -37,9 +36,12 @@ public abstract class ContainerFileDao {
     public void deleteContainerFileAndRelations(Object context, ContainerFile containerFile) {
         List<String> opdsEntryUuids = DbManager.getInstance(context).getContainerFileEntryDao()
                 .findOpdsEntryUuidsByContainerFileId(containerFile.getId());
+        List<String> opdsEntryIds = DbManager.getInstance(context).getContainerFileEntryDao()
+                .findEntryIdsByContainerFile(containerFile.getId());
         DbManager.getInstance(context).getOpdsEntryWithRelationsDao().deleteEntriesWithRelationsByUuids(
                 opdsEntryUuids);
         DbManager.getInstance(context).getContainerFileEntryDao().deleteByContainerFileId(containerFile.getId());
+        DbManager.getInstance(context).getOpdsEntryStatusCacheDao().handleContainerDeleted(opdsEntryIds);
         delete(containerFile);
     }
 
