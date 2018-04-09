@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsLink;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -331,6 +332,26 @@ public abstract class OpdsEntryStatusCacheDao {
             "WHERE statusCacheUid = :entryStatusCacheId")
     protected abstract void updateActiveBytesDownloadedSoFarEntry(int entryStatusCacheId, int downloadJobItemId);
 
+
+    /**
+     * This method should be called when a container is found on the disk, where the entry may or
+     * may not yet be known to the OpdsEntryStatusCache. If the entry is not known yet, it will be
+     * created.
+     *
+     * @param dbManager DbManager object
+     * @param entry Entry found within container (e.g. as returned by the scanner)
+     * @param containerFile The ContainerFile that represents the file in which this entry was found
+     */
+    public void handleContainerFoundOnDisk(DbManager dbManager, OpdsEntryWithRelations entry,
+                                           ContainerFile containerFile) {
+        OpdsEntryStatusCache statusCache = findByEntryId(entry.getEntryId());
+        if(statusCache == null) {
+            handleOpdsEntriesLoaded(dbManager, Arrays.asList(entry));
+            statusCache = findByEntryId(entry.getEntryId());
+        }
+
+        handleContainerDownloadedOrDiscovered(statusCache, containerFile);
+    }
 
     /**
      * This method needs to be called when a container has been downloaded, or discovered on disk.

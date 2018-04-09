@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.ContainerFile;
 import com.ustadmobile.lib.db.entities.ContainerFileEntry;
 import com.ustadmobile.lib.db.entities.ContainerFileWithRelations;
 import com.ustadmobile.lib.db.entities.OpdsEntry;
+import com.ustadmobile.lib.db.entities.OpdsEntryStatusCache;
 import com.ustadmobile.lib.db.entities.OpdsEntryWithRelations;
 
 import java.io.File;
@@ -127,27 +128,9 @@ public class OpdsDirScanner implements Runnable{
                 containerFile.setId((int)containerFileId);
             }
 
-            for(OpdsEntry entry : entriesInFile) {
-                ContainerFileEntry fileEntry = new ContainerFileEntry();
-                fileEntry.setOpdsEntryUuid(entry.getUuid());
-                fileEntry.setContainerFileId(containerFile.getId());
-                fileEntry.setContainerEntryId(entry.getEntryId());
-                containerFileEntries.add(fileEntry);
-
-                dbManager.getOpdsEntryStatusCacheDao().handleContainerDownloadedOrDiscovered(
-                        entry.getEntryId(), containerFile);
-            }
-
-            containerFile.setEntries(containerFileEntries);
-
             //delete old entry info on this file
             dbManager.getContainerFileEntryDao()
                     .deleteOpdsAndContainerFileEntriesByContainerFile(containerFile.getId());
-
-
-            //now persist everything for this file
-            dbManager.getContainerFileEntryDao().insert(containerFileEntries);
-
 
             for(OpdsEntryWithRelations entry : entriesInFile) {
                 if(entry.getLinks() != null)
@@ -155,6 +138,22 @@ public class OpdsDirScanner implements Runnable{
             }
 
             dbManager.getOpdsEntryDao().insertList(new ArrayList<>(entriesInFile));
+
+            for(OpdsEntryWithRelations entry : entriesInFile) {
+                ContainerFileEntry fileEntry = new ContainerFileEntry();
+                fileEntry.setOpdsEntryUuid(entry.getUuid());
+                fileEntry.setContainerFileId(containerFile.getId());
+                fileEntry.setContainerEntryId(entry.getEntryId());
+                containerFileEntries.add(fileEntry);
+
+                dbManager.getOpdsEntryStatusCacheDao().handleContainerFoundOnDisk(dbManager, entry,
+                        containerFile);
+            }
+
+            //now persist everything for this file
+            dbManager.getContainerFileEntryDao().insert(containerFileEntries);
+
+            containerFile.setEntries(containerFileEntries);
 
 //            TODO: check that we update the file size
             dbManager.getContainerFileDao().updateLastUpdatedById(containerFile.getId(),
